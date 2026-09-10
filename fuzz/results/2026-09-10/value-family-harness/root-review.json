@@ -1,0 +1,11 @@
+{
+  "source_sha256": "8ff2555325b0908d11fb9779d5cc653c901bf0e5611188f58ae7b7fc7d31691c",
+  "conclusion": "No source blocker found; independent Clippy, ASan build and60-seed replay passed. Sustained campaigns are separate.",
+  "audit": [
+    "Stack family and slots stay at a stable address until cleanup; callback-capable calls retain no mutable references to state.",
+    "Each child slot is reserved before callback recursion, and all constructor-success paths either immediately free or retain a unique owned handle. Parent-first/reset and reverse cleanup remain API-valid.",
+    "All byte spans derive from live bounded input; callback bytes are copied/read only during the callback. Custom converter reads the declared width.",
+    "Eight slots, four depth levels,64 requests,4096feeds and8resumes bound fuzz work. Allocator failure preserves failed-realloc ownership; successful allocations and encoding instances must balance.",
+    "Additional grammar seeds reproduced the pre-merge missing-Default panic and pass the corrected runtime."
+  ]
+}

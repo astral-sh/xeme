@@ -25,12 +25,31 @@ release and custom allocator balance, including children parsed after their
 parent is freed or reset. Named seeds cover valid non-ASCII conversions, invalid
 maps and scalars, ASCII conversion rejection, and allocation failures.
 
+The `value_family` target resolves external parameter references inside entity
+values through actual C callbacks. Eight stack-owned slots and four callback
+levels bound parser families; each slot owns its custom-encoding callback state.
+It varies unread, initialized empty, partial, completed, ignored-error, and
+rejected children, then feeds retained children after their parent is reset or
+freed. Callback changes, rejected reentry, buffer input, non-ASCII conversions,
+allocation faults, duplicate declarations, parameter-supplied quoted values, and
+missing declaration grammar references exercise value
+continuations and raw declaration callbacks. Every live handle is freed once;
+encoding releases and custom allocations must balance. Error-returning operations
+use valid live handles. No input is required to be well-formed XML.
+
+Thirty-two control bytes precede the `p` and `q` payloads. Bytes 13–14 select the
+split; bytes 17–23 select each child slot's lifecycle, byte 25 selects the DTD
+template, and byte 28 selects the depth that receives callback actions. The
+target permits at most 64 external requests, 4,096 feeds per parse, and eight
+resume attempts per feed. Named seeds document meaningful successful and adversarial paths.
+
 ```console
 cargo fuzz run parse -- -max_len=65536 -max_total_time=300
 cargo fuzz run streaming -- -max_len=65536 -max_total_time=300
 cargo fuzz run ffi fuzz/seeds/ffi -- -max_len=65536 -max_total_time=300
 cargo fuzz run ffi_family fuzz/seeds/ffi_family -- -max_len=65536 -max_total_time=300
 cargo fuzz run multibyte fuzz/seeds/multibyte -- -max_len=65536 -max_total_time=300
+cargo fuzz run value_family fuzz/seeds/value_family -- -max_len=65536 -max_total_time=300
 ```
 
 Use an instrumented nightly toolchain with cargo-fuzz. Keep discovered inputs,

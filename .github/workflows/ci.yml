@@ -90,6 +90,7 @@ jobs:
       - run: cargo fuzz run ffi fuzz/seeds/ffi -- -max_total_time=30 -max_len=65536
       - run: cargo fuzz run ffi_family fuzz/seeds/ffi_family -- -max_total_time=30 -max_len=65536
       - run: cargo fuzz run multibyte fuzz/seeds/multibyte -- -max_total_time=30 -max_len=65536
+      - run: cargo fuzz run value_family fuzz/seeds/value_family -- -max_total_time=30 -max_len=65536
 
   cpython:
     name: CPython XML consumers (${{ matrix.linkage }})

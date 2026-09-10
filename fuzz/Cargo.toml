@@ -48,3 +48,10 @@ path = "fuzz_targets/multibyte.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "value_family"
+path = "fuzz_targets/value_family.rs"
+test = false
+doc = false
+bench = false

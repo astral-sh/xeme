@@ -732,6 +732,35 @@ impl Source {
     pub(crate) fn mark_deferred(&mut self) {
         self.deferred_size = self.remaining().len();
     }
+    /// Scan a quoted prolog token without revisiting an incomplete prefix.
+    pub(crate) fn scan_prolog_literal(
+        &mut self,
+        limit: usize,
+    ) -> Result<Option<usize>, (ErrorKind, usize)> {
+        let text = &self.text[self.cursor..];
+        let quote = text.as_bytes()[0];
+        let start = self.scan.checked.max(1);
+        for (relative, character) in text[start..].char_indices() {
+            let index = start + relative;
+            if index >= limit {
+                return Err((ErrorKind::LimitExceeded, 0));
+            }
+            if !crate::is_xml_char(character) {
+                return Err((ErrorKind::InvalidToken, index));
+            }
+            if character == char::from(quote) {
+                // Retain the closing quote while awaiting its delimiter.
+                self.scan.checked = index;
+                return Ok(Some(index + 1));
+            }
+        }
+        self.scan.checked = text.len();
+        if text.len() > limit {
+            Err((ErrorKind::LimitExceeded, 0))
+        } else {
+            Ok(None)
+        }
+    }
     pub(crate) fn scan_reference(
         &mut self,
         limit: usize,

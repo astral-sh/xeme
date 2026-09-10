@@ -1316,6 +1316,42 @@ impl Parser {
         }
     }
 
+    fn parse_prolog_literal(&mut self) -> Result<bool, Error> {
+        let limit = self.config.limits.max_token_bytes;
+        let end = self
+            .source_mut()
+            .scan_prolog_literal(limit)
+            .map_err(|(kind, offset)| self.err_at(kind, "invalid prolog literal", offset))?;
+        if let Some(end) = end {
+            let remaining = self.source().remaining();
+            if let Some(next) = remaining.as_bytes().get(end) {
+                if matches!(*next, b' ' | b'\t' | b'\r' | b'\n' | b'>' | b'%' | b'[') {
+                    return Err(self.err(ErrorKind::Syntax, "literal outside a declaration"));
+                }
+                return Err(self.err_at(ErrorKind::InvalidToken, "invalid literal delimiter", end));
+            }
+            if self.decoding_error.is_some() {
+                return Err(self.err_at(ErrorKind::InvalidToken, "invalid literal delimiter", end));
+            }
+            if self.is_source_final() {
+                return Err(self.err(ErrorKind::Syntax, "literal outside a declaration"));
+            }
+        } else if let Some((kind, message)) = self.decoding_error {
+            return Err(self.err_at(
+                kind,
+                message,
+                if kind == ErrorKind::PartialCharacter {
+                    0
+                } else {
+                    self.source().remaining().len()
+                },
+            ));
+        } else if self.is_source_final() {
+            return Err(self.err(ErrorKind::UnclosedToken, "unclosed prolog literal"));
+        }
+        Ok(false)
+    }
+
     fn parse_text(&mut self) -> Result<bool, Error> {
         let internal = self.sources.len() > 1;
         if !self.seen_root
@@ -1327,7 +1363,27 @@ impl Parser {
         {
             return Ok(false);
         }
-        let limit = self.source().converted_text_limit();
+        if !self.seen_root
+            && !self.fragment
+            && matches!(self.source().remaining().as_bytes()[0], b'\'' | b'"')
+        {
+            return self.parse_prolog_literal();
+        }
+        let mut limit = self.source().converted_text_limit();
+        if !self.seen_root && !self.fragment {
+            // Whitespace is a separate prolog token before a quoted literal.
+            // Emit its default callback before diagnosing the following token.
+            let remaining = self.source().remaining();
+            let whitespace_end = remaining
+                .char_indices()
+                .find(|(_, character)| !whitespace(*character))
+                .map_or(remaining.len(), |(offset, _)| offset);
+            if whitespace_end > 0
+                && matches!(remaining.as_bytes().get(whitespace_end), Some(b'\'' | b'"'))
+            {
+                limit = limit.min(whitespace_end);
+            }
+        }
         let text = &self.source().remaining()[..limit];
         let final_text = self.is_source_final() && limit == self.source().remaining().len();
         let mut end = text
@@ -1502,6 +1558,9 @@ impl Parser {
 
     fn parse_reference(&mut self) -> Result<bool, Error> {
         let limit = self.config.limits.max_token_bytes;
+        if self.reparse_deferral && !self.is_source_final() && self.source().should_defer(limit) {
+            return Ok(false);
+        }
         let end = self
             .source_mut()
             .scan_reference(limit)
@@ -1516,6 +1575,11 @@ impl Parser {
             }
             if self.is_source_final() {
                 return Err(self.err(ErrorKind::UnclosedToken, "unclosed entity reference"));
+            }
+            if self.sources.len() == 1
+                && self.source().position(0).byte_index == self.feed_start_byte
+            {
+                self.source_mut().mark_deferred();
             }
             return Ok(false);
         };

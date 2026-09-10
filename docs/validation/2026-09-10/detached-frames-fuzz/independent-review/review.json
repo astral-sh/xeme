@@ -1,0 +1,98 @@
+{
+  "status": "passed_no_observed_findings",
+  "scope": "Combined independent source/build/ASan machine-code, campaign-source/log/stat/corpus and archive-readback audit of the six saved5bc806e campaigns. No fuzzers, parser tests, compilation or new timings executed by reviewers.",
+  "source_commit": "5bc806e5fc2a545f22c75f2a1bcbef45cfa3632b",
+  "source_files_exact": 357,
+  "workspace_crates_fresh_ASan_compiles": 3,
+  "fuzz_binaries_fresh_compiles": 6,
+  "totals": {
+    "campaign_executions": 14617069,
+    "initial_raw_files": 26689,
+    "initial_nonempty_files": 26686,
+    "initial_empty_files": 3,
+    "replay_runs": 26692,
+    "final_corpus_disk_files": 16272,
+    "initial_unique_contents_across_targets": 26685,
+    "final_unique_contents_across_targets": 16269
+  },
+  "limits": {
+    "campaign_internal_seconds": 600,
+    "campaign_outer_wait_seconds": 690,
+    "replay_outer_wait_seconds": 180,
+    "input_timeout_seconds": 10,
+    "maximum_input_bytes": 65536,
+    "rss_limit_mib": 1536,
+    "seed": 20260911,
+    "ASAN_OPTIONS": "detect_leaks=0:abort_on_error=1"
+  },
+  "archive": {
+    "evidence_members": 55,
+    "excluded_binaries": 6,
+    "source_archive_members": 357,
+    "initial_archive_members": 26689,
+    "final_archive_members": 16272,
+    "all_member_origin_and_outer_hashes_verified": true,
+    "evidence_sha256": "3bdd18ae72a22f770c653b9a32270da23f454d4f6fa9bd31eb5b6b2d244fedda",
+    "final_corpus_sha256": "d8154f6185e1a39f054962184f503edfe9529e204ce46fbf6271fed236e7ef85"
+  },
+  "representative_ASan_functions": [
+    {
+      "name": "XML_Parse",
+      "asan_call_sites": 8,
+      "sha256": "ee7d52a2d2709bdcac827fc620981ee5277d95c725ec5e1e3751bbeaed1deca8"
+    },
+    {
+      "name": "<oriole::Parser>::parse_text",
+      "asan_call_sites": 154,
+      "sha256": "db276c2d936f615958165a323a40441e4d347cd739bd9887a5472f45bf7b8bb1"
+    },
+    {
+      "name": "<oriole::arena::AdapterFrame>::text_bytes",
+      "asan_call_sites": 3,
+      "sha256": "d2a9ac7f1a5bb5b7d7e34df75c29d3073016da00d71a871fe0770a8a632dc8a3"
+    }
+  ],
+  "outcomes": {
+    "replay_processes": 6,
+    "campaign_processes": 6,
+    "all12_exit0": true,
+    "artifacts": 0,
+    "current_campaign_timeouts": 0,
+    "duration_seconds_range": [
+      601.1411340239865,
+      601.1915125489759
+    ]
+  },
+  "conclusion": "All recorded counts, source/build/binary identities, sanitizer evidence, original/evolved corpus mappings and archive bytes agree.14,617,069 executions is bounded repeated/initialization-inclusive evidence on5bc806e only, not a claim about later coalesced selector or position candidates.",
+  "caveats": [
+    "Runtime identity is5bc806e, preceding coalesced-selector193e and position prototypes. No campaigns for later code are inferred.",
+    "ASan flags plus representative machine-code checks demonstrate instrumented Rust storage/core/FFI and fuzz targets, not full compiler/std/libc instrumentation. The externally linked Clang18 runtime is separately recorded from RustLLVM22 compiler context.",
+    "Build subprocess.run timeout kills its direct process only and has no recorded process-group cleanup; the observed build completed normally with exit0. The initial missing cargo-fuzz PATH help attempt executed no build, as owner note states; raw help failure is not part of this package.",
+    "Six campaign no-finding status is bounded evidence, not proof of memory safety or general compatibility. Random executions include repeated inputs and initialization.",
+    "Counts are libFuzzer execution counts including initialization and repeated runs, not unique inputs; separate replay counts are not part of 14,617,069 campaign executions.",
+    "26,689 is the sum of raw files in target-specific initial directories. Logs load 26,686 nonempty files and show one extra initialization run per target. The three retained empty files are represented by the same empty input tested at initialization.",
+    "Ten-minute campaign max_total_time includes campaign corpus initialization after a separate replay. All logs report 601 seconds and saved campaign elapsed values are 601.141-601.192 seconds.",
+    "16,272 is the number of retained files in the initially empty writable corpus directories. It is distinct from both the original initial corpus and the live in-memory corp counts in the terminal DONE lines; neither raw count is a global unique-input count.",
+    "Leak detection is disabled; no safety proof or claims about later scanner candidates follow from bounded campaigns.",
+    "Known diagnostic marker scan is a saved-log cross-check, not an exhaustive diagnostic parser.",
+    "Actual source and binary bytes, ASan instruction attribution, provenance archive member mapping, and evidence/final-corpus tar readback are delegated to the parent independent audit and not re-audited here.",
+    "Saved file hashes match recorded references and were unchanged during two audit passes; this cannot establish historical immutability between campaign completion and first audit read.",
+    "Per-target campaign cleanup handles running child process groups on timeout/SIGINT/SIGTERM. The outer controller and build helper do not provide complete process-tree cleanup/timeout coverage; no such failure occurred in this completed evidence.",
+    "Original initial corpus and final writable corpus remain separately retained.16,272 final disk files differ from terminal live corpus counts;26,692 replay executions include six automatic empty initialization runs covering the three retained empty files."
+  ],
+  "reviews": {
+    "source_build_package": {
+      "path": "/tmp/oriole-frame-fuzz-independent-review/source-build-package-review.json",
+      "sha256": "0da9c7b724eb10013e4f2cc545de7dea9f50345974ede4c8d928aba3f2f9765a"
+    },
+    "statistics_and_runner": {
+      "path": "/tmp/oriole-frame-fuzz-independent-review/stats-review/review.json",
+      "sha256": "ef8fba2b8f7c4dc493f8bb975446bb83f51341f9497b9ade75bc8a28c719fc6e"
+    }
+  },
+  "generators_sha256": {
+    "/tmp/oriole-frame-fuzz-independent-review/audit.py": "7cc7114ce3278375f6e3c335c58cbb1ef0978198d3e979a312373c6f8f5a64f5",
+    "/tmp/oriole-frame-fuzz-independent-review/combine.py": "214489b219fb21915dcf1aa38c271c335656ebfb6ec73428abd8e5d077eea2f0",
+    "/tmp/oriole-frame-fuzz-independent-review/stats-review/audit.py": "b0332c712ee25add37294236f5540e2a3843791c919ecbde9f7611b774a534cb"
+  }
+}

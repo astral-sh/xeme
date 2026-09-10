@@ -37,8 +37,10 @@ retains every project, build identity, raw sample, and limitation.
 The [current validation report](docs/validation/2026-09-10/version-consistent-runtime/)
 records 369 workspace Rust checks and **4,323 passing / 417 failing upstream API
 configurations**. Remaining allocation, resource, diagnostic, and callback differences
-are explicit in the [compatibility guide](docs/compatibility.md). Earlier fuzzing and
-PBS distribution reports identify their own tested revisions.
+are explicit in the [compatibility guide](docs/compatibility.md). Six [sustained ASan
+campaigns](docs/validation/2026-09-10/version-consistent-fuzz/) completed 14.50 million
+executions on this runtime without findings. PBS distribution reports identify
+their own tested revisions.
 
 ## Installation
 

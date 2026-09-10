@@ -718,7 +718,7 @@ unsafe fn dispatch(
             EventKind::NotationDeclarationPrefix => handled = h.notation.is_some(),
             EventKind::EntityDeclarationDuplicate { .. } => handled = false,
             EventKind::StartElement {
-                name,
+                mut name,
                 mut attributes,
             } => {
                 (*parser).specified_attributes =
@@ -726,7 +726,10 @@ unsafe fn dispatch(
                         .try_into()
                         .unwrap_or(c_int::MAX);
                 if let Some(callback) = h.start_element {
-                    let name = cstring(name)?;
+                    if name.as_bytes().contains(&0) {
+                        return Err(AllocError::InteriorNul);
+                    }
+                    name.try_push('\0')?;
                     let allocator = (*parser).allocator;
                     let mut local_pointers = [ptr::null(); 17];
                     let mut pointers = XmlVec::new_in(allocator);
@@ -746,21 +749,28 @@ unsafe fn dispatch(
                         output[index * 2] = attribute.name.as_ptr().cast();
                         output[index * 2 + 1] = attribute.value.as_ptr().cast();
                     }
-                    callback(arg, name.as_ptr(), output.as_ptr());
+                    callback(arg, name.as_ptr().cast(), output.as_ptr());
                 } else {
                     handled = false;
                 }
                 // The callback and pointer-array borrow have ended. The busy
                 // guard still pins the parser, including after Stop or ignored
                 // callback-time Free/Reset; no core borrow crossed the callback.
-                (*parser).core.recycle_attributes(recycling, attributes);
+                (*parser)
+                    .core
+                    .recycle_start_element(recycling, name, attributes);
             }
-            EventKind::EndElement { name } => {
+            EventKind::EndElement { mut name } => {
                 if let Some(callback) = h.end_element {
-                    callback(arg, cstring(name)?.as_ptr());
+                    if name.as_bytes().contains(&0) {
+                        return Err(AllocError::InteriorNul);
+                    }
+                    name.try_push('\0')?;
+                    callback(arg, name.as_ptr().cast());
                 } else {
                     handled = false;
                 }
+                (*parser).core.recycle_end_element(recycling, name);
             }
             EventKind::Text(text) => {
                 if let Some(callback) = h.text {

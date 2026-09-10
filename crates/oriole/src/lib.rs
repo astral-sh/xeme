@@ -26,7 +26,7 @@ use accounting::EntityBudget;
 pub use oriole_storage::Text;
 pub use recycling::RecyclingToken;
 
-use recycling::{AttributeRecycling, copy_attribute_string};
+use recycling::{EventRecycling, copy_attribute_string};
 
 use encoding::{Decoder, Source};
 pub use names::NameRules;
@@ -533,7 +533,7 @@ pub struct Parser {
     current_raw: String,
     token_scratch: lexical::Buffer,
     raw_attributes: Vec<RawAttribute>,
-    attribute_recycling: AttributeRecycling,
+    event_recycling: EventRecycling,
     expand_internal_entities: bool,
     default_events: bool,
     notation_handler_enabled: bool,
@@ -618,7 +618,7 @@ impl Parser {
             current_raw: String::new_in(allocator),
             token_scratch: lexical::Buffer::new_in(allocator),
             raw_attributes: Vec::new_in(allocator),
-            attribute_recycling: AttributeRecycling::new(allocator)?,
+            event_recycling: EventRecycling::new(allocator)?,
             expand_internal_entities: true,
             default_events: false,
             notation_handler_enabled: true,
@@ -1221,7 +1221,7 @@ impl Parser {
     pub fn next_event_for_recycling(&mut self) -> Result<Option<(Event, RecyclingToken)>, Error> {
         Ok(self
             .next_event()?
-            .map(|event| (event, self.attribute_recycling.token())))
+            .map(|event| (event, self.event_recycling.token())))
     }
 
     /// Return the original attribute storage after an adapter finishes its callback.
@@ -1235,7 +1235,27 @@ impl Parser {
     /// This operation never allocates and retains at most 64 KiB of capacities.
     #[doc(hidden)]
     pub fn recycle_attributes(&mut self, token: RecyclingToken, attributes: Vec<Attribute>) {
-        self.attribute_recycling.recycle(token, attributes);
+        self.event_recycling.recycle(token, attributes);
+    }
+
+    /// Return the original start-event name and attributes after the callback.
+    ///
+    /// The generation and original-owner contract of [`Self::recycle_attributes`]
+    /// applies. At most two name capacities of 4 KiB share its 64 KiB total budget.
+    #[doc(hidden)]
+    pub fn recycle_start_element(
+        &mut self,
+        token: RecyclingToken,
+        name: String,
+        attributes: Vec<Attribute>,
+    ) {
+        self.event_recycling.recycle_start(token, name, attributes);
+    }
+
+    /// Return an original end-event name under the start-event recycling contract.
+    #[doc(hidden)]
+    pub fn recycle_end_element(&mut self, token: RecyclingToken, name: String) {
+        self.event_recycling.recycle_end(token, name);
     }
 
     /// Return the next event, or `None` when input or a custom conversion is needed,
@@ -2543,7 +2563,7 @@ impl Parser {
         let mut attrs = if raw_attrs.is_empty() {
             Vec::new_in(self.allocator)
         } else {
-            self.attribute_recycling.take()
+            self.event_recycling.take()
         };
         attrs.truncate(raw_attrs.len());
         attrs
@@ -2747,17 +2767,20 @@ impl Parser {
                 if !attr.name.contains(':') {
                     continue;
                 }
-                let key = self.expand_name(&attr.name, true, false)?;
+                let key = self.expand_name(&attr.name, true, false, None)?;
                 if !try_set_insert(&mut expanded, key)? {
                     return Err(self.err(
                         ErrorKind::DuplicateAttribute,
                         "duplicate expanded attribute name",
                     ));
                 }
-                attr.name = self.expand_name(&attr.name, true, self.config.namespace_triplets)?;
+                attr.name =
+                    self.expand_name(&attr.name, true, self.config.namespace_triplets, None)?;
             }
         }
-        let expanded_name = self.expand_name(name, false, self.config.namespace_triplets)?;
+        let reusable = self.event_recycling.take_name();
+        let expanded_name =
+            self.expand_name(name, false, self.config.namespace_triplets, reusable)?;
         let raw_encoding = token.for_slice(raw_name).name_encoding(self.allocator)?;
         let raw_encoding = if raw_encoding.is_empty() {
             None
@@ -2766,15 +2789,23 @@ impl Parser {
         };
         self.seen_root = true;
         self.declaration_allowed = false;
+        let stack_name = if expanded_name == name {
+            None
+        } else {
+            Some(expanded_name.try_clone()?)
+        };
+        let raw_name = match name_value {
+            lexical::Decoded::Borrowed(name) => {
+                let reusable = self.event_recycling.take_name();
+                recycling::copy_name(name, reusable, self.allocator)?
+            }
+            lexical::Decoded::Owned(name) => name,
+        };
         try_push(
             &mut self.stack,
             Element {
-                expanded_name: if expanded_name == name {
-                    None
-                } else {
-                    Some(expanded_name.try_clone()?)
-                },
-                raw_name: name_value.into_owned(self.allocator)?,
+                expanded_name: stack_name,
+                raw_name,
                 raw_encoding,
                 bindings,
             },
@@ -2874,9 +2905,15 @@ impl Parser {
         Ok(())
     }
 
-    fn expand_name(&self, name: &str, attribute: bool, triplets: bool) -> Result<String, Error> {
+    fn expand_name(
+        &self,
+        name: &str,
+        attribute: bool,
+        triplets: bool,
+        reusable: Option<String>,
+    ) -> Result<String, Error> {
         let Some(separator) = self.config.namespace_separator else {
-            return string(name, self.allocator);
+            return recycling::copy_name(name, reusable, self.allocator).map_err(Into::into);
         };
         let (prefix, local) = match name.split_once(':') {
             // Raw QNames were validated before custom characters were decoded.
@@ -2900,15 +2937,19 @@ impl Parser {
                 None => None,
             };
         let Some(uri) = uri else {
-            return string(local, self.allocator);
+            return recycling::copy_name(local, reusable, self.allocator).map_err(Into::into);
         };
         // A short qualified name can reuse an arbitrarily long URI on every
         // element or attribute. Bound that copied output independently of input.
         self.charge_expansion(uri.len())?;
-        let mut result = String::try_with_capacity_in(
-            uri.len() + local.len() + prefix.map_or(2, |p| p.len() + 2),
-            self.allocator,
-        )?;
+        let capacity = uri.len() + local.len() + prefix.map_or(2, |p| p.len() + 2);
+        let mut result = if let Some(mut result) = reusable {
+            result.clear();
+            result.try_reserve(capacity)?;
+            result
+        } else {
+            String::try_with_capacity_in(capacity, self.allocator)?
+        };
         result.try_push_str(uri)?;
         if separator != '\0' {
             result.try_push(separator)?;

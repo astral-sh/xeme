@@ -1234,6 +1234,15 @@ impl Parser {
 
     fn parse_text(&mut self) -> Result<bool, Error> {
         let internal = self.sources.len() > 1;
+        if !self.seen_root
+            && !self.fragment
+            && !self.is_source_final()
+            && self
+                .source()
+                .should_defer(self.config.limits.max_token_bytes)
+        {
+            return Ok(false);
+        }
         let limit = self.source().converted_text_limit();
         let text = &self.source().remaining()[..limit];
         let final_text = self.is_source_final() && limit == self.source().remaining().len();
@@ -1267,6 +1276,20 @@ impl Parser {
         if let Some(forbidden) =
             forbidden.filter(|forbidden| invalid.is_none_or(|invalid| invalid > *forbidden))
         {
+            if self.stack.is_empty() && !self.fragment {
+                let whitespace_prefix = text[..forbidden].chars().all(whitespace);
+                return Err(self.err_at(
+                    if self.closed_root {
+                        ErrorKind::JunkAfterDocumentElement
+                    } else if whitespace_prefix {
+                        ErrorKind::Syntax
+                    } else {
+                        ErrorKind::InvalidToken
+                    },
+                    "CDATA terminator outside the document element",
+                    if self.closed_root { 0 } else { forbidden },
+                ));
+            }
             return Err(self.err_at(
                 ErrorKind::InvalidToken,
                 "CDATA terminator in character data",
@@ -1281,6 +1304,25 @@ impl Parser {
         }
         let text = &text[..end];
         if self.stack.is_empty() && !self.fragment && !text.chars().all(whitespace) {
+            if !self.seen_root && is_name(text) && end == self.source().remaining().len() {
+                if end > self.config.limits.max_token_bytes {
+                    return Err(self.err(ErrorKind::LimitExceeded, "oversized prolog token"));
+                }
+                if !self.is_source_final() {
+                    // A name in the prolog is not a complete token yet. Wait
+                    // for its delimiter so decoding errors retain their correct
+                    // precedence, without rescanning every one-byte feed.
+                    self.source_mut().mark_deferred();
+                    return Ok(false);
+                }
+            }
+            if !self.seen_root
+                && is_name(text)
+                && end == self.source().remaining().len()
+                && let Some((kind, message)) = self.decoding_error
+            {
+                return Err(self.err_at(kind, message, end));
+            }
             if !self.seen_root
                 && is_name(text)
                 && self.source().remaining().as_bytes().get(end) == Some(&b'<')
@@ -1415,8 +1457,8 @@ impl Parser {
         };
         let position = self.source().position(end + 1);
         self.save_current_raw(end + 1)?;
-        if let Some(character) =
-            character.map_err(|kind| self.err(kind, "invalid character reference"))?
+        if let Some(character) = character
+            .map_err(|(kind, offset)| self.err_at(kind, "invalid character reference", offset))?
         {
             self.consume(end + 1);
             self.emit(
@@ -2107,7 +2149,7 @@ impl Parser {
             })?;
             let name = &rest[1..end];
             if let Some(character) = character_reference(name)
-                .map_err(|kind| self.err(kind, "invalid character reference"))?
+                .map_err(|(kind, _)| self.err(kind, "invalid character reference"))?
             {
                 output.try_push(character)?;
             } else {
@@ -2321,7 +2363,8 @@ fn valid_encoding_name(name: &str) -> bool {
             .bytes()
             .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'_' | b'-'))
 }
-fn character_reference(name: &str) -> Result<Option<char>, ErrorKind> {
+/// Decode a reference, returning an error offset relative to its opening `&`.
+fn character_reference(name: &str) -> Result<Option<char>, (ErrorKind, usize)> {
     match name {
         "lt" => Ok(Some('<')),
         "gt" => Ok(Some('>')),
@@ -2332,22 +2375,24 @@ fn character_reference(name: &str) -> Result<Option<char>, ErrorKind> {
             let (digits, radix) = name
                 .strip_prefix("#x")
                 .map_or((&name[1..], 10), |digits| (digits, 16));
-            if digits.is_empty()
-                || !digits.bytes().all(|c| {
-                    if radix == 16 {
-                        c.is_ascii_hexdigit()
-                    } else {
-                        c.is_ascii_digit()
-                    }
-                })
-            {
-                return Err(ErrorKind::BadCharacterReference);
+            let invalid = digits.bytes().position(|c| {
+                if radix == 16 {
+                    !c.is_ascii_hexdigit()
+                } else {
+                    !c.is_ascii_digit()
+                }
+            });
+            if digits.is_empty() || invalid.is_some() {
+                return Err((
+                    ErrorKind::InvalidToken,
+                    1 + name.len() - digits.len() + invalid.unwrap_or(0),
+                ));
             }
             let value = u32::from_str_radix(digits, radix)
                 .ok()
                 .and_then(char::from_u32)
                 .filter(|c| is_xml_char(*c))
-                .ok_or(ErrorKind::BadCharacterReference)?;
+                .ok_or((ErrorKind::BadCharacterReference, 0))?;
             Ok(Some(value))
         }
         _ => Ok(None),

@@ -402,8 +402,19 @@ impl Parser {
                         .require_space()
                         .map_err(|message| self.err(ErrorKind::Syntax, message))?;
                     let model_start = cursor.rest();
-                    parse_content_model(&mut cursor, 0, self.config.limits.max_depth)
-                        .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+                    parse_content_model(&mut cursor, 0, self.config.limits.max_depth).map_err(
+                        |message| {
+                            if cursor.rest().starts_with(['?', '*', '+']) {
+                                self.err_at(
+                                    ErrorKind::InvalidToken,
+                                    message,
+                                    offset + end - cursor.rest().len(),
+                                )
+                            } else {
+                                self.err(ErrorKind::Syntax, message)
+                            }
+                        },
+                    )?;
                     let model = string(
                         &model_start[..model_start.len() - cursor.rest().len()],
                         self.allocator,
@@ -434,6 +445,16 @@ impl Parser {
             }
             cursor.space();
             if !cursor.rest().is_empty() {
+                let rest_offset = end - cursor.rest().len();
+                if cursor.rest().starts_with(['?', '*', '+'])
+                    && text[..rest_offset].ends_with(whitespace)
+                {
+                    return Err(self.err_at(
+                        ErrorKind::InvalidToken,
+                        "misplaced DTD repetition marker",
+                        offset + rest_offset,
+                    ));
+                }
                 return Err(self.err(ErrorKind::Syntax, "unexpected text in DTD declaration"));
             }
             for (index, pending) in self.pending.iter_mut().enumerate().skip(first_event) {
@@ -491,7 +512,7 @@ impl Parser {
                 if reference.starts_with('#') {
                     value.push(
                         character_reference(reference)
-                            .map_err(|kind| {
+                            .map_err(|(kind, _)| {
                                 self.err(kind, "invalid character reference in entity value")
                             })?
                             .expect("numeric reference"),

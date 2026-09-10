@@ -73,7 +73,7 @@ fn plain_attributes_and_short_references_keep_normalization_and_errors() {
         ["", "hé😀", " x  y z ", "<&\r"]
     );
     assert!(events.contains(&EventKind::Text(text("<>&'\"A😀entity"))));
-    for xml in ["<r>&#0;</r>", "<r>&#x110000;</r>", "<r>&#+1;</r>"] {
+    for xml in ["<r>&#0;</r>", "<r>&#x110000;</r>"] {
         for chunk in 1..=xml.len() {
             assert_eq!(
                 parse(xml.as_bytes(), chunk, Config::default()),
@@ -205,6 +205,109 @@ fn external_fragments_emit_trailing_text_before_reporting_unbalanced_markup() {
             assert_eq!(error.kind, ErrorKind::AsynchronousEntity);
             assert_eq!(text, xml[5..].replace('\r', "\n"));
         }
+    }
+}
+
+#[test]
+fn numeric_reference_syntax_is_distinct_from_forbidden_characters() {
+    for (reference, kind) in [
+        ("&#;", ErrorKind::InvalidToken),
+        ("&#x;", ErrorKind::InvalidToken),
+        ("&#+1;", ErrorKind::InvalidToken),
+        ("&#-1;", ErrorKind::InvalidToken),
+        ("&#X41;", ErrorKind::InvalidToken),
+        ("&#x4]]>1;", ErrorKind::InvalidToken),
+        ("&#x41]]>;", ErrorKind::InvalidToken),
+        ("&#0;", ErrorKind::BadCharacterReference),
+        ("&#xD800;", ErrorKind::BadCharacterReference),
+        ("&#x110000;", ErrorKind::BadCharacterReference),
+        ("&#99999999999999999999;", ErrorKind::BadCharacterReference),
+    ] {
+        for xml in [
+            format!("<r>{reference}</r>"),
+            format!("<r a='{reference}'/>"),
+            format!("<!DOCTYPE r [<!ENTITY e '{reference}'>]><r/>"),
+        ] {
+            for chunk in 1..=xml.len() {
+                assert_eq!(
+                    parse(xml.as_bytes(), chunk, Config::default()),
+                    Err(kind),
+                    "{xml}, chunk {chunk}"
+                );
+            }
+        }
+    }
+    for (xml, byte_index) in [
+        ("<r>&#;</r>", 5),
+        ("<r>&#x;</r>", 6),
+        ("<r>&#x4]]>1;</r>", 7),
+    ] {
+        let mut parser = Parser::new(Config::default());
+        parser.feed(xml.as_bytes(), true).unwrap();
+        loop {
+            match parser.next_event() {
+                Ok(Some(_)) => {}
+                Err(error) => {
+                    assert_eq!(error.position.byte_index, byte_index);
+                    break;
+                }
+                Ok(None) => panic!("invalid reference was accepted"),
+            }
+        }
+    }
+}
+
+#[test]
+fn malformed_prolog_text_and_dtd_repetition_markers_report_their_context() {
+    for (xml, kind) in [
+        (&b"]]><r/>"[..], ErrorKind::Syntax),
+        (&b" \n]]><r/>"[..], ErrorKind::Syntax),
+        (&b"<r/>]]>"[..], ErrorKind::JunkAfterDocumentElement),
+        (&b"Lo\xa7\x94"[..], ErrorKind::InvalidToken),
+        (
+            &b"<!DOCTYPE r [<!ELEMENT r (a |b * >]><r/>"[..],
+            ErrorKind::InvalidToken,
+        ),
+        (
+            &b"<!DOCTYPE r [<!ELEMENT r (a) *>]><r/>"[..],
+            ErrorKind::InvalidToken,
+        ),
+    ] {
+        for chunk in 1..=xml.len() {
+            assert_eq!(
+                parse(xml, chunk, Config::default()),
+                Err(kind),
+                "{xml:?}, chunk {chunk}"
+            );
+        }
+    }
+    assert!(
+        parse(
+            b"<!DOCTYPE r [<!ELEMENT r (a )*>]><r/>",
+            1,
+            Config::default()
+        )
+        .is_ok()
+    );
+}
+
+#[test]
+fn unfinished_prolog_names_respect_the_token_limit() {
+    for chunk in [1, 17, 64] {
+        assert_eq!(
+            parse(
+                &[b'a'; 64],
+                chunk,
+                Config {
+                    limits: Limits {
+                        max_token_bytes: 32,
+                        ..Limits::default()
+                    },
+                    ..Config::default()
+                },
+            ),
+            Err(ErrorKind::LimitExceeded)
+        );
     }
 }
 

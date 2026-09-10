@@ -43,3 +43,36 @@ jobs:
           components: rustfmt, clippy
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+  native:
+    name: C ABI and callback safety
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: stable
+      - run: sudo apt-get update && sudo apt-get install -y libexpat1-dev pkg-config
+      - run: cargo build --release --locked -p oriole_expat
+      - name: Reference C consumer
+        run: |
+          cc -std=c11 -O2 -Wall -Wextra -Werror tests/c/integration.c $(pkg-config --cflags --libs expat) -o /tmp/reference-c
+          /tmp/reference-c
+      - name: Oriole C consumer and adversarial callbacks
+        run: |
+          cc -std=c11 -O2 -Wall -Wextra -Werror -I include tests/c/integration.c -L target/release -loriole_expat -o /tmp/oriole-c
+          cc -std=c11 -O2 -Wall -Wextra -Werror -I include tests/c/adversarial.c -L target/release -loriole_expat -o /tmp/oriole-adversarial
+          LD_LIBRARY_PATH=target/release /tmp/oriole-c --supported
+          LD_LIBRARY_PATH=target/release /tmp/oriole-adversarial
+  fuzz:
+    name: Sanitized parser fuzz smoke
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: nightly
+      - run: cargo install cargo-fuzz --locked --version 0.13.2
+      - run: cargo fuzz run parse -- -max_total_time=30 -max_len=4096
+      - run: cargo fuzz run streaming -- -max_total_time=30 -max_len=4096

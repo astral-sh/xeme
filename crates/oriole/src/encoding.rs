@@ -814,26 +814,12 @@ impl Source {
         position.byte_index += position.byte_count;
         position.byte_count = 0;
         let mut previous_cr = self.previous_cr;
-        for c in self.remaining()[..offset].chars() {
-            match c {
-                '\r' => {
-                    position.line += 1;
-                    position.column = 0;
-                    previous_cr = true;
-                }
-                '\n' => {
-                    if !previous_cr {
-                        position.line += 1;
-                    }
-                    position.column = 0;
-                    previous_cr = false;
-                }
-                _ => {
-                    position.column += 1;
-                    previous_cr = false;
-                }
-            }
-        }
+        advance_position(
+            &self.remaining()[..offset],
+            &mut position.line,
+            &mut position.column,
+            &mut previous_cr,
+        );
         position.byte_count = self.raw_len(offset, count);
         position
     }
@@ -933,26 +919,12 @@ impl Source {
     pub(crate) fn consume(&mut self, count: usize) {
         self.raw_index += self.raw_len(0, count);
         let text = &self.text[self.cursor..self.cursor + count];
-        for character in text.chars() {
-            match character {
-                '\r' => {
-                    self.line += 1;
-                    self.column = 0;
-                    self.previous_cr = true;
-                }
-                '\n' => {
-                    if !self.previous_cr {
-                        self.line += 1;
-                    }
-                    self.column = 0;
-                    self.previous_cr = false;
-                }
-                _ => {
-                    self.column += 1;
-                    self.previous_cr = false;
-                }
-            }
-        }
+        advance_position(
+            text,
+            &mut self.line,
+            &mut self.column,
+            &mut self.previous_cr,
+        );
         self.cursor += count;
         self.scan = Scan::default();
         self.deferred_size = 0;
@@ -1102,5 +1074,54 @@ impl Source {
         } else {
             Ok(None)
         }
+    }
+}
+
+/// Advance XML line and character coordinates over decoded UTF-8.
+///
+/// A line break discards the preceding column, so only count characters after
+/// the last break. Byte searches can skip UTF-8 spans because CR and LF cannot
+/// occur inside a multibyte character. Keep CR state across empty input and
+/// consumption boundaries so a split CRLF remains one line break.
+#[inline(always)]
+fn advance_position(text: &str, line: &mut usize, column: &mut usize, previous_cr: &mut bool) {
+    // Short tokens use one scalar pass instead of searching for line breaks and
+    // separately counting characters in a second pass.
+    if text.len() <= 128 {
+        for character in text.chars() {
+            match character {
+                '\r' => {
+                    *line += 1;
+                    *column = 0;
+                }
+                '\n' => {
+                    if !*previous_cr {
+                        *line += 1;
+                    }
+                    *column = 0;
+                }
+                _ => *column += 1,
+            }
+            *previous_cr = character == '\r';
+        }
+        return;
+    }
+    advance_long_position(text, line, column, previous_cr);
+}
+
+fn advance_long_position(text: &str, line: &mut usize, column: &mut usize, previous_cr: &mut bool) {
+    let mut rest = text;
+    while let Some(index) = memchr::memchr2(b'\r', b'\n', rest.as_bytes()) {
+        let cr = rest.as_bytes()[index] == b'\r';
+        if cr || index != 0 || !*previous_cr {
+            *line += 1;
+        }
+        *column = 0;
+        *previous_cr = cr;
+        rest = &rest[index + 1..];
+    }
+    if !rest.is_empty() {
+        *column += rest.chars().count();
+        *previous_cr = false;
     }
 }

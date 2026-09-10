@@ -570,10 +570,7 @@ impl Parser {
             .lexical_remaining()
             .for_slice(&self.source().remaining()[..end])
             .to_owned(self.allocator)?;
-        if let Some((offset, _)) = token
-            .char_indices()
-            .find(|(_, character)| !crate::names::is_xml_char(*character))
-        {
+        if let Some(offset) = crate::names::invalid_xml_char(&token) {
             return Err(self.err_at(
                 ErrorKind::InvalidToken,
                 "invalid XML character in DTD",

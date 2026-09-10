@@ -6,6 +6,32 @@ pub(crate) fn is_xml_char(c: char) -> bool {
     matches!(c, '\u{9}' | '\u{a}' | '\u{d}' | '\u{20}'..='\u{d7ff}' | '\u{e000}'..='\u{fffd}' | '\u{10000}'..='\u{10ffff}')
 }
 
+/// Find the first forbidden XML character, skipping ordinary ASCII in words.
+pub(crate) fn invalid_xml_char(text: &str) -> Option<usize> {
+    let mut rest = text;
+    while let Some(chunk) = rest.as_bytes().first_chunk::<8>() {
+        let word = u64::from_le_bytes(*chunk);
+        let high = 0x8080_8080_8080_8080;
+        // A high bit marks a non-ASCII byte or a byte below space. A borrow
+        // can also mark later bytes, but the first marked byte is exact.
+        let special = (word & high) | (word.wrapping_sub(0x2020_2020_2020_2020) & !word & high);
+        if special == 0 {
+            rest = &rest[8..];
+            continue;
+        }
+        // Only ASCII was skipped, so this remains a character boundary.
+        rest = &rest[(special.trailing_zeros() / 8) as usize..];
+        let character = rest.chars().next()?;
+        if !is_xml_char(character) {
+            return Some(text.len() - rest.len());
+        }
+        rest = &rest[character.len_utf8()..];
+    }
+    rest.char_indices()
+        .find(|(_, character)| !is_xml_char(*character))
+        .map(|(index, _)| text.len() - rest.len() + index)
+}
+
 /// RFC 3986 characters that Expat permits as legacy namespace separators.
 pub(crate) fn is_uri_char(c: char) -> bool {
     c.is_ascii_alphanumeric() || "-._~:/?#[]@!$&'()*+,;=%".contains(c)
@@ -395,3 +421,23 @@ const FOURTH_EXTRA: &[(u16, u16)] = &[
     (0x309d, 0x309e),
     (0x30fc, 0x30fe),
 ];
+
+#[cfg(test)]
+mod tests {
+    use super::invalid_xml_char;
+
+    #[test]
+    fn xml_character_validation_preserves_byte_offsets_across_words() {
+        let valid = "\t\n\r \u{7f}\u{85}\u{d7ff}\u{e000}\u{fffd}\u{10000}\u{10ffff}";
+        for offset in 0..16 {
+            let prefix = format!("{}{valid}", "x".repeat(offset));
+            assert_eq!(invalid_xml_char(&prefix), None);
+            for invalid in [
+                '\0', '\u{1}', '\u{8}', '\u{b}', '\u{c}', '\u{e}', '\u{1f}', '\u{fffe}', '\u{ffff}',
+            ] {
+                let text = format!("{prefix}{invalid} é😀\0");
+                assert_eq!(invalid_xml_char(&text), Some(prefix.len()));
+            }
+        }
+    }
+}

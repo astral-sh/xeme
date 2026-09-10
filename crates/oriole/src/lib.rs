@@ -30,7 +30,7 @@ use recycling::{AttributeRecycling, copy_attribute_string};
 
 use encoding::{Decoder, Source};
 pub use names::NameRules;
-use names::{is_uri_char, is_xml_char, whitespace};
+use names::{invalid_xml_char, is_uri_char, is_xml_char, whitespace};
 
 /// Bounds applied independently of input chunking.
 #[derive(Clone, Debug)]
@@ -1797,10 +1797,7 @@ impl Parser {
                     .for_slice(&self.source().remaining()[..end]),
             )?;
             let parsed = (|| {
-                if let Some((offset, _)) = token
-                    .char_indices()
-                    .find(|(_, character)| !is_xml_char(*character))
-                {
+                if let Some(offset) = invalid_xml_char(&token) {
                     return Err(self.err_at(
                         ErrorKind::InvalidToken,
                         "invalid XML character",
@@ -1976,10 +1973,7 @@ impl Parser {
         if end == 0 {
             return Ok(false);
         }
-        let invalid = text[..end]
-            .char_indices()
-            .find(|(_, character)| !is_xml_char(*character))
-            .map(|(index, _)| index);
+        let invalid = invalid_xml_char(&text[..end]);
         let forbidden = text[..end].find("]]>");
         if let Some(forbidden) =
             forbidden.filter(|forbidden| invalid.is_none_or(|invalid| invalid > *forbidden))
@@ -2118,10 +2112,7 @@ impl Parser {
         if end == 0 {
             return Ok(false);
         }
-        if let Some((invalid, _)) = text[..end]
-            .char_indices()
-            .find(|(_, character)| !is_xml_char(*character))
-        {
+        if let Some(invalid) = invalid_xml_char(&text[..end]) {
             if invalid == 0 {
                 return Err(self.err(ErrorKind::InvalidToken, "invalid XML character"));
             }

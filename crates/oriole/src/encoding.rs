@@ -665,6 +665,15 @@ pub(crate) struct Source {
     deferred_size: usize,
     name_rules: crate::NameRules,
 }
+
+/// Coordinates within one source whose consumed prefix remains unchanged.
+/// Offsets advance monotonically, so many callbacks never rescan earlier text.
+#[derive(Debug)]
+pub(crate) struct PositionCursor {
+    offset: usize,
+    position: Position,
+    previous_cr: bool,
+}
 impl Source {
     pub(crate) fn new(allocator: Allocator, name_rules: crate::NameRules) -> Self {
         Self {
@@ -827,6 +836,42 @@ impl Source {
         );
         position.byte_count = self.raw_len(offset, count);
         position
+    }
+
+    pub(crate) fn position_cursor(&self) -> PositionCursor {
+        PositionCursor {
+            offset: 0,
+            position: self.position(0),
+            previous_cr: self.previous_cr,
+        }
+    }
+
+    /// Advance coordinates in an append-only source view. The caller must not
+    /// consume from this source while the cursor is retained. This uses the same
+    /// raw widths, XML line rules and entity anchor as `position_at`.
+    pub(crate) fn position_from_cursor(
+        &self,
+        cursor: &mut PositionCursor,
+        offset: usize,
+        count: usize,
+    ) -> Position {
+        assert!(offset >= cursor.offset);
+        if let Some(anchor) = self.anchor {
+            cursor.offset = offset;
+            return anchor;
+        }
+        cursor.position.byte_index += self.raw_len(cursor.offset, offset - cursor.offset);
+        advance_position(
+            &self.remaining()[cursor.offset..offset],
+            &mut cursor.position.line,
+            &mut cursor.position.column,
+            &mut cursor.previous_cr,
+        );
+        cursor.offset = offset;
+        Position {
+            byte_count: self.raw_len(offset, count),
+            ..cursor.position
+        }
     }
     pub(crate) fn should_defer(&self, limit: usize) -> bool {
         self.deferred_size > 0
@@ -1220,6 +1265,61 @@ fn advance_long_position(text: &str, line: &mut usize, column: &mut usize, previ
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn monotonic_positions_match_source_coordinates_and_anchors() {
+        let text = "prefix\r\nπ\r雪\n😀 tail";
+        for encoding in [
+            Encoding::Utf8,
+            Encoding::Utf16Le,
+            Encoding::Utf16Be,
+            Encoding::SingleByte,
+            Encoding::MultiByte,
+        ] {
+            let mut source = Source::new(Allocator::System, crate::NameRules::default());
+            source.text.push_str(text).unwrap();
+            source.encoding = encoding;
+            source.raw_index = 17;
+            source.line = 3;
+            source.column = 4;
+            source.previous_cr = true;
+            if encoding == Encoding::MultiByte {
+                for character in text.chars() {
+                    try_extend_from_slice(&mut source.raw_widths, &[3]).unwrap();
+                    for _ in 1..character.len_utf8() {
+                        try_extend_from_slice(&mut source.raw_widths, &[0]).unwrap();
+                    }
+                }
+            }
+            let mut cursor = source.position_cursor();
+            for (offset, character) in text.char_indices() {
+                for count in [0, character.len_utf8()] {
+                    assert_eq!(
+                        source.position_from_cursor(&mut cursor, offset, count),
+                        source.position_at(offset, count)
+                    );
+                }
+            }
+            assert_eq!(
+                source.position_from_cursor(&mut cursor, text.len(), 0),
+                source.position_at(text.len(), 0)
+            );
+            let anchor = Position {
+                byte_index: 99,
+                line: 7,
+                column: 8,
+                byte_count: 4,
+            };
+            source.anchor = Some(anchor);
+            let mut cursor = source.position_cursor();
+            for (offset, character) in text.char_indices() {
+                assert_eq!(
+                    source.position_from_cursor(&mut cursor, offset, character.len_utf8()),
+                    anchor
+                );
+            }
+        }
+    }
 
     #[test]
     fn tag_limits_preserve_less_than_precedence_across_feeds() {

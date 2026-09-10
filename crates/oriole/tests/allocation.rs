@@ -129,6 +129,22 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
     assert!(attributes.set_param_entity_parsing(2));
     attributes.feed(b"<!DOCTYPE r [<!ENTITY % declaration \"<!ATTLIST r extra CDATA 'A&#13;&#10;B'>\">%declaration;<!ENTITY e0 ' A&#13;&#10;B '><!ENTITY e1 '&e0;&e0;'><!ENTITY e2 '&e1;'><!ENTITY e3 '&e2;'><!ENTITY e4 '&e3;'><!ENTITY e5 '&e4;'><!ENTITY e6 '&e5;'><!ENTITY e7 '&e6;'><!ENTITY e8 '&e7;'><!ENTITY e9 '&e8;'><!ATTLIST r default CDATA '&e9;'>]><r a='&e9;&e9;'/>", true)?;
     while next_event(&mut attributes)?.is_some() {}
+    let mut streamed = Parser::try_new_in(Config::default(), allocator)?;
+    streamed.set_default_events(true);
+    streamed.set_attlist_handler_enabled(false);
+    streamed.feed(b"<!DOCTYPE r [<!ATTLIST r a (x|y) 'x' b NOTATION (n|m) #IMPLIED c CDATA 'C' d CDATA 'D'>]><r/>", true)?;
+    while let Some(event) = next_event(&mut streamed)? {
+        if matches!(event.kind, EventKind::AttlistDeclarationPrefix)
+            && streamed.current_raw() == Some("(")
+        {
+            streamed.set_attlist_handler_enabled(true);
+        }
+        if let EventKind::AttlistDeclaration(value) = event.kind
+            && value.name == "b"
+        {
+            streamed.set_attlist_handler_enabled(false);
+        }
+    }
     let mut content = parser.external_child_with_encoding(Some(""), None)?;
     content.set_encoding(Some("ISO-8859-1"))?;
     content.feed(b"\xff\xfe\xef\xbb\xbftext", true)?;

@@ -164,6 +164,7 @@ pub struct XML_ParserStruct {
     external_arg: *mut c_void,
     unknown_encoding_arg: *mut c_void,
     default_dispatch: bool,
+    attlist_dispatch: bool,
     default_pending: Queue<XmlString>,
     doctype_close_handled: bool,
     family: Shared<FamilyBudget>,
@@ -331,6 +332,7 @@ unsafe fn create(
                     external_arg: ptr::null_mut(),
                     unknown_encoding_arg: ptr::null_mut(),
                     default_dispatch: false,
+                    attlist_dispatch: false,
                     default_pending: Queue::new_in(allocator),
                     doctype_close_handled: false,
                     family,
@@ -549,6 +551,7 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                 (*parser).parse_error = 0;
                 (*parser).final_buffer = false;
                 (*parser).doctype_close_handled = false;
+                (*parser).attlist_dispatch = false;
                 (*parser).specified_attributes = 0;
                 (*parser).base = None;
                 (*parser).buffer.clear();
@@ -967,14 +970,20 @@ unsafe fn dispatch(
                     required,
                 } = XmlBox::into_inner(declaration);
                 if let Some(callback) = h.attlist_decl {
+                    let element = cstring(element)?;
+                    let name = cstring(name)?;
+                    let attribute_type = cstring(attribute_type)?;
+                    let default = optional_cstring(default)?;
+                    (*parser).attlist_dispatch = true;
                     callback(
                         arg,
-                        cstring(element)?.as_ptr(),
-                        cstring(name)?.as_ptr(),
-                        cstring(attribute_type)?.as_ptr(),
-                        cptr(&optional_cstring(default)?),
+                        element.as_ptr(),
+                        name.as_ptr(),
+                        attribute_type.as_ptr(),
+                        cptr(&default),
                         c_int::from(required),
                     );
+                    (*parser).attlist_dispatch = false;
                 } else {
                     handled = false;
                 }
@@ -1028,7 +1037,12 @@ unsafe fn dispatch(
                     .map(|raw| XmlString::try_from_str_in(raw, (*parser).allocator))
                     .transpose()?;
                 if let Some(raw) = raw {
-                    if split_default {
+                    let single_fragment = split_default
+                        && duplicate_default.is_none()
+                        && DtdFragments(raw.as_str())
+                            .next()
+                            .is_some_and(|fragment| fragment.len() == raw.len());
+                    if split_default && !single_fragment {
                         let mut duplicate_name = raw.starts_with("<!ENTITY");
                         for fragment in DtdFragments(raw.as_str()) {
                             if let Some(closing) = duplicate_default {
@@ -1766,6 +1780,11 @@ pub unsafe extern "C" fn XML_DefaultCurrent(parser: XML_Parser) {
                     .current_raw()
                     .map(|raw| XmlString::try_from_str_in(raw, (*parser).allocator))
                     .transpose()?;
+                let raw = raw.or_else(|| {
+                    (*parser)
+                        .attlist_dispatch
+                        .then(|| XmlString::new_in((*parser).allocator))
+                });
                 if let (Some(callback), Some(raw)) = (callback, raw) {
                     (*parser).default_dispatch = true;
                     callback(arg, raw.as_ptr().cast(), raw.len() as c_int);
@@ -2153,6 +2172,7 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                         external_arg: (*parser).external_arg,
                         unknown_encoding_arg: (*parser).unknown_encoding_arg,
                         default_dispatch: false,
+                        attlist_dispatch: false,
                         default_pending: Queue::new_in(allocator),
                         doctype_close_handled: false,
                         family: Shared::clone(&(*parser).family),

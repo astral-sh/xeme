@@ -3782,3 +3782,164 @@ fn wider_c_entity_limits_keep_cycle_and_work_guards() {
         XML_ParserFree(parser);
     }
 }
+
+#[test]
+fn unused_ordinary_attlist_payloads_do_not_consume_adapter_event_bytes() {
+    // SAFETY: The test owns each parser, reads only scalar counters between API
+    // calls, and releases every handle after its synchronous parse finishes.
+    unsafe {
+        let xml = b"<!DOCTYPE r [<!ATTLIST r a CDATA 'A' b CDATA 'B'>]><r/>";
+        let mut totals = [0; 2];
+        for (index, enabled) in [false, true].into_iter().enumerate() {
+            let parser = XML_ParserCreate(ptr::null());
+            assert!(!parser.is_null());
+            if enabled {
+                XML_SetAttlistDeclHandler(parser, Some(ignore_attlist_declaration));
+            }
+            assert_eq!(
+                XML_Parse(parser, xml.as_ptr().cast(), xml.len() as c_int, 1),
+                OK
+            );
+            let family = &(*parser).family;
+            totals[index] = family.callback_bytes.load(Ordering::Relaxed);
+            XML_ParserFree(parser);
+        }
+        assert_eq!(totals[1] - totals[0], 2 * (1 + 1 + 5 + 1));
+        // The retained StartElement/default-value payloads still enforce the
+        // same family limit when no declaration callback is requested.
+        for remaining in [totals[0] - 1, totals[0]] {
+            let parser = XML_ParserCreate(ptr::null());
+            assert!(!parser.is_null());
+            let family = &(*parser).family;
+            family
+                .callback_bytes
+                .store(MAX_FAMILY_CALLBACK_BYTES - remaining, Ordering::Relaxed);
+            let status = XML_Parse(parser, xml.as_ptr().cast(), xml.len() as c_int, 1);
+            assert_eq!(status, if remaining == totals[0] { OK } else { ERROR });
+            assert_eq!(XML_GetErrorCode(parser), if status == OK { 0 } else { 43 });
+            XML_ParserFree(parser);
+        }
+    }
+}
+
+#[test]
+fn ordinary_attlist_handlers_change_at_tokens_and_resume_between_attributes() {
+    struct State {
+        parser: XML_Parser,
+        install_at_literal: bool,
+        installed: bool,
+        names: std::vec::Vec<std::string::String>,
+        saw_empty_default_current: bool,
+        suspended: bool,
+    }
+    unsafe extern "C" fn raw(data: *mut c_void, text: *const c_char, length: c_int) {
+        // SAFETY: User data and callback bytes remain live for this synchronous
+        // call; copy fields before the callback-capable setter is invoked.
+        unsafe {
+            let pointer = data.cast::<State>();
+            let text = std::slice::from_raw_parts(text.cast::<u8>(), length as usize);
+            if text.is_empty() {
+                (*pointer).saw_empty_default_current = true;
+            }
+            let install = !(*pointer).installed
+                && text
+                    == if (*pointer).install_at_literal {
+                        b"'A'".as_slice()
+                    } else {
+                        b"<!ATTLIST".as_slice()
+                    };
+            if install {
+                (*pointer).installed = true;
+                XML_SetAttlistDeclHandler((*pointer).parser, Some(attribute));
+            }
+        }
+    }
+    unsafe extern "C" fn attribute(
+        data: *mut c_void,
+        _: *const c_char,
+        name: *const c_char,
+        _: *const c_char,
+        _: *const c_char,
+        _: c_int,
+    ) {
+        // SAFETY: Only an owned name and scalar state cross nested DefaultCurrent;
+        // no reference to mutable callback state is held during that API call.
+        unsafe {
+            let pointer = data.cast::<State>();
+            let name = CStr::from_ptr(name).to_str().unwrap().to_owned();
+            let first = name == "a";
+            (*pointer).names.push(name);
+            if first {
+                let parser = (*pointer).parser;
+                assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
+                XML_ParserFree(parser);
+                XML_DefaultCurrent(parser);
+                assert!((*pointer).saw_empty_default_current);
+                assert_eq!(XML_StopParser(parser, 1), OK);
+                (*pointer).suspended = true;
+            }
+        }
+    }
+    // SAFETY: Every parser, callback state and input allocation remains live until
+    // parsing/resuming has completed; reset and final free occur outside callbacks.
+    unsafe {
+        for utf16 in [false, true] {
+            for width in [1, 7, 4096] {
+                for install_at_literal in [false, true] {
+                    let parser = XML_ParserCreate(ptr::null());
+                    assert!(!parser.is_null());
+                    let mut state = State {
+                        parser,
+                        install_at_literal,
+                        installed: false,
+                        names: std::vec::Vec::new(),
+                        saw_empty_default_current: false,
+                        suspended: false,
+                    };
+                    XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                    XML_SetDefaultHandlerExpand(parser, Some(raw));
+                    let xml = if width == 4096 {
+                        format!(
+                            "<!--{}--><!DOCTYPE r [<!ATTLIST r a CDATA 'A' b CDATA 'B'>]>{}<r/>",
+                            "x".repeat(70000),
+                            " ".repeat(70000)
+                        )
+                    } else {
+                        "<!DOCTYPE r [<!ATTLIST r a CDATA 'A' b CDATA 'B'>]><r/>".to_owned()
+                    };
+                    let mut bytes = std::vec::Vec::new();
+                    if utf16 {
+                        bytes.extend_from_slice(&[0xff, 0xfe]);
+                        for unit in xml.encode_utf16() {
+                            bytes.extend_from_slice(&unit.to_le_bytes());
+                        }
+                    } else {
+                        bytes.extend_from_slice(xml.as_bytes());
+                    }
+                    for (index, part) in bytes.chunks(width).enumerate() {
+                        let mut status = XML_Parse(
+                            parser,
+                            part.as_ptr().cast(),
+                            part.len() as c_int,
+                            c_int::from((index + 1) * width >= bytes.len()),
+                        );
+                        if status == SUSPENDED {
+                            assert_eq!(state.names, ["a"]);
+                            status = XML_ResumeParser(parser);
+                        }
+                        assert_eq!(status, OK);
+                    }
+                    if install_at_literal {
+                        assert_eq!(state.names, ["b"]);
+                    } else {
+                        assert_eq!(state.names, ["a", "b"]);
+                        assert!(state.suspended);
+                    }
+                    assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+                    assert!(!(*parser).attlist_dispatch);
+                    XML_ParserFree(parser);
+                }
+            }
+        }
+    }
+}

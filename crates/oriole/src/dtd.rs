@@ -1,3 +1,4 @@
+mod attlist;
 mod composition;
 mod grammar;
 mod semantic;
@@ -26,6 +27,7 @@ pub(crate) struct ConditionalState {
     ignored_bytes: usize,
     header: Option<oriole_storage::Box<composition::Header>>,
     declaration: Option<oriole_storage::Box<composition::Declaration>>,
+    attlist: Option<oriole_storage::Box<attlist::State>>,
 }
 
 impl ConditionalState {
@@ -37,6 +39,7 @@ impl ConditionalState {
             ignored_bytes: 0,
             header: None,
             declaration: None,
+            attlist: None,
         }
     }
 }
@@ -77,10 +80,11 @@ pub(crate) struct DeclarationParameter {
 
 /// Semantic attribute types are always complete. Expat builds enumeration
 /// callback payloads only while its ATTLIST handler is present.
-#[derive(Clone, Copy)]
 enum AttributeCallback<'a> {
     Complete,
     Enumeration(Option<&'a str>),
+    Captured(Option<String>),
+    Silent,
 }
 
 impl Parser {
@@ -391,6 +395,12 @@ impl Parser {
     }
 
     pub(crate) fn parse_dtd_step(&mut self) -> Result<bool, Error> {
+        // An active ordinary declaration retains its complete, unconsumed
+        // source token and DTD context until every callback has been drained.
+        // Resume it before inspecting or consuming any bytes from that source.
+        if self.has_attlist() {
+            return self.continue_attlist();
+        }
         if self.conditional.ignored_depth != 0 {
             return self.parse_ignored_section();
         }
@@ -576,6 +586,9 @@ impl Parser {
                 "invalid XML character in DTD",
                 offset,
             ));
+        }
+        if token.starts_with("<!ATTLIST") && token[9..].starts_with(whitespace) {
+            return self.start_attlist(token, end);
         }
         self.save_current_raw(end)?;
         self.parse_subset(token.view(), 0)?;
@@ -1775,13 +1788,18 @@ impl Parser {
                 .max_default_attributes
                 .max(declarations.ordered.len());
         }
+        let silent = matches!(callback, AttributeCallback::Silent);
+        let uncaptured = matches!(callback, AttributeCallback::Captured(None));
         let attribute_type = match callback {
             AttributeCallback::Complete => attribute_type,
+            AttributeCallback::Silent => attribute_type,
             AttributeCallback::Enumeration(Some(value)) => {
                 self.charge_expansion(value.len())?;
                 string(value, self.allocator)?
             }
             AttributeCallback::Enumeration(None) => return Ok(()),
+            AttributeCallback::Captured(Some(value)) => value,
+            AttributeCallback::Captured(None) => attribute_type,
         };
         if *first_attribute {
             *first_attribute = false;
@@ -1790,6 +1808,17 @@ impl Parser {
             // cloning prevents a long name and many tiny declarations from
             // creating an unbounded queue of repeated callback payloads.
             self.charge_expansion(element.len())?;
+        }
+        if uncaptured {
+            // Ordinary declarations retain Complete's repeated-name work even
+            // when no enumeration members were captured for a callback.
+            return Ok(());
+        }
+        if silent {
+            // The adapter omits this unused payload, but position getters still
+            // observe the same completed attribute as an emitted declaration.
+            self.last_position = position;
+            return Ok(());
         }
         self.emit(
             EventKind::AttlistDeclaration(oriole_storage::try_box(

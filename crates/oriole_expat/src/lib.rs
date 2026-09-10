@@ -1980,8 +1980,8 @@ unsafe fn preserve_input_context(parser: XML_Parser, input: &[u8]) -> Result<(),
     unsafe {
         let context = &mut (*parser).input_context;
         let discard = (*parser)
-            .position
-            .byte_index
+            .core
+            .input_context_byte_index()
             .saturating_sub((*parser).input_context_start)
             .saturating_sub(INPUT_CONTEXT_BYTES)
             .min(context.len());

@@ -2703,3 +2703,106 @@ fn input_context_is_inactive_during_reset_and_destruction_callbacks() {
         }
     }
 }
+
+#[test]
+fn input_context_discards_consumed_eventless_whitespace() {
+    for dtd in [false, true] {
+        // SAFETY: The parser owns all fed bytes; no callbacks retain its context.
+        unsafe {
+            let parser = XML_ParserCreate(ptr::null());
+            if dtd {
+                let prefix = b"<!DOCTYPE r [";
+                assert_eq!(
+                    XML_Parse(parser, prefix.as_ptr().cast(), prefix.len() as c_int, 0),
+                    OK
+                );
+            }
+            let whitespace = [b' '; 1024];
+            for _ in 0..1024 {
+                assert_eq!(
+                    XML_Parse(
+                        parser,
+                        whitespace.as_ptr().cast(),
+                        whitespace.len() as c_int,
+                        0
+                    ),
+                    OK
+                );
+                assert!(
+                    (*parser).input_context.len() <= INPUT_CONTEXT_BYTES + whitespace.len() + 16
+                );
+            }
+            let suffix = if dtd {
+                b"]><r/>".as_slice()
+            } else {
+                b"<r/>".as_slice()
+            };
+            assert_eq!(
+                XML_Parse(parser, suffix.as_ptr().cast(), suffix.len() as c_int, 1),
+                OK
+            );
+            XML_ParserFree(parser);
+        }
+    }
+}
+
+unsafe extern "C" fn context_entity(
+    arg: *mut c_void,
+    _: *const c_char,
+    _: c_int,
+    _: *const c_char,
+    _: c_int,
+    _: *const c_char,
+    _: *const c_char,
+    _: *const c_char,
+    _: *const c_char,
+) {
+    // SAFETY: Forward the live callback state without retaining declaration data.
+    unsafe { record_context(arg) };
+}
+
+#[test]
+fn input_context_keeps_split_dtd_and_parameter_entity_anchors() {
+    let original = format!(
+        "<!ENTITY % p \"<!ENTITY e '{}'>\"><![INCLUDE[%p;<!ENTITY f '{}'>]]>",
+        "first".repeat(700),
+        "second".repeat(700)
+    )
+    .into_bytes();
+    for width in [1, 7, 4096] {
+        for defaults in [false, true] {
+            // SAFETY: The child, parent, input and callback state stay live until
+            // every event has been inspected and the child has been freed.
+            unsafe {
+                let parent = XML_ParserCreate(ptr::null());
+                let parser = XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null());
+                let mut state = ContextState {
+                    parser,
+                    original: original.clone(),
+                    ..ContextState::default()
+                };
+                XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                assert_eq!(XML_SetParamEntityParsing(parser, 2), 1);
+                XML_SetEntityDeclHandler(parser, Some(context_entity));
+                if defaults {
+                    XML_SetDefaultHandlerExpand(parser, Some(context_text));
+                }
+                let chunks = original.len().div_ceil(width);
+                for (index, chunk) in original.chunks(width).enumerate() {
+                    assert_eq!(
+                        XML_Parse(
+                            parser,
+                            chunk.as_ptr().cast(),
+                            chunk.len() as c_int,
+                            c_int::from(index + 1 == chunks)
+                        ),
+                        OK
+                    );
+                }
+                assert!(state.observations.len() >= 3);
+                XML_ParserFree(parser);
+                XML_ParserFree(parent);
+            }
+        }
+    }
+}

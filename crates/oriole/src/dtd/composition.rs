@@ -27,6 +27,37 @@ pub(super) struct Header {
 }
 
 impl Parser {
+    pub(crate) fn declaration_context_byte_index(&self) -> Option<usize> {
+        self.conditional
+            .header
+            .as_ref()
+            .map(|header| header.position.byte_index)
+            .into_iter()
+            .chain(
+                self.conditional
+                    .declaration
+                    .as_ref()
+                    .map(|declaration| declaration.position.byte_index),
+            )
+            .chain(
+                self.conditional
+                    .declaration
+                    .as_ref()
+                    .and_then(|declaration| {
+                        declaration
+                            .request
+                            .as_ref()
+                            .map(|request| request.position.byte_index)
+                    }),
+            )
+            .chain(
+                self.foreign_dtd_pending
+                    .as_ref()
+                    .map(|foreign| foreign.position.byte_index),
+            )
+            .min()
+    }
+
     pub(crate) fn has_header_composition(&self) -> bool {
         self.conditional.header.is_some()
     }

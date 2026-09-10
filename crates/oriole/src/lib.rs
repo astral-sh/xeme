@@ -1088,6 +1088,33 @@ impl Parser {
     pub fn position(&self) -> Position {
         self.last_position
     }
+    /// Earliest original input byte that a pending event can still reference.
+    ///
+    /// Adapters retaining a raw input window can discard bytes before this
+    /// offset. Consumed whitespace need not be retained merely because it did
+    /// not emit an event; incomplete declarations and entity frames keep their
+    /// original anchors until every dependent event has been delivered.
+    #[must_use]
+    pub fn input_context_byte_index(&self) -> usize {
+        self.sources
+            .iter()
+            .map(|source| source.position(0).byte_index)
+            .chain(
+                self.pending
+                    .iter()
+                    .map(|pending| pending.event.position.byte_index),
+            )
+            .chain(self.declaration_context_byte_index())
+            .chain(
+                self.active_parameter_reference
+                    .as_ref()
+                    .map(|(_, position)| position.byte_index),
+            )
+            .chain(self.value_context_byte_index())
+            .min()
+            .expect("a parser always has its original input source")
+    }
+
     #[must_use]
     pub fn is_finished(&self) -> bool {
         self.finished

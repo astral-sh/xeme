@@ -66,6 +66,22 @@ pub(crate) struct State {
 }
 
 impl Parser {
+    pub(crate) fn value_context_byte_index(&self) -> Option<usize> {
+        let state = self.value_state.as_ref()?;
+        state
+            .declaration
+            .as_ref()
+            .map(|declaration| declaration.position.byte_index)
+            .into_iter()
+            .chain(
+                state
+                    .request
+                    .as_ref()
+                    .map(|request| request.position.byte_index),
+            )
+            .min()
+    }
+
     pub(crate) fn begin_external_value(
         &self,
         ready: (String, bool),

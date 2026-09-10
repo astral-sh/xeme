@@ -68,3 +68,25 @@ log is retained separately.
 This checkpoint does not settle the other compatibility gaps, exact callback or
 position differences, the remaining allocation assumptions, or performance.
 The extra raw-input copy belongs in subsequent combined benchmarks.
+
+## Retention follow-up
+
+Independent review found that using the last delivered event's position retained
+an entire eventless whitespace prefix. A 1 MiB prolog supplied in 1 KiB chunks left
+1,048,580 context bytes at the root element. The corrected parser exposes the
+earliest input position still referenced by a source, queued event or pending
+DTD/value continuation. The adapter discards consumed prefix bytes while retaining
+those origins. The same probe now retains 1,028 bytes, exactly matching Expat.
+
+The corrected shared library is
+`474ebbb65712a466890ab05cf17db489ad4e4346de385dd5a7532d474281b7f4`.
+All 224 core/FFI checks pass, including eventless prolog/DTD whitespace and long
+split declarations with parameter entities and optional default callbacks.
+Strict Clippy, formatting and all six native sanitizer runs also pass. The full
+upstream suite has the same 3,751 passes and 989 failures as the first layer;
+every individual outcome and adapted test-source hash is unchanged.
+
+[Retention report](retention-report.json) and
+[retention evidence](retention-evidence.tar.gz) preserve the reproducer,
+independent review, source hashes, full upstream observations and native/gate
+logs. The initial over-retaining candidate and its evidence remain recorded.

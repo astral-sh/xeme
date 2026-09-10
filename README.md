@@ -1,11 +1,58 @@
 # Oriole
 
-A streaming XML parser in Rust. Parse XML incrementally through owned events,
-without building a document tree.
+A streaming XML parser in Rust. Check XML from the command line, use the Expat C
+interface, or embed the parser in your own tools.
 
-**Oriole is experimental.** The C interface targets Expat, but API and callback
-compatibility are incomplete. It is not yet a production-ready replacement for
-Expat. See the [C interface](crates/oriole_expat) for supported modes and gaps.
+Oriole provides incremental parsing, namespace processing, entity expansion, and
+DTD attribute defaults through a reusable library. The Expat-compatible C interface
+is the first integration target, with an opt-in python-build-standalone recipe for
+CPython's XML consumers.
+
+**Oriole is experimental.** It checks XML syntax within the supported feature set.
+It is not yet a production-ready replacement for Expat. See
+[compatibility](docs/compatibility.md) for supported features and remaining gaps.
+
+## Installation
+
+Build from this checkout with Rust 1.96 or later:
+
+```console
+cargo install --path crates/oriole_cli --bin oriole --locked
+```
+
+The parser uses no XML parser dependency. The library performs no filesystem or
+network I/O; applications provide input and resolve external entities themselves.
+The CLI reads a file or standard input and does not fetch external resources.
+
+The standalone executable uses jemalloc on supported Unix platforms and mimalloc
+on Windows. Install with `--no-default-features` to use the system allocator.
+Library users retain control over their allocator.
+
+## Check XML
+
+Given `message.xml`:
+
+```xml
+<message>Hello &amp; goodbye</message>
+```
+
+Check the document or print its parser events:
+
+```console
+oriole message.xml
+oriole --events message.xml
+oriole --events --namespaces --chunk-size 4096 message.xml
+```
+
+Omit the file or pass `-` to read standard input. Invalid XML exits with a nonzero
+status. `--events` prints the event stream, `--namespaces` expands namespace names
+with `|` as the separator, and `--chunk-size` controls input buffering.
+
+The parser handles elements, attributes, namespaces, comments, processing
+instructions, CDATA, character references, internal and caller-resolved external
+entities, and DTD attribute defaults. It supports UTF-8, UTF-16, ASCII, and
+ISO-8859-1 input. It is non-validating: it checks XML syntax without validating
+documents against their DTD content models.
 
 ## Use the library
 
@@ -25,61 +72,84 @@ fn main() -> Result<(), oriole::Error> {
 ```
 
 Pass `false` until the final chunk. A parse error is terminal. Events own their
-strings, so callers can retain them independently of subsequent input.
+strings, so callers can retain them independently of subsequent input. Namespace
+processing is opt-in through `Config::namespace_separator`; namespace triplets
+are optional. The parser core forbids unsafe Rust.
 
-The parser handles elements, attributes, namespaces, comments, processing
-instructions, CDATA, character references, internal entities, caller-resolved
-external entities, and DTD attribute defaults. It supports UTF-8, UTF-16, ASCII,
-and ISO-8859-1 input. Namespace processing
-is opt-in through `Config::namespace_separator`; namespace triplets are optional.
-The parser is non-validating: it checks XML syntax, without validating documents
-against their DTD content models.
+### Expat interface
 
-The core forbids unsafe Rust and uses no XML parser dependency. It performs no
-filesystem or network I/O and leaves allocator selection to the application.
+The [C interface](crates/oriole_expat/) exports shared and static libraries with
+Expat's narrow-character ABI, callbacks, parser reset, suspension, buffer input,
+and custom allocation. Its documentation defines ownership and callback lifetimes,
+supported encoding modes, and remaining compatibility gaps.
 
-## Check XML from the command line
+The [python-build-standalone integration](integration/python-build-standalone/)
+links Oriole into CPython 3.12.13. The recipe is opt-in and currently validated for
+Linux x86-64, including the glibc 2.17 baseline.
 
-```console
-cargo run --release -p oriole_cli -- document.xml
-cargo run --release -p oriole_cli -- --events --namespaces document.xml
-```
-
-Omit the file to read standard input. Invalid XML exits with a nonzero status;
-`--events` prints the event stream and `--chunk-size` controls input buffering.
-
-The standalone executable uses jemalloc on supported Unix platforms and mimalloc
-on Windows, following uv's allocator configuration. Build with
-`--no-default-features` to use the system allocator. Library users retain control
-over their allocator.
-
-## Resource limits
+### Resource limits
 
 `Config::limits` bounds document bytes, unfinished tokens, element depth,
 attributes, entity declarations, and entity expansion. Defaults allow 256 MiB of
-input, 16 MiB tokens, 256 nested elements, and 8 MiB of entity expansion. Limits are
-part of the parser configuration; applications should choose values suited to
-their inputs.
+input, 16 MiB tokens, 256 nested elements, and 8 MiB of entity expansion. Applications
+should choose limits suited to their inputs.
 
 Incremental token scanning retains its progress across chunks to avoid repeatedly
 scanning a growing unfinished token. Internal entity replacement must remain
-balanced and is bounded separately from document input.
+balanced and is bounded separately from document input. The C interface also
+bounds aggregate allocation and work across a parser's external-entity family.
 
-## Compatibility and performance
+## Validation
 
-The [validation report](docs/validation/2026-09-10/) records differential testing,
-actual CPython consumers, native C allocation and callback probes, and sanitizer
-campaigns. It retains the upstream Expat failures alongside passing results.
-The [PBS integration](integration/python-build-standalone/) is opt-in.
+The [validation report](docs/validation/2026-09-10/final-runtime/) identifies the
+source, inputs, commands, and binaries used for compatibility and safety checks.
+Four actual CPython 3.12.13 shared/static, original/fixed consumer configurations
+succeed across all six XML modules, with 803 reported tests and 31 skips per run.
+The [complete PBS distribution](docs/validation/2026-09-10/pbs-final/) also passes
+its archive validator and installed XML suites, including on glibc 2.17.
 
-[Benchmarks](benchmarks/README.md) compare Expat and Oriole,
-including system, jemalloc, and mimalloc configurations. Oriole remains slower
-than Expat on the generated C workloads; measured optimizations and their tradeoffs
-are retained as separate comparisons.
+The generated differential corpus passes 12,318 semantic comparisons. Exact
+callback fragmentation and final-position differences remain. The full adapted
+Expat API matrix reports 3,753 passing and 987 failing configurations; diagnostic
+experiments do not waive those failures. The W3C acceptance corpus reports 5,916
+passing and six failing mandatory checks.
+
+Three sustained Rust AddressSanitizer campaigns complete 3.9 million executions
+without findings, alongside corpus replays, allocation-failure probes, and
+independent source reviews. See [fuzzing](fuzz/README.md) for the harnesses and
+[compatibility](docs/compatibility.md) for the separate release gates.
+
+## Benchmarks
+
+The [recorded benchmarks](benchmarks/results/2026-09-10/final-runtime/) compare
+Oriole's C interface with Expat 2.8.4 on generated XML. These results use 4 KiB
+chunks with namespace processing disabled, on a shared Linux AMD EPYC-Milan host.
+Seven randomized process pairs are run for each workload; each process measures
+ten parses after one discarded warmup. Complete normalized callbacks are compared
+before timing.
+
+| Workload | Oriole | Expat | Oriole / Expat |
+| --- | ---: | ---: | ---: |
+| Elements | 19.442 ms | 3.658 ms | 5.30× |
+| Text | 10.150 ms | 1.609 ms | 6.31× |
+| Entity references | 24.031 ms | 2.133 ms | 11.32× |
+| Prefixed names | 22.249 ms | 3.222 ms | 6.85× |
+
+Times are medians of process medians; ratios are medians of paired ratios.
+Oriole remains slower on these workloads. The report retains raw samples,
+namespace-enabled results, separate system/jemalloc/mimalloc measurements through
+the safe Rust API, and DTD scaling checks. Host load and CPU frequency are
+uncontrolled; these generated workloads do not establish CPython application
+performance. See the [benchmark guide](benchmarks/README.md) to reproduce them.
 
 ## Development
 
-Build with Rust 1.96 or later:
+| Crate | Responsibility |
+| --- | --- |
+| [`oriole`](crates/oriole) | Streaming XML parser and owned events |
+| [`oriole_storage`](crates/oriole_storage) | Fallible storage, allocator ownership, and resource accounting |
+| [`oriole_expat`](crates/oriole_expat) | Expat C interface and callback integration |
+| [`oriole_cli`](crates/oriole_cli) | Command-line XML checker |
 
 ```console
 cargo test --workspace
@@ -88,7 +158,9 @@ cargo fmt --all --check
 ```
 
 See [contributing](CONTRIBUTING.md) for review, performance, and production
-acceptance criteria.
+acceptance criteria, and the [stack review guide](docs/review.md) for the
+implementation and evidence layers. Expat is used by validation tools as an
+independent reference.
 
 ## License
 

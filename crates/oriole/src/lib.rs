@@ -20,7 +20,7 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 pub use oriole_storage::Text;
 
 use encoding::{Decoder, Source};
-use names::{is_name, is_xml_char, whitespace};
+use names::{is_name, is_uri_char, is_xml_char, whitespace};
 
 /// Bounds applied independently of input chunking.
 #[derive(Clone, Debug)]
@@ -2118,11 +2118,9 @@ impl Parser {
                             "a namespace prefix cannot be undeclared in XML 1.0",
                         ));
                     }
-                    if self
-                        .config
-                        .namespace_separator
-                        .is_some_and(|separator| separator != '\0' && uri.contains(separator))
-                    {
+                    if self.config.namespace_separator.is_some_and(|separator| {
+                        separator != '\0' && !is_uri_char(separator) && uri.contains(separator)
+                    }) {
                         return Err(self.err(
                             ErrorKind::Syntax,
                             "namespace URI contains the namespace separator",

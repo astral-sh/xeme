@@ -53,6 +53,10 @@ Namespace separators must be ASCII bytes. The C constructors reject bytes
 `0x80` through `0xff`, which cannot be represented as a single UTF-8 byte by the
 Rust parser. ASCII separators retain their exact byte value; `\0` is supported
 without namespace triplets.
+Choose a separator outside the URI character set, such as `|`, to keep expanded
+names unambiguous. Following Expat, URI characters such as `:` are also supported
+as legacy separators; collisions are rejected for non-URI separators, including
+when the URI introduces that character through an XML character reference.
 
 Custom encodings support single-byte maps and conversion callbacks for two- to
 four-byte sequences. Each completed sequence is converted once, with original

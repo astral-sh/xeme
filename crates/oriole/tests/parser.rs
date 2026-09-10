@@ -740,6 +740,47 @@ fn reused_namespace_uris_and_declaration_names_consume_the_expansion_budget() {
 }
 
 #[test]
+fn namespace_separators_preserve_legacy_uri_characters() {
+    for (separator, document, expected) in [
+        (':', "<p:r xmlns:p='urn:a:b'/>", "urn:a:b:r"),
+        ('!', "<p:r xmlns:p='urn:a!b'/>", "urn:a!b!r"),
+        ('|', "<p:r xmlns:p='urn:a:b'/>", "urn:a:b|r"),
+    ] {
+        for width in [1, 7, document.len()] {
+            let events = parse(
+                document.as_bytes(),
+                width,
+                Config {
+                    namespace_separator: Some(separator),
+                    ..Config::default()
+                },
+            )
+            .unwrap();
+            assert!(events.iter().any(|event| matches!(
+                event, EventKind::StartElement { name, .. } if name == expected
+            )));
+        }
+    }
+    for (separator, document) in [
+        ('|', "<r xmlns='urn:a|b'/>"),
+        ('\n', "<r xmlns='urn:a&#10;b'/>"),
+        ('}', "<r xmlns='urn:a&#125;b'/>"),
+    ] {
+        assert_eq!(
+            parse(
+                document.as_bytes(),
+                1,
+                Config {
+                    namespace_separator: Some(separator),
+                    ..Config::default()
+                }
+            ),
+            Err(ErrorKind::Syntax)
+        );
+    }
+}
+
+#[test]
 fn namespace_constraints() {
     for (xml, kind) in [
         ("<p:r/>", ErrorKind::UndefinedPrefix),

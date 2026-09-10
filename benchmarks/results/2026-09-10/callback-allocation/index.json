@@ -1,0 +1,16 @@
+{
+  "files": {
+    "README.md": "a9feeb1a06cfb58e086c05bffcdecf95e899d191f43cefab7d4e1e273c75c428",
+    "combined-validation.tar.gz": "67304a96e4a6820f267a71c525d574e1576695064876ab36c27846d641ad77b8",
+    "profile-observations.tar.gz": "4b58ab4c5f924ffae66c8ab7128a2808f694ff63310c3e968e22de217bdc63d6",
+    "results.json.gz": "34b2812a503011fd7fb7388c0deecb367854e63296bba7bf2131cda4d3fd54cb",
+    "review.json.gz": "f47b343353a896b522d14ff5362e6ae75b849e883f17a1c042bcde4fdb5a441c",
+    "spare-results.json.gz": "7d881a7eba827db816e8b78ff947a32e945ae5f9b616826f77b3410a25ae9393",
+    "spare-source.json.gz": "0ba712f4d1304bad97c95bb4afc3702bdff9e86deb8f55b046401e84c23d393e",
+    "spare-threshold-checks.json.gz": "ef5536fb8a09264e2658a2bd395da862b97cdd56e3778152a147d127e8fc8af2",
+    "spare.patch.gz": "770782b0ae18c340f43af7245dd4196231d13b75bcc8c056b8eb8eafbbe1695f"
+  },
+  "combined_library_sha256": "2a969c6f5a6be8e016b820857a235cefd2cccd47f98d0f68fd068fb5fb3aae1c",
+  "combined_source_manifest_sha256": "ad316906d9493cfbef549dc613e33b7c86c5de01385204f2bbbed326ac4c03b5",
+  "isolated_library_sha256": "ed393869bb0058130e7d3f91a362bcb018f50388b686c264111f210d9b9ebab2"
+}

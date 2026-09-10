@@ -24,7 +24,14 @@ impl String {
         Ok(result)
     }
     pub fn try_from_str_in(text: &str, allocator: Allocator) -> Result<Self, AllocError> {
-        let mut result = Self::try_with_capacity_in(text.len(), allocator)?;
+        // Keep room for C callback terminators without growing each owned name
+        // and attribute again. Empty Rust strings remain allocation-free.
+        let capacity = if text.is_empty() {
+            0
+        } else {
+            text.len().checked_add(1).ok_or(AllocError::CapacityOverflow)?
+        };
+        let mut result = Self::try_with_capacity_in(capacity, allocator)?;
         result.bytes.extend_from_slice(text.as_bytes());
         Ok(result)
     }

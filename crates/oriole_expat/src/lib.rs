@@ -688,18 +688,25 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                 if let Some(callback) = h.start_element {
                     let name = cstring(name)?;
                     let allocator = (*parser).allocator;
+                    let mut local_pointers = [ptr::null(); 17];
                     let mut pointers = XmlVec::new_in(allocator);
-                    pointers.try_reserve_exact(attributes.len() * 2 + 1)?;
-                    for attribute in &mut attributes {
+                    let pointer_count = attributes.len() * 2 + 1;
+                    let output = if pointer_count <= local_pointers.len() {
+                        &mut local_pointers[..pointer_count]
+                    } else {
+                        pointers.try_reserve_exact(pointer_count)?;
+                        pointers.resize(pointer_count, ptr::null());
+                        &mut pointers
+                    };
+                    for (index, attribute) in attributes.iter_mut().enumerate() {
                         // XML forbids embedded NUL. Reuse the owned event strings
                         // as C strings instead of allocating another owner array.
                         attribute.name.try_push('\0')?;
                         attribute.value.try_push('\0')?;
-                        pointers.push(attribute.name.as_ptr().cast());
-                        pointers.push(attribute.value.as_ptr().cast());
+                        output[index * 2] = attribute.name.as_ptr().cast();
+                        output[index * 2 + 1] = attribute.value.as_ptr().cast();
                     }
-                    pointers.push(ptr::null());
-                    callback(arg, name.as_ptr(), pointers.as_ptr());
+                    callback(arg, name.as_ptr(), output.as_ptr());
                 } else {
                     handled = false;
                 }

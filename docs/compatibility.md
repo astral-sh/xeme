@@ -5,7 +5,7 @@ well-formedness, callback compatibility, and safe resource use are separate gate
 A symbol existing or a document parsing successfully does not establish callback
 or CPython compatibility.
 
-The [current integration report](validation/2026-09-10/coalesced-search/)
+The [current integration report](validation/2026-09-10/scanner-integration/)
 records the latest bounded validation results, including all remaining upstream
 failures. The [earlier full checkpoint](validation/2026-09-10/) retains its own
 runtime, fuzzing and distribution evidence.

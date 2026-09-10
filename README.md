@@ -16,20 +16,20 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole | Expat | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 67.187 ms | 28.823 ms | 2.33× |
-| Wayland protocol | 1.464 ms | 1.066 ms | 1.39× |
-| Maven POM | 1.153 ms | 0.442 ms | 2.61× |
-| Batik SVG | 0.145 ms | 0.133 ms | 1.08× |
-| GTK UI | 0.497 ms | 0.213 ms | 2.33× |
-| DocBook XSL | 0.340 ms | 0.186 ms | 1.82× |
+| Vulkan registry | 68.445 ms | 28.993 ms | 2.36× |
+| Wayland protocol | 1.412 ms | 1.071 ms | 1.32× |
+| Maven POM | 1.149 ms | 0.443 ms | 2.62× |
+| Batik SVG | 0.143 ms | 0.134 ms | 1.06× |
+| GTK UI | 0.488 ms | 0.213 ms | 2.31× |
+| DocBook XSL | 0.339 ms | 0.185 ms | 1.82× |
 
-These [native measurements](benchmarks/results/2026-09-10/coalesced-search/) use original XML from six pinned projects, Expat 2.8.4, 4 KiB chunks, and namespaces disabled on a shared Linux AMD EPYC-Milan host. Times are medians of process medians; ratios are medians of paired ratios.
+These [native measurements](benchmarks/results/2026-09-10/scanner-integration/) use original XML from six pinned projects, Expat 2.8.4, 4 KiB chunks, and namespaces disabled on a shared Linux AMD EPYC-Milan host. Times are medians of process medians; ratios are medians of paired ratios.
 
-The latest text-scanning change reduces elapsed time by 3.3% across the 24 native project conditions and 2.4% across the 24 actual CPython conditions versus `5bc806e`. Oriole still takes 2.04× Expat's time natively and 1.45× through CPython. The two Wayland pyexpat conditions are faster than Expat. The [full report](docs/validation/2026-09-10/coalesced-search/) retains all conditions and samples, including the native and Python regressions.
+The latest position and string changes reduce elapsed time by 1.8% across the 24 native project conditions and 2.2% across the 24 actual CPython conditions versus `193e1278`. Oriole still takes 2.01× Expat's time natively and 1.42× through CPython. The two Wayland pyexpat conditions are faster than Expat. The [full report](docs/validation/2026-09-10/scanner-integration/) retains all conditions and samples, including the native and Python regressions.
 
 Optional [profile-guided builds](tools/pgo/) are available. The [earlier PGO results](benchmarks/results/2026-09-10/version-consistent-pgo/) measure `4b11ace`; they do not measure these new parser changes.
 
-The [latest compatibility report](docs/validation/2026-09-10/coalesced-search/) records 394 workspace tests and **4,347 passing / 393 failing upstream API configurations**. Shared and static CPython each execute 802 tests with the same two text-grouping failures. Remaining allocation, resource, diagnostic, and callback differences are explicit in the [compatibility guide](docs/compatibility.md). Six [sustained ASan campaigns](docs/validation/2026-09-10/detached-frames-fuzz/) completed 14.62 million executions on `5bc806e` without findings; these precede the latest text-scanning change. The [PBS distribution report](docs/validation/2026-09-10/version-consistent-pbs/) applies to the earlier `4b11ace` runtime.
+The [latest compatibility report](docs/validation/2026-09-10/scanner-integration/) records 395 workspace tests and one doc test and **4,347 passing / 393 failing upstream API configurations**. Shared and static CPython each execute 802 tests with the same two text-grouping failures. Remaining allocation, resource, diagnostic, and callback differences are explicit in the [compatibility guide](docs/compatibility.md). Six [sustained ASan campaigns](docs/validation/2026-09-10/detached-frames-fuzz/) completed 14.62 million executions on `5bc806e` without findings; these precede the latest parser changes. The [PBS distribution report](docs/validation/2026-09-10/version-consistent-pbs/) applies to the earlier `4b11ace` runtime.
 
 ## Installation
 

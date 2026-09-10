@@ -1,0 +1,68 @@
+{
+  "scope": "All fixed conditions and samples; geometric means of per-condition paired median time ratios. Shared host.",
+  "groups": {
+    "all": {
+      "conditions": 24,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.9778856367742648,
+          "below_one": 23
+        },
+        "candidate_over_expat": {
+          "geomean": 1.419016018918556,
+          "below_one": 2
+        },
+        "published_over_expat": {
+          "geomean": 1.450588022263018,
+          "below_one": 2
+        }
+      }
+    },
+    "elementtree": {
+      "conditions": 12,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.9778396834190575,
+          "below_one": 12
+        },
+        "candidate_over_expat": {
+          "geomean": 1.5337030082582732,
+          "below_one": 0
+        },
+        "published_over_expat": {
+          "geomean": 1.5657267879334325,
+          "below_one": 0
+        }
+      }
+    },
+    "pyexpat-events": {
+      "conditions": 12,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.9779315922890395,
+          "below_one": 11
+        },
+        "candidate_over_expat": {
+          "geomean": 1.312905074258275,
+          "below_one": 2
+        },
+        "published_over_expat": {
+          "geomean": 1.343916209743226,
+          "below_one": 2
+        }
+      }
+    }
+  },
+  "regressions": [
+    {
+      "condition": {
+        "name": "vulkan",
+        "chunk": 65536,
+        "mode": "pyexpat-events",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "iterations": 3
+      },
+      "ratio": 1.0024854782517578
+    }
+  ]
+}

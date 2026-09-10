@@ -1,6 +1,6 @@
 # Benchmarks
 
-See the [current native and consumer measurements](results/2026-09-10/coalesced-search/),
+See the [current native and consumer measurements](results/2026-09-10/scanner-integration/),
 [earlier matched PGO measurements](results/2026-09-10/version-consistent-pgo/),
 [earlier full runtime measurements](results/2026-09-10/final-runtime/),
 [DTD runtime checkpoint](results/2026-09-10/dtd-checkpoint/),

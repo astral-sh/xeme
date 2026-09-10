@@ -7,6 +7,7 @@ enum Encoding {
     Utf16Be,
     Latin1,
     Ascii,
+    SingleByte,
 }
 impl Encoding {
     fn named(name: &str) -> Option<Self> {
@@ -27,7 +28,7 @@ impl Encoding {
     fn raw_len(self, text: &str) -> usize {
         match self {
             Self::Utf8 | Self::Ascii => text.len(),
-            Self::Latin1 => text.chars().count(),
+            Self::Latin1 | Self::SingleByte => text.chars().count(),
             Self::Utf16Le | Self::Utf16Be => text.chars().map(char::len_utf16).sum::<usize>() * 2,
         }
     }
@@ -39,6 +40,8 @@ pub(crate) struct Decoder {
     requested: Option<String>,
     pending: Vec<u8>,
     declaration_checked: usize,
+    unknown_name: Option<String>,
+    custom_map: Option<Box<[i32; 256]>>,
 }
 impl Decoder {
     pub(crate) fn new(requested: Option<&str>) -> Self {
@@ -47,6 +50,8 @@ impl Decoder {
             requested: requested.map(str::to_owned),
             pending: Vec::new(),
             declaration_checked: 0,
+            unknown_name: None,
+            custom_map: None,
         }
     }
     pub(crate) fn feed(
@@ -86,6 +91,18 @@ impl Decoder {
                     }
                 }
             },
+            Encoding::SingleByte => {
+                let map = self.custom_map.as_ref().expect("custom encoding has a map");
+                for byte in &self.pending {
+                    let value = map[usize::from(*byte)];
+                    let character = u32::try_from(value)
+                        .ok()
+                        .and_then(char::from_u32)
+                        .ok_or((ErrorKind::InvalidToken, "undefined byte in custom encoding"))?;
+                    source.text.push(character);
+                }
+                consumed = self.pending.len();
+            }
             Encoding::Ascii | Encoding::Latin1 => {
                 let end = if encoding == Encoding::Ascii {
                     self.pending
@@ -151,7 +168,14 @@ impl Decoder {
         max_token: usize,
     ) -> Result<Option<(Encoding, usize)>, (ErrorKind, &'static str)> {
         let bytes = &self.pending;
-        if bytes.len() < 4 && !final_input {
+        if bytes.len() < 4
+            && !final_input
+            && !(bytes.len() >= 2
+                && bytes[0].is_ascii()
+                && bytes[0] != 0
+                && bytes[1].is_ascii()
+                && bytes[1] != 0)
+        {
             return Ok(None);
         }
         let (sniffed, skip) = if bytes.starts_with(&[0xef, 0xbb, 0xbf]) {
@@ -179,8 +203,10 @@ impl Decoder {
                     }
                 }
             } else {
-                Encoding::named(requested)
-                    .ok_or((ErrorKind::UnknownEncoding, "unsupported input encoding"))?
+                Encoding::named(requested).ok_or_else(|| {
+                    self.unknown_name = Some(requested.clone());
+                    (ErrorKind::UnknownEncoding, "unsupported input encoding")
+                })?
             };
             if skip > 0 && sniffed != requested {
                 return Err((
@@ -227,8 +253,10 @@ impl Decoder {
                         && let Some(end) = rest[1..].find(quote)
                     {
                         let name = &rest[1..end + 1];
-                        let encoding = Encoding::named(name)
-                            .ok_or((ErrorKind::UnknownEncoding, "unsupported declared encoding"))?;
+                        let encoding = Encoding::named(name).ok_or_else(|| {
+                            self.unknown_name = Some(name.to_owned());
+                            (ErrorKind::UnknownEncoding, "unsupported declared encoding")
+                        })?;
                         if matches!(encoding, Encoding::Utf16Le | Encoding::Utf16Be)
                             || (skip > 0 && encoding != Encoding::Utf8)
                         {
@@ -245,7 +273,81 @@ impl Decoder {
         Ok(Some((Encoding::Utf8, skip)))
     }
 
+    pub(crate) fn unknown_encoding(&self) -> Option<&str> {
+        self.unknown_name.as_deref()
+    }
+    pub(crate) fn append_pending(&mut self, bytes: &[u8]) {
+        self.pending.extend_from_slice(bytes);
+    }
+    pub(crate) fn install_map(
+        &mut self,
+        name: &str,
+        map: [i32; 256],
+        source: &mut Source,
+    ) -> Result<(), (ErrorKind, &'static str)> {
+        if self
+            .unknown_name
+            .as_deref()
+            .is_none_or(|unknown| !unknown.eq_ignore_ascii_case(name))
+        {
+            return Err((
+                ErrorKind::UnknownEncoding,
+                "encoding map does not match the requested encoding",
+            ));
+        }
+        let mut characters = std::collections::HashSet::new();
+        for (byte, value) in map.iter().copied().enumerate() {
+            if (matches!(byte, 9 | 10 | 13) || (32..128).contains(&byte)) && value != byte as i32 {
+                return Err((
+                    ErrorKind::UnknownEncoding,
+                    "custom encoding changes an ASCII markup character",
+                ));
+            }
+            if value < -1
+                || (value >= 0
+                    && (char::from_u32(value as u32).is_none() || !characters.insert(value)))
+            {
+                return Err((
+                    ErrorKind::UnknownEncoding,
+                    "encoding map requires unique Unicode scalar values or -1",
+                ));
+            }
+        }
+        if self.pending.starts_with(&[0xef, 0xbb, 0xbf]) {
+            return Err((
+                ErrorKind::IncorrectEncoding,
+                "custom encoding conflicts with byte order mark",
+            ));
+        }
+        self.custom_map = Some(Box::new(map));
+        self.encoding = Some(Encoding::SingleByte);
+        source.encoding = Encoding::SingleByte;
+        Ok(())
+    }
+    pub(crate) fn inherit_map(&mut self, parent: &Self, source: &mut Source) {
+        if self
+            .requested
+            .as_deref()
+            .zip(parent.unknown_name.as_deref())
+            .is_some_and(|(name, parent)| name.eq_ignore_ascii_case(parent))
+        {
+            self.custom_map = parent.custom_map.clone();
+            self.unknown_name.clone_from(&parent.unknown_name);
+            if self.custom_map.is_some() {
+                self.encoding = Some(Encoding::SingleByte);
+                source.encoding = Encoding::SingleByte;
+            }
+        }
+    }
     pub(crate) fn check_declaration(&self, name: &str) -> Result<(), (ErrorKind, &'static str)> {
+        if self.encoding == Some(Encoding::SingleByte)
+            && self
+                .unknown_name
+                .as_deref()
+                .is_some_and(|custom| custom.eq_ignore_ascii_case(name))
+        {
+            return Ok(());
+        }
         // An explicitly supplied encoding takes precedence over the declaration.
         if self.requested.is_some() {
             return Ok(());
@@ -291,6 +393,7 @@ pub(crate) struct Source {
     pub(crate) initial_depth: usize,
     pub(crate) entity_name: Option<String>,
     scan: Scan,
+    deferred_size: usize,
 }
 impl Source {
     pub(crate) fn new() -> Self {
@@ -306,6 +409,7 @@ impl Source {
             initial_depth: 0,
             entity_name: None,
             scan: Scan::default(),
+            deferred_size: 0,
         }
     }
     pub(crate) fn entity(
@@ -337,11 +441,17 @@ impl Source {
         }
     }
     pub(crate) fn end_position(&self) -> Position {
-        let mut position = self.position(self.remaining().len());
+        self.position_at(self.remaining().len(), 0)
+    }
+    pub(crate) fn position_at(&self, offset: usize, count: usize) -> Position {
+        if let Some(anchor) = self.anchor {
+            return anchor;
+        }
+        let mut position = self.position(offset);
         position.byte_index += position.byte_count;
         position.byte_count = 0;
         let mut previous_cr = self.previous_cr;
-        for c in self.remaining().chars() {
+        for c in self.remaining()[..offset].chars() {
             match c {
                 '\r' => {
                     position.line += 1;
@@ -361,15 +471,31 @@ impl Source {
                 }
             }
         }
+        position.byte_count = self
+            .encoding
+            .raw_len(&self.remaining()[offset..offset + count]);
         position
+    }
+    pub(crate) fn should_defer(&self, limit: usize) -> bool {
+        self.deferred_size > 0
+            && self.remaining().len() < self.deferred_size.saturating_mul(2)
+            && self.remaining().len() <= limit
+    }
+    pub(crate) fn mark_deferred(&mut self) {
+        self.deferred_size = self.remaining().len();
     }
     pub(crate) fn scan_reference(&mut self, limit: usize) -> Result<Option<usize>, ErrorKind> {
         let bytes = &self.text.as_bytes()[self.cursor..];
-        for index in self.scan.checked.max(1)..bytes.len() {
+        for (index, byte) in bytes
+            .iter()
+            .copied()
+            .enumerate()
+            .skip(self.scan.checked.max(1))
+        {
             if index >= limit {
                 return Err(ErrorKind::LimitExceeded);
             }
-            match bytes[index] {
+            match byte {
                 b';' => return Ok(Some(index)),
                 b'<' | b'&' | b'\'' | b'"' | b' ' | b'\t' | b'\r' | b'\n' | 0 => {
                     return Err(ErrorKind::InvalidToken);
@@ -409,6 +535,7 @@ impl Source {
         }
         self.cursor += count;
         self.scan = Scan::default();
+        self.deferred_size = 0;
         if self.cursor >= 64 * 1024 && self.cursor >= self.text.len() / 2 {
             self.text.drain(..self.cursor);
             self.cursor = 0;

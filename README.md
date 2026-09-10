@@ -3,8 +3,9 @@
 A streaming XML parser in Rust. Parse XML incrementally through owned events,
 without building a document tree.
 
-**Oriole is experimental.** An Expat-compatible C interface and compatibility with
-CPython are project goals. It is not yet a production-ready replacement for Expat.
+**Oriole is experimental.** The C interface targets Expat, but API and callback
+compatibility are incomplete. It is not yet a production-ready replacement for
+Expat. See the [C interface](crates/oriole_expat) for supported modes and gaps.
 
 ## Use the library
 

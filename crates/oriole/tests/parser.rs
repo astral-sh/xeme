@@ -260,15 +260,14 @@ fn dtd_comments_do_not_confuse_subset_scanning() {
 }
 
 #[test]
-fn external_entities_are_explicitly_rejected_without_io() {
-    assert_eq!(
-        parse(
-            b"<!DOCTYPE r [<!ENTITY x SYSTEM 'file:///etc/passwd'>]><r>&x;</r>",
-            1,
-            Config::default()
-        ),
-        Err(ErrorKind::ExternalEntityHandling)
-    );
+fn external_entities_require_application_supplied_content() {
+    let events = parse(
+        b"<!DOCTYPE r [<!ENTITY x SYSTEM 'file:///etc/passwd'>]><r>&x;</r>",
+        1,
+        Config::default(),
+    )
+    .unwrap();
+    assert!(events.iter().any(|event| matches!(event, EventKind::ExternalEntityReference { system_id, .. } if system_id == "file:///etc/passwd")));
     assert_eq!(
         parse(
             b"<!DOCTYPE r [<!ENTITY % x SYSTEM 'https://example.com'>%x;]><r/>",
@@ -277,4 +276,143 @@ fn external_entities_are_explicitly_rejected_without_io() {
         ),
         Err(ErrorKind::ExternalEntityHandling)
     );
+}
+
+#[test]
+fn external_entity_children_inherit_namespaces_and_declarations() {
+    let mut parent = Parser::new(Config {
+        namespace_separator: Some('|'),
+        ..Config::default()
+    });
+    parent.feed(b"<!DOCTYPE r [<!ENTITY internal 'hello'><!ENTITY external SYSTEM 'child.xml'>]><r xmlns:p='urn:p'>&external;</r>", true).unwrap();
+    while let Some(event) = parent.next_event().unwrap() {
+        if let EventKind::ExternalEntityReference { context, .. } = event.kind {
+            let mut child = parent.external_child(context.as_deref(), None).unwrap();
+            child
+                .feed(b"<?xml encoding='UTF-8'?>text<p:a/>&internal;<p:b/>", true)
+                .unwrap();
+            let mut events = Vec::new();
+            while let Some(event) = child.next_event().unwrap() {
+                events.push(event.kind);
+            }
+            assert!(child.is_finished());
+            assert!(events.contains(&EventKind::TextDeclaration {
+                version: None,
+                encoding: "UTF-8".into()
+            }));
+            assert!(events.contains(&EventKind::Text("hello".into())));
+            assert!(events.iter().any(
+                |event| matches!(event, EventKind::StartElement {name, ..} if name == "urn:p|a")
+            ));
+        }
+    }
+}
+
+#[test]
+fn external_entity_cycles_and_expansion_budgets_are_shared() {
+    let mut parent = Parser::new(Config {
+        limits: Limits {
+            max_entity_expansion_bytes: 16,
+            ..Limits::default()
+        },
+        ..Config::default()
+    });
+    parent
+        .feed(
+            b"<!DOCTYPE r [<!ENTITY x SYSTEM 'child.xml'>]><r>&x;</r>",
+            true,
+        )
+        .unwrap();
+    while let Some(event) = parent.next_event().unwrap() {
+        if let EventKind::ExternalEntityReference { context, .. } = event.kind {
+            let mut child = parent.external_child(context.as_deref(), None).unwrap();
+            child.feed(b"&x;", true).unwrap();
+            assert_eq!(
+                child.next_event().unwrap_err().kind,
+                ErrorKind::RecursiveEntityReference
+            );
+            let mut sibling = parent.external_child(Some(""), None).unwrap();
+            sibling.feed(b"1234567890", true).unwrap();
+            while sibling.next_event().unwrap().is_some() {}
+            let mut sibling = parent.external_child(Some(""), None).unwrap();
+            assert_eq!(
+                sibling.feed(b"1234", true).unwrap_err().kind,
+                ErrorKind::LimitExceeded
+            );
+        }
+    }
+}
+
+#[test]
+fn custom_single_byte_encoding_retries_buffered_input_once() {
+    let mut parser = Parser::new(Config::default());
+    parser
+        .feed(b"<?xml version='1.0' encoding='custom'?><r>\x80</r>", true)
+        .unwrap();
+    assert_eq!(
+        parser.next_event().unwrap_err().kind,
+        ErrorKind::UnknownEncoding
+    );
+    assert_eq!(parser.unknown_encoding(), Some("custom"));
+    let mut map = std::array::from_fn(|index| index as i32);
+    map[128] = 0x20ac;
+    parser.set_encoding_map("custom", map).unwrap();
+    let mut text = String::new();
+    while let Some(event) = parser.next_event().unwrap() {
+        if let EventKind::Text(value) = event.kind {
+            text.push_str(&value);
+        }
+    }
+    assert_eq!(text, "€");
+    assert!(parser.is_finished());
+}
+
+#[test]
+fn queued_dtd_events_have_individual_raw_tokens() {
+    let mut parser = Parser::new(Config::default());
+    parser
+        .feed(
+            b"<!DOCTYPE r [<!ENTITY e 'value'><!ELEMENT r EMPTY>]><r/>",
+            true,
+        )
+        .unwrap();
+    let mut raw = Vec::new();
+    while let Some(event) = parser.next_event().unwrap() {
+        raw.push((event.kind, parser.current_raw().unwrap_or("").to_owned()));
+    }
+    assert_eq!(raw[0].1, "<!DOCTYPE r [");
+    assert_eq!(raw[1].1, "<!ENTITY e 'value'>");
+    assert_eq!(raw[2].1, "<!ELEMENT r EMPTY>");
+    assert_eq!(raw[3].1, "]>");
+    assert_eq!(raw[4].1, "<r/>");
+    assert_eq!(raw[5].1, "");
+}
+
+#[test]
+fn reparse_deferral_is_optional_and_final_input_always_flushes() {
+    let mut parser = Parser::new(Config::default());
+    parser.feed(b"<r attribute='long", false).unwrap();
+    assert!(parser.next_event().unwrap().is_none());
+    parser.feed(b"'/>", false).unwrap();
+    assert!(parser.next_event().unwrap().is_none());
+    parser.set_reparse_deferral_enabled(false);
+    assert!(matches!(
+        parser.next_event().unwrap().unwrap().kind,
+        EventKind::StartElement { .. }
+    ));
+    while parser.next_event().unwrap().is_some() {}
+    parser.feed(b"", true).unwrap();
+    assert!(parser.next_event().unwrap().is_none());
+    assert!(parser.is_finished());
+}
+
+#[test]
+fn unread_external_subsets_allow_skipped_entities_without_loading_them() {
+    let events = every_chunk("<!DOCTYPE r SYSTEM 'absent'><r a='1&unknown;2'>&unknown;</r>");
+    assert!(
+        events
+            .iter()
+            .any(|event| matches!(event, EventKind::SkippedEntity {name, ..} if name == "unknown"))
+    );
+    assert!(events.iter().any(|event| matches!(event, EventKind::StartElement {attributes, ..} if attributes[0].value == "12")));
 }

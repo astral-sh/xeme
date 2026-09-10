@@ -5,7 +5,7 @@ use crate::{
 
 impl Parser {
     pub(crate) fn parse_doctype(&mut self, token: &str, position: Position) -> Result<(), Error> {
-        if self.seen_root || self.seen_doctype || self.sources.len() > 1 {
+        if self.seen_root || self.seen_doctype || self.sources.len() > 1 || self.fragment {
             return Err(self.err(ErrorKind::Syntax, "misplaced document type declaration"));
         }
         let mut cursor = Cursor::new(&token[9..token.len() - 1]);
@@ -45,6 +45,7 @@ impl Parser {
             }
             None
         };
+        self.has_external_subset = system_id.is_some();
         self.seen_doctype = true;
         self.declaration_allowed = false;
         self.emit(
@@ -56,19 +57,25 @@ impl Parser {
             },
             position,
         );
+        let header_end = subset.map_or(token.len() - 1, |_| token.len() - 1 - cursor.rest().len());
+        self.event_raw(&token[..header_end]);
         if let Some(subset) = subset {
-            self.parse_subset(subset, position)?;
+            self.parse_subset(subset, header_end)?;
         }
         self.emit(EventKind::EndDoctype, position);
+        self.event_raw(if subset.is_some() { "]>" } else { ">" });
         Ok(())
     }
 
-    fn parse_subset(&mut self, mut text: &str, position: Position) -> Result<(), Error> {
+    fn parse_subset(&mut self, mut text: &str, base_offset: usize) -> Result<(), Error> {
+        let initial_len = text.len();
         while !text.is_empty() {
             text = text.trim_start_matches(whitespace);
             if text.is_empty() {
                 break;
             }
+            let offset = base_offset + initial_len - text.len();
+            let position = self.source().position_at(offset, 0);
             if text.starts_with('%') {
                 return Err(self.err(
                     ErrorKind::ExternalEntityHandling,
@@ -84,6 +91,7 @@ impl Parser {
                     return Err(self.err(ErrorKind::InvalidToken, "double hyphen in DTD comment"));
                 }
                 self.emit(EventKind::Comment(normalize_newlines(value)), position);
+                self.event_raw(&text[..end + 7]);
                 text = &rest[end + 3..];
                 continue;
             }
@@ -95,6 +103,7 @@ impl Parser {
                     )
                 })?;
                 self.parse_pi(&text[..end + 2], position)?;
+                self.event_raw(&text[..end + 2]);
                 text = &text[end + 2..];
                 continue;
             }
@@ -117,6 +126,7 @@ impl Parser {
             }
             let end =
                 end.ok_or_else(|| self.err(ErrorKind::UnclosedToken, "unclosed DTD declaration"))?;
+            let first_event = self.pending.len();
             let mut cursor = Cursor::new(&text[2..end]);
             let declaration = cursor
                 .name()
@@ -165,6 +175,13 @@ impl Parser {
             cursor.space();
             if !cursor.rest().is_empty() {
                 return Err(self.err(ErrorKind::Syntax, "unexpected text in DTD declaration"));
+            }
+            for (index, pending) in self.pending.iter_mut().enumerate().skip(first_event) {
+                pending.raw = Some(if index == first_event {
+                    text[..end + 1].to_owned()
+                } else {
+                    String::new()
+                });
             }
             text = &text[end + 1..];
         }
@@ -265,6 +282,8 @@ impl Parser {
                 name.clone(),
                 Entity {
                     value: value.clone(),
+                    system_id: system_id.clone(),
+                    public_id: public_id.clone(),
                     notation: notation.clone(),
                 },
             );

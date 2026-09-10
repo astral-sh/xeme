@@ -10,6 +10,10 @@ mod names;
 
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt;
+use std::sync::{
+    Arc,
+    atomic::{AtomicUsize, Ordering},
+};
 
 use encoding::{Decoder, Source};
 use names::{is_name, is_xml_char, whitespace};
@@ -144,6 +148,15 @@ pub enum EventKind {
         encoding: Option<String>,
         standalone: Option<bool>,
     },
+    TextDeclaration {
+        version: Option<String>,
+        encoding: String,
+    },
+    ExternalEntityReference {
+        context: Option<String>,
+        system_id: String,
+        public_id: Option<String>,
+    },
     StartDoctype {
         name: String,
         system_id: Option<String>,
@@ -198,7 +211,15 @@ struct Element {
 #[derive(Clone, Debug)]
 struct Entity {
     value: Option<String>,
+    system_id: Option<String>,
+    public_id: Option<String>,
     notation: Option<String>,
+}
+
+#[derive(Clone, Debug)]
+struct PendingEvent {
+    event: Event,
+    raw: Option<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -217,7 +238,7 @@ pub struct Parser {
     config: Config,
     decoder: Decoder,
     sources: Vec<Source>,
-    pending: VecDeque<Event>,
+    pending: VecDeque<PendingEvent>,
     stack: Vec<Element>,
     namespaces: HashMap<String, String>,
     entities: HashMap<String, Entity>,
@@ -231,7 +252,14 @@ pub struct Parser {
     finished: bool,
     error: Option<Error>,
     received: usize,
-    expanded: usize,
+    expanded: Arc<AtomicUsize>,
+    fragment: bool,
+    external_subset: bool,
+    external_depth: usize,
+    entity_chain: Vec<String>,
+    has_external_subset: bool,
+    standalone: bool,
+    reparse_deferral: bool,
     last_position: Position,
     current_raw: String,
     expand_internal_entities: bool,
@@ -263,7 +291,14 @@ impl Parser {
             finished: false,
             error: None,
             received: 0,
-            expanded: 0,
+            expanded: Arc::new(AtomicUsize::new(0)),
+            fragment: false,
+            external_subset: false,
+            external_depth: 0,
+            entity_chain: Vec::new(),
+            has_external_subset: false,
+            standalone: false,
+            reparse_deferral: true,
             last_position: Position {
                 line: 1,
                 ..Position::default()
@@ -275,10 +310,68 @@ impl Parser {
         }
     }
 
+    /// Construct an independent parser for an application-provided external entity.
+    ///
+    /// Pass the context from [`EventKind::ExternalEntityReference`]. Namespace
+    /// bindings, declarations, recursion tracking, and the expansion budget are
+    /// inherited. The parser never opens a path or performs a network request.
+    /// A `None` context creates an external-DTD parser, whose input is currently
+    /// rejected explicitly because external DTD processing is not implemented.
+    pub fn external_child(
+        &self,
+        context: Option<&str>,
+        encoding: Option<String>,
+    ) -> Result<Self, Error> {
+        if self.external_depth >= self.config.limits.max_entity_depth {
+            return Err(self.err(
+                ErrorKind::LimitExceeded,
+                "external entity nesting limit exceeded",
+            ));
+        }
+        let mut config = self.config.clone();
+        config.encoding = encoding;
+        let mut child = Self::new(config);
+        child
+            .decoder
+            .inherit_map(&self.decoder, &mut child.sources[0]);
+        child.entities = self.entities.clone();
+        child.defaults = self.defaults.clone();
+        child.has_external_subset = self.has_external_subset;
+        child.standalone = self.standalone;
+        child.reparse_deferral = self.reparse_deferral;
+        child.namespaces = self.namespaces.clone();
+        child.expanded = Arc::clone(&self.expanded);
+        child.fragment = true;
+        child.external_subset = context.is_none();
+        child.external_depth = self.external_depth + 1;
+        child.expand_internal_entities = self.expand_internal_entities;
+        child.entity_chain = self.entity_chain.clone();
+        if let Some(context) = context {
+            for part in context.split('\u{c}').filter(|part| !part.is_empty()) {
+                if let Some((prefix, uri)) = part.split_once('=') {
+                    if uri.is_empty() {
+                        child.namespaces.remove(prefix);
+                    } else {
+                        child.namespaces.insert(prefix.to_owned(), uri.to_owned());
+                    }
+                } else if !child.entity_chain.iter().any(|name| name == part) {
+                    child.entity_chain.push(part.to_owned());
+                }
+            }
+        }
+        Ok(child)
+    }
+
     /// Append input without calling user code. Drain events before feeding more data.
     pub fn feed(&mut self, bytes: &[u8], is_final: bool) -> Result<(), Error> {
         if let Some(error) = &self.error {
             return Err(error.clone());
+        }
+        if self.external_subset {
+            return self.fail(
+                ErrorKind::ExternalEntityHandling,
+                "external DTD subsets are not supported",
+            );
         }
         if self.final_input {
             return self.fail(ErrorKind::Finished, "input has already been finalized");
@@ -287,8 +380,12 @@ impl Parser {
             Some(size) if size <= self.config.limits.max_total_bytes => size,
             _ => return self.fail(ErrorKind::LimitExceeded, "input byte limit exceeded"),
         };
+        if self.fragment {
+            self.charge_expansion(bytes.len())?;
+        }
         self.final_input = is_final;
         if self.decoding_error.is_some() {
+            self.decoder.append_pending(bytes);
             return Ok(());
         }
         if let Err((kind, message)) = self.decoder.feed(
@@ -302,9 +399,44 @@ impl Parser {
         Ok(())
     }
 
+    /// The unresolved encoding name, available after an `UnknownEncoding` error.
+    #[must_use]
+    pub fn unknown_encoding(&self) -> Option<&str> {
+        self.decoder.unknown_encoding()
+    }
+    /// Supply a single-byte decoder and retry buffered input without feeding it again.
+    ///
+    /// Each entry is a Unicode scalar value or `-1` for an undefined byte.
+    /// ASCII markup must retain its meaning; multibyte custom encodings are rejected.
+    pub fn set_encoding_map(&mut self, name: &str, map: [i32; 256]) -> Result<(), Error> {
+        if self
+            .decoding_error
+            .is_none_or(|(kind, _)| kind != ErrorKind::UnknownEncoding)
+        {
+            return Err(self.err(
+                ErrorKind::UnknownEncoding,
+                "no unresolved encoding is pending",
+            ));
+        }
+        self.decoder
+            .install_map(name, map, &mut self.sources[0])
+            .map_err(|(kind, message)| self.err(kind, message))?;
+        self.error = None;
+        self.decoding_error = None;
+        if let Err((kind, message)) = self.decoder.feed(
+            &[],
+            self.final_input,
+            &mut self.sources[0],
+            self.config.limits.max_token_bytes,
+        ) {
+            self.decoding_error = Some((kind, message));
+        }
+        Ok(())
+    }
+
     /// Return the next event, or `None` when more input is needed or parsing is done.
     pub fn next_event(&mut self) -> Result<Option<Event>, Error> {
-        if let Some(event) = self.pending.pop_front() {
+        if let Some(event) = self.pop_event() {
             self.last_position = event.position;
             return Ok(Some(event));
         }
@@ -330,7 +462,7 @@ impl Parser {
             let prefixes: Vec<_> = self
                 .pending
                 .iter()
-                .filter_map(|event| match &event.kind {
+                .filter_map(|event| match &event.event.kind {
                     EventKind::StartNamespace { prefix, .. } => Some(prefix.clone()),
                     _ => None,
                 })
@@ -339,7 +471,7 @@ impl Parser {
             for prefix in prefixes.into_iter().rev() {
                 self.emit(EventKind::EndNamespace { prefix }, position);
             }
-            if let Some(event) = self.pending.pop_front() {
+            if let Some(event) = self.pop_event() {
                 result = Ok(Some(event));
             }
         }
@@ -359,6 +491,13 @@ impl Parser {
     }
     pub fn set_namespace_triplets(&mut self, enabled: bool) {
         self.config.namespace_triplets = enabled;
+    }
+    pub fn set_reparse_deferral_enabled(&mut self, enabled: bool) {
+        self.reparse_deferral = enabled;
+    }
+    #[must_use]
+    pub fn reparse_deferral_enabled(&self) -> bool {
+        self.reparse_deferral
     }
     pub fn set_expand_internal_entities(&mut self, enabled: bool) {
         self.expand_internal_entities = enabled;
@@ -408,7 +547,22 @@ impl Parser {
         Err(error)
     }
     fn emit(&mut self, kind: EventKind, position: Position) {
-        self.pending.push_back(Event { kind, position });
+        self.pending.push_back(PendingEvent {
+            event: Event { kind, position },
+            raw: None,
+        });
+    }
+    fn pop_event(&mut self) -> Option<Event> {
+        let pending = self.pending.pop_front()?;
+        if let Some(raw) = pending.raw {
+            self.current_raw = raw;
+        }
+        Some(pending.event)
+    }
+    fn event_raw(&mut self, raw: &str) {
+        if let Some(pending) = self.pending.back_mut() {
+            pending.raw = Some(raw.to_owned());
+        }
     }
     fn consume(&mut self, count: usize) {
         self.source_mut().consume(count);
@@ -419,7 +573,7 @@ impl Parser {
 
     fn next_event_inner(&mut self) -> Result<Option<Event>, Error> {
         loop {
-            if let Some(event) = self.pending.pop_front() {
+            if let Some(event) = self.pop_event() {
                 return Ok(Some(event));
             }
             if self.finished {
@@ -446,7 +600,7 @@ impl Parser {
                 if self.in_cdata {
                     return Err(self.err(ErrorKind::UnclosedCdataSection, "unclosed CDATA section"));
                 }
-                if !self.seen_root {
+                if !self.seen_root && !self.fragment {
                     return Err(self.err(ErrorKind::NoElements, "document contains no element"));
                 }
                 if !self.stack.is_empty() {
@@ -463,7 +617,7 @@ impl Parser {
             }
             let first = self.source().remaining().as_bytes()[0];
             if first == b'&' {
-                if self.stack.is_empty() {
+                if self.stack.is_empty() && !self.fragment {
                     return Err(self.err(
                         ErrorKind::InvalidToken,
                         "entity reference outside the document element",
@@ -484,7 +638,7 @@ impl Parser {
             let mode = if remaining.starts_with("<!--") {
                 ScanMode::Comment
             } else if remaining.starts_with("<![CDATA[") {
-                if self.stack.is_empty() {
+                if self.stack.is_empty() && !self.fragment {
                     return Err(self.err(ErrorKind::Syntax, "CDATA outside the document element"));
                 }
                 let position = self.source().position(9);
@@ -516,11 +670,16 @@ impl Parser {
             };
             let final_input = self.is_source_final();
             let max_token = self.config.limits.max_token_bytes;
+            let deferral = self.reparse_deferral && !final_input;
+            if deferral && self.source().should_defer(max_token) {
+                return Ok(None);
+            }
             let end = self
                 .source_mut()
                 .scan_token(mode, max_token)
                 .map_err(|kind| self.err(kind, "XML token byte limit exceeded"))?;
             let Some(end) = end else {
+                self.source_mut().mark_deferred();
                 if final_input {
                     return Err(self.err(ErrorKind::UnclosedToken, "unclosed XML token"));
                 }
@@ -574,9 +733,9 @@ impl Parser {
                 "CDATA terminator in character data",
             ));
         }
-        if self.stack.is_empty() && !text.chars().all(whitespace) {
+        if self.stack.is_empty() && !self.fragment && !text.chars().all(whitespace) {
             return Err(self.err(
-                if self.closed_root {
+                if self.closed_root && !self.fragment {
                     ErrorKind::JunkAfterDocumentElement
                 } else {
                     ErrorKind::Syntax
@@ -588,7 +747,7 @@ impl Parser {
         let value = normalize_newlines(text);
         self.current_raw = text.to_owned();
         self.declaration_allowed = false;
-        if !self.stack.is_empty() {
+        if !self.stack.is_empty() || self.fragment {
             self.emit(EventKind::Text(value), position);
         }
         self.consume(end);
@@ -670,28 +829,81 @@ impl Parser {
         if !is_name(&name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid entity name"));
         }
-        let entity = self.entities.get(&name).ok_or_else(|| {
-            self.err(
+        let Some(entity) = self.entities.get(&name) else {
+            if self.has_external_subset && !self.standalone {
+                self.consume(end + 1);
+                self.emit(
+                    EventKind::SkippedEntity {
+                        name,
+                        parameter: false,
+                    },
+                    position,
+                );
+                return Ok(true);
+            }
+            return Err(self.err(
                 ErrorKind::UndefinedEntity,
                 format!("undefined entity: {name}"),
-            )
-        })?;
+            ));
+        };
         if entity.notation.is_some() {
             return Err(self.err(
                 ErrorKind::BinaryEntityReference,
                 "unparsed entity in content",
             ));
         }
+        if self.entity_chain.iter().any(|item| item == &name)
+            || self
+                .sources
+                .iter()
+                .any(|source| source.entity_name.as_deref() == Some(&name))
+        {
+            return Err(self.err(
+                ErrorKind::RecursiveEntityReference,
+                "recursive entity reference",
+            ));
+        }
+        if self.sources.len() + self.external_depth > self.config.limits.max_entity_depth {
+            return Err(self.err(ErrorKind::LimitExceeded, "entity nesting limit exceeded"));
+        }
+        if entity.value.is_none() {
+            let system_id = entity
+                .system_id
+                .clone()
+                .expect("external entities have a system identifier");
+            let public_id = entity.public_id.clone();
+            let mut context = Vec::new();
+            if self.config.namespace_separator.is_some() {
+                let mut bindings: Vec<_> = self.namespaces.iter().collect();
+                bindings.sort_unstable_by_key(|(prefix, _)| *prefix);
+                context.extend(
+                    bindings
+                        .into_iter()
+                        .map(|(prefix, uri)| format!("{prefix}={uri}")),
+                );
+            }
+            context.extend(self.entity_chain.iter().cloned());
+            context.extend(
+                self.sources
+                    .iter()
+                    .filter_map(|source| source.entity_name.clone()),
+            );
+            context.push(name);
+            self.consume(end + 1);
+            self.emit(
+                EventKind::ExternalEntityReference {
+                    context: Some(context.join("\u{c}")),
+                    system_id,
+                    public_id,
+                },
+                position,
+            );
+            return Ok(true);
+        }
         let value = entity
             .value
-            .as_ref()
-            .ok_or_else(|| {
-                self.err(
-                    ErrorKind::ExternalEntityHandling,
-                    "external entity resolution is not supported",
-                )
-            })?
-            .clone();
+            .clone()
+            .expect("internal entity has replacement text");
         if !self.expand_internal_entities {
             self.consume(end + 1);
             self.emit(
@@ -702,19 +914,6 @@ impl Parser {
                 position,
             );
             return Ok(true);
-        }
-        if self
-            .sources
-            .iter()
-            .any(|source| source.entity_name.as_deref() == Some(&name))
-        {
-            return Err(self.err(
-                ErrorKind::RecursiveEntityReference,
-                "recursive entity reference",
-            ));
-        }
-        if self.sources.len() > self.config.limits.max_entity_depth {
-            return Err(self.err(ErrorKind::LimitExceeded, "entity nesting limit exceeded"));
         }
         self.charge_expansion(value.len())?;
         self.consume(end + 1);
@@ -746,6 +945,32 @@ impl Parser {
             }
             let attrs = parse_raw_attributes(rest, false)
                 .map_err(|(kind, message)| self.err(kind, message))?;
+            if self.fragment {
+                let mut attrs = attrs.into_iter();
+                let first = attrs
+                    .next()
+                    .ok_or_else(|| self.err(ErrorKind::XmlDeclaration, "empty text declaration"))?;
+                let (version, encoding_attr) = if first.0 == "version" {
+                    (Some(first.1), attrs.next())
+                } else {
+                    (None, Some(first))
+                };
+                let (name, encoding) = encoding_attr.ok_or_else(|| {
+                    self.err(
+                        ErrorKind::XmlDeclaration,
+                        "text declaration requires an encoding",
+                    )
+                })?;
+                if name != "encoding" || !valid_encoding_name(&encoding) || attrs.next().is_some() {
+                    return Err(self.err(ErrorKind::XmlDeclaration, "invalid text declaration"));
+                }
+                self.decoder
+                    .check_declaration(&encoding)
+                    .map_err(|(kind, message)| self.err(kind, message))?;
+                self.declaration_allowed = false;
+                self.emit(EventKind::TextDeclaration { version, encoding }, position);
+                return Ok(());
+            }
             if attrs.is_empty()
                 || attrs[0].0 != "version"
                 || !matches!(attrs[0].1.as_str(), "1.0" | "1.1")
@@ -794,6 +1019,7 @@ impl Parser {
                     }
                 }
             }
+            self.standalone = standalone == Some(true);
             self.emit(
                 EventKind::XmlDeclaration {
                     version,
@@ -983,7 +1209,15 @@ impl Parser {
             position,
         );
         if empty {
-            self.end_element(position)?;
+            let first_end = self.pending.len();
+            let mut end_position = self.source().position_at(token.len(), 0);
+            if self.sources.len() > 1 {
+                end_position = position;
+            }
+            self.end_element(end_position)?;
+            if let Some(pending) = self.pending.get_mut(first_end) {
+                pending.raw = Some(String::new());
+            }
         }
         Ok(())
     }
@@ -1038,7 +1272,7 @@ impl Parser {
                 position,
             );
         }
-        if self.stack.is_empty() {
+        if self.stack.is_empty() && !self.fragment {
             self.closed_root = true;
         }
         Ok(())
@@ -1098,11 +1332,13 @@ impl Parser {
     }
 
     fn charge_expansion(&mut self, size: usize) -> Result<(), Error> {
-        self.expanded = self
-            .expanded
-            .checked_add(size)
-            .filter(|size| *size <= self.config.limits.max_entity_expansion_bytes)
-            .ok_or_else(|| {
+        self.expanded
+            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
+                expanded
+                    .checked_add(size)
+                    .filter(|expanded| *expanded <= self.config.limits.max_entity_expansion_bytes)
+            })
+            .map_err(|_| {
                 self.err(
                     ErrorKind::LimitExceeded,
                     "entity expansion byte limit exceeded",
@@ -1142,7 +1378,9 @@ impl Parser {
                 if !is_name(name) {
                     return Err(self.err(ErrorKind::InvalidToken, "invalid entity name"));
                 }
-                if chain.iter().any(|item| item == name) {
+                if chain.iter().any(|item| item == name)
+                    || self.entity_chain.iter().any(|item| item == name)
+                {
                     return Err(self.err(
                         ErrorKind::RecursiveEntityReference,
                         "recursive entity in attribute",
@@ -1151,9 +1389,15 @@ impl Parser {
                 if chain.len() >= self.config.limits.max_entity_depth {
                     return Err(self.err(ErrorKind::LimitExceeded, "entity nesting limit exceeded"));
                 }
-                let entity = self.entities.get(name).ok_or_else(|| {
-                    self.err(ErrorKind::UndefinedEntity, "undefined entity in attribute")
-                })?;
+                let Some(entity) = self.entities.get(name) else {
+                    if self.has_external_subset && !self.standalone {
+                        rest = &rest[end + 1..];
+                        continue;
+                    }
+                    return Err(
+                        self.err(ErrorKind::UndefinedEntity, "undefined entity in attribute")
+                    );
+                };
                 let value = entity
                     .value
                     .as_ref()

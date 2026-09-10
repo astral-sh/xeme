@@ -290,3 +290,38 @@ fn dtd_and_value_children_keep_prolog_encoding_detection() {
     }
     assert_eq!(value.as_deref(), Some("LXR"));
 }
+
+#[test]
+fn small_input_and_token_limits_still_allow_complete_utf8_and_utf16_tags() {
+    let utf16: Vec<_> = std::iter::once(0xfeff)
+        .chain("<r/>".encode_utf16())
+        .flat_map(u16::to_le_bytes)
+        .collect();
+    for input in [b"<r/>".as_slice(), utf16.as_slice()] {
+        for chunk in [1, input.len()] {
+            for max_token_bytes in [4, oriole::Limits::default().max_token_bytes] {
+                let mut parser = Parser::new(Config {
+                    limits: oriole::Limits {
+                        max_total_bytes: input.len(),
+                        max_token_bytes,
+                        ..oriole::Limits::default()
+                    },
+                    ..Config::default()
+                });
+                parser.feed(&[], false).unwrap();
+                assert!(parser.next_event().unwrap().is_none());
+                let mut events = 0;
+                for (index, piece) in input.chunks(chunk).enumerate() {
+                    parser
+                        .feed(piece, (index + 1) * chunk >= input.len())
+                        .unwrap();
+                    while parser.next_event().unwrap().is_some() {
+                        events += 1;
+                    }
+                }
+                assert_eq!(events, 2);
+                assert!(parser.is_finished());
+            }
+        }
+    }
+}

@@ -128,14 +128,17 @@ impl Decoder {
         match encoding {
             Encoding::Utf8 => match std::str::from_utf8(&self.pending) {
                 Ok(text) => {
-                    source.text.try_push_str(text)?;
+                    source
+                        .text
+                        .try_push_str_with_minimum(text, max_token.min(1024))?;
                     consumed = self.pending.len();
                 }
                 Err(error) => {
                     consumed = error.valid_up_to();
-                    source.text.try_push_str(
+                    source.text.try_push_str_with_minimum(
                         std::str::from_utf8(&self.pending[..consumed])
                             .expect("validated UTF-8 prefix"),
+                        max_token.min(1024),
                     )?;
                     if error.error_len().is_some() {
                         return Err(Error::bare(ErrorKind::InvalidToken, "invalid UTF-8"));

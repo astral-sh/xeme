@@ -311,6 +311,19 @@ impl Buffer {
         self.push_str(text)
     }
 
+    /// Reserve a bounded first block when appending nonempty decoded text.
+    /// Existing buffers retain the ordinary geometric growth policy.
+    pub(crate) fn try_push_str_with_minimum(
+        &mut self,
+        text: &str,
+        minimum: usize,
+    ) -> Result<(), AllocError> {
+        if !text.is_empty() && self.text.capacity() == 0 {
+            self.text.try_reserve(text.len().max(minimum))?;
+        }
+        self.try_push_str(text)
+    }
+
     pub(crate) fn push(&mut self, scalar: char) -> Result<(), AllocError> {
         self.text.try_push(scalar)
     }
@@ -404,6 +417,28 @@ impl Deref for Buffer {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn initial_reservation_only_changes_the_first_nonempty_append() {
+        let mut buffer = super::Buffer::new_in(oriole_storage::Allocator::System);
+        buffer.try_push_str_with_minimum("", 1024).unwrap();
+        assert_eq!(buffer.text.capacity(), 0);
+        buffer.try_push_str_with_minimum("é", 1024).unwrap();
+        assert_eq!(buffer.as_str(), "é");
+        assert_eq!(buffer.text.capacity(), 1024);
+        buffer.clear();
+        buffer.try_push_str_with_minimum("x", 2048).unwrap();
+        assert_eq!(buffer.as_str(), "x");
+        assert_eq!(buffer.text.capacity(), 1024);
+
+        let mut small = super::Buffer::new_in(oriole_storage::Allocator::System);
+        small.try_push_str_with_minimum("abc", 2).unwrap();
+        let capacity = small.text.capacity();
+        assert!((3..1024).contains(&capacity));
+        small.try_push_str_with_minimum("d", 1024).unwrap();
+        assert_eq!(small.as_str(), "abcd");
+        assert_eq!(small.text.capacity(), capacity);
+    }
+
     use super::*;
 
     #[test]

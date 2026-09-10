@@ -2038,6 +2038,10 @@ unsafe fn preserve_input_context(parser: XML_Parser, input: &[u8]) -> Result<(),
             .min(context.len());
         context.drain(..discard);
         (*parser).input_context_start += discard;
+        if !input.is_empty() && context.capacity() == 0 {
+            let minimum = INPUT_CONTEXT_BYTES.min((*parser).config.limits.max_total_bytes);
+            context.try_reserve(input.len().max(minimum))?;
+        }
         oriole_storage::try_extend_from_slice(context, input)?;
     }
     Ok(())

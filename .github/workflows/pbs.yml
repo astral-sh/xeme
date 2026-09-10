@@ -18,7 +18,7 @@ jobs:
   distribution:
     # This expensive integration gate has a dedicated review layer.
     if: github.event_name == 'workflow_dispatch' || startsWith(github.head_ref, 'charlie/codex-oriole-pbs-')
-    runs-on: ubuntu-24.04
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262

@@ -16,7 +16,7 @@ concurrency:
 jobs:
   test:
     name: Test (${{ matrix.os }}, ${{ matrix.toolchain }})
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ github.repository_owner == 'astral-sh' && (matrix.os == 'ubuntu-24.04' && 'github-ubuntu-24.04-x86_64-4' || matrix.os == 'ubuntu-24.04-arm' && 'github-ubuntu-24.04-aarch64-4') || matrix.os }}
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -37,7 +37,7 @@ jobs:
         env:
           RUSTDOCFLAGS: -D warnings
   lint:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -55,7 +55,7 @@ jobs:
       - run: python3 -m unittest discover -s tools/cpython -p test_run.py
   native:
     name: C ABI and callback safety
-    runs-on: ubuntu-24.04-arm
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-aarch64-4' || 'ubuntu-24.04-arm' }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -78,7 +78,7 @@ jobs:
           LD_LIBRARY_PATH=target/release /tmp/oriole-allocations
   fuzz:
     name: Sanitized parser fuzz smoke
-    runs-on: ubuntu-24.04-arm
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-aarch64-4' || 'ubuntu-24.04-arm' }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -95,7 +95,7 @@ jobs:
 
   cpython:
     name: CPython XML consumers (${{ matrix.linkage }})
-    runs-on: ubuntu-24.04
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -156,7 +156,7 @@ jobs:
 
   pbs-recipe:
     name: PBS integration recipe
-    runs-on: ubuntu-24.04
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262

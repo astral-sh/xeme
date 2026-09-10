@@ -1,0 +1,570 @@
+{
+  "runtime_commit": "d9bca55795ce87ba919f2b10e67fb6ea357954b3",
+  "library_sha256": {
+    "liboriole_expat.so": "b9634be94620eea98659a81c917bc8399aa356855964f45e489b7217ed734bdb",
+    "liboriole_expat.a": "bc4cb85655a956ac0be2409876ad6e4a9921903e0fb8b79dbd89cddc9e0c920a"
+  },
+  "rust_checks": 322,
+  "upstream": {
+    "passed": 4113,
+    "failed": 627,
+    "changed_outcomes": 36,
+    "changes": [
+      {
+        "before": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_deep_nested_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_deep_nested_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_deep_nested_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_deep_nested_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_deep_nested_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_deep_nested_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_deep_nested_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_deep_nested_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_deep_nested_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_deep_nested_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_deep_nested_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_deep_nested_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_deep_nested_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_deep_nested_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_deep_nested_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_deep_nested_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_deep_nested_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_deep_nested_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_deep_nested_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_deep_nested_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_deep_nested_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_deep_nested_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_deep_nested_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_deep_nested_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_deep_nested_attribute_entity",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_deep_nested_entity_delayed_interpretation",
+          "outcome": "pass",
+          "code": 0
+        }
+      }
+    ]
+  },
+  "ordinary_exact": 1518,
+  "attribute_exact_to_baseline": 6468,
+  "custom_attribute_exact": 372,
+  "malformed_attributes": 384,
+  "malformed_text": 2392,
+  "streaming": 32,
+  "custom_exact": 36456,
+  "active_membership": {
+    "cases": 4680,
+    "exact_reference_improvements": 360,
+    "other_changes": 0
+  },
+  "doctype_exact": 4104,
+  "missing_parameter_cases": 1944,
+  "child_cases": 6,
+  "publication": {
+    "cases": 432,
+    "changed_from_shared_baseline": 0,
+    "reference_full_differences": 9,
+    "parent_outcome_differences": 0,
+    "child_outcome_differences": 0
+  },
+  "native_suites": 6,
+  "allocation_scenarios_per_linkage": 336,
+  "scope": "C-only100000entity/count depth policy on composed shared-DTD fast runtime; safe Rust defaults unchanged.",
+  "deep_measurements": [
+    {
+      "kind": 0,
+      "max_parse_seconds": 0.663537425,
+      "max_selected_peak_bytes": 102892324,
+      "max_rss_kib": 124968
+    },
+    {
+      "kind": 1,
+      "max_parse_seconds": 0.572899035,
+      "max_selected_peak_bytes": 70018726,
+      "max_rss_kib": 77052
+    },
+    {
+      "kind": 2,
+      "max_parse_seconds": 0.882349132,
+      "max_selected_peak_bytes": 77626613,
+      "max_rss_kib": 88004
+    }
+  ],
+  "selected_failure_measurements": {
+    "attempts": 152,
+    "NoMemory": 149,
+    "past_last_allocation_success": 3,
+    "live_after_free": 0
+  }
+}

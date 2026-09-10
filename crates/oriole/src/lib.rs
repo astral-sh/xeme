@@ -2250,36 +2250,38 @@ impl Parser {
         let text = &self.source().remaining()[..limit];
         let final_text = self.is_source_final() && limit == self.source().remaining().len();
         let coalesce = !self.stack.is_empty() || self.fragment;
-        let mut boundary = 0;
-        let mut end = text
-            .bytes()
-            .enumerate()
-            .find_map(|(index, byte)| {
-                if matches!(byte, b'<' | b'&') {
-                    return Some(index);
-                }
-                if byte == b'\n' || (!internal && byte == b'\r') {
-                    if !coalesce || index >= 65_536 {
-                        return Some(if boundary > 0 { boundary } else { index });
+        let fast_end = coalesce.then(|| coalesced_text_end(text)).flatten();
+        let mut end = fast_end.unwrap_or_else(|| {
+            let mut boundary = 0;
+            text.bytes()
+                .enumerate()
+                .find_map(|(index, byte)| {
+                    if matches!(byte, b'<' | b'&') {
+                        return Some(index);
                     }
-                    boundary = index
-                        + if byte == b'\r' && text.as_bytes().get(index + 1) == Some(&b'\n') {
-                            2
-                        } else {
-                            1
-                        };
-                }
-                // Bound merging across lines, preserving the existing span of
-                // an individual long line and its malformed-input prefix.
-                (index >= 65_536 && boundary > 0).then_some(boundary)
-            })
-            .map_or(text.len(), |index| {
-                if index == 0 && matches!(text.as_bytes()[0], b'\r' | b'\n') {
-                    if text.starts_with("\r\n") { 2 } else { 1 }
-                } else {
-                    index
-                }
-            });
+                    if byte == b'\n' || (!internal && byte == b'\r') {
+                        if !coalesce || index >= 65_536 {
+                            return Some(if boundary > 0 { boundary } else { index });
+                        }
+                        boundary = index
+                            + if byte == b'\r' && text.as_bytes().get(index + 1) == Some(&b'\n') {
+                                2
+                            } else {
+                                1
+                            };
+                    }
+                    // Bound merging across lines, preserving the existing span of
+                    // an individual long line and its malformed-input prefix.
+                    (index >= 65_536 && boundary > 0).then_some(boundary)
+                })
+                .map_or(text.len(), |index| {
+                    if index == 0 && matches!(text.as_bytes()[0], b'\r' | b'\n') {
+                        if text.starts_with("\r\n") { 2 } else { 1 }
+                    } else {
+                        index
+                    }
+                })
+        });
         if coalesce && end == text.len() && limit < self.source().remaining().len() {
             // Keep a converted buffer boundary at the last complete line when
             // possible. Otherwise merging earlier lines could shift the next
@@ -3681,6 +3683,17 @@ fn parse_raw_attributes(
     }
 }
 
+/// Resolve a coalesced span before newline boundaries can stop the scalar scan.
+fn coalesced_text_end(text: &str) -> Option<usize> {
+    // Markup takes precedence even at the complete-line cutoff. Search bytes so
+    // the bounded prefix may end inside a UTF-8 character without slicing str.
+    let bytes = text.as_bytes();
+    if let Some(end) = memchr::memchr2(b'<', b'&', &bytes[..bytes.len().min(65_537)]) {
+        return Some(end);
+    }
+    (bytes.len() <= 65_536).then_some(bytes.len())
+}
+
 fn string(text: &str, allocator: Allocator) -> Result<String, Error> {
     Ok(String::try_from_str_in(text, allocator)?)
 }
@@ -3993,5 +4006,105 @@ mod attribute_literal_run_tests {
             append_lexical_attribute(&mut actual, lexical::Slice::plain(&input), true).unwrap();
             assert_eq!(actual, format!("{prefix} 😀 end ").as_str());
         }
+    }
+}
+
+#[cfg(test)]
+mod coalesced_text_search_tests {
+    use super::coalesced_text_end;
+
+    // The original complete-line selector, including its root/internal CR rule.
+    fn scalar_end(text: &str, internal: bool) -> usize {
+        let coalesce = true;
+        let mut boundary = 0;
+        text.bytes()
+            .enumerate()
+            .find_map(|(index, byte)| {
+                if matches!(byte, b'<' | b'&') {
+                    return Some(index);
+                }
+                if byte == b'\n' || (!internal && byte == b'\r') {
+                    if !coalesce || index >= 65_536 {
+                        return Some(if boundary > 0 { boundary } else { index });
+                    }
+                    boundary = index
+                        + if byte == b'\r' && text.as_bytes().get(index + 1) == Some(&b'\n') {
+                            2
+                        } else {
+                            1
+                        };
+                }
+                // Bound merging across lines, preserving the existing span of
+                // an individual long line and its malformed-input prefix.
+                (index >= 65_536 && boundary > 0).then_some(boundary)
+            })
+            .map_or(text.len(), |index| {
+                if index == 0 && matches!(text.as_bytes()[0], b'\r' | b'\n') {
+                    if text.starts_with("\r\n") { 2 } else { 1 }
+                } else {
+                    index
+                }
+            })
+    }
+
+    fn compare(text: &str) {
+        for internal in [false, true] {
+            let expected = scalar_end(text, internal);
+            let actual = coalesced_text_end(text).unwrap_or_else(|| scalar_end(text, internal));
+            assert_eq!(
+                actual,
+                expected,
+                "internal={internal}, text length={}",
+                text.len()
+            );
+            assert!(text.is_char_boundary(actual));
+        }
+    }
+
+    #[test]
+    fn bounded_search_matches_scalar_selector_for_all_short_sequences() {
+        let alphabet = ['<', '&', '\r', '\n', 'x', ']', 'é', '\0'];
+        for length in 0..=6 {
+            for mut number in 0..alphabet.len().pow(length) {
+                let mut text = std::string::String::new();
+                for _ in 0..length {
+                    text.push(alphabet[number % alphabet.len()]);
+                    number /= alphabet.len();
+                }
+                compare(&text);
+            }
+        }
+    }
+
+    #[test]
+    fn markup_and_crlf_keep_precedence_at_the_complete_line_cutoff() {
+        for length in [65_535, 65_536, 65_537, 65_538, 131_075] {
+            for first in [0, 1, 65_534, 65_535, 65_536, 65_537] {
+                for second in [0, 1, 65_534, 65_535, 65_536, 65_537] {
+                    if first >= length || second >= length {
+                        continue;
+                    }
+                    for left in *b"<&\r\n" {
+                        for right in *b"<&\r\n" {
+                            let mut text = vec![b'x'; length];
+                            text[first] = left;
+                            text[second] = right;
+                            compare(std::str::from_utf8(&text).unwrap());
+                        }
+                    }
+                }
+            }
+        }
+        for prefix in ["é".repeat(32_768), "aé".repeat(21_845), "\r".repeat(65_537)] {
+            for tail in ["", "<", "&", "é<", "\r\n<", "]]>\0"] {
+                compare(&format!("{prefix}{tail}"));
+            }
+        }
+        let crossing = format!("{}\r\n<", "x".repeat(65_535));
+        assert_eq!(coalesced_text_end(&crossing), None);
+        assert_eq!(scalar_end(&crossing, false), 65_537);
+        assert_eq!(scalar_end(&crossing, true), 65_536);
+        let cutoff = format!("\n{}<", "x".repeat(65_535));
+        assert_eq!(coalesced_text_end(&cutoff), Some(65_536));
     }
 }

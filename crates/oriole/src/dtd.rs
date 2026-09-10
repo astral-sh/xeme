@@ -66,6 +66,36 @@ struct EntityValueFrame<'a> {
     normalize: bool,
 }
 
+/// A declaration replacement ends at a lexical boundary, even when its grammar
+/// (for example a content-model group) continues in the containing entity.
+struct DeclarationFrame<'a> {
+    rest: &'a str,
+    name: Option<&'a str>,
+    source_offset: usize,
+    normalize: bool,
+}
+
+struct DeclarationLiteral {
+    offset: usize,
+    normalize: bool,
+    parameters: Vec<String>,
+}
+
+struct DeclarationExpansion {
+    text: String,
+    raw: String,
+    literals: Vec<DeclarationLiteral>,
+    parameters: Vec<DeclarationParameter>,
+}
+
+struct DeclarationParameter {
+    offset: usize,
+    position: Position,
+    raw_start: usize,
+    raw_end: usize,
+    disabled: bool,
+}
+
 impl Parser {
     /// Continue a conditional header after an external DTD callback. Each frame
     /// owns its lexical boundary, so child input never becomes parent syntax.
@@ -876,6 +906,298 @@ impl Parser {
         Ok(true)
     }
 
+    /// Expand complete declaration tokens, retaining literal provenance and
+    /// separating replacement frames with grammar-only whitespace. Quoted
+    /// values and references must finish in the frame where they begin.
+    fn declaration_tokens(
+        &self,
+        text: &str,
+        base_offset: usize,
+    ) -> Result<Option<DeclarationExpansion>, Error> {
+        // The overwhelmingly common declaration contains no parameter reference.
+        if !text.contains('%') {
+            return Ok(None);
+        }
+        let mut check = text;
+        let mut has_reference = false;
+        while let Some(offset) = check.find(['\'', '"', '%']) {
+            check = &check[offset..];
+            if check.starts_with('%') {
+                if !check[1..].starts_with(whitespace) {
+                    has_reference = true;
+                    break;
+                }
+                check = &check[1..];
+            } else {
+                let quote = check.as_bytes()[0] as char;
+                let Some(end) = check[1..].find(quote) else {
+                    break;
+                };
+                check = &check[end + 2..];
+            }
+        }
+        if !has_reference {
+            return Ok(None);
+        }
+        let mut result = DeclarationExpansion {
+            text: String::new_in(self.allocator),
+            raw: String::new_in(self.allocator),
+            literals: Vec::new_in(self.allocator),
+            parameters: Vec::new_in(self.allocator),
+        };
+        let mut parents: Vec<DeclarationFrame<'_>> = Vec::new_in(self.allocator);
+        let mut current = DeclarationFrame {
+            rest: text,
+            name: None,
+            source_offset: base_offset,
+            normalize: self.sources.len() == 1,
+        };
+        loop {
+            let end = current
+                .rest
+                .find(['\'', '"', '%', '<', '>'])
+                .unwrap_or(current.rest.len());
+            if current.rest[..end].ends_with(')') && current.rest.as_bytes().get(end) == Some(&b'%')
+            {
+                return Err(self.err_at(
+                    ErrorKind::InvalidToken,
+                    "parameter reference cannot delimit a closing model group",
+                    current.source_offset + if current.name.is_none() { end } else { 0 },
+                ));
+            }
+            self.append_declaration_token(&mut result, &current.rest[..end], false)?;
+            current.rest = &current.rest[end..];
+            if current.name.is_none() {
+                current.source_offset += end;
+            }
+            if current.rest.is_empty() {
+                if let Some(parent) = parents.pop() {
+                    self.append_declaration_token(&mut result, " ", true)?;
+                    current = parent;
+                    continue;
+                }
+                return Ok(Some(result));
+            }
+            if current.rest.starts_with(['<', '>']) {
+                return Err(self.err_at(
+                    ErrorKind::IncompleteParameterEntity,
+                    "parameter replacement crosses a declaration boundary",
+                    current.source_offset,
+                ));
+            }
+            if current.rest.starts_with(['\'', '"']) {
+                let quote = current.rest.as_bytes()[0] as char;
+                let end = current.rest[1..].find(quote).ok_or_else(|| {
+                    self.err_at(
+                        ErrorKind::UnclosedToken,
+                        "quoted declaration token crosses a parameter boundary",
+                        current.source_offset,
+                    )
+                })? + 2;
+                self.charge_expansion(size_of::<DeclarationLiteral>())?;
+                let mut parameters = Vec::new_in(self.allocator);
+                for name in parents
+                    .iter()
+                    .filter_map(|frame| frame.name)
+                    .chain(current.name)
+                {
+                    self.charge_expansion(size_of::<String>() + name.len())?;
+                    try_push(&mut parameters, string(name, self.allocator)?)?;
+                }
+                try_push(
+                    &mut result.literals,
+                    DeclarationLiteral {
+                        offset: result.text.len(),
+                        normalize: current.normalize,
+                        parameters,
+                    },
+                )?;
+                self.append_declaration_token(&mut result, &current.rest[..end], false)?;
+                current.rest = &current.rest[end..];
+                if current.name.is_none() {
+                    current.source_offset += end;
+                }
+                continue;
+            }
+            // The percent sign in <!ENTITY % name ...> is a grammar marker.
+            if current.rest[1..].starts_with(whitespace) {
+                self.append_declaration_token(&mut result, "%", false)?;
+                current.rest = &current.rest[1..];
+                if current.name.is_none() {
+                    current.source_offset += 1;
+                }
+                continue;
+            }
+            let end = current.rest.find(';').ok_or_else(|| {
+                self.err_at(
+                    ErrorKind::InvalidToken,
+                    "unclosed declaration parameter reference",
+                    current.source_offset,
+                )
+            })?;
+            let name = &current.rest[1..end];
+            if !crate::names::is_name(name)
+                || (self.config.namespace_separator.is_some() && name.contains(':'))
+            {
+                return Err(self.err_at(
+                    ErrorKind::InvalidToken,
+                    "invalid declaration parameter name",
+                    current.source_offset,
+                ));
+            }
+            if !self.external_subset && self.sources.len() == 1 {
+                return Err(self.err_at(
+                    ErrorKind::ParameterEntityReference,
+                    "parameter reference in an internal subset declaration",
+                    current.source_offset,
+                ));
+            }
+            self.charge_expansion(end + 1 + size_of::<DeclarationFrame<'_>>())?;
+            let entity = self.parameter_entities.get(name);
+            self.append_declaration_token(&mut result, " ", true)?;
+            if self.parameter_mode == 0 || entity.is_none() {
+                self.charge_expansion(
+                    2 * size_of::<crate::PendingEvent>() + size_of::<DeclarationParameter>(),
+                )?;
+                try_push(
+                    &mut result.parameters,
+                    DeclarationParameter {
+                        offset: result.text.len(),
+                        position: self.source().position_at(current.source_offset, end + 1),
+                        raw_start: result.raw.len(),
+                        raw_end: result.raw.len() + if self.default_events { end + 1 } else { 0 },
+                        disabled: self.parameter_mode == 0,
+                    },
+                )?;
+                if self.default_events {
+                    result.raw.try_push_str(&current.rest[..end + 1])?;
+                }
+                current.rest = &current.rest[end + 1..];
+                if current.name.is_none() {
+                    current.source_offset += end + 1;
+                }
+                continue;
+            }
+            if current.name == Some(name)
+                || parents.iter().any(|frame| frame.name == Some(name))
+                || self
+                    .entity_chain
+                    .iter()
+                    .any(|entry| entry.strip_prefix('%') == Some(name))
+                || self.sources.iter().any(|source| {
+                    source
+                        .entity_name
+                        .as_deref()
+                        .and_then(|name| name.strip_prefix('%'))
+                        == Some(name)
+                })
+            {
+                return Err(self.err_at(
+                    ErrorKind::RecursiveEntityReference,
+                    "recursive declaration parameter entity",
+                    current.source_offset,
+                ));
+            }
+            if parents.len()
+                + self.sources.len()
+                + self.external_depth
+                + self.inherited_parameter_depth
+                > self.config.limits.max_entity_depth
+            {
+                return Err(self.err_at(
+                    ErrorKind::LimitExceeded,
+                    "declaration parameter nesting limit exceeded",
+                    current.source_offset,
+                ));
+            }
+            let value = entity
+                .expect("declared parameter")
+                .value
+                .as_deref()
+                .ok_or_else(|| {
+                    self.err_at(
+                        ErrorKind::ExternalEntityHandling,
+                        "external parameter reference inside a declaration is unsupported",
+                        current.source_offset,
+                    )
+                })?;
+            self.charge_expansion(value.len())?;
+            let position = current.source_offset;
+            current.rest = &current.rest[end + 1..];
+            if current.name.is_none() {
+                current.source_offset += end + 1;
+            }
+            try_push(&mut parents, current)?;
+            current = DeclarationFrame {
+                rest: value,
+                name: Some(name),
+                source_offset: position,
+                normalize: false,
+            };
+        }
+    }
+
+    fn append_declaration_token(
+        &self,
+        result: &mut DeclarationExpansion,
+        text: &str,
+        boundary: bool,
+    ) -> Result<(), Error> {
+        if result.text.len().saturating_add(text.len()) > self.config.limits.max_token_bytes {
+            return Err(self.err(
+                ErrorKind::LimitExceeded,
+                "expanded declaration token limit exceeded",
+            ));
+        }
+        if text
+            .chars()
+            .any(|character| !crate::names::is_xml_char(character))
+        {
+            return Err(self.err(
+                ErrorKind::InvalidToken,
+                "invalid declaration replacement character",
+            ));
+        }
+        result.text.try_push_str(text)?;
+        if !boundary && self.default_events {
+            result.raw.try_push_str(text)?;
+        }
+        Ok(())
+    }
+
+    fn declaration_parameters(&mut self, cursor: &mut Cursor<'_>) -> Result<(), Error> {
+        let offset = cursor.offset();
+        while let Some(parameter) = cursor.parameters.get(cursor.parameter_index) {
+            if parameter.offset > offset {
+                break;
+            }
+            cursor.parameter_index += 1;
+            if parameter.disabled && !self.standalone {
+                self.emit(EventKind::NotStandalone, parameter.position)?;
+                self.event_raw("")?;
+            }
+            if self.default_events && cursor.parameter_defaults {
+                let end = if self.standalone {
+                    parameter.raw_end
+                } else {
+                    cursor
+                        .parameters
+                        .get(cursor.parameter_index)
+                        .map_or(cursor.raw.len(), |next| next.raw_start)
+                };
+                self.emit(EventKind::Default, parameter.position)?;
+                let mut raw = string(&cursor.raw[parameter.raw_start..end], self.allocator)?;
+                if !self.standalone && cursor.parameter_index == cursor.parameters.len() {
+                    raw.try_push('>')?;
+                }
+                self.pending.back_mut().expect("default event").raw = Some(raw);
+            }
+            self.has_external_subset = true;
+            self.declarations_skipped |= !self.standalone;
+        }
+        Ok(())
+    }
+
     fn parse_subset(&mut self, mut text: &str, base_offset: usize) -> Result<(), Error> {
         let initial_len = text.len();
         while !text.is_empty() {
@@ -938,10 +1260,21 @@ impl Parser {
             self.declaration_allowed = false;
             let first_event = self.pending.len();
             let previously_skipped = self.declarations_skipped;
-            let mut cursor = Cursor::new(&text[2..end], self.config.namespace_separator.is_some());
+            let expansion = self.declaration_tokens(&text[2..end], offset + 2)?;
+            let grammar = expansion
+                .as_ref()
+                .map_or(&text[2..end], |value| value.text.as_str());
+            let mut cursor = Cursor::new(grammar, self.config.namespace_separator.is_some());
+            if let Some(expansion) = &expansion {
+                cursor.literals = &expansion.literals;
+                cursor.parameters = &expansion.parameters;
+                cursor.raw = &expansion.raw;
+            }
             let declaration = cursor
                 .name()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+            cursor.parameter_defaults =
+                !previously_skipped && matches!(declaration, "ENTITY" | "ATTLIST");
             cursor
                 .require_space()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -963,7 +1296,7 @@ impl Parser {
                                 self.err_at(
                                     ErrorKind::InvalidToken,
                                     message,
-                                    offset + end - cursor.rest().len(),
+                                    offset + 2 + cursor.offset().min(end - 2),
                                 )
                             } else {
                                 self.err(ErrorKind::Syntax, message)
@@ -974,6 +1307,7 @@ impl Parser {
                         &model_start[..model_start.len() - cursor.rest().len()],
                         self.allocator,
                     )?;
+                    self.declaration_parameters(&mut cursor)?;
                     self.emit(EventKind::ElementDeclaration { name, model }, position)?;
                 }
                 "NOTATION" => {
@@ -987,6 +1321,7 @@ impl Parser {
                     let (system_id, public_id) =
                         external_id(&mut cursor, true, self.allocator, self.sources.len() == 1)
                             .map_err(|error| self.err(error.kind, error.message))?;
+                    self.declaration_parameters(&mut cursor)?;
                     self.emit(
                         EventKind::NotationDeclaration {
                             name,
@@ -999,15 +1334,16 @@ impl Parser {
                 _ => return Err(self.err(ErrorKind::Syntax, "unsupported DTD declaration")),
             }
             cursor.space();
+            self.declaration_parameters(&mut cursor)?;
             if !cursor.rest().is_empty() {
-                let rest_offset = end - cursor.rest().len();
+                let rest_offset = cursor.offset();
                 if cursor.rest().starts_with(['?', '*', '+'])
-                    && text[..rest_offset].ends_with(whitespace)
+                    && grammar[..rest_offset].ends_with(whitespace)
                 {
                     return Err(self.err_at(
                         ErrorKind::InvalidToken,
                         "misplaced DTD repetition marker",
-                        offset + rest_offset,
+                        offset + 2 + rest_offset.min(end - 2),
                     ));
                 }
                 return Err(self.err(ErrorKind::Syntax, "unexpected text in DTD declaration"));
@@ -1015,7 +1351,11 @@ impl Parser {
             if self.declarations_skipped
                 && matches!(declaration, "ENTITY" | "ATTLIST")
                 && self.default_events
-                && self.pending.len() == first_event
+                && self
+                    .pending
+                    .iter()
+                    .skip(first_event)
+                    .all(|pending| matches!(pending.event.kind, EventKind::NotStandalone))
             {
                 self.emit(EventKind::Default, position)?;
             }
@@ -1025,9 +1365,23 @@ impl Parser {
                 && self.pending.iter().skip(first_event).any(|pending| {
                     matches!(pending.event.kind, EventKind::EntityDeclaration { .. })
                 });
-            for (index, pending) in self.pending.iter_mut().enumerate().skip(first_event) {
-                pending.raw = Some(if index == first_event {
-                    string(&text[..end + usize::from(!closing_default)], self.allocator)?
+            let mut first_raw = true;
+            for pending in self.pending.iter_mut().skip(first_event) {
+                if pending.raw.is_some() {
+                    continue;
+                }
+                pending.raw = Some(if first_raw {
+                    first_raw = false;
+                    if let Some(expansion) = &expansion {
+                        let mut raw = string("<!", self.allocator)?;
+                        raw.try_push_str(&expansion.raw)?;
+                        if !closing_default {
+                            raw.try_push('>')?;
+                        }
+                        raw
+                    } else {
+                        string(&text[..end + usize::from(!closing_default)], self.allocator)?
+                    }
                 } else {
                     String::new_in(self.allocator)
                 });
@@ -1067,12 +1421,20 @@ impl Parser {
             let raw = cursor
                 .quoted()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+            self.declaration_parameters(cursor)?;
             if self.declarations_skipped {
                 return Ok(());
             }
             let declaring = (parameter && !self.parameter_entities.contains_key(&name))
                 .then_some(name.as_str());
-            let (value, skipped) = self.entity_value(raw, declaring)?;
+            let (value, skipped) = self.entity_value(
+                raw,
+                declaring,
+                cursor
+                    .last_literal_normalize
+                    .unwrap_or(self.sources.len() == 1),
+                cursor.last_literal_parameters,
+            )?;
             skipped_parameter = skipped;
             (Some(value), None, None, None)
         } else {
@@ -1098,6 +1460,7 @@ impl Parser {
             };
             (None, system_id, public_id, notation)
         };
+        self.declaration_parameters(cursor)?;
         if self.declarations_skipped {
             return Ok(());
         }
@@ -1152,13 +1515,15 @@ impl Parser {
         &self,
         raw: &str,
         declaring_parameter: Option<&str>,
+        normalize: bool,
+        declaration_parameters: &[String],
     ) -> Result<(String, bool), Error> {
         let mut value = String::try_with_capacity_in(raw.len(), self.allocator)?;
         let mut parents = Vec::new_in(self.allocator);
         let mut current = EntityValueFrame {
             rest: raw,
             name: None,
-            normalize: self.sources.len() == 1,
+            normalize,
         };
         let mut skipped = false;
         loop {
@@ -1210,6 +1575,7 @@ impl Parser {
             // Charge reference work even for empty or missing replacements.
             self.charge_expansion(end + 1 + size_of::<EntityValueFrame<'_>>())?;
             if declaring_parameter == Some(reference)
+                || declaration_parameters.iter().any(|name| name == reference)
                 || current.name == Some(reference)
                 || parents
                     .iter()
@@ -1240,6 +1606,7 @@ impl Parser {
                 + self.sources.len()
                 + self.external_depth
                 + self.inherited_parameter_depth
+                + declaration_parameters.len()
                 > self.config.limits.max_entity_depth
             {
                 return Err(self.err(
@@ -1297,6 +1664,7 @@ impl Parser {
         let mut first_attribute = true;
         loop {
             let spaced = cursor.space();
+            self.declaration_parameters(cursor)?;
             if cursor.rest().is_empty() {
                 break;
             }
@@ -1362,15 +1730,37 @@ impl Parser {
                 let raw = cursor
                     .quoted()
                     .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+                self.declaration_parameters(cursor)?;
                 if self.declarations_skipped {
                     continue;
                 }
-                let mut value = self.expand_attribute(raw, &mut Vec::new_in(self.allocator))?;
+                // A CR/LF pair in a replacement was produced by character
+                // references, so it represents two attribute whitespace
+                // characters rather than one physical line ending.
+                let normalized =
+                    if cursor.last_literal_normalize == Some(false) && raw.contains("\r\n") {
+                        let mut value = String::try_with_capacity_in(raw.len(), self.allocator)?;
+                        for character in raw.chars() {
+                            value.try_push(if whitespace(character) {
+                                ' '
+                            } else {
+                                character
+                            })?;
+                        }
+                        Some(value)
+                    } else {
+                        None
+                    };
+                let mut value = self.expand_attribute(
+                    normalized.as_deref().unwrap_or(raw),
+                    &mut Vec::new_in(self.allocator),
+                )?;
                 if attribute_type != "CDATA" {
                     value = collapse_spaces(&value, self.allocator)?;
                 }
                 Some(value)
             };
+            self.declaration_parameters(cursor)?;
             if self.declarations_skipped {
                 continue;
             }
@@ -1424,10 +1814,34 @@ impl Parser {
 struct Cursor<'a> {
     text: &'a str,
     namespaces: bool,
+    initial_len: usize,
+    literals: &'a [DeclarationLiteral],
+    literal_index: usize,
+    last_literal_normalize: Option<bool>,
+    last_literal_parameters: &'a [String],
+    parameters: &'a [DeclarationParameter],
+    parameter_index: usize,
+    parameter_defaults: bool,
+    raw: &'a str,
 }
 impl<'a> Cursor<'a> {
     fn new(text: &'a str, namespaces: bool) -> Self {
-        Self { text, namespaces }
+        Self {
+            text,
+            namespaces,
+            initial_len: text.len(),
+            literals: &[],
+            literal_index: 0,
+            last_literal_normalize: None,
+            last_literal_parameters: &[],
+            parameters: &[],
+            parameter_index: 0,
+            parameter_defaults: false,
+            raw: "",
+        }
+    }
+    fn offset(&self) -> usize {
+        self.initial_len - self.text.len()
     }
     fn rest(&self) -> &'a str {
         self.text
@@ -1472,6 +1886,24 @@ impl<'a> Cursor<'a> {
         Ok(name)
     }
     fn quoted(&mut self) -> Result<&'a str, &'static str> {
+        let offset = self.offset();
+        while self
+            .literals
+            .get(self.literal_index)
+            .is_some_and(|literal| literal.offset < offset)
+        {
+            self.literal_index += 1;
+        }
+        self.last_literal_normalize = self
+            .literals
+            .get(self.literal_index)
+            .filter(|literal| literal.offset == offset)
+            .map(|literal| literal.normalize);
+        self.last_literal_parameters = self
+            .literals
+            .get(self.literal_index)
+            .filter(|literal| literal.offset == offset)
+            .map_or(&[], |literal| &literal.parameters);
         let quote = self
             .text
             .chars()
@@ -1492,7 +1924,7 @@ fn external_id(
     normalize: bool,
 ) -> Result<(Option<String>, Option<String>), Error> {
     let syntax = |message| Error::bare(ErrorKind::Syntax, message);
-    let system_literal = |value| {
+    let system_literal = |value, normalize| {
         if normalize {
             normalize_newlines(value, allocator)
         } else {
@@ -1502,7 +1934,13 @@ fn external_id(
     if cursor.eat("SYSTEM") {
         cursor.require_space().map_err(syntax)?;
         let value = cursor.quoted().map_err(syntax)?;
-        Ok((Some(system_literal(value)?), None))
+        Ok((
+            Some(system_literal(
+                value,
+                cursor.last_literal_normalize.unwrap_or(normalize),
+            )?),
+            None,
+        ))
     } else if cursor.eat("PUBLIC") {
         cursor.require_space().map_err(syntax)?;
         let public = cursor.quoted().map_err(syntax)?;
@@ -1527,7 +1965,13 @@ fn external_id(
             return Err(syntax("system identifier requires whitespace"));
         }
         let system = cursor.quoted().map_err(syntax)?;
-        Ok((Some(system_literal(system)?), Some(normalized)))
+        Ok((
+            Some(system_literal(
+                system,
+                cursor.last_literal_normalize.unwrap_or(normalize),
+            )?),
+            Some(normalized),
+        ))
     } else {
         Err(syntax("external identifier requires SYSTEM or PUBLIC"))
     }

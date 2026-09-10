@@ -69,8 +69,12 @@ reports retain these acceptance and diagnostic differences.
 
 The following Expat modes are explicitly unsupported:
 
-- Arbitrary parameter-entity declaration fragments and external parameter
-  references inside entity values are rejected. References
+- Declaration start/end delimiters split across parameter entities and external
+  parameter references inside declarations or entity values are rejected.
+  Internal parameter entities can supply complete lexical tokens inside
+  declarations in external DTDs and parameter entities. Replacement frames
+  preserve name and quote boundaries, attribute whitespace, and entity-value
+  provenance; their grammar can continue across a content-model group. References
   between declarations, nested `INCLUDE`/`IGNORE` sections in external DTDs, and
   internal parameter entities selecting conditional keywords or expanding entity
   values in external DTDs and parameter entities are supported. Value replacements

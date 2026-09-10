@@ -1,0 +1,90 @@
+{
+  "conclusion": "Bounded declaration-token expansion is implemented and passes the selected semantic, streaming, allocation-failure and lint checks. Exact malformed diagnostics and handler-dependent Default fallback remain incomplete.",
+  "source_manifest": "source.json",
+  "patch": "declaration-tokens.patch",
+  "patch_check": "git apply --check passed against /tmp/oriole-pe-values",
+  "implementation": [
+    "Iterative borrowed lexical frames expand internal PEs only in legal external/parameter declaration contexts; complete names and literals cannot splice across entity boundaries.",
+    "Grammar-only boundary whitespace remains separate from Default bytes; content-model groups can continue across frames.",
+    "Quoted tokens retain their physical/replacement origin and active parameter-name chain through value interpretation, preserving CR/LF semantics, recursion precedence and combined nesting limits.",
+    "Missing/disabled grammar references suppress declarations from their cursor position when not standalone, retain earlier attribute callbacks and emit skipped raw fragments.",
+    "Replacement bytes, empty-reference work, active-name copies, literal metadata, and pending callback structures are charged before allocation; output and depth have explicit limits."
+  ],
+  "validation": {
+    "core_and_ffi_tests_passed": 150,
+    "allocation_failures": "Every allocation in the expanded core workload was faulted; zero global allocator use and no leaked blocks. FFI allocation/reentry suite also passed.",
+    "clippy": "cargo +ohm clippy -p oriole -p oriole_expat --all-targets -- -D warnings passed",
+    "format": "cargo +ohm fmt --all completed",
+    "utf8_utf16_all_chunk_cases": 9536,
+    "utf8_utf16_differences": 0,
+    "literal_provenance_cases": 42,
+    "literal_provenance_differences": 0,
+    "matrices": [
+      {
+        "evidence": "/tmp/oriole-external-pe-review/declaration-final.json",
+        "cases": 318,
+        "acceptance_differences": 0,
+        "error_code_differences": 12,
+        "successful_cases": 198,
+        "successful_default_differences": 0,
+        "successful_declaration_differences": 0,
+        "malformed_error_pairs": {
+          "4 -> 5": 4,
+          "29 -> 5": 8
+        }
+      },
+      {
+        "evidence": "/tmp/oriole-external-pe-review/declaration-broad-first.json",
+        "cases": 1680,
+        "acceptance_differences": 0,
+        "error_code_differences": 92,
+        "successful_cases": 324,
+        "successful_default_differences": 0,
+        "successful_declaration_differences": 0,
+        "malformed_error_pairs": {
+          "4 -> 2": 66,
+          "5 -> 4": 26
+        }
+      }
+    ],
+    "baseline_focused_acceptance_differences": 186,
+    "candidate_focused_acceptance_differences": 0
+  },
+  "scope": [
+    "Matrices compare parent/child acceptance, child error codes, EntityDecl and Attlist payloads and concatenated Default bytes with declaration handlers registered. Root NotStandalone ordering is excluded as a pre-existing difference.",
+    "No claims of universal malformed callback/error-location parity are made."
+  ],
+  "remaining_limits": [
+    "Malformed standalone repetition markers and general references in declaration grammar can report Syntax2 instead of InvalidToken4. An incomplete percent token in a replacement reports4 instead of5.",
+    "The focused matrix retains UnclosedToken5 vs expected IncompleteParameterEntity29 for whole declaration start/end fragments, and5 vs4 for an already incomplete physical quoted declaration when PE parsing is disabled. All reject.",
+    "Default-only consumers without EntityDecl/Attlist handlers retain incomplete whole-declaration fallback: skipped inline references may omit prefixes or duplicate raw references/suffixes. Six reproductions are preserved separately.",
+    "External PEs inside declaration grammar remain unsupported. External-value continuations are outside this layer.",
+    "A whole physical declaration is tokenized before semantic callback dispatch; handler changes and malformed-prefix callback timing are not fully Expat-equivalent."
+  ],
+  "integration_notes": [
+    "Apply this layer after the external-header layer with a reviewed merge. Preserve the header layer entity_chain percent-name recursion checks and inherited_parameter_depth terms in entity_value.",
+    "Also add inherited_parameter_depth to declaration_tokens depth accounting and check inherited percent-prefixed entity_chain there; that field is absent from this layer base snapshot.",
+    "Merge the README paragraph with the external-header support description. No storage, header-continuation, FFI ABI or external-child runtime files were edited by this layer."
+  ],
+  "check_limitations": [
+    "A full-workspace clippy attempt reached the CLI jemalloc native build and ran out of disk. Only that isolated workspace failed native build subtree was removed; scoped affected-package clippy passed. Root owns final workspace/CLI checks."
+  ],
+  "independent_review": "/root/ffi/multibyte_fuzz source review found no bounds/provenance/resource blocker; literal/depth probe report pending if available.",
+  "evidence": [
+    "/tmp/oriole-external-pe-review/declaration-final.json",
+    "/tmp/oriole-external-pe-review/declaration-baseline.json",
+    "/tmp/oriole-external-pe-review/declaration-broad-first.json",
+    "/tmp/oriole-external-pe-review/declaration-chunks-final.json",
+    "/tmp/oriole-external-pe-review/declaration-literals-final.json",
+    "/tmp/oriole-external-pe-review/declaration-no-handler-defaults.json"
+  ],
+  "artifacts": {
+    "source.json": "ea3758f04642e5f3771b8c7d423c2277d3206f32306f90485e392b0c074b51e4",
+    "declaration-tokens.patch": "91760e1938d06ff8280fe0b16baedec11a948f5f9e97446aa58c4e86740af5d5",
+    "oriole-declaration-scoped-clippy.log": "c43dba1822058ceeba018f71266f4545960693f5f907e06876441a7a672af59d",
+    "oriole-declaration-build.log": "f90bdf911b72ded02b3b5d7e7efb3e6a1d1d7588fa07b6704f8489ea2c14cbac",
+    "oriole-declaration-chunks.log": "e8188d9d431719f28d43bd8ce5c3827d4bcfc61df4652b7d93ccea0207fcd881",
+    "oriole-declaration-literals-final.log": "7160530acf18cdf2a9c4973e7019ecb8b8bd7dd8631bad7ef063895e9aadc29e",
+    "oriole-declaration-all-final.log": "a728e7f70d39fffb81373234a1863b18355a21773e38ebff32abfc03416f7feb"
+  }
+}

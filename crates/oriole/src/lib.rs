@@ -3543,8 +3543,22 @@ fn append_lexical_attribute(
     text: lexical::Slice<'_>,
     normalize_line_endings: bool,
 ) -> Result<(), Error> {
-    if !text.has_ascii_aliases() && !text.contains(['\t', '\r', '\n']) {
-        output.try_push_str(&text)?;
+    if !text.has_ascii_aliases() {
+        let text = text.as_str();
+        let mut start = 0;
+        while let Some(offset) = memchr::memchr3(b'\t', b'\r', b'\n', &text.as_bytes()[start..]) {
+            let end = start + offset;
+            output.try_push_str(&text[start..end])?;
+            output.try_push(' ')?;
+            start = end + 1;
+            if normalize_line_endings
+                && text.as_bytes()[end] == b'\r'
+                && text.as_bytes().get(start) == Some(&b'\n')
+            {
+                start += 1;
+            }
+        }
+        output.try_push_str(&text[start..])?;
         return Ok(());
     }
     let mut previous_cr = false;
@@ -3767,5 +3781,55 @@ mod parameter_state_tests {
             ErrorKind::LimitExceeded
         );
         assert!(parser.parameter_state.get().is_none());
+    }
+}
+
+#[cfg(test)]
+mod attribute_literal_run_tests {
+    use super::*;
+
+    #[test]
+    fn ordinary_runs_match_scalar_whitespace_normalization_at_boundaries() {
+        let alphabet = ['a', 'é', '😀', ' ', '\t', '\r', '\n'];
+        for length in 0..=5 {
+            for mut number in 0..7_usize.pow(length) {
+                let mut input = std::string::String::new();
+                for _ in 0..length {
+                    input.push(alphabet[number % alphabet.len()]);
+                    number /= alphabet.len();
+                }
+                for normalize in [false, true] {
+                    let mut expected = std::string::String::from("prior\r");
+                    let mut previous_cr = false;
+                    for character in input.chars() {
+                        if character == '\n' && previous_cr {
+                            previous_cr = false;
+                            continue;
+                        }
+                        previous_cr = normalize && character == '\r';
+                        expected.push(if whitespace(character) {
+                            ' '
+                        } else {
+                            character
+                        });
+                    }
+                    let mut actual = String::try_from_str_in("prior\r", Allocator::System).unwrap();
+                    append_lexical_attribute(&mut actual, lexical::Slice::plain(&input), normalize)
+                        .unwrap();
+                    assert_eq!(
+                        actual,
+                        expected.as_str(),
+                        "normalize={normalize}, input={input:?}"
+                    );
+                }
+            }
+        }
+        for width in [63, 64, 65, 127, 128, 129, 4095, 4096, 4097] {
+            let prefix = "é".repeat(width);
+            let input = format!("{prefix}\r\n😀\tend\r");
+            let mut actual = String::new_in(Allocator::System);
+            append_lexical_attribute(&mut actual, lexical::Slice::plain(&input), true).unwrap();
+            assert_eq!(actual, format!("{prefix} 😀 end ").as_str());
+        }
     }
 }

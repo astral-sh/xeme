@@ -769,6 +769,11 @@ impl Source {
     }
 
     fn raw_len(&self, offset: usize, count: usize) -> usize {
+        if matches!(self.encoding, Encoding::Utf8 | Encoding::Ascii) {
+            // Native UTF-8 and ASCII keep one source byte per stored byte.
+            debug_assert!(self.remaining().get(offset..offset + count).is_some());
+            return count;
+        }
         if self.encoding == Encoding::MultiByte {
             self.raw_widths[self.cursor + offset..self.cursor + offset + count]
                 .iter()

@@ -136,26 +136,13 @@ static void handler_argument(void) {
     XML_ParserFree(active);
     active = NULL;
 }
-int main(int argc, char **argv) {
-    if (argc == 2 && strcmp(argv[1], "--unsupported-mm-contract") == 0) {
-        XML_Memory_Handling_Suite memory = {custom_malloc, custom_realloc, custom_free};
-        assert(XML_ParserCreate_MM(NULL, &memory, NULL) == NULL);
-        puts("Custom memory suite explicitly rejected; this is an unsupported-feature contract, not Expat compatibility");
-        return 0;
-    }
-    int supported = argc == 2 && strcmp(argv[1], "--supported") == 0;
-    if (argc != 1 && !supported) {
-        fprintf(stderr, "usage: %s [--supported|--unsupported-mm-contract]\n", argv[0]);
-        return 2;
-    }
+int main(void) {
     incremental();
     buffer_api();
     suspend_resume();
     handler_argument();
-    if (!supported) {
-        custom_memory();
-        failed_allocation();
-    }
-    printf("C ABI %s integration passed (%s)\n", supported ? "supported-subset" : "full", XML_ExpatVersion());
+    custom_memory();
+    failed_allocation();
+    printf("C ABI full integration passed (%s)\n", XML_ExpatVersion());
     return 0;
 }

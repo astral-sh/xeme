@@ -62,8 +62,10 @@ jobs:
         run: |
           cc -std=c11 -O2 -Wall -Wextra -Werror -I include tests/c/integration.c -L target/release -loriole_expat -o /tmp/oriole-c
           cc -std=c11 -O2 -Wall -Wextra -Werror -I include tests/c/adversarial.c -L target/release -loriole_expat -o /tmp/oriole-adversarial
-          LD_LIBRARY_PATH=target/release /tmp/oriole-c --supported
+          LD_LIBRARY_PATH=target/release /tmp/oriole-c
           LD_LIBRARY_PATH=target/release /tmp/oriole-adversarial
+          cc -std=c11 -O2 -Wall -Wextra -Werror -I include tests/c/allocations.c -L target/release -loriole_expat -o /tmp/oriole-allocations
+          LD_LIBRARY_PATH=target/release /tmp/oriole-allocations
   fuzz:
     name: Sanitized parser fuzz smoke
     runs-on: ubuntu-24.04-arm

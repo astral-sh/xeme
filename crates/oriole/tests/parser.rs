@@ -1,5 +1,9 @@
 use oriole::{Config, ErrorKind, EventKind, Limits, Parser};
 
+fn text(value: &str) -> oriole_storage::String {
+    oriole_storage::String::try_from_str_in(value, oriole_storage::Allocator::System).unwrap()
+}
+
 fn parse(xml: &[u8], chunk: usize, config: Config) -> Result<Vec<EventKind>, ErrorKind> {
     let mut parser = Parser::new(config);
     let mut events = Vec::new();
@@ -11,7 +15,7 @@ fn parse(xml: &[u8], chunk: usize, config: Config) -> Result<Vec<EventKind>, Err
         while let Some(event) = parser.next_event().map_err(|error| error.kind)? {
             if let EventKind::Text(text) = event.kind {
                 if let Some(EventKind::Text(previous)) = events.last_mut() {
-                    previous.push_str(&text);
+                    previous.push_str(&text).unwrap();
                 } else {
                     events.push(EventKind::Text(text));
                 }
@@ -41,8 +45,8 @@ fn streaming_tokens_references_and_normalization() {
     let events = every_chunk(
         "<?xml version='1.0'?><!-- prolog --><r a=' x\r\ny &#x9; &amp; '><n/>hé😀\r\n&amp;&#x1F600;<![CDATA[x<>&\r\ny]]><?target data?></r><!--done-->",
     );
-    assert!(events.contains(&EventKind::Text("hé😀\n&😀".into())));
-    assert!(events.contains(&EventKind::Text("x<>&\ny".into())));
+    assert!(events.contains(&EventKind::Text(text("hé😀\n&😀"))));
+    assert!(events.contains(&EventKind::Text(text("x<>&\ny"))));
     assert!(events.iter().any(|event| matches!(event, EventKind::StartElement { attributes, .. } if attributes.first().is_some_and(|attr| attr.value == " x y \t & "))));
 }
 
@@ -69,7 +73,7 @@ fn dtd_entities_defaults_and_content_models() {
         "<!DOCTYPE r [<!ELEMENT r (#PCDATA|b)*><!ELEMENT b EMPTY><!ENTITY word 'hello'><!ENTITY markup '<b/>&word;'><!ATTLIST r a CDATA 'default' b NMTOKENS '  a   b  '>]><r>&markup;</r>",
     );
     assert!(events.iter().any(|event| matches!(event, EventKind::StartElement {name, attributes} if name == "r" && attributes[0].value == "default" && !attributes[0].specified && attributes[1].value == "a b")));
-    assert!(events.contains(&EventKind::Text("hello".into())));
+    assert!(events.contains(&EventKind::Text(text("hello"))));
 }
 
 #[test]
@@ -120,7 +124,7 @@ fn encodings_and_split_surrogates() {
             assert!(
                 parse(&bytes, chunk, Config::default())
                     .unwrap()
-                    .contains(&EventKind::Text("hé😀".into()))
+                    .contains(&EventKind::Text(text("hé😀")))
             );
         }
     }
@@ -129,7 +133,7 @@ fn encodings_and_split_surrogates() {
         assert!(
             parse(latin, chunk, Config::default())
                 .unwrap()
-                .contains(&EventKind::Text("é".into()))
+                .contains(&EventKind::Text(text("é")))
         );
     }
 }
@@ -298,9 +302,9 @@ fn external_entity_children_inherit_namespaces_and_declarations() {
             assert!(child.is_finished());
             assert!(events.contains(&EventKind::TextDeclaration {
                 version: None,
-                encoding: "UTF-8".into()
+                encoding: text("UTF-8")
             }));
-            assert!(events.contains(&EventKind::Text("hello".into())));
+            assert!(events.contains(&EventKind::Text(text("hello"))));
             assert!(events.iter().any(
                 |event| matches!(event, EventKind::StartElement {name, ..} if name == "urn:p|a")
             ));

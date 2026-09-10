@@ -8,12 +8,12 @@ mod dtd;
 mod encoding;
 mod names;
 
-use std::collections::{HashMap, HashSet, VecDeque};
-use std::fmt;
-use std::sync::{
-    Arc,
-    atomic::{AtomicUsize, Ordering},
+use oriole_storage::{
+    AllocError, Allocator, HashMap, Queue, Shared, String, TryClone, Vec, hash_map, hash_set,
+    try_insert, try_push, try_set_insert,
 };
+use std::fmt;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use encoding::{Decoder, Source};
 use names::{is_name, is_xml_char, whitespace};
@@ -49,7 +49,7 @@ impl Default for Limits {
 pub struct Config {
     pub namespace_separator: Option<char>,
     pub namespace_triplets: bool,
-    pub encoding: Option<String>,
+    pub encoding: Option<std::string::String>,
     pub limits: Limits,
 }
 
@@ -63,10 +63,10 @@ pub struct Position {
 }
 
 /// An XML parse failure. A parser remains failed after returning an error.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Error {
     pub kind: ErrorKind,
-    pub message: String,
+    pub message: &'static str,
     pub position: Position,
 }
 
@@ -112,21 +112,38 @@ impl fmt::Display for Error {
     }
 }
 impl std::error::Error for Error {}
+impl Error {
+    pub(crate) fn bare(kind: ErrorKind, message: &'static str) -> Self {
+        Self {
+            kind,
+            message,
+            position: Position {
+                line: 1,
+                ..Position::default()
+            },
+        }
+    }
+}
+impl From<AllocError> for Error {
+    fn from(_: AllocError) -> Self {
+        Self::bare(ErrorKind::NoMemory, "out of memory")
+    }
+}
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Attribute {
     pub name: String,
     pub value: String,
     pub specified: bool,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Event {
     pub kind: EventKind,
     pub position: Position,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum EventKind {
     StartElement {
         name: String,
@@ -201,14 +218,14 @@ pub enum EventKind {
     },
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct Element {
     raw_name: String,
     expanded_name: String,
     bindings: Vec<(String, Option<String>)>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct Entity {
     value: Option<String>,
     system_id: Option<String>,
@@ -216,17 +233,37 @@ struct Entity {
     notation: Option<String>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct PendingEvent {
     event: Event,
     raw: Option<String>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct DefaultAttribute {
     name: String,
     attribute_type: String,
     value: Option<String>,
+}
+
+impl TryClone for Entity {
+    fn try_clone(&self) -> Result<Self, AllocError> {
+        Ok(Self {
+            value: self.value.try_clone()?,
+            system_id: self.system_id.try_clone()?,
+            public_id: self.public_id.try_clone()?,
+            notation: self.notation.try_clone()?,
+        })
+    }
+}
+impl TryClone for DefaultAttribute {
+    fn try_clone(&self) -> Result<Self, AllocError> {
+        Ok(Self {
+            name: self.name.try_clone()?,
+            attribute_type: self.attribute_type.try_clone()?,
+            value: self.value.try_clone()?,
+        })
+    }
 }
 
 /// An incremental, non-validating XML 1.0 parser.
@@ -236,9 +273,10 @@ struct DefaultAttribute {
 #[derive(Debug)]
 pub struct Parser {
     config: Config,
+    allocator: Allocator,
     decoder: Decoder,
     sources: Vec<Source>,
-    pending: VecDeque<PendingEvent>,
+    pending: Queue<PendingEvent>,
     stack: Vec<Element>,
     namespaces: HashMap<String, String>,
     entities: HashMap<String, Entity>,
@@ -252,7 +290,7 @@ pub struct Parser {
     finished: bool,
     error: Option<Error>,
     received: usize,
-    expanded: Arc<AtomicUsize>,
+    expanded: Shared<AtomicUsize>,
     fragment: bool,
     external_subset: bool,
     external_depth: usize,
@@ -270,18 +308,41 @@ pub struct Parser {
 impl Parser {
     #[must_use]
     pub fn new(config: Config) -> Self {
-        let decoder = Decoder::new(config.encoding.as_deref());
-        let mut namespaces = HashMap::new();
-        namespaces.insert("xml".into(), "http://www.w3.org/XML/1998/namespace".into());
-        Self {
+        Self::try_new_in(config, Allocator::System).expect("XML parser allocation failed")
+    }
+
+    /// Construct a parser whose owned data uses the selected allocator.
+    pub fn try_new_in(mut config: Config, allocator: Allocator) -> Result<Self, Error> {
+        let encoding = config.encoding.take();
+        Self::try_new_with_encoding_in(config, encoding.as_deref(), allocator)
+    }
+
+    /// Construct a parser from a borrowed encoding name, avoiding a host allocation.
+    pub fn try_new_with_encoding_in(
+        mut config: Config,
+        encoding: Option<&str>,
+        allocator: Allocator,
+    ) -> Result<Self, Error> {
+        config.encoding = None;
+        let decoder = Decoder::new(encoding, allocator)?;
+        let mut namespaces = hash_map(allocator);
+        try_insert(
+            &mut namespaces,
+            string("xml", allocator)?,
+            string("http://www.w3.org/XML/1998/namespace", allocator)?,
+        )?;
+        let mut sources = Vec::new_in(allocator);
+        try_push(&mut sources, Source::new(allocator))?;
+        Ok(Self {
             config,
+            allocator,
             decoder,
-            sources: vec![Source::new()],
-            pending: VecDeque::new(),
-            stack: Vec::new(),
+            sources,
             namespaces,
-            entities: HashMap::new(),
-            defaults: HashMap::new(),
+            pending: Queue::new_in(allocator),
+            stack: Vec::new_in(allocator),
+            entities: hash_map(allocator),
+            defaults: hash_map(allocator),
             seen_root: false,
             closed_root: false,
             seen_doctype: false,
@@ -291,11 +352,11 @@ impl Parser {
             finished: false,
             error: None,
             received: 0,
-            expanded: Arc::new(AtomicUsize::new(0)),
+            expanded: Shared::try_new_in(AtomicUsize::new(0), allocator)?,
             fragment: false,
             external_subset: false,
             external_depth: 0,
-            entity_chain: Vec::new(),
+            entity_chain: Vec::new_in(allocator),
             has_external_subset: false,
             standalone: false,
             reparse_deferral: true,
@@ -303,11 +364,16 @@ impl Parser {
                 line: 1,
                 ..Position::default()
             },
-            current_raw: String::new(),
+            current_raw: String::new_in(allocator),
             expand_internal_entities: true,
             decoding_error: None,
             id_attribute_index: None,
-        }
+        })
+    }
+
+    #[must_use]
+    pub fn allocator(&self) -> Allocator {
+        self.allocator
     }
 
     /// Construct an independent parser for an application-provided external entity.
@@ -320,7 +386,16 @@ impl Parser {
     pub fn external_child(
         &self,
         context: Option<&str>,
-        encoding: Option<String>,
+        encoding: Option<std::string::String>,
+    ) -> Result<Self, Error> {
+        self.external_child_with_encoding(context, encoding.as_deref())
+    }
+
+    /// Construct an external entity parser without allocating an encoding argument.
+    pub fn external_child_with_encoding(
+        &self,
+        context: Option<&str>,
+        encoding: Option<&str>,
     ) -> Result<Self, Error> {
         if self.external_depth >= self.config.limits.max_entity_depth {
             return Err(self.err(
@@ -328,34 +403,53 @@ impl Parser {
                 "external entity nesting limit exceeded",
             ));
         }
-        let mut config = self.config.clone();
-        config.encoding = encoding;
-        let mut child = Self::new(config);
+        // The constructor consumes Config.encoding into the allocator-owned decoder.
+        // The stored config contains only inline values, so this clone cannot allocate.
+        debug_assert!(self.config.encoding.is_none());
+        let mut child =
+            Self::try_new_with_encoding_in(self.config.clone(), encoding, self.allocator)?;
         child
             .decoder
-            .inherit_map(&self.decoder, &mut child.sources[0]);
-        child.entities = self.entities.clone();
-        child.defaults = self.defaults.clone();
-        child.has_external_subset = self.has_external_subset;
-        child.standalone = self.standalone;
-        child.reparse_deferral = self.reparse_deferral;
-        child.namespaces = self.namespaces.clone();
-        child.expanded = Arc::clone(&self.expanded);
+            .inherit_map(&self.decoder, &mut child.sources[0])?;
+        for (name, entity) in &self.entities {
+            try_insert(&mut child.entities, name.try_clone()?, entity.try_clone()?)?;
+        }
+        for (name, attributes) in &self.defaults {
+            let mut cloned = Vec::new_in(self.allocator);
+            for attribute in attributes {
+                try_push(&mut cloned, attribute.try_clone()?)?;
+            }
+            try_insert(&mut child.defaults, name.try_clone()?, cloned)?;
+        }
+        child.namespaces.clear();
+        for (prefix, uri) in &self.namespaces {
+            try_insert(&mut child.namespaces, prefix.try_clone()?, uri.try_clone()?)?;
+        }
+        child.expanded = self.expanded.clone();
         child.fragment = true;
         child.external_subset = context.is_none();
         child.external_depth = self.external_depth + 1;
         child.expand_internal_entities = self.expand_internal_entities;
-        child.entity_chain = self.entity_chain.clone();
+        child.has_external_subset = self.has_external_subset;
+        child.standalone = self.standalone;
+        child.reparse_deferral = self.reparse_deferral;
+        for name in &self.entity_chain {
+            try_push(&mut child.entity_chain, name.try_clone()?)?;
+        }
         if let Some(context) = context {
             for part in context.split('\u{c}').filter(|part| !part.is_empty()) {
                 if let Some((prefix, uri)) = part.split_once('=') {
                     if uri.is_empty() {
                         child.namespaces.remove(prefix);
                     } else {
-                        child.namespaces.insert(prefix.to_owned(), uri.to_owned());
+                        try_insert(
+                            &mut child.namespaces,
+                            string(prefix, self.allocator)?,
+                            string(uri, self.allocator)?,
+                        )?;
                     }
                 } else if !child.entity_chain.iter().any(|name| name == part) {
-                    child.entity_chain.push(part.to_owned());
+                    try_push(&mut child.entity_chain, string(part, self.allocator)?)?;
                 }
             }
         }
@@ -365,7 +459,7 @@ impl Parser {
     /// Append input without calling user code. Drain events before feeding more data.
     pub fn feed(&mut self, bytes: &[u8], is_final: bool) -> Result<(), Error> {
         if let Some(error) = &self.error {
-            return Err(error.clone());
+            return Err(*error);
         }
         if self.external_subset {
             return self.fail(
@@ -380,21 +474,27 @@ impl Parser {
             Some(size) if size <= self.config.limits.max_total_bytes => size,
             _ => return self.fail(ErrorKind::LimitExceeded, "input byte limit exceeded"),
         };
-        if self.fragment {
-            self.charge_expansion(bytes.len())?;
+        if self.fragment
+            && let Err(error) = self.charge_expansion(bytes.len())
+        {
+            self.error = Some(error);
+            return Err(error);
         }
         self.final_input = is_final;
         if self.decoding_error.is_some() {
-            self.decoder.append_pending(bytes);
+            if let Err(error) = self.decoder.append_pending(bytes) {
+                self.error = Some(error);
+                return Err(error);
+            }
             return Ok(());
         }
-        if let Err((kind, message)) = self.decoder.feed(
+        if let Err(error) = self.decoder.feed(
             bytes,
             is_final,
             &mut self.sources[0],
             self.config.limits.max_token_bytes,
         ) {
-            self.decoding_error = Some((kind, message));
+            self.decoding_error = Some((error.kind, error.message));
         }
         Ok(())
     }
@@ -409,6 +509,9 @@ impl Parser {
     /// Each entry is a Unicode scalar value or `-1` for an undefined byte.
     /// ASCII markup must retain its meaning; multibyte custom encodings are rejected.
     pub fn set_encoding_map(&mut self, name: &str, map: [i32; 256]) -> Result<(), Error> {
+        if let Some(error) = self.error.filter(|error| error.kind == ErrorKind::NoMemory) {
+            return Err(error);
+        }
         if self
             .decoding_error
             .is_none_or(|(kind, _)| kind != ErrorKind::UnknownEncoding)
@@ -418,18 +521,21 @@ impl Parser {
                 "no unresolved encoding is pending",
             ));
         }
-        self.decoder
-            .install_map(name, map, &mut self.sources[0])
-            .map_err(|(kind, message)| self.err(kind, message))?;
+        if let Err(error) = self.decoder.install_map(name, map, &mut self.sources[0]) {
+            if error.kind == ErrorKind::NoMemory {
+                self.error = Some(error);
+            }
+            return Err(error);
+        }
         self.error = None;
         self.decoding_error = None;
-        if let Err((kind, message)) = self.decoder.feed(
+        if let Err(error) = self.decoder.feed(
             &[],
             self.final_input,
             &mut self.sources[0],
             self.config.limits.max_token_bytes,
         ) {
-            self.decoding_error = Some((kind, message));
+            self.decoding_error = Some((error.kind, error.message));
         }
         Ok(())
     }
@@ -441,7 +547,7 @@ impl Parser {
             return Ok(Some(event));
         }
         if let Some(error) = &self.error {
-            return Err(error.clone());
+            return Err(*error);
         }
         let mut result = self.next_event_inner();
         if let (Err(error), Some((kind, message))) = (&result, self.decoding_error)
@@ -453,23 +559,32 @@ impl Parser {
             let source = &self.sources[0];
             result = Err(Error {
                 kind,
-                message: message.into(),
+                message,
                 position: source.end_position(),
             });
         }
         if let Err(error) = &result {
-            self.error = Some(error.clone());
-            let prefixes: Vec<_> = self
-                .pending
-                .iter()
-                .filter_map(|event| match &event.event.kind {
-                    EventKind::StartNamespace { prefix, .. } => Some(prefix.clone()),
-                    _ => None,
-                })
-                .collect();
-            let position = error.position;
-            for prefix in prefixes.into_iter().rev() {
-                self.emit(EventKind::EndNamespace { prefix }, position);
+            self.error = Some(*error);
+            if error.kind == ErrorKind::NoMemory {
+                self.pending.clear();
+                return result;
+            }
+            let cleanup = (|| -> Result<(), Error> {
+                let mut prefixes = Vec::new_in(self.allocator);
+                for event in self.pending.iter() {
+                    if let EventKind::StartNamespace { prefix, .. } = &event.event.kind {
+                        try_push(&mut prefixes, prefix.try_clone()?)?;
+                    }
+                }
+                for prefix in prefixes.into_iter().rev() {
+                    self.emit(EventKind::EndNamespace { prefix }, error.position)?;
+                }
+                Ok(())
+            })();
+            if let Err(error) = cleanup {
+                self.error = Some(error);
+                self.pending.clear();
+                return Err(error);
             }
             if let Some(event) = self.pop_event() {
                 result = Ok(Some(event));
@@ -534,23 +649,24 @@ impl Parser {
     fn here(&self) -> Position {
         self.source().position(0)
     }
-    fn err(&self, kind: ErrorKind, message: impl Into<String>) -> Error {
+    fn err(&self, kind: ErrorKind, message: &'static str) -> Error {
         Error {
             kind,
-            message: message.into(),
+            message,
             position: self.here(),
         }
     }
-    fn fail<T>(&mut self, kind: ErrorKind, message: impl Into<String>) -> Result<T, Error> {
+    fn fail<T>(&mut self, kind: ErrorKind, message: &'static str) -> Result<T, Error> {
         let error = self.err(kind, message);
-        self.error = Some(error.clone());
+        self.error = Some(error);
         Err(error)
     }
-    fn emit(&mut self, kind: EventKind, position: Position) {
-        self.pending.push_back(PendingEvent {
+    fn emit(&mut self, kind: EventKind, position: Position) -> Result<(), Error> {
+        self.pending.try_push_back(PendingEvent {
             event: Event { kind, position },
             raw: None,
-        });
+        })?;
+        Ok(())
     }
     fn pop_event(&mut self) -> Option<Event> {
         let pending = self.pending.pop_front()?;
@@ -559,10 +675,11 @@ impl Parser {
         }
         Some(pending.event)
     }
-    fn event_raw(&mut self, raw: &str) {
+    fn event_raw(&mut self, raw: &str) -> Result<(), Error> {
         if let Some(pending) = self.pending.back_mut() {
-            pending.raw = Some(raw.to_owned());
+            pending.raw = Some(string(raw, self.allocator)?);
         }
+        Ok(())
     }
     fn consume(&mut self, count: usize) {
         self.source_mut().consume(count);
@@ -642,10 +759,10 @@ impl Parser {
                     return Err(self.err(ErrorKind::Syntax, "CDATA outside the document element"));
                 }
                 let position = self.source().position(9);
-                self.current_raw = "<![CDATA[".into();
+                self.current_raw = string("<![CDATA[", self.allocator)?;
                 self.consume(9);
                 self.in_cdata = true;
-                self.emit(EventKind::StartCdata, position);
+                self.emit(EventKind::StartCdata, position)?;
                 continue;
             } else if remaining.starts_with("<?") {
                 ScanMode::Pi
@@ -686,8 +803,8 @@ impl Parser {
                 return Ok(None);
             };
             let position = self.source().position(end);
-            let token = self.source().remaining()[..end].to_owned();
-            self.current_raw.clone_from(&token);
+            let token = string(&self.source().remaining()[..end], self.allocator)?;
+            self.current_raw = token.try_clone()?;
             validate_chars(&token).map_err(|kind| self.err(kind, "invalid XML character"))?;
             match mode {
                 ScanMode::Comment => {
@@ -696,7 +813,10 @@ impl Parser {
                         return Err(self.err(ErrorKind::InvalidToken, "double hyphen in comment"));
                     }
                     self.declaration_allowed = false;
-                    self.emit(EventKind::Comment(normalize_newlines(text)), position);
+                    self.emit(
+                        EventKind::Comment(normalize_newlines(text, self.allocator)?),
+                        position,
+                    )?;
                 }
                 ScanMode::Pi => self.parse_pi(&token, position)?,
                 ScanMode::Doctype => self.parse_doctype(&token, position)?,
@@ -744,11 +864,11 @@ impl Parser {
             ));
         }
         let position = self.source().position(end);
-        let value = normalize_newlines(text);
-        self.current_raw = text.to_owned();
+        let value = normalize_newlines(text, self.allocator)?;
+        self.current_raw = string(text, self.allocator)?;
         self.declaration_allowed = false;
         if !self.stack.is_empty() || self.fragment {
-            self.emit(EventKind::Text(value), position);
+            self.emit(EventKind::Text(value), position)?;
         }
         self.consume(end);
         Ok(true)
@@ -758,10 +878,10 @@ impl Parser {
         let text = self.source().remaining();
         if text.starts_with("]]>") {
             let position = self.source().position(3);
-            self.current_raw = "]]>".into();
+            self.current_raw = string("]]>", self.allocator)?;
             self.consume(3);
             self.in_cdata = false;
-            self.emit(EventKind::EndCdata, position);
+            self.emit(EventKind::EndCdata, position)?;
             return Ok(true);
         }
         let end = if let Some(end) = text.find("]]>") {
@@ -784,10 +904,10 @@ impl Parser {
         let text = &text[..end];
         validate_chars(text).map_err(|kind| self.err(kind, "invalid XML character"))?;
         let position = self.source().position(end);
-        let value = normalize_newlines(text);
-        self.current_raw = text.to_owned();
+        let value = normalize_newlines(text, self.allocator)?;
+        self.current_raw = string(text, self.allocator)?;
         self.consume(end);
-        self.emit(EventKind::Text(value), position);
+        self.emit(EventKind::Text(value), position)?;
         Ok(true)
     }
 
@@ -816,14 +936,17 @@ impl Parser {
                 "entity reference byte limit exceeded",
             ));
         }
-        let name = text[1..end].to_owned();
+        let name = string(&text[1..end], self.allocator)?;
         let position = self.source().position(end + 1);
-        self.current_raw = text[..end + 1].to_owned();
+        self.current_raw = string(&text[..end + 1], self.allocator)?;
         if let Some(character) = character_reference(&name)
             .map_err(|kind| self.err(kind, "invalid character reference"))?
         {
             self.consume(end + 1);
-            self.emit(EventKind::Text(character.to_string()), position);
+            self.emit(
+                EventKind::Text(string(character.encode_utf8(&mut [0; 4]), self.allocator)?),
+                position,
+            )?;
             return Ok(true);
         }
         if !is_name(&name) {
@@ -838,13 +961,10 @@ impl Parser {
                         parameter: false,
                     },
                     position,
-                );
+                )?;
                 return Ok(true);
             }
-            return Err(self.err(
-                ErrorKind::UndefinedEntity,
-                format!("undefined entity: {name}"),
-            ));
+            return Err(self.err(ErrorKind::UndefinedEntity, "undefined entity"));
         };
         if entity.notation.is_some() {
             return Err(self.err(
@@ -869,40 +989,48 @@ impl Parser {
         if entity.value.is_none() {
             let system_id = entity
                 .system_id
-                .clone()
+                .try_clone()?
                 .expect("external entities have a system identifier");
-            let public_id = entity.public_id.clone();
-            let mut context = Vec::new();
+            let public_id = entity.public_id.try_clone()?;
+            let mut context = String::new_in(self.allocator);
             if self.config.namespace_separator.is_some() {
-                let mut bindings: Vec<_> = self.namespaces.iter().collect();
+                let mut bindings = Vec::new_in(self.allocator);
+                for binding in &self.namespaces {
+                    try_push(&mut bindings, binding)?;
+                }
                 bindings.sort_unstable_by_key(|(prefix, _)| *prefix);
-                context.extend(
-                    bindings
-                        .into_iter()
-                        .map(|(prefix, uri)| format!("{prefix}={uri}")),
-                );
+                for (prefix, uri) in bindings {
+                    context.try_push_str(prefix)?;
+                    context.try_push('=')?;
+                    context.try_push_str(uri)?;
+                    context.try_push('\u{c}')?;
+                }
             }
-            context.extend(self.entity_chain.iter().cloned());
-            context.extend(
-                self.sources
-                    .iter()
-                    .filter_map(|source| source.entity_name.clone()),
-            );
-            context.push(name);
+            for name in &self.entity_chain {
+                context.try_push_str(name)?;
+                context.try_push('\u{c}')?;
+            }
+            for source in &self.sources {
+                if let Some(name) = &source.entity_name {
+                    context.try_push_str(name)?;
+                    context.try_push('\u{c}')?;
+                }
+            }
+            context.try_push_str(&name)?;
             self.consume(end + 1);
             self.emit(
                 EventKind::ExternalEntityReference {
-                    context: Some(context.join("\u{c}")),
+                    context: Some(context),
                     system_id,
                     public_id,
                 },
                 position,
-            );
+            )?;
             return Ok(true);
         }
         let value = entity
             .value
-            .clone()
+            .try_clone()?
             .expect("internal entity has replacement text");
         if !self.expand_internal_entities {
             self.consume(end + 1);
@@ -912,13 +1040,15 @@ impl Parser {
                     parameter: false,
                 },
                 position,
-            );
+            )?;
             return Ok(true);
         }
         self.charge_expansion(value.len())?;
         self.consume(end + 1);
-        self.sources
-            .push(Source::entity(value, name, position, self.stack.len()));
+        try_push(
+            &mut self.sources,
+            Source::entity(value, name, position, self.stack.len()),
+        )?;
         Ok(true)
     }
 
@@ -943,15 +1073,15 @@ impl Parser {
                     "XML declaration is not at the beginning",
                 ));
             }
-            let attrs = parse_raw_attributes(rest, false)
-                .map_err(|(kind, message)| self.err(kind, message))?;
+            let attrs = parse_raw_attributes(rest, false, self.allocator)
+                .map_err(|error| self.err(error.kind, error.message))?;
             if self.fragment {
                 let mut attrs = attrs.into_iter();
                 let first = attrs
                     .next()
                     .ok_or_else(|| self.err(ErrorKind::XmlDeclaration, "empty text declaration"))?;
                 let (version, encoding_attr) = if first.0 == "version" {
-                    (Some(first.1), attrs.next())
+                    (Some(string(first.1, self.allocator)?), attrs.next())
                 } else {
                     (None, Some(first))
                 };
@@ -961,46 +1091,49 @@ impl Parser {
                         "text declaration requires an encoding",
                     )
                 })?;
-                if name != "encoding" || !valid_encoding_name(&encoding) || attrs.next().is_some() {
+                if name != "encoding" || !valid_encoding_name(encoding) || attrs.next().is_some() {
                     return Err(self.err(ErrorKind::XmlDeclaration, "invalid text declaration"));
                 }
                 self.decoder
-                    .check_declaration(&encoding)
-                    .map_err(|(kind, message)| self.err(kind, message))?;
+                    .check_declaration(encoding)
+                    .map_err(|error| self.err(error.kind, error.message))?;
                 self.declaration_allowed = false;
-                self.emit(EventKind::TextDeclaration { version, encoding }, position);
+                self.emit(
+                    EventKind::TextDeclaration {
+                        version,
+                        encoding: string(encoding, self.allocator)?,
+                    },
+                    position,
+                )?;
                 return Ok(());
             }
-            if attrs.is_empty()
-                || attrs[0].0 != "version"
-                || !matches!(attrs[0].1.as_str(), "1.0" | "1.1")
-            {
+            if attrs.is_empty() || attrs[0].0 != "version" || !matches!(attrs[0].1, "1.0" | "1.1") {
                 return Err(self.err(
                     ErrorKind::XmlDeclaration,
                     "XML declaration must begin with a version",
                 ));
             }
-            let version = attrs[0].1.clone();
+            let version = string(attrs[0].1, self.allocator)?;
             if version != "1.0" {
                 return Err(self.err(ErrorKind::XmlDeclaration, "only XML 1.0 is supported"));
             }
             let mut encoding = None;
             let mut standalone = None;
             for (name, value) in attrs.into_iter().skip(1) {
-                match name.as_str() {
+                match name {
                     "encoding" if encoding.is_none() && standalone.is_none() => {
-                        if !valid_encoding_name(&value) {
+                        if !valid_encoding_name(value) {
                             return Err(
                                 self.err(ErrorKind::XmlDeclaration, "invalid encoding name")
                             );
                         }
                         self.decoder
-                            .check_declaration(&value)
-                            .map_err(|(kind, message)| self.err(kind, message))?;
-                        encoding = Some(value);
+                            .check_declaration(value)
+                            .map_err(|error| self.err(error.kind, error.message))?;
+                        encoding = Some(string(value, self.allocator)?);
                     }
                     "standalone" if standalone.is_none() => {
-                        standalone = Some(match value.as_str() {
+                        standalone = Some(match value {
                             "yes" => true,
                             "no" => false,
                             _ => {
@@ -1027,7 +1160,7 @@ impl Parser {
                     standalone,
                 },
                 position,
-            );
+            )?;
         } else {
             if self.config.namespace_separator.is_some() && target.contains(':') {
                 return Err(self.err(
@@ -1037,11 +1170,11 @@ impl Parser {
             }
             self.emit(
                 EventKind::ProcessingInstruction {
-                    target: target.to_owned(),
-                    data: normalize_newlines(rest.trim_start_matches(whitespace)),
+                    target: string(target, self.allocator)?,
+                    data: normalize_newlines(rest.trim_start_matches(whitespace), self.allocator)?,
                 },
                 position,
-            );
+            )?;
         }
         self.declaration_allowed = false;
         Ok(())
@@ -1061,35 +1194,46 @@ impl Parser {
         let body = &token[1..token.len() - if empty { 2 } else { 1 }];
         let (name, rest) = take_name(body)
             .ok_or_else(|| self.err(ErrorKind::InvalidToken, "invalid element name"))?;
-        let raw_attrs =
-            parse_raw_attributes(rest, true).map_err(|(kind, message)| self.err(kind, message))?;
+        let raw_attrs = parse_raw_attributes(rest, true, self.allocator)
+            .map_err(|error| self.err(error.kind, error.message))?;
         if raw_attrs.len() > self.config.limits.max_attributes {
             return Err(self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded"));
         }
-        let mut attrs = Vec::with_capacity(raw_attrs.len());
-        let mut names = HashSet::new();
+        let mut attrs = Vec::new_in(self.allocator);
+        attrs
+            .try_reserve(raw_attrs.len())
+            .map_err(|_| AllocError::OutOfMemory)?;
+        let mut names = hash_set(self.allocator);
         for (attr_name, value) in raw_attrs {
-            if !names.insert(attr_name.clone()) {
+            if !try_set_insert(&mut names, attr_name)? {
                 return Err(self.err(ErrorKind::DuplicateAttribute, "duplicate attribute"));
             }
-            let mut value = self.expand_attribute(&value, &mut Vec::new())?;
+            let mut value = self.expand_attribute(value, &mut Vec::new_in(self.allocator))?;
             if self
                 .defaults
                 .get(name)
                 .and_then(|decls| decls.iter().find(|decl| decl.name == attr_name))
                 .is_some_and(|decl| decl.attribute_type != "CDATA")
             {
-                value = collapse_spaces(&value);
+                value = collapse_spaces(&value, self.allocator)?;
             }
-            attrs.push(Attribute {
-                name: attr_name,
-                value,
-                specified: true,
-            });
+            try_push(
+                &mut attrs,
+                Attribute {
+                    name: string(attr_name, self.allocator)?,
+                    value,
+                    specified: true,
+                },
+            )?;
         }
-        if let Some(defaults) = self.defaults.get(name).cloned() {
+        if let Some(defaults) = self
+            .defaults
+            .get(name)
+            .map(TryClone::try_clone)
+            .transpose()?
+        {
             for default in defaults {
-                if !names.contains(&default.name)
+                if !names.contains(default.name.as_str())
                     && let Some(value) = default.value
                 {
                     if attrs.len() >= self.config.limits.max_attributes {
@@ -1097,11 +1241,14 @@ impl Parser {
                             self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded")
                         );
                     }
-                    attrs.push(Attribute {
-                        name: default.name,
-                        value,
-                        specified: false,
-                    });
+                    try_push(
+                        &mut attrs,
+                        Attribute {
+                            name: default.name,
+                            value,
+                            specified: false,
+                        },
+                    )?;
                 }
             }
         }
@@ -1112,7 +1259,7 @@ impl Parser {
                 })
             })
         });
-        let mut bindings = Vec::new();
+        let mut bindings = Vec::new_in(self.allocator);
         if self.config.namespace_separator.is_some() {
             for attr in &attrs {
                 let prefix = if attr.name == "xmlns" {
@@ -1163,28 +1310,41 @@ impl Parser {
                     let previous = if uri.is_empty() {
                         self.namespaces.remove(prefix)
                     } else {
-                        self.namespaces.insert(prefix.to_owned(), uri.clone())
+                        try_insert(
+                            &mut self.namespaces,
+                            string(prefix, self.allocator)?,
+                            uri.try_clone()?,
+                        )?
                     };
-                    bindings.push((prefix.to_owned(), previous));
+                    try_push(&mut bindings, (string(prefix, self.allocator)?, previous))?;
                     self.emit(
                         EventKind::StartNamespace {
-                            prefix: (!prefix.is_empty()).then(|| prefix.to_owned()),
-                            uri: (!uri.is_empty()).then(|| uri.clone()),
+                            prefix: if prefix.is_empty() {
+                                None
+                            } else {
+                                Some(string(prefix, self.allocator)?)
+                            },
+                            uri: if uri.is_empty() {
+                                None
+                            } else {
+                                Some(uri.try_clone()?)
+                            },
                         },
                         position,
-                    );
+                    )?;
                 }
             }
             let id_name = self
                 .id_attribute_index
-                .map(|index| attrs[index].name.clone());
+                .map(|index| attrs[index].name.try_clone())
+                .transpose()?;
             attrs.retain(|attr| attr.name != "xmlns" && !attr.name.starts_with("xmlns:"));
             self.id_attribute_index =
                 id_name.and_then(|name| attrs.iter().position(|attribute| attribute.name == name));
-            let mut expanded = HashSet::new();
+            let mut expanded = hash_set(self.allocator);
             for attr in &mut attrs {
                 let key = self.expand_name(&attr.name, true, false)?;
-                if !expanded.insert(key) {
+                if !try_set_insert(&mut expanded, key)? {
                     return Err(self.err(
                         ErrorKind::DuplicateAttribute,
                         "duplicate expanded attribute name",
@@ -1196,18 +1356,21 @@ impl Parser {
         let expanded_name = self.expand_name(name, false, self.config.namespace_triplets)?;
         self.seen_root = true;
         self.declaration_allowed = false;
-        self.stack.push(Element {
-            raw_name: name.to_owned(),
-            expanded_name: expanded_name.clone(),
-            bindings,
-        });
+        try_push(
+            &mut self.stack,
+            Element {
+                raw_name: string(name, self.allocator)?,
+                expanded_name: expanded_name.try_clone()?,
+                bindings,
+            },
+        )?;
         self.emit(
             EventKind::StartElement {
                 name: expanded_name,
                 attributes: attrs,
             },
             position,
-        );
+        )?;
         if empty {
             let first_end = self.pending.len();
             let mut end_position = self.source().position_at(token.len(), 0);
@@ -1216,7 +1379,7 @@ impl Parser {
             }
             self.end_element(end_position)?;
             if let Some(pending) = self.pending.get_mut(first_end) {
-                pending.raw = Some(String::new());
+                pending.raw = Some(String::new_in(self.allocator));
             }
         }
         Ok(())
@@ -1255,11 +1418,11 @@ impl Parser {
                 name: element.expanded_name,
             },
             position,
-        );
+        )?;
         for (prefix, previous) in element.bindings.into_iter().rev() {
             match previous {
                 Some(uri) => {
-                    self.namespaces.insert(prefix.clone(), uri);
+                    try_insert(&mut self.namespaces, prefix.try_clone()?, uri)?;
                 }
                 None => {
                     self.namespaces.remove(&prefix);
@@ -1270,7 +1433,7 @@ impl Parser {
                     prefix: (!prefix.is_empty()).then_some(prefix),
                 },
                 position,
-            );
+            )?;
         }
         if self.stack.is_empty() && !self.fragment {
             self.closed_root = true;
@@ -1280,7 +1443,7 @@ impl Parser {
 
     fn expand_name(&self, name: &str, attribute: bool, triplets: bool) -> Result<String, Error> {
         let Some(separator) = self.config.namespace_separator else {
-            return Ok(name.to_owned());
+            return string(name, self.allocator);
         };
         let (prefix, local) = match name.split_once(':') {
             Some((prefix, local)) => {
@@ -1296,37 +1459,37 @@ impl Parser {
             }
             None => (None, name),
         };
-        let uri = match prefix {
-            Some("xmlns") => {
-                return Err(self.err(
-                    ErrorKind::ReservedPrefixXmlns,
-                    "xmlns cannot prefix an element or ordinary attribute",
-                ));
-            }
-            Some(prefix) => Some(self.namespaces.get(prefix).ok_or_else(|| {
-                self.err(
-                    ErrorKind::UndefinedPrefix,
-                    format!("unbound namespace prefix: {prefix}"),
-                )
-            })?),
-            None if !attribute => self.namespaces.get(""),
-            None => None,
-        };
+        let uri =
+            match prefix {
+                Some("xmlns") => {
+                    return Err(self.err(
+                        ErrorKind::ReservedPrefixXmlns,
+                        "xmlns cannot prefix an element or ordinary attribute",
+                    ));
+                }
+                Some(prefix) => Some(self.namespaces.get(prefix).ok_or_else(|| {
+                    self.err(ErrorKind::UndefinedPrefix, "unbound namespace prefix")
+                })?),
+                None if !attribute => self.namespaces.get(""),
+                None => None,
+            };
         let Some(uri) = uri else {
-            return Ok(local.to_owned());
+            return string(local, self.allocator);
         };
-        let mut result =
-            String::with_capacity(uri.len() + local.len() + prefix.map_or(2, |p| p.len() + 2));
-        result.push_str(uri);
+        let mut result = String::try_with_capacity_in(
+            uri.len() + local.len() + prefix.map_or(2, |p| p.len() + 2),
+            self.allocator,
+        )?;
+        result.try_push_str(uri)?;
         if separator != '\0' {
-            result.push(separator);
+            result.try_push(separator)?;
         }
-        result.push_str(local);
+        result.try_push_str(local)?;
         if triplets && let Some(prefix) = prefix {
             if separator != '\0' {
-                result.push(separator);
+                result.try_push(separator)?;
             }
-            result.push_str(prefix);
+            result.try_push_str(prefix)?;
         }
         Ok(result)
     }
@@ -1348,11 +1511,14 @@ impl Parser {
     }
 
     fn expand_attribute(&mut self, value: &str, chain: &mut Vec<String>) -> Result<String, Error> {
-        let mut output = String::with_capacity(value.len());
+        let mut output = String::try_with_capacity_in(value.len(), self.allocator)?;
         let mut rest = value;
         while !rest.is_empty() {
             let end = rest.find(['&', '<']).unwrap_or(rest.len());
-            output.push_str(&normalize_attribute_whitespace(&rest[..end]));
+            output.try_push_str(&normalize_attribute_whitespace(
+                &rest[..end],
+                self.allocator,
+            )?)?;
             rest = &rest[end..];
             if rest.is_empty() {
                 break;
@@ -1373,7 +1539,7 @@ impl Parser {
             if let Some(character) = character_reference(name)
                 .map_err(|kind| self.err(kind, "invalid character reference"))?
             {
-                output.push(character);
+                output.try_push(character)?;
             } else {
                 if !is_name(name) {
                     return Err(self.err(ErrorKind::InvalidToken, "invalid entity name"));
@@ -1407,10 +1573,10 @@ impl Parser {
                             "external entity in attribute",
                         )
                     })?
-                    .clone();
+                    .try_clone()?;
                 self.charge_expansion(value.len())?;
-                chain.push(name.to_owned());
-                output.push_str(&self.expand_attribute(&value, chain)?);
+                try_push(chain, string(name, self.allocator)?)?;
+                output.try_push_str(&self.expand_attribute(&value, chain)?)?;
                 chain.pop();
             }
             rest = &rest[end + 1..];
@@ -1437,14 +1603,16 @@ fn take_name(input: &str) -> Option<(&str, &str)> {
 }
 
 fn parse_raw_attributes(
-    mut text: &str,
+    text: &str,
     allow_refs: bool,
-) -> Result<Vec<(String, String)>, (ErrorKind, &'static str)> {
-    let mut result = Vec::new();
+    allocator: Allocator,
+) -> Result<Vec<(&str, &str)>, Error> {
+    let mut text = text;
+    let mut result = Vec::new_in(allocator);
     while !text.is_empty() {
         let trimmed = text.trim_start_matches(whitespace);
         if trimmed.len() == text.len() {
-            return Err((
+            return Err(Error::bare(
                 ErrorKind::InvalidToken,
                 "attributes must be separated by whitespace",
             ));
@@ -1453,30 +1621,39 @@ fn parse_raw_attributes(
         if text.is_empty() {
             break;
         }
-        let (name, rest) =
-            take_name(text).ok_or((ErrorKind::InvalidToken, "invalid attribute name"))?;
-        let rest = rest.trim_start_matches(whitespace);
+        let (name, rest) = take_name(text).ok_or(Error::bare(
+            ErrorKind::InvalidToken,
+            "invalid attribute name",
+        ))?;
         let rest = rest
+            .trim_start_matches(whitespace)
             .strip_prefix('=')
-            .ok_or((ErrorKind::InvalidToken, "attribute is missing equals sign"))?
+            .ok_or(Error::bare(
+                ErrorKind::InvalidToken,
+                "attribute is missing equals sign",
+            ))?
             .trim_start_matches(whitespace);
         let quote = rest
             .chars()
             .next()
-            .filter(|c| *c == '\'' || *c == '"')
-            .ok_or((ErrorKind::InvalidToken, "attribute value must be quoted"))?;
+            .filter(|c| matches!(c, '\'' | '"'))
+            .ok_or(Error::bare(
+                ErrorKind::InvalidToken,
+                "attribute value must be quoted",
+            ))?;
         let rest = &rest[1..];
-        let end = rest
-            .find(quote)
-            .ok_or((ErrorKind::UnclosedToken, "unclosed attribute value"))?;
+        let end = rest.find(quote).ok_or(Error::bare(
+            ErrorKind::UnclosedToken,
+            "unclosed attribute value",
+        ))?;
         let value = &rest[..end];
         if value.contains('<') || (!allow_refs && value.contains('&')) {
-            return Err((
+            return Err(Error::bare(
                 ErrorKind::InvalidToken,
                 "invalid character in attribute value",
             ));
         }
-        result.push((name.to_owned(), value.to_owned()));
+        try_push(&mut result, (name, value))?;
         text = &rest[end + 1..];
     }
     Ok(result)
@@ -1489,20 +1666,43 @@ fn validate_chars(text: &str) -> Result<(), ErrorKind> {
         Err(ErrorKind::InvalidToken)
     }
 }
-fn normalize_newlines(text: &str) -> String {
-    text.replace("\r\n", "\n").replace('\r', "\n")
+fn string(text: &str, allocator: Allocator) -> Result<String, Error> {
+    Ok(String::try_from_str_in(text, allocator)?)
 }
-fn normalize_attribute_whitespace(text: &str) -> String {
-    normalize_newlines(text)
-        .chars()
-        .map(|c| if whitespace(c) { ' ' } else { c })
-        .collect()
+fn normalize_newlines(text: &str, allocator: Allocator) -> Result<String, Error> {
+    let mut output = String::try_with_capacity_in(text.len(), allocator)?;
+    let mut previous_cr = false;
+    for character in text.chars() {
+        if character == '\n' && previous_cr {
+            previous_cr = false;
+            continue;
+        }
+        previous_cr = character == '\r';
+        output.try_push(if previous_cr { '\n' } else { character })?;
+    }
+    Ok(output)
 }
-fn collapse_spaces(text: &str) -> String {
-    text.split(' ')
-        .filter(|part| !part.is_empty())
-        .collect::<Vec<_>>()
-        .join(" ")
+fn normalize_attribute_whitespace(text: &str, allocator: Allocator) -> Result<String, Error> {
+    let normalized = normalize_newlines(text, allocator)?;
+    let mut output = String::try_with_capacity_in(normalized.len(), allocator)?;
+    for character in normalized.chars() {
+        output.try_push(if whitespace(character) {
+            ' '
+        } else {
+            character
+        })?;
+    }
+    Ok(output)
+}
+fn collapse_spaces(text: &str, allocator: Allocator) -> Result<String, Error> {
+    let mut output = String::new_in(allocator);
+    for part in text.split(' ').filter(|part| !part.is_empty()) {
+        if !output.is_empty() {
+            output.try_push(' ')?;
+        }
+        output.try_push_str(part)?;
+    }
+    Ok(output)
 }
 fn valid_encoding_name(name: &str) -> bool {
     name.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)

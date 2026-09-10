@@ -7,5 +7,8 @@ license.workspace = true
 repository.workspace = true
 description = "A safe, streaming XML parser"
 
+[dependencies]
+oriole_storage = { path = "../oriole_storage" }
+
 [lints]
 workspace = true

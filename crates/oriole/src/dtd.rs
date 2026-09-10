@@ -1,7 +1,8 @@
 use crate::{
     DefaultAttribute, Entity, Error, ErrorKind, EventKind, Parser, Position, character_reference,
-    collapse_spaces, normalize_newlines, take_name, whitespace,
+    collapse_spaces, normalize_newlines, string, take_name, whitespace,
 };
+use oriole_storage::{Allocator, String, TryClone, Vec, try_insert, try_push};
 
 impl Parser {
     pub(crate) fn parse_doctype(&mut self, token: &str, position: Position) -> Result<(), Error> {
@@ -14,8 +15,8 @@ impl Parser {
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
         let name = cursor
             .name()
-            .map_err(|message| self.err(ErrorKind::Syntax, message))?
-            .to_owned();
+            .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        let name = string(name, self.allocator)?;
         let had_space = cursor.space();
         let (system_id, public_id) = if cursor.starts("SYSTEM") || cursor.starts("PUBLIC") {
             if !had_space {
@@ -24,8 +25,8 @@ impl Parser {
                     "document type identifiers require whitespace",
                 ));
             }
-            external_id(&mut cursor, false)
-                .map_err(|message| self.err(ErrorKind::Syntax, message))?
+            external_id(&mut cursor, false, self.allocator)
+                .map_err(|error| self.err(error.kind, error.message))?
         } else {
             (None, None)
         };
@@ -56,14 +57,14 @@ impl Parser {
                 has_internal_subset: subset.is_some(),
             },
             position,
-        );
+        )?;
         let header_end = subset.map_or(token.len() - 1, |_| token.len() - 1 - cursor.rest().len());
-        self.event_raw(&token[..header_end]);
+        self.event_raw(&token[..header_end])?;
         if let Some(subset) = subset {
             self.parse_subset(subset, header_end)?;
         }
-        self.emit(EventKind::EndDoctype, position);
-        self.event_raw(if subset.is_some() { "]>" } else { ">" });
+        self.emit(EventKind::EndDoctype, position)?;
+        self.event_raw(if subset.is_some() { "]>" } else { ">" })?;
         Ok(())
     }
 
@@ -90,8 +91,11 @@ impl Parser {
                 if value.contains("--") || value.ends_with('-') {
                     return Err(self.err(ErrorKind::InvalidToken, "double hyphen in DTD comment"));
                 }
-                self.emit(EventKind::Comment(normalize_newlines(value)), position);
-                self.event_raw(&text[..end + 7]);
+                self.emit(
+                    EventKind::Comment(normalize_newlines(value, self.allocator)?),
+                    position,
+                )?;
+                self.event_raw(&text[..end + 7])?;
                 text = &rest[end + 3..];
                 continue;
             }
@@ -103,7 +107,7 @@ impl Parser {
                     )
                 })?;
                 self.parse_pi(&text[..end + 2], position)?;
-                self.event_raw(&text[..end + 2]);
+                self.event_raw(&text[..end + 2])?;
                 text = &text[end + 2..];
                 continue;
             }
@@ -140,27 +144,30 @@ impl Parser {
                 "ELEMENT" => {
                     let name = cursor
                         .name()
-                        .map_err(|message| self.err(ErrorKind::Syntax, message))?
-                        .to_owned();
+                        .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+                    let name = string(name, self.allocator)?;
                     cursor
                         .require_space()
                         .map_err(|message| self.err(ErrorKind::Syntax, message))?;
                     let model_start = cursor.rest();
                     parse_content_model(&mut cursor, 0, self.config.limits.max_depth)
                         .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-                    let model = model_start[..model_start.len() - cursor.rest().len()].to_owned();
-                    self.emit(EventKind::ElementDeclaration { name, model }, position);
+                    let model = string(
+                        &model_start[..model_start.len() - cursor.rest().len()],
+                        self.allocator,
+                    )?;
+                    self.emit(EventKind::ElementDeclaration { name, model }, position)?;
                 }
                 "NOTATION" => {
                     let name = cursor
                         .name()
-                        .map_err(|message| self.err(ErrorKind::Syntax, message))?
-                        .to_owned();
+                        .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+                    let name = string(name, self.allocator)?;
                     cursor
                         .require_space()
                         .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-                    let (system_id, public_id) = external_id(&mut cursor, true)
-                        .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+                    let (system_id, public_id) = external_id(&mut cursor, true, self.allocator)
+                        .map_err(|error| self.err(error.kind, error.message))?;
                     self.emit(
                         EventKind::NotationDeclaration {
                             name,
@@ -168,7 +175,7 @@ impl Parser {
                             public_id,
                         },
                         position,
-                    );
+                    )?;
                 }
                 _ => return Err(self.err(ErrorKind::Syntax, "unsupported DTD declaration")),
             }
@@ -178,9 +185,9 @@ impl Parser {
             }
             for (index, pending) in self.pending.iter_mut().enumerate().skip(first_event) {
                 pending.raw = Some(if index == first_event {
-                    text[..end + 1].to_owned()
+                    string(&text[..end + 1], self.allocator)?
                 } else {
-                    String::new()
+                    String::new_in(self.allocator)
                 });
             }
             text = &text[end + 1..];
@@ -201,8 +208,8 @@ impl Parser {
         }
         let name = cursor
             .name()
-            .map_err(|message| self.err(ErrorKind::Syntax, message))?
-            .to_owned();
+            .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        let name = string(name, self.allocator)?;
         cursor
             .require_space()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -216,10 +223,10 @@ impl Parser {
                     "parameter entities in entity values are unsupported",
                 ));
             }
-            let mut value = String::with_capacity(raw.len());
+            let mut value = String::try_with_capacity_in(raw.len(), self.allocator)?;
             let mut rest = raw;
             while let Some(start) = rest.find('&') {
-                value.push_str(&normalize_newlines(&rest[..start]));
+                value.push_str(&normalize_newlines(&rest[..start], self.allocator)?)?;
                 rest = &rest[start..];
                 let end = rest.find(';').ok_or_else(|| {
                     self.err(
@@ -235,7 +242,7 @@ impl Parser {
                                 self.err(kind, "invalid character reference in entity value")
                             })?
                             .expect("numeric reference"),
-                    );
+                    )?;
                 } else {
                     if !crate::names::is_name(reference) {
                         return Err(self.err(
@@ -243,15 +250,15 @@ impl Parser {
                             "invalid entity reference in entity value",
                         ));
                     }
-                    value.push_str(&rest[..end + 1]);
+                    value.push_str(&rest[..end + 1])?;
                 }
                 rest = &rest[end + 1..];
             }
-            value.push_str(&normalize_newlines(rest));
+            value.push_str(&normalize_newlines(rest, self.allocator)?)?;
             (Some(value), None, None, None)
         } else {
-            let (system_id, public_id) = external_id(cursor, false)
-                .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+            let (system_id, public_id) = external_id(cursor, false, self.allocator)
+                .map_err(|error| self.err(error.kind, error.message))?;
             let spaced = cursor.space();
             let notation = if cursor.eat("NDATA") {
                 if parameter || !spaced {
@@ -260,12 +267,12 @@ impl Parser {
                 cursor
                     .require_space()
                     .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-                Some(
+                Some(string(
                     cursor
                         .name()
-                        .map_err(|message| self.err(ErrorKind::Syntax, message))?
-                        .to_owned(),
-                )
+                        .map_err(|message| self.err(ErrorKind::Syntax, message))?,
+                    self.allocator,
+                )?)
             } else {
                 None
             };
@@ -278,15 +285,16 @@ impl Parser {
                     "entity declaration count limit exceeded",
                 ));
             }
-            self.entities.insert(
-                name.clone(),
+            try_insert(
+                &mut self.entities,
+                name.try_clone()?,
                 Entity {
-                    value: value.clone(),
-                    system_id: system_id.clone(),
-                    public_id: public_id.clone(),
-                    notation: notation.clone(),
+                    value: value.try_clone()?,
+                    system_id: system_id.try_clone()?,
+                    public_id: public_id.try_clone()?,
+                    notation: notation.try_clone()?,
                 },
-            );
+            )?;
             self.emit(
                 EventKind::EntityDeclaration {
                     name,
@@ -297,7 +305,7 @@ impl Parser {
                     notation,
                 },
                 position,
-            );
+            )?;
         } else if parameter {
             self.emit(
                 EventKind::EntityDeclaration {
@@ -309,7 +317,7 @@ impl Parser {
                     notation,
                 },
                 position,
-            );
+            )?;
         }
         Ok(())
     }
@@ -321,8 +329,8 @@ impl Parser {
     ) -> Result<(), Error> {
         let element = cursor
             .name()
-            .map_err(|message| self.err(ErrorKind::Syntax, message))?
-            .to_owned();
+            .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        let element = string(element, self.allocator)?;
         loop {
             let spaced = cursor.space();
             if cursor.rest().is_empty() {
@@ -336,8 +344,8 @@ impl Parser {
             }
             let name = cursor
                 .name()
-                .map_err(|message| self.err(ErrorKind::Syntax, message))?
-                .to_owned();
+                .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+            let name = string(name, self.allocator)?;
             cursor
                 .require_space()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -369,7 +377,8 @@ impl Parser {
                     return Err(self.err(ErrorKind::Syntax, "invalid attribute type"));
                 }
             }
-            let attribute_type = start[..start.len() - cursor.rest().len()].to_owned();
+            let attribute_type =
+                string(&start[..start.len() - cursor.rest().len()], self.allocator)?;
             cursor
                 .require_space()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -386,13 +395,23 @@ impl Parser {
                 let raw = cursor
                     .quoted()
                     .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-                let mut value = self.expand_attribute(raw, &mut Vec::new())?;
+                let mut value = self.expand_attribute(raw, &mut Vec::new_in(self.allocator))?;
                 if attribute_type != "CDATA" {
-                    value = collapse_spaces(&value);
+                    value = collapse_spaces(&value, self.allocator)?;
                 }
                 Some(value)
             };
-            let declarations = self.defaults.entry(element.clone()).or_default();
+            if !self.defaults.contains_key(&element) {
+                try_insert(
+                    &mut self.defaults,
+                    element.try_clone()?,
+                    Vec::new_in(self.allocator),
+                )?;
+            }
+            let declarations = self
+                .defaults
+                .get_mut(&element)
+                .expect("default list was inserted");
             if !declarations
                 .iter()
                 .any(|declaration| declaration.name == name)
@@ -403,22 +422,25 @@ impl Parser {
                         "default attribute count limit exceeded",
                     ));
                 }
-                declarations.push(DefaultAttribute {
-                    name: name.clone(),
-                    attribute_type: attribute_type.clone(),
-                    value: value.clone(),
-                });
+                try_push(
+                    declarations,
+                    DefaultAttribute {
+                        name: name.try_clone()?,
+                        attribute_type: attribute_type.try_clone()?,
+                        value: value.try_clone()?,
+                    },
+                )?;
             }
             self.emit(
                 EventKind::AttlistDeclaration {
-                    element: element.clone(),
+                    element: element.try_clone()?,
                     name,
                     attribute_type,
                     default: value,
                     required,
                 },
                 position,
-            );
+            )?;
         }
         Ok(())
     }
@@ -480,35 +502,43 @@ impl<'a> Cursor<'a> {
 fn external_id(
     cursor: &mut Cursor<'_>,
     public_only: bool,
-) -> Result<(Option<String>, Option<String>), &'static str> {
+    allocator: Allocator,
+) -> Result<(Option<String>, Option<String>), Error> {
+    let syntax = |message| Error::bare(ErrorKind::Syntax, message);
     if cursor.eat("SYSTEM") {
-        cursor.require_space()?;
-        let value = cursor.quoted()?;
-        Ok((Some(normalize_newlines(value)), None))
+        cursor.require_space().map_err(syntax)?;
+        let value = cursor.quoted().map_err(syntax)?;
+        Ok((Some(normalize_newlines(value, allocator)?), None))
     } else if cursor.eat("PUBLIC") {
-        cursor.require_space()?;
-        let public = cursor.quoted()?;
+        cursor.require_space().map_err(syntax)?;
+        let public = cursor.quoted().map_err(syntax)?;
         if !public
             .chars()
             .all(|c| c.is_ascii_alphanumeric() || " \r\n-'()+,./:=?;!*#@$_%".contains(c))
         {
-            return Err("invalid public identifier character");
+            return Err(syntax("invalid public identifier character"));
         }
-        let public = public
-            .split_ascii_whitespace()
-            .collect::<Vec<_>>()
-            .join(" ");
+        let mut normalized = String::new_in(allocator);
+        for part in public.split_ascii_whitespace() {
+            if !normalized.is_empty() {
+                normalized.push(' ')?;
+            }
+            normalized.push_str(part)?;
+        }
         let spaced = cursor.space();
         if public_only && !cursor.starts("\"") && !cursor.starts("'") {
-            return Ok((None, Some(public)));
+            return Ok((None, Some(normalized)));
         }
         if !spaced {
-            return Err("system identifier requires whitespace");
+            return Err(syntax("system identifier requires whitespace"));
         }
-        let system = cursor.quoted()?;
-        Ok((Some(normalize_newlines(system)), Some(public)))
+        let system = cursor.quoted().map_err(syntax)?;
+        Ok((
+            Some(normalize_newlines(system, allocator)?),
+            Some(normalized),
+        ))
     } else {
-        Err("external identifier requires SYSTEM or PUBLIC")
+        Err(syntax("external identifier requires SYSTEM or PUBLIC"))
     }
 }
 

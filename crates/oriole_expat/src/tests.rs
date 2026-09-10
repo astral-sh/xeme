@@ -282,7 +282,11 @@ fn buffer_reservation_cannot_bypass_input_budget() {
     }
 }
 
-unsafe extern "C" fn parse_independent_child(data: *mut c_void, _name: *const c_char, _attrs: *const *const c_char) {
+unsafe extern "C" fn parse_independent_child(
+    data: *mut c_void,
+    _name: *const c_char,
+    _attrs: *const *const c_char,
+) {
     // SAFETY: A distinct parser can run while the parent callback is active.
     unsafe {
         let child = XML_ParserCreate(ptr::null());
@@ -306,7 +310,7 @@ fn a_different_parser_can_run_from_a_callback() {
 }
 
 #[test]
-fn custom_allocator_suite_is_explicitly_unsupported() {
+fn incomplete_allocator_suite_is_rejected() {
     // SAFETY: The non-null suite is rejected without calling any function pointer.
     unsafe {
         let suite = XML_Memory_Handling_Suite {
@@ -372,12 +376,20 @@ fn late_encoding_change_does_not_poison_incremental_parse() {
     }
 }
 
-unsafe extern "C" fn external_entity(parent: XML_Parser, context: *const c_char, _base: *const c_char, _system: *const c_char, _public: *const c_char) -> c_int {
+unsafe extern "C" fn external_entity(
+    parent: XML_Parser,
+    context: *const c_char,
+    _base: *const c_char,
+    _system: *const c_char,
+    _public: *const c_char,
+) -> c_int {
     // SAFETY: The child owns a snapshot of its parent's environment and is distinct
     // from the active parent. Callback context remains live through construction.
     unsafe {
         let child = XML_ExternalEntityParserCreate(parent, context, ptr::null());
-        if child.is_null() { return 0; }
+        if child.is_null() {
+            return 0;
+        }
         let document = b"<x/>&internal;tail";
         let result = XML_Parse(child, document.as_ptr().cast(), document.len() as c_int, 1);
         XML_ParserFree(child);
@@ -393,9 +405,19 @@ fn external_callback_can_parse_an_inherited_fragment() {
         let parser = configured(&mut state);
         XML_SetExternalEntityRefHandler(parser, Some(external_entity));
         let document = b"<!DOCTYPE r [<!ENTITY internal 'ok'><!ENTITY ext SYSTEM 'external.xml'>]><r>&ext;</r>";
-        assert_eq!(XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1), OK);
+        assert_eq!(
+            XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1),
+            OK
+        );
         assert!(state.events.contains(&"start:x".to_owned()));
-        assert_eq!(state.events.iter().filter_map(|s| s.strip_prefix("text:")).collect::<String>(), "oktail");
+        assert_eq!(
+            state
+                .events
+                .iter()
+                .filter_map(|s| s.strip_prefix("text:"))
+                .collect::<String>(),
+            "oktail"
+        );
         XML_ParserFree(parser);
     }
 }
@@ -411,7 +433,10 @@ fn child_survives_parent_deletion() {
         XML_ParserFree(parent);
         state.parser = child;
         assert_eq!(XML_Parse(child, c"hello<a/><b/>".as_ptr(), 13, 1), OK);
-        assert_eq!(state.events, ["text:hello", "start:a", "end:a", "start:b", "end:b"]);
+        assert_eq!(
+            state.events,
+            ["text:hello", "start:a", "end:a", "start:b", "end:b"]
+        );
         assert_eq!(XML_ParserReset(child, ptr::null()), 0);
         XML_ParserFree(child);
     }
@@ -425,7 +450,10 @@ fn external_dtd_construction_does_not_taint_parent() {
         let child = XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null());
         assert!(!child.is_null());
         assert_eq!(XML_GetErrorCode(parent), 0);
-        assert_eq!(XML_Parse(child, c"<!ELEMENT r EMPTY>".as_ptr(), 18, 1), ERROR);
+        assert_eq!(
+            XML_Parse(child, c"<!ELEMENT r EMPTY>".as_ptr(), 18, 1),
+            ERROR
+        );
         assert_eq!(XML_GetErrorCode(parent), 0);
         XML_ParserFree(child);
         assert_eq!(XML_Parse(parent, c"<r/>".as_ptr(), 4, 1), OK);
@@ -446,7 +474,10 @@ fn external_children_share_input_and_construction_budgets() {
         assert_eq!(XML_GetErrorCode(parent), 43);
         XML_ParserFree(child);
         assert_eq!(XML_ParserReset(parent, ptr::null()), 1);
-        Arc::as_ref(&(*parent).family).children.store(MAX_FAMILY_CHILDREN, Ordering::Relaxed);
+        let family = &(*parent).family;
+        family
+            .children
+            .store(MAX_FAMILY_CHILDREN, Ordering::Relaxed);
         assert!(XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null()).is_null());
         assert_eq!(XML_GetErrorCode(parent), 43);
         XML_ParserFree(parent);
@@ -472,13 +503,21 @@ fn external_child_depth_is_bounded() {
 
 unsafe extern "C" fn release_custom_encoding(data: *mut c_void) {
     // SAFETY: The test retains State through reset/free of the custom encoding.
-    unsafe { (*data.cast::<State>()).releases += 1; }
+    unsafe {
+        (*data.cast::<State>()).releases += 1;
+    }
 }
 
-unsafe extern "C" fn custom_encoding(data: *mut c_void, _name: *const c_char, info: *mut XML_Encoding) -> c_int {
+unsafe extern "C" fn custom_encoding(
+    data: *mut c_void,
+    _name: *const c_char,
+    info: *mut XML_Encoding,
+) -> c_int {
     // SAFETY: Expat supplies a writable XML_Encoding for the callback duration.
     unsafe {
-        for index in 0..256 { (*info).map[index] = index as i32; }
+        for index in 0..256 {
+            (*info).map[index] = index as i32;
+        }
         (*info).map[128] = 0x20ac;
         (*info).data = data;
         (*info).release = Some(release_custom_encoding);
@@ -493,9 +532,16 @@ fn custom_single_byte_encoding_and_release_ownership() {
         let mut state = State::default();
         let parser = configured(&mut state);
         XML_SetEncoding(parser, c"test-map".as_ptr());
-        XML_SetUnknownEncodingHandler(parser, Some(custom_encoding), ptr::from_mut(&mut state).cast());
+        XML_SetUnknownEncodingHandler(
+            parser,
+            Some(custom_encoding),
+            ptr::from_mut(&mut state).cast(),
+        );
         let input = b"<r>\x80</r>";
-        assert_eq!(XML_Parse(parser, input.as_ptr().cast(), input.len() as c_int, 1), OK);
+        assert_eq!(
+            XML_Parse(parser, input.as_ptr().cast(), input.len() as c_int, 1),
+            OK
+        );
         assert!(state.events.contains(&"text:€".to_owned()));
         assert_eq!(state.releases, 0);
         assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
@@ -505,9 +551,16 @@ fn custom_single_byte_encoding_and_release_ownership() {
     }
 }
 
-unsafe extern "C" fn reject_custom_encoding(data: *mut c_void, _name: *const c_char, info: *mut XML_Encoding) -> c_int {
+unsafe extern "C" fn reject_custom_encoding(
+    data: *mut c_void,
+    _name: *const c_char,
+    info: *mut XML_Encoding,
+) -> c_int {
     // SAFETY: A rejected callback's data is still released according to Expat.
-    unsafe { (*info).data = data; (*info).release = Some(release_custom_encoding); }
+    unsafe {
+        (*info).data = data;
+        (*info).release = Some(release_custom_encoding);
+    }
     0
 }
 
@@ -518,7 +571,11 @@ fn rejected_custom_encoding_releases_data_once() {
         let mut state = State::default();
         let parser = configured(&mut state);
         XML_SetEncoding(parser, c"rejected".as_ptr());
-        XML_SetUnknownEncodingHandler(parser, Some(reject_custom_encoding), ptr::from_mut(&mut state).cast());
+        XML_SetUnknownEncodingHandler(
+            parser,
+            Some(reject_custom_encoding),
+            ptr::from_mut(&mut state).cast(),
+        );
         assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), ERROR);
         assert_eq!(XML_GetErrorCode(parser), 18);
         assert_eq!(state.releases, 1);
@@ -527,7 +584,11 @@ fn rejected_custom_encoding_releases_data_once() {
     }
 }
 
-unsafe extern "C" fn free_custom_encoding(data: *mut c_void, name: *const c_char, info: *mut XML_Encoding) -> c_int {
+unsafe extern "C" fn free_custom_encoding(
+    data: *mut c_void,
+    name: *const c_char,
+    info: *mut XML_Encoding,
+) -> c_int {
     // SAFETY: Callback-time free is deferred until the outer parse returns.
     unsafe {
         custom_encoding(data, name, info);
@@ -543,7 +604,11 @@ fn freeing_from_unknown_encoding_callback_releases_data_once() {
         let mut state = State::default();
         let parser = configured(&mut state);
         XML_SetEncoding(parser, c"free-map".as_ptr());
-        XML_SetUnknownEncodingHandler(parser, Some(free_custom_encoding), ptr::from_mut(&mut state).cast());
+        XML_SetUnknownEncodingHandler(
+            parser,
+            Some(free_custom_encoding),
+            ptr::from_mut(&mut state).cast(),
+        );
         assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), ERROR);
         assert_eq!(state.releases, 1);
     }
@@ -589,10 +654,20 @@ fn default_doctype_fragments_survive_suspension() {
         XML_SetElementHandler(parser, None, None);
         XML_SetDefaultHandlerExpand(parser, Some(stop_default_once));
         let input = b"<!DOCTYPE r SYSTEM 'some.dtd'><r/>";
-        assert_eq!(XML_Parse(parser, input.as_ptr().cast(), input.len() as c_int, 1), SUSPENDED);
+        assert_eq!(
+            XML_Parse(parser, input.as_ptr().cast(), input.len() as c_int, 1),
+            SUSPENDED
+        );
         assert_eq!(state.events, ["text:<!DOCTYPE"]);
         assert_eq!(XML_ResumeParser(parser), OK);
-        assert_eq!(state.events.iter().filter_map(|s| s.strip_prefix("text:")).collect::<String>(), std::str::from_utf8(input).unwrap());
+        assert_eq!(
+            state
+                .events
+                .iter()
+                .filter_map(|s| s.strip_prefix("text:"))
+                .collect::<String>(),
+            std::str::from_utf8(input).unwrap()
+        );
         XML_ParserFree(parser);
     }
 }

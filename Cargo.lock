@@ -60,6 +60,9 @@ dependencies = [
 [[package]]
 name = "oriole"
 version = "0.0.1"
+dependencies = [
+ "oriole_storage",
+]
 
 [[package]]
 name = "oriole_cli"
@@ -75,6 +78,7 @@ name = "oriole_expat"
 version = "0.0.1"
 dependencies = [
  "oriole",
+ "oriole_storage",
 ]
 
 [[package]]

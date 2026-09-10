@@ -19,7 +19,7 @@ Callbacks can suspend, abort, change handlers, or free the parser. A callback's
 requests, and reset on the active parser fail with `XML_ERROR_UNEXPECTED_STATE`.
 Recursive `XML_DefaultCurrent` calls are also rejected. A different parser can be
 used from a callback. Rust panics in allocating entry points are caught before the C
-boundary; allocator exhaustion can still abort the process, as in ordinary Rust.
+boundary. Allocation failures return a null parser or `XML_ERROR_NO_MEMORY`.
 
 Content-model callbacks receive one C allocation containing the entire model and
 its names. The consumer owns that allocation and releases it with
@@ -33,9 +33,6 @@ handlers, location/error access, and the standard C memory helper functions.
 
 The following Expat modes are explicitly unsupported:
 
-- Non-null `XML_Memory_Handling_Suite`: `XML_ParserCreate_MM` returns null. The
-  contract requires **every** internal allocation to use the supplied suite; routing
-  only the parser handle through it would violate that contract. A null suite works.
 - External DTDs and parameter-entity expansion: external DTD child construction
   succeeds, but parsing that child reports an error. Enabling parameter expansion
   returns false. External general entities work through caller-provided callbacks
@@ -54,7 +51,7 @@ The following Expat modes are explicitly unsupported:
   advertises `XML_CONTEXT_BYTES=0`.
 - Wide-character and `XML_LARGE_SIZE` builds: the header rejects these configurations.
 
-These boundaries prevent claiming a drop-in CPython replacement. In particular,
-CPython uses a custom memory suite by default. Consumer tests that explicitly switch
-to the system allocator measure callback compatibility, not allocator compatibility.
-See [the release gates](../../CONTRIBUTING.md#acceptance) for the complete integration plan.
+These boundaries prevent claiming a drop-in CPython replacement. Both null and
+complete custom memory suites work; every parser allocation uses its owning suite.
+Incomplete suites are rejected. Allocator callbacks cannot re-enter parser APIs.
+See [the release gates](../../docs/compatibility.md) for the complete integration plan.

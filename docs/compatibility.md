@@ -45,11 +45,10 @@ Oriole's documented resource ceilings intentionally differ from Expat's defaults
 - Custom memory allocation, reallocation, freeing, and initial allocation failure.
 - Parser pointers as callback arguments.
 
-The default mode is the full gate, including custom memory suites. Oriole currently
-rejects non-null custom memory suites: the Rust core's allocations cannot yet obey
-a per-parser C allocator contract. `--supported` runs only the implemented lifecycle
-and buffer subset; `--unsupported-mm-contract` checks explicit rejection. Neither
-mode passes the full replacement gate.
+Every invocation includes the custom memory suite and initial allocation failure
+gates. Parser storage uses fallible allocator-aware containers. Allocation failure
+must return a null parser or `XML_ERROR_NO_MEMORY`, release all successfully
+allocated blocks, and leave a failed `XML_MemRealloc` block available to its owner.
 
 `tests/c/adversarial.c` independently probes Oriole's callback-time parser deletion,
 same-parser reentry rejection, recursive default-handler rejection, independent
@@ -58,8 +57,11 @@ is an Oriole guarantee; this test is not presented as equivalent Expat behavior.
 
 Compile the same integration source against both libraries. A reference run must pass before
 its assertions are used to judge Oriole. The harness was bootstrapped against
-system Expat 2.6.1. Custom allocation counts here validate public memory ownership;
-they do not prove that every internal Rust allocation uses the supplied suite.
+system Expat 2.6.1. These C allocation counts validate public ownership. Separate
+Rust tests inject failure at each allocation, detect allocations escaping the
+supplied suite, force reallocations to move across alignment offsets, and exercise
+concurrent shared ownership. Allocation ownership is retained across parser,
+child, callback, and content-model lifetimes.
 
 ## CPython integration
 

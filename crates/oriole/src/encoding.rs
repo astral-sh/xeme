@@ -1,4 +1,5 @@
-use crate::{ErrorKind, Position, ScanMode};
+use crate::{Error, ErrorKind, Position, ScanMode};
+use oriole_storage::{Allocator, Box, String, Vec, try_box, try_extend_from_slice};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Encoding {
@@ -36,6 +37,7 @@ impl Encoding {
 
 #[derive(Debug)]
 pub(crate) struct Decoder {
+    allocator: Allocator,
     encoding: Option<Encoding>,
     requested: Option<String>,
     pending: Vec<u8>,
@@ -44,15 +46,18 @@ pub(crate) struct Decoder {
     custom_map: Option<Box<[i32; 256]>>,
 }
 impl Decoder {
-    pub(crate) fn new(requested: Option<&str>) -> Self {
-        Self {
+    pub(crate) fn new(requested: Option<&str>, allocator: Allocator) -> Result<Self, Error> {
+        Ok(Self {
+            allocator,
             encoding: None,
-            requested: requested.map(str::to_owned),
-            pending: Vec::new(),
+            requested: requested
+                .map(|name| String::try_from_str_in(name, allocator))
+                .transpose()?,
+            pending: Vec::new_in(allocator),
             declaration_checked: 0,
             unknown_name: None,
             custom_map: None,
-        }
+        })
     }
     pub(crate) fn feed(
         &mut self,
@@ -60,8 +65,8 @@ impl Decoder {
         final_input: bool,
         source: &mut Source,
         max_token: usize,
-    ) -> Result<(), (ErrorKind, &'static str)> {
-        self.pending.extend_from_slice(bytes);
+    ) -> Result<(), Error> {
+        try_extend_from_slice(&mut self.pending, bytes)?;
         if self.encoding.is_none() {
             let Some((encoding, skip)) = self.detect(final_input, max_token)? else {
                 return Ok(());
@@ -77,17 +82,17 @@ impl Decoder {
         match encoding {
             Encoding::Utf8 => match std::str::from_utf8(&self.pending) {
                 Ok(text) => {
-                    source.text.push_str(text);
+                    source.text.try_push_str(text)?;
                     consumed = self.pending.len();
                 }
                 Err(error) => {
                     consumed = error.valid_up_to();
-                    source.text.push_str(
+                    source.text.try_push_str(
                         std::str::from_utf8(&self.pending[..consumed])
                             .expect("validated UTF-8 prefix"),
-                    );
+                    )?;
                     if error.error_len().is_some() {
-                        return Err((ErrorKind::InvalidToken, "invalid UTF-8"));
+                        return Err(Error::bare(ErrorKind::InvalidToken, "invalid UTF-8"));
                     }
                 }
             },
@@ -95,11 +100,15 @@ impl Decoder {
                 let map = self.custom_map.as_ref().expect("custom encoding has a map");
                 for byte in &self.pending {
                     let value = map[usize::from(*byte)];
-                    let character = u32::try_from(value)
-                        .ok()
-                        .and_then(char::from_u32)
-                        .ok_or((ErrorKind::InvalidToken, "undefined byte in custom encoding"))?;
-                    source.text.push(character);
+                    let character =
+                        u32::try_from(value)
+                            .ok()
+                            .and_then(char::from_u32)
+                            .ok_or(Error::bare(
+                                ErrorKind::InvalidToken,
+                                "undefined byte in custom encoding",
+                            ))?;
+                    source.text.try_push(character)?;
                 }
                 consumed = self.pending.len();
             }
@@ -112,11 +121,14 @@ impl Decoder {
                 } else {
                     self.pending.len()
                 };
-                source
-                    .text
-                    .extend(self.pending[..end].iter().map(|byte| char::from(*byte)));
+                for byte in &self.pending[..end] {
+                    source.text.try_push(char::from(*byte))?;
+                }
                 if end < self.pending.len() {
-                    return Err((ErrorKind::InvalidToken, "non-ASCII byte in ASCII document"));
+                    return Err(Error::bare(
+                        ErrorKind::InvalidToken,
+                        "non-ASCII byte in ASCII document",
+                    ));
                 }
                 consumed = self.pending.len();
             }
@@ -136,7 +148,10 @@ impl Decoder {
                         }
                         let second = unit(&self.pending[consumed + 2..]);
                         if !(0xdc00..=0xdfff).contains(&second) {
-                            return Err((ErrorKind::InvalidToken, "unpaired UTF-16 surrogate"));
+                            return Err(Error::bare(
+                                ErrorKind::InvalidToken,
+                                "unpaired UTF-16 surrogate",
+                            ));
                         }
                         (
                             0x10000
@@ -147,17 +162,22 @@ impl Decoder {
                     } else {
                         (u32::from(first), 2)
                     };
-                    source.text.push(
-                        char::from_u32(codepoint)
-                            .ok_or((ErrorKind::InvalidToken, "unpaired UTF-16 surrogate"))?,
-                    );
+                    source
+                        .text
+                        .try_push(char::from_u32(codepoint).ok_or(Error::bare(
+                            ErrorKind::InvalidToken,
+                            "unpaired UTF-16 surrogate",
+                        ))?)?;
                     consumed += width;
                 }
             }
         }
         self.pending.drain(..consumed);
         if final_input && !self.pending.is_empty() {
-            return Err((ErrorKind::PartialCharacter, "incomplete encoded character"));
+            return Err(Error::bare(
+                ErrorKind::PartialCharacter,
+                "incomplete encoded character",
+            ));
         }
         Ok(())
     }
@@ -166,7 +186,7 @@ impl Decoder {
         &mut self,
         final_input: bool,
         max_token: usize,
-    ) -> Result<Option<(Encoding, usize)>, (ErrorKind, &'static str)> {
+    ) -> Result<Option<(Encoding, usize)>, Error> {
         let bytes = &self.pending;
         if bytes.len() < 4
             && !final_input
@@ -196,20 +216,24 @@ impl Decoder {
                 match sniffed {
                     Encoding::Utf16Le | Encoding::Utf16Be => sniffed,
                     _ => {
-                        return Err((
+                        return Err(Error::bare(
                             ErrorKind::IncorrectEncoding,
                             "UTF-16 input requires a byte order mark or declaration",
                         ));
                     }
                 }
             } else {
-                Encoding::named(requested).ok_or_else(|| {
-                    self.unknown_name = Some(requested.clone());
-                    (ErrorKind::UnknownEncoding, "unsupported input encoding")
-                })?
+                let Some(encoding) = Encoding::named(requested) else {
+                    self.unknown_name = Some(requested.try_clone()?);
+                    return Err(Error::bare(
+                        ErrorKind::UnknownEncoding,
+                        "unsupported input encoding",
+                    ));
+                };
+                encoding
             };
             if skip > 0 && sniffed != requested {
-                return Err((
+                return Err(Error::bare(
                     ErrorKind::IncorrectEncoding,
                     "byte order mark conflicts with the requested encoding",
                 ));
@@ -232,7 +256,7 @@ impl Decoder {
             self.declaration_checked = content.len().saturating_sub(1);
             let Some(end) = end else {
                 if content.len() > max_token {
-                    return Err((
+                    return Err(Error::bare(
                         ErrorKind::LimitExceeded,
                         "XML declaration byte limit exceeded",
                     ));
@@ -253,14 +277,18 @@ impl Decoder {
                         && let Some(end) = rest[1..].find(quote)
                     {
                         let name = &rest[1..end + 1];
-                        let encoding = Encoding::named(name).ok_or_else(|| {
-                            self.unknown_name = Some(name.to_owned());
-                            (ErrorKind::UnknownEncoding, "unsupported declared encoding")
-                        })?;
+                        let Some(encoding) = Encoding::named(name) else {
+                            self.unknown_name =
+                                Some(String::try_from_str_in(name, self.allocator)?);
+                            return Err(Error::bare(
+                                ErrorKind::UnknownEncoding,
+                                "unsupported declared encoding",
+                            ));
+                        };
                         if matches!(encoding, Encoding::Utf16Le | Encoding::Utf16Be)
                             || (skip > 0 && encoding != Encoding::Utf8)
                         {
-                            return Err((
+                            return Err(Error::bare(
                                 ErrorKind::IncorrectEncoding,
                                 "declared encoding conflicts with input bytes",
                             ));
@@ -276,70 +304,79 @@ impl Decoder {
     pub(crate) fn unknown_encoding(&self) -> Option<&str> {
         self.unknown_name.as_deref()
     }
-    pub(crate) fn append_pending(&mut self, bytes: &[u8]) {
-        self.pending.extend_from_slice(bytes);
+    pub(crate) fn append_pending(&mut self, bytes: &[u8]) -> Result<(), Error> {
+        try_extend_from_slice(&mut self.pending, bytes)?;
+        Ok(())
     }
     pub(crate) fn install_map(
         &mut self,
         name: &str,
         map: [i32; 256],
         source: &mut Source,
-    ) -> Result<(), (ErrorKind, &'static str)> {
+    ) -> Result<(), Error> {
         if self
             .unknown_name
             .as_deref()
             .is_none_or(|unknown| !unknown.eq_ignore_ascii_case(name))
         {
-            return Err((
+            return Err(Error::bare(
                 ErrorKind::UnknownEncoding,
                 "encoding map does not match the requested encoding",
             ));
         }
-        let mut characters = std::collections::HashSet::new();
         for (byte, value) in map.iter().copied().enumerate() {
             if (matches!(byte, 9 | 10 | 13) || (32..128).contains(&byte)) && value != byte as i32 {
-                return Err((
+                return Err(Error::bare(
                     ErrorKind::UnknownEncoding,
                     "custom encoding changes an ASCII markup character",
                 ));
             }
             if value < -1
                 || (value >= 0
-                    && (char::from_u32(value as u32).is_none() || !characters.insert(value)))
+                    && (char::from_u32(value as u32).is_none() || map[..byte].contains(&value)))
             {
-                return Err((
+                return Err(Error::bare(
                     ErrorKind::UnknownEncoding,
                     "encoding map requires unique Unicode scalar values or -1",
                 ));
             }
         }
         if self.pending.starts_with(&[0xef, 0xbb, 0xbf]) {
-            return Err((
+            return Err(Error::bare(
                 ErrorKind::IncorrectEncoding,
                 "custom encoding conflicts with byte order mark",
             ));
         }
-        self.custom_map = Some(Box::new(map));
+        self.custom_map = Some(try_box(map, self.allocator)?);
         self.encoding = Some(Encoding::SingleByte);
         source.encoding = Encoding::SingleByte;
         Ok(())
     }
-    pub(crate) fn inherit_map(&mut self, parent: &Self, source: &mut Source) {
+    pub(crate) fn inherit_map(&mut self, parent: &Self, source: &mut Source) -> Result<(), Error> {
         if self
             .requested
             .as_deref()
             .zip(parent.unknown_name.as_deref())
             .is_some_and(|(name, parent)| name.eq_ignore_ascii_case(parent))
         {
-            self.custom_map = parent.custom_map.clone();
-            self.unknown_name.clone_from(&parent.unknown_name);
+            self.custom_map = parent
+                .custom_map
+                .as_ref()
+                .map(|map| try_box(**map, self.allocator))
+                .transpose()?;
+            self.unknown_name = parent
+                .unknown_name
+                .as_ref()
+                .map(|name| String::try_from_str_in(name, self.allocator))
+                .transpose()?;
             if self.custom_map.is_some() {
                 self.encoding = Some(Encoding::SingleByte);
                 source.encoding = Encoding::SingleByte;
             }
         }
+        Ok(())
     }
-    pub(crate) fn check_declaration(&self, name: &str) -> Result<(), (ErrorKind, &'static str)> {
+    pub(crate) fn check_declaration(&self, name: &str) -> Result<(), Error> {
         if self.encoding == Some(Encoding::SingleByte)
             && self
                 .unknown_name
@@ -358,10 +395,12 @@ impl Decoder {
         {
             return Ok(());
         }
-        let declared = Encoding::named(name)
-            .ok_or((ErrorKind::UnknownEncoding, "unsupported declared encoding"))?;
+        let declared = Encoding::named(name).ok_or(Error::bare(
+            ErrorKind::UnknownEncoding,
+            "unsupported declared encoding",
+        ))?;
         if declared != actual {
-            return Err((
+            return Err(Error::bare(
                 ErrorKind::IncorrectEncoding,
                 "declared encoding conflicts with detected encoding",
             ));
@@ -396,9 +435,9 @@ pub(crate) struct Source {
     deferred_size: usize,
 }
 impl Source {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(allocator: Allocator) -> Self {
         Self {
-            text: String::new(),
+            text: String::new_in(allocator),
             cursor: 0,
             encoding: Encoding::Utf8,
             raw_index: 0,
@@ -418,12 +457,13 @@ impl Source {
         position: Position,
         initial_depth: usize,
     ) -> Self {
+        let allocator = text.allocator();
         Self {
             text,
             anchor: Some(position),
             initial_depth,
             entity_name: Some(name),
-            ..Self::new()
+            ..Self::new(allocator)
         }
     }
     pub(crate) fn remaining(&self) -> &str {

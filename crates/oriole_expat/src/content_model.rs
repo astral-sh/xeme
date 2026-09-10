@@ -4,7 +4,8 @@ use std::ffi::c_char;
 use std::mem::{align_of, size_of};
 use std::ptr;
 
-use super::{XML_Content, malloc};
+use super::XML_Content;
+use oriole_storage::{Allocator, Vec};
 
 struct Model<'a> {
     kind: i32,
@@ -16,6 +17,7 @@ struct Model<'a> {
 struct Reader<'a> {
     text: &'a str,
     nodes: usize,
+    allocator: Allocator,
 }
 
 impl<'a> Reader<'a> {
@@ -53,12 +55,13 @@ impl<'a> Reader<'a> {
         self.trim();
         if self.take("(") {
             if self.take("#PCDATA") {
-                let mut children = Vec::new();
+                let mut children = Vec::new_in(self.allocator);
                 while self.take("|") {
                     let child = self.node(depth + 1)?;
                     if child.kind != 4 || child.quant != 0 {
                         return Err(2);
                     }
+                    children.try_reserve(1).map_err(|_| 1)?;
                     children.push(child);
                 }
                 if !self.take(")") {
@@ -77,7 +80,9 @@ impl<'a> Reader<'a> {
                     children,
                 });
             }
-            let mut children = vec![self.node(depth + 1)?];
+            let mut children = Vec::new_in(self.allocator);
+            children.try_reserve(1).map_err(|_| 1)?;
+            children.push(self.node(depth + 1)?);
             self.trim();
             let separator = match self.text.as_bytes().first() {
                 Some(b',') => ",",
@@ -86,6 +91,7 @@ impl<'a> Reader<'a> {
                 _ => return Err(2),
             };
             while self.take(separator) {
+                children.try_reserve(1).map_err(|_| 1)?;
                 children.push(self.node(depth + 1)?);
             }
             if !self.take(")") {
@@ -111,7 +117,7 @@ impl<'a> Reader<'a> {
                 kind: 4,
                 quant: self.quant(),
                 name: Some(name),
-                children: Vec::new(),
+                children: Vec::new_in(self.allocator),
             })
         }
     }
@@ -128,23 +134,27 @@ fn count(model: &Model<'_>) -> (usize, usize) {
 }
 
 /// Allocate the full node tree and strings in one block, matching Expat's free API.
-pub(super) fn allocate(text: &str) -> Result<*mut XML_Content, i32> {
+pub(super) fn allocate(text: &str, allocator: Allocator) -> Result<*mut XML_Content, i32> {
     let text = text.trim();
     let model = match text {
         "EMPTY" => Model {
             kind: 1,
             quant: 0,
             name: None,
-            children: Vec::new(),
+            children: Vec::new_in(allocator),
         },
         "ANY" => Model {
             kind: 2,
             quant: 0,
             name: None,
-            children: Vec::new(),
+            children: Vec::new_in(allocator),
         },
         _ => {
-            let mut reader = Reader { text, nodes: 0 };
+            let mut reader = Reader {
+                text,
+                nodes: 0,
+                allocator,
+            };
             let model = reader.node(0)?;
             reader.trim();
             if !reader.text.is_empty() || ![3, 5, 6].contains(&model.kind) {
@@ -155,19 +165,39 @@ pub(super) fn allocate(text: &str) -> Result<*mut XML_Content, i32> {
     };
     let (nodes, string_bytes) = count(&model);
     let node_bytes = nodes.checked_mul(size_of::<XML_Content>()).ok_or(1)?;
-    let size = node_bytes.checked_add(string_bytes).ok_or(1)?;
+    let size = node_bytes
+        .checked_add(string_bytes)
+        .and_then(|size| size.checked_add(OWNER_BYTES))
+        .ok_or(1)?;
     assert!(align_of::<XML_Content>() <= align_of::<u128>());
     // SAFETY: malloc is aligned for XML_Content and the checked size covers every
     // node and name. The returned block transfers ownership to the C callback.
     unsafe {
-        let block = malloc(size).cast::<XML_Content>();
-        if block.is_null() {
+        let owner = allocator.malloc(size).cast::<u8>();
+        if owner.is_null() {
             return Err(1);
         }
+        owner.cast::<Allocator>().write(allocator);
+        let block = owner.add(OWNER_BYTES).cast::<XML_Content>();
         let mut next_node = 1;
         let mut next_string = block.cast::<u8>().add(node_bytes).cast::<c_char>();
         write_node(&model, block, block, &mut next_node, &mut next_string);
         Ok(block)
+    }
+}
+
+const OWNER_BYTES: usize = size_of::<Allocator>().next_multiple_of(align_of::<XML_Content>());
+
+pub(super) unsafe fn free(model: *mut XML_Content) {
+    if model.is_null() {
+        return;
+    }
+    // SAFETY: allocate stores a copied allocator immediately before the model's
+    // node block. It survives parent deletion and receives its original pointer.
+    unsafe {
+        let owner = model.cast::<u8>().sub(OWNER_BYTES);
+        let allocator = owner.cast::<Allocator>().read();
+        allocator.free(owner.cast());
     }
 }
 
@@ -219,7 +249,7 @@ mod tests {
 
     #[test]
     fn children_are_contiguous_and_owned_by_one_allocation() {
-        let model = allocate("(head,(body|section)+,foot?)").unwrap();
+        let model = allocate("(head,(body|section)+,foot?)", Allocator::System).unwrap();
         // SAFETY: The allocated model is live, and indices follow checked counts.
         unsafe {
             assert_eq!((*model).kind, 6);
@@ -236,8 +266,14 @@ mod tests {
 
     #[test]
     fn malformed_and_deep_models_are_bounded() {
-        assert!(allocate("(a,b|c)").is_err());
-        assert!(allocate("(#PCDATA|x)").is_err());
-        assert!(allocate(&format!("{}a{}", "(".repeat(1000), ")".repeat(1000))).is_err());
+        assert!(allocate("(a,b|c)", Allocator::System).is_err());
+        assert!(allocate("(#PCDATA|x)", Allocator::System).is_err());
+        assert!(
+            allocate(
+                &format!("{}a{}", "(".repeat(1000), ")".repeat(1000)),
+                Allocator::System
+            )
+            .is_err()
+        );
     }
 }

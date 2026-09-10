@@ -30,7 +30,7 @@ fn drain(parser: &mut Parser, events: &mut Vec<EventKind>) -> Result<(), ()> {
     while let Some(event) = parser.next_event().map_err(|_| ())? {
         if let EventKind::Text(text) = event.kind {
             if let Some(EventKind::Text(previous)) = events.last_mut() {
-                previous.push_str(&text);
+                previous.try_push_str(&text).map_err(|_| ())?;
             } else {
                 events.push(EventKind::Text(text));
             }
@@ -42,10 +42,17 @@ fn drain(parser: &mut Parser, events: &mut Vec<EventKind>) -> Result<(), ()> {
 }
 
 fuzz_target!(|data: &[u8]| {
-    let Some((&control, xml)) = data.split_first() else { return };
-    if xml.len() > 65_536 { return; }
+    let Some((&control, xml)) = data.split_first() else {
+        return;
+    };
+    if xml.len() > 65_536 {
+        return;
+    }
     let namespaces = control & 128 != 0;
     let contiguous = parse(xml, xml.len().max(1), namespaces);
     let incremental = parse(xml, usize::from(control & 127) + 1, namespaces);
-    assert_eq!(contiguous, incremental, "chunking changed acceptance or normalized events");
+    assert_eq!(
+        contiguous, incremental,
+        "chunking changed acceptance or normalized events"
+    );
 });

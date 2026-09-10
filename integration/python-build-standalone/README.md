@@ -114,7 +114,10 @@ retain archive hashes and glibc/native-library results. Re-run allocator failure
 callback lifecycle, differential, and sanitizer gates on the same Oriole source.
 The CPython static-extension harness in `tools/cpython/` is a separate local gate.
 
-No complete PBS container build, older-glibc runtime check, macOS packaging,
-Windows packaging, cross build, or fully static Python validation is claimed by
-this recipe. The default PBS dependency should remain Expat until those relevant
+The [first complete Linux x86-64 container build](../../docs/validation/2026-09-10/pbs-distribution-build/)
+produced an archive, but a CI workspace setup error prevented the distribution
+validator and installed-interpreter checks from running. The follow-up compiles
+the validator before building Python and retains the experimental archive as a
+seven-day CI artifact. Older-glibc validation, macOS packaging, Windows packaging,
+cross builds, and fully static Python validation remain open. The default PBS dependency should remain Expat until those relevant
 release gates pass.

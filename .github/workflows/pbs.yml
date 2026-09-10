@@ -17,7 +17,7 @@ concurrency:
 jobs:
   distribution:
     # This expensive integration gate has a dedicated review layer.
-    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'charlie/codex-oriole-pbs-distribution' || github.head_ref == 'charlie/codex-oriole-pbs-source-pin'
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.head_ref, 'charlie/codex-oriole-pbs-')
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
@@ -34,6 +34,11 @@ jobs:
         with:
           toolchain: stable
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+      - name: Build the distribution validator
+        working-directory: .cache/pbs
+        run: |
+          set -o pipefail
+          cargo build --release --locked 2>&1 | tee "$RUNNER_TEMP/pbs-validator-build.log"
       - name: Build the frozen Oriole bundle
         run: |
           rustup component add rust-docs
@@ -44,11 +49,17 @@ jobs:
         run: |
           set -o pipefail
           bash integration/python-build-standalone/run.sh "$GITHUB_WORKSPACE/.cache/pbs" "$RUNNER_TEMP/oriole-bundle" 2>&1 | tee "$RUNNER_TEMP/pbs-build.log"
+      - name: Preserve the experimental distribution
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: oriole-pbs-experimental-distribution
+          path: .cache/pbs/dist/*.tar.zst
+          if-no-files-found: error
+          retention-days: 7
       - name: Validate the complete distribution
         working-directory: .cache/pbs
         run: |
           set -o pipefail
-          cargo build --release --locked
           target/release/pythonbuild validate-distribution dist/*.tar.zst 2>&1 | tee "$RUNNER_TEMP/pbs-validate.log"
           uv run --no-dev test-distribution.py dist/*.tar.zst 2>&1 | tee "$RUNNER_TEMP/pbs-custom-tests.log"
           uv run --no-dev test-distribution.py --stdlib dist/*.tar.zst \

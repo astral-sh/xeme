@@ -222,6 +222,7 @@ impl Parser {
         cursor
             .require_space()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        self.check_dtd_token(&cursor)?;
         let name = string(
             cursor
                 .name()
@@ -434,7 +435,7 @@ impl Parser {
         if self.in_doctype && text.starts_with(']') {
             if self.sources.len() > 1 {
                 return Err(self.err(
-                    ErrorKind::AsynchronousEntity,
+                    ErrorKind::InvalidToken,
                     "parameter entity closes its containing subset",
                 ));
             }
@@ -479,7 +480,12 @@ impl Parser {
             crate::ScanMode::DtdDeclaration
         } else if text == "<" && !self.is_source_final() {
             return Ok(false);
+        } else if text.starts_with(['\'', '"']) {
+            return self.parse_prolog_literal();
         } else {
+            if invalid_dtd_token(text, self.config.namespace_separator.is_some()).is_some() {
+                return Err(self.err(ErrorKind::InvalidToken, "invalid token in DTD"));
+            }
             return Err(self.err(ErrorKind::Syntax, "unexpected text in DTD"));
         };
         let limit = self.config.limits.max_token_bytes;
@@ -1109,6 +1115,7 @@ impl Parser {
         position: Position,
         error_offset: usize,
     ) -> Result<(), Error> {
+        self.check_dtd_token(cursor)?;
         let name = cursor
             .name()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -1142,6 +1149,7 @@ impl Parser {
         position: Position,
         emit: bool,
     ) -> Result<(), Error> {
+        self.check_dtd_token(cursor)?;
         let name = cursor
             .ncname()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -1177,6 +1185,7 @@ impl Parser {
                 .require_space()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
         }
+        self.check_dtd_token(cursor)?;
         let name = cursor
             .ncname()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -1496,6 +1505,7 @@ impl Parser {
         cursor: &mut Cursor<'_>,
         position: Position,
     ) -> Result<(), Error> {
+        self.check_dtd_token(cursor)?;
         let element = cursor
             .name()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -1534,6 +1544,7 @@ impl Parser {
         first_attribute: &mut bool,
         callback: AttributeCallback<'_>,
     ) -> Result<(), Error> {
+        self.check_dtd_token(cursor)?;
         let name = cursor
             .name()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -1550,6 +1561,7 @@ impl Parser {
         } else if cursor.starts("(") {
             enumeration(cursor, false).map_err(|message| self.err(ErrorKind::Syntax, message))?;
         } else {
+            self.check_dtd_token(cursor)?;
             let attribute_type = cursor
                 .name()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -1575,6 +1587,7 @@ impl Parser {
         cursor
             .require_space()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        self.check_dtd_token(cursor)?;
         let mut required = cursor.eat("#REQUIRED");
         let value = if required || cursor.eat("#IMPLIED") {
             None
@@ -1674,6 +1687,51 @@ impl Parser {
         )?;
         Ok(())
     }
+
+    fn check_dtd_token(&self, cursor: &Cursor<'_>) -> Result<(), Error> {
+        if invalid_dtd_token(cursor.rest(), cursor.namespaces).is_some() {
+            return Err(self.err(ErrorKind::InvalidToken, "invalid DTD token"));
+        }
+        Ok(())
+    }
+}
+
+/// Distinguish a malformed prolog token from a valid token in the wrong role.
+fn invalid_dtd_token(text: &str, namespaces: bool) -> Option<usize> {
+    let first = text.chars().next()?;
+    let pound = first == '#';
+    let start = usize::from(pound);
+    let rest = &text[start..];
+    if pound {
+        if rest.chars().next().is_none_or(|character| {
+            !crate::names::is_name_start(character) || (namespaces && character == ':')
+        }) {
+            return Some(start);
+        }
+    } else if !crate::names::is_name_char(first) {
+        return (!matches!(
+            first,
+            '\'' | '"' | '(' | ')' | '[' | ']' | ',' | '|' | '%' | '<' | '>'
+        ))
+        .then_some(0);
+    }
+    let (end, next) = rest
+        .char_indices()
+        .find(|(_, character)| !crate::names::is_name_char(*character))?;
+    if whitespace(next)
+        || matches!(next, ')' | '>' | '%' | '|')
+        || (!pound && matches!(next, ',' | '['))
+    {
+        return None;
+    }
+    if !pound
+        && matches!(next, '?' | '*' | '+')
+        && crate::names::is_name(&rest[..end])
+        && (!namespaces || crate::names::is_qname(&rest[..end]))
+    {
+        return None;
+    }
+    Some(start + end)
 }
 
 struct Cursor<'a> {
@@ -1831,7 +1889,10 @@ fn external_id(
             .chars()
             .all(|c| c.is_ascii_alphanumeric() || " \r\n-'()+,./:=?;!*#@$_%".contains(c))
         {
-            return Err(syntax("invalid public identifier character"));
+            return Err(Error::bare(
+                ErrorKind::PublicId,
+                "invalid public identifier character",
+            ));
         }
         let mut normalized = String::new_in(allocator);
         for part in public.split_ascii_whitespace() {

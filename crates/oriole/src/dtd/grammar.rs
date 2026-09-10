@@ -547,7 +547,7 @@ impl Cursor {
             .char_indices()
             .find(|(_, c)| !c.is_ascii_alphanumeric() && !" \r\n-'()+,./:=?;!*#@$_%".contains(*c))
         {
-            return Err((ErrorKind::Syntax, token.start + 1 + offset));
+            return Err((ErrorKind::PublicId, token.start + 1 + offset));
         }
         Ok(())
     }
@@ -566,6 +566,11 @@ impl Cursor {
         let Some(first) = rest.chars().next() else {
             return Ok(None);
         };
+        if !matches!(first, '?' | '*' | '+')
+            && let Some(offset) = super::invalid_dtd_token(rest, self.namespaces)
+        {
+            return Err((ErrorKind::InvalidToken, self.offset + offset));
+        }
         let (kind, length) = if matches!(first, '\'' | '"') {
             let end = rest[1..]
                 .find(first)

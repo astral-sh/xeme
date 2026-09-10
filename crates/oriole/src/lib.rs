@@ -117,6 +117,7 @@ pub enum ErrorKind {
     EntityDeclaredInParameterEntity,
     MisplacedXmlDeclaration,
     XmlDeclaration,
+    PublicId,
     UndeclaringPrefix,
     UndefinedPrefix,
     ReservedPrefixXml,
@@ -2486,6 +2487,13 @@ impl Parser {
     }
 
     fn parse_end(&mut self, token: &str, position: Position) -> Result<(), Error> {
+        if self.stack.is_empty() && !self.fragment {
+            return Err(self.err_at(
+                ErrorKind::InvalidToken,
+                "end tag outside the root element",
+                1,
+            ));
+        }
         let body = &token[2..token.len() - 1];
         let (name, rest) =
             take_name(body).ok_or_else(|| self.err(ErrorKind::InvalidToken, "invalid end tag"))?;

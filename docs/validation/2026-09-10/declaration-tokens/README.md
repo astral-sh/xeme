@@ -9,7 +9,7 @@ references preserve earlier attribute callbacks and suppress later declarations 
 required. Metadata, output, and empty-reference work are bounded before allocation.
 
 The isolated layer passes 150 core/C-interface tests and strict Clippy. The combined
-header/declaration source passes 162 tests, formatting, and strict Clippy. Independent
+header/declaration source passes 163 tests, formatting, and strict Clippy. Independent
 merge review confirms that inherited ancestry and depth accounting remain intact.
 All 9,536 UTF-8/UTF-16 chunk summaries and 42 literal-provenance cases match.
 

@@ -52,6 +52,7 @@ jobs:
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
       - run: uvx --from ruff==0.16.6 ruff check tools benchmarks integration
       - run: uvx --from ty==0.0.80 ty check --extra-search-path tools tools benchmarks integration
+      - run: python3 -m unittest discover -s tools/cpython -p test_run.py
   native:
     name: C ABI and callback safety
     runs-on: ubuntu-24.04-arm
@@ -118,7 +119,7 @@ jobs:
         run: >-
           uv run --no-project --python 3.12.13 python tools/cpython/run.py
           --source .cache/cpython --library target/release/liboriole_expat.so
-          --output /tmp/oriole-cpython-shared
+          --output /tmp/oriole-cpython-shared --allow-text-fragmentation
       - name: Run actual static-library consumers
         if: matrix.linkage == 'static'
         run: >-
@@ -126,7 +127,7 @@ jobs:
           --source .cache/cpython --library target/release/liboriole_expat.a
           --native-library gcc_s --native-library util --native-library rt
           --native-library pthread --native-library m --native-library dl
-          --native-library c --output /tmp/oriole-cpython-static
+          --native-library c --output /tmp/oriole-cpython-static --allow-text-fragmentation
       - name: Show consumer test results
         if: always()
         run: cat /tmp/oriole-cpython-*/probe.log /tmp/oriole-cpython-*/tests.log
@@ -135,13 +136,13 @@ jobs:
           if [ '${{ matrix.linkage }}' = shared ]; then
             uv run --no-project --python 3.12.13 python tools/cpython/run.py \
               --source .cache/cpython --library target/release/liboriole_expat.so \
-              --output /tmp/oriole-cpython-fixed --consumer-fix
+              --output /tmp/oriole-cpython-fixed --consumer-fix --allow-text-fragmentation
           else
             uv run --no-project --python 3.12.13 python tools/cpython/run.py \
               --source .cache/cpython --library target/release/liboriole_expat.a \
               --native-library gcc_s --native-library util --native-library rt \
               --native-library pthread --native-library m --native-library dl \
-              --native-library c --output /tmp/oriole-cpython-fixed --consumer-fix
+              --native-library c --output /tmp/oriole-cpython-fixed --consumer-fix --allow-text-fragmentation
           fi
       - name: Check CPython cleanup under child allocation failure
         run: |

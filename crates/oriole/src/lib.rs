@@ -1841,9 +1841,30 @@ impl Parser {
         }
         let text = &self.source().remaining()[..limit];
         let final_text = self.is_source_final() && limit == self.source().remaining().len();
+        let coalesce = !self.stack.is_empty() || self.fragment;
+        let mut boundary = 0;
         let mut end = text
             .bytes()
-            .position(|byte| matches!(byte, b'<' | b'&' | b'\n') || (!internal && byte == b'\r'))
+            .enumerate()
+            .find_map(|(index, byte)| {
+                if matches!(byte, b'<' | b'&') {
+                    return Some(index);
+                }
+                if byte == b'\n' || (!internal && byte == b'\r') {
+                    if !coalesce || index >= 65_536 {
+                        return Some(if boundary > 0 { boundary } else { index });
+                    }
+                    boundary = index
+                        + if byte == b'\r' && text.as_bytes().get(index + 1) == Some(&b'\n') {
+                            2
+                        } else {
+                            1
+                        };
+                }
+                // Bound merging across lines, preserving the existing span of
+                // an individual long line and its malformed-input prefix.
+                (index >= 65_536 && boundary > 0).then_some(boundary)
+            })
             .map_or(text.len(), |index| {
                 if index == 0 && matches!(text.as_bytes()[0], b'\r' | b'\n') {
                     if text.starts_with("\r\n") { 2 } else { 1 }
@@ -1851,6 +1872,18 @@ impl Parser {
                     index
                 }
             });
+        if coalesce && end == text.len() && limit < self.source().remaining().len() {
+            // Keep a converted buffer boundary at the last complete line when
+            // possible. Otherwise merging earlier lines could shift the next
+            // conversion window into a malformed token and emit extra data.
+            let complete = text.strip_suffix('\r').unwrap_or(text);
+            if let Some(newline) = complete
+                .bytes()
+                .rposition(|byte| byte == b'\n' || (!internal && byte == b'\r'))
+            {
+                end = newline + 1;
+            }
+        }
         if end == text.len() && !final_text {
             if text.ends_with('\r') {
                 end -= 1;
@@ -1885,13 +1918,22 @@ impl Parser {
                     if self.closed_root { 0 } else { forbidden },
                 ));
             }
-            return Err(self.err_at(
-                ErrorKind::InvalidToken,
-                "CDATA terminator in character data",
-                forbidden + 2,
-            ));
+            // Earlier lines were complete tokens before coalescing. Deliver
+            // their valid prefix before diagnosing the malformed final line.
+            if let Some(newline) = text[..forbidden]
+                .bytes()
+                .rposition(|byte| byte == b'\n' || (!internal && byte == b'\r'))
+            {
+                end = newline + 1;
+            } else {
+                return Err(self.err_at(
+                    ErrorKind::InvalidToken,
+                    "CDATA terminator in character data",
+                    forbidden + 2,
+                ));
+            }
         }
-        if let Some(stop) = invalid {
+        if let Some(stop) = invalid.filter(|stop| *stop < end) {
             if stop == 0 {
                 return Err(self.err_at(ErrorKind::InvalidToken, "invalid XML character data", 0));
             }

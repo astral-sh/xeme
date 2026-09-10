@@ -1361,7 +1361,7 @@ fn partial_token_after_progress_is_retried_without_deferral() {
 }
 
 #[test]
-fn line_break_callbacks_are_separate_in_text_and_cdata() {
+fn text_coalesces_lines_and_cdata_keeps_its_boundaries() {
     let mut parser = Parser::new(Config::default());
     parser
         .feed(b"<r>a\nb\r\nc<![CDATA[d\ne]]></r>", true)
@@ -1372,10 +1372,7 @@ fn line_break_callbacks_are_separate_in_text_and_cdata() {
             data.push(value);
         }
     }
-    assert_eq!(
-        data,
-        ["a", "\n", "b", "\n", "c", "d", "\n", "e"].map(text::<oriole::Text>)
-    );
+    assert_eq!(data, ["a\nb\nc", "d", "\n", "e"].map(text::<oriole::Text>));
 }
 
 #[test]
@@ -1488,7 +1485,7 @@ fn many_newlines_and_a_fragmented_dtd_closer_are_streamed() {
                 callbacks += 1;
             }
         }
-        assert_eq!(callbacks, 65_536);
+        assert_eq!(callbacks, if cdata { 65_536 } else { 1 });
     }
     let mut parser = Parser::new(Config::default());
     parser.feed(b"<!DOCTYPE r []", false).unwrap();

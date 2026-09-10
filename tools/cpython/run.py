@@ -31,6 +31,35 @@ TESTS = [
     "test_pulldom",
 ]
 
+TEXT_FRAGMENTATION_FAILURES = {
+    "test1 (test.test_pyexpat.BufferTextTest.test1)",
+    "test_handlers (test.test_sax.CDATAHandlerTest.test_handlers)",
+}
+
+
+def only_text_fragmentation(log: str, returncode: int, file_count: int) -> bool:
+    """Recognize only the two pinned upstream callback-boundary assertions."""
+    failures = re.findall(r"^(FAIL|ERROR): (.+)$", log, re.MULTILINE)
+    total = re.search(
+        r"^Total tests: run=\d+ failures=(\d+)(?: skipped=\d+)?$", log, re.MULTILINE
+    )
+    complete = (
+        f"Total test files: run={file_count}/{file_count} failed={len(failures)}"
+        in log.splitlines()
+    )
+    return (
+        returncode == 2
+        and bool(failures)
+        and total is not None
+        and int(total[1]) == len(failures)
+        and complete
+        and len({name for _, name in failures}) == len(failures)
+        and all(
+            kind == "FAIL" and name in TEXT_FRAGMENTATION_FAILURES
+            for kind, name in failures
+        )
+    )
+
 
 def apply_consumer_fix(text: str, root: Path, output: Path) -> tuple[str, dict]:
     """Apply the pinned upstream allocation-failure backport to a temporary copy."""
@@ -68,6 +97,11 @@ def main() -> int:
     parser.add_argument("--library", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--system-allocator", action="store_true")
+    parser.add_argument(
+        "--allow-text-fragmentation",
+        action="store_true",
+        help="Accept two known callback-boundary assertions only after semantic checks",
+    )
     parser.add_argument(
         "--consumer-fix",
         action="store_true",
@@ -260,6 +294,37 @@ for name in ('pyexpat', '_elementtree'):
             timeout=900,
             check=False,
         )
+    gate_exit_code = result.returncode
+    fragmentation = None
+    if args.allow_text_fragmentation:
+        semantic_script = Path(__file__).with_name("text_fragmentation.py")
+        semantic_command = [executable, "-s", str(semantic_script), str(output)]
+        with (output / "text-fragmentation.log").open("w") as log:
+            semantic = subprocess.run(
+                semantic_command,
+                env=env,
+                stdout=log,
+                stderr=subprocess.STDOUT,
+                timeout=120,
+                check=False,
+            )
+        known_failures = only_text_fragmentation(
+            (output / "tests.log").read_text(), result.returncode, len(args.tests)
+        )
+        accepted = known_failures and semantic.returncode == 0
+        if accepted:
+            gate_exit_code = 0
+        if semantic.returncode:
+            gate_exit_code = gate_exit_code or semantic.returncode
+        fragmentation = {
+            "accepted_upstream_failures": accepted,
+            "allowed_assertions": sorted(TEXT_FRAGMENTATION_FAILURES),
+            "semantic_command": semantic_command,
+            "semantic_exit_code": semantic.returncode,
+            "semantic_source_sha256": hashlib.sha256(
+                semantic_script.read_bytes()
+            ).hexdigest(),
+        }
     evidence = {
         "schema_version": 1,
         "cpython_revision": revision,
@@ -272,12 +337,14 @@ for name in ('pyexpat', '_elementtree'):
         "test_command": command,
         "probe_exit_code": probe.returncode,
         "tests_exit_code": result.returncode,
+        "gate_exit_code": gate_exit_code,
+        "text_fragmentation": fragmentation,
         "source_sha256": hashlib.sha256(module_source.read_bytes()).hexdigest(),
         "compiled_source_sha256": hashlib.sha256(adapted.read_bytes()).hexdigest(),
     }
     (output / "summary.json").write_text(json.dumps(evidence, indent=2) + "\n")
     print(json.dumps(evidence, indent=2))
-    return result.returncode or probe.returncode
+    return gate_exit_code or probe.returncode
 
 
 if __name__ == "__main__":

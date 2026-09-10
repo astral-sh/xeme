@@ -97,6 +97,16 @@ license directory, and its extension metadata references Oriole's notices.
 
 ## Validation
 
+The latest candidate at [`1262888`](https://github.com/astral-sh/oriole/commit/1262888)
+includes external DTD declaration grammar, internal declaration composition,
+namespace and encoding corrections, foreign-DTD read policy, and completed-parser
+API behavior. Its [combined source report](../../docs/validation/2026-09-10/external-grammar/)
+records the full API and W3C matrices and independent review. The dedicated PBS
+gate rebuilds this source and exercises the resulting distribution, including
+glibc 2.17; its results are recorded separately from the earlier successful build
+below. Local tests and earlier archive results do not establish this candidate's
+distribution result.
+
 The combined runtime at [`b68bdca`](https://github.com/astral-sh/oriole/commit/b68bdca)
 includes the reviewed external-value continuations, declaration Default callbacks,
 allocation-free shared state, and inline character data. Its

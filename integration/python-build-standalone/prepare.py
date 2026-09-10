@@ -62,6 +62,8 @@ def main() -> None:
     cargo = ["cargo", *([f"+{args.toolchain}"] if args.toolchain else [])]
     rustc = ["rustc", *([f"+{args.toolchain}"] if args.toolchain else [])]
     env = dict(os.environ)
+    # CI may force ANSI colors; native-static-libs is machine-read below.
+    env["CARGO_TERM_COLOR"] = "never"
     target_dir = Path(env.get("CARGO_TARGET_DIR", ROOT / "target" / "pbs")).resolve()
     env["CARGO_TARGET_DIR"] = str(target_dir)
     env["RUSTFLAGS"] = (

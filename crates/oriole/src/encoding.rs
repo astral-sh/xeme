@@ -723,6 +723,11 @@ impl Source {
         &self.text[self.cursor..]
     }
 
+    /// Identify an unanchored UTF-8 token without projecting custom raw widths.
+    pub(crate) fn native_utf8_byte_index(&self) -> Option<usize> {
+        (self.encoding == Encoding::Utf8 && self.anchor.is_none()).then_some(self.raw_index)
+    }
+
     #[inline]
     pub(crate) fn has_conversions(&self) -> bool {
         self.text.has_conversions()

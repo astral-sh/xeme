@@ -12,6 +12,7 @@ mod encoding;
 mod lexical;
 mod names;
 mod recycling;
+mod tag;
 mod value;
 mod value_lexer;
 
@@ -537,6 +538,7 @@ pub struct Parser {
     current_raw: String,
     token_scratch: lexical::Buffer,
     raw_attributes: Vec<RawAttribute>,
+    tag_scanner: tag::TagScanner,
     event_recycling: EventRecycling,
     expand_internal_entities: bool,
     default_events: bool,
@@ -626,6 +628,7 @@ impl Parser {
             current_raw: String::new_in(allocator),
             token_scratch: lexical::Buffer::new_in(allocator),
             raw_attributes: Vec::new_in(allocator),
+            tag_scanner: tag::TagScanner::default(),
             event_recycling: EventRecycling::new(allocator)?,
             expand_internal_entities: true,
             default_events: false,
@@ -1976,12 +1979,38 @@ impl Parser {
             if deferral && self.source().should_defer(max_token) {
                 return Ok(());
             }
-            let end = self
-                .source_mut()
-                .scan_token(mode, max_token)
-                .map_err(|(kind, offset)| {
-                    self.err_at(kind, "invalid or oversized XML token", offset)
-                })?;
+            let planned = if mode == ScanMode::Tag
+                && !self.source().remaining().starts_with("</")
+                && self.config.namespace_separator.is_none()
+                && !self.seen_doctype
+                && !self.foreign_dtd
+                && self.shared_tables.get().is_none()
+                && !self.fragment
+                && self.sources.len() == 1
+                && let Some(source_index) = self.source().native_utf8_byte_index()
+            {
+                self.tag_scanner.scan(
+                    self.sources[0].remaining(),
+                    source_index,
+                    max_token,
+                    self.config.limits.max_attributes,
+                    self.config.name_rules,
+                    &mut self.raw_attributes,
+                )
+            } else {
+                tag::Planned::Fallback
+            };
+            let end = match planned {
+                tag::Planned::Complete { end, .. } => Some(end),
+                tag::Planned::Incomplete => None,
+                tag::Planned::Fallback => {
+                    self.source_mut()
+                        .scan_token(mode, max_token)
+                        .map_err(|(kind, offset)| {
+                            self.err_at(kind, "invalid or oversized XML token", offset)
+                        })?
+                }
+            };
             let Some(end) = end else {
                 if self.sources.len() == 1
                     && self.source().position(0).byte_index == self.feed_start_byte
@@ -2013,7 +2042,9 @@ impl Parser {
                     .for_slice(&self.source().remaining()[..end]),
             )?;
             let parsed = (|| {
-                if let Some(offset) = invalid_xml_char(&token) {
+                if !matches!(planned, tag::Planned::Complete { .. })
+                    && let Some(offset) = invalid_xml_char(&token)
+                {
                     return Err(self.err_at(
                         ErrorKind::InvalidToken,
                         "invalid XML character",
@@ -2048,7 +2079,7 @@ impl Parser {
                     ScanMode::Tag if token.starts_with("</") => {
                         self.parse_end(token.view(), position)?
                     }
-                    ScanMode::Tag => self.parse_start(token.view(), position)?,
+                    ScanMode::Tag => self.parse_start(token.view(), position, planned)?,
                     ScanMode::DtdDeclaration => {
                         unreachable!("DTD scanner only runs in DTD context")
                     }
@@ -2707,7 +2738,12 @@ impl Parser {
         Ok(())
     }
 
-    fn parse_start(&mut self, token: lexical::Slice<'_>, position: Position) -> Result<(), Error> {
+    fn parse_start(
+        &mut self,
+        token: lexical::Slice<'_>,
+        position: Position,
+        planned: tag::Planned,
+    ) -> Result<(), Error> {
         if self.closed_root {
             return Err(self.err(
                 ErrorKind::JunkAfterDocumentElement,
@@ -2719,8 +2755,12 @@ impl Parser {
         }
         let empty = token.ends_with("/>");
         let body = &token[1..token.len() - if empty { 2 } else { 1 }];
-        let (raw_name, rest) = take_name(body, self.config.name_rules)
-            .ok_or_else(|| self.err_at(ErrorKind::InvalidToken, "invalid element name", 1))?;
+        let (raw_name, rest) = if let tag::Planned::Complete { name_end, .. } = planned {
+            body.split_at(name_end - 1)
+        } else {
+            take_name(body, self.config.name_rules)
+                .ok_or_else(|| self.err_at(ErrorKind::InvalidToken, "invalid element name", 1))?
+        };
         if self.config.namespace_separator.is_some() && !self.config.name_rules.is_qname(raw_name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid qualified element name"));
         }
@@ -2730,20 +2770,22 @@ impl Parser {
         // Validate the complete tag before expanding values or emitting callbacks.
         let mut raw_attrs =
             std::mem::replace(&mut self.raw_attributes, Vec::new_in(self.allocator));
-        parse_raw_attributes(
-            rest,
-            true,
-            &mut raw_attrs,
-            self.config.limits.max_attributes,
-            self.config.name_rules,
-        )
-        .map_err(|error| {
-            self.err_at(
-                error.kind,
-                error.message,
-                1 + raw_name.len() + error.position.byte_index,
+        if !matches!(planned, tag::Planned::Complete { .. }) {
+            parse_raw_attributes(
+                rest,
+                true,
+                &mut raw_attrs,
+                self.config.limits.max_attributes,
+                self.config.name_rules,
             )
-        })?;
+            .map_err(|error| {
+                self.err_at(
+                    error.kind,
+                    error.message,
+                    1 + raw_name.len() + error.position.byte_index,
+                )
+            })?;
+        }
         if raw_attrs.len() > self.config.limits.max_attributes {
             return Err(self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded"));
         }
@@ -3462,93 +3504,29 @@ fn parse_raw_attributes(
     limit: usize,
     name_rules: NameRules,
 ) -> Result<(), Error> {
-    let original_len = text.len();
-    let mut text = text;
     result.clear();
-    let error_at = |kind, message, remaining: &str| Error {
-        kind,
-        message,
-        position: Position {
-            byte_index: original_len - remaining.len(),
-            line: 1,
-            column: 0,
-            byte_count: 0,
-        },
-    };
-    while !text.is_empty() {
-        let trimmed = text.trim_start_matches(whitespace);
-        if trimmed.len() == text.len() {
-            return Err(error_at(
-                ErrorKind::InvalidToken,
-                "attributes must be separated by whitespace",
-                text,
-            ));
+    let mut scanner = tag::AttributeScanner::new(0);
+    loop {
+        let step = scanner
+            .next(text, true, false, allow_refs, limit, name_rules)
+            .map_err(|error| Error {
+                kind: error.kind,
+                message: error.message,
+                position: Position {
+                    byte_index: error.offset,
+                    line: 1,
+                    column: 0,
+                    byte_count: 0,
+                },
+            })?;
+        match step {
+            tag::Step::Attribute(attribute) => try_push(result, attribute)?,
+            tag::Step::End => return Ok(()),
+            tag::Step::Incomplete | tag::Step::TagEnd { .. } => {
+                unreachable!("complete attribute views have no tag delimiter")
+            }
         }
-        text = trimmed;
-        if text.is_empty() {
-            break;
-        }
-        if result.len() >= limit {
-            return Err(error_at(
-                ErrorKind::LimitExceeded,
-                "attribute count limit exceeded",
-                text,
-            ));
-        }
-        let name_offset = original_len - text.len();
-        let (name, rest) = take_name(text, name_rules).ok_or(error_at(
-            ErrorKind::InvalidToken,
-            "invalid attribute name",
-            text,
-        ))?;
-        let rest = rest.trim_start_matches(whitespace);
-        let rest = rest
-            .strip_prefix('=')
-            .ok_or(error_at(
-                ErrorKind::InvalidToken,
-                "attribute is missing equals sign",
-                rest,
-            ))?
-            .trim_start_matches(whitespace);
-        let quote = rest
-            .chars()
-            .next()
-            .filter(|c| matches!(c, '\'' | '"'))
-            .ok_or(error_at(
-                ErrorKind::InvalidToken,
-                "attribute value must be quoted",
-                rest,
-            ))?;
-        let rest = &rest[1..];
-        let end = rest.find(quote).ok_or(error_at(
-            ErrorKind::UnclosedToken,
-            "unclosed attribute value",
-            rest,
-        ))?;
-        let value = &rest[..end];
-        let value_offset = original_len - rest.len();
-        if let Some(offset) = value
-            .find('<')
-            .or_else(|| (!allow_refs).then(|| value.find('&')).flatten())
-        {
-            return Err(error_at(
-                ErrorKind::InvalidToken,
-                "invalid character in attribute value",
-                &rest[offset..],
-            ));
-        }
-        try_push(
-            result,
-            RawAttribute {
-                name_start: name_offset,
-                name_end: name_offset + name.len(),
-                value_start: value_offset,
-                value_end: value_offset + value.len(),
-            },
-        )?;
-        text = &rest[end + 1..];
     }
-    Ok(())
 }
 
 fn string(text: &str, allocator: Allocator) -> Result<String, Error> {

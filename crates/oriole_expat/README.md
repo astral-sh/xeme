@@ -115,18 +115,21 @@ The following Expat modes are explicitly unsupported:
 - Caller-supplied hash salts and relative entity-amplification tuning: those setters
   return false. Oriole instead applies absolute input, token, nesting, attribute,
   and entity-expansion limits.
-- Input context buffers: `XML_GetInputContext` returns null, and the feature table
-  advertises `XML_CONTEXT_BYTES=0`.
 - Wide-character and `XML_LARGE_SIZE` builds: the header rejects these configurations.
+
+`XML_GetInputContext` exposes original encoded bytes while parsing is active,
+including entity-reference spellings and UTF-16 input. The buffer retains at least
+1,024 bytes before pending input and remains valid for the requesting callback.
+The getter returns null outside parsing and after reset.
 
 Reparse deferral is configurable, with progressive scanning in both modes. The
 live-allocation tracker supports Expat's maximum-amplification and activation
-threshold controls, including child allocations and blocks requested through
-`XML_MemMalloc`/`XML_MemRealloc`. These helpers can fail the configured relative
-limit even for a small request; they are not exempt from family accounting.
+threshold controls, including child allocations. Application-owned blocks requested
+through `XML_MemMalloc`/`XML_MemRealloc` use the selected allocator but are exempt
+from parser amplification accounting, including when requested inside a callback.
 Defaults are 100 times the root's input size, activated at 64 MiB of live
 allocation. Allocation headers retain their tracker through reallocation and through destruction of their original parser.
-A separate 512 MiB ceiling on live backing allocations remains active even when
+A separate 512 MiB ceiling on parser-owned live backing allocations remains active even when
 relative amplification checks are disabled.
 
 A parser family shares a 256 MiB raw-input budget and an 8 MiB entity-expansion

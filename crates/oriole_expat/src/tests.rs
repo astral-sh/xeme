@@ -975,18 +975,19 @@ fn allocation_tracker_accepts_infinity_and_rejects_child_settings() {
 }
 
 #[test]
-fn public_memory_helpers_account_for_and_release_live_bytes() {
+fn public_memory_helpers_are_exempt_from_parser_amplification() {
     // SAFETY: Each pointer is used only through its original parser's memory API.
     unsafe {
         let parser = XML_ParserCreate(ptr::null());
         let tracker = Shared::clone(&(*parser).tracker);
         let initial = tracker.live_bytes();
+        assert_eq!(XML_SetAllocTrackerActivationThreshold(parser, 0), 1);
         let memory = XML_MemMalloc(parser, 1000);
         assert!(!memory.is_null());
-        assert!(tracker.live_bytes() >= initial + 1000);
+        assert_eq!(tracker.live_bytes(), initial);
         let memory = XML_MemRealloc(parser, memory, 2000);
         assert!(!memory.is_null());
-        assert!(tracker.live_bytes() >= initial + 2000);
+        assert_eq!(tracker.live_bytes(), initial);
         XML_MemFree(parser, memory);
         assert_eq!(tracker.live_bytes(), initial);
         XML_ParserFree(parser);
@@ -2541,5 +2542,164 @@ fn external_grammar_continuation_outlives_its_ancestor() {
         }
         assert_eq!(state.events, ["attr:a", "external:p", "attr:b"]);
         XML_ParserFree(child);
+    }
+}
+
+#[test]
+fn memory_helpers_clear_the_ambient_parser_tracking_scope() {
+    // SAFETY: The helper blocks use their live parser's allocator. Nesting the
+    // scope reproduces a helper call made by an event callback during parsing.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        let tracker = Shared::clone(&(*parser).tracker);
+        assert_eq!(XML_SetAllocTrackerActivationThreshold(parser, 0), 1);
+        let initial = tracker.live_bytes();
+        with_tracking(&tracker, || {
+            let malloc = XML_MemMalloc(parser, 1000);
+            let realloc = XML_MemRealloc(parser, ptr::null_mut(), 1000);
+            assert!(!malloc.is_null());
+            assert!(!realloc.is_null());
+            assert_eq!(tracker.live_bytes(), initial);
+            XML_MemFree(parser, malloc);
+            XML_MemFree(parser, realloc);
+        });
+        XML_ParserFree(parser);
+        assert_eq!(tracker.live_bytes(), 0);
+    }
+}
+
+#[derive(Default)]
+struct ContextState {
+    parser: XML_Parser,
+    original: Vec<u8>,
+    observations: Vec<(usize, Vec<u8>)>,
+    suspend_next: bool,
+}
+
+unsafe extern "C" fn record_context(arg: *mut c_void) {
+    // SAFETY: The caller retains state and input until parsing finishes. Context
+    // pointers are inspected and copied inside this callback only.
+    unsafe {
+        let state = &mut *arg.cast::<ContextState>();
+        let mut offset = -1;
+        let mut size = -1;
+        let bytes = XML_GetInputContext(state.parser, &mut offset, &mut size);
+        assert!(!bytes.is_null());
+        assert!(offset >= 0 && size >= offset);
+        let index = XML_GetCurrentByteIndex(state.parser) as usize;
+        let count = XML_GetCurrentByteCount(state.parser) as usize;
+        let context = std::slice::from_raw_parts(bytes.cast::<u8>(), size as usize);
+        let start = index - offset as usize;
+        assert_eq!(context, &state.original[start..start + context.len()]);
+        let raw = context[offset as usize..offset as usize + count].to_vec();
+        state.observations.push((index, raw));
+        if state.suspend_next {
+            state.suspend_next = false;
+            assert_eq!(XML_StopParser(state.parser, 1), OK);
+        }
+    }
+}
+
+unsafe extern "C" fn context_start(arg: *mut c_void, _: *const c_char, _: *const *const c_char) {
+    // SAFETY: Forward the live callback state without retaining the callback data.
+    unsafe { record_context(arg) };
+}
+
+unsafe extern "C" fn context_text(arg: *mut c_void, _: *const c_char, _: c_int) {
+    // SAFETY: Forward the live callback state without retaining the callback data.
+    unsafe { record_context(arg) };
+}
+
+#[test]
+fn input_context_preserves_original_bytes_across_feeds_and_suspension() {
+    let xml = format!(
+        "<!DOCTYPE r [<!ENTITY e 'expanded'>]><r a='{}'>{}&e;<s/></r>",
+        "attribute".repeat(300),
+        "content".repeat(600)
+    );
+    let mut utf16 = vec![0xff, 0xfe];
+    utf16.extend(xml.encode_utf16().flat_map(u16::to_le_bytes));
+    for original in [xml.into_bytes(), utf16] {
+        for width in [1, 7, 4096, original.len()] {
+            for buffered in [false, true] {
+                // SAFETY: Input, callback state and parser are owned until cleanup.
+                unsafe {
+                    let parser = XML_ParserCreate(ptr::null());
+                    let mut state = ContextState {
+                        parser,
+                        original: original.clone(),
+                        suspend_next: true,
+                        ..ContextState::default()
+                    };
+                    XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                    XML_SetStartElementHandler(parser, Some(context_start));
+                    XML_SetCharacterDataHandler(parser, Some(context_text));
+                    let mut offset = -1;
+                    let mut size = -1;
+                    assert!(XML_GetInputContext(parser, &mut offset, &mut size).is_null());
+                    let chunks = original.len().div_ceil(width);
+                    for (index, chunk) in original.chunks(width).enumerate() {
+                        let final_input = c_int::from(index + 1 == chunks);
+                        let status = if buffered {
+                            let buffer = XML_GetBuffer(parser, chunk.len() as c_int);
+                            assert!(!buffer.is_null());
+                            ptr::copy_nonoverlapping(chunk.as_ptr(), buffer.cast(), chunk.len());
+                            XML_ParseBuffer(parser, chunk.len() as c_int, final_input)
+                        } else {
+                            XML_Parse(
+                                parser,
+                                chunk.as_ptr().cast(),
+                                chunk.len() as c_int,
+                                final_input,
+                            )
+                        };
+                        assert!(matches!(status, OK | SUSPENDED));
+                        if status == SUSPENDED {
+                            assert!(XML_GetInputContext(parser, &mut offset, &mut size).is_null());
+                            assert_eq!(XML_ResumeParser(parser), OK);
+                        }
+                    }
+                    assert!(state.observations.len() >= 4);
+                    assert!(XML_GetInputContext(parser, &mut offset, &mut size).is_null());
+                    assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+                    assert!(XML_GetInputContext(parser, &mut offset, &mut size).is_null());
+                    assert_eq!(XML_GetCurrentByteIndex(parser), -1);
+                    assert_eq!(XML_Parse(parser, ptr::null(), 0, 0), OK);
+                    assert_eq!(XML_GetCurrentByteIndex(parser), 0);
+                    XML_ParserFree(parser);
+                }
+            }
+        }
+    }
+}
+
+unsafe extern "C" fn release_without_input_context(data: *mut c_void) {
+    // SAFETY: Encoding release owns live callback state and a live parser handle.
+    unsafe {
+        let state = &mut *data.cast::<State>();
+        state.releases += 1;
+        let mut offset = -1;
+        let mut size = -1;
+        assert!(XML_GetInputContext(state.parser, &mut offset, &mut size).is_null());
+    }
+}
+
+#[test]
+fn input_context_is_inactive_during_reset_and_destruction_callbacks() {
+    for reset in [false, true] {
+        // SAFETY: The release callback is installed with test-owned state, and
+        // reset/free owns the handle until that callback returns.
+        unsafe {
+            let mut state = State::default();
+            let parser = configured(&mut state);
+            assert_eq!(XML_Parse(parser, c"<r>".as_ptr(), 3, 0), OK);
+            (*parser).encoding_release = Some(release_without_input_context);
+            (*parser).encoding_data = ptr::from_mut(&mut state).cast();
+            if reset {
+                assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            }
+            XML_ParserFree(parser);
+            assert_eq!(state.releases, 1);
+        }
     }
 }

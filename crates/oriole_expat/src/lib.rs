@@ -20,7 +20,7 @@ use std::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
 use oriole::{Config, ErrorKind, EventKind, Parser, Position};
 use oriole_storage::{
     AllocError, AllocationTracker, Allocator, Box as XmlBox, CString, MemorySuite, Queue, Shared,
-    String as XmlString, Vec as XmlVec, in_allocator_callback, with_tracking,
+    String as XmlString, Vec as XmlVec, in_allocator_callback, with_tracking, without_tracking,
 };
 
 mod content_model;
@@ -33,6 +33,7 @@ const UNEXPECTED_STATE: c_int = 23;
 const MAX_FAMILY_CALLBACK_BYTES: usize = 64 * 1024 * 1024;
 const MAX_FAMILY_CHILDREN: usize = 1024;
 const MAX_EXTERNAL_DEPTH: usize = 32;
+const INPUT_CONTEXT_BYTES: usize = 1024;
 
 #[derive(Default)]
 struct FamilyBudget {
@@ -157,6 +158,9 @@ pub struct XML_ParserStruct {
     base: Option<CString>,
     buffer: XmlVec<u8>,
     buffer_available: bool,
+    input_context: XmlVec<u8>,
+    input_context_start: usize,
+    input_context_active: bool,
     external_arg: *mut c_void,
     unknown_encoding_arg: *mut c_void,
     default_dispatch: bool,
@@ -311,6 +315,9 @@ unsafe fn create(
                     base: None,
                     buffer: XmlVec::new_in(allocator),
                     buffer_available: false,
+                    input_context: XmlVec::new_in(allocator),
+                    input_context_start: 0,
+                    input_context_active: false,
                     external_arg: ptr::null_mut(),
                     unknown_encoding_arg: ptr::null_mut(),
                     default_dispatch: false,
@@ -532,6 +539,8 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                 (*parser).base = None;
                 (*parser).buffer.clear();
                 (*parser).buffer_available = false;
+                (*parser).input_context.clear();
+                (*parser).input_context_start = 0;
                 (*parser).external_arg = ptr::null_mut();
                 while (*parser).default_pending.pop_front().is_some() {}
                 (*parser).family = family;
@@ -1301,6 +1310,7 @@ unsafe fn finish_operation(
             fail_parse(parser, UNEXPECTED_STATE);
             ERROR
         });
+        (*parser).input_context_active = false;
         (*parser).busy = false;
         result
     }
@@ -1356,6 +1366,7 @@ pub unsafe extern "C" fn XML_Parse(
                 return ERROR;
             }
             (*parser).busy = true;
+            (*parser).input_context_active = true;
             (*parser).state = 1;
             (*parser).final_buffer = final_input != 0;
             let result = catch_unwind(AssertUnwindSafe(|| {
@@ -1364,6 +1375,10 @@ pub unsafe extern "C" fn XML_Parse(
                 } else {
                     std::slice::from_raw_parts(input.cast::<u8>(), len as usize)
                 };
+                if preserve_input_context(parser, input).is_err() {
+                    fail_parse(parser, 1);
+                    return ERROR;
+                }
                 if let Err(error) = (*parser).core.feed(input, final_input != 0) {
                     if error.kind == ErrorKind::UnknownEncoding && resolve_unknown_encoding(parser)
                     {
@@ -1544,6 +1559,7 @@ pub unsafe extern "C" fn XML_ResumeParser(parser: XML_Parser) -> c_int {
             }
             (*parser).error = 0;
             (*parser).busy = true;
+            (*parser).input_context_active = true;
             (*parser).state = 1;
             let result = catch_unwind(AssertUnwindSafe(|| run_events(parser)));
             finish_operation(parser, result)
@@ -1912,6 +1928,9 @@ pub unsafe extern "C" fn XML_GetCurrentByteIndex(parser: XML_Parser) -> c_long {
     }
     // SAFETY: Scalar read from the caller's serialized live handle.
     unsafe {
+        if (*parser).state == 0 {
+            return -1;
+        }
         (*parser)
             .position
             .byte_index
@@ -1952,14 +1971,66 @@ pub unsafe extern "C" fn XML_GetParsingStatus(parser: XML_Parser, status: *mut X
     }
 }
 
+/// Retain original bytes around pending events, including split tokens and
+/// suspended input. The decoder may normalize or convert its own input, so its
+/// UTF-8 source buffer cannot implement the C API's raw-input contract.
+unsafe fn preserve_input_context(parser: XML_Parser, input: &[u8]) -> Result<(), AllocError> {
+    // SAFETY: The outer parse operation owns the busy guard. No context borrow
+    // crosses a callback, and this storage is distinct from XML_GetBuffer's data.
+    unsafe {
+        let context = &mut (*parser).input_context;
+        let discard = (*parser)
+            .position
+            .byte_index
+            .saturating_sub((*parser).input_context_start)
+            .saturating_sub(INPUT_CONTEXT_BYTES)
+            .min(context.len());
+        context.drain(..discard);
+        (*parser).input_context_start += discard;
+        context.try_reserve(input.len())?;
+        context.extend_from_slice(input);
+    }
+    Ok(())
+}
+
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn XML_GetInputContext(
-    _parser: XML_Parser,
-    _offset: *mut c_int,
-    _size: *mut c_int,
+    parser: XML_Parser,
+    offset: *mut c_int,
+    size: *mut c_int,
 ) -> *const c_char {
-    // XML_CONTEXT_BYTES=0 is advertised in the feature list.
-    ptr::null()
+    if parser.is_null() || offset.is_null() || size.is_null() || in_allocator_callback() {
+        return ptr::null();
+    }
+    // SAFETY: The caller supplies a serialized live parser and writable outputs.
+    // Active parsing owns the input storage; recursive parse/reset/free cannot
+    // invalidate it before the requesting callback returns.
+    unsafe {
+        if !(*parser).input_context_active
+            || (*parser).destroying
+            || (*parser).input_context.is_empty()
+        {
+            return ptr::null();
+        }
+        let Some(start) = (*parser)
+            .position
+            .byte_index
+            .checked_sub((*parser).input_context_start)
+        else {
+            return ptr::null();
+        };
+        let context = &(*parser).input_context;
+        if start > context.len() || (*parser).position.byte_count > context.len() - start {
+            return ptr::null();
+        }
+        let (Ok(start), Ok(length)) = (c_int::try_from(start), c_int::try_from(context.len()))
+        else {
+            return ptr::null();
+        };
+        *offset = start;
+        *size = length;
+        context.as_ptr().cast()
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -2045,6 +2116,9 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                             .transpose()?,
                         buffer: XmlVec::new_in(allocator),
                         buffer_available: false,
+                        input_context: XmlVec::new_in(allocator),
+                        input_context_start: 0,
+                        input_context_active: false,
                         external_arg: (*parser).external_arg,
                         unknown_encoding_arg: (*parser).unknown_encoding_arg,
                         default_dispatch: false,
@@ -2175,13 +2249,15 @@ pub unsafe extern "C" fn XML_SetAllocTrackerActivationThreshold(
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn XML_MemMalloc(parser: XML_Parser, size: usize) -> *mut c_void {
-    // SAFETY: The scope owns a tracker clone and rejects allocator-callback reentry
-    // before reading parser state; all temporary allocations use the same family.
-    let operation = || {
-        if in_allocator_callback() {
-            return ptr::null_mut();
-        }
-        // SAFETY: The live parser's allocator is copied before its callback executes.
+    if in_allocator_callback() {
+        return ptr::null_mut();
+    }
+    // Public memory helpers allocate application-owned storage. Expat excludes
+    // them from parser amplification accounting, including calls made inside a
+    // parse callback. Explicitly clear the inherited tracking scope while keeping
+    // the selected allocator and allocation-owned layout metadata.
+    without_tracking(|| {
+        // SAFETY: Copy the live parser's allocator before invoking user code.
         unsafe {
             let allocator = if parser.is_null() {
                 Allocator::System
@@ -2190,10 +2266,7 @@ pub unsafe extern "C" fn XML_MemMalloc(parser: XML_Parser, size: usize) -> *mut 
             };
             allocator.tracked_malloc(size)
         }
-    };
-    // SAFETY: The operation checks the handle before use; its tracker clone owns
-    // the accounting context even when an operation destroys the parser.
-    unsafe { with_parser_tracking(parser, operation) }
+    })
 }
 
 #[unsafe(no_mangle)]
@@ -2202,14 +2275,14 @@ pub unsafe extern "C" fn XML_MemRealloc(
     pointer: *mut c_void,
     size: usize,
 ) -> *mut c_void {
-    // SAFETY: The scope owns a tracker clone and rejects allocator-callback reentry
-    // before reading parser state; all temporary allocations use the same family.
-    let operation = || {
-        if in_allocator_callback() {
-            return ptr::null_mut();
-        }
-        // SAFETY: Caller supplies NULL or a live allocation from XML_MemMalloc or
-        // XML_MemRealloc on the same allocator suite.
+    if in_allocator_callback() {
+        return ptr::null_mut();
+    }
+    // Clearing the ambient scope also covers realloc(NULL, size) from a parse
+    // callback. Existing helper blocks retain their original untracked metadata.
+    without_tracking(|| {
+        // SAFETY: The pointer is NULL or a live block from these helpers using
+        // this allocator suite. Failed growth preserves the original allocation.
         unsafe {
             let allocator = if parser.is_null() {
                 Allocator::System
@@ -2218,10 +2291,7 @@ pub unsafe extern "C" fn XML_MemRealloc(
             };
             allocator.tracked_realloc(pointer, size)
         }
-    };
-    // SAFETY: The operation checks the handle before use; its tracker clone owns
-    // the accounting context even when an operation destroys the parser.
-    unsafe { with_parser_tracking(parser, operation) }
+    })
 }
 
 #[unsafe(no_mangle)]
@@ -2296,7 +2366,7 @@ static FEATURES: [XML_Feature; 8] = [
     XML_Feature {
         feature: 4,
         name: c"XML_CONTEXT_BYTES".as_ptr(),
-        value: 0,
+        value: INPUT_CONTEXT_BYTES as c_long,
     },
     XML_Feature {
         feature: 13,

@@ -1,4 +1,5 @@
 /* Public callback guards, plus Oriole's bounded recursive-default rejection. */
+#define XML_GE 1
 #include "expat.h"
 #include <assert.h>
 #include <stdio.h>
@@ -18,6 +19,11 @@ static void XMLCALL on_default(void *data, const char *text, int length) {
 static void XMLCALL on_start(void *data, const char *name, const char **attributes) {
     assert(data == &calls);
     calls++;
+    int offset = -1;
+    int length = -1;
+    const char *context = XML_GetInputContext(parser, &offset, &length);
+    assert(context && offset >= 0 && length - offset >= 14);
+    assert(memcmp(context + offset, "<r a='value'/>", 14) == 0);
     switch (operation) {
     case 0:
         XML_ParserFree(parser);
@@ -45,11 +51,23 @@ static void XMLCALL on_start(void *data, const char *name, const char **attribut
         XML_ParserFree(child);
         assert(XML_SetBase(parser, XML_GetBase(parser)) == XML_STATUS_OK);
         assert(strcmp(XML_GetBase(parser), "urn:base") == 0);
+        assert(XML_SetAllocTrackerActivationThreshold(parser, 0) == XML_TRUE);
+        void *memory = XML_MemMalloc(parser, 1000);
+        assert(memory);
+        memset(memory, 0x55, 1000);
+        memory = XML_MemRealloc(parser, memory, 2000);
+        assert(memory);
+        memset(memory, 0xaa, 2000);
+        XML_MemFree(parser, memory);
+        assert(XML_SetAllocTrackerActivationThreshold(parser, 64ULL * 1024 * 1024)
+               == XML_TRUE);
         break;
     }
     default:
         assert(0);
     }
+    /* Callback-safe mutations and nested parsing must not invalidate this view. */
+    assert(memcmp(context + offset, "<r a='value'/>", 14) == 0);
 }
 
 int main(void) {

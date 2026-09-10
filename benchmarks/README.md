@@ -1,6 +1,7 @@
 # Benchmarks
 
-See the [combined runtime measurements](results/2026-09-10/combined-runtime/),
+See the [DTD runtime checkpoint](results/2026-09-10/dtd-checkpoint/),
+[earlier combined runtime measurements](results/2026-09-10/combined-runtime/),
 [inline text experiment](results/2026-09-10/inline-text/),
 [earlier validated checkpoint](results/2026-09-10/checkpoint/),
 [explicit namespace measurements](results/2026-09-10/namespaces/),
@@ -73,3 +74,29 @@ DTD declaration and ID metadata; deterministic regressions check those contracts
 separately. Compare complete normalized callbacks outside the timed region too.
 
 No benchmark result is a compatibility or production-readiness certification.
+
+## DTD composition and incremental scanning
+
+`dtd_composition_workload.py` generates declaration delimiters supplied by internal
+parameter entities, conditional headers, repeated empty replacements, and long
+quoted literals. `native_dtd_driver.c` adds an in-memory external DTD resolver and
+declaration callbacks, including complete content model traversal and freeing.
+The Linux runner compares exact serialized callback metadata before timing and
+checks every timed digest and declaration/request count against that preflight.
+
+```console
+python3 benchmarks/dtd_composition_workload.py --output /tmp/dtd-inputs
+cc -std=c11 -O3 -Wall -Wextra -Werror -I include \
+  benchmarks/native_dtd_driver.c -ldl -o /tmp/dtd-driver
+python3 benchmarks/dtd_scaling.py \
+  --library /absolute/liboriole_expat.so --reference /absolute/libexpat.so \
+  --inputs /tmp/dtd-inputs --driver /tmp/dtd-driver \
+  --build-manifest /absolute/build.json --output /tmp/dtd-results
+```
+
+As with the other runners, the build manifest should identify the parser source,
+compiler, commands, header and driver hashes. The report retains its hash along
+with all samples, preflight metadata, worker failures, and input/library hashes.
+The optional `--external-grammar` generator flag adds repeated empty external
+references inside declarations; use it only for implementations supporting that
+mode. Positions and Default callbacks remain separate compatibility checks.

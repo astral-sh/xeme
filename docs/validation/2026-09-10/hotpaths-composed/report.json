@@ -1,0 +1,254 @@
+{
+  "runtime_commit": "ebcd46dd0cd720d1f28de5fda0b87cf4b1b05756",
+  "parent_commit": "30493d5",
+  "library_sha256": {
+    "liboriole_expat.so": "43896d5864c67a72f64ab46ccb312f670d6f44c7accbad67d6115361e77226e0",
+    "liboriole_expat.a": "830194799dc337fcb47a10c92026b57782ee0d05633219b7d74e9b51608c5cef"
+  },
+  "rust_checks": 300,
+  "ordinary": {
+    "cases": 1518,
+    "exact_pass": true,
+    "difference_counts": {
+      "status": 0,
+      "error": 0,
+      "normalized_events": 0,
+      "events": 0,
+      "position": 0,
+      "callback_errors": 0
+    }
+  },
+  "attribute_oracle": {
+    "conditions": 6468,
+    "baseline_changes": 0,
+    "reference_acceptance": 0,
+    "reference_errors": 0,
+    "reference_events": 0,
+    "reference_positions": 2580
+  },
+  "alias_conditions": 372,
+  "alias_differences": 0,
+  "malformed_attribute_conditions": 384,
+  "malformed_attribute_changes": 0,
+  "malformed_text_conditions": 2392,
+  "malformed_text_differences": 0,
+  "streaming_conditions": 32,
+  "custom_conditions": 36456,
+  "custom_differences": 0,
+  "upstream": {
+    "passed": 4065,
+    "failed": 675,
+    "changed_outcomes": 0
+  },
+  "native_suites": 6,
+  "allocation_scenarios_per_linkage": 333,
+  "performance": {
+    "scope": "Screening candidate/control/Expat on all six pinned projects and two generated adverse fixtures; CPU0, shared host. Five randomized pairs, seven measured parses plus warmup per subprocess. This is native callback-driver throughput, not actual project process timing.",
+    "conditions": 28,
+    "project_geomean_speedup": 1.1306432160575877,
+    "project_geomean_slowdown_vs_expat": 2.8622075179499156,
+    "project_speedup_range": [
+      1.0684027515016412,
+      1.2359706860283641
+    ],
+    "rows": [
+      {
+        "project": "batik",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.235823430733272,
+        "slowdown_vs_expat": 2.014229180632744
+      },
+      {
+        "project": "batik",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.1102611684258887,
+        "slowdown_vs_expat": 2.242962011255429
+      },
+      {
+        "project": "batik",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.2359706860283641,
+        "slowdown_vs_expat": 2.39489632128935
+      },
+      {
+        "project": "batik",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.2298698729576492,
+        "slowdown_vs_expat": 2.333676834295136
+      },
+      {
+        "project": "docbook",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.1315088007725367,
+        "slowdown_vs_expat": 2.517815560620368
+      },
+      {
+        "project": "docbook",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.107237021919409,
+        "slowdown_vs_expat": 2.7176419608035847
+      },
+      {
+        "project": "docbook",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.12284510978434,
+        "slowdown_vs_expat": 2.833159034671147
+      },
+      {
+        "project": "docbook",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0720772925147355,
+        "slowdown_vs_expat": 3.1647972039339995
+      },
+      {
+        "project": "generated-entities",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0446214872916117,
+        "slowdown_vs_expat": 7.389232383514038
+      },
+      {
+        "project": "generated-entities",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0360463561634656,
+        "slowdown_vs_expat": 7.522750889611695
+      },
+      {
+        "project": "generated-rare-declarations",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0906592774967188,
+        "slowdown_vs_expat": 4.6990933866311035
+      },
+      {
+        "project": "generated-rare-declarations",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.080186217583438,
+        "slowdown_vs_expat": 4.854568673917436
+      },
+      {
+        "project": "gtk",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0864885256555,
+        "slowdown_vs_expat": 3.2762095501005883
+      },
+      {
+        "project": "gtk",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0684027515016412,
+        "slowdown_vs_expat": 3.387560286769498
+      },
+      {
+        "project": "gtk",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0821779289182565,
+        "slowdown_vs_expat": 3.700191667507314
+      },
+      {
+        "project": "gtk",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.1017835577459114,
+        "slowdown_vs_expat": 4.033046814659791
+      },
+      {
+        "project": "maven",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.1194854389580815,
+        "slowdown_vs_expat": 3.642424164036767
+      },
+      {
+        "project": "maven",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.102661852638423,
+        "slowdown_vs_expat": 3.4040698710500616
+      },
+      {
+        "project": "maven",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0864868040946105,
+        "slowdown_vs_expat": 3.946966626453744
+      },
+      {
+        "project": "maven",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.12337103312696,
+        "slowdown_vs_expat": 3.7357772098952076
+      },
+      {
+        "project": "vulkan",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.1096506604761667,
+        "slowdown_vs_expat": 3.1949322749885476
+      },
+      {
+        "project": "vulkan",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.1299633811034686,
+        "slowdown_vs_expat": 3.432508016975156
+      },
+      {
+        "project": "vulkan",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.135058383983432,
+        "slowdown_vs_expat": 3.240095768826469
+      },
+      {
+        "project": "vulkan",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.124043521213999,
+        "slowdown_vs_expat": 3.457871039759685
+      },
+      {
+        "project": "wayland",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.1626683284449144,
+        "slowdown_vs_expat": 1.9110825570189525
+      },
+      {
+        "project": "wayland",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.1544080937615535,
+        "slowdown_vs_expat": 2.0712781242103833
+      },
+      {
+        "project": "wayland",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.1588486965986806,
+        "slowdown_vs_expat": 1.9656432783192168
+      },
+      {
+        "project": "wayland",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.1669790646285625,
+        "slowdown_vs_expat": 2.0376218277222904
+      }
+    ]
+  },
+  "scope": "Full root composition. Original candidate and actual CPython isolated screens retained separately. No current PBS or sustained fuzz claim."
+}

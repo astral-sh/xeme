@@ -71,8 +71,9 @@ fn main() -> Result<(), oriole::Error> {
 }
 ```
 
-Pass `false` until the final chunk. A parse error is terminal. Events own their
-strings, so callers can retain them independently of subsequent input. Namespace
+Pass `false` until the final chunk. Parse errors are terminal except for an
+unresolved custom encoding, which can be supplied through `set_encoding_map`.
+Events own their strings, so callers can retain them independently of subsequent input. Namespace
 processing is opt-in through `Config::namespace_separator`; namespace triplets
 are optional. Names use XML 1.0 Fifth Edition rules by default;
 `Config::name_rules` can select Fourth Edition rules. The C interface selects
@@ -103,46 +104,56 @@ bounds aggregate allocation and work across a parser's external-entity family.
 
 ## Validation
 
-The [validation report](docs/validation/2026-09-10/final-runtime/) identifies the
-source, inputs, commands, and binaries used for compatibility and safety checks.
-Four actual CPython 3.12.13 shared/static, original/fixed consumer configurations
-succeed across all six XML modules, with 803 reported tests and 31 skips per run.
-The [complete PBS distribution](docs/validation/2026-09-10/pbs-final/) also passes
-its archive validator and installed XML suites, including on glibc 2.17.
+The [current integration report](docs/validation/2026-09-10/hotpaths-composed/)
+records 300 Rust checks, selected-allocation failure tests, native C sanitizer
+checks, and exact differential comparisons. The full adapted Expat API matrix
+reports **4,065 passing and 675 failing configurations**. Allocation schedules,
+resource limits, diagnostics and some callback behavior still differ from Expat;
+these failures remain recorded.
 
-The generated differential corpus passes 12,318 semantic comparisons. Exact
-callback fragmentation and final-position differences remain. The full adapted
-Expat API matrix reports 3,753 passing and 987 failing configurations; diagnostic
-experiments do not waive those failures. The W3C acceptance corpus reports 5,916
-passing and six failing mandatory checks.
+Earlier [full validation](docs/validation/2026-09-10/final-runtime/) includes
+12,318 semantic differential comparisons, W3C acceptance checks, and three
+sustained Rust AddressSanitizer campaigns totaling 3.9 million executions without
+findings. Earlier [CPython checks](docs/validation/2026-09-10/text-coalescing/)
+retain two callback-fragmentation failures behind an explicit semantic gate.
+The [PBS distribution](docs/validation/2026-09-10/pbs-final/) passes its installed
+XML suites, including on glibc 2.17. Those broad campaigns identify their exact
+older runtime; they have not yet been repeated for every subsequent change.
 
-Three sustained Rust AddressSanitizer campaigns complete 3.9 million executions
-without findings, alongside corpus replays, allocation-failure probes, and
-independent source reviews. See [fuzzing](fuzz/README.md) for the harnesses and
+See [fuzzing](fuzz/README.md) for the harnesses and
 [compatibility](docs/compatibility.md) for the separate release gates.
 
 ## Benchmarks
 
-The [recorded benchmarks](benchmarks/results/2026-09-10/final-runtime/) compare
-Oriole's C interface with Expat 2.8.4 on generated XML. These results use 4 KiB
-chunks with namespace processing disabled, on a shared Linux AMD EPYC-Milan host.
-Seven randomized process pairs are run for each workload; each process measures
-ten parses after one discarded warmup. Complete normalized callbacks are compared
-before timing.
+The [current benchmarks](docs/validation/2026-09-10/hotpaths-composed/) compare
+Oriole's C interface with Expat 2.8.4 on original, pinned XML files from real
+projects. These results use 4 KiB chunks with namespaces disabled, on a shared
+Linux AMD EPYC-Milan host. Five randomized process pairs each measure seven parses
+after warmup. Complete normalized callbacks are checked before timing.
 
-| Workload | Oriole | Expat | Oriole / Expat |
+| Project XML | Oriole | Expat | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Elements | 19.442 ms | 3.658 ms | 5.30× |
-| Text | 10.150 ms | 1.609 ms | 6.31× |
-| Entity references | 24.031 ms | 2.133 ms | 11.32× |
-| Prefixed names | 22.249 ms | 3.222 ms | 6.85× |
+| Vulkan registry | 95.009 ms | 29.625 ms | 3.20× |
+| Wayland protocol | 2.112 ms | 1.097 ms | 1.91× |
+| Maven POM | 1.686 ms | 0.461 ms | 3.64× |
+| Batik SVG | 0.286 ms | 0.142 ms | 2.01× |
+| GTK UI | 0.726 ms | 0.222 ms | 3.28× |
+| DocBook XSL | 0.502 ms | 0.201 ms | 2.52× |
 
-Times are medians of process medians; ratios are medians of paired ratios.
-Oriole remains slower on these workloads. The report retains raw samples,
-namespace-enabled results, separate system/jemalloc/mimalloc measurements through
-the safe Rust API, and DTD scaling checks. Host load and CPU frequency are
-uncontrolled; these generated workloads do not establish CPython application
-performance. See the [benchmark guide](benchmarks/README.md) to reproduce them.
+Times are medians of process medians; ratios are medians of paired time ratios.
+Oriole remains slower than Expat. Across both namespace modes and 4 KiB/64 KiB
+chunks, this change improves the preceding Oriole implementation by 13% on
+average. Raw samples, generated controls and exact source/library hashes are
+retained; host load and CPU frequency are uncontrolled.
+
+Separate [actual CPython screens](benchmarks/results/2026-09-10/python-hotpath-screens/)
+measure unmodified ElementTree and pyexpat modules over the same six project
+files. The latest isolated candidate takes 1.82× Expat's time in ElementTree and
+1.52× in pyexpat on average; Wayland through pyexpat is within 5%. These are XML
+consumer measurements, not full application execution. See the
+[benchmark guide](benchmarks/README.md) to reproduce the workloads and
+[allocator comparison](benchmarks/results/2026-09-10/real-project-allocators/)
+for system/jemalloc measurements.
 
 ## Development
 

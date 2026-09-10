@@ -1,0 +1,132 @@
+--- a/cpython-unix/build.py
++++ b/cpython-unix/build.py
+@@ -4,6 +4,7 @@
+ # file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ 
+ import argparse
++import hashlib
+ import json
+ import os
+ import pathlib
+@@ -738,6 +739,68 @@
+     return bi
+ 
+ 
++def install_oriole_overlay(
++    build_env, host_platform, target_triple, python_version, build_options
++):
++    """Install an explicitly selected archive only in this CPython build container."""
++    location = os.environ.get("PYBUILD_ORIOLE_BUNDLE")
++    if not location:
++        return
++    if (
++        host_platform != "linux_x86_64"
++        or platform.system() != "Linux"
++        or target_triple != "x86_64-unknown-linux-gnu"
++        or python_version != "3.12.13"
++        or "static" in build_options.split("+")
++        or not build_env.is_isolated
++    ):
++        raise ValueError(
++            "Oriole overlay requires Linux x86_64 Docker, CPython 3.12.13, and a shared Python build"
++        )
++    bundle = pathlib.Path(location).resolve()
++    manifest = json.loads((bundle / "manifest.json").read_text())
++    if (
++        manifest.get("format") != 1
++        or manifest.get("target") != target_triple
++        or manifest.get("pbs_revision") != "a4553880293fe9d1bb62747d34ab0e5121d3554f"
++    ):
++        raise ValueError("Oriole bundle target or recipe revision does not match")
++    destinations = {
++        "libexpat.a": ("/tools/deps/lib", "libexpat.a"),
++        "expat.h": ("/tools/deps/include", "expat.h"),
++        "expat.pc": ("/tools/deps/lib/pkgconfig", "expat.pc"),
++        "native-static-libs.txt": ("/tools/deps/lib", "oriole-native-static-libs.txt"),
++        "LICENSE.oriole.txt": ("/build", "LICENSE.oriole.txt"),
++    }
++    for name in destinations:
++        if (
++            hashlib.sha256((bundle / name).read_bytes()).hexdigest()
++            != manifest["files"][name]
++        ):
++            raise ValueError(f"Oriole bundle checksum mismatch: {name}")
++    native = (bundle / "native-static-libs.txt").read_text().split()
++    if not native or any(
++        re.fullmatch(r"-l[A-Za-z0-9_]+", flag) is None for flag in native
++    ):
++        raise ValueError("Oriole native linker flags require review")
++    build_env.run(["mkdir", "-p", "/tools/deps/include", "/tools/deps/lib/pkgconfig"])
++    for name, (directory, installed_name) in destinations.items():
++        build_env.copy_file(
++            bundle / name, dest_path=directory, dest_name=installed_name
++        )
++    # Preserve build provenance in the distribution's existing license directory.
++    build_env.copy_file(
++        bundle / "manifest.json",
++        dest_path="/build",
++        dest_name="LICENSE.oriole-build.txt",
++    )
++    DOWNLOADS["expat"] = {
++        **DOWNLOADS["expat"],
++        "licenses": ["MIT", "Apache-2.0"],
++        "license_file": "LICENSE.oriole.txt",
++    }
++
++
+ def build_cpython(
+     settings,
+     client,
+@@ -804,6 +867,14 @@
+ 
+         for p in sorted(packages):
+             build_env.install_artifact_archive(BUILD, p, target_triple, build_options)
++
++        install_oriole_overlay(
++            build_env,
++            host_platform,
++            target_triple,
++            python_version,
++            build_options,
++        )
+ 
+         # Install the host CPython.
+         build_env.install_toolchain_archive(
+--- a/cpython-unix/Makefile
++++ b/cpython-unix/Makefile
+@@ -252,6 +252,10 @@
+ # Each X.Y Python version has its own set of variables and targets. This independent
+ # definition allows multiple Python versions to be built using the same Makefile
+ # invocation.
++# An explicit overlay must rebuild CPython even if a prior archive is cached.
++.PHONY: oriole-cpython-overlay
++oriole-cpython-overlay:
++
+ define python_version_template
+ PYTHON_DEPENDS_$(1) := \
+     $$(PYTHON_SUPPORT_FILES) \
+@@ -282,6 +286,7 @@
+     $$(NULL)
+ 
+ ALL_PYTHON_DEPENDS_$(1) = \
++    $$(if $$(PYBUILD_ORIOLE_BUNDLE),oriole-cpython-overlay) \
+     $$(PYTHON_DEP_DEPENDS) \
+     $$(HERE)/build-cpython.sh \
+     $$(PYTHON_DEPENDS_$(1)) \
+--- a/cpython-unix/build-cpython.sh
++++ b/cpython-unix/build-cpython.sh
+@@ -28,6 +28,14 @@
+         # https://github.com/python/cpython/issues/155813
+         export ac_cv_lib_ffi_ffi_call=no
+     fi
++fi
++
++# Oriole's optional overlay supplies the complete static Rust link dependencies.
++# CPython 3.12 uses these configure variables directly, without pkg-config.
++if [[ -f "${TOOLS_PATH}/deps/lib/oriole-native-static-libs.txt" ]]; then
++    read -r oriole_native_libs < "${TOOLS_PATH}/deps/lib/oriole-native-static-libs.txt"
++    export LIBEXPAT_CFLAGS="-I${TOOLS_PATH}/deps/include"
++    export LIBEXPAT_LDFLAGS="-L${TOOLS_PATH}/deps/lib -lexpat ${oriole_native_libs}"
+ fi
+ 
+ # configure somehow has problems locating llvm-profdata even though it is in

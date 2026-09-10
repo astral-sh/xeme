@@ -15,18 +15,22 @@ concurrency:
 
 jobs:
   test:
-    name: Test (${{ matrix.os }})
+    name: Test (${{ matrix.os }}, ${{ matrix.toolchain }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, ubuntu-24.04-arm, windows-latest]
+        os: [ubuntu-24.04, ubuntu-24.04-arm, windows-latest, macos-15]
+        toolchain: [stable]
+        include:
+          - os: ubuntu-24.04
+            toolchain: 1.96.0
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
         with:
-          toolchain: stable
+          toolchain: ${{ matrix.toolchain }}
       - run: cargo test --workspace --locked
       - run: cargo test --workspace --locked --no-default-features
       - run: cargo doc --workspace --no-deps --locked
@@ -46,8 +50,8 @@ jobs:
       - run: cargo fmt --manifest-path benchmarks/inprocess/Cargo.toml --check
       - run: cargo clippy --manifest-path benchmarks/inprocess/Cargo.toml --all-targets --locked -- -D warnings
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
-      - run: uvx --from ruff==0.16.6 ruff check tools benchmarks
-      - run: uvx --from ty==0.0.80 ty check --extra-search-path tools tools benchmarks
+      - run: uvx --from ruff==0.16.6 ruff check tools benchmarks integration
+      - run: uvx --from ty==0.0.80 ty check --extra-search-path tools tools benchmarks integration
   native:
     name: C ABI and callback safety
     runs-on: ubuntu-24.04-arm
@@ -84,3 +88,55 @@ jobs:
       - run: cargo fuzz run parse -- -max_total_time=30 -max_len=4096
       - run: cargo fuzz run streaming -- -max_total_time=30 -max_len=4096
       - run: cargo fuzz run ffi fuzz/seeds/ffi -- -max_total_time=30 -max_len=65536
+
+  cpython:
+    name: CPython XML consumers (${{ matrix.linkage }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        linkage: [shared, static]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: python/cpython
+          ref: 3bb231a6a5dc02b95658877318bf61501a7209e9
+          path: .cache/cpython
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: stable
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+      - run: uv python install 3.12.13
+      - run: cargo build --release --locked -p oriole_expat
+      - name: Run actual shared-library consumers
+        if: matrix.linkage == 'shared'
+        run: >-
+          uv run --no-project --python 3.12.13 python tools/cpython/run.py
+          --source .cache/cpython --library target/release/liboriole_expat.so
+          --output /tmp/oriole-cpython-shared
+      - name: Run actual static-library consumers
+        if: matrix.linkage == 'static'
+        run: >-
+          uv run --no-project --python 3.12.13 python tools/cpython/run.py
+          --source .cache/cpython --library target/release/liboriole_expat.a
+          --native-library gcc_s --native-library util --native-library rt
+          --native-library pthread --native-library m --native-library dl
+          --native-library c --output /tmp/oriole-cpython-static
+      - name: Show consumer test results
+        if: always()
+        run: cat /tmp/oriole-cpython-*/probe.log /tmp/oriole-cpython-*/tests.log
+
+  pbs-recipe:
+    name: PBS integration recipe
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: astral-sh/python-build-standalone
+          ref: a4553880293fe9d1bb62747d34ab0e5121d3554f
+          path: .cache/pbs
+      - run: python3 integration/python-build-standalone/validate.py --pbs .cache/pbs

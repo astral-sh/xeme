@@ -33,11 +33,16 @@ def resolve_library(value: str) -> Path:
     listing = subprocess.run(
         ["ldconfig", "-p"], check=True, capture_output=True, text=True
     ).stdout
-    for line in listing.splitlines():
-        fields = line.split()
-        if fields and fields[0] == value and "x86-64" in line:
-            return Path(fields[-1]).resolve()
-    raise ValueError(f"cannot resolve library path for hashing: {value}")
+    candidates = {
+        Path(fields[-1]).resolve()
+        for line in listing.splitlines()
+        if (fields := line.split()) and fields[0] == value
+    }
+    if len(candidates) == 1:
+        return candidates.pop()
+    raise ValueError(
+        f"cannot resolve one library path for {value}; supply an absolute path"
+    )
 
 
 def preflight(path: Path) -> None:

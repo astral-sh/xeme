@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-10T02:20:05.729171+00:00",
+  "pbs_revision": "a4553880293fe9d1bb62747d34ab0e5121d3554f",
+  "pbs_patch_sha256": "8a69fa22a6b5e3084baca4bf6f826bee9037a537d0f4e52844ae13ad6f08e4d5",
+  "bundle_manifest_sha256": "2e51c3f0d2eaf80891aa45570ef6d5364971d076ba41529c2f5f00e1d13ffa85",
+  "archive_sha256": "10ebd04fe8ea15c8cdda38bf292aa0d790c7582d7058ce7e53a3c4786c077d66",
+  "header_sha256": "f9d9b5c3e1824d23276f06127cd1321f4370dce298e71d0123b71a866cce63d0",
+  "rustc": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+  "native_static_libraries": [
+    "-lgcc_s",
+    "-lutil",
+    "-lrt",
+    "-lpthread",
+    "-lm",
+    "-ldl",
+    "-lc"
+  ],
+  "checks": {
+    "clean_patch_application": true,
+    "patched_python_compiles": true,
+    "shell_syntax": true,
+    "default_path_and_hash_rejection": true,
+    "configure_native_link_flags": true,
+    "host_static_c_integration": true,
+    "host_static_c_adversarial_lifecycle": true,
+    "host_shared_link_of_complete_pic_archive": true,
+    "full_pbs_container_build": false,
+    "pbs_distribution_validator": false,
+    "old_glibc_runtime": false
+  },
+  "scope": "Native Linux x86_64 development host. A local archive/patch integration check, not a PBS deployment validation."
+}

@@ -100,6 +100,20 @@ unsafe extern "C" fn model(data: *mut c_void, _: *const c_char, content: *mut XM
     unsafe { XML_FreeContentModel(data.cast(), content) };
 }
 
+unsafe extern "C" fn convert(_: *mut c_void, _: *const c_char) -> i32 {
+    0xe9
+}
+
+unsafe extern "C" fn unknown(_: *mut c_void, _: *const c_char, encoding: *mut XML_Encoding) -> i32 {
+    // SAFETY: Expat provides a writable encoding descriptor for this callback.
+    unsafe {
+        (*encoding).map = std::array::from_fn(|byte| byte as i32);
+        (*encoding).map[0x80] = -2;
+        (*encoding).convert = Some(convert);
+    }
+    1
+}
+
 #[test]
 fn custom_parser_never_uses_global_storage_and_blocks_allocator_reentry() {
     let suite = XML_Memory_Handling_Suite {
@@ -132,6 +146,24 @@ fn custom_parser_never_uses_global_storage_and_blocks_allocator_reentry() {
         XML_ParserFree(child);
         assert_eq!(XML_ParserReset(parser, c"UTF-8".as_ptr()), 1);
         assert_eq!(XML_Parse(parser, c"<again/>".as_ptr(), 8, 1), 1);
+        assert_eq!(XML_ParserReset(parser, c"multibyte".as_ptr()), 1);
+        XML_SetUnknownEncodingHandler(parser, Some(unknown), ptr::null_mut());
+        let encoded = b"<\x80\0 a='\x80\0'>\x80\0</\x80\0>";
+        for (index, byte) in encoded.iter().enumerate() {
+            assert_eq!(
+                XML_Parse(
+                    parser,
+                    ptr::from_ref(byte).cast(),
+                    1,
+                    i32::from(index + 1 == encoded.len())
+                ),
+                1
+            );
+        }
+        let child = XML_ExternalEntityParserCreate(parser, c"".as_ptr(), c"multibyte".as_ptr());
+        assert!(!child.is_null());
+        assert_eq!(XML_Parse(child, [0x80_u8, 0].as_ptr().cast(), 2, 1), 1);
+        XML_ParserFree(child);
         XML_ParserFree(parser);
         CALLBACK_PARSER.with(|value| value.set(ptr::null_mut()));
     }

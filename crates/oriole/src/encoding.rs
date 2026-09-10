@@ -9,6 +9,7 @@ enum Encoding {
     Latin1,
     Ascii,
     SingleByte,
+    MultiByte,
 }
 impl Encoding {
     fn named(name: &str) -> Option<Self> {
@@ -30,6 +31,7 @@ impl Encoding {
         match self {
             Self::Utf8 | Self::Ascii => text.len(),
             Self::Latin1 | Self::SingleByte => text.chars().count(),
+            Self::MultiByte => unreachable!("custom byte widths belong to the source"),
             Self::Utf16Le | Self::Utf16Be => text.chars().map(char::len_utf16).sum::<usize>() * 2,
         }
     }
@@ -41,10 +43,12 @@ pub(crate) struct Decoder {
     encoding: Option<Encoding>,
     requested: Option<String>,
     pending: Vec<u8>,
+    pending_cursor: usize,
     declaration_checked: usize,
     unknown_name: Option<String>,
     unknown_position: Option<Position>,
     custom_map: Option<Box<[i32; 256]>>,
+    conversion: Option<([u8; 4], u8)>,
 }
 impl Decoder {
     pub(crate) fn new(requested: Option<&str>, allocator: Allocator) -> Result<Self, Error> {
@@ -55,10 +59,12 @@ impl Decoder {
                 .map(|name| String::try_from_str_in(name, allocator))
                 .transpose()?,
             pending: Vec::new_in(allocator),
+            pending_cursor: 0,
             declaration_checked: 0,
             unknown_name: None,
             unknown_position: None,
             custom_map: None,
+            conversion: None,
         })
     }
     pub(crate) fn feed(
@@ -69,6 +75,9 @@ impl Decoder {
         max_token: usize,
     ) -> Result<(), Error> {
         try_extend_from_slice(&mut self.pending, bytes)?;
+        if self.conversion.is_some() {
+            return Ok(());
+        }
         if self.encoding.is_none() {
             let Some((encoding, skip)) = self.detect(final_input, max_token)? else {
                 return Ok(());
@@ -80,7 +89,7 @@ impl Decoder {
             self.pending.drain(..skip);
         }
         let encoding = self.encoding.expect("encoding was detected");
-        let mut consumed = 0;
+        let mut consumed = self.pending_cursor;
         match encoding {
             Encoding::Utf8 => match std::str::from_utf8(&self.pending) {
                 Ok(text) => {
@@ -98,10 +107,20 @@ impl Decoder {
                     }
                 }
             },
-            Encoding::SingleByte => {
+            Encoding::SingleByte | Encoding::MultiByte => {
                 let map = self.custom_map.as_ref().expect("custom encoding has a map");
-                for byte in &self.pending {
-                    let value = map[usize::from(*byte)];
+                while consumed < self.pending.len() {
+                    let value = map[usize::from(self.pending[consumed])];
+                    if (-4..=-2).contains(&value) {
+                        let width = (-value) as usize;
+                        if self.pending.len() - consumed >= width {
+                            let mut sequence = [0; 4];
+                            sequence[..width]
+                                .copy_from_slice(&self.pending[consumed..consumed + width]);
+                            self.conversion = Some((sequence, width as u8));
+                        }
+                        break;
+                    }
                     let character =
                         u32::try_from(value)
                             .ok()
@@ -110,9 +129,9 @@ impl Decoder {
                                 ErrorKind::InvalidToken,
                                 "undefined byte in custom encoding",
                             ))?;
-                    source.text.try_push(character)?;
+                    source.push_custom(character, 1)?;
+                    consumed += 1;
                 }
-                consumed = self.pending.len();
             }
             Encoding::Ascii | Encoding::Latin1 => {
                 let end = if encoding == Encoding::Ascii {
@@ -174,8 +193,18 @@ impl Decoder {
                 }
             }
         }
-        self.pending.drain(..consumed);
-        if final_input && !self.pending.is_empty() {
+        if encoding == Encoding::MultiByte {
+            self.pending_cursor = consumed;
+            if consumed == self.pending.len()
+                || (consumed >= 64 * 1024 && consumed >= self.pending.len() / 2)
+            {
+                self.pending.drain(..consumed);
+                self.pending_cursor = 0;
+            }
+        } else {
+            self.pending.drain(..consumed);
+        }
+        if final_input && self.conversion.is_none() && self.pending_cursor < self.pending.len() {
             let kind = if matches!(encoding, Encoding::Utf16Le | Encoding::Utf16Be)
                 && self.pending.len() == 1
             {
@@ -346,6 +375,7 @@ impl Decoder {
         &mut self,
         name: &str,
         map: [i32; 256],
+        allow_multibyte: bool,
         source: &mut Source,
     ) -> Result<(), Error> {
         if self
@@ -365,7 +395,10 @@ impl Decoder {
                     "custom encoding changes an ASCII markup character",
                 ));
             }
-            if !(-1..=0xffff).contains(&value) || (required_ascii(value) && value != byte as i32) {
+            let minimum = if allow_multibyte { -4 } else { -1 };
+            if !(minimum..=0xffff).contains(&value)
+                || (required_ascii(value) && value != byte as i32)
+            {
                 return Err(Error::bare(
                     ErrorKind::UnknownEncoding,
                     "custom encoding changes XML syntax or requires multibyte conversion",
@@ -378,18 +411,61 @@ impl Decoder {
                 "custom encoding conflicts with byte order mark",
             ));
         }
+        let encoding = if map.iter().any(|value| *value < -1) {
+            Encoding::MultiByte
+        } else {
+            Encoding::SingleByte
+        };
         self.custom_map = Some(try_box(map, self.allocator)?);
         if self.pending.starts_with(&[0xef, 0xbb, 0xbf]) {
             self.pending.drain(..3);
             source.raw_index = 3;
             source.column = 1;
         }
-        self.encoding = Some(Encoding::SingleByte);
-        source.encoding = Encoding::SingleByte;
+        self.encoding = Some(encoding);
+        source.encoding = encoding;
+        if encoding == Encoding::MultiByte {
+            source.decoded_end = source.position(0);
+        }
+        Ok(())
+    }
+    pub(crate) fn conversion(&self) -> Option<([u8; 4], u8)> {
+        self.conversion
+    }
+
+    pub(crate) fn resolve_conversion(
+        &mut self,
+        value: i32,
+        source: &mut Source,
+    ) -> Result<(), Error> {
+        let (_, width) = self.conversion.ok_or(Error::bare(
+            ErrorKind::InvalidToken,
+            "no encoding conversion is pending",
+        ))?;
+        let character = u32::try_from(value)
+            .ok()
+            .filter(|value| *value <= 0xffff)
+            .and_then(char::from_u32)
+            .filter(|character| crate::names::is_xml_char(*character))
+            // XML tokenization distinguishes raw ASCII from multibyte sequences,
+            // even when a converter gives both the same scalar. Reject all ASCII
+            // aliases so decoding cannot synthesize delimiters, keywords, reserved
+            // names, or numeric/predefined references before the UTF-8 tokenizer.
+            .filter(|character| !character.is_ascii())
+            .ok_or(Error::bare(
+                ErrorKind::InvalidToken,
+                "invalid custom encoding conversion",
+            ))?;
+        source.push_custom(character, width)?;
+        self.pending_cursor += usize::from(width);
+        self.conversion = None;
         Ok(())
     }
     /// Payload copied by `inherit_map` for a matching requested encoding.
     pub(crate) fn inherited_map_bytes(&self, requested: Option<&str>) -> (usize, usize) {
+        if self.encoding == Some(Encoding::MultiByte) {
+            return (0, 0);
+        }
         if requested
             .zip(self.unknown_name.as_deref())
             .is_some_and(|(requested, name)| requested.eq_ignore_ascii_case(name))
@@ -406,6 +482,11 @@ impl Decoder {
     }
 
     pub(crate) fn inherit_map(&mut self, parent: &Self, source: &mut Source) -> Result<(), Error> {
+        // A multibyte converter has application-owned state. A child must request
+        // its own encoding instance instead of inheriting a borrowed callback.
+        if parent.encoding == Some(Encoding::MultiByte) {
+            return Ok(());
+        }
         if self
             .requested
             .as_deref()
@@ -430,11 +511,13 @@ impl Decoder {
         Ok(())
     }
     pub(crate) fn check_declaration(&self, name: &str) -> Result<(), Error> {
-        if self.encoding == Some(Encoding::SingleByte)
-            && self
-                .unknown_name
-                .as_deref()
-                .is_some_and(|custom| custom.eq_ignore_ascii_case(name))
+        if matches!(
+            self.encoding,
+            Some(Encoding::SingleByte | Encoding::MultiByte)
+        ) && self
+            .unknown_name
+            .as_deref()
+            .is_some_and(|custom| custom.eq_ignore_ascii_case(name))
         {
             return Ok(());
         }
@@ -487,6 +570,9 @@ pub(crate) struct Source {
     cursor: usize,
     encoding: Encoding,
     raw_index: usize,
+    raw_widths: Vec<u8>,
+    decoded_end: Position,
+    decoded_end_cr: bool,
     line: usize,
     column: usize,
     previous_cr: bool,
@@ -503,6 +589,12 @@ impl Source {
             cursor: 0,
             encoding: Encoding::Utf8,
             raw_index: 0,
+            raw_widths: Vec::new_in(allocator),
+            decoded_end: Position {
+                line: 1,
+                ..Position::default()
+            },
+            decoded_end_cr: false,
             line: 1,
             column: 0,
             previous_cr: false,
@@ -532,6 +624,49 @@ impl Source {
         &self.text[self.cursor..]
     }
 
+    fn push_custom(&mut self, character: char, raw_width: u8) -> Result<(), Error> {
+        if self.encoding == Encoding::MultiByte {
+            let count = character.len_utf8();
+            self.raw_widths
+                .try_reserve(count)
+                .map_err(oriole_storage::AllocError::from)?;
+            self.text.try_reserve(count)?;
+            // Both reservations precede mutation, so allocation failure preserves
+            // the alignment between UTF-8 bytes and original encoded widths.
+            self.raw_widths.push(raw_width);
+            self.raw_widths.extend(std::iter::repeat_n(0, count - 1));
+            self.decoded_end.byte_index += usize::from(raw_width);
+            match character {
+                '\r' => {
+                    self.decoded_end.line += 1;
+                    self.decoded_end.column = 0;
+                }
+                '\n' => {
+                    if !self.decoded_end_cr {
+                        self.decoded_end.line += 1;
+                    }
+                    self.decoded_end.column = 0;
+                }
+                _ => self.decoded_end.column += 1,
+            }
+            self.decoded_end_cr = character == '\r';
+        }
+        self.text.try_push(character)?;
+        Ok(())
+    }
+
+    fn raw_len(&self, offset: usize, count: usize) -> usize {
+        if self.encoding == Encoding::MultiByte {
+            self.raw_widths[self.cursor + offset..self.cursor + offset + count]
+                .iter()
+                .map(|width| usize::from(*width))
+                .sum()
+        } else {
+            self.encoding
+                .raw_len(&self.remaining()[offset..offset + count])
+        }
+    }
+
     /// Expat emits converted character data through a 1 KiB UTF-8 buffer.
     /// Its native UTF-8 and ASCII paths do not need that conversion buffer.
     pub(crate) fn converted_text_limit(&self) -> usize {
@@ -549,10 +684,13 @@ impl Source {
             byte_index: self.raw_index,
             line: self.line,
             column: self.column,
-            byte_count: self.encoding.raw_len(&self.remaining()[..count]),
+            byte_count: self.raw_len(0, count),
         }
     }
     pub(crate) fn end_position(&self) -> Position {
+        if self.encoding == Encoding::MultiByte {
+            return self.decoded_end;
+        }
         self.position_at(self.remaining().len(), 0)
     }
     pub(crate) fn position_at(&self, offset: usize, count: usize) -> Position {
@@ -583,9 +721,7 @@ impl Source {
                 }
             }
         }
-        position.byte_count = self
-            .encoding
-            .raw_len(&self.remaining()[offset..offset + count]);
+        position.byte_count = self.raw_len(offset, count);
         position
     }
     pub(crate) fn should_defer(&self, limit: usize) -> bool {
@@ -623,8 +759,8 @@ impl Source {
         }
     }
     pub(crate) fn consume(&mut self, count: usize) {
+        self.raw_index += self.raw_len(0, count);
         let text = &self.text[self.cursor..self.cursor + count];
-        self.raw_index += self.encoding.raw_len(text);
         for character in text.chars() {
             match character {
                 '\r' => {
@@ -650,6 +786,9 @@ impl Source {
         self.deferred_size = 0;
         if self.cursor >= 64 * 1024 && self.cursor >= self.text.len() / 2 {
             self.text.drain(..self.cursor);
+            if self.encoding == Encoding::MultiByte {
+                self.raw_widths.drain(..self.cursor);
+            }
             self.cursor = 0;
         }
     }

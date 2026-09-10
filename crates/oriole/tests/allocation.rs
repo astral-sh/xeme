@@ -164,6 +164,36 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         _ => panic!("custom encoding unexpectedly resolved without its map"),
     }
     while next_event(&mut parser)?.is_some() {}
+    let mut parser =
+        Parser::try_new_with_encoding_in(Config::default(), Some("multibyte"), allocator)?;
+    parser.feed(b"<\x80\0 a='\x80\0'>\x80\0</\x80\0>", true)?;
+    match parser.next_event() {
+        Err(error) if error.kind == ErrorKind::UnknownEncoding => {
+            let mut map = std::array::from_fn(|index| index as i32);
+            map[128] = -2;
+            parser.set_multibyte_encoding_map("multibyte", map)?;
+        }
+        Err(error) => return Err(error),
+        _ => panic!("multibyte encoding unexpectedly resolved without its map"),
+    }
+    loop {
+        if next_event(&mut parser)?.is_some() {
+            continue;
+        }
+        if parser.encoding_conversion().is_none() {
+            break;
+        }
+        if let Err(error) = parser.resolve_encoding_conversion('é' as i32) {
+            let calls = CALLS.get();
+            assert_eq!(parser.next_event().unwrap_err(), error);
+            assert_eq!(
+                parser.resolve_encoding_conversion('é' as i32).unwrap_err(),
+                error
+            );
+            assert_eq!(CALLS.get(), calls);
+            return Err(error);
+        }
+    }
     Ok(())
 }
 

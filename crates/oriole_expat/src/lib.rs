@@ -164,6 +164,7 @@ pub struct XML_ParserStruct {
     family: Shared<FamilyBudget>,
     child_depth: usize,
     encoding_release: Option<unsafe extern "C" fn(*mut c_void)>,
+    encoding_convert: Option<unsafe extern "C" fn(*mut c_void, *const c_char) -> c_int>,
     encoding_data: *mut c_void,
     lifetime: Shared<AtomicPtr<XML_ParserStruct>>,
     parent_lifetime: Option<Shared<AtomicPtr<XML_ParserStruct>>>,
@@ -314,6 +315,7 @@ unsafe fn create(
                     family,
                     child_depth: 0,
                     encoding_release: None,
+                    encoding_convert: None,
                     encoding_data: ptr::null_mut(),
                     lifetime,
                     parent_lifetime: None,
@@ -439,6 +441,7 @@ unsafe fn release_encoding(parser: XML_Parser) {
     // callback reentry cannot release the same encoding data a second time.
     unsafe {
         let release = (*parser).encoding_release.take();
+        (*parser).encoding_convert = None;
         let data = std::mem::replace(&mut (*parser).encoding_data, ptr::null_mut());
         if let Some(release) = release {
             release(data);
@@ -1062,6 +1065,12 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
                     event
                 }
                 Ok(None) => {
+                    if resolve_pending_conversion(parser) {
+                        continue;
+                    }
+                    if (*parser).parse_error != 0 {
+                        return ERROR;
+                    }
                     (*parser).position = (*parser).core.position();
                     if (*parser).core.is_finished() {
                         if !merge_external_subset(parser) {
@@ -1139,6 +1148,32 @@ unsafe fn resolve_unknown_encoding(parser: XML_Parser) -> bool {
     }
 }
 
+unsafe fn resolve_pending_conversion(parser: XML_Parser) -> bool {
+    // SAFETY: The core returns a copied sequence. No parser reference or input
+    // buffer borrow survives the converter call, and the outer busy guard remains.
+    unsafe {
+        let Some(request) = (*parser).core.encoding_conversion() else {
+            return false;
+        };
+        let Some(convert) = (*parser).encoding_convert else {
+            fail_parse(parser, 18);
+            return false;
+        };
+        let data = (*parser).encoding_data;
+        (*parser).position = request.position;
+        let value = convert(data, request.bytes.as_ptr().cast());
+        if (*parser).parse_error != 0 || (*parser).destroying {
+            return false;
+        }
+        if let Err(error) = (*parser).core.resolve_encoding_conversion(value) {
+            fail_parse(parser, error_code(&error.kind));
+            (*parser).position = error.position;
+            return false;
+        }
+        true
+    }
+}
+
 unsafe fn try_resolve_unknown_encoding(parser: XML_Parser) -> Result<bool, AllocError> {
     // SAFETY: Only owned names and stack callback output survive the C call.
     unsafe {
@@ -1159,11 +1194,17 @@ unsafe fn try_resolve_unknown_encoding(parser: XML_Parser) -> Result<bool, Alloc
         };
         let accepted = handler(arg, c_name.as_ptr(), &mut info) != 0;
         if accepted && !(*parser).destroying && (*parser).parse_error == 0 {
-            match (*parser).core.set_encoding_map(&name, info.map) {
+            let installed = if info.convert.is_some() {
+                (*parser).core.set_multibyte_encoding_map(&name, info.map)
+            } else {
+                (*parser).core.set_encoding_map(&name, info.map)
+            };
+            match installed {
                 Ok(()) => {
                     release_encoding(parser);
                     if !(*parser).destroying && (*parser).parse_error == 0 {
                         (*parser).encoding_release = info.release;
+                        (*parser).encoding_convert = info.convert;
                         (*parser).encoding_data = info.data;
                         return Ok(true);
                     }
@@ -1927,6 +1968,7 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                         family: Shared::clone(&(*parser).family),
                         child_depth: (*parser).child_depth + 1,
                         encoding_release: None,
+                        encoding_convert: None,
                         encoding_data: ptr::null_mut(),
                         lifetime,
                         parent_lifetime: Some(Shared::clone(&(*parser).lifetime)),

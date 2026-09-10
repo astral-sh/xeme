@@ -1192,3 +1192,227 @@ fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
         }
     }
 }
+
+#[derive(Default)]
+struct MultibyteState {
+    parser: XML_Parser,
+    handlers: usize,
+    conversions: usize,
+    releases: usize,
+    value: i32,
+    action: u8,
+    invalid_map: u8,
+}
+
+unsafe extern "C" fn convert_multibyte(data: *mut c_void, _: *const c_char) -> c_int {
+    // SAFETY: Tests retain the state and inspect it only between callback calls.
+    // Raw field copies, rather than a State reference, survive reentrant API calls.
+    unsafe {
+        let state = data.cast::<MultibyteState>();
+        (*state).conversions += 1;
+        let parser = (*state).parser;
+        match (*state).action {
+            1 => {
+                assert_eq!(XML_Parse(parser, c"<bad/>".as_ptr(), 6, 1), ERROR);
+                assert_eq!(XML_ParseBuffer(parser, 0, 0), ERROR);
+                assert!(XML_GetBuffer(parser, 1).is_null());
+                assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
+                XML_ParserFree(parser);
+                assert_eq!(XML_GetErrorCode(parser), 0);
+            }
+            2 => assert_eq!(XML_StopParser(parser, 1), OK),
+            3 => assert_eq!(XML_StopParser(parser, 0), OK),
+            _ => {}
+        }
+        (*state).value
+    }
+}
+
+unsafe extern "C" fn release_multibyte(data: *mut c_void) {
+    // SAFETY: The callback owns one registered encoding instance; state outlives it.
+    unsafe { (*data.cast::<MultibyteState>()).releases += 1 };
+}
+
+unsafe extern "C" fn encoding_multibyte(
+    data: *mut c_void,
+    _: *const c_char,
+    info: *mut XML_Encoding,
+) -> c_int {
+    // SAFETY: Expat provides the writable encoding record for this callback.
+    unsafe {
+        let state = data.cast::<MultibyteState>();
+        (*state).handlers += 1;
+        (*info).map = std::array::from_fn(|index| index as i32);
+        (*info).map[128] = if (*state).invalid_map == 2 { -5 } else { -2 };
+        (*info).data = data;
+        (*info).release = Some(release_multibyte);
+        (*info).convert = if (*state).invalid_map == 1 {
+            None
+        } else {
+            Some(convert_multibyte)
+        };
+        if (*state).action == 4 {
+            assert_eq!(
+                XML_SetAllocTrackerActivationThreshold((*state).parser, 0),
+                1
+            );
+            assert_eq!(
+                XML_SetAllocTrackerMaximumAmplification((*state).parser, 1.0),
+                1
+            );
+        }
+    }
+    OK
+}
+
+unsafe fn configured_multibyte(state: &mut MultibyteState) -> XML_Parser {
+    // SAFETY: The tests keep state live until all related parser handles are freed.
+    unsafe {
+        let parser = XML_ParserCreate(c"multibyte".as_ptr());
+        assert!(!parser.is_null());
+        state.parser = parser;
+        XML_SetUnknownEncodingHandler(
+            parser,
+            Some(encoding_multibyte),
+            ptr::from_mut(state).cast(),
+        );
+        parser
+    }
+}
+
+#[test]
+fn multibyte_converter_reentry_is_guarded_and_release_is_owned_once() {
+    // SAFETY: Test-owned state, bytes and handles obey the C API lifetime contract.
+    unsafe {
+        let mut state = MultibyteState {
+            value: 'é' as i32,
+            action: 1,
+            ..MultibyteState::default()
+        };
+        let parser = configured_multibyte(&mut state);
+        let document = b"<\x80\0 a='\x80\0'>\x80\0</\x80\0>";
+        for chunk in document.chunks(1) {
+            assert_eq!(XML_Parse(parser, chunk.as_ptr().cast(), 1, 0), OK);
+        }
+        assert_eq!(XML_Parse(parser, ptr::null(), 0, 1), OK);
+        assert_eq!(state.handlers, 1);
+        assert_eq!(state.conversions, 4);
+        assert_eq!(state.releases, 0);
+        assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+        assert_eq!(state.releases, 1);
+        XML_ParserFree(parser);
+        assert_eq!(state.releases, 1);
+    }
+}
+
+#[test]
+fn multibyte_converter_can_suspend_or_abort_without_repeating_conversion() {
+    // SAFETY: The converter acts only on its own active parser.
+    unsafe {
+        for action in [2, 3] {
+            let mut state = MultibyteState {
+                value: 'é' as i32,
+                action,
+                ..MultibyteState::default()
+            };
+            let parser = configured_multibyte(&mut state);
+            let document = b"<r>\x80\0</r>";
+            let status = XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1);
+            assert_eq!(status, if action == 2 { SUSPENDED } else { ERROR });
+            if action == 2 {
+                state.action = 0;
+                assert_eq!(XML_ResumeParser(parser), OK);
+            } else {
+                assert_eq!(XML_GetErrorCode(parser), 35);
+            }
+            assert_eq!(state.conversions, 1);
+            XML_ParserFree(parser);
+            assert_eq!(state.releases, 1);
+        }
+    }
+}
+
+#[test]
+fn external_child_requests_its_own_multibyte_encoding_after_parent_free() {
+    // SAFETY: Encoding callback state outlives both independently owned parsers.
+    unsafe {
+        let mut state = MultibyteState {
+            value: 'é' as i32,
+            ..MultibyteState::default()
+        };
+        let parser = configured_multibyte(&mut state);
+        assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), OK);
+        let child = XML_ExternalEntityParserCreate(parser, c"".as_ptr(), c"multibyte".as_ptr());
+        assert!(!child.is_null());
+        XML_ParserFree(parser);
+        assert_eq!(state.releases, 1);
+        state.parser = child;
+        let document = b"<\x80\0/>";
+        assert_eq!(
+            XML_Parse(child, document.as_ptr().cast(), document.len() as c_int, 1),
+            OK
+        );
+        assert_eq!(state.handlers, 2);
+        assert_eq!(state.conversions, 1);
+        XML_ParserFree(child);
+        assert_eq!(state.releases, 2);
+    }
+}
+
+#[test]
+fn invalid_multibyte_maps_and_conversion_results_release_once() {
+    // SAFETY: All failures retain live test state until the parser is destroyed.
+    unsafe {
+        for (invalid_map, value, expected) in [
+            (1, 65, 18),
+            (2, 65, 18),
+            (0, -1, 4),
+            (0, 0xd800, 4),
+            (0, 0x10000, 4),
+            (0, 60, 4),
+        ] {
+            let mut state = MultibyteState {
+                value,
+                invalid_map,
+                ..MultibyteState::default()
+            };
+            let parser = configured_multibyte(&mut state);
+            let document = b"<r>\x80\0</r>";
+            assert_eq!(
+                XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1),
+                ERROR
+            );
+            assert_eq!(XML_GetErrorCode(parser), expected);
+            assert_eq!(state.releases, usize::from(invalid_map != 0));
+            XML_ParserFree(parser);
+            assert_eq!(state.releases, 1);
+        }
+    }
+}
+
+#[test]
+fn multibyte_map_allocation_failure_releases_the_callback_instance_once() {
+    // SAFETY: The handler tightens the live parser's tracker before its map is
+    // allocated; callback state remains live through failure and destruction.
+    unsafe {
+        let mut state = MultibyteState {
+            value: 'é' as i32,
+            action: 4,
+            ..MultibyteState::default()
+        };
+        let parser = configured_multibyte(&mut state);
+        let document = b"<r>\x80\0</r>";
+        assert_eq!(
+            XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1),
+            ERROR
+        );
+        assert_eq!(XML_GetErrorCode(parser), 1);
+        assert_eq!(state.handlers, 1);
+        assert_eq!(state.conversions, 0);
+        assert_eq!(state.releases, 1);
+        assert_eq!(XML_Parse(parser, ptr::null(), 0, 1), ERROR);
+        assert_eq!(state.handlers, 1);
+        XML_ParserFree(parser);
+        assert_eq!(state.releases, 1);
+    }
+}

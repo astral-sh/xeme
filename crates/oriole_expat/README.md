@@ -54,6 +54,14 @@ Namespace separators must be ASCII bytes. The C constructors reject bytes
 Rust parser. ASCII separators retain their exact byte value; `\0` is supported
 without namespace triplets.
 
+Custom encodings support single-byte maps and conversion callbacks for two- to
+four-byte sequences. Each completed sequence is converted once, with original
+byte widths retained for positions. Reset, free, and rejected maps release their
+encoding instance once; external children acquire their own converter instance.
+Converted values must be non-ASCII XML characters in the Basic Multilingual Plane
+(`U+0080` through `U+FFFF`, excluding surrogates and invalid XML characters).
+ASCII characters use direct single-byte map entries.
+
 The following Expat modes are explicitly unsupported:
 
 - Parameter entities inside declarations and external parameter references inside
@@ -61,9 +69,12 @@ The following Expat modes are explicitly unsupported:
   `INCLUDE`/`IGNORE` sections in external DTDs, and internal parameter entities
   selecting conditional keywords are supported. Conditional nesting uses the
   element-depth ceiling; a whole ignored section uses the token-byte ceiling.
-- Multibyte custom encoding conversion callbacks: single-byte custom maps work,
-  including release callbacks on reset/free and on rejected maps. Maps requiring
-  multibyte conversion report `XML_ERROR_UNKNOWN_ENCODING`.
+- Multibyte sequences that convert to ASCII are rejected with
+  `XML_ERROR_INVALID_TOKEN`. Expat accepts some such aliases and distinguishes
+  their original byte form when recognizing keywords, references, and XML
+  declarations. Oriole rejects these aliases before UTF-8 tokenization, including
+  in text, names, attributes, DTDs, and CDATA. Custom-encoding compatibility is
+  therefore incomplete.
 - Caller-supplied hash salts and relative entity-amplification tuning: those setters
   return false. Oriole instead applies absolute input, token, nesting, attribute,
   and entity-expansion limits.

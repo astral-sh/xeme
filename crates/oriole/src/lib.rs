@@ -67,6 +67,15 @@ pub struct Position {
     pub byte_count: usize,
 }
 
+/// One complete application-defined encoded character, owned across callbacks.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct EncodingConversion {
+    /// The first `length` bytes form the sequence; remaining bytes are padding.
+    pub bytes: [u8; 4],
+    pub length: u8,
+    pub position: Position,
+}
+
 /// An XML parse failure. A parser remains failed after returning an error.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Error {
@@ -780,6 +789,25 @@ impl Parser {
     /// Each entry is a Unicode scalar value or `-1` for an undefined byte.
     /// ASCII markup must retain its meaning; multibyte custom encodings are rejected.
     pub fn set_encoding_map(&mut self, name: &str, map: [i32; 256]) -> Result<(), Error> {
+        self.install_encoding_map(name, map, false)
+    }
+
+    /// Install a map with two- to four-byte sequences resolved by the application.
+    ///
+    /// After draining available events, inspect [`Self::encoding_conversion`] and
+    /// supply its result using [`Self::resolve_encoding_conversion`]. No callback
+    /// runs while the parser is borrowed. Entries `-2` through `-4` give byte widths.
+    /// Converted ASCII aliases are unsupported; ASCII must use direct map entries.
+    pub fn set_multibyte_encoding_map(&mut self, name: &str, map: [i32; 256]) -> Result<(), Error> {
+        self.install_encoding_map(name, map, true)
+    }
+
+    fn install_encoding_map(
+        &mut self,
+        name: &str,
+        map: [i32; 256],
+        multibyte: bool,
+    ) -> Result<(), Error> {
         if let Some(error) = self.error.filter(|error| error.kind == ErrorKind::NoMemory) {
             return Err(error);
         }
@@ -792,7 +820,10 @@ impl Parser {
                 "no unresolved encoding is pending",
             ));
         }
-        if let Err(error) = self.decoder.install_map(name, map, &mut self.sources[0]) {
+        if let Err(error) = self
+            .decoder
+            .install_map(name, map, multibyte, &mut self.sources[0])
+        {
             if error.kind == ErrorKind::NoMemory {
                 self.error = Some(error);
             }
@@ -811,7 +842,49 @@ impl Parser {
         Ok(())
     }
 
-    /// Return the next event, or `None` when more input is needed or parsing is done.
+    /// Return an owned conversion request after available XML events are drained.
+    #[must_use]
+    pub fn encoding_conversion(&self) -> Option<EncodingConversion> {
+        if self.error.is_some() || self.decoding_error.is_some() {
+            return None;
+        }
+        self.decoder.conversion().map(|(bytes, length)| {
+            let mut position = self.sources[0].end_position();
+            position.byte_count = usize::from(length);
+            EncodingConversion {
+                bytes,
+                length,
+                position,
+            }
+        })
+    }
+
+    /// Resolve the pending sequence to a non-ASCII BMP scalar, or pass `-1` for invalid data.
+    ///
+    /// ASCII aliases are rejected so conversion cannot change XML lexical syntax.
+    pub fn resolve_encoding_conversion(&mut self, value: i32) -> Result<(), Error> {
+        if let Some(error) = self.error {
+            return Err(error);
+        }
+        if let Err(mut error) = self.decoder.resolve_conversion(value, &mut self.sources[0]) {
+            error.position = self.sources[0].end_position();
+            self.error = Some(error);
+            return Err(error);
+        }
+        if let Err(error) = self.decoder.feed(
+            &[],
+            self.final_input,
+            &mut self.sources[0],
+            self.config.limits.max_token_bytes,
+        ) {
+            self.decoding_error = Some((error.kind, error.message));
+        }
+        Ok(())
+    }
+
+    /// Return the next event, or `None` when input or a custom conversion is needed,
+    /// or parsing is done. Inspect [`Self::encoding_conversion`] before feeding
+    /// more input when using a multibyte custom map.
     pub fn next_event(&mut self) -> Result<Option<Event>, Error> {
         if let Some(event) = self.pop_event() {
             self.last_position = event.position;
@@ -1002,7 +1075,9 @@ impl Parser {
         self.source_mut().consume(count);
     }
     fn is_source_final(&self) -> bool {
-        self.sources.len() > 1 || self.final_input || self.decoding_error.is_some()
+        self.sources.len() > 1
+            || (self.final_input && self.decoder.conversion().is_none())
+            || self.decoding_error.is_some()
     }
 
     fn next_event_inner(&mut self) -> Result<Option<Event>, Error> {
@@ -1034,7 +1109,7 @@ impl Parser {
                     }
                     return Err(error);
                 }
-                if !self.final_input {
+                if !self.is_source_final() {
                     return Ok(None);
                 }
                 self.finish_conditional_source()?;

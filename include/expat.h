@@ -543,6 +543,12 @@ typedef void(XMLCALL *XML_SkippedEntityHandler)(void *userData,
 
    4. No Unicode character may be encoded by more than one distinct
       sequence of bytes.
+
+   Oriole additionally rejects every multibyte sequence whose convert
+   result is ASCII (less than 0x80), with XML_ERROR_INVALID_TOKEN. ASCII
+   characters must use direct single-byte map entries. This prevents
+   conversion from changing lexical XML syntax; it is a compatibility
+   boundary for noncanonical custom encodings accepted by Expat.
 */
 typedef struct {
   int map[256];

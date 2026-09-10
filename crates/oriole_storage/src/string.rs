@@ -29,7 +29,9 @@ impl String {
         let capacity = if text.is_empty() {
             0
         } else {
-            text.len().checked_add(1).ok_or(AllocError::CapacityOverflow)?
+            text.len()
+                .checked_add(1)
+                .ok_or(AllocError::CapacityOverflow)?
         };
         let mut result = Self::try_with_capacity_in(capacity, allocator)?;
         result.bytes.extend_from_slice(text.as_bytes());

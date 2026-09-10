@@ -1027,53 +1027,65 @@ unsafe fn dispatch(
         }
     }
     if !handled {
-        // SAFETY: No callback retains parser-owned data. The raw token must be
-        // copied since a default callback can change parser configuration.
+        // SAFETY: The raw fallback uses the same guarded, owned-fragment path.
         unsafe {
-            if !(*parser).destroying && (*parser).handlers.default.is_some() {
-                let raw = (*parser)
-                    .core
-                    .current_raw()
-                    .map(|raw| XmlString::try_from_str_in(raw, (*parser).allocator))
-                    .transpose()?;
-                if let Some(raw) = raw {
-                    let single_fragment = split_default
-                        && duplicate_default.is_none()
-                        && DtdFragments(raw.as_str())
-                            .next()
-                            .is_some_and(|fragment| fragment.len() == raw.len());
-                    if split_default && !single_fragment {
-                        let mut duplicate_name = raw.starts_with("<!ENTITY");
-                        for fragment in DtdFragments(raw.as_str()) {
-                            if let Some(closing) = duplicate_default {
-                                if fragment.chars().all(char::is_whitespace)
-                                    || matches!(fragment, "<!ENTITY" | "%")
-                                {
-                                    continue;
-                                }
-                                if duplicate_name {
-                                    duplicate_name = false;
-                                } else if fragment == "NDATA" {
-                                    duplicate_name = true;
-                                    continue;
-                                } else if matches!(fragment, "SYSTEM" | "PUBLIC")
-                                    || (fragment == ">" && !closing)
-                                {
-                                    continue;
-                                }
+            dispatch_unhandled(parser, split_default, duplicate_default)?;
+        }
+    }
+    Ok(())
+}
+
+unsafe fn dispatch_unhandled(
+    parser: XML_Parser,
+    split_default: bool,
+    duplicate_default: Option<bool>,
+) -> Result<(), AllocError> {
+    // SAFETY: No callback retains parser-owned data. The raw token must be
+    // copied since a default callback can change parser configuration.
+    unsafe {
+        if !(*parser).destroying && (*parser).handlers.default.is_some() {
+            let raw = (*parser)
+                .core
+                .current_raw()
+                .map(|raw| XmlString::try_from_str_in(raw, (*parser).allocator))
+                .transpose()?;
+            if let Some(raw) = raw {
+                let single_fragment = split_default
+                    && duplicate_default.is_none()
+                    && DtdFragments(raw.as_str())
+                        .next()
+                        .is_some_and(|fragment| fragment.len() == raw.len());
+                if split_default && !single_fragment {
+                    let mut duplicate_name = raw.starts_with("<!ENTITY");
+                    for fragment in DtdFragments(raw.as_str()) {
+                        if let Some(closing) = duplicate_default {
+                            if fragment.chars().all(char::is_whitespace)
+                                || matches!(fragment, "<!ENTITY" | "%")
+                            {
+                                continue;
                             }
-                            (*parser)
-                                .default_pending
-                                .try_push_back(XmlString::try_from_str_in(
-                                    fragment,
-                                    (*parser).allocator,
-                                )?)?;
+                            if duplicate_name {
+                                duplicate_name = false;
+                            } else if fragment == "NDATA" {
+                                duplicate_name = true;
+                                continue;
+                            } else if matches!(fragment, "SYSTEM" | "PUBLIC")
+                                || (fragment == ">" && !closing)
+                            {
+                                continue;
+                            }
                         }
-                    } else {
-                        (*parser).default_pending.try_push_back(raw)?;
+                        (*parser)
+                            .default_pending
+                            .try_push_back(XmlString::try_from_str_in(
+                                fragment,
+                                (*parser).allocator,
+                            )?)?;
                     }
-                    drain_default_fragments(parser);
+                } else {
+                    (*parser).default_pending.try_push_back(raw)?;
                 }
+                drain_default_fragments(parser);
             }
         }
     }
@@ -1151,7 +1163,77 @@ unsafe fn drain_default_fragments(parser: XML_Parser) {
     }
 }
 
+unsafe fn dispatch_start_frame(
+    parser: XML_Parser,
+    frame: &oriole::AdapterFrame,
+) -> Result<(), AllocError> {
+    // SAFETY: The busy guard pins the parser. Frame bytes are independently
+    // owned by run_events, and only scalar handler/allocator copies escape.
+    let (callback, arg, allocator) = unsafe {
+        let family = &(*parser).family;
+        if !charge(
+            &family.callback_bytes,
+            frame.callback_bytes(),
+            MAX_FAMILY_CALLBACK_BYTES,
+        ) {
+            fail_parse(parser, 43);
+            return Ok(());
+        }
+        (*parser).specified_attributes = (frame.attributes().len() * 2)
+            .try_into()
+            .unwrap_or(c_int::MAX);
+        (
+            (*parser).handlers.start_element,
+            if (*parser).handler_arg_is_parser {
+                parser.cast()
+            } else {
+                (*parser).user_data
+            },
+            (*parser).allocator,
+        )
+    };
+    let Some(callback) = callback else {
+        // SAFETY: No parser borrow crosses the owned raw-fragment callbacks.
+        return unsafe { dispatch_unhandled(parser, false, None) };
+    };
+    let mut local_pointers = [ptr::null(); 17];
+    let mut pointers = XmlVec::new_in(allocator);
+    let pointer_count = frame.attributes().len() * 2 + 1;
+    let output = if pointer_count <= local_pointers.len() {
+        &mut local_pointers[..pointer_count]
+    } else {
+        pointers.try_reserve_exact(pointer_count)?;
+        pointers.resize(pointer_count, ptr::null());
+        &mut pointers
+    };
+    for (index, (name, value)) in frame.attributes().enumerate() {
+        output[index * 2] = name.as_ptr().cast();
+        output[index * 2 + 1] = value.as_ptr().cast();
+    }
+    // SAFETY: The validated native strings have one final NUL and no interior
+    // NUL. The separately owned immutable arena and pointer array remain live
+    // through the callback; no parser/source/map reference is retained.
+    unsafe {
+        callback(arg, frame.name_bytes().as_ptr().cast(), output.as_ptr());
+    }
+    Ok(())
+}
+
 unsafe fn run_events(parser: XML_Parser) -> c_int {
+    // SAFETY: Called under the busy guard. The frame owns all storage outside
+    // CParser, so callback-time setters may access the core independently.
+    unsafe {
+        if (*parser).destroying {
+            return ERROR;
+        }
+        let mut frame = (*parser).core.adapter_frame();
+        let result = run_events_with_frame(parser, &mut frame);
+        (*parser).core.finish_adapter_frame(frame);
+        result
+    }
+}
+
+unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterFrame) -> c_int {
     loop {
         // SAFETY: Pending lexical fragments belong to a previously suspended event.
         unsafe {
@@ -1172,7 +1254,10 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
                 (*parser).error = 0;
                 return SUSPENDED;
             }
-            match (*parser).core.next_event_for_recycling_into(&mut event) {
+            match (*parser)
+                .core
+                .next_event_for_adapter_into(&mut event, frame)
+            {
                 Ok(Some(recycling)) => recycling,
                 Ok(None) => {
                     if resolve_pending_conversion(parser) {
@@ -1208,6 +1293,17 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
                 }
             }
         };
+        if frame.is_active() {
+            // SAFETY: Both the frame and its position are owned outside CParser.
+            unsafe {
+                (*parser).position = frame.position();
+                if dispatch_start_frame(parser, frame).is_err() {
+                    fail_parse(parser, 1);
+                    return ERROR;
+                }
+            }
+            continue;
+        }
         let event = event.expect("recycling token accompanies an owned event");
         // SAFETY: The event owns its data and the parser remains busy.
         unsafe {

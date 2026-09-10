@@ -418,6 +418,58 @@ fn every_allocation_can_fail_and_all_memory_uses_the_selected_suite() {
     check_allocations(workload);
 }
 
+#[test]
+fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
+    fn frames(allocator: Allocator) -> Result<(), Error> {
+        let mut parser = Parser::try_new_in(Config::default(), allocator)?;
+        parser.feed(b"<r><n a='first' b='value'/><n a='second' b='new'/><n a='literal' b='other'/><n a='&amp;'/><n a='last'/></r>", true)?;
+        let mut frame = parser.adapter_frame();
+        let result = (|| {
+            loop {
+                let mut event = None;
+                let result = parser.next_event_for_adapter_into(&mut event, &mut frame);
+                let token = match result {
+                    Ok(Some(token)) => token,
+                    Ok(None) => break,
+                    Err(error) => {
+                        assert!(event.is_none());
+                        assert!(!frame.is_active());
+                        let calls = CALLS.get();
+                        assert_eq!(
+                            parser
+                                .next_event_for_adapter_into(&mut event, &mut frame)
+                                .unwrap_err(),
+                            error
+                        );
+                        assert_eq!(CALLS.get(), calls);
+                        return Err(error);
+                    }
+                };
+                if frame.is_active() {
+                    assert!(event.is_none());
+                    assert_eq!(frame.name_bytes().last(), Some(&0));
+                    for (name, value) in frame.attributes() {
+                        assert_eq!(name.last(), Some(&0));
+                        assert_eq!(value.last(), Some(&0));
+                    }
+                } else {
+                    match event.unwrap().kind {
+                        EventKind::StartElement { name, attributes } => {
+                            parser.recycle_start_element(token, name, attributes)
+                        }
+                        EventKind::EndElement { name } => parser.recycle_end_element(token, name),
+                        _ => {}
+                    }
+                }
+            }
+            Ok(())
+        })();
+        parser.finish_adapter_frame(frame);
+        result
+    }
+    check_allocations(frames);
+}
+
 fn check_allocations(workload: fn(Allocator) -> Result<(), Error>) {
     // SAFETY: The callbacks use a complete libc-backed suite with failure injection;
     // every pointer remains valid until realloc succeeds or its matching free call.

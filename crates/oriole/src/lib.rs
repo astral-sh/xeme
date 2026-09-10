@@ -6,6 +6,7 @@
 
 mod accounting;
 mod active;
+mod arena;
 mod dtd;
 mod dtd_tables;
 mod encoding;
@@ -27,6 +28,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use accounting::EntityBudget;
 use dtd_tables::DtdTables;
 
+pub use arena::AdapterFrame;
 pub use oriole_storage::Text;
 pub use recycling::RecyclingToken;
 
@@ -86,6 +88,23 @@ pub struct Position {
     pub line: usize,
     pub column: usize,
     pub byte_count: usize,
+}
+
+struct EventOutput<'a> {
+    event: &'a mut Option<Event>,
+    frame: Option<&'a mut AdapterFrame>,
+}
+
+impl EventOutput<'_> {
+    fn has_frame(&self) -> bool {
+        self.frame.as_ref().is_some_and(|frame| frame.active)
+    }
+
+    fn clear_frame(&mut self) {
+        if let Some(frame) = self.frame.as_deref_mut() {
+            frame.clear();
+        }
+    }
 }
 
 /// One complete application-defined encoded character, owned across callbacks.
@@ -1402,6 +1421,46 @@ impl Parser {
     }
 
     fn next_event_into(&mut self, output: &mut Option<Event>) -> Result<(), Error> {
+        self.next_delivery_into(&mut EventOutput {
+            event: output,
+            frame: None,
+        })
+    }
+
+    /// Create allocation-free detached adapter storage for this parser generation.
+    #[doc(hidden)]
+    pub fn adapter_frame(&self) -> AdapterFrame {
+        AdapterFrame::new(self.allocator, self.event_recycling.token())
+    }
+
+    /// Fill caller-owned event/frame slots without retaining a parser reference.
+    /// The frame must come from this parser; foreign generations use owned events.
+    #[doc(hidden)]
+    pub fn next_event_for_adapter_into(
+        &mut self,
+        event: &mut Option<Event>,
+        frame: &mut AdapterFrame,
+    ) -> Result<Option<RecyclingToken>, Error> {
+        *event = None;
+        frame.clear();
+        if !self.event_recycling.accepts(&frame.generation) {
+            return self.next_event_for_recycling_into(event);
+        }
+        self.next_delivery_into(&mut EventOutput {
+            event,
+            frame: Some(frame),
+        })?;
+        Ok((event.is_some() || frame.active).then(|| self.event_recycling.token()))
+    }
+
+    /// Drop the detached cache before releasing its share of retained-memory space.
+    #[doc(hidden)]
+    pub fn finish_adapter_frame(&mut self, frame: AdapterFrame) {
+        let token = frame.finish();
+        self.event_recycling.release_adapter(&token);
+    }
+
+    fn next_delivery_into(&mut self, output: &mut EventOutput<'_>) -> Result<(), Error> {
         // Keep ordinary documents outside the owned-table publication frame.
         if self.shared_tables.get().is_none() && !self.in_doctype {
             return self.next_event_scoped(output);
@@ -1409,7 +1468,7 @@ impl Parser {
         self.next_event_with_tables(output)
     }
 
-    fn next_event_with_tables(&mut self, output: &mut Option<Event>) -> Result<(), Error> {
+    fn next_event_with_tables(&mut self, output: &mut EventOutput<'_>) -> Result<(), Error> {
         // DOCTYPE always yields its start event before parsing any declarations.
         // A child created by that callback may have initialized this owner first.
         if self.error.is_none()
@@ -1424,15 +1483,15 @@ impl Parser {
         self.with_dtd_tables(|parser| parser.next_event_scoped(output))
     }
 
-    fn next_event_scoped(&mut self, output: &mut Option<Event>) -> Result<(), Error> {
+    fn next_event_scoped(&mut self, output: &mut EventOutput<'_>) -> Result<(), Error> {
         if let Some(event) = self.finish_foreign_dtd() {
             self.last_position = event.position;
-            *output = Some(event);
+            *output.event = Some(event);
             return Ok(());
         }
         if let Some(event) = self.pop_event() {
             self.last_position = event.position;
-            *output = Some(event);
+            *output.event = Some(event);
             return Ok(());
         }
         if let Some(error) = &self.error {
@@ -1470,6 +1529,7 @@ impl Parser {
             });
         }
         if let Err(error) = &result {
+            output.clear_frame();
             self.error = Some(*error);
             // Unknown encodings can be installed after an error and resume
             // parsing. Other terminal failures no longer need copied names;
@@ -1503,14 +1563,17 @@ impl Parser {
                 return Err(error);
             }
             if let Some(event) = self.pop_event() {
-                *output = Some(event);
+                *output.event = Some(event);
                 result = Ok(());
             }
         }
         if result.is_ok()
-            && let Some(event) = output
+            && let Some(event) = output.event
         {
             self.last_position = event.position;
+        }
+        if result.is_ok() && output.has_frame() {
+            self.last_position = output.frame.as_ref().unwrap().position();
         }
         result
     }
@@ -1770,7 +1833,7 @@ impl Parser {
             || self.decoding_error.is_some()
     }
 
-    fn next_event_inner(&mut self, output: &mut Option<Event>) -> Result<(), Error> {
+    fn next_event_inner(&mut self, output: &mut EventOutput<'_>) -> Result<(), Error> {
         // Encoding detection consumes a BOM without producing a text token.
         // Charge that prefix even for empty input or an incomplete next token.
         self.account_source(0)?;
@@ -1789,8 +1852,11 @@ impl Parser {
             }
         }
         loop {
+            if output.has_frame() {
+                return Ok(());
+            }
             if let Some(event) = self.pop_event() {
-                *output = Some(event);
+                *output.event = Some(event);
                 return Ok(());
             }
             if self.finished {
@@ -1981,7 +2047,6 @@ impl Parser {
             }
             let planned = if mode == ScanMode::Tag
                 && !self.source().remaining().starts_with("</")
-                && self.config.namespace_separator.is_none()
                 && !self.seen_doctype
                 && !self.foreign_dtd
                 && self.shared_tables.get().is_none()
@@ -2079,7 +2144,12 @@ impl Parser {
                     ScanMode::Tag if token.starts_with("</") => {
                         self.parse_end(token.view(), position)?
                     }
-                    ScanMode::Tag => self.parse_start(token.view(), position, planned)?,
+                    ScanMode::Tag => self.parse_start(
+                        token.view(),
+                        position,
+                        planned,
+                        output.frame.as_deref_mut(),
+                    )?,
                     ScanMode::DtdDeclaration => {
                         unreachable!("DTD scanner only runs in DTD context")
                     }
@@ -2743,6 +2813,7 @@ impl Parser {
         token: lexical::Slice<'_>,
         position: Position,
         planned: tag::Planned,
+        frame: Option<&mut AdapterFrame>,
     ) -> Result<(), Error> {
         if self.closed_root {
             return Err(self.err(
@@ -2789,16 +2860,38 @@ impl Parser {
         if raw_attrs.len() > self.config.limits.max_attributes {
             return Err(self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded"));
         }
+        let mut frame = frame.filter(|_| {
+            matches!(planned, tag::Planned::Complete { .. })
+                && token.len() <= arena::MAX_ARENA_BYTES
+                && raw_attrs.len() <= arena::MAX_ARENA_ATTRIBUTES
+                // A frame contains final callback spellings. Namespace-aware
+                // tags can share this storage only when expansion is identity.
+                && (self.config.namespace_separator.is_none()
+                    || (!raw_name.contains(':')
+                        && !self.namespaces.contains_key("")
+                        && raw_attrs.iter().all(|attribute| {
+                            let name = attribute.name(rest);
+                            name != "xmlns" && !name.contains(':')
+                        })))
+        });
+        if let Some(frame) = frame.as_deref_mut() {
+            debug_assert!(self.tables.defaults.is_empty());
+            self.event_recycling
+                .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
+            frame.prepare(raw_attrs.len())?;
+        }
         // Empty tags need no attribute buffer and must not evict a warm cache.
-        let mut attrs = if raw_attrs.is_empty() {
+        let mut attrs = if frame.is_some() || raw_attrs.is_empty() {
             Vec::new_in(self.allocator)
         } else {
             self.event_recycling.take()
         };
-        attrs.truncate(raw_attrs.len());
-        attrs
-            .try_reserve(raw_attrs.len().saturating_sub(attrs.len()))
-            .map_err(|_| AllocError::OutOfMemory)?;
+        if frame.is_none() {
+            attrs.truncate(raw_attrs.len());
+            attrs
+                .try_reserve(raw_attrs.len().saturating_sub(attrs.len()))
+                .map_err(|_| AllocError::OutOfMemory)?;
+        }
         let mut decoded_names = Vec::new_in(self.allocator);
         if token.has_ascii_aliases() {
             decoded_names
@@ -2843,6 +2936,10 @@ impl Parser {
                     "duplicate attribute",
                     1 + raw_name.len() + attribute_offset,
                 ));
+            }
+            if let Some(frame) = frame.as_deref_mut() {
+                frame.push_attribute(attr_name, value)?;
+                continue;
             }
             if index == attrs.len() {
                 try_push(
@@ -3010,9 +3107,13 @@ impl Parser {
                     self.expand_name(&attr.name, true, self.config.namespace_triplets, None)?;
             }
         }
-        let reusable = self.event_recycling.take_name();
-        let expanded_name =
-            self.expand_name(name, false, self.config.namespace_triplets, reusable)?;
+        let expanded_name = if let Some(frame) = frame.as_deref_mut() {
+            frame.set_name(name)?;
+            None
+        } else {
+            let reusable = self.event_recycling.take_name();
+            Some(self.expand_name(name, false, self.config.namespace_triplets, reusable)?)
+        };
         let raw_encoding = token.for_slice(raw_name).name_encoding(self.allocator)?;
         let raw_encoding = if raw_encoding.is_empty() {
             None
@@ -3021,11 +3122,11 @@ impl Parser {
         };
         self.seen_root = true;
         self.declaration_allowed = false;
-        let stack_name = if expanded_name == name {
-            None
-        } else {
-            Some(expanded_name.try_clone()?)
-        };
+        let stack_name = expanded_name
+            .as_ref()
+            .filter(|expanded| expanded.as_str() != name)
+            .map(String::try_clone)
+            .transpose()?;
         let raw_name = match name_value {
             lexical::Decoded::Borrowed(name) => {
                 let reusable = self.event_recycling.take_name();
@@ -3042,13 +3143,15 @@ impl Parser {
                 bindings,
             },
         )?;
-        self.emit(
-            EventKind::StartElement {
-                name: expanded_name,
-                attributes: attrs,
-            },
-            position,
-        )?;
+        if let Some(name) = expanded_name {
+            self.emit(
+                EventKind::StartElement {
+                    name,
+                    attributes: attrs,
+                },
+                position,
+            )?;
+        }
         if empty {
             let first_end = self.pending.len();
             let mut end_position = self.source().position_at(token.len(), 0);
@@ -3065,6 +3168,9 @@ impl Parser {
         if raw_attrs.capacity() <= 128 {
             raw_attrs.clear();
             self.raw_attributes = raw_attrs;
+        }
+        if let Some(frame) = frame {
+            frame.publish(position);
         }
         Ok(())
     }

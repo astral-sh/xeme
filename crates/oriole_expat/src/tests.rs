@@ -1316,6 +1316,68 @@ fn default_whitespace_counts_toward_the_shared_event_budget() {
 }
 
 #[test]
+fn arena_start_enforces_exact_callback_budget_with_default_fallback() {
+    for start_handler in [false, true] {
+        for remaining in [2, 3] {
+            // SAFETY: All owners remain live; this test manually holds the same
+            // dispatch guard as the adapter and never borrows the core in a callback.
+            unsafe {
+                let mut state = State::default();
+                let parser = configured(&mut state);
+                XML_SetStartElementHandler(parser, start_handler.then_some(start));
+                XML_SetDefaultHandler(parser, Some(text));
+                (*parser)
+                    .core
+                    .feed(b"<r><warm a='first'/><n a='v'>", false)
+                    .unwrap();
+                for _ in 0..3 {
+                    (*parser).core.next_event().unwrap().unwrap();
+                }
+                let mut frame = (*parser).core.adapter_frame();
+                let mut event = None;
+                (*parser)
+                    .core
+                    .next_event_for_adapter_into(&mut event, &mut frame)
+                    .unwrap()
+                    .unwrap();
+                assert!(frame.is_active());
+                assert!(event.is_none());
+                assert_eq!(frame.callback_bytes(), 3);
+                let family = &(*parser).family;
+                family
+                    .callback_bytes
+                    .store(MAX_FAMILY_CALLBACK_BYTES - remaining, Ordering::Relaxed);
+                (*parser).busy = true;
+                dispatch_start_frame(parser, &frame).unwrap();
+                (*parser).busy = false;
+                let family = &(*parser).family;
+                if remaining == 2 {
+                    assert_eq!(XML_GetErrorCode(parser), 43);
+                    assert!(state.events.is_empty());
+                    assert_eq!(
+                        family.callback_bytes.load(Ordering::Relaxed),
+                        MAX_FAMILY_CALLBACK_BYTES - 2
+                    );
+                } else {
+                    assert_eq!(XML_GetErrorCode(parser), 0);
+                    if start_handler {
+                        assert_eq!(state.events, ["start:n", "a=v"]);
+                    } else {
+                        assert_eq!(state.events, ["text:<n a='v'>"]);
+                    }
+                    assert_eq!(
+                        family.callback_bytes.load(Ordering::Relaxed),
+                        MAX_FAMILY_CALLBACK_BYTES
+                    );
+                }
+                (*parser).core.finish_adapter_frame(frame);
+                XML_ParserFree(parser);
+            }
+        }
+    }
+}
+
+#[test]
 fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
     fn word() -> XmlString {
         XmlString::try_from_str_in("x", Allocator::System).unwrap()
@@ -3058,6 +3120,120 @@ fn recycling_waits_for_callbacks_and_survives_suspend_resume_and_reset() {
         assert_eq!(XML_ResumeParser(parser), OK);
         assert_eq!(state.events, ["first", "second", "reset"]);
         XML_ParserFree(parser);
+    }
+}
+
+#[test]
+fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
+    #[derive(Default)]
+    struct ArenaState {
+        parser: XML_Parser,
+        starts: usize,
+        raw: Vec<String>,
+        ends: Vec<String>,
+    }
+    unsafe extern "C" fn raw(data: *mut c_void, value: *const c_char, length: c_int) {
+        // SAFETY: The caller keeps state live and supplies callback-owned bytes.
+        unsafe {
+            let bytes = std::slice::from_raw_parts(value.cast(), length as usize);
+            (*data.cast::<ArenaState>())
+                .raw
+                .push(String::from_utf8(bytes.to_vec()).unwrap());
+        }
+    }
+    unsafe extern "C" fn end(data: *mut c_void, name: *const c_char) {
+        // SAFETY: State and name remain live during this synchronous callback.
+        unsafe {
+            (*data.cast::<ArenaState>())
+                .ends
+                .push(CStr::from_ptr(name).to_str().unwrap().to_owned());
+        }
+    }
+    unsafe extern "C" fn start(
+        data: *mut c_void,
+        name: *const c_char,
+        attrs: *const *const c_char,
+    ) {
+        // SAFETY: All pointers are callback-lived. Raw state pointers prevent
+        // retaining a mutable State reference across nested DefaultCurrent.
+        unsafe {
+            if CStr::from_ptr(name).to_bytes() != b"n" {
+                return;
+            }
+            let state = data.cast::<ArenaState>();
+            let parser = (*state).parser;
+            (*state).starts += 1;
+            let value = CStr::from_ptr(*attrs.add(1)).to_bytes().to_vec();
+            XML_DefaultCurrent(parser);
+            let mut offset = 0;
+            let mut size = 0;
+            let context = XML_GetInputContext(parser, &mut offset, &mut size);
+            assert!(!context.is_null());
+            let context = std::slice::from_raw_parts(context.cast::<u8>(), size as usize);
+            assert!(context[offset as usize..].starts_with(b"<n a="));
+            assert_eq!(XML_SetBase(parser, c"changed".as_ptr()), OK);
+            XML_ParserFree(parser);
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
+            assert_eq!(XML_Parse(parser, c"<reenter/>".as_ptr(), 10, 1), ERROR);
+            assert_eq!(CStr::from_ptr(name).to_bytes(), b"n");
+            assert_eq!(CStr::from_ptr(*attrs.add(1)).to_bytes(), value);
+            if (*state).starts == 2 {
+                assert_eq!(XML_GetSpecifiedAttributeCount(parser), 4);
+                assert_eq!(CStr::from_ptr(*attrs.add(3)).to_bytes(), b"more");
+                XML_SetEndElementHandler(parser, Some(end));
+                assert_eq!(XML_StopParser(parser, 1), OK);
+                assert_eq!(CStr::from_ptr(*attrs.add(3)).to_bytes(), b"more");
+            }
+        }
+    }
+    // SAFETY: Each parser and state stays live through its callbacks and resumes.
+    unsafe {
+        let input = b"<r><n a='first'/><n a='second' b='more'/></r>";
+        for width in [1, 7, input.len()] {
+            let parser = XML_ParserCreate(ptr::null());
+            let mut state = ArenaState {
+                parser,
+                ..ArenaState::default()
+            };
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+            XML_SetStartElementHandler(parser, Some(start));
+            XML_SetDefaultHandler(parser, Some(raw));
+            for (index, chunk) in input.chunks(width).enumerate() {
+                let status = XML_Parse(
+                    parser,
+                    chunk.as_ptr().cast(),
+                    chunk.len() as c_int,
+                    c_int::from((index + 1) * width >= input.len()),
+                );
+                if status == SUSPENDED {
+                    assert_eq!(
+                        (*parser).core.current_raw(),
+                        Some("<n a='second' b='more'/>")
+                    );
+                    assert_eq!(XML_GetCurrentByteIndex(parser), 17);
+                    let raw_count = state.raw.len();
+                    XML_DefaultCurrent(parser);
+                    assert_eq!(state.raw.len(), raw_count);
+                    assert_eq!(XML_ResumeParser(parser), OK);
+                } else {
+                    assert_eq!(status, OK);
+                }
+            }
+            assert_eq!(state.starts, 2);
+            assert_eq!(
+                state
+                    .raw
+                    .iter()
+                    .filter(|value| !value.is_empty())
+                    .collect::<Vec<_>>(),
+                [
+                    &"<n a='first'/>".to_owned(),
+                    &"<n a='second' b='more'/>".to_owned()
+                ]
+            );
+            assert_eq!(state.ends, ["n", "r"]);
+            XML_ParserFree(parser);
+        }
     }
 }
 

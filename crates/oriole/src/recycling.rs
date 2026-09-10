@@ -25,6 +25,7 @@ pub(crate) struct EventRecycling {
     parser_id: u64,
     attributes: Vec<Attribute>,
     attribute_bytes: usize,
+    adapter_bytes: usize,
     names: [String; 2],
 }
 
@@ -38,6 +39,7 @@ impl EventRecycling {
             parser_id,
             attributes: Vec::new_in(allocator),
             attribute_bytes: 0,
+            adapter_bytes: 0,
             names: [String::new_in(allocator), String::new_in(allocator)],
         })
     }
@@ -46,6 +48,30 @@ impl EventRecycling {
     pub(crate) fn token(&self) -> RecyclingToken {
         RecyclingToken {
             parser_id: self.parser_id,
+        }
+    }
+
+    pub(crate) fn accepts(&self, token: &RecyclingToken) -> bool {
+        token.parser_id == self.parser_id
+    }
+
+    /// An adapter's detached arena shares the existing aggregate cache budget.
+    /// Reserve only when its first eligible event is prepared, without allocating.
+    pub(crate) fn reserve_adapter(&mut self, token: &RecyclingToken, bytes: usize) {
+        assert!(self.accepts(token));
+        assert!(bytes <= MAX_RETAINED_BYTES - 2 * MAX_STRING_BYTES);
+        self.adapter_bytes = bytes;
+        if self.attribute_bytes + self.names[0].capacity() + self.names[1].capacity()
+            > MAX_RETAINED_BYTES - bytes
+        {
+            self.attributes = Vec::new_in(*self.attributes.allocator());
+            self.attribute_bytes = 0;
+        }
+    }
+
+    pub(crate) fn release_adapter(&mut self, token: &RecyclingToken) {
+        if self.accepts(token) {
+            self.adapter_bytes = 0;
         }
     }
 
@@ -103,8 +129,10 @@ impl EventRecycling {
         if capacity <= self.names[index].capacity() || capacity > MAX_STRING_BYTES {
             return;
         }
-        let remaining =
-            MAX_RETAINED_BYTES - self.attribute_bytes - self.names[1 - index].capacity();
+        let remaining = MAX_RETAINED_BYTES
+            - self.adapter_bytes
+            - self.attribute_bytes
+            - self.names[1 - index].capacity();
         if capacity <= remaining {
             name.clear();
             self.names[index] = name;
@@ -119,7 +147,10 @@ impl EventRecycling {
             return;
         }
         let allocator = *self.attributes.allocator();
-        let budget = MAX_RETAINED_BYTES - self.names[0].capacity() - self.names[1].capacity();
+        let budget = MAX_RETAINED_BYTES
+            - self.adapter_bytes
+            - self.names[0].capacity()
+            - self.names[1].capacity();
         let Some(mut remaining) = attributes
             .capacity()
             .checked_mul(size_of::<Attribute>())
@@ -175,6 +206,79 @@ pub(crate) fn copy_attribute_string(output: &mut String, text: &str) -> Result<(
 mod tests {
     use super::*;
     use crate::{Config, EventKind, Parser};
+
+    #[test]
+    fn arena_and_owned_fallbacks_share_the_retained_capacity_budget() {
+        fn check(parser: &Parser) {
+            let cache = &parser.event_recycling;
+            let attributes = cache.attributes.capacity() * size_of::<Attribute>()
+                + cache
+                    .attributes
+                    .iter()
+                    .map(|a| a.name.capacity() + a.value.capacity())
+                    .sum::<usize>();
+            assert_eq!(attributes, cache.attribute_bytes);
+            assert!(
+                attributes
+                    + cache.adapter_bytes
+                    + cache.names.iter().map(String::capacity).sum::<usize>()
+                    <= MAX_RETAINED_BYTES
+            );
+        }
+        let mut xml = std::string::String::from("<r><warm");
+        for index in 0..64 {
+            use std::fmt::Write;
+            write!(&mut xml, " a{index}='{}'", "x".repeat(1024)).unwrap();
+        }
+        xml.push_str("/><n a='v'/><fallback a='&amp;'/><n a='again'/></r>");
+        let mut parser = Parser::new(Config::default());
+        parser.feed(xml.as_bytes(), true).unwrap();
+        parser.next_event().unwrap().unwrap();
+        let (event, token) = parser.next_event_for_recycling().unwrap().unwrap();
+        let EventKind::StartElement { name, attributes } = event.kind else {
+            panic!("warm start")
+        };
+        parser.recycle_start_element(token, name, attributes);
+        check(&parser);
+        assert!(
+            parser.event_recycling.attribute_bytes
+                > MAX_RETAINED_BYTES - crate::arena::RETAINED_ARENA_BYTES
+        );
+        assert_eq!(parser.event_recycling.adapter_bytes, 0);
+        let mut frame = parser.adapter_frame();
+        let mut frames = 0;
+        let mut fallbacks = 0;
+        loop {
+            let mut event = None;
+            let Some(token) = parser
+                .next_event_for_adapter_into(&mut event, &mut frame)
+                .unwrap()
+            else {
+                break;
+            };
+            if frame.is_active() {
+                frames += 1;
+                assert_eq!(
+                    parser.event_recycling.adapter_bytes,
+                    crate::arena::RETAINED_ARENA_BYTES
+                );
+            } else {
+                match event.unwrap().kind {
+                    EventKind::StartElement { name, attributes } => {
+                        fallbacks += 1;
+                        parser.recycle_start_element(token, name, attributes);
+                    }
+                    EventKind::EndElement { name } => parser.recycle_end_element(token, name),
+                    _ => {}
+                }
+            }
+            check(&parser);
+        }
+        assert_eq!((frames, fallbacks), (2, 1));
+        parser.finish_adapter_frame(frame);
+        assert_eq!(parser.event_recycling.adapter_bytes, 0);
+        check(&parser);
+    }
 
     fn next_attributes(parser: &mut Parser) -> (RecyclingToken, Vec<Attribute>) {
         loop {

@@ -5,6 +5,7 @@ mod queue;
 mod shared;
 mod string;
 mod tracking;
+mod try_lock;
 
 pub use allocator::{Allocator, CustomAllocator, MemorySuite, in_allocator_callback};
 pub use allocator_api2::alloc::{Allocator as AllocatorApi, Layout};
@@ -15,6 +16,7 @@ pub use tracking::{
     ACTIVATION_THRESHOLD_DEFAULT, AllocationTracker, MAXIMUM_AMPLIFICATION_DEFAULT,
     MAXIMUM_LIVE_BYTES, with_tracking, without_tracking,
 };
+pub use try_lock::{TryLock, TryLockGuard};
 
 /// An allocation failure that can be reported without allocating another object.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

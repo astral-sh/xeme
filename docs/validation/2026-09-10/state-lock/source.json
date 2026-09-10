@@ -1,0 +1,12 @@
+{
+  "base_commit": "e80213d",
+  "files": {
+    "crates/oriole_storage/src/try_lock.rs": "e08e75c6b2a1410d74d3fda3667e7f031dfade5eb26e0d5db5b98f6233ce6fde",
+    "crates/oriole_storage/src/lib.rs": "48e7760841923e645db631b5c58f7737a2460b0fa5cefc2debf85e3690ef7a19",
+    "crates/oriole_storage/src/tests.rs": "cfb098444234179b42d73a62846f5978789db3da0e848999b0c8c9f0322c5de4"
+  },
+  "tests": 26,
+  "negative_trait_doctests": 1,
+  "clippy": "pass",
+  "format": "pass"
+}

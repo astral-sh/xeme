@@ -98,6 +98,36 @@ fn failure_at_every_allocation_preserves_ownership() {
 }
 
 #[test]
+fn shared_try_lock_releases_after_selected_allocator_failure() {
+    let alloc = allocator(usize::MAX);
+    let owner = Shared::try_new_in(
+        TryLock::new(String::try_from_str_in("old", alloc).unwrap()),
+        alloc,
+    )
+    .unwrap();
+    let child = owner.clone();
+    let calls = CALLS.get();
+    let mut guard = owner.try_lock().unwrap();
+    assert!(child.try_lock().is_none());
+    assert_eq!(CALLS.get(), calls, "locking must not allocate");
+    FAIL_AT.set(calls + 1);
+    assert_eq!(
+        guard.try_push_str("a value large enough to require growing the allocation"),
+        Err(AllocError::OutOfMemory)
+    );
+    drop(guard);
+    assert_eq!(child.try_lock().unwrap().as_str(), "old");
+    assert_eq!(
+        CALLS.get(),
+        calls + 1,
+        "unlocking and relocking must not allocate"
+    );
+    drop(owner);
+    drop(child);
+    assert_eq!(LIVE.get(), 0);
+}
+
+#[test]
 fn over_aligned_reallocation_preserves_bytes_and_failure_ownership() {
     let alloc = allocator(usize::MAX);
     for alignment in [1, 8, 16, 64, 256, 4096] {

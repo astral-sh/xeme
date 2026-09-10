@@ -1,0 +1,22 @@
+{
+  "source": "/tmp/oriole-external-values/crates/oriole_storage/src/try_lock.rs",
+  "sha256": "e08e75c6b2a1410d74d3fda3667e7f031dfade5eb26e0d5db5b98f6233ce6fde",
+  "conclusion": "No blocking unsafe-code or allocation-contract finding in root review.",
+  "checks": [
+    "A successful Acquire CAS creates the unique guard; failed acquisition neither blocks nor allocates.",
+    "Guard Drop publishes value writes with Release before the next acquisition.",
+    "UnsafeCell references are bounded by guard borrow lifetimes; DerefMut requires exclusive guard access.",
+    "TryLock Sync requires T Send; automatic guard traits additionally see PhantomData<&mutT>, requiring T Sync to share a guard.",
+    "Moving a guard across threads is sound for the atomic lock, which has no pthread owner-thread requirement.",
+    "Forgetting a guard only leaves the lock unavailable; no safe access bypass remains.",
+    "No OS mutex, allocator operation, wait, or destructor callback is introduced by lock/guard mechanics."
+  ],
+  "test_review": [
+    "Cross-thread contention/visibility and guard transfer",
+    "Release on unwinding",
+    "Value destroyed exactly once when owner drops",
+    "Selected allocator failure leaves value intact and permits reacquisition",
+    "Compile-fail guardSync check for Cell payload"
+  ],
+  "scope": "Value channel integration and caller callback lifetimes also require combined tests/fuzzing; the primitive itself does not establish those semantics."
+}

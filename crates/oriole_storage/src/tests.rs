@@ -69,6 +69,45 @@ fn allocator(fail_at: usize) -> Allocator {
 }
 
 #[test]
+fn bulk_append_preserves_contents_when_growth_fails() {
+    let alloc = allocator(usize::MAX);
+    let mut values = Vec::new_in(alloc);
+    try_extend_from_slice(&mut values, &[1_u64, 2, 3]).unwrap();
+    let calls = CALLS.get();
+    FAIL_AT.set(calls + 1);
+    try_extend_from_slice(&mut values, &[]).unwrap();
+    assert_eq!(CALLS.get(), calls);
+    assert_eq!(
+        try_extend_from_slice(&mut values, &[4; 64]),
+        Err(AllocError::OutOfMemory)
+    );
+    assert_eq!(&*values, &[1, 2, 3]);
+    FAIL_AT.set(usize::MAX);
+    try_extend_from_slice(&mut values, &[4, 5]).unwrap();
+    assert_eq!(&*values, &[1, 2, 3, 4, 5]);
+    drop(values);
+    assert_eq!(LIVE.get(), 0);
+}
+
+#[test]
+fn bulk_append_checks_zero_sized_length_overflow() {
+    let alloc = allocator(1);
+    let mut values = Vec::new_in(alloc);
+    try_extend_from_slice(&mut values, &[(), ()]).unwrap();
+    assert_eq!(values.len(), 2);
+    // SAFETY: Unit values occupy no storage, all are initialized, and a vector
+    // of zero-sized elements has capacity usize::MAX without allocating.
+    unsafe { values.set_len(usize::MAX) };
+    try_extend_from_slice(&mut values, &[]).unwrap();
+    assert_eq!(
+        try_extend_from_slice(&mut values, &[()]),
+        Err(AllocError::CapacityOverflow)
+    );
+    assert_eq!(values.len(), usize::MAX);
+    assert_eq!(CALLS.get(), 0);
+}
+
+#[test]
 fn failure_at_every_allocation_preserves_ownership() {
     fn operation(alloc: Allocator) -> Result<(), AllocError> {
         let mut text = String::try_from_str_in("café", alloc)?;

@@ -443,6 +443,7 @@ pub struct Parser {
     reparse_deferral: bool,
     last_position: Position,
     current_raw: String,
+    token_scratch: String,
     expand_internal_entities: bool,
     default_events: bool,
     notation_handler_enabled: bool,
@@ -525,6 +526,7 @@ impl Parser {
                 ..Position::default()
             },
             current_raw: String::new_in(allocator),
+            token_scratch: String::new_in(allocator),
             expand_internal_entities: true,
             default_events: false,
             notation_handler_enabled: true,
@@ -1177,6 +1179,7 @@ impl Parser {
         self.error = Some(error);
         Err(error)
     }
+    #[inline(always)]
     fn emit(&mut self, kind: EventKind, position: Position) -> Result<(), Error> {
         self.pending.try_push_back(PendingEvent {
             event: Event { kind, position },
@@ -1184,6 +1187,7 @@ impl Parser {
         })?;
         Ok(())
     }
+    #[inline(always)]
     fn pop_event(&mut self) -> Option<Event> {
         let pending = self.pending.pop_front()?;
         if matches!(
@@ -1465,7 +1469,10 @@ impl Parser {
                 }
             }
             let position = self.source().position(end);
-            let token = string(&self.source().remaining()[..end], self.allocator)?;
+            let mut token =
+                std::mem::replace(&mut self.token_scratch, String::new_in(self.allocator));
+            token.clear();
+            token.try_push_str(&self.source().remaining()[..end])?;
             self.save_current_raw(end)?;
             if let Some((offset, _)) = token
                 .char_indices()
@@ -1499,6 +1506,7 @@ impl Parser {
                 ScanMode::Tag => self.parse_start(&token, position)?,
                 ScanMode::DtdDeclaration => unreachable!("DTD scanner only runs in DTD context"),
             }
+            self.token_scratch = token;
             self.consume(end);
         }
     }
@@ -2108,9 +2116,18 @@ impl Parser {
         attrs
             .try_reserve(raw_attrs.len())
             .map_err(|_| AllocError::OutOfMemory)?;
-        let mut names = hash_set(self.allocator);
-        for (attr_name, value, attribute_offset, _) in raw_attrs {
-            if !try_set_insert(&mut names, attr_name)? {
+        // Most elements have only a few attributes. Keep the linear scan bounded;
+        // larger elements retain a randomized hash table against collision attacks.
+        let mut names = (raw_attrs.len() > 8).then(|| hash_set(self.allocator));
+        for (index, &(attr_name, value, attribute_offset, _)) in raw_attrs.iter().enumerate() {
+            let duplicate = if let Some(names) = &mut names {
+                !try_set_insert(names, attr_name)?
+            } else {
+                raw_attrs[..index]
+                    .iter()
+                    .any(|(name, ..)| *name == attr_name)
+            };
+            if duplicate {
                 return Err(self.err_at(
                     ErrorKind::DuplicateAttribute,
                     "duplicate attribute",
@@ -2137,8 +2154,14 @@ impl Parser {
         }
         if let Some(defaults) = self.defaults.get(name) {
             for default in &defaults.ordered {
-                if !names.contains(default.name.as_str())
-                    && let Some(value) = &default.value
+                if !names.as_ref().map_or_else(
+                    || {
+                        raw_attrs
+                            .iter()
+                            .any(|(name, ..)| *name == default.name.as_str())
+                    },
+                    |names| names.contains(default.name.as_str()),
+                ) && let Some(value) = &default.value
                 {
                     if attrs.len() >= self.config.limits.max_attributes {
                         return Err(

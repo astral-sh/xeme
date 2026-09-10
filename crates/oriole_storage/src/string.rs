@@ -6,7 +6,7 @@ use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::ops::{Deref, RangeBounds};
 
-use crate::{AllocError, Allocator, Vec};
+use crate::{AllocError, Allocator, Vec, try_extend_from_slice};
 
 pub struct String {
     bytes: Vec<u8>,
@@ -34,7 +34,7 @@ impl String {
                 .ok_or(AllocError::CapacityOverflow)?
         };
         let mut result = Self::try_with_capacity_in(capacity, allocator)?;
-        result.bytes.extend_from_slice(text.as_bytes());
+        try_extend_from_slice(&mut result.bytes, text.as_bytes())?;
         Ok(result)
     }
     pub fn try_clone(&self) -> Result<Self, AllocError> {
@@ -55,9 +55,7 @@ impl String {
         &self.bytes
     }
     pub fn try_push_str(&mut self, text: &str) -> Result<(), AllocError> {
-        self.bytes.try_reserve(text.len())?;
-        self.bytes.extend_from_slice(text.as_bytes());
-        Ok(())
+        try_extend_from_slice(&mut self.bytes, text.as_bytes())
     }
     pub fn try_push(&mut self, character: char) -> Result<(), AllocError> {
         self.try_push_str(character.encode_utf8(&mut [0; 4]))
@@ -187,7 +185,7 @@ impl CString {
     pub fn try_from_cstr_in(text: &CStr, allocator: Allocator) -> Result<Self, AllocError> {
         let mut bytes = Vec::new_in(allocator);
         bytes.try_reserve_exact(text.to_bytes_with_nul().len())?;
-        bytes.extend_from_slice(text.to_bytes_with_nul());
+        try_extend_from_slice(&mut bytes, text.to_bytes_with_nul())?;
         Ok(Self { bytes })
     }
     pub fn try_from_string(text: String) -> Result<Self, AllocError> {

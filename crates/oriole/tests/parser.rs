@@ -56,6 +56,37 @@ fn every_chunk(xml: &str) -> Vec<EventKind> {
 }
 
 #[test]
+fn attribute_duplicates_and_defaults_across_small_and_large_elements() {
+    for count in [1, 8, 9, 32] {
+        let attributes: String = (0..count).map(|i| format!(" a{i}='{i}'")).collect();
+        let valid = format!(
+            "<!DOCTYPE r [<!ATTLIST r a0 CDATA 'default' extra CDATA 'added'>]><r{attributes}/>"
+        );
+        for chunk in [1, 7, valid.len()] {
+            let events = parse(valid.as_bytes(), chunk, Config::default()).unwrap();
+            let Some(EventKind::StartElement { attributes, .. }) = events
+                .iter()
+                .find(|event| matches!(event, EventKind::StartElement { .. }))
+            else {
+                panic!("missing root element");
+            };
+            assert_eq!(attributes.len(), count + 1);
+            assert_eq!(attributes[0].value, "0");
+            assert!(attributes[0].specified);
+            assert_eq!(attributes[count].name, "extra");
+            assert!(!attributes[count].specified);
+        }
+        let duplicate = format!("<r{attributes} a0='duplicate'/>");
+        for chunk in [1, 7, duplicate.len()] {
+            assert_eq!(
+                parse(duplicate.as_bytes(), chunk, Config::default()),
+                Err(ErrorKind::DuplicateAttribute)
+            );
+        }
+    }
+}
+
+#[test]
 fn streaming_tokens_references_and_normalization() {
     let events = every_chunk(
         "<?xml version='1.0'?><!-- prolog --><r a=' x\r\ny &#x9; &amp; '><n/>hé😀\r\n&amp;&#x1F600;<![CDATA[x<>&\r\ny]]><?target data?></r><!--done-->",

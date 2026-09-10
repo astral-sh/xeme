@@ -85,9 +85,30 @@ pub fn try_push<T>(values: &mut Vec<T>, value: T) -> Result<(), AllocError> {
     values.push(value);
     Ok(())
 }
+/// Append bitwise copies after reserving all space fallibly.
+///
+/// `allocator-api2` cannot specialize its generic `extend_from_slice` for `Copy`
+/// elements on stable Rust. Copy the whole slice instead of checking capacity
+/// and cloning each byte separately.
+#[inline]
 pub fn try_extend_from_slice<T: Copy>(values: &mut Vec<T>, other: &[T]) -> Result<(), AllocError> {
+    let old_len = values.len();
+    let new_len = old_len
+        .checked_add(other.len())
+        .ok_or(AllocError::CapacityOverflow)?;
     values.try_reserve(other.len())?;
-    values.extend_from_slice(other);
+    // SAFETY: Reservation provides space for every copied element, and both
+    // pointers are aligned even for empty or zero-sized slices. The exclusive
+    // vector borrow excludes overlap with `other`. `Copy` elements need no
+    // cloning or destruction, and the new length exposes only initialized data.
+    unsafe {
+        std::ptr::copy_nonoverlapping(
+            other.as_ptr(),
+            values.as_mut_ptr().add(old_len),
+            other.len(),
+        );
+        values.set_len(new_len);
+    }
     Ok(())
 }
 pub fn try_insert<K: Eq + std::hash::Hash, V>(

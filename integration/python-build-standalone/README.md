@@ -97,15 +97,14 @@ license directory, and its extension metadata references Oriole's notices.
 
 ## Validation
 
-The latest candidate at [`1262888`](https://github.com/astral-sh/oriole/commit/1262888)
+The runtime at [`1262888`](https://github.com/astral-sh/oriole/commit/1262888)
 includes external DTD declaration grammar, internal declaration composition,
 namespace and encoding corrections, foreign-DTD read policy, and completed-parser
-API behavior. Its [combined source report](../../docs/validation/2026-09-10/external-grammar/)
-records the full API and W3C matrices and independent review. The dedicated PBS
-gate rebuilds this source and exercises the resulting distribution, including
-glibc 2.17; its results are recorded separately from the earlier successful build
-below. Local tests and earlier archive results do not establish this candidate's
-distribution result.
+API behavior. Its [complete distribution validation](../../docs/validation/2026-09-10/pbs-final/)
+passes the archive validator, custom checks, installed XML suites, parser identity,
+and the actual glibc 2.17 baseline. Source/header/manifest hashes match the
+[final local validation and benchmarks](../../docs/validation/2026-09-10/final-runtime/);
+the PBS stable-toolchain bundle has its own binary and distribution hashes.
 
 The combined runtime at [`b68bdca`](https://github.com/astral-sh/oriole/commit/b68bdca)
 includes the reviewed external-value continuations, declaration Default callbacks,
@@ -142,14 +141,12 @@ retain archive hashes and glibc/native-library results. Re-run allocator failure
 callback lifecycle, differential, and sanitizer gates on the same Oriole source.
 The CPython static-extension harness in `tools/cpython/` is a separate local gate.
 
-The [completed Linux x86-64 validation](../../docs/validation/2026-09-10/pbs-values/)
-passes the archive validator, custom distribution checks, installed XML suites,
-and the actual CentOS 7/glibc 2.17 runtime. Its manifest identifies the earlier
-`b68bdca` runtime used for the combined benchmarks and sustained fuzz campaigns;
-later source checkpoints require their own distribution builds.
-The experimental archive is retained as a seven-day CI artifact, with permanent
-hashes and complete compressed logs in the repository. Earlier build failures
-and their corrections remain documented.
+The [completed Linux x86-64 validation](../../docs/validation/2026-09-10/pbs-final/)
+identifies runtime `1262888`, matching the final consumer, benchmark and sustained
+fuzz source. The experimental archive is retained as a seven-day CI artifact;
+permanent hashes, metadata, complete compressed logs and independent audits are
+in the repository. Earlier successful archives and failures remain separately
+identified by their source revisions.
 
 macOS packaging, Windows packaging, cross builds, and fully static Python
 validation remain open. The default PBS dependency should remain Expat until the

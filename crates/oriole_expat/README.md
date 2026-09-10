@@ -121,9 +121,11 @@ The following Expat modes are explicitly unsupported:
 
 Reparse deferral is configurable, with progressive scanning in both modes. The
 live-allocation tracker supports Expat's maximum-amplification and activation
-threshold controls, including child allocations. Defaults are 100 times the root's
-input size, activated at 64 MiB of live allocation. Allocation headers retain their
-tracker through reallocation and through destruction of their original parser.
+threshold controls, including child allocations and blocks requested through
+`XML_MemMalloc`/`XML_MemRealloc`. These helpers can fail the configured relative
+limit even for a small request; they are not exempt from family accounting.
+Defaults are 100 times the root's input size, activated at 64 MiB of live
+allocation. Allocation headers retain their tracker through reallocation and through destruction of their original parser.
 A separate 512 MiB ceiling on live backing allocations remains active even when
 relative amplification checks are disabled.
 

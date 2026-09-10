@@ -12,7 +12,7 @@ The [final runtime package](final-runtime/) identifies parser revision `1262888`
 | Generated differential corpus | 12,318 semantic comparisons pass; six exact-fragment and 450 final-position differences remain | [Final generated corpus](final-runtime/) |
 | Three ten-minute Rust ASan campaigns | 3,912,477 executions without findings; 15,713 corpus input files and 84 stress replays | [Frozen source, corpora and audits](final-runtime/) |
 | W3C acceptance corpus | 5,916 required checks pass, six fail; 81 optional observations, no resolver errors | [Full results](external-grammar/) |
-| Final full PBS distribution | Build and installed-distribution gates in progress | [Dedicated build](https://github.com/astral-sh/oriole/actions/runs/34456274540) |
+| Final full PBS distribution | All distribution gates pass, including installed XML suites and glibc 2.17 | [Final archive, logs and source audit](pbs-final/) |
 
 [Final benchmarks](../../../benchmarks/results/2026-09-10/final-runtime/) measure the same runtime through the C and safe Rust APIs, with namespace modes, alternate allocators and DTD scaling. Oriole remains about 5–11 times slower than Expat on the 4 KiB generated C workloads. Raw runs, semantic preflights, allocation counts and limitations are retained.
 
@@ -97,10 +97,9 @@ atomic lifetime tokens. Related parser operations still require serialization.
 
 The [PBS recipe](../../../integration/python-build-standalone/) has a real PIC
 archive, native static consumer checks, and complete-archive shared-link validation.
-The [earlier `b68bdca` PBS job](pbs-values/) passed the complete Linux x86-64 distribution, its
+The [final `1262888` PBS job](pbs-final/) passes the complete Linux x86-64 distribution, its
 metadata/linkage validator, and the resulting interpreter's XML tests, including
-the actual glibc 2.17 baseline. The final-runtime build is tracked above. Other
-distribution targets need separate validation.
+the actual glibc 2.17 baseline. Other distribution targets need separate validation.
 
 Complete Expat compatibility, unsupported DTD/custom-encoding modes, strict callback
 and position equivalence, and broader target distribution validation remain open.

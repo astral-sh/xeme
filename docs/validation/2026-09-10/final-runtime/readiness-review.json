@@ -1,0 +1,335 @@
+{
+  "status": "bounded_readiness_audit_complete_no_new_serious_finding",
+  "reviewer": "/root/ffi/conditional_review",
+  "audit_time_utc": "2026-09-10T09:14:28Z",
+  "runtime_commit": "1262888",
+  "library_sha256": "ff5d86621114e464a0b20f108b6308fe155d9e8c87bd764bc00872cf124750f8",
+  "scope": {
+    "method": "Read-only report/assertion/source review. No runtime edits, suite reruns or new probes.",
+    "full_matrix": {
+      "pass": 3753,
+      "fail": 987,
+      "signals": 0,
+      "timeouts": 0
+    },
+    "reviewed_nonallocation_first_failure_names": 32,
+    "reviewed_failed_configurations": 357,
+    "allocation_family_excluded": "test_alloc_*, test_nsalloc_*, and test_misc_alloc_create_parser_with_encoding:58 names/630 failed configurations, covered by the separate allocation audit.",
+    "important_limit": "Each upstream configuration stops at its first failed assertion. Classification explains those observed failures; it does not prove that later assertions in each test would pass."
+  },
+  "categories": {
+    "malformed_diagnostic_codes": {
+      "test_names": 11,
+      "failed_configurations": 132,
+      "tests": {
+        "test_bad_attr_desc_keyword": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     2: syntax error (line 2, offset 2)\nASSERTION: test_bad_attr_desc_keyword at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:5444"
+          ]
+        },
+        "test_bad_doctype": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     4: not well-formed (invalid token) (line 2, offset 16)\nASSERTION: test_bad_doctype at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:5483"
+          ]
+        },
+        "test_bad_doctype_plus": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     2: syntax error (line 1, offset 0)\nASSERTION: test_bad_doctype_plus at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:5519"
+          ]
+        },
+        "test_bad_doctype_query": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     2: syntax error (line 1, offset 0)\nASSERTION: test_bad_doctype_query at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:5537"
+          ]
+        },
+        "test_bad_doctype_star": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     2: syntax error (line 1, offset 0)\nASSERTION: test_bad_doctype_star at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:5528"
+          ]
+        },
+        "test_bad_public_doctype": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     2: syntax error (line 1, offset 0)\nASSERTION: test_bad_public_doctype at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:3867"
+          ]
+        },
+        "test_external_entity_values": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     2: syntax error (line 1, offset 0)\nASSERTION: test_external_entity_values at /tmp/oriole-upstream-grammar-combined/adapted/handlers.c:1009"
+          ]
+        },
+        "test_invalid_foreign_dtd": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     2: syntax error (line 1, offset 0)\nASSERTION: test_invalid_foreign_dtd at /tmp/oriole-upstream-grammar-combined/adapted/handlers.c:506"
+          ]
+        },
+        "test_misc_deny_internal_entity_closing_doctype_issue_317": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR: Error code does not match XML_ERROR_INVALID_TOKEN\nASSERTION: test_misc_deny_internal_entity_closing_doctype_issue_317 at /tmp/oriole-upstream-grammar-combined/adapted/misc_tests.c:446"
+          ]
+        },
+        "test_ns_invalid_doctype": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     2: syntax error (line 1, offset 0)\nASSERTION: test_ns_invalid_doctype at /tmp/oriole-upstream-grammar-combined/adapted/ns_tests.c:671"
+          ]
+        },
+        "test_short_doctype": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     7: mismatched tag (line 1, offset 16)\nASSERTION: test_short_doctype at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:5672"
+          ]
+        }
+      }
+    },
+    "position_observations": {
+      "test_names": 2,
+      "failed_configurations": 24,
+      "tests": {
+        "test_byte_info_at_end": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR: Byte index/count incorrect at start of parse\nASSERTION: test_byte_info_at_end at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:3489"
+          ]
+        },
+        "test_misc_async_entity_rejected": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR: check failed: XML_GetCurrentColumnNumber(parser) == testCase.expectedErrorColumn\nASSERTION: test_misc_async_entity_rejected at /tmp/oriole-upstream-grammar-combined/adapted/misc_tests.c:774"
+          ]
+        }
+      }
+    },
+    "unsupported_input_context": {
+      "test_names": 2,
+      "failed_configurations": 24,
+      "tests": {
+        "test_byte_info_at_cdata": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR: Failed to get context buffer\nASSERTION: test_byte_info_at_cdata at /tmp/oriole-upstream-grammar-combined/adapted/handlers.c:1660"
+          ]
+        },
+        "test_misc_expected_event_ptr_issue_980": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR: check failed: context != NULL\nASSERTION: test_misc_expected_event_ptr_issue_980 at /tmp/oriole-upstream-grammar-combined/adapted/misc_tests.c:643"
+          ]
+        }
+      }
+    },
+    "incremental_callback_timing": {
+      "test_names": 1,
+      "failed_configurations": 12,
+      "tests": {
+        "test_reparse_deferral_is_inherited": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR: check failed: testdata.count == 1\nASSERTION: test_reparse_deferral_is_inherited at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:6162"
+          ]
+        }
+      }
+    },
+    "custom_converter_ascii_aliases": {
+      "test_names": 3,
+      "failed_configurations": 36,
+      "tests": {
+        "test_misc_unknown_encoding_callbacks_protected": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR: check failed: XML_Parse(parser, doc, (int)strlen(doc), XML_TRUE) == XML_STATUS_OK\nASSERTION: test_misc_unknown_encoding_callbacks_protected at /tmp/oriole-upstream-grammar-combined/adapted/misc_tests.c:888"
+          ]
+        },
+        "test_unknown_encoding_long_name_1": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     4: not well-formed (invalid token) (line 2, offset 29)\nASSERTION: test_unknown_encoding_long_name_1 at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:4819"
+          ]
+        },
+        "test_unknown_encoding_success": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     4: not well-formed (invalid token) (line 2, offset 1)\nASSERTION: test_unknown_encoding_success at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:4776"
+          ]
+        }
+      }
+    },
+    "broader_unicode_name_repertoire": {
+      "test_names": 2,
+      "failed_configurations": 18,
+      "tests": {
+        "test_long_utf8_character": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR: 4-byte UTF-8 character in element name not faulted\nASSERTION: test_long_utf8_character at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:447"
+          ]
+        },
+        "test_utf8_in_start_tags": {
+          "failed_configurations": 6,
+          "first_assertion_observations": [
+            "ERROR: UTF-8 regression detected\nASSERTION: test_utf8_in_start_tags at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:5333"
+          ]
+        }
+      }
+    },
+    "unsupported_security_configuration_setters": {
+      "test_names": 3,
+      "failed_configurations": 36,
+      "tests": {
+        "test_amplification_isolated_external_parser": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR: check failed: XML_SetBillionLaughsAttackProtectionMaximumAmplification( parser, maximumToleratedAmplification) == XML_TRUE\nASSERTION: test_amplification_isolated_external_parser at /tmp/oriole-upstream-grammar-combined/adapted/acc_tests.c:161"
+          ]
+        },
+        "test_billion_laughs_attack_protection_api": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR: Call with positive limit >=1.0 is supposed to succeed\nASSERTION: test_billion_laughs_attack_protection_api at /tmp/oriole-upstream-grammar-combined/adapted/acc_tests.c:98"
+          ]
+        },
+        "test_hash_salt_setter": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR: check failed: XML_SetHashSalt16Bytes(parser, entropy) == XML_TRUE\nASSERTION: test_hash_salt_setter at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:207"
+          ]
+        }
+      }
+    },
+    "implementation_identity": {
+      "test_names": 1,
+      "failed_configurations": 12,
+      "tests": {
+        "test_misc_version": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR: Version mismatch\nASSERTION: test_misc_version at /tmp/oriole-upstream-grammar-combined/adapted/misc_tests.c:220"
+          ]
+        }
+      }
+    },
+    "absolute_resource_limits": {
+      "test_names": 5,
+      "failed_configurations": 50,
+      "tests": {
+        "test_buffer_can_grow_to_max": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR: check failed: XML_GetBuffer(parser, maxbuf - prefix_len) != NULL\nASSERTION: test_buffer_can_grow_to_max at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:3456"
+          ]
+        },
+        "test_deep_nested_attribute_entity": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     43: limit on input amplification factor (from DTD and entities) breached (line 10002, offset 2)\nASSERTION: test_deep_nested_attribute_entity at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:5905"
+          ]
+        },
+        "test_deep_nested_entity": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     43: limit on input amplification factor (from DTD and entities) breached (line 10002, offset 2)\nASSERTION: test_deep_nested_entity at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:5859"
+          ]
+        },
+        "test_deep_nested_entity_delayed_interpretation": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR:     43: limit on input amplification factor (from DTD and entities) breached (line 10002, offset 2)\nASSERTION: test_deep_nested_entity_delayed_interpretation at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:5946"
+          ]
+        },
+        "test_misc_input_2gb": {
+          "failed_configurations": 2,
+          "first_assertion_observations": [
+            "ERROR: check failed: XML_Parse(parser, buf, sizeof(buf), XML_FALSE) == XML_STATUS_OK\nASSERTION: test_misc_input_2gb at /tmp/oriole-upstream-grammar-combined/adapted/misc_tests.c:951"
+          ]
+        }
+      }
+    },
+    "memory_helper_tracker_contract": {
+      "test_names": 1,
+      "failed_configurations": 12,
+      "tests": {
+        "test_mem_api_unlimited": {
+          "failed_configurations": 12,
+          "first_assertion_observations": [
+            "ERROR: check failed: ptr != NULL\nASSERTION: test_mem_api_unlimited at /tmp/oriole-upstream-grammar-combined/adapted/alloc_tests.c:2197"
+          ]
+        }
+      }
+    },
+    "allocation_growth_heuristic": {
+      "test_names": 1,
+      "failed_configurations": 1,
+      "tests": {
+        "test_bypass_heuristic_when_close_to_bufsize": {
+          "failed_configurations": 1,
+          "first_assertion_observations": [
+            "ERROR: check failed: g_totalAlloc - alloc_before < 4096\nASSERTION: test_bypass_heuristic_when_close_to_bufsize at /tmp/oriole-upstream-grammar-combined/adapted/basic_tests.c:6398"
+          ]
+        }
+      }
+    }
+  },
+  "security_and_data_review": [
+    "The asynchronous-entity regression fails at column comparison after its parse-status and XML_ERROR_ASYNC_ENTITY assertions succeed. It does not report accepted cross-entity markup.",
+    "The internal-entity-closes-DOCTYPE regression rejects before its error-code comparison fails. It does not report acceptance of the attempted source-boundary escape.",
+    "The external-entity-values and invalid-foreign-DTD failures shown here are child malformed-input diagnostic mismatches; the tests reach code-comparison assertions, rather than unexpected successful acceptance.",
+    "The unknown-encoding callback-protection test deliberately converts a multibyte sequence to ASCII A. The supported contract rejects that alias. This test consequently does not establish its later release/reentry assertions, which are covered separately for supported conversions by lifecycle regressions and the callback-driven ASan campaigns.",
+    "Caller salt setters reject unsupported requests, while actual entity/namespace maps use std::collections::hash_map::RandomState rather than an unseeded fixed hasher.",
+    "Relative entity-amplification setters reject unsupported requests; this is distinct from the supported live-allocation tracker controls. Absolute family input/expansion/depth/metadata limits remain active.",
+    "test_mem_api_unlimited is specifically a tracker-scope difference: after setting activation threshold0, a1000-byte XML_MemMalloc is rejected because Oriole tracks helper allocations. It is not merely the512MiB backing ceiling or an observed corrupting allocation failure.",
+    "The UTF8-start-tag failure output identifies only case19, U+0901 at NameStart; supplementary-name acceptance is also intentionally broader than pinned Expat. These are documented name-repertoire differences, not reported acceptance of malformed UTF8.",
+    "No previously unreported successful-document data loss, ownership violation, acceptance bypass or memory-safety defect was identified in these observed assertions and associated source paths. This is a scoped negative finding, not proof of absence."
+  ],
+  "broad_drop_in_blockers": [
+    "357 remaining non-allocation configurations and630 allocation-contract configurations remain failures, even where the behavior is intentional or the diagnostic overlay explains a retry ceiling.",
+    "Consumers depending on exact malformed error codes, positions, callback fragmentation/timing/partial error callbacks or XML_GetInputContext cannot assume Expat equivalence.",
+    "Custom converters that alias ASCII, delayed external-value encoding declarations, broader Unicode names, non-ASCII namespace separators, wide-character and XML_LARGE_SIZE builds have explicit incompatibilities or unsupported modes.",
+    "Caller-provided hash salts, relative entity-amplification setters, absolute family/resource ceilings and tracked XML_MemMalloc/Realloc helpers require consumer-specific handling. Large or deeply nested otherwise well-formed inputs may be rejected.",
+    "Version structure identifies target API2.8.4 while the string identifies oriole_0.0.1; software assuming matching identity strings/version semantics must account for this documented distinction.",
+    "The measured C interface remains about5\u201311 times slower on generated4KiB workloads. Application capacity/latency needs its own measurement.",
+    "Additional distribution targets and final installed-interpreter/PBS validation are separate deployment gates."
+  ],
+  "bounded_trial_assessment": {
+    "assessment": "The retained evidence supports a controlled, opt-in CPython3.12.13 Linuxx86-64 trial for workloads within the documented contract, once the exact final PBS artifact completes its installed-interpreter and baseline gates. It does not support replacing arbitrary Expat consumers by default.",
+    "support": [
+      "Actual pinned CPython XML consumers succeed across shared/static and original/fixed cleanup configurations; the explicit cleanup fix remains part of the intended integration.",
+      "246 workspace tests, native callback/allocation probes, semantic differential comparisons, W3C acceptance observations and the final3,912,477-execution ASan checkpoint cover the tested bounded deployment.",
+      "Source, binary, input and command hashes preserve the exact lineage; failure/skip counts and remaining contracts are retained."
+    ],
+    "conditions": [
+      "Use the opt-in integration and retain a way to compare/return to the reference build during the trial.",
+      "Check the application uses supported encoding, namespace, entity, callback and input-size behavior, and handles parse errors/unsupported setter returns.",
+      "Evaluate actual application throughput and memory under representative workloads; generated parser benchmarks do not establish CPython application performance.",
+      "At this audit time the exact final PBS run34456274540 was still pending according to the root task. Its actual outcome must be recorded separately; earlier successful archives are not substituted."
+    ]
+  },
+  "evidence_hashes": {
+    "results.json": "efbc25ed1aa35a74bd48c33664384539de7ce09937401ab9b445ec52d7506c93",
+    "tests.log": "aa74f3b63b0b58ae81330393cbb032055f6cbe6b67467c21656916f0f87ff7ad",
+    "manifest.json": "63a29a6d6485bcceaca672609ccbeb7ef7c7d6ba35cf03279f0f7b7a639dd5f0",
+    "adapted/basic_tests.c": "7b296d5d7efdb0cace491a8abc77a6ad669b07a3474dfcb94e393b5575d01ea3",
+    "adapted/misc_tests.c": "ee1cf0c22e2b3ef36603d897ba25a64c818f94ab7b12f33d5c7c43f979b12f75",
+    "adapted/handlers.c": "82d1fc40333e27bf43208c62f03275c08982c9904b866acf8eb0e262893b26a9",
+    "adapted/acc_tests.c": "9c7af0ac02920777515a52ebe4f11cf3e397fc3ede28ce3795d97520b2e61a51",
+    "adapted/alloc_tests.c": "9ab0a92a26a12f05d3c3ab73689050d16857c2ae36f8632ec52a47bae5dac1ca",
+    "adapted/ns_tests.c": "7c3c2272517e65c0a083cb903f64f2e6ebfd0aa499ec023904458b4a2e20a409",
+    "crates/oriole_expat/README.md": "2566c632d4adacda8d728bf9fa5f1b405426fdc7d6ab220606506b5fcba61ae4",
+    "crates/oriole_expat/src/lib.rs": "4f9ceb7bd892b8bf6ac232482d7cb3a6f19698196379f80e4809f263f20eba06",
+    "crates/oriole/src/lib.rs": "92b021ee6f6bd5294a6d0edc9494932dc043c1eb22ec17d9d86b433e654aed79",
+    "crates/oriole_storage/src/lib.rs": "48e7760841923e645db631b5c58f7737a2460b0fa5cefc2debf85e3690ef7a19",
+    "crates/oriole_storage/src/tracking.rs": "c6f53efa24a5c31dad71d597c42612748c3209796507a2b2eafb7368a1b69cc6"
+  },
+  "related_reviews": [
+    "/tmp/oriole-final-fuzz-independent-review.json",
+    "/tmp/oriole-final-benchmark-independent-review.json",
+    "/tmp/oriole-final-checkpoint-doc-review.json"
+  ]
+}

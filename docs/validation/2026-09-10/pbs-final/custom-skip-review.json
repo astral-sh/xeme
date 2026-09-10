@@ -1,0 +1,52 @@
+{
+  "status": "source_and_retained_log_audit_passed",
+  "reviewer": "/root/ffi/conditional_review",
+  "method": "No test reruns or imports. AST method ordering and retained unittest progress characters identify the five skipped tests; source decorators identify their scope.",
+  "runner_behavior": "pythonbuild.testdist.main always invokes run_custom_unittests once. --stdlib additionally invokes run_stdlib_tests, so the separate custom invocation and XML-stdlib invocation each run the same22-test custom suite. One22/5 summary is in pbs-custom-tests.log and the other in pbs-xml-tests.log; they are not two distinct custom suites.",
+  "observations": {
+    "pbs-custom-tests.log": {
+      "progress": "...s.s............s.ss",
+      "skipped": [
+        "test_curses_interactive",
+        "test_gil_disabled",
+        "test_ssl_with_keylogfile",
+        "test_tkinter",
+        "test_zstd_multithreaded"
+      ],
+      "reported_tests": 22,
+      "non_skipped_successful_tests": 17,
+      "log_sha256": "9fad26681c547c96e4059c077e3b2ce0672a327ab3bcc92718c8c0677f3308dc"
+    },
+    "pbs-xml-tests.log": {
+      "progress": "...s.s............s.ss",
+      "skipped": [
+        "test_curses_interactive",
+        "test_gil_disabled",
+        "test_ssl_with_keylogfile",
+        "test_tkinter",
+        "test_zstd_multithreaded"
+      ],
+      "reported_tests": 22,
+      "non_skipped_successful_tests": 17,
+      "log_sha256": "6749b511be7e987b3facdbf96030f2c29457d0668a51cccec272c4a66386875f"
+    }
+  },
+  "skip_classification": {
+    "test_curses_interactive": "Interactive curses/terminal test. Linux excludes the Windows predicate; absence of TERM is the remaining source skip condition.",
+    "test_gil_disabled": "Py_GIL_DISABLED/free-threading build configuration; gated to Python3.13+, unavailable for the tested3.12.13 interpreter.",
+    "test_ssl_with_keylogfile": "Windows-specific OpenSSL uplink/SSLKEYLOGFILE regression; excluded on the tested Linux build.",
+    "test_tkinter": "GUI/Tcl/Tk construction test, gated on DISPLAY and TCL_LIBRARY. Terse progress output identifies the skipped test but does not distinguish which missing-variable predicate fired.",
+    "test_zstd_multithreaded": "compression.zstd worker support; gated to Python3.14+, unavailable for3.12.13."
+  },
+  "scope": [
+    "The five skips cover terminal/GUI, Windows SSL behavior and features introduced after Python3.12; none is an Expat/XML test.",
+    "Each custom invocation reports22 tests with5 skips, therefore17 non-skipped successful tests. Repetition under --stdlib does not double unique test coverage.",
+    "The six installed XML modules and their802 reported tests/13 skips are a separate stdlib result, outside these custom-suite counts."
+  ],
+  "source_hashes": {
+    "test-distribution.py": "ab1fc65b09950f399ea9b49e709d6ba880477bf0b8c4dc22fbdc91e8290c9325",
+    "pythonbuild/testdist.py": "9e273eb1c2187d940df36613fa0db7a702afb8dfe63e26f32a3aa8f719e24772",
+    "pythonbuild/disttests/__init__.py": "451bdc0f94c418c4f87a302496add2e06b071499228740038b6b51db33b4a5bd"
+  },
+  "issues": []
+}

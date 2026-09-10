@@ -20,6 +20,8 @@ not silently accept malformed XML.
 
 ## Review and performance
 
+The [stack review guide](docs/review.md) links the implementation layers and explains how to read their evidence.
+
 Keep parser behavior, C integration, validation, and optimizations in separately
 reviewable changes. Review input limits and callback reentry independently of the
 feature implementation. Record unresolved findings as release blockers.

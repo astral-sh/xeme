@@ -361,6 +361,15 @@ impl Decoder {
         Ok(Some((Encoding::Utf8, skip)))
     }
 
+    /// A parameter child is read once its protocol encoding is known, even for
+    /// empty non-final input that does not complete byte-order detection.
+    pub(crate) fn protocol_encoding_ready(&self) -> bool {
+        self.encoding.is_some()
+            || self.requested.as_deref().is_none_or(|name| {
+                Encoding::named(name).is_some() || name.eq_ignore_ascii_case("UTF-16")
+            })
+    }
+
     pub(crate) fn unknown_encoding(&self) -> Option<&str> {
         self.unknown_name.as_deref()
     }

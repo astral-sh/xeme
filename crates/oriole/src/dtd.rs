@@ -2,7 +2,8 @@ use crate::{
     DefaultAttribute, DefaultAttributes, Entity, Error, ErrorKind, EventKind, Parser, Position,
     character_reference, collapse_spaces, normalize_newlines, string, take_name, whitespace,
 };
-use oriole_storage::{Allocator, String, TryClone, Vec, try_insert, try_push};
+use oriole_storage::{Allocator, Shared, String, TryClone, Vec, try_insert, try_push};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 #[derive(Debug)]
 pub(crate) struct ConditionalState {
@@ -11,6 +12,7 @@ pub(crate) struct ConditionalState {
     ignored_source: usize,
     ignored_bytes: usize,
     header_checked: usize,
+    header: Option<HeaderContinuation>,
 }
 
 impl ConditionalState {
@@ -21,8 +23,39 @@ impl ConditionalState {
             ignored_source: 0,
             ignored_bytes: 0,
             header_checked: 0,
+            header: None,
         }
     }
+}
+
+#[derive(Debug)]
+struct HeaderFrame {
+    text: String,
+    offset: usize,
+    name: Option<String>,
+    position: Option<Position>,
+}
+
+#[derive(Debug)]
+struct HeaderExternal {
+    name: String,
+    system_id: Option<String>,
+    public_id: Option<String>,
+    position: Position,
+    read: Shared<AtomicBool>,
+    delivered: bool,
+}
+
+#[derive(Debug)]
+struct HeaderContinuation {
+    frames: Vec<HeaderFrame>,
+    selected: Option<bool>,
+    skipped: bool,
+    raw: String,
+    raw_position: Position,
+    expanded_bytes: usize,
+    end: usize,
+    external: Option<HeaderExternal>,
 }
 
 /// A replacement is a distinct lexical source: references cannot span frames,
@@ -34,42 +67,72 @@ struct EntityValueFrame<'a> {
 }
 
 impl Parser {
-    fn expand_conditional_keyword<'a>(
-        &'a self,
-        text: &'a str,
-        chain: &mut Vec<&'a str>,
-        output: &mut String,
-        selected: &mut Option<bool>,
-        skipped: &mut bool,
-        disabled: &mut Vec<usize>,
-    ) -> Result<(), Error> {
-        let mut rest = text;
-        loop {
-            let offset = rest.find('%').unwrap_or(rest.len());
-            // Parameter replacement adds lexical boundaries even though those
-            // virtual spaces are not delivered to the default handler.
-            let word = rest[..offset].trim_matches(whitespace);
+    /// Continue a conditional header after an external DTD callback. Each frame
+    /// owns its lexical boundary, so child input never becomes parent syntax.
+    fn continue_conditional_header(&mut self) -> Result<bool, Error> {
+        let mut header = self.conditional.header.take().expect("pending header");
+        if let Some(mut external) = header.external.take() {
+            if !external.delivered {
+                external.read.store(false, Ordering::Relaxed);
+                let kind = EventKind::ExternalEntityReference {
+                    context: None,
+                    system_id: external.system_id.try_clone()?,
+                    public_id: external.public_id.try_clone()?,
+                };
+                self.emit(kind, external.position)?;
+                let mut raw = string("%", self.allocator)?;
+                raw.push_str(&external.name)?;
+                raw.push(';')?;
+                self.pending.back_mut().expect("external event").raw = Some(raw);
+                external.delivered = true;
+                header.external = Some(external);
+                self.conditional.header = Some(header);
+                return Ok(true);
+            }
+            if external.read.load(Ordering::Relaxed) {
+                if !self.standalone {
+                    self.emit(EventKind::NotStandalone, external.position)?;
+                    self.event_raw("")?;
+                    self.conditional.header = Some(header);
+                    return Ok(true);
+                }
+            } else {
+                header.skipped = true;
+                self.declarations_skipped |= !self.standalone;
+            }
+        }
+        while let Some(frame) = header.frames.last_mut() {
+            let rest = &frame.text[frame.offset..];
+            let literal = rest.find('%').unwrap_or(rest.len());
+            let word = rest[..literal].trim_matches(whitespace);
             if !word.is_empty() {
-                *selected = Some(match (word, *selected) {
+                header.selected = Some(match (word, header.selected) {
                     ("INCLUDE", None) => true,
                     ("IGNORE", None) => false,
                     _ => {
+                        let leading = rest[..literal].len()
+                            - rest[..literal].trim_start_matches(whitespace).len();
+                        header.raw.push_str(&rest[..leading])?;
+                        self.flush_conditional_header_raw(&mut header)?;
                         return Err(
                             self.err(ErrorKind::Syntax, "invalid conditional section keyword")
                         );
                     }
                 });
             }
-            if output.len().saturating_add(offset) > self.config.limits.max_token_bytes {
+            if header.expanded_bytes.saturating_add(literal) > self.config.limits.max_token_bytes {
                 return Err(self.err(
                     ErrorKind::LimitExceeded,
                     "expanded conditional header limit exceeded",
                 ));
             }
-            output.try_push_str(&rest[..offset])?;
-            rest = &rest[offset..];
+            header.expanded_bytes += literal;
+            header.raw.push_str(&rest[..literal])?;
+            frame.offset += literal;
+            let rest = &frame.text[frame.offset..];
             if rest.is_empty() {
-                return Ok(());
+                header.frames.pop();
+                continue;
             }
             let end = rest.find(';').ok_or_else(|| {
                 self.err(
@@ -86,37 +149,62 @@ impl Parser {
                     "invalid conditional parameter name",
                 ));
             }
+            let position = frame
+                .position
+                .unwrap_or_else(|| self.source().position_at(3 + frame.offset, end + 1));
             let entity = self.parameter_entities.get(name);
-            // An external subset that is already being parsed uses mode 1
-            // even when the parent document declared standalone="yes".
             if self.parameter_mode == 0 || entity.is_none() {
-                if output.len().saturating_add(end + 1) > self.config.limits.max_token_bytes {
+                if header.expanded_bytes.saturating_add(end + 1)
+                    > self.config.limits.max_token_bytes
+                {
                     return Err(self.err(
                         ErrorKind::LimitExceeded,
                         "expanded conditional header limit exceeded",
                     ));
                 }
-                *skipped = true;
+                header.expanded_bytes += end + 1;
+                header.skipped = true;
+                self.declarations_skipped |= !self.standalone;
+                // Own the reference before releasing the frame borrow to emit.
+                let reference = string(&rest[..end + 1], self.allocator)?;
+                frame.offset += end + 1;
                 if self.parameter_mode == 0 && !self.standalone {
-                    // This reference can queue a NotStandalone event and a
-                    // Default fragment. Charge their structural storage before
-                    // retaining the offset, even when replacement is disabled.
-                    self.charge_expansion(
-                        2 * size_of::<crate::PendingEvent>() + size_of::<usize>(),
-                    )?;
-                    try_push(disabled, 3 + text.len() - rest.len())?;
+                    self.charge_expansion(2 * size_of::<crate::PendingEvent>())?;
+                    self.flush_conditional_header_raw(&mut header)?;
+                    self.emit(EventKind::NotStandalone, position)?;
+                    self.event_raw("")?;
                 }
-                output.try_push_str(&rest[..end + 1])?;
-                rest = &rest[end + 1..];
+                header.raw.push_str(&reference)?;
                 continue;
             }
-            if chain.contains(&name) {
+            self.charge_expansion(end + 1 + size_of::<HeaderFrame>())?;
+            let name = string(name, self.allocator)?;
+            frame.offset += end + 1;
+            if header
+                .frames
+                .iter()
+                .any(|frame| frame.name.as_ref() == Some(&name))
+                || self.sources.iter().any(|source| {
+                    source
+                        .entity_name
+                        .as_deref()
+                        .and_then(|name| name.strip_prefix('%'))
+                        == Some(name.as_str())
+                })
+                || self
+                    .entity_chain
+                    .iter()
+                    .any(|active| active.strip_prefix('%') == Some(name.as_str()))
+            {
                 return Err(self.err(
                     ErrorKind::RecursiveEntityReference,
                     "recursive conditional parameter entity",
                 ));
             }
-            if chain.len() + self.sources.len() + self.external_depth
+            if header.frames.len() - 1
+                + self.sources.len()
+                + self.external_depth
+                + self.inherited_parameter_depth
                 > self.config.limits.max_entity_depth
             {
                 return Err(self.err(
@@ -124,19 +212,124 @@ impl Parser {
                     "conditional parameter nesting limit exceeded",
                 ));
             }
-            let entity = entity.expect("enabled, declared parameter entity");
-            let value = entity.value.as_ref().ok_or_else(|| {
-                self.err(
-                    ErrorKind::ExternalEntityHandling,
-                    "external parameter reference inside a conditional header is unsupported",
-                )
-            })?;
-            self.charge_expansion(value.len())?;
-            try_push(chain, name)?;
-            self.expand_conditional_keyword(value, chain, output, selected, skipped, disabled)?;
-            chain.pop();
-            rest = &rest[end + 1..];
+            let entity = entity.expect("enabled declared parameter");
+            if let Some(value) = &entity.value {
+                self.charge_expansion(value.len())?;
+                let text = value.try_clone()?;
+                try_push(
+                    &mut header.frames,
+                    HeaderFrame {
+                        text,
+                        offset: 0,
+                        name: Some(name),
+                        position: Some(position),
+                    },
+                )?;
+                continue;
+            }
+            self.charge_external_identifiers(entity)?;
+            self.charge_expansion(size_of::<HeaderExternal>() + size_of::<AtomicBool>())?;
+            let external = HeaderExternal {
+                name,
+                system_id: entity.system_id.try_clone()?,
+                public_id: entity.public_id.try_clone()?,
+                position,
+                read: match &self.parameter_read {
+                    Some(read) => read.clone(),
+                    None => Shared::try_new_in(AtomicBool::new(false), self.allocator)?,
+                },
+                delivered: false,
+            };
+            self.has_external_subset = true;
+            self.flush_conditional_header_raw(&mut header)?;
+            header.raw_position = self.source().position_at(3 + header.frames[0].offset, 0);
+            header.external = Some(external);
+            self.conditional.header = Some(header);
+            return Ok(true);
         }
+        let Some(included) = header.selected else {
+            self.flush_conditional_header_raw(&mut header)?;
+            return Err(self.err(ErrorKind::Syntax, "missing conditional section keyword"));
+        };
+        if self.conditional.included_sources.len() >= self.config.limits.max_depth {
+            return Err(self.err(
+                ErrorKind::LimitExceeded,
+                "conditional section nesting limit exceeded",
+            ));
+        }
+        if included {
+            try_push(&mut self.conditional.included_sources, self.sources.len())?;
+        } else {
+            self.conditional.ignored_depth = 1;
+            self.conditional.ignored_source = self.sources.len();
+            self.conditional.ignored_bytes = header.end;
+        }
+        if header.skipped {
+            self.has_external_subset = true;
+            self.declarations_skipped |= !self.standalone;
+        }
+        header.raw.push('[')?;
+        self.flush_conditional_header_raw(&mut header)?;
+        self.conditional.header_checked = 0;
+        self.declaration_allowed = false;
+        self.consume(header.end);
+        Ok(true)
+    }
+
+    /// Queue owned raw bytes before yielding to a handler that may change handlers.
+    fn flush_conditional_header_raw(
+        &mut self,
+        header: &mut HeaderContinuation,
+    ) -> Result<(), Error> {
+        let raw = std::mem::replace(&mut header.raw, String::new_in(self.allocator));
+        if self.default_events && !raw.is_empty() {
+            self.emit(EventKind::Default, header.raw_position)?;
+            self.pending.back_mut().expect("default event").raw = Some(raw);
+        }
+        Ok(())
+    }
+
+    /// Inherit active parameter names even though Expat's C context is null.
+    /// A pending header prefix has not begun its external callback yet.
+    pub(crate) fn inherit_parameter_context(&self, child: &mut Self) -> Result<(), Error> {
+        let header = self.conditional.header.as_ref();
+        let external = header
+            .and_then(|header| header.external.as_ref())
+            .filter(|external| external.delivered);
+        let active = external.map(|external| external.name.as_str()).or_else(|| {
+            self.active_parameter_reference
+                .as_ref()
+                .and_then(|(name, _)| name.strip_prefix('%'))
+        });
+        let Some(active) = active else {
+            return Ok(());
+        };
+        let frames = if external.is_some() {
+            header.map(|header| &header.frames[..]).unwrap_or(&[])
+        } else {
+            &[]
+        };
+        let sources = self.sources.iter().filter_map(|source| {
+            source
+                .entity_name
+                .as_deref()
+                .and_then(|name| name.strip_prefix('%'))
+        });
+        for name in sources
+            .chain(frames.iter().filter_map(|frame| frame.name.as_deref()))
+            .chain(std::iter::once(active))
+        {
+            self.charge_expansion(size_of::<String>() + name.len() + 1)?;
+            let mut active = string("%", self.allocator)?;
+            active.push_str(name)?;
+            try_push(&mut child.entity_chain, active)?;
+        }
+        child.inherited_parameter_depth = self.inherited_parameter_depth + self.sources.len() - 1
+            + frames.iter().filter(|frame| frame.name.is_some()).count();
+        if let Some(external) = external {
+            child.parameter_read = Some(external.read.clone());
+        }
+        Ok(())
     }
 
     pub(crate) fn finish_conditional_source(&self) -> Result<(), Error> {
@@ -168,6 +361,9 @@ impl Parser {
     }
 
     fn start_conditional_section(&mut self) -> Result<bool, Error> {
+        if self.conditional.header.is_some() {
+            return self.continue_conditional_header();
+        }
         if !self.external_subset {
             return Err(self.err(
                 ErrorKind::Syntax,
@@ -210,82 +406,53 @@ impl Parser {
             return Ok(false);
         };
         let header = &text[3..end - 1];
-        let keyword = header.trim_matches(whitespace);
-        let has_parameter = keyword.contains('%');
-        let mut expanded = String::new_in(self.allocator);
-        let mut skipped = false;
-        let mut disabled = Vec::new_in(self.allocator);
-        let included = if has_parameter {
-            let mut selected = None;
-            self.expand_conditional_keyword(
-                header,
-                &mut Vec::new_in(self.allocator),
-                &mut expanded,
-                &mut selected,
-                &mut skipped,
-                &mut disabled,
-            )?;
-            selected
-                .ok_or_else(|| self.err(ErrorKind::Syntax, "missing conditional section keyword"))?
-        } else {
-            match keyword {
+        if !header.contains('%') {
+            let included = match header.trim_matches(whitespace) {
                 "INCLUDE" => true,
                 "IGNORE" => false,
                 _ => return Err(self.err(ErrorKind::Syntax, "invalid conditional section keyword")),
+            };
+            if self.conditional.included_sources.len() >= self.config.limits.max_depth {
+                return Err(self.err(
+                    ErrorKind::LimitExceeded,
+                    "conditional section nesting limit exceeded",
+                ));
             }
-        };
-        if self.conditional.included_sources.len() >= self.config.limits.max_depth {
-            return Err(self.err(
-                ErrorKind::LimitExceeded,
-                "conditional section nesting limit exceeded",
-            ));
-        }
-        if included {
-            try_push(&mut self.conditional.included_sources, self.sources.len())?;
-        } else {
-            self.conditional.ignored_depth = 1;
-            self.conditional.ignored_source = self.sources.len();
-            self.conditional.ignored_bytes = end;
-        }
-        self.conditional.header_checked = 0;
-        if skipped {
-            self.has_external_subset = true;
-            self.declarations_skipped |= !self.standalone;
-        }
-        if !disabled.is_empty() && !self.standalone {
-            // Deliver the prefix before the callback: a consumer can stop
-            // parsing from NotStandalone and must not receive later markup.
-            let mut start = 0;
-            for offset in disabled {
-                self.conditional_default_range(start, offset)?;
-                let position = self.source().position_at(offset, 0);
-                self.emit(EventKind::NotStandalone, position)?;
-                self.event_raw("")?;
-                start = offset;
+            if included {
+                try_push(&mut self.conditional.included_sources, self.sources.len())?;
+            } else {
+                self.conditional.ignored_depth = 1;
+                self.conditional.ignored_source = self.sources.len();
+                self.conditional.ignored_bytes = end;
             }
-            self.conditional_default_range(start, end)?;
-            self.declaration_allowed = false;
-            self.consume(end);
+            self.conditional.header_checked = 0;
+            self.conditional_raw(end)?;
             return Ok(true);
         }
-        self.conditional_raw(end)?;
-        if has_parameter && self.default_events {
-            let mut raw = string("<![", self.allocator)?;
-            raw.try_push_str(&expanded)?;
-            raw.try_push('[')?;
-            self.event_raw(&raw)?;
-        }
-        Ok(true)
-    }
-
-    fn conditional_default_range(&mut self, start: usize, end: usize) -> Result<(), Error> {
-        if self.default_events && start != end {
-            let position = self.source().position_at(start, end - start);
-            let raw = string(&self.source().remaining()[start..end], self.allocator)?;
-            self.emit(EventKind::Default, position)?;
-            self.event_raw(&raw)?;
-        }
-        Ok(())
+        self.charge_expansion(
+            size_of::<HeaderContinuation>() + size_of::<HeaderFrame>() + header.len(),
+        )?;
+        let mut frames = Vec::new_in(self.allocator);
+        try_push(
+            &mut frames,
+            HeaderFrame {
+                text: string(header, self.allocator)?,
+                offset: 0,
+                name: None,
+                position: None,
+            },
+        )?;
+        self.conditional.header = Some(HeaderContinuation {
+            frames,
+            selected: None,
+            skipped: false,
+            raw: string("<![", self.allocator)?,
+            raw_position: self.source().position(end),
+            expanded_bytes: 0,
+            end,
+            external: None,
+        });
+        self.continue_conditional_header()
     }
 
     fn parse_ignored_section(&mut self) -> Result<bool, Error> {
@@ -632,10 +799,23 @@ impl Parser {
             }
             return Ok(true);
         }
-        let entity = self
-            .parameter_entities
-            .get(&name)
-            .ok_or_else(|| self.err(ErrorKind::UndefinedEntity, "undefined parameter entity"))?;
+        let Some(entity) = self.parameter_entities.get(&name) else {
+            if !self.external_subset {
+                return Err(self.err(ErrorKind::UndefinedEntity, "undefined parameter entity"));
+            }
+            self.declarations_skipped |= !self.standalone;
+            let raw = string(&self.source().remaining()[..end + 1], self.allocator)?;
+            self.consume(end + 1);
+            self.emit(
+                EventKind::SkippedEntity {
+                    name,
+                    parameter: true,
+                },
+                position,
+            )?;
+            self.pending.back_mut().expect("skipped parameter").raw = Some(raw);
+            return Ok(true);
+        };
         let mut source_name = String::new_in(self.allocator);
         source_name.push('%')?;
         source_name.push_str(&name)?;
@@ -643,13 +823,16 @@ impl Parser {
             .sources
             .iter()
             .any(|source| source.entity_name.as_ref() == Some(&source_name))
+            || self.entity_chain.iter().any(|name| name == &source_name)
         {
             return Err(self.err(
                 ErrorKind::RecursiveEntityReference,
                 "recursive parameter entity",
             ));
         }
-        if self.sources.len() + self.external_depth > self.config.limits.max_entity_depth {
+        if self.sources.len() + self.external_depth + self.inherited_parameter_depth
+            > self.config.limits.max_entity_depth
+        {
             return Err(self.err(
                 ErrorKind::LimitExceeded,
                 "parameter entity nesting limit exceeded",
@@ -668,6 +851,18 @@ impl Parser {
             let system_id = entity.system_id.try_clone()?;
             let public_id = entity.public_id.try_clone()?;
             self.consume(end + 1);
+            let mut raw = source_name.try_clone()?;
+            raw.push(';')?;
+            self.active_parameter_reference = Some((source_name, position));
+            if self.parameter_read.is_none() {
+                self.charge_expansion(size_of::<AtomicBool>())?;
+                self.parameter_read =
+                    Some(Shared::try_new_in(AtomicBool::new(false), self.allocator)?);
+            }
+            self.parameter_read
+                .as_ref()
+                .expect("parameter read marker")
+                .store(false, Ordering::Relaxed);
             self.emit(
                 EventKind::ExternalEntityReference {
                     context: None,
@@ -676,7 +871,7 @@ impl Parser {
                 },
                 position,
             )?;
-            self.event_raw("")?;
+            self.pending.back_mut().expect("external parameter").raw = Some(raw);
         }
         Ok(true)
     }
@@ -1019,6 +1214,10 @@ impl Parser {
                 || parents
                     .iter()
                     .any(|frame: &EntityValueFrame<'_>| frame.name == Some(reference))
+                || self
+                    .entity_chain
+                    .iter()
+                    .any(|name| name.strip_prefix('%') == Some(reference))
                 || self.sources.iter().any(|source| {
                     source
                         .entity_name
@@ -1037,7 +1236,10 @@ impl Parser {
                 skipped = true;
                 continue;
             };
-            if parents.len() + self.sources.len() + self.external_depth
+            if parents.len()
+                + self.sources.len()
+                + self.external_depth
+                + self.inherited_parameter_depth
                 > self.config.limits.max_entity_depth
             {
                 return Err(self.err(

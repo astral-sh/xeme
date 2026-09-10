@@ -158,6 +158,27 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         true,
     )?;
     while next_event(&mut missing)?.is_some() {}
+    let mut header = parent.external_child(None, None)?;
+    header.set_param_entity_parsing(2);
+    header.set_default_events(true);
+    header.feed(
+        b"<!ENTITY % hook SYSTEM 'hook'><![%hook;%keyword;[<!ENTITY loaded 'yes'>]]>",
+        true,
+    )?;
+    while let Some(event) = next_event(&mut header)? {
+        if let EventKind::ExternalEntityReference { context: None, .. } = event.kind {
+            let mut loaded = header.external_child(None, None)?;
+            loaded.feed(b"<!ENTITY % keyword 'INCLUDE'>", true)?;
+            while next_event(&mut loaded)?.is_some() {}
+            if let Err(error) = header.merge_external_subset(&loaded) {
+                let calls = CALLS.get();
+                assert_eq!(header.next_event().unwrap_err(), error);
+                assert_eq!(header.feed(&[], true).unwrap_err(), error);
+                assert_eq!(CALLS.get(), calls);
+                return Err(error);
+            }
+        }
+    }
     let mut parser =
         Parser::try_new_with_encoding_in(Config::default(), Some("custom"), allocator)?;
     parser.feed(b"<r>\x80</r>", true)?;

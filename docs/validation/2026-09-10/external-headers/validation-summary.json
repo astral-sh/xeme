@@ -1,0 +1,38 @@
+{
+  "primary_differential": {
+    "cases": 1836,
+    "status_error_matches": 1792,
+    "status_error_fixed": 1156,
+    "new_status_error_differences": 0,
+    "full_normalized_matches": 896,
+    "new_normalized_differences": 0,
+    "parent_status_error_matches": 1836,
+    "events_except_root_not_standalone_matches": 1836
+  },
+  "extra_mixed_headers": {
+    "cases": 576,
+    "status_error_matches": 576,
+    "scoped_event_matches": 564,
+    "known_duplicate_entity_default_fragment_differences": 12
+  },
+  "upstream": {
+    "reference": {
+      "pass": 192
+    },
+    "baseline": {
+      "pass": 168,
+      "fail": 24
+    },
+    "candidate": {
+      "pass": 192
+    }
+  },
+  "tests": {
+    "core": 97,
+    "ffi": 52,
+    "total": 149,
+    "clippy": "pass",
+    "format": "pass",
+    "allocator_failure_and_no_global_bypass": "pass"
+  }
+}

@@ -13,7 +13,7 @@ use oriole_storage::{
     try_insert, try_push, try_set_insert,
 };
 use std::fmt;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 use encoding::{Decoder, Source};
 use names::{is_name, is_xml_char, whitespace};
@@ -344,8 +344,9 @@ impl TryClone for DefaultAttribute {
 /// references between declarations and nested INCLUDE/IGNORE sections in external
 /// DTDs. Internal parameter entities may select a conditional keyword or expand
 /// inside entity values in external DTDs and parameter entities. Arbitrary
-/// declaration fragments and external references inside entity values or
-/// conditional headers remain unsupported.
+/// declaration fragments and external references inside entity values remain
+/// unsupported. External references in conditional headers load separate DTDs;
+/// their declarations are available before the header resumes.
 #[derive(Debug)]
 pub struct Parser {
     config: Config,
@@ -379,6 +380,10 @@ pub struct Parser {
     external_subset: bool,
     external_depth: usize,
     entity_chain: Vec<String>,
+    parameter_read: Option<Shared<AtomicBool>>,
+    parameter_encoding_initialized: bool,
+    active_parameter_reference: Option<(String, Position)>,
+    inherited_parameter_depth: usize,
     has_external_subset: bool,
     standalone: bool,
     reparse_deferral: bool,
@@ -450,6 +455,10 @@ impl Parser {
             external_subset: false,
             external_depth: 0,
             entity_chain: Vec::new_in(allocator),
+            parameter_read: None,
+            parameter_encoding_initialized: false,
+            active_parameter_reference: None,
+            inherited_parameter_depth: 0,
             has_external_subset: false,
             standalone: false,
             reparse_deferral: true,
@@ -548,6 +557,11 @@ impl Parser {
         child.fragment = true;
         child.external_subset = context.is_none();
         child.external_depth = self.external_depth + 1;
+        child.inherited_parameter_depth = self.inherited_parameter_depth;
+        if context.is_none() {
+            child.parameter_read = self.parameter_read.clone();
+            child.declarations_skipped = self.declarations_skipped;
+        }
         child.expand_internal_entities = self.expand_internal_entities;
         child.default_events = self.default_events;
         child.parameter_mode = self.parameter_mode;
@@ -556,6 +570,9 @@ impl Parser {
         child.reparse_deferral = self.reparse_deferral;
         for name in &self.entity_chain {
             try_push(&mut child.entity_chain, name.try_clone()?)?;
+        }
+        if context.is_none() {
+            self.inherit_parameter_context(&mut child)?;
         }
         if let Some(context) = context {
             for part in context.split('\u{c}').filter(|part| !part.is_empty()) {
@@ -744,6 +761,7 @@ impl Parser {
                 }
             }
         }
+        self.declarations_skipped |= child.declarations_skipped;
         Ok(())
     }
 
@@ -767,6 +785,7 @@ impl Parser {
             return Err(error);
         }
         self.final_input = is_final;
+        self.mark_parameter_read();
         if self.decoding_error.is_some() {
             if let Err(error) = self.decoder.append_pending(bytes) {
                 self.error = Some(error);
@@ -783,6 +802,15 @@ impl Parser {
             self.decoding_error = Some((error.kind, error.message));
         }
         Ok(())
+    }
+
+    fn mark_parameter_read(&mut self) {
+        if !self.parameter_encoding_initialized && self.decoder.protocol_encoding_ready() {
+            self.parameter_encoding_initialized = true;
+            if let Some(read) = &self.parameter_read {
+                read.store(true, Ordering::Relaxed);
+            }
+        }
     }
 
     /// The unresolved encoding name, available after an `UnknownEncoding` error.
@@ -835,6 +863,7 @@ impl Parser {
             }
             return Err(error);
         }
+        self.mark_parameter_read();
         self.error = None;
         self.decoding_error = None;
         if let Err(error) = self.decoder.feed(
@@ -1087,6 +1116,20 @@ impl Parser {
     }
 
     fn next_event_inner(&mut self) -> Result<Option<Event>, Error> {
+        if let Some((_, position)) = self.active_parameter_reference.take() {
+            if self
+                .parameter_read
+                .as_ref()
+                .is_some_and(|read| read.load(Ordering::Relaxed))
+            {
+                if !self.standalone {
+                    self.emit(EventKind::NotStandalone, position)?;
+                    self.event_raw("")?;
+                }
+            } else {
+                self.declarations_skipped |= !self.standalone;
+            }
+        }
         loop {
             if let Some(event) = self.pop_event() {
                 return Ok(Some(event));

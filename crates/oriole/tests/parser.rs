@@ -322,7 +322,8 @@ fn repeated_external_entity_identifiers_consume_the_shared_expansion_budget() {
         (
             "<!DOCTYPE r [<!ENTITY % e PUBLIC 'public' 'system'>%e;%e;%e;]><r/>",
             true,
-            24,
+            // Two sets of identifiers plus the shared parameter-read marker.
+            24 + size_of::<bool>(),
         ),
     ] {
         for chunk in 1..=xml.len() {

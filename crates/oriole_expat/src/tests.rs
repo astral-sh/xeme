@@ -1469,3 +1469,125 @@ fn entity_value_parameter_context_has_the_expat_error_code() {
         }
     }
 }
+
+#[derive(Default)]
+struct HeaderCallbackState {
+    root: XML_Parser,
+    action: u8,
+    requests: usize,
+    declarations: Vec<String>,
+}
+
+unsafe extern "C" fn header_entity_decl(
+    data: *mut c_void,
+    name: *const c_char,
+    _: c_int,
+    _: *const c_char,
+    _: c_int,
+    _: *const c_char,
+    _: *const c_char,
+    _: *const c_char,
+    _: *const c_char,
+) {
+    // SAFETY: The test owns callback data and Expat supplies a callback-lived name.
+    unsafe {
+        (*data.cast::<HeaderCallbackState>())
+            .declarations
+            .push(CStr::from_ptr(name).to_str().unwrap().to_owned());
+    }
+}
+
+unsafe extern "C" fn header_external(
+    parser: XML_Parser,
+    context: *const c_char,
+    _: *const c_char,
+    system: *const c_char,
+    _: *const c_char,
+) -> c_int {
+    // SAFETY: All parser handles and callback strings remain live. Raw state access
+    // keeps no reference to callback state across parser calls that may invoke it.
+    unsafe {
+        let state = XML_GetUserData(parser).cast::<HeaderCallbackState>();
+        let parameter = CStr::from_ptr(system).to_bytes() == b"p";
+        if parameter {
+            (*state).requests += 1;
+            assert_eq!(XML_StopParser(parser, 1), ERROR);
+            assert_eq!(XML_GetErrorCode(parser), 37);
+            match (*state).action {
+                0 => return 1,
+                2 => assert_eq!(XML_StopParser((*state).root, 1), OK),
+                3 => {
+                    assert_eq!(XML_StopParser(parser, 0), OK);
+                    return 1;
+                }
+                _ => {}
+            }
+        }
+        let child = XML_ExternalEntityParserCreate(parser, context, ptr::null());
+        assert!(!child.is_null());
+        let input: &[u8] = if parameter {
+            b"<!ENTITY % keyword 'INCLUDE'>"
+        } else {
+            b"<!ENTITY % p SYSTEM 'p'><![INCLUDE%p;[<!ENTITY e 'yes'>]]><!ENTITY after 'yes'>"
+        };
+        let mut status = OK;
+        for (index, byte) in input.iter().enumerate() {
+            let buffer = XML_GetBuffer(child, 1).cast::<u8>();
+            assert!(!buffer.is_null());
+            buffer.write(*byte);
+            status = XML_ParseBuffer(child, 1, c_int::from(index + 1 == input.len()));
+            if status != OK {
+                break;
+            }
+        }
+        XML_ParserFree(child);
+        c_int::from(status == OK)
+    }
+}
+
+#[test]
+fn external_header_callbacks_preserve_buffer_input_abort_and_parent_suspension() {
+    // SAFETY: Test-owned state outlives the root and every synchronous child. Each
+    // successful child is freed exactly once after its buffer parse has returned.
+    unsafe {
+        for action in 0..=3 {
+            let root = XML_ParserCreate(ptr::null());
+            assert!(!root.is_null());
+            let mut state = HeaderCallbackState {
+                root,
+                action,
+                ..HeaderCallbackState::default()
+            };
+            XML_SetUserData(root, ptr::from_mut(&mut state).cast());
+            XML_SetParamEntityParsing(root, 2);
+            XML_SetEntityDeclHandler(root, Some(header_entity_decl));
+            XML_SetExternalEntityRefHandler(root, Some(header_external));
+            let input = b"<!DOCTYPE r SYSTEM 'd'><r/>";
+            let status = XML_Parse(root, input.as_ptr().cast(), input.len() as c_int, 1);
+            assert_eq!(state.requests, 1);
+            match action {
+                0 => {
+                    assert_eq!(status, OK);
+                    assert_eq!(state.declarations, ["p"]);
+                }
+                1 => {
+                    assert_eq!(status, OK);
+                    assert_eq!(state.declarations, ["p", "keyword", "e", "after"]);
+                }
+                2 => {
+                    assert_eq!(status, SUSPENDED);
+                    assert_eq!(XML_ResumeParser(root), OK);
+                    assert_eq!(state.requests, 1);
+                    assert_eq!(state.declarations, ["p", "keyword", "e", "after"]);
+                }
+                3 => {
+                    assert_eq!(status, ERROR);
+                    assert_eq!(XML_GetErrorCode(root), 21);
+                    assert_eq!(state.declarations, ["p"]);
+                }
+                _ => unreachable!(),
+            }
+            XML_ParserFree(root);
+        }
+    }
+}

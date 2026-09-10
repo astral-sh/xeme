@@ -612,6 +612,7 @@ pub(crate) struct Source {
     anchor: Option<Position>,
     pub(crate) initial_depth: usize,
     pub(crate) entity_name: Option<String>,
+    pub(crate) dtd_fragment: bool,
     scan: Scan,
     deferred_size: usize,
 }
@@ -634,6 +635,7 @@ impl Source {
             anchor: None,
             initial_depth: 0,
             entity_name: None,
+            dtd_fragment: false,
             scan: Scan::default(),
             deferred_size: 0,
         }
@@ -930,7 +932,7 @@ impl Source {
                 }
                 scan.checked = bytes.len().saturating_sub(terminator.len() - 1);
             }
-            ScanMode::Tag | ScanMode::Doctype => {
+            ScanMode::Tag | ScanMode::Doctype | ScanMode::DtdDeclaration => {
                 let element_markup = mode == ScanMode::Tag
                     && bytes.first() == Some(&b'<')
                     && bytes.get(1) != Some(&b'!');
@@ -983,6 +985,14 @@ impl Source {
                     } else {
                         match bytes[index] {
                             b'\'' | b'"' => scan.quote = bytes[index],
+                            b'%' if mode == ScanMode::DtdDeclaration => {
+                                if index + 1 == bytes.len() {
+                                    break;
+                                }
+                                if !matches!(bytes[index + 1], b' ' | b'\t' | b'\r' | b'\n') {
+                                    return Ok(Some(index + 1));
+                                }
+                            }
                             b'[' if mode == ScanMode::Doctype => return Ok(Some(index + 1)),
                             b']' if mode == ScanMode::Doctype => {
                                 scan.brackets = scan.brackets.saturating_sub(1);

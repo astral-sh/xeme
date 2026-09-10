@@ -8,12 +8,12 @@ and source hashes, commands, skipped tests, and failures. Its main runtime is
 
 | Gate | Result | Evidence |
 | --- | --- | --- |
-| Full Expat public API matrix | 3,705 pass, 1,035 fail after policy/encoding fixes; 84 improvements, zero regressions; no crashes/timeouts | [Latest matrix](content-api-matrix/), [earlier failure classification](combined-evidence/) |
+| Full Expat public API matrix | 3,741 pass, 999 fail; 36 further improvements, zero regressions; no crashes/timeouts | [Latest matrix](dtd-composition/), [earlier failure classification](combined-evidence/) |
 | CPython 3.12.13 | Four shared/static, original/fixed consumers each pass 803 tests, 31 skips | [Consumer reports](combined-evidence/consumers/) |
 | Native allocation and callback probes | Six shared/static runs pass, including 353 allocation-failure scenarios per linkage | [Native report](combined-evidence/native/) |
 | Three ten-minute Rust ASan campaigns | 4,240,573 executions without findings, plus corpus and large-input replays | [Frozen source and corpora](combined-evidence/campaigns/final/) |
 | Full PBS distribution | Measured runtime passes archive validator, custom checks, installed XML suites, and CentOS 7/glibc 2.17 with 802 tests, 13 skips | [Successful build and runtime evidence](pbs-values/) |
-| W3C acceptance corpus | 5,901 required checks pass, 21 fail; 81 optional observations; no resolver errors | [Original catalog and full results](w3c/) |
+| W3C acceptance corpus | 5,913 required checks pass, nine fail; 81 optional observations; no resolver errors | [Latest results](dtd-composition/), [original catalog](w3c/) |
 | External entity values and declaration callbacks | 18,468 positive observations match; malformed-input differences retained | [Implementation and review](external-values/) |
 | Foreign DTD policy | 4,632 outcomes and 480 nested observations match; 24 upstream configurations fixed | [Policy review](foreign-dtd-policy/) |
 | External content encoding | Five upstream tests fixed across all 12 configurations; context oracles add no differences | [Encoding review](content-encoding/) |

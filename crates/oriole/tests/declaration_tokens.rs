@@ -107,11 +107,7 @@ fn replacement_tokens_cannot_join_names_or_quoted_literals() {
             ErrorKind::UnclosedToken,
         ),
         ("*", "<!ELEMENT r (a)%p;>", ErrorKind::InvalidToken),
-        (
-            "EMPTY>",
-            "<!ELEMENT r %p;>",
-            ErrorKind::IncompleteParameterEntity,
-        ),
+        ("EMPTY>", "<!ELEMENT r %p;>", ErrorKind::Syntax),
     ] {
         let dtd = format!("<!ENTITY % p '{replacement}'>{body}");
         for chunk in 1..=dtd.len() {
@@ -245,5 +241,49 @@ fn replacement_attribute_line_endings_are_not_normalized_twice() {
     for chunk in 1..=dtd.len() {
         let (_, declarations) = external(dtd, chunk, 2, false, Config::default()).unwrap();
         assert_eq!(declarations.attribute_values, ["A  B"]);
+    }
+}
+
+#[test]
+fn parameter_delimiters_close_declarations_and_preserve_following_source_text() {
+    for (replacement, declaration, expected) in [
+        (">", "<!ELEMENT r (#PCDATA) %p;", None),
+        ("(#PCDATA)>", "<!ELEMENT r %p;", None),
+        ("a CDATA #IMPLIED>", "<!ATTLIST r %p;", None),
+        ("><!ENTITY z ", "<!ELEMENT r EMPTY %p; 'Z'>", Some("Z")),
+        ("><!ENTITY z 'Z'>", "<!ELEMENT r EMPTY %p;", Some("Z")),
+    ] {
+        let dtd = format!("<!ENTITY % p \"{replacement}\">{declaration}");
+        for chunk in 1..=dtd.len() {
+            let (_, declarations) =
+                external(dtd.as_bytes(), chunk, 2, false, Config::default()).unwrap();
+            if let Some(value) = expected {
+                assert!(
+                    declarations
+                        .values
+                        .iter()
+                        .any(|(name, parameter, actual)| name == "z"
+                            && !parameter
+                            && actual == value)
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn nested_delimiter_sources_keep_quotes_and_reference_recursion_separate() {
+    let dtd = br#"<!ENTITY % q "><!ENTITY z "><!ENTITY % p "&#37;q;"><!ELEMENT r EMPTY %p; "Z">"#;
+    for chunk in 1..=dtd.len() {
+        let (_, declarations) = external(dtd, chunk, 2, false, Config::default()).unwrap();
+        assert_eq!(declarations.values.last().unwrap().2, "Z");
+    }
+    for dtd in [
+        br#"<!ENTITY % p "><!ENTITY z '"><!ELEMENT r EMPTY %p;Z'>"#.as_slice(),
+        br#"<!ENTITY % p "&#37;p;"><!ELEMENT r EMPTY %p;"#,
+    ] {
+        for chunk in 1..=dtd.len() {
+            assert!(external(dtd, chunk, 2, false, Config::default()).is_err());
+        }
     }
 }

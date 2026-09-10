@@ -1,0 +1,543 @@
+//! Incremental declaration grammar over distinct parameter-entity sources.
+//!
+//! XML's proper declaration/PE nesting rules are validity constraints. A
+//! nonvalidating parser accepts a closing delimiter from a replacement, while
+//! names, quoted literals and references still have one lexical source.
+
+use super::*;
+
+#[derive(Debug)]
+pub(super) struct Declaration {
+    expansion: DeclarationExpansion,
+    position: Position,
+    quote_checked: usize,
+}
+
+#[derive(Debug)]
+pub(super) struct Header {
+    selected: Option<bool>,
+    word: String,
+    raw: String,
+    position: Position,
+    bytes: usize,
+}
+
+impl Parser {
+    pub(crate) fn has_header_composition(&self) -> bool {
+        self.conditional.header.is_some()
+    }
+
+    pub(super) fn start_header_composition(&mut self) -> Result<bool, Error> {
+        if !self.external_subset {
+            return Err(self.err(
+                ErrorKind::Syntax,
+                "conditional section in the internal subset",
+            ));
+        }
+        self.charge_expansion(size_of::<Header>())?;
+        self.conditional.header = Some(oriole_storage::try_box(
+            Header {
+                selected: None,
+                word: String::new_in(self.allocator),
+                raw: string("<![", self.allocator)?,
+                position: self.here(),
+                bytes: 3,
+            },
+            self.allocator,
+        )?);
+        self.consume(3);
+        self.continue_header_composition()
+    }
+
+    /// Select a complete keyword and opening bracket from lexical sources.
+    /// Only ordinary external DTD parsers run during external callbacks.
+    pub(crate) fn continue_header_composition(&mut self) -> Result<bool, Error> {
+        let mut state = self.conditional.header.take().expect("pending header");
+        loop {
+            if self.source().remaining().is_empty() {
+                if self.sources.len() > 1 {
+                    if !self.source().dtd_fragment {
+                        return Err(self.err(
+                            ErrorKind::IncompleteParameterEntity,
+                            "conditional header crosses a between-declaration parameter boundary",
+                        ));
+                    }
+                    self.header_word(&mut state)?;
+                    self.sources.pop();
+                    continue;
+                }
+                if self.is_source_final() {
+                    return Err(self.err(
+                        ErrorKind::IncompleteParameterEntity,
+                        "unclosed conditional header",
+                    ));
+                }
+                self.conditional.header = Some(state);
+                return Ok(false);
+            }
+            let text = self.source().remaining();
+            let character = text.chars().next().expect("nonempty source");
+            if !crate::names::is_xml_char(character) {
+                return Err(self.err(
+                    ErrorKind::InvalidToken,
+                    "invalid conditional header character",
+                ));
+            }
+            if character == '%' {
+                self.header_word(&mut state)?;
+                let limit = self.config.limits.max_token_bytes;
+                let end = self
+                    .source_mut()
+                    .scan_reference(limit)
+                    .map_err(|(kind, offset)| {
+                        self.err_at(kind, "invalid conditional parameter reference", offset)
+                    })?;
+                let Some(end) = end else {
+                    if self.is_source_final() {
+                        return Err(self.err(
+                            ErrorKind::Syntax,
+                            "unclosed conditional parameter reference",
+                        ));
+                    }
+                    self.conditional.header = Some(state);
+                    return Ok(false);
+                };
+                let name = &self.source().remaining()[1..end];
+                if !crate::names::is_name(name)
+                    || (self.config.namespace_separator.is_some() && name.contains(':'))
+                {
+                    return Err(self.err(
+                        ErrorKind::InvalidToken,
+                        "invalid conditional parameter name",
+                    ));
+                }
+                let entity = self.parameter_entities.get(name);
+                if self.parameter_mode == 0 || entity.is_none() {
+                    state.bytes = state.bytes.saturating_add(end + 1);
+                    if state.bytes > self.config.limits.max_token_bytes {
+                        return Err(self.err(
+                            ErrorKind::LimitExceeded,
+                            "expanded conditional header limit exceeded",
+                        ));
+                    }
+                    let position = self.source().position(end + 1);
+                    let raw = string(&self.source().remaining()[..end + 1], self.allocator)?;
+                    self.declarations_skipped |= !self.standalone;
+                    self.has_external_subset = true;
+                    if self.parameter_mode == 0 && !self.standalone {
+                        self.charge_expansion(2 * size_of::<crate::PendingEvent>())?;
+                        self.flush_header_composition(&mut state)?;
+                        self.emit(EventKind::NotStandalone, position)?;
+                        self.event_raw("")?;
+                    }
+                    state.raw.push_str(&raw)?;
+                    self.consume(end + 1);
+                    continue;
+                }
+                if entity.expect("declared parameter").value.is_none() {
+                    self.flush_header_composition(&mut state)?;
+                    if !self.pending.is_empty() {
+                        self.conditional.header = Some(state);
+                        return Ok(true);
+                    }
+                    // The normal reference path shares the read marker and
+                    // inherits active source names into the external child.
+                    self.parse_parameter_reference()?;
+                    state.position = self.here();
+                    self.conditional.header = Some(state);
+                    return Ok(true);
+                }
+                if self
+                    .entity_chain
+                    .iter()
+                    .any(|entry| entry.strip_prefix('%') == Some(name))
+                    || self.sources.iter().any(|source| {
+                        source
+                            .entity_name
+                            .as_deref()
+                            .and_then(|name| name.strip_prefix('%'))
+                            == Some(name)
+                    })
+                {
+                    return Err(self.err(
+                        ErrorKind::RecursiveEntityReference,
+                        "recursive conditional parameter entity",
+                    ));
+                }
+                if self.sources.len() + self.external_depth + self.inherited_parameter_depth
+                    > self.config.limits.max_entity_depth
+                {
+                    return Err(self.err(
+                        ErrorKind::LimitExceeded,
+                        "conditional parameter nesting limit exceeded",
+                    ));
+                }
+                let value = entity
+                    .expect("declared parameter")
+                    .value
+                    .as_ref()
+                    .expect("internal parameter");
+                self.charge_expansion(
+                    value.len() + end + 1 + size_of::<crate::encoding::Source>(),
+                )?;
+                let value = value.try_clone()?;
+                let mut source_name = string("%", self.allocator)?;
+                source_name.push_str(name)?;
+                let position = self.source().position(end + 1);
+                self.consume(end + 1);
+                let mut source =
+                    crate::encoding::Source::entity(value, source_name, position, self.stack.len());
+                source.dtd_fragment = true;
+                try_push(&mut self.sources, source)?;
+                continue;
+            }
+            state.bytes = state.bytes.saturating_add(character.len_utf8());
+            if state.bytes > self.config.limits.max_token_bytes {
+                return Err(self.err(
+                    ErrorKind::LimitExceeded,
+                    "expanded conditional header limit exceeded",
+                ));
+            }
+            if character == '[' || whitespace(character) {
+                self.header_word(&mut state)?;
+            } else {
+                state.word.push(character)?;
+            }
+            if character == '[' && state.selected.is_none() {
+                self.flush_header_composition(&mut state)?;
+                return Err(self.err(ErrorKind::Syntax, "missing conditional section keyword"));
+            }
+            state.raw.push(character)?;
+            self.consume(character.len_utf8());
+            if character == '[' {
+                let included = state.selected.expect("complete conditional keyword");
+                if self.conditional.included_sources.len() >= self.config.limits.max_depth {
+                    return Err(self.err(
+                        ErrorKind::LimitExceeded,
+                        "conditional section nesting limit exceeded",
+                    ));
+                }
+                if included {
+                    try_push(&mut self.conditional.included_sources, self.sources.len())?;
+                } else {
+                    self.conditional.ignored_depth = 1;
+                    self.conditional.ignored_source = self.sources.len();
+                    self.conditional.ignored_bytes = state.bytes;
+                }
+                self.flush_header_composition(&mut state)?;
+                self.declaration_allowed = false;
+                return Ok(true);
+            }
+        }
+    }
+
+    fn header_word(&mut self, state: &mut Header) -> Result<(), Error> {
+        if !state.word.is_empty() {
+            state.selected = Some(match (state.word.as_str(), state.selected) {
+                ("INCLUDE", None) => true,
+                ("IGNORE", None) => false,
+                _ => {
+                    state.raw.truncate(state.raw.len() - state.word.len());
+                    self.flush_header_composition(state)?;
+                    return Err(self.err(ErrorKind::Syntax, "invalid conditional section keyword"));
+                }
+            });
+            state.word.clear();
+        }
+        Ok(())
+    }
+
+    fn flush_header_composition(&mut self, state: &mut Header) -> Result<(), Error> {
+        let raw = std::mem::replace(&mut state.raw, String::new_in(self.allocator));
+        if self.default_events && !raw.is_empty() {
+            self.emit(EventKind::Default, state.position)?;
+            self.pending.back_mut().expect("header default").raw = Some(raw);
+        }
+        state.position = self.here();
+        Ok(())
+    }
+
+    pub(crate) fn has_declaration_composition(&self) -> bool {
+        self.conditional.declaration.is_some()
+    }
+
+    pub(super) fn start_declaration_composition(&mut self) -> Result<bool, Error> {
+        self.charge_expansion(size_of::<Declaration>())?;
+        self.conditional.declaration = Some(oriole_storage::try_box(
+            Declaration {
+                expansion: DeclarationExpansion {
+                    text: String::new_in(self.allocator),
+                    raw: String::new_in(self.allocator),
+                    literals: Vec::new_in(self.allocator),
+                    parameters: Vec::new_in(self.allocator),
+                    // Value callbacks may install a Default handler later.
+                    capture_raw: true,
+                },
+                position: self.here(),
+                quote_checked: 0,
+            },
+            self.allocator,
+        )?);
+        self.consume(2); // The declaration opener is one lexical token.
+        self.continue_declaration_composition()
+    }
+
+    /// Consume each physical byte once. Entity source boundaries add grammar
+    /// whitespace, and quoted tokens remain in their originating source.
+    pub(crate) fn continue_declaration_composition(&mut self) -> Result<bool, Error> {
+        let mut state = self
+            .conditional
+            .declaration
+            .take()
+            .expect("pending declaration");
+        loop {
+            if self.source().remaining().is_empty() {
+                if self.sources.len() > 1 {
+                    if !self.source().dtd_fragment {
+                        return Err(self.err(
+                            ErrorKind::IncompleteParameterEntity,
+                            "declaration crosses a between-declaration parameter boundary",
+                        ));
+                    }
+                    self.sources.pop();
+                    self.append_declaration_token(&mut state.expansion, " ", true)?;
+                    continue;
+                }
+                if self.is_source_final() {
+                    return Err(self.err(ErrorKind::UnclosedToken, "unclosed DTD declaration"));
+                }
+                self.conditional.declaration = Some(state);
+                return Ok(false);
+            }
+            let text = self.source().remaining();
+            let end = text.find(['\'', '"', '%', '<', '>']).unwrap_or(text.len());
+            if end != 0 {
+                self.append_declaration_token(&mut state.expansion, &text[..end], false)?;
+                self.consume(end);
+                continue;
+            }
+            match text.as_bytes()[0] {
+                b'>' => {
+                    self.consume(1);
+                    return self
+                        .finish_declaration_composition(oriole_storage::Box::into_inner(state));
+                }
+                b'<' => {
+                    return Err(self.err(ErrorKind::InvalidToken, "markup inside a declaration"));
+                }
+                b'\'' | b'"' => {
+                    let quote = text.as_bytes()[0];
+                    let checked = state.quote_checked.max(1);
+                    let Some(end) = text.as_bytes()[checked..]
+                        .iter()
+                        .position(|&b| b == quote)
+                        .map(|offset| checked + offset + 1)
+                    else {
+                        if state.expansion.text.len().saturating_add(text.len())
+                            > self.config.limits.max_token_bytes
+                        {
+                            return Err(self.err(
+                                ErrorKind::LimitExceeded,
+                                "expanded declaration token limit exceeded",
+                            ));
+                        }
+                        if self.is_source_final() {
+                            return Err(self.err(
+                                ErrorKind::UnclosedToken,
+                                "quoted declaration token crosses a parameter boundary",
+                            ));
+                        }
+                        state.quote_checked = text.len();
+                        self.conditional.declaration = Some(state);
+                        return Ok(false);
+                    };
+                    self.charge_expansion(size_of::<DeclarationLiteral>())?;
+                    let mut parameters = Vec::new_in(self.allocator);
+                    for source in &self.sources {
+                        if let Some(name) = source
+                            .entity_name
+                            .as_deref()
+                            .and_then(|name| name.strip_prefix('%'))
+                        {
+                            self.charge_expansion(size_of::<String>() + name.len())?;
+                            try_push(&mut parameters, string(name, self.allocator)?)?;
+                        }
+                    }
+                    let offset = state.expansion.text.len();
+                    try_push(
+                        &mut state.expansion.literals,
+                        DeclarationLiteral {
+                            offset,
+                            normalize: self.sources.len() == 1,
+                            parameters,
+                        },
+                    )?;
+                    self.append_declaration_token(&mut state.expansion, &text[..end], false)?;
+                    self.consume(end);
+                    state.quote_checked = 0;
+                }
+                b'%' => {
+                    if text.len() == 1 && !self.is_source_final() {
+                        self.conditional.declaration = Some(state);
+                        return Ok(false);
+                    }
+                    if text[1..].starts_with(whitespace) {
+                        self.append_declaration_token(&mut state.expansion, "%", false)?;
+                        self.consume(1);
+                        continue;
+                    }
+                    let limit = self.config.limits.max_token_bytes;
+                    let end =
+                        self.source_mut()
+                            .scan_reference(limit)
+                            .map_err(|(kind, offset)| {
+                                self.err_at(kind, "invalid declaration parameter reference", offset)
+                            })?;
+                    let Some(end) = end else {
+                        if self.is_source_final() {
+                            return Err(self.err(
+                                ErrorKind::InvalidToken,
+                                "unclosed declaration parameter reference",
+                            ));
+                        }
+                        self.conditional.declaration = Some(state);
+                        return Ok(false);
+                    };
+                    let name = &self.source().remaining()[1..end];
+                    if !crate::names::is_name(name)
+                        || (self.config.namespace_separator.is_some() && name.contains(':'))
+                    {
+                        return Err(self.err(
+                            ErrorKind::InvalidToken,
+                            "invalid declaration parameter name",
+                        ));
+                    }
+                    if !self.external_subset && self.sources.len() == 1 {
+                        return Err(self.err(
+                            ErrorKind::ParameterEntityReference,
+                            "parameter reference in an internal subset declaration",
+                        ));
+                    }
+                    if state.expansion.text.ends_with(')') {
+                        return Err(self.err(
+                            ErrorKind::InvalidToken,
+                            "parameter reference cannot delimit a closing model group",
+                        ));
+                    }
+                    self.charge_expansion(end + 1)?;
+                    self.append_declaration_token(&mut state.expansion, " ", true)?;
+                    let entity = self.parameter_entities.get(name);
+                    if self.parameter_mode == 0 || entity.is_none() {
+                        self.charge_expansion(
+                            2 * size_of::<crate::PendingEvent>()
+                                + size_of::<DeclarationParameter>(),
+                        )?;
+                        let offset = state.expansion.text.len();
+                        let raw_start = state.expansion.raw.len();
+                        try_push(
+                            &mut state.expansion.parameters,
+                            DeclarationParameter {
+                                offset,
+                                position: self.source().position(end + 1),
+                                raw_start,
+                                raw_end: raw_start + end + 1,
+                                disabled: self.parameter_mode == 0,
+                            },
+                        )?;
+                        state
+                            .expansion
+                            .raw
+                            .try_push_str(&self.source().remaining()[..end + 1])?;
+                        self.consume(end + 1);
+                        continue;
+                    }
+                    if self
+                        .entity_chain
+                        .iter()
+                        .any(|entry| entry.strip_prefix('%') == Some(name))
+                        || self.sources.iter().any(|source| {
+                            source
+                                .entity_name
+                                .as_deref()
+                                .and_then(|name| name.strip_prefix('%'))
+                                == Some(name)
+                        })
+                    {
+                        return Err(self.err(
+                            ErrorKind::RecursiveEntityReference,
+                            "recursive declaration parameter entity",
+                        ));
+                    }
+                    if self.sources.len() + self.external_depth + self.inherited_parameter_depth
+                        > self.config.limits.max_entity_depth
+                    {
+                        return Err(self.err(
+                            ErrorKind::LimitExceeded,
+                            "declaration parameter nesting limit exceeded",
+                        ));
+                    }
+                    let entity = entity.expect("declared parameter");
+                    let value = entity.value.as_ref().ok_or_else(|| {
+                        self.err(
+                            ErrorKind::ExternalEntityHandling,
+                            "external parameter reference inside a declaration is unsupported",
+                        )
+                    })?;
+                    self.charge_expansion(
+                        value.len() + name.len() + 1 + size_of::<crate::encoding::Source>(),
+                    )?;
+                    let value = value.try_clone()?;
+                    let mut source_name = string("%", self.allocator)?;
+                    source_name.push_str(name)?;
+                    let position = self.source().position(end + 1);
+                    self.consume(end + 1);
+                    let mut source = crate::encoding::Source::entity(
+                        value,
+                        source_name,
+                        position,
+                        self.stack.len(),
+                    );
+                    source.dtd_fragment = true;
+                    try_push(&mut self.sources, source)?;
+                }
+                _ => unreachable!("declaration delimiter"),
+            }
+        }
+    }
+
+    /// Parse the completed grammar with an anchored source for diagnostics. The
+    /// original source, including an unconsumed replacement tail, is restored
+    /// on both success and failure; no callback is dispatched in this scope.
+    fn finish_declaration_composition(&mut self, mut state: Declaration) -> Result<bool, Error> {
+        self.charge_expansion(state.expansion.text.len() + 3)?;
+        let mut token = string("<!", self.allocator)?;
+        token.push_str(&state.expansion.text)?;
+        token.push('>')?;
+        for literal in &mut state.expansion.literals {
+            literal.parameters.retain(|name| {
+                !self.sources.iter().any(|source| {
+                    source
+                        .entity_name
+                        .as_deref()
+                        .and_then(|value| value.strip_prefix('%'))
+                        == Some(name.as_str())
+                })
+            });
+        }
+        let source_name = self
+            .source()
+            .entity_name
+            .as_ref()
+            .map_or_else(|| Ok(String::new_in(self.allocator)), TryClone::try_clone)?;
+        let anchored = crate::encoding::Source::entity(
+            String::new_in(self.allocator),
+            source_name,
+            state.position,
+            self.stack.len(),
+        );
+        let original = std::mem::replace(self.sources.last_mut().expect("source"), anchored);
+        let result = self.parse_subset_expanded(&token, 0, Some(state.expansion));
+        *self.sources.last_mut().expect("source") = original;
+        result.map(|()| true)
+    }
+}

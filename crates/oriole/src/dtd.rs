@@ -1,3 +1,5 @@
+mod composition;
+
 use crate::{
     DefaultAttribute, DefaultAttributes, Entity, Error, ErrorKind, EventKind, Parser, Position,
     character_reference, collapse_spaces, normalize_newlines, string, take_name, whitespace,
@@ -19,8 +21,8 @@ pub(crate) struct ConditionalState {
     ignored_depth: usize,
     ignored_source: usize,
     ignored_bytes: usize,
-    header_checked: usize,
-    header: Option<HeaderContinuation>,
+    header: Option<oriole_storage::Box<composition::Header>>,
+    declaration: Option<oriole_storage::Box<composition::Declaration>>,
 }
 
 impl ConditionalState {
@@ -30,40 +32,10 @@ impl ConditionalState {
             ignored_depth: 0,
             ignored_source: 0,
             ignored_bytes: 0,
-            header_checked: 0,
             header: None,
+            declaration: None,
         }
     }
-}
-
-#[derive(Debug)]
-struct HeaderFrame {
-    text: String,
-    offset: usize,
-    name: Option<String>,
-    position: Option<Position>,
-}
-
-#[derive(Debug)]
-struct HeaderExternal {
-    name: String,
-    system_id: Option<String>,
-    public_id: Option<String>,
-    position: Position,
-    read: Shared<AtomicBool>,
-    delivered: bool,
-}
-
-#[derive(Debug)]
-struct HeaderContinuation {
-    frames: Vec<HeaderFrame>,
-    selected: Option<bool>,
-    skipped: bool,
-    raw: String,
-    raw_position: Position,
-    expanded_bytes: usize,
-    end: usize,
-    external: Option<HeaderExternal>,
 }
 
 /// A replacement is a distinct lexical source: references cannot span frames,
@@ -74,21 +46,14 @@ struct EntityValueFrame<'a> {
     normalize: bool,
 }
 
-/// A declaration replacement ends at a lexical boundary, even when its grammar
-/// (for example a content-model group) continues in the containing entity.
-struct DeclarationFrame<'a> {
-    rest: &'a str,
-    name: Option<&'a str>,
-    source_offset: usize,
-    normalize: bool,
-}
-
+#[derive(Debug)]
 struct DeclarationLiteral {
     offset: usize,
     normalize: bool,
     parameters: Vec<String>,
 }
 
+#[derive(Debug)]
 struct DeclarationExpansion {
     text: String,
     raw: String,
@@ -107,247 +72,15 @@ pub(crate) struct DeclarationParameter {
 }
 
 impl Parser {
-    /// Continue a conditional header after an external DTD callback. Each frame
-    /// owns its lexical boundary, so child input never becomes parent syntax.
-    fn continue_conditional_header(&mut self) -> Result<bool, Error> {
-        let mut header = self.conditional.header.take().expect("pending header");
-        if let Some(mut external) = header.external.take() {
-            if !external.delivered {
-                external.read.store(false, Ordering::Relaxed);
-                let kind = EventKind::ExternalEntityReference {
-                    context: None,
-                    system_id: external.system_id.try_clone()?,
-                    public_id: external.public_id.try_clone()?,
-                };
-                self.emit(kind, external.position)?;
-                let mut raw = string("%", self.allocator)?;
-                raw.push_str(&external.name)?;
-                raw.push(';')?;
-                self.pending.back_mut().expect("external event").raw = Some(raw);
-                external.delivered = true;
-                header.external = Some(external);
-                self.conditional.header = Some(header);
-                return Ok(true);
-            }
-            if external.read.load(Ordering::Relaxed) {
-                if !self.standalone {
-                    self.emit(EventKind::NotStandalone, external.position)?;
-                    self.event_raw("")?;
-                    self.conditional.header = Some(header);
-                    return Ok(true);
-                }
-            } else {
-                header.skipped = true;
-                self.declarations_skipped |= !self.standalone;
-            }
-        }
-        while let Some(frame) = header.frames.last_mut() {
-            let rest = &frame.text[frame.offset..];
-            let literal = rest.find('%').unwrap_or(rest.len());
-            let word = rest[..literal].trim_matches(whitespace);
-            if !word.is_empty() {
-                header.selected = Some(match (word, header.selected) {
-                    ("INCLUDE", None) => true,
-                    ("IGNORE", None) => false,
-                    _ => {
-                        let leading = rest[..literal].len()
-                            - rest[..literal].trim_start_matches(whitespace).len();
-                        header.raw.push_str(&rest[..leading])?;
-                        self.flush_conditional_header_raw(&mut header)?;
-                        return Err(
-                            self.err(ErrorKind::Syntax, "invalid conditional section keyword")
-                        );
-                    }
-                });
-            }
-            if header.expanded_bytes.saturating_add(literal) > self.config.limits.max_token_bytes {
-                return Err(self.err(
-                    ErrorKind::LimitExceeded,
-                    "expanded conditional header limit exceeded",
-                ));
-            }
-            header.expanded_bytes += literal;
-            header.raw.push_str(&rest[..literal])?;
-            frame.offset += literal;
-            let rest = &frame.text[frame.offset..];
-            if rest.is_empty() {
-                header.frames.pop();
-                continue;
-            }
-            let end = rest.find(';').ok_or_else(|| {
-                self.err(
-                    ErrorKind::Syntax,
-                    "unclosed conditional parameter reference",
-                )
-            })?;
-            let name = &rest[1..end];
-            if !crate::names::is_name(name)
-                || (self.config.namespace_separator.is_some() && name.contains(':'))
-            {
-                return Err(self.err(
-                    ErrorKind::InvalidToken,
-                    "invalid conditional parameter name",
-                ));
-            }
-            let position = frame
-                .position
-                .unwrap_or_else(|| self.source().position_at(3 + frame.offset, end + 1));
-            let entity = self.parameter_entities.get(name);
-            if self.parameter_mode == 0 || entity.is_none() {
-                if header.expanded_bytes.saturating_add(end + 1)
-                    > self.config.limits.max_token_bytes
-                {
-                    return Err(self.err(
-                        ErrorKind::LimitExceeded,
-                        "expanded conditional header limit exceeded",
-                    ));
-                }
-                header.expanded_bytes += end + 1;
-                header.skipped = true;
-                self.declarations_skipped |= !self.standalone;
-                // Own the reference before releasing the frame borrow to emit.
-                let reference = string(&rest[..end + 1], self.allocator)?;
-                frame.offset += end + 1;
-                if self.parameter_mode == 0 && !self.standalone {
-                    self.charge_expansion(2 * size_of::<crate::PendingEvent>())?;
-                    self.flush_conditional_header_raw(&mut header)?;
-                    self.emit(EventKind::NotStandalone, position)?;
-                    self.event_raw("")?;
-                }
-                header.raw.push_str(&reference)?;
-                continue;
-            }
-            self.charge_expansion(end + 1 + size_of::<HeaderFrame>())?;
-            let name = string(name, self.allocator)?;
-            frame.offset += end + 1;
-            if header
-                .frames
-                .iter()
-                .any(|frame| frame.name.as_ref() == Some(&name))
-                || self.sources.iter().any(|source| {
-                    source
-                        .entity_name
-                        .as_deref()
-                        .and_then(|name| name.strip_prefix('%'))
-                        == Some(name.as_str())
-                })
-                || self
-                    .entity_chain
-                    .iter()
-                    .any(|active| active.strip_prefix('%') == Some(name.as_str()))
-            {
-                return Err(self.err(
-                    ErrorKind::RecursiveEntityReference,
-                    "recursive conditional parameter entity",
-                ));
-            }
-            if header.frames.len() - 1
-                + self.sources.len()
-                + self.external_depth
-                + self.inherited_parameter_depth
-                > self.config.limits.max_entity_depth
-            {
-                return Err(self.err(
-                    ErrorKind::LimitExceeded,
-                    "conditional parameter nesting limit exceeded",
-                ));
-            }
-            let entity = entity.expect("enabled declared parameter");
-            if let Some(value) = &entity.value {
-                self.charge_expansion(value.len())?;
-                let text = value.try_clone()?;
-                try_push(
-                    &mut header.frames,
-                    HeaderFrame {
-                        text,
-                        offset: 0,
-                        name: Some(name),
-                        position: Some(position),
-                    },
-                )?;
-                continue;
-            }
-            self.charge_external_identifiers(entity)?;
-            self.charge_expansion(size_of::<HeaderExternal>() + size_of::<AtomicBool>())?;
-            let external = HeaderExternal {
-                name,
-                system_id: entity.system_id.try_clone()?,
-                public_id: entity.public_id.try_clone()?,
-                position,
-                read: match &self.parameter_read {
-                    Some(read) => read.clone(),
-                    None => Shared::try_new_in(AtomicBool::new(false), self.allocator)?,
-                },
-                delivered: false,
-            };
-            self.has_external_subset = true;
-            self.flush_conditional_header_raw(&mut header)?;
-            header.raw_position = self.source().position_at(3 + header.frames[0].offset, 0);
-            header.external = Some(external);
-            self.conditional.header = Some(header);
-            return Ok(true);
-        }
-        let Some(included) = header.selected else {
-            self.flush_conditional_header_raw(&mut header)?;
-            return Err(self.err(ErrorKind::Syntax, "missing conditional section keyword"));
-        };
-        if self.conditional.included_sources.len() >= self.config.limits.max_depth {
-            return Err(self.err(
-                ErrorKind::LimitExceeded,
-                "conditional section nesting limit exceeded",
-            ));
-        }
-        if included {
-            try_push(&mut self.conditional.included_sources, self.sources.len())?;
-        } else {
-            self.conditional.ignored_depth = 1;
-            self.conditional.ignored_source = self.sources.len();
-            self.conditional.ignored_bytes = header.end;
-        }
-        if header.skipped {
-            self.has_external_subset = true;
-            self.declarations_skipped |= !self.standalone;
-        }
-        header.raw.push('[')?;
-        self.flush_conditional_header_raw(&mut header)?;
-        self.conditional.header_checked = 0;
-        self.declaration_allowed = false;
-        self.consume(header.end);
-        Ok(true)
-    }
-
-    /// Queue owned raw bytes before yielding to a handler that may change handlers.
-    fn flush_conditional_header_raw(
-        &mut self,
-        header: &mut HeaderContinuation,
-    ) -> Result<(), Error> {
-        let raw = std::mem::replace(&mut header.raw, String::new_in(self.allocator));
-        if self.default_events && !raw.is_empty() {
-            self.emit(EventKind::Default, header.raw_position)?;
-            self.pending.back_mut().expect("default event").raw = Some(raw);
-        }
-        Ok(())
-    }
-
     /// Inherit active parameter names even though Expat's C context is null.
     /// A pending header prefix has not begun its external callback yet.
     pub(crate) fn inherit_parameter_context(&self, child: &mut Self) -> Result<(), Error> {
-        let header = self.conditional.header.as_ref();
-        let external = header
-            .and_then(|header| header.external.as_ref())
-            .filter(|external| external.delivered);
-        let active = external.map(|external| external.name.as_str()).or_else(|| {
-            self.active_parameter_reference
-                .as_ref()
-                .and_then(|(name, _)| name.strip_prefix('%'))
-        });
+        let active = self
+            .active_parameter_reference
+            .as_ref()
+            .and_then(|(name, _)| name.strip_prefix('%'));
         let Some(active) = active else {
             return Ok(());
-        };
-        let frames = if external.is_some() {
-            header.map(|header| &header.frames[..]).unwrap_or(&[])
-        } else {
-            &[]
         };
         let sources = self.sources.iter().filter_map(|source| {
             source
@@ -355,35 +88,29 @@ impl Parser {
                 .as_deref()
                 .and_then(|name| name.strip_prefix('%'))
         });
-        for name in sources
-            .chain(frames.iter().filter_map(|frame| frame.name.as_deref()))
-            .chain(std::iter::once(active))
-        {
+        for name in sources.chain(std::iter::once(active)) {
             self.charge_expansion(size_of::<String>() + name.len() + 1)?;
             let mut active = string("%", self.allocator)?;
             active.push_str(name)?;
             try_push(&mut child.entity_chain, active)?;
         }
-        child.inherited_parameter_depth = self.inherited_parameter_depth + self.sources.len() - 1
-            + frames.iter().filter(|frame| frame.name.is_some()).count();
-        if let Some(external) = external {
-            child.parameter_read = Some(external.read.clone());
-        }
+        child.inherited_parameter_depth = self.inherited_parameter_depth + self.sources.len() - 1;
         Ok(())
     }
 
     pub(crate) fn finish_conditional_source(&self) -> Result<(), Error> {
-        if self.conditional.included_sources.last() == Some(&self.sources.len())
-            || (self.conditional.ignored_depth != 0
-                && self.conditional.ignored_source == self.sources.len())
+        if self.conditional.ignored_depth != 0
+            && self.conditional.ignored_source == self.sources.len()
+        {
+            return Err(self.err(ErrorKind::Syntax, "unclosed ignored conditional section"));
+        }
+        if (self.sources.len() == 1 && !self.conditional.included_sources.is_empty())
+            || (!self.source().dtd_fragment
+                && self.conditional.included_sources.last() == Some(&self.sources.len()))
         {
             return Err(self.err(
-                if self.sources.len() > 1 || self.conditional.ignored_depth == 0 {
-                    ErrorKind::IncompleteParameterEntity
-                } else {
-                    ErrorKind::Syntax
-                },
-                "conditional section is not closed in its source entity",
+                ErrorKind::IncompleteParameterEntity,
+                "unclosed conditional section",
             ));
         }
         Ok(())
@@ -401,98 +128,7 @@ impl Parser {
     }
 
     fn start_conditional_section(&mut self) -> Result<bool, Error> {
-        if self.conditional.header.is_some() {
-            return self.continue_conditional_header();
-        }
-        if !self.external_subset {
-            return Err(self.err(
-                ErrorKind::Syntax,
-                "conditional section in the internal subset",
-            ));
-        }
-        let text = self.source().remaining();
-        let checked = self.conditional.header_checked.max(3);
-        let limit = self.config.limits.max_token_bytes;
-        let mut end = None;
-        for (offset, character) in text[checked..].char_indices() {
-            let offset = checked + offset;
-            if offset >= limit {
-                return Err(self.err_at(
-                    ErrorKind::LimitExceeded,
-                    "conditional header limit exceeded",
-                    offset,
-                ));
-            }
-            if character == '[' {
-                end = Some(offset + 1);
-                break;
-            }
-            if !crate::names::is_xml_char(character) {
-                return Err(self.err_at(
-                    ErrorKind::InvalidToken,
-                    "invalid conditional header character",
-                    offset,
-                ));
-            }
-        }
-        let Some(end) = end else {
-            self.conditional.header_checked = text.len();
-            if self.is_source_final() {
-                return Err(self.err(
-                    ErrorKind::IncompleteParameterEntity,
-                    "unclosed conditional header",
-                ));
-            }
-            return Ok(false);
-        };
-        let header = &text[3..end - 1];
-        if !header.contains('%') {
-            let included = match header.trim_matches(whitespace) {
-                "INCLUDE" => true,
-                "IGNORE" => false,
-                _ => return Err(self.err(ErrorKind::Syntax, "invalid conditional section keyword")),
-            };
-            if self.conditional.included_sources.len() >= self.config.limits.max_depth {
-                return Err(self.err(
-                    ErrorKind::LimitExceeded,
-                    "conditional section nesting limit exceeded",
-                ));
-            }
-            if included {
-                try_push(&mut self.conditional.included_sources, self.sources.len())?;
-            } else {
-                self.conditional.ignored_depth = 1;
-                self.conditional.ignored_source = self.sources.len();
-                self.conditional.ignored_bytes = end;
-            }
-            self.conditional.header_checked = 0;
-            self.conditional_raw(end)?;
-            return Ok(true);
-        }
-        self.charge_expansion(
-            size_of::<HeaderContinuation>() + size_of::<HeaderFrame>() + header.len(),
-        )?;
-        let mut frames = Vec::new_in(self.allocator);
-        try_push(
-            &mut frames,
-            HeaderFrame {
-                text: string(header, self.allocator)?,
-                offset: 0,
-                name: None,
-                position: None,
-            },
-        )?;
-        self.conditional.header = Some(HeaderContinuation {
-            frames,
-            selected: None,
-            skipped: false,
-            raw: string("<![", self.allocator)?,
-            raw_position: self.source().position(end),
-            expanded_bytes: 0,
-            end,
-            external: None,
-        });
-        self.continue_conditional_header()
+        self.start_header_composition()
     }
 
     fn parse_ignored_section(&mut self) -> Result<bool, Error> {
@@ -826,7 +462,7 @@ impl Parser {
         } else if text.starts_with("<?") {
             crate::ScanMode::Pi
         } else if text.starts_with("<!") {
-            crate::ScanMode::Tag
+            crate::ScanMode::DtdDeclaration
         } else if text == "<" && !self.is_source_final() {
             return Ok(false);
         } else {
@@ -852,11 +488,28 @@ impl Parser {
                 self.err_at(kind, "invalid or oversized DTD token", offset)
             })?;
         let Some(end) = end else {
+            if mode == crate::ScanMode::DtdDeclaration && self.sources.len() > 1 {
+                if ["<!ELEMENT", "<!ATTLIST", "<!ENTITY", "<!NOTATION"]
+                    .iter()
+                    .any(|opener| opener.starts_with(self.source().remaining()))
+                {
+                    return Err(self.err(
+                        ErrorKind::UnclosedToken,
+                        "declaration opener crosses a parameter boundary",
+                    ));
+                }
+                return self.start_declaration_composition();
+            }
             if self.is_source_final() {
                 return Err(self.err(ErrorKind::UnclosedToken, "unclosed DTD declaration"));
             }
             return Ok(false);
         };
+        if mode == crate::ScanMode::DtdDeclaration
+            && self.source().remaining().as_bytes()[end - 1] == b'%'
+        {
+            return self.start_declaration_composition();
+        }
         let token = string(&self.source().remaining()[..end], self.allocator)?;
         if let Some((offset, _)) = token
             .char_indices()
@@ -990,240 +643,6 @@ impl Parser {
             self.pending.back_mut().expect("external parameter").raw = Some(raw);
         }
         Ok(true)
-    }
-
-    /// Expand complete declaration tokens, retaining literal provenance and
-    /// separating replacement frames with grammar-only whitespace. Quoted
-    /// values and references must finish in the frame where they begin.
-    fn declaration_tokens(
-        &self,
-        text: &str,
-        base_offset: usize,
-    ) -> Result<Option<DeclarationExpansion>, Error> {
-        // The overwhelmingly common declaration contains no parameter reference.
-        if !text.contains('%') {
-            return Ok(None);
-        }
-        let mut check = text;
-        let mut has_reference = false;
-        while let Some(offset) = check.find(['\'', '"', '%']) {
-            check = &check[offset..];
-            if check.starts_with('%') {
-                if !check[1..].starts_with(whitespace) {
-                    has_reference = true;
-                    break;
-                }
-                check = &check[1..];
-            } else {
-                let quote = check.as_bytes()[0] as char;
-                let Some(end) = check[1..].find(quote) else {
-                    break;
-                };
-                check = &check[end + 2..];
-            }
-        }
-        if !has_reference {
-            return Ok(None);
-        }
-        let mut result = DeclarationExpansion {
-            text: String::new_in(self.allocator),
-            raw: String::new_in(self.allocator),
-            literals: Vec::new_in(self.allocator),
-            parameters: Vec::new_in(self.allocator),
-            // An external value callback can install a Default handler while
-            // an ENTITY declaration is suspended. Keep its future raw suffix.
-            capture_raw: self.default_events || text.starts_with("ENTITY"),
-        };
-        let mut parents: Vec<DeclarationFrame<'_>> = Vec::new_in(self.allocator);
-        let mut current = DeclarationFrame {
-            rest: text,
-            name: None,
-            source_offset: base_offset,
-            normalize: self.sources.len() == 1,
-        };
-        loop {
-            let end = current
-                .rest
-                .find(['\'', '"', '%', '<', '>'])
-                .unwrap_or(current.rest.len());
-            if current.rest[..end].ends_with(')') && current.rest.as_bytes().get(end) == Some(&b'%')
-            {
-                return Err(self.err_at(
-                    ErrorKind::InvalidToken,
-                    "parameter reference cannot delimit a closing model group",
-                    current.source_offset + if current.name.is_none() { end } else { 0 },
-                ));
-            }
-            self.append_declaration_token(&mut result, &current.rest[..end], false)?;
-            current.rest = &current.rest[end..];
-            if current.name.is_none() {
-                current.source_offset += end;
-            }
-            if current.rest.is_empty() {
-                if let Some(parent) = parents.pop() {
-                    self.append_declaration_token(&mut result, " ", true)?;
-                    current = parent;
-                    continue;
-                }
-                return Ok(Some(result));
-            }
-            if current.rest.starts_with(['<', '>']) {
-                return Err(self.err_at(
-                    ErrorKind::IncompleteParameterEntity,
-                    "parameter replacement crosses a declaration boundary",
-                    current.source_offset,
-                ));
-            }
-            if current.rest.starts_with(['\'', '"']) {
-                let quote = current.rest.as_bytes()[0] as char;
-                let end = current.rest[1..].find(quote).ok_or_else(|| {
-                    self.err_at(
-                        ErrorKind::UnclosedToken,
-                        "quoted declaration token crosses a parameter boundary",
-                        current.source_offset,
-                    )
-                })? + 2;
-                self.charge_expansion(size_of::<DeclarationLiteral>())?;
-                let mut parameters = Vec::new_in(self.allocator);
-                for name in parents
-                    .iter()
-                    .filter_map(|frame| frame.name)
-                    .chain(current.name)
-                {
-                    self.charge_expansion(size_of::<String>() + name.len())?;
-                    try_push(&mut parameters, string(name, self.allocator)?)?;
-                }
-                try_push(
-                    &mut result.literals,
-                    DeclarationLiteral {
-                        offset: result.text.len(),
-                        normalize: current.normalize,
-                        parameters,
-                    },
-                )?;
-                self.append_declaration_token(&mut result, &current.rest[..end], false)?;
-                current.rest = &current.rest[end..];
-                if current.name.is_none() {
-                    current.source_offset += end;
-                }
-                continue;
-            }
-            // The percent sign in <!ENTITY % name ...> is a grammar marker.
-            if current.rest[1..].starts_with(whitespace) {
-                self.append_declaration_token(&mut result, "%", false)?;
-                current.rest = &current.rest[1..];
-                if current.name.is_none() {
-                    current.source_offset += 1;
-                }
-                continue;
-            }
-            let end = current.rest.find(';').ok_or_else(|| {
-                self.err_at(
-                    ErrorKind::InvalidToken,
-                    "unclosed declaration parameter reference",
-                    current.source_offset,
-                )
-            })?;
-            let name = &current.rest[1..end];
-            if !crate::names::is_name(name)
-                || (self.config.namespace_separator.is_some() && name.contains(':'))
-            {
-                return Err(self.err_at(
-                    ErrorKind::InvalidToken,
-                    "invalid declaration parameter name",
-                    current.source_offset,
-                ));
-            }
-            if !self.external_subset && self.sources.len() == 1 {
-                return Err(self.err_at(
-                    ErrorKind::ParameterEntityReference,
-                    "parameter reference in an internal subset declaration",
-                    current.source_offset,
-                ));
-            }
-            self.charge_expansion(end + 1 + size_of::<DeclarationFrame<'_>>())?;
-            let entity = self.parameter_entities.get(name);
-            self.append_declaration_token(&mut result, " ", true)?;
-            if self.parameter_mode == 0 || entity.is_none() {
-                self.charge_expansion(
-                    2 * size_of::<crate::PendingEvent>() + size_of::<DeclarationParameter>(),
-                )?;
-                try_push(
-                    &mut result.parameters,
-                    DeclarationParameter {
-                        offset: result.text.len(),
-                        position: self.source().position_at(current.source_offset, end + 1),
-                        raw_start: result.raw.len(),
-                        raw_end: result.raw.len() + if result.capture_raw { end + 1 } else { 0 },
-                        disabled: self.parameter_mode == 0,
-                    },
-                )?;
-                if result.capture_raw {
-                    result.raw.try_push_str(&current.rest[..end + 1])?;
-                }
-                current.rest = &current.rest[end + 1..];
-                if current.name.is_none() {
-                    current.source_offset += end + 1;
-                }
-                continue;
-            }
-            if current.name == Some(name)
-                || parents.iter().any(|frame| frame.name == Some(name))
-                || self
-                    .entity_chain
-                    .iter()
-                    .any(|entry| entry.strip_prefix('%') == Some(name))
-                || self.sources.iter().any(|source| {
-                    source
-                        .entity_name
-                        .as_deref()
-                        .and_then(|name| name.strip_prefix('%'))
-                        == Some(name)
-                })
-            {
-                return Err(self.err_at(
-                    ErrorKind::RecursiveEntityReference,
-                    "recursive declaration parameter entity",
-                    current.source_offset,
-                ));
-            }
-            if parents.len()
-                + self.sources.len()
-                + self.external_depth
-                + self.inherited_parameter_depth
-                > self.config.limits.max_entity_depth
-            {
-                return Err(self.err_at(
-                    ErrorKind::LimitExceeded,
-                    "declaration parameter nesting limit exceeded",
-                    current.source_offset,
-                ));
-            }
-            let value = entity
-                .expect("declared parameter")
-                .value
-                .as_deref()
-                .ok_or_else(|| {
-                    self.err_at(
-                        ErrorKind::ExternalEntityHandling,
-                        "external parameter reference inside a declaration is unsupported",
-                        current.source_offset,
-                    )
-                })?;
-            self.charge_expansion(value.len())?;
-            let position = current.source_offset;
-            current.rest = &current.rest[end + 1..];
-            if current.name.is_none() {
-                current.source_offset += end + 1;
-            }
-            try_push(&mut parents, current)?;
-            current = DeclarationFrame {
-                rest: value,
-                name: Some(name),
-                source_offset: position,
-                normalize: false,
-            };
-        }
     }
 
     fn append_declaration_token(
@@ -1373,7 +792,16 @@ impl Parser {
         Ok(())
     }
 
-    fn parse_subset(&mut self, mut text: &str, base_offset: usize) -> Result<(), Error> {
+    fn parse_subset(&mut self, text: &str, base_offset: usize) -> Result<(), Error> {
+        self.parse_subset_expanded(text, base_offset, None)
+    }
+
+    fn parse_subset_expanded(
+        &mut self,
+        mut text: &str,
+        base_offset: usize,
+        mut prepared: Option<DeclarationExpansion>,
+    ) -> Result<(), Error> {
         let initial_len = text.len();
         while !text.is_empty() {
             text = text.trim_start_matches(whitespace);
@@ -1435,7 +863,7 @@ impl Parser {
             self.declaration_allowed = false;
             let first_event = self.pending.len();
             let previously_skipped = self.declarations_skipped;
-            let expansion = self.declaration_tokens(&text[2..end], offset + 2)?;
+            let expansion = prepared.take();
             let grammar = expansion
                 .as_ref()
                 .map_or(&text[2..end], |value| value.text.as_str());

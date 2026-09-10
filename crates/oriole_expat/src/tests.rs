@@ -1646,6 +1646,47 @@ unsafe extern "C" fn header_entity_decl(
     }
 }
 
+#[test]
+fn parameter_delimiters_preserve_buffer_input_after_parent_free() {
+    let dtd = br#"<!ENTITY % p "><!ENTITY e "><!ELEMENT r EMPTY %p;"works"><!ENTITY % h "INCLUDE["><![%h;<!ENTITY after "done">]]>"#;
+    // SAFETY: Fixed callback state outlives the retained child. Every write uses
+    // its GetBuffer allocation, and parent and child are each freed once.
+    unsafe {
+        for namespaces in [false, true] {
+            for width in 1..=dtd.len() {
+                let parent = if namespaces {
+                    XML_ParserCreateNS(ptr::null(), b'|' as c_char)
+                } else {
+                    XML_ParserCreate(ptr::null())
+                };
+                assert!(!parent.is_null());
+                let child = XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null());
+                assert!(!child.is_null());
+                XML_ParserFree(parent);
+                let mut state = HeaderCallbackState::default();
+                XML_SetUserData(child, ptr::from_mut(&mut state).cast());
+                XML_SetEntityDeclHandler(child, Some(header_entity_decl));
+                assert_eq!(XML_SetParamEntityParsing(child, 2), 1);
+                for (index, bytes) in dtd.chunks(width).enumerate() {
+                    let buffer = XML_GetBuffer(child, bytes.len() as c_int);
+                    assert!(!buffer.is_null());
+                    ptr::copy_nonoverlapping(bytes.as_ptr(), buffer.cast(), bytes.len());
+                    assert_eq!(
+                        XML_ParseBuffer(
+                            child,
+                            bytes.len() as c_int,
+                            c_int::from((index + 1) * width >= dtd.len())
+                        ),
+                        OK,
+                    );
+                }
+                assert_eq!(state.declarations, ["p", "e", "h", "after"]);
+                XML_ParserFree(child);
+            }
+        }
+    }
+}
+
 unsafe extern "C" fn header_external(
     parser: XML_Parser,
     context: *const c_char,

@@ -1,0 +1,13 @@
+# Internal DTD delimiter composition
+
+Internal parameter entities can now provide a declaration’s closing `>` or a conditional header’s opening `[`. Replacement tails remain available to subsequent declarations. Names, quoted literals and references retain their lexical source boundaries; between-declaration replacements still require complete declarations. The owned collector replaces the previous borrowed expander, preserves the ordinary scanner fast path, and adds no unsafe code or FFI runtime changes.
+
+The combined source is PR55 plus the reviewed patch whose SHA256 is `f0c37be05e7503c2bff42b15e514680586c99d5d173ba3c94d5e1e93556f82ae`. Its release library SHA256 is `35bac262f1b77c0066b17ce82529bd52d71e1b850de4faa477e340bcbbd4c710`. `combined-gates/source.json` records every source hash, including later namespace, version, foreign-DTD, decoder, and API-state changes that are absent from the isolated prototype.
+
+All 227 workspace tests, strict Clippy and formatting pass. The combined 1,242-case oracle fixes 270 comparisons with no new outcome or successful normalized child-event differences. Its 242 remaining differences involve failed or unsupported inputs. The earlier header suites retain the same 44 failed-input diagnostics among 1,836 cases; 576 mixed and 54 nested/read cases match. These overlapping suites are reported separately.
+
+The complete adapted Expat API matrix passes 3,741 configurations and fails 999. Compared with the preceding 3,705-pass checkpoint, the 36 new passes come from namespace-separator, completed encoding-setter and partial-epilog fixes. There are zero regressions, signals or timeouts; all remaining failures are test assertions. The original public assertions and exclusions remain in the archived harness.
+
+The complete W3C run passes 5,913 required observations and fails nine, with 81 optional observations and no resolver errors or inconclusive results. Four internal DTD documents now pass at every chunk size. Three documents still fail: an external PE reference in ATTLIST grammar, mixed XML declaration versions across entities, and a BOM/declared-encoding inconsistency. The latter two also fail with reference Expat. This measures acceptance only; it does not compare canonical output. The pinned mirror and catalog provenance are preserved in the earlier W3C report.
+
+Independent review found no memory, source-provenance or nesting blocker. Its 450-case matrix has no acceptance mismatch or successful-callback regression; 90 failed-input diagnostic differences remain. The isolated handoff retains an earlier malformed-header Default-prefix regression and its correction. Final combined sanitizer campaigns and consumer builds are subsequent gates, not claimed by this layer.

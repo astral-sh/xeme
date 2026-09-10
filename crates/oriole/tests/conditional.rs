@@ -106,10 +106,7 @@ fn incomplete_parameter_sections_and_stray_closings_are_rejected() {
             "<!ENTITY % p '<![INCLUDE['>%p;]]>",
             ErrorKind::IncompleteParameterEntity,
         ),
-        (
-            "<!ENTITY % p '<![IGNORE['>%p;]]>",
-            ErrorKind::IncompleteParameterEntity,
-        ),
+        ("<!ENTITY % p '<![IGNORE['>%p;]]>", ErrorKind::Syntax),
     ] {
         for chunk in 1..=dtd.len() {
             assert_eq!(
@@ -400,6 +397,88 @@ fn skipped_declarations_parse_structure_without_expanding_literal_values() {
                 subset(dtd.as_bytes(), chunk, Config::default()).unwrap_err(),
                 expected
             );
+        }
+    }
+}
+
+#[test]
+fn parameter_header_delimiters_preserve_the_replacement_suffix() {
+    for dtd in [
+        r#"<!ENTITY % p "INCLUDE["><![%p;<!ENTITY e 'ok'>]]>"#,
+        r#"<!ENTITY % p "["><![INCLUDE%p;<!ENTITY e 'ok'>]]>"#,
+        r#"<!ENTITY % p "INCLUDE[<!ENTITY e "><![%p;'ok'>]]>"#,
+        r#"<!ENTITY % p "INCLUDE[<!ENTITY e 'ok'>]]>"><![%p;"#,
+        r#"<!ENTITY % q "INCLUDE["><!ENTITY % p "&#37;q;"><![%p;<!ENTITY e 'ok'>]]>"#,
+    ] {
+        let mut encodings = vec![dtd.as_bytes().to_vec()];
+        for little in [false, true] {
+            let mut bytes = if little {
+                vec![0xff, 0xfe]
+            } else {
+                vec![0xfe, 0xff]
+            };
+            for unit in dtd.encode_utf16() {
+                bytes.extend_from_slice(&if little {
+                    unit.to_le_bytes()
+                } else {
+                    unit.to_be_bytes()
+                });
+            }
+            encodings.push(bytes);
+        }
+        for bytes in encodings {
+            for chunk in 1..=bytes.len() {
+                let (mut parser, _) = subset(&bytes, chunk, Config::default()).unwrap();
+                parser.feed(b"<r>&e;</r>", true).unwrap();
+                let mut text = String::new();
+                while let Some(event) = parser.next_event().unwrap() {
+                    if let EventKind::Text(value) = event.kind {
+                        text.push_str(&value);
+                    }
+                }
+                assert_eq!(text, "ok", "{dtd}; chunk {chunk}");
+            }
+        }
+    }
+}
+
+#[test]
+fn malformed_headers_preserve_default_prefixes_before_the_error() {
+    for (input, expected) in [
+        ("<![%missing;[", "<![%missing;"),
+        ("<![IN%missing;[", "<!["),
+        ("<![%missing;CLUDE[", "<![%missing;"),
+    ] {
+        for width in 1..=input.len() {
+            let parent = Parser::new(Config::default());
+            let mut child = parent.external_child(None, None).unwrap();
+            child.set_default_events(true);
+            let mut raw = String::new();
+            let mut failure = None;
+            for (index, bytes) in input.as_bytes().chunks(width).enumerate() {
+                child
+                    .feed(bytes, (index + 1) * width >= input.len())
+                    .unwrap();
+                loop {
+                    match child.next_event() {
+                        Ok(Some(event)) => {
+                            if matches!(event.kind, EventKind::Default) {
+                                raw.push_str(child.current_raw().unwrap());
+                            }
+                        }
+                        Ok(None) => break,
+                        Err(error) => {
+                            failure = Some(error.kind);
+                            break;
+                        }
+                    }
+                }
+                if failure.is_some() {
+                    break;
+                }
+            }
+            assert_eq!(failure, Some(ErrorKind::Syntax));
+            assert_eq!(raw, expected, "{input}; chunk {width}");
         }
     }
 }

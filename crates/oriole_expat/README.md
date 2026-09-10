@@ -73,12 +73,14 @@ reports retain these acceptance and diagnostic differences.
 
 The following Expat modes are explicitly unsupported:
 
-- Declaration start/end delimiters split across parameter entities and external
-  parameter references between declaration grammar tokens are rejected.
-  Internal parameter entities can supply complete lexical tokens inside
-  declarations in external DTDs and parameter entities. Replacement frames
-  preserve name and quote boundaries, attribute whitespace, and entity-value
-  provenance; their grammar can continue across a content-model group. References
+- External parameter references between declaration grammar tokens are rejected.
+  Internal parameter entities can supply complete lexical tokens and grammar
+  delimiters inside declarations in external DTDs and parameter entities.
+  Replacement frames preserve name and quote boundaries, attribute whitespace,
+  and entity-value provenance. A replacement may close the containing declaration
+  or conditional header and leave further declaration grammar to resume in the
+  parent. References between declarations must contain complete declarations;
+  ignored conditional sections must close within their source. References
   between declarations, nested `INCLUDE`/`IGNORE` sections in external DTDs, and
   internal parameter entities selecting conditional keywords or expanding entity
   values in external DTDs and parameter entities are supported. Value replacements

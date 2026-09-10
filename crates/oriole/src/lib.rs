@@ -360,8 +360,10 @@ impl TryClone for DefaultAttribute {
 /// references between declarations and nested INCLUDE/IGNORE sections in external
 /// DTDs. Internal parameter entities may select a conditional keyword or expand
 /// inside entity values in external DTDs and parameter entities, and supply
-/// complete lexical tokens inside declarations. Declaration delimiters cannot
-/// span replacement boundaries. External references in conditional headers load
+/// complete lexical tokens and grammar delimiters inside declarations. Names,
+/// quoted literals, and references retain their original lexical boundaries;
+/// references between declarations must contain complete declarations.
+/// External references in conditional headers load
 /// separate DTDs; their declarations are available before the header resumes.
 /// External references inside entity values create value children whose output
 /// continues the pending declaration, preserving each child's lexical boundary.
@@ -1205,6 +1207,18 @@ impl Parser {
                 }
                 continue;
             }
+            if self.has_header_composition() {
+                if !self.continue_header_composition()? {
+                    return Ok(None);
+                }
+                continue;
+            }
+            if self.has_declaration_composition() {
+                if !self.continue_declaration_composition()? {
+                    return Ok(None);
+                }
+                continue;
+            }
             if self.source().remaining().is_empty() {
                 if self.sources.len() > 1 {
                     self.finish_conditional_source()?;
@@ -1420,6 +1434,7 @@ impl Parser {
                 ScanMode::Doctype => self.parse_doctype(&token, position)?,
                 ScanMode::Tag if token.starts_with("</") => self.parse_end(&token, position)?,
                 ScanMode::Tag => self.parse_start(&token, position)?,
+                ScanMode::DtdDeclaration => unreachable!("DTD scanner only runs in DTD context"),
             }
             self.consume(end);
         }
@@ -2477,6 +2492,7 @@ pub(crate) enum ScanMode {
     Comment,
     Pi,
     Doctype,
+    DtdDeclaration,
 }
 
 fn take_name(input: &str) -> Option<(&str, &str)> {

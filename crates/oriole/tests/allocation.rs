@@ -133,7 +133,7 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
             let mut child = parser.external_child_with_encoding(None, None)?;
             child.set_default_events(true);
             child.feed(
-                b"<!ENTITY % mode 'INCLUDE'><![%mode;[<![INCLUDE[<!ENTITY % part 'load'><!ENTITY % indirect '&#37;part;'><!ENTITY external '%indirect;ed'><!ENTITY % cr '&#13;'><!ENTITY quoted 'A%cr;\r\nB'>]]><!ATTLIST r default CDATA 'yes'><!ENTITY % model '(n|'><!ENTITY % attrs 'x CDATA &#34;A&#13;&#10;B&#34;'><!ENTITY % literal '&#34;T&#34;'><!ELEMENT r %model;m)><!ATTLIST r %attrs;><!ENTITY token %literal;><!ATTLIST r before CDATA 'B' %missing; after CDATA 'A'>]]><![IGNORE[ignored %missing; <![ nested ]]>]]>",
+                b"<!ENTITY % close '><!ENTITY tail '><!ELEMENT before EMPTY %close; 'tail'><!ENTITY % mode 'INCLUDE['><![%mode;<![INCLUDE[<!ENTITY % part 'load'><!ENTITY % indirect '&#37;part;'><!ENTITY external '%indirect;ed'><!ENTITY % cr '&#13;'><!ENTITY quoted 'A%cr;\r\nB'>]]><!ATTLIST r default CDATA 'yes'><!ENTITY % model '(n|'><!ENTITY % attrs 'x CDATA &#34;A&#13;&#10;B&#34;'><!ENTITY % literal '&#34;T&#34;'><!ELEMENT r %model;m)><!ATTLIST r %attrs;><!ENTITY token %literal;><!ATTLIST r before CDATA 'B' %missing; after CDATA 'A'>]]><![IGNORE[ignored %missing; <![ nested ]]>]]>",
                 true,
             )?;
             while next_event(&mut child)?.is_some() {}

@@ -8,9 +8,13 @@ use super::*;
 
 #[derive(Debug)]
 pub(super) struct Declaration {
-    expansion: DeclarationExpansion,
-    position: Position,
+    pub(super) expansion: DeclarationExpansion,
+    pub(super) position: Position,
     quote_checked: usize,
+    pub(super) semantic: Option<semantic::State>,
+    pub(super) request: Option<semantic::Request>,
+    pub(super) complete: bool,
+    pub(super) ready: usize,
 }
 
 #[derive(Debug)]
@@ -272,9 +276,14 @@ impl Parser {
                     parameters: Vec::new_in(self.allocator),
                     // Value callbacks may install a Default handler later.
                     capture_raw: true,
+                    raw_offsets: Vec::new_in(self.allocator),
                 },
                 position: self.here(),
                 quote_checked: 0,
+                semantic: None,
+                request: None,
+                complete: false,
+                ready: 0,
             },
             self.allocator,
         )?);
@@ -291,6 +300,18 @@ impl Parser {
             .take()
             .expect("pending declaration");
         loop {
+            if state
+                .semantic
+                .as_ref()
+                .is_some_and(|semantic| state.ready > semantic.waited_prefix)
+                || (state.semantic.is_some() && (state.request.is_some() || state.complete))
+            {
+                let done = self.advance_declaration_semantics(&mut state)?;
+                if !done {
+                    self.conditional.declaration = Some(state);
+                }
+                return Ok(true);
+            }
             if self.source().remaining().is_empty() {
                 if self.sources.len() > 1 {
                     if !self.source().dtd_fragment {
@@ -301,6 +322,7 @@ impl Parser {
                     }
                     self.sources.pop();
                     self.append_declaration_token(&mut state.expansion, " ", true)?;
+                    state.ready = state.expansion.text.len();
                     continue;
                 }
                 if self.is_source_final() {
@@ -312,6 +334,11 @@ impl Parser {
             let text = self.source().remaining();
             let end = text.find(['\'', '"', '%', '<', '>']).unwrap_or(text.len());
             if end != 0 {
+                if let Some((offset, character)) =
+                    text[..end].char_indices().rfind(|(_, c)| whitespace(*c))
+                {
+                    state.ready = state.expansion.text.len() + offset + character.len_utf8();
+                }
                 self.append_declaration_token(&mut state.expansion, &text[..end], false)?;
                 self.consume(end);
                 continue;
@@ -319,6 +346,11 @@ impl Parser {
             match text.as_bytes()[0] {
                 b'>' => {
                     self.consume(1);
+                    if state.semantic.is_some() {
+                        state.complete = true;
+                        state.ready = state.expansion.text.len();
+                        continue;
+                    }
                     return self
                         .finish_declaration_composition(oriole_storage::Box::into_inner(state));
                 }
@@ -375,6 +407,7 @@ impl Parser {
                     self.append_declaration_token(&mut state.expansion, &text[..end], false)?;
                     self.consume(end);
                     state.quote_checked = 0;
+                    state.ready = state.expansion.text.len();
                 }
                 b'%' => {
                     if text.len() == 1 && !self.is_source_final() {
@@ -426,6 +459,7 @@ impl Parser {
                     }
                     self.charge_expansion(end + 1)?;
                     self.append_declaration_token(&mut state.expansion, " ", true)?;
+                    state.ready = state.expansion.text.len();
                     let entity = self.parameter_entities.get(name);
                     if self.parameter_mode == 0 || entity.is_none() {
                         self.charge_expansion(
@@ -448,6 +482,7 @@ impl Parser {
                             .expansion
                             .raw
                             .try_push_str(&self.source().remaining()[..end + 1])?;
+                        self.declaration_raw_boundary(&mut state.expansion)?;
                         self.consume(end + 1);
                         continue;
                     }
@@ -477,12 +512,37 @@ impl Parser {
                         ));
                     }
                     let entity = entity.expect("declared parameter");
-                    let value = entity.value.as_ref().ok_or_else(|| {
-                        self.err(
-                            ErrorKind::ExternalEntityHandling,
-                            "external parameter reference inside a declaration is unsupported",
-                        )
-                    })?;
+                    let Some(value) = entity.value.as_ref() else {
+                        self.charge_external_identifiers(entity)?;
+                        self.charge_expansion(
+                            2 * name.len()
+                                + 4
+                                + size_of::<semantic::Request>()
+                                + size_of::<crate::PendingEvent>(),
+                        )?;
+                        let system_id = entity.system_id.try_clone()?;
+                        let public_id = entity.public_id.try_clone()?;
+                        let mut source_name = string("%", self.allocator)?;
+                        source_name.push_str(name)?;
+                        let position = self.source().position(end + 1);
+                        self.consume(end + 1);
+                        state.request = Some(semantic::Request {
+                            source_name,
+                            system_id,
+                            public_id,
+                            position,
+                        });
+                        if state.semantic.is_none() {
+                            self.charge_expansion(
+                                size_of::<semantic::State>()
+                                    + grammar::Cursor::maximum_stack_bytes(
+                                        self.config.limits.max_depth,
+                                    ),
+                            )?;
+                            state.semantic = Some(semantic::State::new(self));
+                        }
+                        continue;
+                    };
                     self.charge_expansion(
                         value.len() + name.len() + 1 + size_of::<crate::encoding::Source>(),
                     )?;

@@ -1,4 +1,6 @@
 mod composition;
+mod grammar;
+mod semantic;
 
 use crate::{
     DefaultAttribute, DefaultAttributes, Entity, Error, ErrorKind, EventKind, Parser, Position,
@@ -60,6 +62,7 @@ struct DeclarationExpansion {
     literals: Vec<DeclarationLiteral>,
     parameters: Vec<DeclarationParameter>,
     capture_raw: bool,
+    raw_offsets: Vec<(usize, usize)>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -69,6 +72,14 @@ pub(crate) struct DeclarationParameter {
     raw_start: usize,
     raw_end: usize,
     disabled: bool,
+}
+
+/// Semantic attribute types are always complete. Expat builds enumeration
+/// callback payloads only while its ATTLIST handler is present.
+#[derive(Clone, Copy)]
+enum AttributeCallback<'a> {
+    Complete,
+    Enumeration(Option<&'a str>),
 }
 
 impl Parser {
@@ -669,6 +680,22 @@ impl Parser {
         result.text.try_push_str(text)?;
         if !boundary && result.capture_raw {
             result.raw.try_push_str(text)?;
+        } else if boundary {
+            self.declaration_raw_boundary(result)?;
+        }
+        Ok(())
+    }
+
+    /// Record only changes in grammar/raw displacement, never one entry per feed.
+    fn declaration_raw_boundary(&self, expansion: &mut DeclarationExpansion) -> Result<(), Error> {
+        let pair = (expansion.text.len(), expansion.raw.len());
+        if let Some(last) = expansion.raw_offsets.last_mut()
+            && last.0 == pair.0
+        {
+            *last = pair;
+        } else {
+            self.charge_expansion(size_of::<(usize, usize)>())?;
+            try_push(&mut expansion.raw_offsets, pair)?;
         }
         Ok(())
     }
@@ -713,7 +740,9 @@ impl Parser {
                 self.declaration_default_segment(
                     cursor,
                     end,
-                    !self.standalone && cursor.parameter_index == cursor.parameters.len(),
+                    cursor.closes_declaration
+                        && !self.standalone
+                        && cursor.parameter_index == cursor.parameters.len(),
                     true,
                     parameter.position,
                 )?;
@@ -761,6 +790,8 @@ impl Parser {
                         EventKind::EntityDeclaration { .. }
                             | EventKind::AttlistDeclaration { .. }
                             | EventKind::EntityDeclarationDuplicate { .. }
+                            | EventKind::ElementDeclaration { .. }
+                            | EventKind::NotationDeclaration { .. }
                     )
                 {
                     pending.raw = Some(if assigned {
@@ -772,17 +803,20 @@ impl Parser {
                 }
             }
         }
-        if !assigned {
+        if !assigned && !cursor.silent_defaults {
             self.charge_expansion(size_of::<crate::PendingEvent>())?;
             self.emit(
                 if unconditional {
                     EventKind::Default
                 } else if let Some((external, unparsed)) = cursor.duplicate_defaults {
                     EventKind::EntityDeclarationDuplicate { external, unparsed }
-                } else if cursor.entity_defaults {
-                    EventKind::EntityDeclarationPrefix
                 } else {
-                    EventKind::AttlistDeclarationPrefix
+                    match cursor.projection {
+                        Some(grammar::Kind::Element) => EventKind::ElementDeclarationPrefix,
+                        Some(grammar::Kind::Notation) => EventKind::NotationDeclarationPrefix,
+                        _ if cursor.entity_defaults => EventKind::EntityDeclarationPrefix,
+                        _ => EventKind::AttlistDeclarationPrefix,
+                    }
                 },
                 position,
             )?;
@@ -887,56 +921,8 @@ impl Parser {
             match declaration {
                 "ENTITY" => self.entity_declaration(&mut cursor, position)?,
                 "ATTLIST" => self.attlist_declaration(&mut cursor, position)?,
-                "ELEMENT" => {
-                    let name = cursor
-                        .name()
-                        .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-                    let name = string(name, self.allocator)?;
-                    cursor
-                        .require_space()
-                        .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-                    let model_start = cursor.rest();
-                    parse_content_model(&mut cursor, 0, self.config.limits.max_depth).map_err(
-                        |message| {
-                            if cursor.rest().starts_with(['?', '*', '+']) {
-                                self.err_at(
-                                    ErrorKind::InvalidToken,
-                                    message,
-                                    offset + 2 + cursor.offset().min(end - 2),
-                                )
-                            } else {
-                                self.err(ErrorKind::Syntax, message)
-                            }
-                        },
-                    )?;
-                    let model = string(
-                        &model_start[..model_start.len() - cursor.rest().len()],
-                        self.allocator,
-                    )?;
-                    self.declaration_parameters(&mut cursor)?;
-                    self.emit(EventKind::ElementDeclaration { name, model }, position)?;
-                }
-                "NOTATION" => {
-                    let name = cursor
-                        .ncname()
-                        .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-                    let name = string(name, self.allocator)?;
-                    cursor
-                        .require_space()
-                        .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-                    let (system_id, public_id) =
-                        external_id(&mut cursor, true, self.allocator, self.sources.len() == 1)
-                            .map_err(|error| self.err(error.kind, error.message))?;
-                    self.declaration_parameters(&mut cursor)?;
-                    self.emit(
-                        EventKind::NotationDeclaration {
-                            name,
-                            system_id,
-                            public_id,
-                        },
-                        position,
-                    )?;
-                }
+                "ELEMENT" => self.element_declaration(&mut cursor, position, offset + 2)?,
+                "NOTATION" => self.notation_declaration(&mut cursor, position, true)?,
                 _ => return Err(self.err(ErrorKind::Syntax, "unsupported DTD declaration")),
             }
             if let Some(mut state) = self.value_state.take() {
@@ -1074,9 +1060,11 @@ impl Parser {
         parameters: &[DeclarationParameter],
         first_event: usize,
         position: Position,
+        closes_declaration: bool,
     ) -> Result<(), Error> {
         let mut cursor = Cursor::new("", self.config.namespace_separator.is_some());
-        cursor.raw = &raw[2..raw.len() - 1];
+        cursor.raw = &raw[2..raw.len() - usize::from(closes_declaration)];
+        cursor.closes_declaration = closes_declaration;
         cursor.raw_offset = quote - 2;
         cursor.raw_started = true;
         cursor.raw_event = first_event;
@@ -1100,13 +1088,76 @@ impl Parser {
             self.declaration_default_segment(
                 &mut cursor,
                 end,
-                !closing_default,
+                closes_declaration && !closing_default,
                 value_skipped,
                 position,
             )?;
-            if closing_default {
+            if closes_declaration && closing_default {
                 self.declaration_default_segment(&mut cursor, end, true, true, position)?;
             }
+        }
+        Ok(())
+    }
+
+    fn element_declaration(
+        &mut self,
+        cursor: &mut Cursor<'_>,
+        position: Position,
+        error_offset: usize,
+    ) -> Result<(), Error> {
+        let name = cursor
+            .name()
+            .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        let name = string(name, self.allocator)?;
+        cursor
+            .require_space()
+            .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        let model_start = cursor.rest();
+        parse_content_model(cursor, 0, self.config.limits.max_depth).map_err(|message| {
+            if cursor.rest().starts_with(['?', '*', '+']) {
+                self.err_at(
+                    ErrorKind::InvalidToken,
+                    message,
+                    error_offset + cursor.offset(),
+                )
+            } else {
+                self.err(ErrorKind::Syntax, message)
+            }
+        })?;
+        let model = string(
+            &model_start[..model_start.len() - cursor.rest().len()],
+            self.allocator,
+        )?;
+        self.declaration_parameters(cursor)?;
+        self.emit(EventKind::ElementDeclaration { name, model }, position)
+    }
+
+    fn notation_declaration(
+        &mut self,
+        cursor: &mut Cursor<'_>,
+        position: Position,
+        emit: bool,
+    ) -> Result<(), Error> {
+        let name = cursor
+            .ncname()
+            .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        let name = string(name, self.allocator)?;
+        cursor
+            .require_space()
+            .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        let (system_id, public_id) =
+            external_id(cursor, true, self.allocator, self.sources.len() == 1)
+                .map_err(|error| self.err(error.kind, error.message))?;
+        self.declaration_parameters(cursor)?;
+        if emit {
+            self.emit(
+                EventKind::NotationDeclaration {
+                    name,
+                    system_id,
+                    public_id,
+                },
+                position,
+            )?;
         }
         Ok(())
     }
@@ -1174,6 +1225,7 @@ impl Parser {
                         prefix_start: 0,
                         tail_parameters: Vec::new_in(self.allocator),
                         prefix_sent: false,
+                        closes_declaration: true,
                         suffix_error: None,
                     });
                     self.value_state = Some(state);
@@ -1361,6 +1413,11 @@ impl Parser {
                 ));
             }
             let Some(replacement) = entity.value.as_deref() else {
+                // An entity name reserved by an unfinished declaration has no
+                // replacement or external identifier yet. Value reads are empty.
+                if entity.system_id.is_none() {
+                    continue;
+                }
                 let mut frames = Vec::new_in(self.allocator);
                 for frame in parents.into_iter().chain(std::iter::once(current)) {
                     self.charge_expansion(
@@ -1446,139 +1503,165 @@ impl Parser {
                     "attribute declarations require whitespace",
                 ));
             }
-            let name = cursor
-                .name()
-                .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-            let name = string(name, self.allocator)?;
+            self.attlist_attribute(
+                cursor,
+                position,
+                &element,
+                &mut first_attribute,
+                AttributeCallback::Complete,
+            )?;
+        }
+        Ok(())
+    }
+
+    /// Commit one complete attribute, preserving the same definition and callback
+    /// accounting when an ATTLIST pauses at an external parameter reference.
+    fn attlist_attribute(
+        &mut self,
+        cursor: &mut Cursor<'_>,
+        position: Position,
+        element: &String,
+        first_attribute: &mut bool,
+        callback: AttributeCallback<'_>,
+    ) -> Result<(), Error> {
+        let name = cursor
+            .name()
+            .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        let name = string(name, self.allocator)?;
+        cursor
+            .require_space()
+            .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        let start = cursor.rest();
+        if cursor.eat("NOTATION") {
             cursor
                 .require_space()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-            let start = cursor.rest();
-            if cursor.eat("NOTATION") {
+            enumeration(cursor, true).map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        } else if cursor.starts("(") {
+            enumeration(cursor, false).map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        } else {
+            let attribute_type = cursor
+                .name()
+                .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+            if !matches!(
+                attribute_type,
+                "CDATA"
+                    | "ID"
+                    | "IDREF"
+                    | "IDREFS"
+                    | "ENTITY"
+                    | "ENTITIES"
+                    | "NMTOKEN"
+                    | "NMTOKENS"
+            ) {
+                return Err(self.err(ErrorKind::Syntax, "invalid attribute type"));
+            }
+        }
+        let raw_type = &start[..start.len() - cursor.rest().len()];
+        let mut attribute_type = String::try_with_capacity_in(raw_type.len(), self.allocator)?;
+        for part in raw_type.split(whitespace) {
+            attribute_type.push_str(part)?;
+        }
+        cursor
+            .require_space()
+            .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        let mut required = cursor.eat("#REQUIRED");
+        let value = if required || cursor.eat("#IMPLIED") {
+            None
+        } else {
+            if cursor.eat("#FIXED") {
+                required = true;
                 cursor
                     .require_space()
                     .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-                enumeration(cursor, true)
-                    .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-            } else if cursor.starts("(") {
-                enumeration(cursor, false)
-                    .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-            } else {
-                let attribute_type = cursor
-                    .name()
-                    .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-                if !matches!(
-                    attribute_type,
-                    "CDATA"
-                        | "ID"
-                        | "IDREF"
-                        | "IDREFS"
-                        | "ENTITY"
-                        | "ENTITIES"
-                        | "NMTOKEN"
-                        | "NMTOKENS"
-                ) {
-                    return Err(self.err(ErrorKind::Syntax, "invalid attribute type"));
-                }
             }
-            let raw_type = &start[..start.len() - cursor.rest().len()];
-            let mut attribute_type = String::try_with_capacity_in(raw_type.len(), self.allocator)?;
-            for part in raw_type.split(whitespace) {
-                attribute_type.push_str(part)?;
-            }
-            cursor
-                .require_space()
+            let raw = cursor
+                .quoted()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-            let mut required = cursor.eat("#REQUIRED");
-            let value = if required || cursor.eat("#IMPLIED") {
-                None
-            } else {
-                if cursor.eat("#FIXED") {
-                    required = true;
-                    cursor
-                        .require_space()
-                        .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-                }
-                let raw = cursor
-                    .quoted()
-                    .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-                self.declaration_parameters(cursor)?;
-                if self.declarations_skipped {
-                    continue;
-                }
-                // A CR/LF pair in a replacement was produced by character
-                // references, so it represents two attribute whitespace
-                // characters rather than one physical line ending.
-                let normalized =
-                    if cursor.last_literal_normalize == Some(false) && raw.contains("\r\n") {
-                        let mut value = String::try_with_capacity_in(raw.len(), self.allocator)?;
-                        for character in raw.chars() {
-                            value.try_push(if whitespace(character) {
-                                ' '
-                            } else {
-                                character
-                            })?;
-                        }
-                        Some(value)
-                    } else {
-                        None
-                    };
-                let mut value = self.expand_attribute(
-                    normalized.as_deref().unwrap_or(raw),
-                    &mut Vec::new_in(self.allocator),
-                )?;
-                if attribute_type != "CDATA" {
-                    value = collapse_spaces(&value, self.allocator)?;
-                }
-                Some(value)
-            };
             self.declaration_parameters(cursor)?;
             if self.declarations_skipped {
-                continue;
+                return Ok(());
             }
-            if !self.defaults.contains_key(&element) {
-                try_insert(
-                    &mut self.defaults,
-                    element.try_clone()?,
-                    DefaultAttributes::new(self.allocator),
-                )?;
-            }
-            let declarations = self
-                .defaults
-                .get_mut(&element)
-                .expect("default list was inserted");
-            if declarations.get(&name).is_none() {
-                if declarations.ordered.len() >= self.config.limits.max_attributes {
-                    return Err(self.err(
-                        ErrorKind::LimitExceeded,
-                        "default attribute count limit exceeded",
-                    ));
+            // A CR/LF pair in a replacement was produced by character
+            // references, so it represents two attribute whitespace
+            // characters rather than one physical line ending.
+            let normalized = if cursor.last_literal_normalize == Some(false) && raw.contains("\r\n")
+            {
+                let mut value = String::try_with_capacity_in(raw.len(), self.allocator)?;
+                for character in raw.chars() {
+                    value.try_push(if whitespace(character) {
+                        ' '
+                    } else {
+                        character
+                    })?;
                 }
-                declarations.try_insert(DefaultAttribute {
-                    name: name.try_clone()?,
-                    attribute_type: attribute_type.try_clone()?,
-                    value: value.try_clone()?,
-                })?;
-            }
-            if first_attribute {
-                first_attribute = false;
+                Some(value)
             } else {
-                // Every later callback reuses the same input name. Charging before
-                // cloning prevents a long name and many tiny declarations from
-                // creating an unbounded queue of repeated callback payloads.
-                self.charge_expansion(element.len())?;
+                None
+            };
+            let mut value = self.expand_attribute(
+                normalized.as_deref().unwrap_or(raw),
+                &mut Vec::new_in(self.allocator),
+            )?;
+            if attribute_type != "CDATA" {
+                value = collapse_spaces(&value, self.allocator)?;
             }
-            self.emit(
-                EventKind::AttlistDeclaration {
-                    element: element.try_clone()?,
-                    name,
-                    attribute_type,
-                    default: value,
-                    required,
-                },
-                position,
+            Some(value)
+        };
+        self.declaration_parameters(cursor)?;
+        if self.declarations_skipped {
+            return Ok(());
+        }
+        if !self.defaults.contains_key(element) {
+            try_insert(
+                &mut self.defaults,
+                element.try_clone()?,
+                DefaultAttributes::new(self.allocator),
             )?;
         }
+        let declarations = self
+            .defaults
+            .get_mut(element)
+            .expect("default list was inserted");
+        if declarations.get(&name).is_none() {
+            if declarations.ordered.len() >= self.config.limits.max_attributes {
+                return Err(self.err(
+                    ErrorKind::LimitExceeded,
+                    "default attribute count limit exceeded",
+                ));
+            }
+            declarations.try_insert(DefaultAttribute {
+                name: name.try_clone()?,
+                attribute_type: attribute_type.try_clone()?,
+                value: value.try_clone()?,
+            })?;
+        }
+        let attribute_type = match callback {
+            AttributeCallback::Complete => attribute_type,
+            AttributeCallback::Enumeration(Some(value)) => {
+                self.charge_expansion(value.len())?;
+                string(value, self.allocator)?
+            }
+            AttributeCallback::Enumeration(None) => return Ok(()),
+        };
+        if *first_attribute {
+            *first_attribute = false;
+        } else {
+            // Every later callback reuses the same input name. Charging before
+            // cloning prevents a long name and many tiny declarations from
+            // creating an unbounded queue of repeated callback payloads.
+            self.charge_expansion(element.len())?;
+        }
+        self.emit(
+            EventKind::AttlistDeclaration {
+                element: element.try_clone()?,
+                name,
+                attribute_type,
+                default: value,
+                required,
+            },
+            position,
+        )?;
         Ok(())
     }
 }
@@ -1595,11 +1678,14 @@ struct Cursor<'a> {
     parameter_index: usize,
     parameter_defaults: bool,
     entity_defaults: bool,
+    projection: Option<grammar::Kind>,
     duplicate_defaults: Option<(bool, bool)>,
     raw_offset: usize,
     raw_event: usize,
     raw_started: bool,
     raw_closed: bool,
+    closes_declaration: bool,
+    silent_defaults: bool,
     raw: &'a str,
 }
 impl<'a> Cursor<'a> {
@@ -1616,11 +1702,14 @@ impl<'a> Cursor<'a> {
             parameter_index: 0,
             parameter_defaults: false,
             entity_defaults: false,
+            projection: None,
             duplicate_defaults: None,
             raw_offset: 0,
             raw_event: 0,
             raw_started: false,
             raw_closed: false,
+            closes_declaration: true,
+            silent_defaults: false,
             raw: "",
         }
     }

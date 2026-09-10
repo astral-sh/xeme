@@ -2359,3 +2359,187 @@ fn zero_length_parse_buffer_finishes_owned_input_without_a_reservation() {
         XML_ParserFree(parser);
     }
 }
+
+#[derive(Default)]
+struct GrammarCallbackState {
+    root: XML_Parser,
+    action: u8,
+    requests: usize,
+    events: Vec<String>,
+}
+
+unsafe extern "C" fn grammar_attlist(
+    data: *mut c_void,
+    _: *const c_char,
+    name: *const c_char,
+    _: *const c_char,
+    _: *const c_char,
+    _: c_int,
+) {
+    // SAFETY: Expat-style callback strings and the test's stack state are live.
+    unsafe {
+        (*data.cast::<GrammarCallbackState>())
+            .events
+            .push(format!("attr:{}", CStr::from_ptr(name).to_str().unwrap()));
+    }
+}
+
+unsafe extern "C" fn grammar_default(data: *mut c_void, text: *const c_char, length: c_int) {
+    // SAFETY: The callback span is readable and test state outlives every child.
+    unsafe {
+        let text =
+            std::str::from_utf8(std::slice::from_raw_parts(text.cast(), length as usize)).unwrap();
+        (*data.cast::<GrammarCallbackState>())
+            .events
+            .push(format!("raw:{text}"));
+    }
+}
+
+unsafe extern "C" fn grammar_external(
+    parser: XML_Parser,
+    context: *const c_char,
+    _: *const c_char,
+    system: *const c_char,
+    _: *const c_char,
+) -> c_int {
+    // SAFETY: No reference to shared state crosses a callback-capable API.
+    // Child handles and each GetBuffer span are used only while valid.
+    unsafe {
+        let state = XML_GetUserData(parser).cast::<GrammarCallbackState>();
+        let leaf = !system.is_null() && CStr::from_ptr(system).to_bytes() == b"p";
+        if leaf {
+            (*state).requests += 1;
+            (*state).events.push("external:p".into());
+            assert_eq!(XML_StopParser(parser, 1), ERROR);
+            assert_eq!(XML_GetErrorCode(parser), 37);
+            match (*state).action {
+                1 => return OK,
+                2 => assert_eq!(XML_StopParser((*state).root, 1), OK),
+                3 => {
+                    assert_eq!(XML_StopParser(parser, 0), OK);
+                    return OK;
+                }
+                4 => XML_SetAttlistDeclHandler(parser, None),
+                5 => XML_SetAttlistDeclHandler(parser, Some(grammar_attlist)),
+                _ => {}
+            }
+        }
+        let child = XML_ExternalEntityParserCreate(parser, context, ptr::null());
+        assert!(!child.is_null());
+        let mut status = OK;
+        if leaf {
+            status = XML_Parse(child, ptr::null(), 0, 1);
+        } else {
+            let bytes = b"<!ENTITY % p SYSTEM 'p'><!ATTLIST r a CDATA 'A' %p; b CDATA 'B'>";
+            for (index, byte) in bytes.iter().enumerate() {
+                let buffer = XML_GetBuffer(child, 1).cast::<u8>();
+                assert!(!buffer.is_null());
+                buffer.write(*byte);
+                status = XML_ParseBuffer(child, 1, c_int::from(index + 1 == bytes.len()));
+                if status != OK {
+                    break;
+                }
+            }
+        }
+        XML_ParserFree(child);
+        c_int::from(status == OK)
+    }
+}
+
+#[test]
+fn external_grammar_keeps_early_callbacks_stop_state_and_handler_changes() {
+    // SAFETY: All parsers are freed once before their callback state goes away.
+    unsafe {
+        for action in 0..=5 {
+            for namespaces in [false, true] {
+                let root = if namespaces {
+                    XML_ParserCreateNS(ptr::null(), b'|' as c_char)
+                } else {
+                    XML_ParserCreate(ptr::null())
+                };
+                assert!(!root.is_null());
+                let mut state = GrammarCallbackState {
+                    root,
+                    action,
+                    ..GrammarCallbackState::default()
+                };
+                XML_SetUserData(root, ptr::from_mut(&mut state).cast());
+                XML_SetParamEntityParsing(root, 2);
+                XML_SetExternalEntityRefHandler(root, Some(grammar_external));
+                XML_SetDefaultHandlerExpand(root, Some(grammar_default));
+                if action != 5 {
+                    XML_SetAttlistDeclHandler(root, Some(grammar_attlist));
+                }
+                let bytes = b"<!DOCTYPE r SYSTEM 'd'><r/>";
+                let status = XML_Parse(root, bytes.as_ptr().cast(), bytes.len() as c_int, 1);
+                assert_eq!(state.requests, 1);
+                let external = state
+                    .events
+                    .iter()
+                    .position(|event| event == "external:p")
+                    .unwrap();
+                if action != 5 {
+                    let before = state
+                        .events
+                        .iter()
+                        .position(|event| event == "attr:a")
+                        .unwrap();
+                    assert!(before < external);
+                }
+                if action == 3 {
+                    assert_eq!(status, ERROR);
+                    assert_eq!(XML_GetErrorCode(root), 21);
+                } else {
+                    assert_eq!(status, if action == 2 { SUSPENDED } else { OK });
+                    if action == 2 {
+                        assert_eq!(XML_ResumeParser(root), OK);
+                        assert_eq!(state.requests, 1);
+                    }
+                    let after = state.events.iter().position(|event| event == "attr:b");
+                    assert_eq!(after.is_some(), !matches!(action, 1 | 4));
+                    if let Some(after) = after {
+                        assert!(external < after);
+                    }
+                    if matches!(action, 1 | 4) {
+                        let raw: String = state.events[external + 1..]
+                            .iter()
+                            .filter_map(|event| event.strip_prefix("raw:"))
+                            .collect();
+                        assert!(raw.contains("b CDATA"), "action={action}: {raw}");
+                    }
+                }
+                XML_ParserFree(root);
+            }
+        }
+    }
+}
+
+#[test]
+fn external_grammar_continuation_outlives_its_ancestor() {
+    // SAFETY: The external child independently owns its inherited state. The
+    // ancestor is freed before parsing and is never used by these callbacks.
+    unsafe {
+        let root = XML_ParserCreate(ptr::null());
+        assert!(!root.is_null());
+        let child = XML_ExternalEntityParserCreate(root, ptr::null(), ptr::null());
+        assert!(!child.is_null());
+        XML_ParserFree(root);
+        let mut state = GrammarCallbackState::default();
+        XML_SetUserData(child, ptr::from_mut(&mut state).cast());
+        XML_SetParamEntityParsing(child, 2);
+        XML_SetExternalEntityRefHandler(child, Some(grammar_external));
+        XML_SetAttlistDeclHandler(child, Some(grammar_attlist));
+        let input = b"<!ENTITY % p SYSTEM 'p'><!ATTLIST r a CDATA 'A' %p; b CDATA 'B'>";
+        for (index, byte) in input.iter().enumerate() {
+            let buffer = XML_GetBuffer(child, 1).cast::<u8>();
+            assert!(!buffer.is_null());
+            buffer.write(*byte);
+            assert_eq!(
+                XML_ParseBuffer(child, 1, c_int::from(index + 1 == input.len())),
+                OK
+            );
+        }
+        assert_eq!(state.events, ["attr:a", "external:p", "attr:b"]);
+        XML_ParserFree(child);
+    }
+}

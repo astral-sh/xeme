@@ -175,6 +175,12 @@ pub enum EventKind {
     /// Raw declaration bytes delivered only when no attribute declaration
     /// handler is installed by a compatibility consumer.
     AttlistDeclarationPrefix,
+    /// Raw declaration bytes delivered only when no element declaration handler
+    /// is installed by a compatibility consumer.
+    ElementDeclarationPrefix,
+    /// Raw declaration bytes delivered only when no notation declaration handler
+    /// is installed by a compatibility consumer.
+    NotationDeclarationPrefix,
     /// An ignored duplicate entity declaration, available with default events.
     EntityDeclarationDuplicate {
         external: bool,
@@ -332,6 +338,29 @@ impl TryClone for DefaultAttributes {
     }
 }
 
+impl Entity {
+    /// General-content children copy Expat's DTD table. A reserved slot without
+    /// a system ID becomes an empty internal value in that copy; parameter
+    /// children retain the unfinished slot and its already parsed identifiers.
+    fn clone_for_child(
+        &self,
+        parameter_context: bool,
+        allocator: Allocator,
+    ) -> Result<Self, AllocError> {
+        if !parameter_context && self.value.is_none() && self.system_id.is_none() {
+            Ok(Self {
+                value: Some(String::new_in(allocator)),
+                system_id: None,
+                public_id: None,
+                notation: self.notation.try_clone()?,
+                declared_in_parameter_entity: self.declared_in_parameter_entity,
+            })
+        } else {
+            self.try_clone()
+        }
+    }
+}
+
 impl TryClone for Entity {
     fn try_clone(&self) -> Result<Self, AllocError> {
         Ok(Self {
@@ -363,8 +392,10 @@ impl TryClone for DefaultAttribute {
 /// complete lexical tokens and grammar delimiters inside declarations. Names,
 /// quoted literals, and references retain their original lexical boundaries;
 /// references between declarations must contain complete declarations.
-/// External references in conditional headers load
-/// separate DTDs; their declarations are available before the header resumes.
+/// External references between declaration tokens and in conditional headers
+/// load separate DTDs; their declarations are available before grammar resumes.
+/// Completed attributes and declarations are emitted before a subsequent child
+/// is requested, and a child cannot replace its parent's reserved entity name.
 /// External references inside entity values create value children whose output
 /// continues the pending declaration, preserving each child's lexical boundary.
 /// Encoding declarations in value children must appear before any value content.
@@ -414,6 +445,8 @@ pub struct Parser {
     current_raw: String,
     expand_internal_entities: bool,
     default_events: bool,
+    notation_handler_enabled: bool,
+    attlist_handler_enabled: bool,
     decoding_error: Option<(ErrorKind, &'static str)>,
     id_attribute_index: Option<usize>,
 }
@@ -494,6 +527,8 @@ impl Parser {
             current_raw: String::new_in(allocator),
             expand_internal_entities: true,
             default_events: false,
+            notation_handler_enabled: true,
+            attlist_handler_enabled: true,
             decoding_error: None,
             id_attribute_index: None,
         })
@@ -571,7 +606,11 @@ impl Parser {
             .decoder
             .inherit_map(&self.decoder, &mut child.sources[0])?;
         for (name, entity) in &self.entities {
-            try_insert(&mut child.entities, name.try_clone()?, entity.try_clone()?)?;
+            try_insert(
+                &mut child.entities,
+                name.try_clone()?,
+                entity.clone_for_child(context.is_none(), self.allocator)?,
+            )?;
         }
         for (name, attributes) in &self.defaults {
             try_insert(
@@ -584,7 +623,7 @@ impl Parser {
             try_insert(
                 &mut child.parameter_entities,
                 name.try_clone()?,
-                entity.try_clone()?,
+                entity.clone_for_child(context.is_none(), self.allocator)?,
             )?;
         }
         child.namespaces.clear();
@@ -602,6 +641,8 @@ impl Parser {
         }
         child.expand_internal_entities = self.expand_internal_entities;
         child.default_events = self.default_events;
+        child.notation_handler_enabled = self.notation_handler_enabled;
+        child.attlist_handler_enabled = self.attlist_handler_enabled;
         child.parameter_mode = self.parameter_mode;
         child.has_external_subset = self.has_external_subset;
         child.standalone = self.standalone;
@@ -1068,6 +1109,23 @@ impl Parser {
     pub fn set_default_events(&mut self, enabled: bool) {
         self.default_events = enabled;
     }
+
+    /// Update a foreign interface's notation-handler availability. Safe event
+    /// consumers leave this enabled. A continuation captures this preference
+    /// when it reads the notation name, matching Expat's callback prerequisites.
+    #[doc(hidden)]
+    pub fn set_notation_handler_enabled(&mut self, enabled: bool) {
+        self.notation_handler_enabled = enabled;
+    }
+
+    /// Update a foreign interface's ATTLIST-handler availability. Enumeration
+    /// callback types retain the members read while that handler was installed;
+    /// the semantic default definition always keeps its complete type.
+    #[doc(hidden)]
+    pub fn set_attlist_handler_enabled(&mut self, enabled: bool) {
+        self.attlist_handler_enabled = enabled;
+    }
+
     /// Index of the declared ID attribute on the current start element, if present.
     #[must_use]
     pub fn id_attribute_index(&self) -> Option<usize> {
@@ -1794,10 +1852,9 @@ impl Parser {
         }
         if entity.value.is_none() {
             self.charge_external_identifiers(entity)?;
-            let system_id = entity
-                .system_id
-                .try_clone()?
-                .expect("external entities have a system identifier");
+            // A name reserved by an unfinished DTD declaration has no system
+            // identifier yet; Expat still requests this entity with a null ID.
+            let system_id = entity.system_id.try_clone()?;
             let public_id = entity.public_id.try_clone()?;
             let mut context = String::new_in(self.allocator);
             if self.config.namespace_separator.is_some() {
@@ -1836,7 +1893,7 @@ impl Parser {
             self.emit(
                 EventKind::ExternalEntityReference {
                     context: Some(context),
-                    system_id: Some(system_id),
+                    system_id,
                     public_id,
                 },
                 position,
@@ -2457,7 +2514,7 @@ impl Parser {
                     return Err(self.err(ErrorKind::LimitExceeded, "entity nesting limit exceeded"));
                 }
                 let Some(entity) = self.entities.get(name) else {
-                    if self.has_external_subset && !self.standalone {
+                    if !self.requires_internal_entity_declaration() {
                         rest = &rest[end + 1..];
                         continue;
                     }

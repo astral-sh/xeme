@@ -8,13 +8,15 @@ and source hashes, commands, skipped tests, and failures. Its main runtime is
 
 | Gate | Result | Evidence |
 | --- | --- | --- |
-| Full Expat public API matrix | 3,741 pass, 999 fail; 36 further improvements, zero regressions; no crashes/timeouts | [Latest matrix](dtd-composition/), [earlier failure classification](combined-evidence/) |
+| Full Expat public API matrix | 3,753 pass, 987 fail; 12 further improvements, zero regressions; no crashes/timeouts | [Latest matrix](external-grammar/), [earlier failure classification](combined-evidence/) |
 | CPython 3.12.13 | Six XML modules succeed in four shared/static, original/fixed configurations; 803 reported tests, 31 skips per run | [Latest consumer reports](../../../benchmarks/results/2026-09-10/dtd-checkpoint/) |
 | Native allocation and callback probes | Six shared/static runs pass, including 353 allocation-failure scenarios per linkage | [Latest native report](../../../benchmarks/results/2026-09-10/dtd-checkpoint/) |
 | Generated differential corpus | 12,318 semantic comparisons pass; six exact-fragment and 450 final-position differences remain | [Combined runtime replay](../../../benchmarks/results/2026-09-10/dtd-checkpoint/) |
 | Three ten-minute Rust ASan campaigns | 4,240,573 executions without findings, plus corpus and large-input replays | [Frozen source and corpora](combined-evidence/campaigns/final/) |
 | Full PBS distribution | Measured runtime passes archive validator, custom checks, installed XML suites, and CentOS 7/glibc 2.17 with 802 tests, 13 skips | [Successful build and runtime evidence](pbs-values/) |
-| W3C acceptance corpus | 5,913 required checks pass, nine fail; 81 optional observations; no resolver errors | [Latest results](dtd-composition/), [original catalog](w3c/) |
+| W3C acceptance corpus | 5,916 required checks pass, six fail; 81 optional observations; no resolver errors | [Latest results](external-grammar/), [original catalog](w3c/) |
+| External DTD declaration grammar | Independent 8,254 encoded comparisons match; full 4,656-case matrix has no outcome or successful normalized-callback differences | [Implementation, review and combined checks](external-grammar/) |
+| Declared UTF-16 diagnostics | Incorrect-encoding errors retain their declaration value location; 60 focused upstream configurations pass | [Encoding review](encoding-mismatch/) |
 | External entity values and declaration callbacks | 18,468 positive observations match; malformed-input differences retained | [Implementation and review](external-values/) |
 | Foreign DTD policy | 4,632 outcomes and 480 nested observations match; 24 upstream configurations fixed | [Policy review](foreign-dtd-policy/) |
 | External content encoding | Five upstream tests fixed across all 12 configurations; context oracles add no differences | [Encoding review](content-encoding/) |

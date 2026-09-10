@@ -28,8 +28,9 @@ Pass `false` until the final chunk. A parse error is terminal. Events own their
 strings, so callers can retain them independently of subsequent input.
 
 The parser handles elements, attributes, namespaces, comments, processing
-instructions, CDATA, character references, internal entities, and DTD attribute
-defaults. It supports UTF-8, UTF-16, ASCII, and ISO-8859-1 input. Namespace processing
+instructions, CDATA, character references, internal entities, caller-resolved
+external entities, and DTD attribute defaults. It supports UTF-8, UTF-16, ASCII,
+and ISO-8859-1 input. Namespace processing
 is opt-in through `Config::namespace_separator`; namespace triplets are optional.
 The parser is non-validating: it checks XML syntax, without validating documents
 against their DTD content models.

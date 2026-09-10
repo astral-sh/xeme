@@ -71,30 +71,36 @@ reference, including CJK Extension A and supplementary name characters. Some
 well-formed names accepted by Oriole therefore fail in Expat. Compatibility
 reports retain these acceptance and diagnostic differences.
 
+Internal parameter entities can supply complete lexical tokens and grammar
+delimiters inside declarations in external DTDs and parameter entities.
+Replacement frames preserve name and quote boundaries, attribute whitespace,
+and entity-value provenance. A replacement may close the containing declaration
+or conditional header and leave further declaration grammar to resume in the
+parent. References between declarations must contain complete declarations;
+ignored conditional sections must close within their source.
+
+External references between declaration tokens and in conditional headers load
+separate DTDs. A child may supply declarations used by the remaining grammar;
+it does not supply literal grammar or keyword text. Completed attributes and
+declarations are reported before the next external callback, and a child cannot
+replace its parent's reserved entity name. Skipped children stop later entity
+and attribute declarations unless the document is standalone; initialized empty
+children retain normal processing.
+
+Nested `INCLUDE`/`IGNORE` sections and internal parameter entities selecting
+conditional keywords or expanding entity values are supported in external DTDs
+and parameter entities. External references inside entity values create separate
+value children and resume the pending declaration with their output. Children
+validate complete lexical tokens before storing value text and preserve quote
+and reference boundaries. These paths share the family's expansion and depth
+limits. Conditional nesting uses the element-depth ceiling; a whole ignored
+section uses the token-byte ceiling. Value children distinguish unread children
+from initialized empty or failed children, including partial output before a
+storage error.
+
 The following Expat modes are explicitly unsupported:
 
-- External parameter references between declaration grammar tokens are rejected.
-  Internal parameter entities can supply complete lexical tokens and grammar
-  delimiters inside declarations in external DTDs and parameter entities.
-  Replacement frames preserve name and quote boundaries, attribute whitespace,
-  and entity-value provenance. A replacement may close the containing declaration
-  or conditional header and leave further declaration grammar to resume in the
-  parent. References between declarations must contain complete declarations;
-  ignored conditional sections must close within their source. References
-  between declarations, nested `INCLUDE`/`IGNORE` sections in external DTDs, and
-  internal parameter entities selecting conditional keywords or expanding entity
-  values in external DTDs and parameter entities are supported. Value replacements
-  preserve quote and reference boundaries and share the entity-expansion and
-  nesting limits. Conditional nesting uses the element-depth ceiling; a whole
-  ignored section uses the token-byte ceiling. External references in conditional
-  headers load separate DTDs and import their declarations before the header
-  resumes; they do not supply keyword text. External references inside entity
-  values create separate value children and resume the pending declaration with
-  their output. Children validate complete lexical tokens before storing value
-  text, preserve quote/reference boundaries, and share the family's expansion
-  and depth limits. They distinguish unread children from initialized empty or
-  failed children, including partial value output before a storage error.
-  A value child's encoding declaration must be first, apart from its byte-order
+- A value child's encoding declaration must be first, apart from its byte-order
   mark. Expat also permits the first declaration after value content, including
   whitespace or a comment; Oriole cannot switch encoding after that prefix has
   been decoded. A leading custom-encoding declaration may request its encoding

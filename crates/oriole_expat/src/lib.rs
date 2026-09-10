@@ -284,8 +284,10 @@ unsafe fn create(
                 namespace_separator: separator,
                 ..Config::default()
             };
-            let core = Parser::try_new_with_encoding_in(config.clone(), encoding, allocator)
+            let mut core = Parser::try_new_with_encoding_in(config.clone(), encoding, allocator)
                 .map_err(|_| AllocError::OutOfMemory)?;
+            core.set_notation_handler_enabled(false);
+            core.set_attlist_handler_enabled(false);
             let position = core.position();
             let family = Shared::try_new_in(FamilyBudget::default(), allocator)?;
             let lifetime = Shared::try_new_in(AtomicPtr::new(ptr::null_mut()), allocator)?;
@@ -492,7 +494,7 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                 let encoding = input_string(encoding)?
                     .map(|value| XmlString::try_from_str_in(value, allocator))
                     .transpose()?;
-                let core = Parser::try_new_with_encoding_in(
+                let mut core = Parser::try_new_with_encoding_in(
                     (*parser).config.clone(),
                     encoding.as_deref(),
                     allocator,
@@ -511,6 +513,8 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                     old_lifetime.store(ptr::null_mut(), Ordering::Release);
                 }
                 (*parser).lifetime = lifetime;
+                core.set_notation_handler_enabled(false);
+                core.set_attlist_handler_enabled(false);
                 (*parser).core = core;
                 (*parser).position = (*parser).core.position();
                 let unknown_encoding = (*parser).handlers.unknown_encoding;
@@ -577,6 +581,8 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
         EventKind::Default
         | EventKind::EntityDeclarationPrefix
         | EventKind::AttlistDeclarationPrefix
+        | EventKind::ElementDeclarationPrefix
+        | EventKind::NotationDeclarationPrefix
         | EventKind::EntityDeclarationDuplicate { .. } => {
             // SAFETY: Only the copied length survives this read, before any callback.
             unsafe { (*parser).core.current_raw().map_or(0, str::len) }
@@ -676,6 +682,8 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
             | EventKind::NotationDeclaration { .. }
             | EventKind::EntityDeclarationPrefix
             | EventKind::AttlistDeclarationPrefix
+            | EventKind::ElementDeclarationPrefix
+            | EventKind::NotationDeclarationPrefix
             | EventKind::EntityDeclarationDuplicate { .. }
     );
     let duplicate_default = match &kind {
@@ -692,6 +700,8 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
             EventKind::Default => handled = false,
             EventKind::EntityDeclarationPrefix => handled = h.entity_decl.is_some(),
             EventKind::AttlistDeclarationPrefix => handled = h.attlist_decl.is_some(),
+            EventKind::ElementDeclarationPrefix => handled = h.element_decl.is_some(),
+            EventKind::NotationDeclarationPrefix => handled = h.notation.is_some(),
             EventKind::EntityDeclarationDuplicate { .. } => handled = false,
             EventKind::StartElement {
                 name,
@@ -1574,9 +1584,31 @@ setter!(
 );
 setter!(XML_SetEndNamespaceDeclHandler, end_namespace, StringHandler);
 setter!(XML_SetEntityDeclHandler, entity_decl, EntityDecl);
-setter!(XML_SetAttlistDeclHandler, attlist_decl, AttlistDecl);
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn XML_SetAttlistDeclHandler(parser: XML_Parser, handler: AttlistDecl) {
+    if !parser.is_null() && !in_allocator_callback() {
+        // SAFETY: Both scalar updates use the caller's serialized live handle.
+        unsafe {
+            (*parser).handlers.attlist_decl = handler;
+            (*parser)
+                .core
+                .set_attlist_handler_enabled(handler.is_some());
+        }
+    }
+}
 setter!(XML_SetUnparsedEntityDeclHandler, unparsed, UnparsedDecl);
-setter!(XML_SetNotationDeclHandler, notation, NotationDecl);
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn XML_SetNotationDeclHandler(parser: XML_Parser, handler: NotationDecl) {
+    if !parser.is_null() && !in_allocator_callback() {
+        // SAFETY: Both updates are allocation-free on the serialized live handle.
+        unsafe {
+            (*parser).handlers.notation = handler;
+            (*parser)
+                .core
+                .set_notation_handler_enabled(handler.is_some());
+        }
+    }
+}
 setter!(XML_SetExternalEntityRefHandler, external, ExternalEntity);
 setter!(XML_SetSkippedEntityHandler, skipped, SkippedEntity);
 setter!(XML_SetNotStandaloneHandler, not_standalone, NotStandalone);

@@ -211,6 +211,28 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
             values.merge_external_subset(&child)?;
         }
     }
+    let mut grammar = parent.external_child(None, None)?;
+    grammar.set_param_entity_parsing(2);
+    grammar.set_default_events(true);
+    grammar.feed(
+        b"<!ENTITY % p SYSTEM 'p'><!ENTITY % v SYSTEM 'v'><!ATTLIST r a CDATA 'A' %p; b (x|%p;y) 'x'><!ENTITY e %p; 'L%v;R' %p;><!NOTATION n PUBLIC 'pub' %p;><!ELEMENT r (a|(%p;b,c)) %p;>",
+        true,
+    )?;
+    while let Some(event) = next_event(&mut grammar)? {
+        if let EventKind::ExternalEntityReference { system_id, .. } = event.kind {
+            let mut child = grammar.external_child(None, None)?;
+            child.feed(
+                if system_id.as_deref() == Some("v") {
+                    b"X"
+                } else {
+                    b""
+                },
+                true,
+            )?;
+            while next_event(&mut child)?.is_some() {}
+            grammar.merge_external_subset(&child)?;
+        }
+    }
     for document in [b"<r/>".as_slice(), b"<!DOCTYPE r []><r/>"] {
         let mut foreign = Parser::try_new_in(Config::default(), allocator)?;
         assert!(foreign.set_use_foreign_dtd(true));

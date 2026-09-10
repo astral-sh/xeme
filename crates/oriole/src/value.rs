@@ -31,6 +31,7 @@ pub(crate) struct Declaration {
     pub(crate) prefix_start: usize,
     pub(crate) tail_parameters: Vec<crate::dtd::DeclarationParameter>,
     pub(crate) prefix_sent: bool,
+    pub(crate) closes_declaration: bool,
     pub(crate) suffix_error: Option<Error>,
 }
 
@@ -440,6 +441,11 @@ impl Parser {
                 };
                 state.frames.last_mut().expect("value frame").offset += end + 1;
                 try_push(&mut state.frames, frame)?;
+            } else if entity.system_id.is_none() {
+                state.frames.last_mut().expect("value frame").offset += end + 1;
+                if state.child {
+                    state.frames.clear();
+                }
             } else {
                 let request = self.value_request(name, entity)?;
                 state.frames.last_mut().expect("value frame").offset += end + 1;
@@ -515,6 +521,7 @@ impl Parser {
             &declaration.tail_parameters,
             first_event,
             declaration.position,
+            declaration.closes_declaration,
         )?;
         if let Some(error) = declaration.suffix_error {
             return Err(error);

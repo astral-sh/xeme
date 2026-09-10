@@ -92,3 +92,22 @@ Seven paired processes each timed five parses after a warmup. The
 the extra index has a setup cost. The [ordinary workloads](bench-index-common.json.gz)
 stayed within about 2% of their parent. The [build manifest](index-build.json)
 and [source hashes](index-source.json) identify the measured candidate.
+
+## Reusing raw-token storage
+
+Reusing `current_raw` storage reduces temporary allocation while leaving returned
+event payloads independently owned. At 4 KiB chunks with the system allocator:
+
+| Workload | Indexed parent, ms | Reused buffer, ms | Allocation requests before → after |
+| --- | ---: | ---: | ---: |
+| Elements and attributes | 16.36 | 15.90 | 140,021 → 130,021 |
+| Text with line breaks | 9.89 | 9.08 | 40,234 → 20,127 |
+| References | 25.19 | 22.25 | 190,096 → 110,057 |
+| Prefixed names, namespace processing disabled | 18.58 | 17.52 | 150,047 → 120,036 |
+
+These [paired results](bench-reuse-common.json.gz) used seven pairs and ten timed
+parses per process. The [build manifest](reuse-build.json) and
+[source hashes](reuse-source.json) identify the candidate. Allocation counts come
+from separate instrumented runs. The retained buffer keeps its largest capacity
+until reset or destruction; existing token/input and C-family allocation limits
+still apply. This is an allocation/time improvement with a retention tradeoff.

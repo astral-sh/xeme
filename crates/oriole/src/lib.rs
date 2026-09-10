@@ -867,9 +867,28 @@ impl Parser {
     fn pop_event(&mut self) -> Option<Event> {
         let pending = self.pending.pop_front()?;
         if let Some(raw) = pending.raw {
-            self.current_raw = raw;
+            if raw.is_empty() {
+                self.current_raw.clear();
+            } else {
+                self.current_raw = raw;
+            }
         }
         Some(pending.event)
+    }
+
+    fn save_current_raw(&mut self, count: usize) -> Result<(), Error> {
+        // Preserve the previous value if growth fails, and retain capacity across
+        // events. Returned event payloads remain independently owned.
+        self.current_raw
+            .try_reserve(count.saturating_sub(self.current_raw.len()))?;
+        self.current_raw.clear();
+        let source = self
+            .sources
+            .last()
+            .expect("parser always has an input source");
+        self.current_raw
+            .try_push_str(&source.remaining()[..count])?;
+        Ok(())
     }
     fn event_raw(&mut self, raw: &str) -> Result<(), Error> {
         if let Some(pending) = self.pending.back_mut() {
@@ -972,7 +991,7 @@ impl Parser {
                     return Err(self.err(ErrorKind::Syntax, "CDATA outside the document element"));
                 }
                 let position = self.source().position(9);
-                self.current_raw = string("<![CDATA[", self.allocator)?;
+                self.save_current_raw(9)?;
                 self.consume(9);
                 self.in_cdata = true;
                 self.emit(EventKind::StartCdata, position)?;
@@ -1060,7 +1079,7 @@ impl Parser {
             }
             let position = self.source().position(end);
             let token = string(&self.source().remaining()[..end], self.allocator)?;
-            self.current_raw = token.try_clone()?;
+            self.save_current_raw(end)?;
             if let Some((offset, _)) = token
                 .char_indices()
                 .find(|(_, character)| !is_xml_char(*character))
@@ -1162,7 +1181,7 @@ impl Parser {
         }
         let position = self.source().position(end);
         let value = self.source_text(text)?;
-        self.current_raw = string(text, self.allocator)?;
+        self.save_current_raw(end)?;
         self.declaration_allowed = false;
         if !self.stack.is_empty() || self.fragment {
             self.emit(EventKind::Text(value), position)?;
@@ -1178,7 +1197,7 @@ impl Parser {
         let final_text = self.is_source_final() && limit == self.source().remaining().len();
         if text.starts_with("]]>") {
             let position = self.source().position(3);
-            self.current_raw = string("]]>", self.allocator)?;
+            self.save_current_raw(3)?;
             self.consume(3);
             self.in_cdata = false;
             self.emit(EventKind::EndCdata, position)?;
@@ -1226,7 +1245,7 @@ impl Parser {
         let text = &text[..end];
         let position = self.source().position(end);
         let value = self.source_text(text)?;
-        self.current_raw = string(text, self.allocator)?;
+        self.save_current_raw(end)?;
         self.consume(end);
         self.emit(EventKind::Text(value), position)?;
         Ok(true)
@@ -1267,7 +1286,7 @@ impl Parser {
         }
         let name = string(&text[1..end], self.allocator)?;
         let position = self.source().position(end + 1);
-        self.current_raw = string(&text[..end + 1], self.allocator)?;
+        self.save_current_raw(end + 1)?;
         if let Some(character) = character_reference(&name)
             .map_err(|kind| self.err(kind, "invalid character reference"))?
         {

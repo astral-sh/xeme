@@ -216,7 +216,7 @@ impl Parser {
                 offset,
             ));
         }
-        self.current_raw = token.try_clone()?;
+        self.save_current_raw(end)?;
         self.parse_subset(&token, 0)?;
         self.consume(end);
         Ok(true)

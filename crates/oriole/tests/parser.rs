@@ -467,6 +467,39 @@ fn queued_dtd_events_have_individual_raw_tokens() {
 }
 
 #[test]
+fn raw_tokens_and_owned_events_survive_reusing_the_raw_buffer() {
+    let mut parser = Parser::new(Config::default());
+    parser
+        .feed(b"<r><child/>a&amp;b<![CDATA[c]]></r>", true)
+        .unwrap();
+    let mut retained = Vec::new();
+    let mut raw = Vec::new();
+    while let Some(event) = parser.next_event().unwrap() {
+        raw.push(parser.current_raw().map(str::to_owned));
+        retained.push(event.kind);
+    }
+    assert_eq!(
+        raw,
+        [
+            Some("<r>"),
+            Some("<child/>"),
+            None,
+            Some("a"),
+            Some("&amp;"),
+            Some("b"),
+            Some("<![CDATA["),
+            Some("c"),
+            Some("]]>"),
+            Some("</r>")
+        ]
+        .map(|raw| raw.map(str::to_owned))
+    );
+    assert!(matches!(&retained[1], EventKind::StartElement {name, ..} if name == "child"));
+    assert_eq!(retained[3], EventKind::Text(text("a")));
+    assert_eq!(retained[4], EventKind::Text(text("&")));
+}
+
+#[test]
 fn reparse_deferral_is_optional_and_final_input_always_flushes() {
     let mut parser = Parser::new(Config::default());
     parser.feed(b"<r attribute='long", false).unwrap();

@@ -46,7 +46,7 @@ fn value_continuations_preserve_grammar_and_default_callback_state() {
                                     raw.push_str(fragment);
                                 }
                                 match event.kind {
-                                    EventKind::ExternalEntityReference { .. } => {
+                                    EventKind::ExternalEntityReference(_) => {
                                         if change {
                                             parser.set_default_events(!defaults);
                                         }
@@ -55,14 +55,19 @@ fn value_continuations_preserve_grammar_and_default_callback_state() {
                                         while child.next_event().unwrap().is_some() {}
                                         parser.merge_external_subset(&child).unwrap();
                                     }
-                                    EventKind::EntityDeclaration {
-                                        name,
-                                        value: Some(value),
-                                        ..
-                                    } => {
+                                    EventKind::EntityDeclaration(declaration)
+                                        if declaration.value.is_some() =>
+                                    {
+                                        let oriole::EntityDeclaration {
+                                            name,
+                                            value: stored_value,
+                                            ..
+                                        } = oriole_storage::Box::into_inner(declaration);
+                                        let value = stored_value.expect("matched optional field");
+
                                         values.push((name.to_string(), value.to_string()));
                                     }
-                                    EventKind::AttlistDeclaration { .. } => attributes += 1,
+                                    EventKind::AttlistDeclaration(_) => attributes += 1,
                                     _ => {}
                                 }
                             }
@@ -112,17 +117,24 @@ fn unread_values_default_the_gap_before_trailing_grammar() {
     let mut defaults = String::new();
     while let Some(event) = parser.next_event().unwrap() {
         match event.kind {
-            EventKind::ExternalEntityReference { .. } => {
+            EventKind::ExternalEntityReference(_) => {
                 // Return without creating a child; the parent must retain its
                 // current declaration but stop processing later declarations.
             }
-            EventKind::EntityDeclaration { name, value, .. } if name == "e" => {
+            EventKind::EntityDeclaration(declaration) if (declaration.name == "e") => {
+                let oriole::EntityDeclaration { value, .. } =
+                    oriole_storage::Box::into_inner(declaration);
+
                 assert_eq!(value.as_deref(), Some("LR"));
                 assert_eq!(parser.current_raw(), Some("'L%p;R'"));
                 after_value = true;
             }
             EventKind::Default if after_value => defaults.push_str(parser.current_raw().unwrap()),
-            EventKind::EntityDeclaration { name, .. } => assert_ne!(name, "after"),
+            EventKind::EntityDeclaration(declaration) => {
+                let oriole::EntityDeclaration { name, .. } =
+                    oriole_storage::Box::into_inner(declaration);
+                assert_ne!(name, "after")
+            }
             _ => {}
         }
     }
@@ -143,11 +155,14 @@ fn drain(
     );
     while let Some(event) = parser.next_event().map_err(|error| error.kind)? {
         match event.kind {
-            EventKind::ExternalEntityReference {
-                context,
-                system_id: Some(system),
-                ..
-            } => {
+            EventKind::ExternalEntityReference(declaration) if declaration.system_id.is_some() => {
+                let oriole::ExternalEntityReference {
+                    context,
+                    system_id: stored_system_id,
+                    ..
+                } = oriole_storage::Box::into_inner(declaration);
+                let system = stored_system_id.expect("matched optional field");
+
                 assert!(context.is_none());
                 let load = loads
                     .iter()
@@ -190,11 +205,14 @@ fn drain(
                         .map_err(|error| error.kind)?;
                 }
             }
-            EventKind::EntityDeclaration {
-                name,
-                value: Some(value),
-                ..
-            } => {
+            EventKind::EntityDeclaration(declaration) if declaration.value.is_some() => {
+                let oriole::EntityDeclaration {
+                    name,
+                    value: stored_value,
+                    ..
+                } = oriole_storage::Box::into_inner(declaration);
+                let value = stored_value.expect("matched optional field");
+
                 declarations.push((name.to_string(), value.to_string()));
             }
             _ => {}
@@ -391,7 +409,7 @@ fn value_channel_survives_custom_encoding_recovery_and_parent_drop() {
         .unwrap();
     while !matches!(
         dtd.next_event().unwrap().unwrap().kind,
-        EventKind::ExternalEntityReference { .. }
+        EventKind::ExternalEntityReference(_)
     ) {}
     let mut child = dtd
         .external_child_with_encoding(None, Some("custom"))
@@ -408,7 +426,7 @@ fn value_channel_survives_custom_encoding_recovery_and_parent_drop() {
     dtd.merge_external_subset(&child).unwrap();
     let value = dtd.next_event().unwrap().unwrap();
     assert!(
-        matches!(value.kind, EventKind::EntityDeclaration { value: Some(ref value), .. } if value == "\"€\r\"")
+        matches!(value.kind, EventKind::EntityDeclaration(declaration) if matches!(declaration.as_ref(), oriole::EntityDeclaration { value: Some(value), .. } if value == "\"€\r\""))
     );
     drop(root);
     drop(dtd);

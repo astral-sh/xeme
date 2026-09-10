@@ -390,7 +390,7 @@ fn repeated_external_entity_identifiers_consume_the_shared_expansion_budget() {
                 loop {
                     match parser.next_event() {
                         Ok(Some(event)) => {
-                            if matches!(event.kind, EventKind::ExternalEntityReference { .. }) {
+                            if matches!(event.kind, EventKind::ExternalEntityReference(_)) {
                                 references += 1;
                             }
                         }
@@ -429,7 +429,10 @@ fn external_entity_namespace_context_consumes_the_expansion_budget() {
     parser.feed(xml.as_bytes(), true).unwrap();
     let context = loop {
         let event = parser.next_event().unwrap().unwrap();
-        if let EventKind::ExternalEntityReference { context, .. } = event.kind {
+        if let EventKind::ExternalEntityReference(declaration) = event.kind {
+            let oriole::ExternalEntityReference { context, .. } =
+                oriole_storage::Box::into_inner(declaration);
+
             break context.unwrap();
         }
     };
@@ -448,13 +451,14 @@ fn attribute_declaration_types_omit_grammar_whitespace() {
     let declarations: Vec<_> = events
         .iter()
         .filter_map(|event| {
-            if let EventKind::AttlistDeclaration {
-                attribute_type,
-                default,
-                required,
-                ..
-            } = event
-            {
+            if let EventKind::AttlistDeclaration(declaration) = event {
+                let oriole::AttributeDeclaration {
+                    attribute_type,
+                    default,
+                    required,
+                    ..
+                } = declaration.as_ref();
+
                 Some((attribute_type.as_str(), default.as_deref(), *required))
             } else {
                 None
@@ -936,7 +940,7 @@ fn external_entities_require_application_supplied_content() {
         Config::default(),
     )
     .unwrap();
-    assert!(events.iter().any(|event| matches!(event, EventKind::ExternalEntityReference { system_id, .. } if system_id.as_deref() == Some("file:///etc/passwd"))));
+    assert!(events.iter().any(|event| matches!(event, EventKind::ExternalEntityReference(declaration) if matches!(declaration.as_ref(), oriole::ExternalEntityReference { system_id, .. } if system_id.as_deref() == Some("file:///etc/passwd")))));
     assert!(
         parse(
             b"<!DOCTYPE r [<!ENTITY % x SYSTEM 'https://example.com'>%x;]><r/>",
@@ -955,7 +959,10 @@ fn external_entity_children_inherit_namespaces_and_declarations() {
     });
     parent.feed(b"<!DOCTYPE r [<!ENTITY internal 'hello'><!ENTITY external SYSTEM 'child.xml'>]><r xmlns:p='urn:p'>&external;</r>", true).unwrap();
     while let Some(event) = parent.next_event().unwrap() {
-        if let EventKind::ExternalEntityReference { context, .. } = event.kind {
+        if let EventKind::ExternalEntityReference(declaration) = event.kind {
+            let oriole::ExternalEntityReference { context, .. } =
+                oriole_storage::Box::into_inner(declaration);
+
             let mut child = parent.external_child(context.as_deref(), None).unwrap();
             child
                 .feed(b"<?xml encoding='UTF-8'?>text<p:a/>&internal;<p:b/>", true)
@@ -995,7 +1002,10 @@ fn external_entity_cycles_and_expansion_budgets_are_shared() {
         )
         .unwrap();
     while let Some(event) = parent.next_event().unwrap() {
-        if let EventKind::ExternalEntityReference { context, .. } = event.kind {
+        if let EventKind::ExternalEntityReference(declaration) = event.kind {
+            let oriole::ExternalEntityReference { context, .. } =
+                oriole_storage::Box::into_inner(declaration);
+
             let mut child = parent.external_child(context.as_deref(), None).unwrap();
             child.feed(b"&x;", true).unwrap();
             assert_eq!(
@@ -1131,7 +1141,7 @@ fn external_dtd_declarations_merge_before_document_content() {
     let mut seen = false;
     while let Some(event) = parser.next_event().unwrap() {
         match event.kind {
-            EventKind::ExternalEntityReference { context: None, .. } => {
+            EventKind::ExternalEntityReference(declaration) if declaration.context.is_none() => {
                 let mut child = parser.external_child_with_encoding(None, None).unwrap();
                 child.feed(b"<?xml encoding='UTF-8'?><!ENTITY external 'loaded'><!ATTLIST r default CDATA 'yes'>", true).unwrap();
                 while child.next_event().unwrap().is_some() {}
@@ -1156,7 +1166,7 @@ fn indexed_declarations_preserve_order_types_ids_and_external_precedence() {
     let mut seen = false;
     while let Some(event) = parser.next_event().unwrap() {
         match event.kind {
-            EventKind::ExternalEntityReference { context: None, .. } => {
+            EventKind::ExternalEntityReference(declaration) if declaration.context.is_none() => {
                 let mut child = parser.external_child_with_encoding(None, None).unwrap();
                 child
                     .feed(
@@ -1291,8 +1301,8 @@ fn standalone_documents_reject_entities_declared_in_parameter_entities() {
                         Ok(Some(event)) => {
                             if matches!(
                                 event.kind,
-                                EventKind::ExternalEntityReference { context: None, .. }
-                            ) {
+                                EventKind::ExternalEntityReference(declaration) if matches!(declaration.as_ref(), oriole::ExternalEntityReference { context: None, .. }
+                            )) {
                                 let mut child =
                                     parser.external_child_with_encoding(None, None).unwrap();
                                 child.feed(b"<!ENTITY e 'value'>", true).unwrap();
@@ -1326,12 +1336,12 @@ fn foreign_dtd_requests_have_null_identifiers() {
     parser.feed(b"<r/>", true).unwrap();
     assert!(matches!(
         parser.next_event().unwrap().unwrap().kind,
-        EventKind::ExternalEntityReference {
+        EventKind::ExternalEntityReference(declaration) if matches!(declaration.as_ref(), oriole::ExternalEntityReference {
             context: None,
             system_id: None,
             public_id: None
         }
-    ));
+    )));
     while parser.next_event().unwrap().is_some() {}
 }
 
@@ -1390,12 +1400,12 @@ fn external_subset_callback_occurs_before_a_root_is_available() {
         .unwrap();
     let mut requested = false;
     while let Some(event) = parser.next_event().unwrap() {
-        if let EventKind::ExternalEntityReference {
-            context: None,
-            system_id,
-            ..
-        } = event.kind
+        if let EventKind::ExternalEntityReference(declaration) = event.kind
+            && declaration.context.is_none()
         {
+            let oriole::ExternalEntityReference { system_id, .. } =
+                oriole_storage::Box::into_inner(declaration);
+
             assert_eq!(system_id.as_deref(), Some("unsupported://non-existing"));
             requested = true;
         }
@@ -1419,11 +1429,11 @@ fn changing_the_encoding_preserves_entity_and_deferral_options() {
     let mut skipped = false;
     while let Some(event) = parser.next_event().unwrap() {
         match event.kind {
-            EventKind::ExternalEntityReference {
-                context: None,
-                system_id: None,
-                ..
-            } => foreign = true,
+            EventKind::ExternalEntityReference(declaration)
+                if declaration.context.is_none() && declaration.system_id.is_none() =>
+            {
+                foreign = true
+            }
             EventKind::SkippedEntity {
                 name,
                 parameter: false,
@@ -1557,4 +1567,94 @@ fn conversion_buffer_boundaries_preserve_utf8_and_cdata_delimiters() {
     }
     assert_eq!(lengths, [1023, 1024, 1024, 2]);
     assert_eq!(content, "x".repeat(1023) + &"é".repeat(1025));
+}
+
+#[test]
+fn attribute_offsets_preserve_owned_events_across_reuse_and_large_tags() {
+    let mut xml = String::from(
+        "<?xml version='1.0' standalone='yes'?><!DOCTYPE r [<!ATTLIST p:é default CDATA 'fallback'>]><r xmlns:p='urn:p'><p:é naïve='left&amp;é' a='first'/><b",
+    );
+    for index in 0..129 {
+        use std::fmt::Write;
+        write!(xml, " a{index}='{index}'").unwrap();
+    }
+    xml.push_str("/><p:z p:last='tail' plain='final'/></r>");
+    let mut utf16 = vec![0xff, 0xfe];
+    utf16.extend(xml.encode_utf16().flat_map(u16::to_le_bytes));
+    for bytes in [xml.as_bytes(), &utf16] {
+        for chunk in [1, 7, 4096, bytes.len()] {
+            let events = parse(
+                bytes,
+                chunk,
+                Config {
+                    namespace_separator: Some('|'),
+                    namespace_triplets: true,
+                    ..Config::default()
+                },
+            )
+            .unwrap();
+            let starts: Vec<_> = events
+                .iter()
+                .filter_map(|event| match event {
+                    EventKind::StartElement { name, attributes } => Some((name, attributes)),
+                    _ => None,
+                })
+                .collect();
+            assert_eq!(starts.len(), 4);
+            assert_eq!(starts[1].0, "urn:p|é|p");
+            let attributes = starts[1].1;
+            assert_eq!(attributes.len(), 3);
+            assert_eq!(attributes[0].name, "naïve");
+            assert_eq!(attributes[0].value, "left&é");
+            assert_eq!(attributes[1].value, "first");
+            assert_eq!(attributes[2].name, "default");
+            assert_eq!(attributes[2].value, "fallback");
+            assert!(!attributes[2].specified);
+            assert_eq!(starts[2].1.len(), 129);
+            assert_eq!(starts[2].1[128].name, "a128");
+            assert_eq!(starts[2].1[128].value, "128");
+            assert_eq!(starts[3].0, "urn:p|z|p");
+            assert_eq!(starts[3].1[0].name, "urn:p|last|p");
+            assert_eq!(starts[3].1[0].value, "tail");
+            assert_eq!(starts[3].1[1].value, "final");
+        }
+    }
+}
+
+#[test]
+fn raw_attribute_validation_precedes_value_and_namespace_processing() {
+    for attributes in ["a='&missing;'", "a='one' a='two'", "xmlns:xml='wrong'"] {
+        let xml = format!("<r><child {attributes} broken/></r>");
+        for chunk in [1, 7, xml.len()] {
+            let mut parser = Parser::new(Config {
+                namespace_separator: Some('|'),
+                ..Config::default()
+            });
+            let mut starts = Vec::new();
+            let mut result = Ok(());
+            let mut chunks = xml.as_bytes().chunks(chunk).peekable();
+            'input: while let Some(bytes) = chunks.next() {
+                parser.feed(bytes, chunks.peek().is_none()).unwrap();
+                loop {
+                    match parser.next_event() {
+                        Ok(Some(event)) => {
+                            if let EventKind::StartElement { name, .. } = event.kind {
+                                starts.push(name);
+                            }
+                        }
+                        Ok(None) => break,
+                        Err(error) => {
+                            result = Err(error);
+                            break 'input;
+                        }
+                    }
+                }
+            }
+            let error = result.unwrap_err();
+            assert_eq!(error.kind, ErrorKind::InvalidToken);
+            assert_eq!(error.message, "attribute is missing equals sign");
+            assert_eq!(starts.len(), 1);
+            assert_eq!(starts[0], "r");
+        }
+    }
 }

@@ -252,12 +252,15 @@ impl Parser {
             self.event_raw("")?;
         }
         self.emit(
-            EventKind::StartDoctype {
-                name,
-                system_id,
-                public_id,
-                has_internal_subset,
-            },
+            EventKind::StartDoctype(oriole_storage::try_box(
+                crate::DoctypeDeclaration {
+                    name,
+                    system_id,
+                    public_id,
+                    has_internal_subset,
+                },
+                self.allocator,
+            )?),
             position,
         )?;
         self.event_raw(if has_internal_subset {
@@ -293,11 +296,14 @@ impl Parser {
             delivered: false,
         });
         self.emit(
-            EventKind::ExternalEntityReference {
-                context: None,
-                system_id: None,
-                public_id: None,
-            },
+            EventKind::ExternalEntityReference(oriole_storage::try_box(
+                crate::ExternalEntityReference {
+                    context: None,
+                    system_id: None,
+                    public_id: None,
+                },
+                self.allocator,
+            )?),
             position,
         )?;
         self.event_raw("")
@@ -359,11 +365,14 @@ impl Parser {
             } else if system_id.is_some() && self.parameter_entities_enabled() {
                 self.has_external_subset = true;
                 self.emit(
-                    EventKind::ExternalEntityReference {
-                        context: None,
-                        system_id,
-                        public_id,
-                    },
+                    EventKind::ExternalEntityReference(oriole_storage::try_box(
+                        crate::ExternalEntityReference {
+                            context: None,
+                            system_id,
+                            public_id,
+                        },
+                        self.allocator,
+                    )?),
                     position,
                 )?;
                 self.event_raw("")?;
@@ -654,11 +663,14 @@ impl Parser {
                 .expect("parameter read marker")
                 .store(false, Ordering::Relaxed);
             self.emit(
-                EventKind::ExternalEntityReference {
-                    context: None,
-                    system_id,
-                    public_id,
-                },
+                EventKind::ExternalEntityReference(oriole_storage::try_box(
+                    crate::ExternalEntityReference {
+                        context: None,
+                        system_id,
+                        public_id,
+                    },
+                    self.allocator,
+                )?),
                 position,
             )?;
             self.pending.back_mut().expect("external parameter").raw = Some(raw);
@@ -797,11 +809,11 @@ impl Parser {
                 if pending.raw.is_none()
                     && matches!(
                         pending.event.kind,
-                        EventKind::EntityDeclaration { .. }
-                            | EventKind::AttlistDeclaration { .. }
+                        EventKind::EntityDeclaration(_)
+                            | EventKind::AttlistDeclaration(_)
                             | EventKind::EntityDeclarationDuplicate { .. }
                             | EventKind::ElementDeclaration { .. }
-                            | EventKind::NotationDeclaration { .. }
+                            | EventKind::NotationDeclaration(_)
                     )
                 {
                     pending.raw = Some(if assigned {
@@ -989,7 +1001,7 @@ impl Parser {
                     && self.declarations_skipped
                     && (cursor.duplicate_defaults.is_some()
                         || self.pending.iter().skip(first_event).any(|pending| {
-                            matches!(pending.event.kind, EventKind::EntityDeclaration { .. })
+                            matches!(pending.event.kind, EventKind::EntityDeclaration(_))
                         }));
                 let raw_end = cursor.raw.len();
                 self.declaration_default_segment(
@@ -1022,12 +1034,13 @@ impl Parser {
             {
                 self.emit(EventKind::Default, position)?;
             }
-            let closing_default = !previously_skipped
-                && self.declarations_skipped
-                && self.default_events
-                && self.pending.iter().skip(first_event).any(|pending| {
-                    matches!(pending.event.kind, EventKind::EntityDeclaration { .. })
-                });
+            let closing_default =
+                !previously_skipped
+                    && self.declarations_skipped
+                    && self.default_events
+                    && self.pending.iter().skip(first_event).any(|pending| {
+                        matches!(pending.event.kind, EventKind::EntityDeclaration(_))
+                    });
             let mut first_raw = true;
             for pending in self.pending.iter_mut().skip(first_event) {
                 if pending.raw.is_some() {
@@ -1163,11 +1176,14 @@ impl Parser {
         self.declaration_parameters(cursor)?;
         if emit {
             self.emit(
-                EventKind::NotationDeclaration {
-                    name,
-                    system_id,
-                    public_id,
-                },
+                EventKind::NotationDeclaration(oriole_storage::try_box(
+                    crate::NotationDeclaration {
+                        name,
+                        system_id,
+                        public_id,
+                    },
+                    self.allocator,
+                )?),
                 position,
             )?;
         }
@@ -1300,14 +1316,17 @@ impl Parser {
                 },
             )?;
             self.emit(
-                EventKind::EntityDeclaration {
-                    name,
-                    value,
-                    parameter,
-                    system_id,
-                    public_id,
-                    notation,
-                },
+                EventKind::EntityDeclaration(oriole_storage::try_box(
+                    crate::EntityDeclaration {
+                        name,
+                        value,
+                        parameter,
+                        system_id,
+                        public_id,
+                        notation,
+                    },
+                    self.allocator,
+                )?),
                 position,
             )?;
         }
@@ -1676,13 +1695,16 @@ impl Parser {
             self.charge_expansion(element.len())?;
         }
         self.emit(
-            EventKind::AttlistDeclaration {
-                element: element.try_clone()?,
-                name,
-                attribute_type,
-                default: value,
-                required,
-            },
+            EventKind::AttlistDeclaration(oriole_storage::try_box(
+                crate::AttributeDeclaration {
+                    element: element.try_clone()?,
+                    name,
+                    attribute_type,
+                    default: value,
+                    required,
+                },
+                self.allocator,
+            )?),
             position,
         )?;
         Ok(())

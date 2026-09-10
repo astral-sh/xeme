@@ -130,7 +130,10 @@ fn repeated_empty_external_references_share_constructor_cost() {
     let mut children = 0;
     let mut rejected = false;
     while let Some(event) = parent.next_event().unwrap() {
-        if let EventKind::ExternalEntityReference { context, .. } = event.kind {
+        if let EventKind::ExternalEntityReference(declaration) = event.kind {
+            let oriole::ExternalEntityReference { context, .. } =
+                oriole_storage::Box::into_inner(declaration);
+
             let before = ALLOCATIONS.get();
             match parent.external_child_with_encoding(context.as_deref(), None) {
                 Ok(mut child) => {

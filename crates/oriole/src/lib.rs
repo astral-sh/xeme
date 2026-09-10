@@ -8,6 +8,7 @@ mod accounting;
 mod dtd;
 mod encoding;
 mod names;
+mod recycling;
 mod value;
 mod value_lexer;
 
@@ -21,6 +22,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use accounting::EntityBudget;
 
 pub use oriole_storage::Text;
+pub use recycling::RecyclingToken;
+
+use recycling::{AttributeRecycling, copy_attribute_string};
 
 use encoding::{Decoder, Source};
 use names::{is_name, is_uri_char, is_xml_char, whitespace};
@@ -168,6 +172,52 @@ pub struct Event {
     pub position: Position,
 }
 
+/// An external entity request with owned callback metadata.
+#[derive(Debug, Eq, PartialEq)]
+pub struct ExternalEntityReference {
+    pub context: Option<String>,
+    pub system_id: Option<String>,
+    pub public_id: Option<String>,
+}
+
+/// The opening declaration of the document type.
+#[derive(Debug, Eq, PartialEq)]
+pub struct DoctypeDeclaration {
+    pub name: String,
+    pub system_id: Option<String>,
+    pub public_id: Option<String>,
+    pub has_internal_subset: bool,
+}
+
+/// An internal, external, or unparsed entity declaration.
+#[derive(Debug, Eq, PartialEq)]
+pub struct EntityDeclaration {
+    pub name: String,
+    pub value: Option<String>,
+    pub parameter: bool,
+    pub system_id: Option<String>,
+    pub public_id: Option<String>,
+    pub notation: Option<String>,
+}
+
+/// One attribute declared in an attribute-list declaration.
+#[derive(Debug, Eq, PartialEq)]
+pub struct AttributeDeclaration {
+    pub element: String,
+    pub name: String,
+    pub attribute_type: String,
+    pub default: Option<String>,
+    pub required: bool,
+}
+
+/// A notation declaration with its external identifier.
+#[derive(Debug, Eq, PartialEq)]
+pub struct NotationDeclaration {
+    pub name: String,
+    pub system_id: Option<String>,
+    pub public_id: Option<String>,
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum EventKind {
     /// Opt-in whitespace callback outside element content. Read [`Parser::current_raw`]
@@ -215,17 +265,8 @@ pub enum EventKind {
         version: Option<String>,
         encoding: String,
     },
-    ExternalEntityReference {
-        context: Option<String>,
-        system_id: Option<String>,
-        public_id: Option<String>,
-    },
-    StartDoctype {
-        name: String,
-        system_id: Option<String>,
-        public_id: Option<String>,
-        has_internal_subset: bool,
-    },
+    ExternalEntityReference(oriole_storage::Box<ExternalEntityReference>),
+    StartDoctype(oriole_storage::Box<DoctypeDeclaration>),
     EndDoctype,
     NotStandalone,
     StartNamespace {
@@ -235,26 +276,9 @@ pub enum EventKind {
     EndNamespace {
         prefix: Option<String>,
     },
-    EntityDeclaration {
-        name: String,
-        value: Option<String>,
-        parameter: bool,
-        system_id: Option<String>,
-        public_id: Option<String>,
-        notation: Option<String>,
-    },
-    AttlistDeclaration {
-        element: String,
-        name: String,
-        attribute_type: String,
-        default: Option<String>,
-        required: bool,
-    },
-    NotationDeclaration {
-        name: String,
-        system_id: Option<String>,
-        public_id: Option<String>,
-    },
+    EntityDeclaration(oriole_storage::Box<EntityDeclaration>),
+    AttlistDeclaration(oriole_storage::Box<AttributeDeclaration>),
+    NotationDeclaration(oriole_storage::Box<NotationDeclaration>),
     ElementDeclaration {
         name: String,
         model: String,
@@ -471,6 +495,8 @@ pub struct Parser {
     last_position: Position,
     current_raw: String,
     token_scratch: String,
+    raw_attributes: Vec<RawAttribute>,
+    attribute_recycling: AttributeRecycling,
     expand_internal_entities: bool,
     default_events: bool,
     notation_handler_enabled: bool,
@@ -554,6 +580,8 @@ impl Parser {
             },
             current_raw: String::new_in(allocator),
             token_scratch: String::new_in(allocator),
+            raw_attributes: Vec::new_in(allocator),
+            attribute_recycling: AttributeRecycling::new(allocator)?,
             expand_internal_entities: true,
             default_events: false,
             notation_handler_enabled: true,
@@ -1087,6 +1115,33 @@ impl Parser {
         Ok(())
     }
 
+    /// Return an owned event and a token for an adapter that returns its storage.
+    ///
+    /// Ordinary [`Self::next_event`] consumers keep the existing owned-event API.
+    /// The token is allocation-free, cannot be cloned, and identifies this parser
+    /// generation without retaining a parser reference across a callback.
+    #[doc(hidden)]
+    #[inline(always)]
+    pub fn next_event_for_recycling(&mut self) -> Result<Option<(Event, RecyclingToken)>, Error> {
+        Ok(self
+            .next_event()?
+            .map(|event| (event, self.attribute_recycling.token())))
+    }
+
+    /// Return the original attribute storage after an adapter finishes its callback.
+    ///
+    /// The token rejects accidental returns to another parser, including a reset
+    /// parser at the same address. The adapter must return the original buffers:
+    /// substituting foreign storage can violate allocator routing and accounting.
+    /// This is a host contract, not a security boundary against malicious Rust
+    /// code, which can also change resource limits. Every allocation retains its
+    /// original allocator regardless. Rejected or oversized storage is dropped.
+    /// This operation never allocates and retains at most 64 KiB of capacities.
+    #[doc(hidden)]
+    pub fn recycle_attributes(&mut self, token: RecyclingToken, attributes: Vec<Attribute>) {
+        self.attribute_recycling.recycle(token, attributes);
+    }
+
     /// Return the next event, or `None` when input or a custom conversion is needed,
     /// or parsing is done. Inspect [`Self::encoding_conversion`] before feeding
     /// more input when using a multibyte custom map.
@@ -1317,11 +1372,8 @@ impl Parser {
         let pending = self.pending.pop_front()?;
         if matches!(
             &pending.event.kind,
-            EventKind::ExternalEntityReference {
-                context: None,
-                system_id: None,
-                ..
-            }
+            EventKind::ExternalEntityReference(reference)
+                if reference.context.is_none() && reference.system_id.is_none()
         ) && let Some(foreign) = &mut self.foreign_dtd_pending
         {
             foreign.delivered = true;
@@ -2059,11 +2111,14 @@ impl Parser {
             context.try_push_str(&name)?;
             self.consume(end + 1)?;
             self.emit(
-                EventKind::ExternalEntityReference {
-                    context: Some(context),
-                    system_id,
-                    public_id,
-                },
+                EventKind::ExternalEntityReference(oriole_storage::try_box(
+                    crate::ExternalEntityReference {
+                        context: Some(context),
+                        system_id,
+                        public_id,
+                    },
+                    self.allocator,
+                )?),
                 position,
             )?;
             return Ok(true);
@@ -2117,7 +2172,8 @@ impl Parser {
                     "XML declaration is not at the beginning",
                 ));
             }
-            let attrs = parse_raw_attributes(rest, false, self.allocator, 3).map_err(|error| {
+            let mut attrs = Vec::new_in(self.allocator);
+            parse_raw_attributes(rest, false, &mut attrs, 3).map_err(|error| {
                 self.err_at(
                     if error.kind == ErrorKind::NoMemory {
                         ErrorKind::NoMemory
@@ -2129,7 +2185,7 @@ impl Parser {
                 )
             })?;
             if self.fragment && !self.is_external_value() {
-                let mut attrs = attrs.into_iter();
+                let mut attrs = attrs.into_iter().map(|attribute| attribute.parts(rest));
                 let first = attrs
                     .next()
                     .ok_or_else(|| self.err(ErrorKind::XmlDeclaration, "empty text declaration"))?;
@@ -2161,21 +2217,25 @@ impl Parser {
                 return Ok(());
             }
             if attrs.is_empty()
-                || attrs[0].0 != "version"
-                || !attrs[0].1.strip_prefix("1.").is_some_and(|minor| {
-                    !minor.is_empty() && minor.bytes().all(|byte| byte.is_ascii_digit())
-                })
+                || attrs[0].name(rest) != "version"
+                || !attrs[0]
+                    .value(rest)
+                    .strip_prefix("1.")
+                    .is_some_and(|minor| {
+                        !minor.is_empty() && minor.bytes().all(|byte| byte.is_ascii_digit())
+                    })
             {
                 return Err(self.err_at(
                     ErrorKind::XmlDeclaration,
                     "XML declaration must begin with a version",
-                    2 + target.len() + attrs.first().map_or(0, |attribute| attribute.2),
+                    2 + target.len() + attrs.first().map_or(0, |attribute| attribute.name_start),
                 ));
             }
-            let version = string(attrs[0].1, self.allocator)?;
+            let version = string(attrs[0].value(rest), self.allocator)?;
             let mut encoding = None;
             let mut standalone = None;
-            for (name, value, _, _) in attrs.into_iter().skip(1) {
+            for attribute in attrs.into_iter().skip(1) {
+                let (name, value, _, _) = attribute.parts(rest);
                 match name {
                     "encoding" if encoding.is_none() && standalone.is_none() => {
                         if !valid_encoding_name(value) {
@@ -2256,10 +2316,14 @@ impl Parser {
         let body = &token[1..token.len() - if empty { 2 } else { 1 }];
         let (name, rest) = take_name(body)
             .ok_or_else(|| self.err_at(ErrorKind::InvalidToken, "invalid element name", 1))?;
-        let raw_attrs = parse_raw_attributes(
+        // Offset records retain no references into the reusable lexical buffer.
+        // Validate the complete tag before expanding values or emitting callbacks.
+        let mut raw_attrs =
+            std::mem::replace(&mut self.raw_attributes, Vec::new_in(self.allocator));
+        parse_raw_attributes(
             rest,
             true,
-            self.allocator,
+            &mut raw_attrs,
             self.config.limits.max_attributes,
         )
         .map_err(|error| {
@@ -2272,21 +2336,28 @@ impl Parser {
         if raw_attrs.len() > self.config.limits.max_attributes {
             return Err(self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded"));
         }
-        let mut attrs = Vec::new_in(self.allocator);
+        // Empty tags need no attribute buffer and must not evict a warm cache.
+        let mut attrs = if raw_attrs.is_empty() {
+            Vec::new_in(self.allocator)
+        } else {
+            self.attribute_recycling.take()
+        };
+        attrs.truncate(raw_attrs.len());
         attrs
-            .try_reserve(raw_attrs.len())
+            .try_reserve(raw_attrs.len().saturating_sub(attrs.len()))
             .map_err(|_| AllocError::OutOfMemory)?;
         // Most elements have only a few attributes. Keep the linear scan bounded;
         // larger elements retain a randomized hash table against collision attacks.
         let mut names = (raw_attrs.len() > 8)
             .then(|| HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator));
-        for (index, &(attr_name, value, attribute_offset, _)) in raw_attrs.iter().enumerate() {
+        for (index, attribute) in raw_attrs.iter().enumerate() {
+            let (attr_name, value, attribute_offset, _) = attribute.parts(rest);
             let duplicate = if let Some(names) = &mut names {
                 !try_set_insert(names, attr_name)?
             } else {
                 raw_attrs[..index]
                     .iter()
-                    .any(|(name, ..)| *name == attr_name)
+                    .any(|attribute| attribute.name(rest) == attr_name)
             };
             if duplicate {
                 return Err(self.err_at(
@@ -2295,23 +2366,28 @@ impl Parser {
                     1 + name.len() + attribute_offset,
                 ));
             }
-            let mut value = self.expand_attribute(value, &mut Vec::new_in(self.allocator))?;
+            if index == attrs.len() {
+                try_push(
+                    &mut attrs,
+                    Attribute {
+                        name: String::new_in(self.allocator),
+                        value: String::new_in(self.allocator),
+                        specified: true,
+                    },
+                )?;
+            }
+            let attribute = &mut attrs[index];
+            self.expand_attribute_into(value, &mut attribute.value)?;
             if self
                 .defaults
                 .get(name)
                 .and_then(|decls| decls.get(attr_name))
                 .is_some_and(|decl| decl.attribute_type != "CDATA")
             {
-                value = collapse_spaces(&value, self.allocator)?;
+                attribute.value = collapse_spaces(&attribute.value, self.allocator)?;
             }
-            try_push(
-                &mut attrs,
-                Attribute {
-                    name: string(attr_name, self.allocator)?,
-                    value,
-                    specified: true,
-                },
-            )?;
+            copy_attribute_string(&mut attribute.name, attr_name)?;
+            attribute.specified = true;
         }
         if let Some(defaults) = self.defaults.get(name) {
             for default in &defaults.ordered {
@@ -2319,7 +2395,7 @@ impl Parser {
                     || {
                         raw_attrs
                             .iter()
-                            .any(|(name, ..)| *name == default.name.as_str())
+                            .any(|attribute| attribute.name(rest) == default.name.as_str())
                     },
                     |names| names.contains(default.name.as_str()),
                 ) && let Some(value) = &default.value
@@ -2482,6 +2558,12 @@ impl Parser {
             if let Some(pending) = self.pending.get_mut(first_end) {
                 pending.raw = Some(String::new_in(self.allocator));
             }
+        }
+        // Cache at most 4 KiB of offset records after a tag. A large attribute
+        // list remains valid but does not permanently enlarge each parser.
+        if raw_attrs.capacity() <= 128 {
+            raw_attrs.clear();
+            self.raw_attributes = raw_attrs;
         }
         Ok(())
     }
@@ -2667,6 +2749,20 @@ impl Parser {
         }
     }
 
+    /// Refill common literal values without allocating a new owner. Keep complex
+    /// entity and physical-whitespace normalization on their existing paths.
+    fn expand_attribute_into(&mut self, value: &str, output: &mut String) -> Result<(), Error> {
+        if value
+            .bytes()
+            .any(|byte| matches!(byte, b'&' | b'<' | b'\t' | b'\r' | b'\n'))
+        {
+            *output = self.expand_attribute(value, &mut Vec::new_in(self.allocator))?;
+        } else {
+            copy_attribute_string(output, value)?;
+        }
+        Ok(())
+    }
+
     fn expand_attribute(&mut self, value: &str, chain: &mut Vec<String>) -> Result<String, Error> {
         if !value.bytes().any(|byte| matches!(byte, b'&' | b'<')) {
             if !chain.is_empty() {
@@ -2784,15 +2880,43 @@ fn take_name(input: &str) -> Option<(&str, &str)> {
     Some((&input[..end], &input[end..]))
 }
 
+/// Byte offsets within one tag's attribute text. Scratch records never borrow input.
+#[derive(Clone, Copy, Debug)]
+struct RawAttribute {
+    name_start: usize,
+    name_end: usize,
+    value_start: usize,
+    value_end: usize,
+}
+
+impl RawAttribute {
+    fn name<'a>(&self, text: &'a str) -> &'a str {
+        &text[self.name_start..self.name_end]
+    }
+
+    fn value<'a>(&self, text: &'a str) -> &'a str {
+        &text[self.value_start..self.value_end]
+    }
+
+    fn parts<'a>(&self, text: &'a str) -> (&'a str, &'a str, usize, usize) {
+        (
+            self.name(text),
+            self.value(text),
+            self.name_start,
+            self.value_start,
+        )
+    }
+}
+
 fn parse_raw_attributes(
     text: &str,
     allow_refs: bool,
-    allocator: Allocator,
+    result: &mut Vec<RawAttribute>,
     limit: usize,
-) -> Result<Vec<(&str, &str, usize, usize)>, Error> {
+) -> Result<(), Error> {
     let original_len = text.len();
     let mut text = text;
-    let mut result = Vec::new_in(allocator);
+    result.clear();
     let error_at = |kind, message, remaining: &str| Error {
         kind,
         message,
@@ -2865,10 +2989,18 @@ fn parse_raw_attributes(
                 &rest[offset..],
             ));
         }
-        try_push(&mut result, (name, value, name_offset, value_offset))?;
+        try_push(
+            result,
+            RawAttribute {
+                name_start: name_offset,
+                name_end: name_offset + name.len(),
+                value_start: value_offset,
+                value_end: value_offset + value.len(),
+            },
+        )?;
         text = &rest[end + 1..];
     }
-    Ok(result)
+    Ok(())
 }
 
 fn string(text: &str, allocator: Allocator) -> Result<String, Error> {

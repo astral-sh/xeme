@@ -32,11 +32,14 @@ fn drain(
     );
     while let Some(event) = parser.next_event().map_err(|error| error.kind)? {
         match event.kind {
-            EventKind::ExternalEntityReference {
-                context,
-                system_id: Some(system),
-                ..
-            } => {
+            EventKind::ExternalEntityReference(declaration) if declaration.system_id.is_some() => {
+                let oriole::ExternalEntityReference {
+                    context,
+                    system_id: stored_system_id,
+                    ..
+                } = oriole_storage::Box::into_inner(declaration);
+                let system = stored_system_id.expect("matched optional field");
+
                 assert!(context.is_none());
                 events.trace.push(format!("{actor}:external:{system}"));
                 let load = loads
@@ -103,7 +106,10 @@ fn drain(
                         .map_err(|error| error.kind)?;
                 }
             }
-            EventKind::EntityDeclaration { name, .. } => {
+            EventKind::EntityDeclaration(declaration) => {
+                let oriole::EntityDeclaration { name, .. } =
+                    oriole_storage::Box::into_inner(declaration);
+
                 events.trace.push(format!("{actor}:entity:{name}"));
                 events.declarations.push(name.to_string());
             }
@@ -384,13 +390,16 @@ fn header_children_are_acknowledged_only_during_the_request_and_outlive_parents(
                     unrelated.feed(b"", true).unwrap();
                     assert!(unrelated.next_event().unwrap().is_none());
                 }
-                EventKind::ExternalEntityReference { .. } if load => {
+                EventKind::ExternalEntityReference(_) if load => {
                     let mut child = parser.external_child(None, None).unwrap();
                     child.feed(b"", false).unwrap();
                     assert!(child.next_event().unwrap().is_none());
                     retained = Some(child);
                 }
-                EventKind::EntityDeclaration { name, .. } => {
+                EventKind::EntityDeclaration(declaration) => {
+                    let oriole::EntityDeclaration { name, .. } =
+                        oriole_storage::Box::into_inner(declaration);
+
                     declarations.push(name.to_string());
                 }
                 EventKind::NotStandalone => notifications += 1,
@@ -405,7 +414,7 @@ fn header_children_are_acknowledged_only_during_the_request_and_outlive_parents(
             child.feed(b"<!ENTITY retained 'valid'>", true).unwrap();
             assert!(matches!(
                 child.next_event().unwrap().unwrap().kind,
-                EventKind::EntityDeclaration { .. }
+                EventKind::EntityDeclaration(_)
             ));
             assert!(child.next_event().unwrap().is_none());
             assert!(child.is_finished());

@@ -1321,17 +1321,29 @@ fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
                 version: Some(word()),
                 encoding: word(),
             },
-            2 => EventKind::ExternalEntityReference {
-                context: Some(word()),
-                system_id: Some(word()),
-                public_id: Some(word()),
-            },
-            3 => EventKind::StartDoctype {
-                name: word(),
-                system_id: Some(word()),
-                public_id: Some(word()),
-                has_internal_subset: false,
-            },
+            2 => EventKind::ExternalEntityReference(
+                oriole_storage::try_box(
+                    oriole::ExternalEntityReference {
+                        context: Some(word()),
+                        system_id: Some(word()),
+                        public_id: Some(word()),
+                    },
+                    Allocator::System,
+                )
+                .unwrap(),
+            ),
+            3 => EventKind::StartDoctype(
+                oriole_storage::try_box(
+                    oriole::DoctypeDeclaration {
+                        name: word(),
+                        system_id: Some(word()),
+                        public_id: Some(word()),
+                        has_internal_subset: false,
+                    },
+                    Allocator::System,
+                )
+                .unwrap(),
+            ),
             4 => EventKind::StartNamespace {
                 prefix: Some(word()),
                 uri: Some(word()),
@@ -1339,26 +1351,44 @@ fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
             5 => EventKind::EndNamespace {
                 prefix: Some(word()),
             },
-            6 => EventKind::EntityDeclaration {
-                name: word(),
-                value: Some(word()),
-                parameter: false,
-                system_id: Some(word()),
-                public_id: Some(word()),
-                notation: Some(word()),
-            },
-            7 => EventKind::AttlistDeclaration {
-                element: word(),
-                name: word(),
-                attribute_type: word(),
-                default: Some(word()),
-                required: false,
-            },
-            8 => EventKind::NotationDeclaration {
-                name: word(),
-                system_id: Some(word()),
-                public_id: Some(word()),
-            },
+            6 => EventKind::EntityDeclaration(
+                oriole_storage::try_box(
+                    oriole::EntityDeclaration {
+                        name: word(),
+                        value: Some(word()),
+                        parameter: false,
+                        system_id: Some(word()),
+                        public_id: Some(word()),
+                        notation: Some(word()),
+                    },
+                    Allocator::System,
+                )
+                .unwrap(),
+            ),
+            7 => EventKind::AttlistDeclaration(
+                oriole_storage::try_box(
+                    oriole::AttributeDeclaration {
+                        element: word(),
+                        name: word(),
+                        attribute_type: word(),
+                        default: Some(word()),
+                        required: false,
+                    },
+                    Allocator::System,
+                )
+                .unwrap(),
+            ),
+            8 => EventKind::NotationDeclaration(
+                oriole_storage::try_box(
+                    oriole::NotationDeclaration {
+                        name: word(),
+                        system_id: Some(word()),
+                        public_id: Some(word()),
+                    },
+                    Allocator::System,
+                )
+                .unwrap(),
+            ),
             9 => EventKind::SkippedEntity {
                 name: word(),
                 parameter: false,
@@ -1383,8 +1413,11 @@ fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
                     family
                         .callback_bytes
                         .store(MAX_FAMILY_CALLBACK_BYTES - remaining, Ordering::Relaxed);
+                    (*parser).core.feed(b"<r/>", true).unwrap();
+                    let (_, recycling) =
+                        (*parser).core.next_event_for_recycling().unwrap().unwrap();
                     (*parser).busy = true;
-                    dispatch(parser, event(case)).unwrap();
+                    dispatch(parser, event(case), recycling).unwrap();
                     (*parser).busy = false;
                     assert_eq!(
                         XML_GetErrorCode(parser),
@@ -2939,5 +2972,64 @@ fn hash_salt_changes_root_configuration_and_preserves_owned_children() {
             1
         );
         XML_ParserFree(root);
+    }
+}
+
+unsafe extern "C" fn suspend_with_live_attribute_strings(
+    data: *mut c_void,
+    name: *const c_char,
+    attributes: *const *const c_char,
+) {
+    // SAFETY: The outer test keeps State and its live parser on this thread. All
+    // callback bytes remain readable until this function returns.
+    unsafe {
+        let state = &mut *data.cast::<State>();
+        let value = CStr::from_ptr(*attributes.add(1));
+        let before = value.to_bytes().to_vec();
+        state.events.push(value.to_str().unwrap().to_owned());
+        XML_ParserFree(state.parser);
+        assert_eq!(XML_ParserReset(state.parser, ptr::null()), 0);
+        assert_eq!(
+            XML_Parse(state.parser, c"<recursive/>".as_ptr(), 12, 1),
+            ERROR
+        );
+        assert_eq!(XML_StopParser(state.parser, 1), OK);
+        assert_eq!(CStr::from_ptr(*attributes.add(1)).to_bytes(), before);
+        assert_eq!(CStr::from_ptr(name).to_bytes(), b"n");
+    }
+}
+
+#[test]
+fn recycling_waits_for_callbacks_and_survives_suspend_resume_and_reset() {
+    // SAFETY: Every parser, input and user-data pointer remains live through its
+    // callbacks. Callback-time Free is ignored; final cleanup frees exactly once.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        let mut state = State {
+            parser,
+            ..State::default()
+        };
+        XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+        XML_SetStartElementHandler(parser, Some(suspend_with_live_attribute_strings));
+        let input = c"<n a='first'><n a='second'/></n>";
+        assert_eq!(
+            XML_Parse(parser, input.as_ptr(), input.to_bytes().len() as c_int, 1),
+            SUSPENDED
+        );
+        assert_eq!(state.events, ["first"]);
+        assert_eq!(XML_ResumeParser(parser), SUSPENDED);
+        assert_eq!(state.events, ["first", "second"]);
+        assert_eq!(XML_ResumeParser(parser), OK);
+        assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+        XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+        XML_SetStartElementHandler(parser, Some(suspend_with_live_attribute_strings));
+        let input = c"<n a='reset'/>";
+        assert_eq!(
+            XML_Parse(parser, input.as_ptr(), input.to_bytes().len() as c_int, 1),
+            SUSPENDED
+        );
+        assert_eq!(XML_ResumeParser(parser), OK);
+        assert_eq!(state.events, ["first", "second", "reset"]);
+        XML_ParserFree(parser);
     }
 }

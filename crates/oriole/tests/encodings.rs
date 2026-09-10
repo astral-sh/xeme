@@ -272,16 +272,17 @@ fn dtd_and_value_children_keep_prolog_encoding_detection() {
     let mut value = None;
     while let Some(event) = dtd.next_event().unwrap() {
         match event.kind {
-            EventKind::ExternalEntityReference { .. } => {
+            EventKind::ExternalEntityReference(_) => {
                 let mut child = dtd.external_child(None, None).unwrap();
                 // The whole-buffer prolog signature selects UTF-16LE for an
                 // entity value, whereas the same content child is invalid.
                 encoded_content(&mut child, b"X\0", 2).unwrap();
                 dtd.merge_external_subset(&child).unwrap();
             }
-            EventKind::EntityDeclaration {
-                name, value: text, ..
-            } if name == "e" => {
+            EventKind::EntityDeclaration(declaration) if (declaration.name == "e") => {
+                let oriole::EntityDeclaration { value: text, .. } =
+                    oriole_storage::Box::into_inner(declaration);
+
                 value = text.map(|text| text.to_string());
             }
             _ => {}

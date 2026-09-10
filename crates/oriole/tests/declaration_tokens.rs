@@ -12,12 +12,15 @@ struct Declarations {
 fn drain(parser: &mut Parser, declarations: &mut Declarations) -> Result<(), ErrorKind> {
     while let Some(event) = parser.next_event().map_err(|error| error.kind)? {
         match event.kind {
-            EventKind::EntityDeclaration {
-                name,
-                parameter,
-                value: Some(value),
-                ..
-            } => {
+            EventKind::EntityDeclaration(declaration) if declaration.value.is_some() => {
+                let oriole::EntityDeclaration {
+                    name,
+                    parameter,
+                    value: stored_value,
+                    ..
+                } = oriole_storage::Box::into_inner(declaration);
+                let value = stored_value.expect("matched optional field");
+
                 declarations
                     .values
                     .push((name.to_string(), parameter, value.to_string()));
@@ -25,7 +28,10 @@ fn drain(parser: &mut Parser, declarations: &mut Declarations) -> Result<(), Err
             EventKind::Default => declarations
                 .defaults
                 .push_str(parser.current_raw().unwrap()),
-            EventKind::AttlistDeclaration { default, .. } => {
+            EventKind::AttlistDeclaration(declaration) => {
+                let oriole::AttributeDeclaration { default, .. } =
+                    oriole_storage::Box::into_inner(declaration);
+
                 declarations.attributes += 1;
                 if let Some(value) = default {
                     declarations.attribute_values.push(value.to_string());

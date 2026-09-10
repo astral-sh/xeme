@@ -113,10 +113,11 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         allocator,
     )?;
     parser.set_default_events(true);
-    parser.feed(b"\r\n<!DOCTYPE r [ \n<!ENTITY internal '<p:n/>'><!ENTITY external SYSTEM 'child'><!ATTLIST r a NMTOKENS ' a  b '>\t]>\n<r xmlns:p='urn:p' p:attr='v'>&internal;&external;<!--c--><![CDATA[x]]></r>\r\n", true)?;
+    parser.feed(b"\r\n<!DOCTYPE r [ \n<!ENTITY internal '<p:n/>'><!ENTITY external SYSTEM 'child'><!NOTATION n SYSTEM 'notation'><!ATTLIST r a NMTOKENS ' a  b '>\t]>\n<r xmlns:p='urn:p' p:attr='v'>&internal;&external;<!--c--><![CDATA[x]]></r>\r\n", true)?;
     while let Some(event) = next_event(&mut parser)? {
-        if let EventKind::ExternalEntityReference { context, .. } = event.kind {
-            let mut child = parser.external_child_with_encoding(context.as_deref(), None)?;
+        if let EventKind::ExternalEntityReference(reference) = event.kind {
+            let mut child =
+                parser.external_child_with_encoding(reference.context.as_deref(), None)?;
             child.feed(b"<?xml encoding='UTF-8'?><p:x a='value'/>text", true)?;
             while next_event(&mut child)?.is_some() {}
         }
@@ -129,7 +130,9 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
     assert!(parser.set_param_entity_parsing(2));
     parser.feed(b"<!DOCTYPE r SYSTEM 'test.dtd'><r>&external;</r>", true)?;
     while let Some(event) = next_event(&mut parser)? {
-        if let EventKind::ExternalEntityReference { context: None, .. } = event.kind {
+        if let EventKind::ExternalEntityReference(reference) = event.kind
+            && reference.context.is_none()
+        {
             let mut child = parser.external_child_with_encoding(None, None)?;
             child.set_default_events(true);
             child.feed(
@@ -177,7 +180,9 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         true,
     )?;
     while let Some(event) = next_event(&mut header)? {
-        if let EventKind::ExternalEntityReference { context: None, .. } = event.kind {
+        if let EventKind::ExternalEntityReference(reference) = event.kind
+            && reference.context.is_none()
+        {
             let mut loaded = header.external_child(None, None)?;
             loaded.feed(b"<!ENTITY % keyword 'INCLUDE'>", true)?;
             while next_event(&mut loaded)?.is_some() {}
@@ -197,11 +202,11 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         true,
     )?;
     while let Some(event) = next_event(&mut values)? {
-        if let EventKind::ExternalEntityReference { .. } = event.kind {
+        if let EventKind::ExternalEntityReference(_) = event.kind {
             let mut child = values.external_child(None, None)?;
             child.feed(b"<?xml version='1.0'?>X%q;Y", true)?;
             while let Some(event) = next_event(&mut child)? {
-                if let EventKind::ExternalEntityReference { .. } = event.kind {
+                if let EventKind::ExternalEntityReference(_) = event.kind {
                     let mut nested = child.external_child(None, None)?;
                     nested.feed(b"\"&#13;Q\"", true)?;
                     while next_event(&mut nested)?.is_some() {}
@@ -219,10 +224,10 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         true,
     )?;
     while let Some(event) = next_event(&mut grammar)? {
-        if let EventKind::ExternalEntityReference { system_id, .. } = event.kind {
+        if let EventKind::ExternalEntityReference(reference) = event.kind {
             let mut child = grammar.external_child(None, None)?;
             child.feed(
-                if system_id.as_deref() == Some("v") {
+                if reference.system_id.as_deref() == Some("v") {
                     b"X"
                 } else {
                     b""
@@ -241,7 +246,7 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         let mut notified = false;
         while let Some(event) = next_event(&mut foreign)? {
             match event.kind {
-                EventKind::ExternalEntityReference { .. } => {
+                EventKind::ExternalEntityReference(_) => {
                     let mut child = foreign.external_child(None, None)?;
                     child.feed(b"", true)?;
                     while next_event(&mut child)?.is_some() {}
@@ -252,6 +257,31 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         }
         assert!(notified);
     }
+    // Exercise scratch reuse and growth while failure injection is active.
+    // Every completed event remains owned independently of later lexical scans.
+    let mut parser = Parser::try_new_with_encoding_in(Config::default(), None, allocator)?;
+    let xml = concat!(
+        "<r><a a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7'/>",
+        "<b b0='0' b1='1' b2='2' b3='3' b4='4' b5='5' b6='6' b7='7' b8='8'/>",
+        "<c final='&amp;é'/></r>",
+    );
+    let mut chunks = xml.as_bytes().chunks(7).peekable();
+    let mut starts = 0;
+    while let Some(bytes) = chunks.next() {
+        parser.feed(bytes, chunks.peek().is_none())?;
+        while let Some(event) = next_event(&mut parser)? {
+            if let EventKind::StartElement { name, attributes } = event.kind {
+                starts += 1;
+                if name == "c" {
+                    assert_eq!(attributes.len(), 1);
+                    assert_eq!(attributes[0].name, "final");
+                    assert_eq!(attributes[0].value, "&é");
+                }
+            }
+        }
+    }
+    assert_eq!(starts, 4);
+    assert!(parser.is_finished());
     let mut parser =
         Parser::try_new_with_encoding_in(Config::default(), Some("custom"), allocator)?;
     parser.feed(b"<r>\x80</r>", true)?;
@@ -298,6 +328,40 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
             );
             assert_eq!(CALLS.get(), calls);
             return Err(error);
+        }
+    }
+    // Retained metadata must own both its fields and its allocation suite after
+    // the originating parser has been destroyed. Every new payload allocation
+    // also participates in the fail-at-each-allocation loop below.
+    let mut parser = Parser::try_new_in(Config::default(), allocator)?;
+    parser.feed(b"<!DOCTYPE r [<!ENTITY e SYSTEM 'child'><!ATTLIST r a CDATA 'v'><!NOTATION n SYSTEM 'notation'>]><r>&e;</r>", true)?;
+    let mut retained: [Option<oriole::Event>; 5] = Default::default();
+    while let Some(event) = next_event(&mut parser)? {
+        let slot = match &event.kind {
+            EventKind::StartDoctype(_) => 0,
+            EventKind::EntityDeclaration(_) => 1,
+            EventKind::AttlistDeclaration(_) => 2,
+            EventKind::NotationDeclaration(_) => 3,
+            EventKind::ExternalEntityReference(_) => 4,
+            _ => continue,
+        };
+        retained[slot] = Some(event);
+    }
+    drop(parser);
+    for event in retained {
+        match event.expect("retained metadata event").kind {
+            EventKind::StartDoctype(value) => assert_eq!(value.name, "r"),
+            EventKind::EntityDeclaration(value) => {
+                assert_eq!(value.system_id.as_deref(), Some("child"))
+            }
+            EventKind::AttlistDeclaration(value) => assert_eq!(value.default.as_deref(), Some("v")),
+            EventKind::NotationDeclaration(value) => {
+                assert_eq!(value.system_id.as_deref(), Some("notation"))
+            }
+            EventKind::ExternalEntityReference(value) => {
+                assert_eq!(value.system_id.as_deref(), Some("child"))
+            }
+            _ => unreachable!(),
         }
     }
     Ok(())
@@ -424,4 +488,107 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
     for failure in 1..=count {
         attempt(failure);
     }
+}
+
+/// Exercise returned original buffers through growth, normalization and entities.
+fn recycling_workload(allocator: Allocator, xml: &[u8], recycle: bool) -> Result<(), Error> {
+    let mut parser = Parser::try_new_in(Config::default(), allocator)?;
+    parser.feed(xml, true)?;
+    while let Some((event, token)) = parser.next_event_for_recycling()? {
+        if let EventKind::StartElement { mut attributes, .. } = event.kind {
+            for attribute in &mut attributes {
+                // Match the C bridge's terminator preparation without a callback.
+                attribute.name.try_push('\0')?;
+                attribute.value.try_push('\0')?;
+            }
+            if recycle {
+                parser.recycle_attributes(token, attributes);
+            }
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn recycled_attributes_reduce_allocations_and_survive_each_failure() {
+    // SAFETY: This complete libc-backed suite preserves ownership on failure.
+    let allocator = unsafe {
+        Allocator::from_callbacks(MemorySuite {
+            malloc: Some(checked_malloc),
+            realloc: Some(checked_realloc),
+            free: Some(checked_free),
+        })
+        .unwrap()
+    };
+    let mut xml = std::string::String::from(
+        "<!DOCTYPE r [<!ENTITY e 'entity'><!ATTLIST n a NMTOKENS #IMPLIED>]><r>",
+    );
+    for _ in 0..24 {
+        xml.push_str("<n a='a' b='literal value' c='value' d='another' e='value' f='value' g='value' h='value'/><empty/>");
+    }
+    xml.push_str("<n a='  a  b  ' b='&e;' c='physical\r\nspace' d='");
+    xml.push_str(&"x".repeat(8192));
+    xml.push_str("'/><n a='small' b='again'/></r>");
+    let run = |failure, recycle| {
+        FAIL_AT.set(failure);
+        CALLS.set(0);
+        GLOBAL_CALLS.set(0);
+        TRACK_GLOBAL.set(true);
+        let result = recycling_workload(allocator, xml.as_bytes(), recycle);
+        TRACK_GLOBAL.set(false);
+        assert_eq!(LIVE.get(), 0, "allocation {failure}");
+        assert_eq!(GLOBAL_CALLS.get(), 0, "allocation {failure}");
+        (result, CALLS.get())
+    };
+    let (result, ordinary) = run(0, false);
+    result.unwrap();
+    let (result, recycled) = run(0, true);
+    result.unwrap();
+    assert!(
+        recycled < ordinary / 2,
+        "ordinary={ordinary}, recycled={recycled}"
+    );
+    for failure in 1..=recycled {
+        assert_eq!(run(failure, true).0.unwrap_err().kind, ErrorKind::NoMemory);
+    }
+    FAIL_AT.set(0);
+}
+
+#[test]
+fn foreign_recycling_token_rejects_storage_from_the_same_custom_suite() {
+    // SAFETY: The complete suite routes both parsers through matching libc calls.
+    let allocator = unsafe {
+        Allocator::from_callbacks(MemorySuite {
+            malloc: Some(checked_malloc),
+            realloc: Some(checked_realloc),
+            free: Some(checked_free),
+        })
+        .unwrap()
+    };
+    let input = b"<r a='value' b='another value'/>";
+    let run = |return_foreign| {
+        FAIL_AT.set(0);
+        let mut first = Parser::try_new_in(Config::default(), allocator).unwrap();
+        first.feed(input, true).unwrap();
+        let (event, token) = first.next_event_for_recycling().unwrap().unwrap();
+        let EventKind::StartElement { attributes, .. } = event.kind else {
+            panic!()
+        };
+        let mut second = Parser::try_new_in(Config::default(), allocator).unwrap();
+        if return_foreign {
+            second.recycle_attributes(token, attributes);
+        }
+        let before = CALLS.get();
+        second.feed(input, true).unwrap();
+        while second.next_event().unwrap().is_some() {}
+        CALLS.get() - before
+    };
+    let ordinary = run(false);
+    assert_eq!(LIVE.get(), 0);
+    assert_eq!(
+        run(true),
+        ordinary,
+        "a foreign cache must not warm another parser"
+    );
+    assert_eq!(LIVE.get(), 0);
 }

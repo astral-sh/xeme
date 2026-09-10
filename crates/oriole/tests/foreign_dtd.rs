@@ -32,7 +32,7 @@ fn foreign_dtd_read_acknowledgement_controls_notifications_and_unknown_entities(
                                     }
                                 };
                                 match event.kind {
-                                    EventKind::ExternalEntityReference { .. } => {
+                                    EventKind::ExternalEntityReference(_) => {
                                         external += 1;
                                         match action {
                                             0 => parser.external_entity_handler_absent(),
@@ -88,7 +88,7 @@ fn unread_foreign_dtd_preserves_prior_parameter_references() {
     let mut skipped = 0;
     while let Some(event) = parser.next_event().unwrap() {
         match event.kind {
-            EventKind::ExternalEntityReference { .. } => foreign += 1,
+            EventKind::ExternalEntityReference(_) => foreign += 1,
             EventKind::SkippedEntity { .. } => skipped += 1,
             _ => {}
         }

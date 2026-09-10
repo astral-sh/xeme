@@ -159,11 +159,14 @@ impl Parser {
                     raw.push(';')?;
                     self.has_external_subset = true;
                     self.emit(
-                        EventKind::ExternalEntityReference {
-                            context: None,
-                            system_id: request.system_id,
-                            public_id: request.public_id,
-                        },
+                        EventKind::ExternalEntityReference(oriole_storage::try_box(
+                            crate::ExternalEntityReference {
+                                context: None,
+                                system_id: request.system_id,
+                                public_id: request.public_id,
+                            },
+                            self.allocator,
+                        )?),
                         request.position,
                     )?;
                     self.pending

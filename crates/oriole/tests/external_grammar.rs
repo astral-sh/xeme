@@ -24,21 +24,34 @@ fn parse(dtd: &[u8], width: usize, read: Read, standalone: bool) -> Result<Vec<S
             .map_err(|e| e.kind)?;
         while let Some(event) = parser.next_event().map_err(|e| e.kind)? {
             match event.kind {
-                EventKind::AttlistDeclaration { name, default, .. } => {
+                EventKind::AttlistDeclaration(declaration) => {
+                    let oriole::AttributeDeclaration { name, default, .. } =
+                        oriole_storage::Box::into_inner(declaration);
+
                     events.push(format!("attr:{name}={}", default.as_deref().unwrap_or("")))
                 }
-                EventKind::EntityDeclaration {
-                    name,
-                    value: Some(value),
-                    ..
-                } => events.push(format!("entity:{name}={value}")),
+                EventKind::EntityDeclaration(declaration) if declaration.value.is_some() => {
+                    let oriole::EntityDeclaration {
+                        name,
+                        value: stored_value,
+                        ..
+                    } = oriole_storage::Box::into_inner(declaration);
+                    let value = stored_value.expect("matched optional field");
+                    events.push(format!("entity:{name}={value}"))
+                }
                 EventKind::ElementDeclaration { name, .. } => {
                     events.push(format!("element:{name}"))
                 }
-                EventKind::NotationDeclaration { name, .. } => {
+                EventKind::NotationDeclaration(declaration) => {
+                    let oriole::NotationDeclaration { name, .. } =
+                        oriole_storage::Box::into_inner(declaration);
+
                     events.push(format!("notation:{name}"))
                 }
-                EventKind::ExternalEntityReference { system_id, .. } => {
+                EventKind::ExternalEntityReference(declaration) => {
+                    let oriole::ExternalEntityReference { system_id, .. } =
+                        oriole_storage::Box::into_inner(declaration);
+
                     events.push(format!(
                         "external:{}",
                         system_id.as_deref().unwrap_or("NULL")
@@ -148,7 +161,7 @@ fn completed_attributes_are_visible_before_the_final_declaration_delimiter() {
         .feed(b"<!ENTITY % p SYSTEM 'p'><!ATTLIST r a CDATA %p;", false)
         .unwrap();
     while let Some(event) = parser.next_event().unwrap() {
-        if matches!(event.kind, EventKind::ExternalEntityReference { .. }) {
+        if matches!(event.kind, EventKind::ExternalEntityReference(_)) {
             let mut child = parser.external_child(None, None).unwrap();
             child.feed(b"", true).unwrap();
             while child.next_event().unwrap().is_some() {}
@@ -159,7 +172,10 @@ fn completed_attributes_are_visible_before_the_final_declaration_delimiter() {
         parser.feed(bytes, false).unwrap();
         let mut names = Vec::new();
         while let Some(event) = parser.next_event().unwrap() {
-            if let EventKind::AttlistDeclaration { name, .. } = event.kind {
+            if let EventKind::AttlistDeclaration(declaration) = event.kind {
+                let oriole::AttributeDeclaration { name, .. } =
+                    oriole_storage::Box::into_inner(declaration);
+
                 names.push(name.to_string());
             }
         }
@@ -186,7 +202,7 @@ fn empty_grammar_children_share_a_finite_work_budget() {
     let error = loop {
         match parser.next_event() {
             Err(error) => break error,
-            Ok(Some(event)) if matches!(event.kind, EventKind::ExternalEntityReference { .. }) => {
+            Ok(Some(event)) if matches!(event.kind, EventKind::ExternalEntityReference(_)) => {
                 requests += 1;
                 let mut child = match parser.external_child(None, None) {
                     Ok(child) => child,
@@ -222,7 +238,10 @@ fn undefined_default_entities_follow_document_or_external_context() {
             .unwrap();
         let mut found = false;
         while let Some(event) = external.next_event().unwrap() {
-            if let EventKind::AttlistDeclaration { default, .. } = event.kind {
+            if let EventKind::AttlistDeclaration(declaration) = event.kind {
+                let oriole::AttributeDeclaration { default, .. } =
+                    oriole_storage::Box::into_inner(declaration);
+
                 found = true;
                 assert_eq!(default.as_deref(), Some("LR"));
             }
@@ -272,7 +291,7 @@ fn partially_declared_ids_are_inherited_with_context_specific_slot_semantics() {
         let dtd = format!("<!ENTITY % p SYSTEM 'p'>{declaration}");
         parser.feed(dtd.as_bytes(), true).unwrap();
         while let Some(event) = parser.next_event().unwrap() {
-            if matches!(event.kind, EventKind::ExternalEntityReference { .. }) {
+            if matches!(event.kind, EventKind::ExternalEntityReference(_)) {
                 let mut child = parser
                     .external_child(if parameter { None } else { Some("") }, None)
                     .unwrap();
@@ -281,12 +300,13 @@ fn partially_declared_ids_are_inherited_with_context_specific_slot_semantics() {
                     .unwrap();
                 let mut requests = Vec::new();
                 while let Some(event) = child.next_event().unwrap() {
-                    if let EventKind::ExternalEntityReference {
-                        system_id,
-                        public_id,
-                        ..
-                    } = event.kind
-                    {
+                    if let EventKind::ExternalEntityReference(declaration) = event.kind {
+                        let oriole::ExternalEntityReference {
+                            system_id,
+                            public_id,
+                            ..
+                        } = oriole_storage::Box::into_inner(declaration);
+
                         requests.push((
                             system_id.map(|value| value.to_string()),
                             public_id.map(|value| value.to_string()),
@@ -323,14 +343,17 @@ fn enumeration_callback_capture_does_not_change_semantic_defaults() {
         let mut types = Vec::new();
         while let Some(event) = parser.next_event().unwrap() {
             match event.kind {
-                EventKind::ExternalEntityReference { .. } => {
+                EventKind::ExternalEntityReference(_) => {
                     parser.set_attlist_handler_enabled(true);
                     let mut child = parser.external_child(None, None).unwrap();
                     child.feed(b"", true).unwrap();
                     while child.next_event().unwrap().is_some() {}
                     parser.merge_external_subset(&child).unwrap();
                 }
-                EventKind::AttlistDeclaration { attribute_type, .. } => {
+                EventKind::AttlistDeclaration(declaration) => {
+                    let oriole::AttributeDeclaration { attribute_type, .. } =
+                        oriole_storage::Box::into_inner(declaration);
+
                     types.push(attribute_type.to_string())
                 }
                 _ => {}

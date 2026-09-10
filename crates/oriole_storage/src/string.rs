@@ -69,6 +69,11 @@ impl String {
     pub fn try_reserve(&mut self, additional: usize) -> Result<(), AllocError> {
         self.bytes.try_reserve(additional).map_err(Into::into)
     }
+    /// Allocated byte capacity, including room reserved for C terminators.
+    #[must_use]
+    pub fn capacity(&self) -> usize {
+        self.bytes.capacity()
+    }
     pub fn clear(&mut self) {
         self.bytes.clear();
     }

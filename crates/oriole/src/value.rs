@@ -329,11 +329,14 @@ impl Parser {
             if !request.delivered {
                 state.read.store(false, Ordering::Relaxed);
                 self.emit(
-                    EventKind::ExternalEntityReference {
-                        context: None,
-                        system_id: request.system_id.try_clone()?,
-                        public_id: request.public_id.try_clone()?,
-                    },
+                    EventKind::ExternalEntityReference(oriole_storage::try_box(
+                        crate::ExternalEntityReference {
+                            context: None,
+                            system_id: request.system_id.try_clone()?,
+                            public_id: request.public_id.try_clone()?,
+                        },
+                        self.allocator,
+                    )?),
                     request.position,
                 )?;
                 self.event_raw("")?;
@@ -521,14 +524,17 @@ impl Parser {
                 },
             )?;
             self.emit(
-                EventKind::EntityDeclaration {
-                    name: declaration.name,
-                    parameter: declaration.parameter,
-                    value: Some(value),
-                    system_id: None,
-                    public_id: None,
-                    notation: None,
-                },
+                EventKind::EntityDeclaration(oriole_storage::try_box(
+                    crate::EntityDeclaration {
+                        name: declaration.name,
+                        parameter: declaration.parameter,
+                        value: Some(value),
+                        system_id: None,
+                        public_id: None,
+                        notation: None,
+                    },
+                    self.allocator,
+                )?),
                 declaration.position,
             )?;
         } else if self.default_events {

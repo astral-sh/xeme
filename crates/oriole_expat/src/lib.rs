@@ -17,7 +17,7 @@ use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::ptr;
 use std::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
 
-use oriole::{Config, ErrorKind, EventKind, Parser, Position};
+use oriole::{Config, ErrorKind, EventKind, Parser, Position, RecyclingToken};
 use oriole_storage::{
     AllocError, AllocationTracker, Allocator, Box as XmlBox, CString, MemorySuite, Queue, Shared,
     String as XmlString, Vec as XmlVec, in_allocator_callback, with_tracking, without_tracking,
@@ -561,12 +561,16 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
 }
 
 /// Run callbacks after releasing all references to the opaque parser.
-unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError> {
+unsafe fn dispatch(
+    parser: XML_Parser,
+    kind: EventKind,
+    recycling: RecyclingToken,
+) -> Result<(), AllocError> {
     let needs_base = matches!(
         &kind,
-        EventKind::ExternalEntityReference { .. }
-            | EventKind::EntityDeclaration { .. }
-            | EventKind::NotationDeclaration { .. }
+        EventKind::ExternalEntityReference(_)
+            | EventKind::EntityDeclaration(_)
+            | EventKind::NotationDeclaration(_)
     );
     // SAFETY: Parser is pinned by the busy flag until the outer parse exits.
     // Copies and owned strings are the only values retained across callbacks.
@@ -615,45 +619,36 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
             version, encoding, ..
         } => version.len() + optional_len(encoding),
         EventKind::TextDeclaration { version, encoding } => optional_len(version) + encoding.len(),
-        EventKind::ExternalEntityReference {
-            context,
-            system_id,
-            public_id,
-        } => optional_len(context) + optional_len(system_id) + optional_len(public_id),
-        EventKind::StartDoctype {
-            name,
-            system_id,
-            public_id,
-            ..
+        EventKind::ExternalEntityReference(reference) => {
+            optional_len(&reference.context)
+                + optional_len(&reference.system_id)
+                + optional_len(&reference.public_id)
         }
-        | EventKind::NotationDeclaration {
-            name,
-            system_id,
-            public_id,
-        } => name.len() + optional_len(system_id) + optional_len(public_id),
+        EventKind::StartDoctype(declaration) => {
+            declaration.name.len()
+                + optional_len(&declaration.system_id)
+                + optional_len(&declaration.public_id)
+        }
+        EventKind::NotationDeclaration(declaration) => {
+            declaration.name.len()
+                + optional_len(&declaration.system_id)
+                + optional_len(&declaration.public_id)
+        }
         EventKind::StartNamespace { prefix, uri } => optional_len(prefix) + optional_len(uri),
         EventKind::EndNamespace { prefix } => optional_len(prefix),
-        EventKind::EntityDeclaration {
-            name,
-            value,
-            system_id,
-            public_id,
-            notation,
-            ..
-        } => {
-            name.len()
-                + optional_len(value)
-                + optional_len(system_id)
-                + optional_len(public_id)
-                + optional_len(notation)
+        EventKind::EntityDeclaration(declaration) => {
+            declaration.name.len()
+                + optional_len(&declaration.value)
+                + optional_len(&declaration.system_id)
+                + optional_len(&declaration.public_id)
+                + optional_len(&declaration.notation)
         }
-        EventKind::AttlistDeclaration {
-            element,
-            name,
-            attribute_type,
-            default,
-            ..
-        } => element.len() + name.len() + attribute_type.len() + optional_len(default),
+        EventKind::AttlistDeclaration(declaration) => {
+            declaration.element.len()
+                + declaration.name.len()
+                + declaration.attribute_type.len()
+                + optional_len(&declaration.default)
+        }
         EventKind::StartCdata
         | EventKind::EndCdata
         | EventKind::EndDoctype
@@ -686,12 +681,12 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
     };
     let split_default = matches!(
         &kind,
-        EventKind::StartDoctype { .. }
+        EventKind::StartDoctype(_)
             | EventKind::EndDoctype
-            | EventKind::EntityDeclaration { .. }
-            | EventKind::AttlistDeclaration { .. }
+            | EventKind::EntityDeclaration(_)
+            | EventKind::AttlistDeclaration(_)
             | EventKind::ElementDeclaration { .. }
-            | EventKind::NotationDeclaration { .. }
+            | EventKind::NotationDeclaration(_)
             | EventKind::EntityDeclarationPrefix
             | EventKind::AttlistDeclarationPrefix
             | EventKind::ElementDeclarationPrefix
@@ -748,6 +743,10 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                 } else {
                     handled = false;
                 }
+                // The callback and pointer-array borrow have ended. The busy
+                // guard still pins the parser, including after Stop or ignored
+                // callback-time Free/Reset; no core borrow crossed the callback.
+                (*parser).core.recycle_attributes(recycling, attributes);
             }
             EventKind::EndElement { name } => {
                 if let Some(callback) = h.end_element {
@@ -819,11 +818,12 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                     handled = false;
                 }
             }
-            EventKind::ExternalEntityReference {
-                context,
-                system_id,
-                public_id,
-            } => {
+            EventKind::ExternalEntityReference(declaration) => {
+                let oriole::ExternalEntityReference {
+                    context,
+                    system_id,
+                    public_id,
+                } = XmlBox::into_inner(declaration);
                 if let Some(callback) = h.external {
                     let handler_arg = if (*parser).external_arg.is_null() {
                         parser
@@ -852,12 +852,13 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                     fail_parse(parser, 22);
                 }
             }
-            EventKind::StartDoctype {
-                name,
-                system_id,
-                public_id,
-                has_internal_subset,
-            } => {
+            EventKind::StartDoctype(declaration) => {
+                let oriole::DoctypeDeclaration {
+                    name,
+                    system_id,
+                    public_id,
+                    has_internal_subset,
+                } = XmlBox::into_inner(declaration);
                 if let Some(callback) = h.start_doctype {
                     callback(
                         arg,
@@ -891,14 +892,15 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                     callback(arg, cptr(&optional_cstring(prefix)?));
                 }
             }
-            EventKind::EntityDeclaration {
-                name,
-                value,
-                parameter,
-                system_id,
-                public_id,
-                notation,
-            } => {
+            EventKind::EntityDeclaration(declaration) => {
+                let oriole::EntityDeclaration {
+                    name,
+                    value,
+                    parameter,
+                    system_id,
+                    public_id,
+                    notation,
+                } = XmlBox::into_inner(declaration);
                 if let (Some(callback), Some(notation_name)) = (h.unparsed, notation.as_ref()) {
                     let notation_name =
                         CString::try_from_str_in(notation_name, (*parser).allocator)?;
@@ -927,13 +929,14 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                     handled = false;
                 }
             }
-            EventKind::AttlistDeclaration {
-                element,
-                name,
-                attribute_type,
-                default,
-                required,
-            } => {
+            EventKind::AttlistDeclaration(declaration) => {
+                let oriole::AttributeDeclaration {
+                    element,
+                    name,
+                    attribute_type,
+                    default,
+                    required,
+                } = XmlBox::into_inner(declaration);
                 if let Some(callback) = h.attlist_decl {
                     callback(
                         arg,
@@ -947,11 +950,12 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                     handled = false;
                 }
             }
-            EventKind::NotationDeclaration {
-                name,
-                system_id,
-                public_id,
-            } => {
+            EventKind::NotationDeclaration(declaration) => {
+                let oriole::NotationDeclaration {
+                    name,
+                    system_id,
+                    public_id,
+                } = XmlBox::into_inner(declaration);
                 if let Some(callback) = h.notation {
                     callback(
                         arg,
@@ -1112,7 +1116,7 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
         }
         // SAFETY: No references to parser fields escape this scope or cross
         // dispatch. The busy guard prevents freeing or reparsing the core.
-        let event = unsafe {
+        let (event, recycling) = unsafe {
             if (*parser).destroying {
                 return ERROR;
             }
@@ -1124,10 +1128,10 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
                 (*parser).error = 0;
                 return SUSPENDED;
             }
-            match (*parser).core.next_event() {
-                Ok(Some(event)) => {
+            match (*parser).core.next_event_for_recycling() {
+                Ok(Some((event, recycling))) => {
                     (*parser).position = event.position;
-                    event
+                    (event, recycling)
                 }
                 Ok(None) => {
                     if resolve_pending_conversion(parser) {
@@ -1165,7 +1169,7 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
         };
         // SAFETY: The event owns its data and the parser remains busy.
         unsafe {
-            if dispatch(parser, event.kind).is_err() {
+            if dispatch(parser, event.kind, recycling).is_err() {
                 fail_parse(parser, 1);
                 return ERROR;
             }

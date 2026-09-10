@@ -256,10 +256,12 @@ fn skipped_header_parameters_preserve_markup_and_suppress_declarations() {
                                 EventKind::NotStandalone => {
                                     notifications.push(event.position.byte_index)
                                 }
-                                EventKind::EntityDeclaration { name, .. } if name == "e" => {
+                                EventKind::EntityDeclaration(declaration)
+                                    if (declaration.name == "e") =>
+                                {
                                     declarations += 1
                                 }
-                                EventKind::AttlistDeclaration { .. } => declarations += 1,
+                                EventKind::AttlistDeclaration(_) => declarations += 1,
                                 EventKind::SkippedEntity { .. } => {
                                     panic!("header references do not emit SkippedEntity")
                                 }

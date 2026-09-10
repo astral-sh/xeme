@@ -1,0 +1,206 @@
+{
+  "selection": "Six projects selected by XML use case before any benchmark measurements. Inputs are original upstream bytes without concatenation, repetition or transformation. The Wayland GitHub repository is a mirror of upstream GitLab.",
+  "projects": [
+    {
+      "name": "vulkan",
+      "repository": "KhronosGroup/Vulkan-Docs",
+      "commit": "f84d432d5b8912362f96f581f29bbc4f3c8c7843",
+      "purpose": "code-generation registry",
+      "files": [
+        {
+          "role": "input",
+          "upstream_path": "xml/vk.xml",
+          "path": "corpus/vulkan/vk.xml",
+          "url": "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Docs/f84d432d5b8912362f96f581f29bbc4f3c8c7843/xml/vk.xml",
+          "source_url": "https://github.com/KhronosGroup/Vulkan-Docs/blob/f84d432d5b8912362f96f581f29bbc4f3c8c7843/xml/vk.xml",
+          "bytes": 3309653,
+          "sha256": "cf31c965cf6e788697139601da0c7e02a75a9b6c7ac764e7641f5521ffd9da06"
+        },
+        {
+          "role": "license",
+          "upstream_path": "LICENSES/Apache-2.0.txt",
+          "path": "corpus/vulkan/Apache-2.0.txt",
+          "url": "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Docs/f84d432d5b8912362f96f581f29bbc4f3c8c7843/LICENSES/Apache-2.0.txt",
+          "source_url": "https://github.com/KhronosGroup/Vulkan-Docs/blob/f84d432d5b8912362f96f581f29bbc4f3c8c7843/LICENSES/Apache-2.0.txt",
+          "bytes": 10343,
+          "sha256": "44b0a56e80b41a1b0a6bd1292515e806539fd97b30be54c2719e6c763190ab57"
+        },
+        {
+          "role": "license",
+          "upstream_path": "LICENSES/MIT.txt",
+          "path": "corpus/vulkan/MIT.txt",
+          "url": "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Docs/f84d432d5b8912362f96f581f29bbc4f3c8c7843/LICENSES/MIT.txt",
+          "source_url": "https://github.com/KhronosGroup/Vulkan-Docs/blob/f84d432d5b8912362f96f581f29bbc4f3c8c7843/LICENSES/MIT.txt",
+          "bytes": 1108,
+          "sha256": "8f25018489d6fe0dec34a352314c38dc146247b7de65735790f4398a92afa84b"
+        }
+      ]
+    },
+    {
+      "name": "wayland",
+      "repository": "wayland-mirror/wayland",
+      "commit": "1ab6b693b16e1d9734496fe60c8a6ed277e4dec3",
+      "purpose": "protocol description",
+      "files": [
+        {
+          "role": "input",
+          "upstream_path": "protocol/wayland.xml",
+          "path": "corpus/wayland/wayland.xml",
+          "url": "https://raw.githubusercontent.com/wayland-mirror/wayland/1ab6b693b16e1d9734496fe60c8a6ed277e4dec3/protocol/wayland.xml",
+          "source_url": "https://github.com/wayland-mirror/wayland/blob/1ab6b693b16e1d9734496fe60c8a6ed277e4dec3/protocol/wayland.xml",
+          "bytes": 151742,
+          "sha256": "7eb8569529235c85e16d15612fc367da4538b7d515b13e32ec48ba0742c42610"
+        },
+        {
+          "role": "license",
+          "upstream_path": "COPYING",
+          "path": "corpus/wayland/COPYING",
+          "url": "https://raw.githubusercontent.com/wayland-mirror/wayland/1ab6b693b16e1d9734496fe60c8a6ed277e4dec3/COPYING",
+          "source_url": "https://github.com/wayland-mirror/wayland/blob/1ab6b693b16e1d9734496fe60c8a6ed277e4dec3/COPYING",
+          "bytes": 1340,
+          "sha256": "6eefcb023622a463168a5c20add95fd24a38c7482622a9254a23b99b7c153061"
+        }
+      ]
+    },
+    {
+      "name": "maven",
+      "repository": "apache/maven",
+      "commit": "40c59633cbb9c2bc4c915440f7198bad5cb60faf",
+      "purpose": "project build metadata",
+      "files": [
+        {
+          "role": "input",
+          "upstream_path": "pom.xml",
+          "path": "corpus/maven/pom.xml",
+          "url": "https://raw.githubusercontent.com/apache/maven/40c59633cbb9c2bc4c915440f7198bad5cb60faf/pom.xml",
+          "source_url": "https://github.com/apache/maven/blob/40c59633cbb9c2bc4c915440f7198bad5cb60faf/pom.xml",
+          "bytes": 47826,
+          "sha256": "5dbb69898d881458df5735b8c50c5166d21aa2d69659d21eea4d888a295b3b3f"
+        },
+        {
+          "role": "license",
+          "upstream_path": "LICENSE",
+          "path": "corpus/maven/LICENSE",
+          "url": "https://raw.githubusercontent.com/apache/maven/40c59633cbb9c2bc4c915440f7198bad5cb60faf/LICENSE",
+          "source_url": "https://github.com/apache/maven/blob/40c59633cbb9c2bc4c915440f7198bad5cb60faf/LICENSE",
+          "bytes": 11358,
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "role": "notice",
+          "upstream_path": "NOTICE",
+          "path": "corpus/maven/NOTICE",
+          "url": "https://raw.githubusercontent.com/apache/maven/40c59633cbb9c2bc4c915440f7198bad5cb60faf/NOTICE",
+          "source_url": "https://github.com/apache/maven/blob/40c59633cbb9c2bc4c915440f7198bad5cb60faf/NOTICE",
+          "bytes": 167,
+          "sha256": "633cdd68388defe137dd4b6a02bc9656cefae3b33c64b371e31b104aad40adac"
+        }
+      ]
+    },
+    {
+      "name": "batik",
+      "repository": "apache/xmlgraphics-batik",
+      "commit": "21a1ff1023186cc2694a6c210a64b28877eb36e3",
+      "purpose": "SVG artwork",
+      "files": [
+        {
+          "role": "input",
+          "upstream_path": "samples/batikLogo.svg",
+          "path": "corpus/batik/batikLogo.svg",
+          "url": "https://raw.githubusercontent.com/apache/xmlgraphics-batik/21a1ff1023186cc2694a6c210a64b28877eb36e3/samples/batikLogo.svg",
+          "source_url": "https://github.com/apache/xmlgraphics-batik/blob/21a1ff1023186cc2694a6c210a64b28877eb36e3/samples/batikLogo.svg",
+          "bytes": 16607,
+          "sha256": "15ab08890f4e57be784d687d3522ef8799486e725826f8abeec29c6cde38050f"
+        },
+        {
+          "role": "license",
+          "upstream_path": "batik-shared-resources/src/main/resources/LICENSE",
+          "path": "corpus/batik/LICENSE",
+          "url": "https://raw.githubusercontent.com/apache/xmlgraphics-batik/21a1ff1023186cc2694a6c210a64b28877eb36e3/batik-shared-resources/src/main/resources/LICENSE",
+          "source_url": "https://github.com/apache/xmlgraphics-batik/blob/21a1ff1023186cc2694a6c210a64b28877eb36e3/batik-shared-resources/src/main/resources/LICENSE",
+          "bytes": 11357,
+          "sha256": "d92a946963232d6d81e81b4617cb9754b0acfaf3f8d24d2357bba9bdb90a825d"
+        },
+        {
+          "role": "notice",
+          "upstream_path": "batik-shared-resources/src/main/resources/NOTICE",
+          "path": "corpus/batik/NOTICE",
+          "url": "https://raw.githubusercontent.com/apache/xmlgraphics-batik/21a1ff1023186cc2694a6c210a64b28877eb36e3/batik-shared-resources/src/main/resources/NOTICE",
+          "source_url": "https://github.com/apache/xmlgraphics-batik/blob/21a1ff1023186cc2694a6c210a64b28877eb36e3/batik-shared-resources/src/main/resources/NOTICE",
+          "bytes": 684,
+          "sha256": "5bf623383a96228ce3d9d15b093768e31fb0f865c75fd850a9a6f00422b30f18"
+        }
+      ]
+    },
+    {
+      "name": "gtk",
+      "repository": "GNOME/gtk",
+      "commit": "51a0bf3627204325ccf0f8f24f587728a18c43df",
+      "purpose": "UI object tree",
+      "files": [
+        {
+          "role": "related-small-input",
+          "upstream_path": "gtk/ui/gtkfilechooserdialog.ui",
+          "path": "corpus/gtk/gtkfilechooserdialog.ui",
+          "url": "https://raw.githubusercontent.com/GNOME/gtk/51a0bf3627204325ccf0f8f24f587728a18c43df/gtk/ui/gtkfilechooserdialog.ui",
+          "source_url": "https://github.com/GNOME/gtk/blob/51a0bf3627204325ccf0f8f24f587728a18c43df/gtk/ui/gtkfilechooserdialog.ui",
+          "bytes": 1245,
+          "sha256": "b646f653a169252181e10631abaeaa1f451580f3e395e3c93b8f55d8293db0c5"
+        },
+        {
+          "role": "license",
+          "upstream_path": "COPYING",
+          "path": "corpus/gtk/COPYING",
+          "url": "https://raw.githubusercontent.com/GNOME/gtk/51a0bf3627204325ccf0f8f24f587728a18c43df/COPYING",
+          "source_url": "https://github.com/GNOME/gtk/blob/51a0bf3627204325ccf0f8f24f587728a18c43df/COPYING",
+          "bytes": 25383,
+          "sha256": "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c"
+        },
+        {
+          "role": "input",
+          "upstream_path": "gtk/ui/gtkfilechooserwidget.ui",
+          "path": "corpus/gtk/gtkfilechooserwidget.ui",
+          "url": "https://raw.githubusercontent.com/GNOME/gtk/51a0bf3627204325ccf0f8f24f587728a18c43df/gtk/ui/gtkfilechooserwidget.ui",
+          "source_url": "https://github.com/GNOME/gtk/blob/51a0bf3627204325ccf0f8f24f587728a18c43df/gtk/ui/gtkfilechooserwidget.ui",
+          "bytes": 26739,
+          "sha256": "2620a2b6553ce99cc564eb3d359eb9cb9c7b8f259e0ccc1aa49bb3534a38101d"
+        }
+      ],
+      "selection_note": "The initially selected dialog is a 1245-byte template wrapper. The directly related file chooser widget is the main UI tree; it replaced the thin wrapper before any parser measurements. Original wrapper retained as evidence."
+    },
+    {
+      "name": "docbook",
+      "repository": "docbook/xslt10-stylesheets",
+      "commit": "efd62655c11cc8773708df7a843613fa1e932bf8",
+      "purpose": "XSLT stylesheet",
+      "files": [
+        {
+          "role": "input",
+          "upstream_path": "xsl/fo/docbook.xsl",
+          "path": "corpus/docbook/docbook.xsl",
+          "url": "https://raw.githubusercontent.com/docbook/xslt10-stylesheets/efd62655c11cc8773708df7a843613fa1e932bf8/xsl/fo/docbook.xsl",
+          "source_url": "https://github.com/docbook/xslt10-stylesheets/blob/efd62655c11cc8773708df7a843613fa1e932bf8/xsl/fo/docbook.xsl",
+          "bytes": 17433,
+          "sha256": "7f13c5f4977faa028462910cf6d3fdeeeab64d87553f1fff12f0afa8f1c49818"
+        },
+        {
+          "role": "license",
+          "upstream_path": "xsl/COPYING",
+          "path": "corpus/docbook/COPYING",
+          "url": "https://raw.githubusercontent.com/docbook/xslt10-stylesheets/efd62655c11cc8773708df7a843613fa1e932bf8/xsl/COPYING",
+          "source_url": "https://github.com/docbook/xslt10-stylesheets/blob/efd62655c11cc8773708df7a843613fa1e932bf8/xsl/COPYING",
+          "bytes": 1999,
+          "sha256": "0505354efe9c3b3d01c49a03bfe5e19358174f112f683c63f36fa2f723368764"
+        }
+      ]
+    }
+  ],
+  "licenses": {
+    "vulkan": "Apache-2.0 OR MIT",
+    "wayland": "MIT",
+    "maven": "Apache-2.0",
+    "batik": "Apache-2.0",
+    "gtk": "LGPL-2.1-or-later",
+    "docbook": "DocBook project permissive license (see xsl/COPYING)"
+  }
+}

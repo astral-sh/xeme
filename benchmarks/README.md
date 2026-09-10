@@ -101,3 +101,7 @@ with all samples, preflight metadata, worker failures, and input/library hashes.
 The optional `--external-grammar` generator flag adds repeated empty external
 references inside declarations; use it only for implementations supporting that
 mode. Positions and Default callbacks remain separate compatibility checks.
+
+## Real-project inputs and consumers
+
+The [pinned corpus](projects/README.md) contains original XML from Vulkan, Wayland, Maven, Batik, GTK and DocBook. The runners compare native callbacks, matched CPython consumers and complete Wayland code-generation commands, validating all outputs before reporting timings. See the [baseline results](results/2026-09-10/real-project-baseline/README.md) and [reproduction commands](projects/RERUN.md).

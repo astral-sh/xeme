@@ -123,6 +123,11 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
             while next_event(&mut child)?.is_some() {}
         }
     }
+    // Branches revisit completed entities; depth forces both explicit-stack and
+    // active-set growth through the selected allocator.
+    let mut attributes = Parser::try_new_in(Config::default(), allocator)?;
+    attributes.feed(b"<!DOCTYPE r [<!ENTITY e0 ' A&#13;&#10;B '><!ENTITY e1 '&e0;&e0;'><!ENTITY e2 '&e1;'><!ENTITY e3 '&e2;'><!ENTITY e4 '&e3;'><!ENTITY e5 '&e4;'><!ENTITY e6 '&e5;'><!ENTITY e7 '&e6;'><!ENTITY e8 '&e7;'><!ENTITY e9 '&e8;'><!ATTLIST r default CDATA '&e9;'>]><r a='&e9;&e9;'/>", true)?;
+    while next_event(&mut attributes)?.is_some() {}
     let mut content = parser.external_child_with_encoding(Some(""), None)?;
     content.set_encoding(Some("ISO-8859-1"))?;
     content.feed(b"\xff\xfe\xef\xbb\xbftext", true)?;

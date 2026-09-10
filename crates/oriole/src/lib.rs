@@ -3001,7 +3001,7 @@ impl Parser {
     /// Refill common literal values without allocating a new owner. Keep
     /// converted aliases and normalization on the provenance-aware expansion path.
     fn expand_attribute_into(
-        &mut self,
+        &self,
         value: lexical::Slice<'_>,
         output: &mut String,
         tokenized: bool,
@@ -3012,7 +3012,12 @@ impl Parser {
                 .bytes()
                 .any(|byte| matches!(byte, b'&' | b'<' | b'\t' | b'\r' | b'\n'))
         {
-            *output = self.expand_attribute(value, &mut Vec::new_in(self.allocator), tokenized)?;
+            output.try_reserve(value.len().saturating_sub(output.len()))?;
+            output.clear();
+            self.append_attribute(value, output, tokenized)?;
+            if tokenized && output.ends_with(' ') {
+                output.truncate(output.len() - 1);
+            }
         } else {
             copy_attribute_string(output, &value)?;
         }
@@ -3020,41 +3025,49 @@ impl Parser {
     }
 
     fn expand_attribute(
-        &mut self,
+        &self,
         value: lexical::Slice<'_>,
-        chain: &mut Vec<String>,
         tokenized: bool,
     ) -> Result<String, Error> {
-        if !tokenized && !value.bytes().any(|byte| matches!(byte, b'&' | b'<')) {
-            if !chain.is_empty() {
-                self.account_entity_bytes(value.len(), true)?;
-            }
-            return normalize_lexical_attribute(value, self.allocator);
-        }
         let mut output = String::try_with_capacity_in(value.len(), self.allocator)?;
-        self.append_attribute(value, chain, &mut output, tokenized)?;
+        self.append_attribute(value, &mut output, tokenized)?;
         if tokenized && output.ends_with(' ') {
             output.truncate(output.len() - 1);
         }
         Ok(output)
     }
 
-    /// Expand into one output so normalization spans entity boundaries. Converted
-    /// ASCII remains data while raw whitespace and numeric spaces are normalized.
+    /// Expand borrowed replacement frames into one output. Original lexical
+    /// slices survive each frame so converted ASCII keeps its literal role.
+    /// No parser table mutation or application callback occurs during expansion.
     fn append_attribute(
-        &mut self,
+        &self,
         value: lexical::Slice<'_>,
-        chain: &mut Vec<String>,
         output: &mut String,
         tokenized: bool,
     ) -> Result<(), Error> {
-        let mut rest: &str = &value;
-        while !rest.is_empty() {
+        struct Frame<'a> {
+            rest: lexical::Slice<'a>,
+            name: &'a str,
+        }
+        let mut frames = Vec::new_in(self.allocator);
+        let mut active = HashSet::with_hasher_in(self.entities.hasher().clone(), self.allocator);
+        let mut seeded = false;
+        let mut rest = value;
+        loop {
+            if rest.is_empty() {
+                let Some(Frame { rest: parent, name }) = frames.pop() else {
+                    break;
+                };
+                active.remove(name);
+                rest = parent;
+                continue;
+            }
             let end = rest.find(['&', '<']).unwrap_or(rest.len());
-            if !chain.is_empty() {
+            if !frames.is_empty() {
                 self.account_entity_bytes(end, true)?;
             }
-            let literal = value.for_slice(&rest[..end]);
+            let literal = rest.for_slice(&rest.as_str()[..end]);
             if tokenized {
                 for (character, raw_ascii) in literal.decoded_chars() {
                     if raw_ascii && whitespace(character) {
@@ -3064,11 +3077,11 @@ impl Parser {
                     }
                 }
             } else {
-                output.try_push_str(&normalize_lexical_attribute(literal, self.allocator)?)?;
+                append_lexical_attribute(output, literal)?;
             }
-            rest = &rest[end..];
+            rest = rest.for_slice(&rest.as_str()[end..]);
             if rest.is_empty() {
-                break;
+                continue;
             }
             if rest.starts_with('<') {
                 return Err(self.err(
@@ -3082,10 +3095,10 @@ impl Parser {
                     "unclosed attribute entity reference",
                 )
             })?;
-            if !chain.is_empty() {
+            if !frames.is_empty() {
                 self.account_entity_bytes(end + 1, true)?;
             }
-            let raw_name = &rest[1..end];
+            let raw_name = &rest.as_str()[1..end];
             if let Some(character) = character_reference(raw_name)
                 .map_err(|(kind, _)| self.err(kind, "invalid character reference"))?
             {
@@ -3097,55 +3110,62 @@ impl Parser {
                 } else {
                     output.try_push(character)?;
                 }
-            } else {
-                let decoded_name = value.for_slice(raw_name).decoded(self.allocator)?;
-                let name: &str = &decoded_name;
-                if !self.config.name_rules.is_name(raw_name)
-                    || (self.config.namespace_separator.is_some() && raw_name.contains(':'))
-                {
-                    return Err(self.err(ErrorKind::InvalidToken, "invalid entity name"));
-                }
-                if chain.iter().any(|item| item == name)
-                    || self.entity_chain.iter().any(|item| item == name)
-                {
-                    return Err(self.err(
-                        ErrorKind::RecursiveEntityReference,
-                        "recursive entity in attribute",
-                    ));
-                }
-                if chain.len() >= self.config.limits.max_entity_depth {
-                    return Err(self.err(ErrorKind::LimitExceeded, "entity nesting limit exceeded"));
-                }
-                let Some(entity) = self.entities.get(name) else {
-                    if !self.requires_internal_entity_declaration() {
-                        rest = &rest[end + 1..];
-                        continue;
-                    }
-                    return Err(
-                        self.err(ErrorKind::UndefinedEntity, "undefined entity in attribute")
-                    );
-                };
-                if entity.declared_in_parameter_entity
-                    && self.requires_internal_entity_declaration()
-                {
-                    return Err(self.err(
-                        ErrorKind::EntityDeclaredInParameterEntity,
-                        "entity was declared in a parameter entity",
-                    ));
-                }
-                let value = entity.value.as_ref().ok_or_else(|| {
-                    self.err(
-                        ErrorKind::ExternalEntityInAttribute,
-                        "external entity in attribute",
-                    )
-                })?;
-                self.charge_expansion(value.len())?;
-                let value = value.try_clone()?;
-                try_push(chain, string(name, self.allocator)?)?;
-                self.append_attribute(lexical::Slice::plain(&value), chain, output, tokenized)?;
-                chain.pop();
+                rest = rest.for_slice(&rest.as_str()[end + 1..]);
+                continue;
             }
-            rest = &rest[end + 1..];
+            let decoded_name = rest.for_slice(raw_name).decoded(self.allocator)?;
+            let name: &str = &decoded_name;
+            if !self.config.name_rules.is_name(raw_name)
+                || (self.config.namespace_separator.is_some() && raw_name.contains(':'))
+            {
+                return Err(self.err(ErrorKind::InvalidToken, "invalid entity name"));
+            }
+            if !seeded {
+                for name in &self.entity_chain {
+                    try_set_insert(&mut active, name.as_str())?;
+                }
+                seeded = true;
+            }
+            if active.contains(name) {
+                return Err(self.err(
+                    ErrorKind::RecursiveEntityReference,
+                    "recursive entity in attribute",
+                ));
+            }
+            if frames.len() >= self.config.limits.max_entity_depth {
+                return Err(self.err(ErrorKind::LimitExceeded, "entity nesting limit exceeded"));
+            }
+            let Some((key, entity)) = self.entities.get_key_value(name) else {
+                if !self.requires_internal_entity_declaration() {
+                    rest = rest.for_slice(&rest.as_str()[end + 1..]);
+                    continue;
+                }
+                return Err(self.err(ErrorKind::UndefinedEntity, "undefined entity in attribute"));
+            };
+            if entity.declared_in_parameter_entity && self.requires_internal_entity_declaration() {
+                return Err(self.err(
+                    ErrorKind::EntityDeclaredInParameterEntity,
+                    "entity was declared in a parameter entity",
+                ));
+            }
+            let value = entity.value.as_ref().ok_or_else(|| {
+                self.err(
+                    ErrorKind::ExternalEntityInAttribute,
+                    "external entity in attribute",
+                )
+            })?;
+            self.charge_expansion(value.len())?;
+            // Use the stable map key: a decoded custom name can be a temporary
+            // owner, while both the frame and active index outlive this iteration.
+            try_set_insert(&mut active, key.as_str())?;
+            try_push(
+                &mut frames,
+                Frame {
+                    rest: rest.for_slice(&rest.as_str()[end + 1..]),
+                    name: key.as_str(),
+                },
+            )?;
+            rest = lexical::Slice::plain(value);
         }
         Ok(())
     }
@@ -3314,50 +3334,27 @@ fn normalize_newlines(text: &str, allocator: Allocator) -> Result<String, Error>
     }
     Ok(output)
 }
-fn normalize_lexical_attribute(
-    text: lexical::Slice<'_>,
-    allocator: Allocator,
-) -> Result<String, Error> {
-    if !text.has_ascii_aliases() {
-        return normalize_attribute_whitespace(&text, allocator);
+fn append_lexical_attribute(output: &mut String, text: lexical::Slice<'_>) -> Result<(), Error> {
+    if !text.has_ascii_aliases() && !text.contains(['\t', '\r', '\n']) {
+        output.try_push_str(&text)?;
+        return Ok(());
     }
-    let mut output = String::try_with_capacity_in(text.len(), allocator)?;
     let mut previous_cr = false;
-    for (character, ascii) in text.decoded_chars() {
-        if ascii && character == '\n' && previous_cr {
+    for (character, raw_ascii) in text.decoded_chars() {
+        if raw_ascii && character == '\n' && previous_cr {
             previous_cr = false;
             continue;
         }
-        previous_cr = ascii && character == '\r';
-        output.try_push(if ascii && whitespace(character) {
+        previous_cr = raw_ascii && character == '\r';
+        output.try_push(if raw_ascii && whitespace(character) {
             ' '
         } else {
             character
         })?;
     }
-    Ok(output)
+    Ok(())
 }
 
-fn normalize_attribute_whitespace(text: &str, allocator: Allocator) -> Result<String, Error> {
-    if !text.contains(['\t', '\r', '\n']) {
-        return string(text, allocator);
-    }
-    let mut output = String::try_with_capacity_in(text.len(), allocator)?;
-    let mut previous_cr = false;
-    for character in text.chars() {
-        if character == '\n' && previous_cr {
-            previous_cr = false;
-            continue;
-        }
-        previous_cr = character == '\r';
-        output.try_push(if whitespace(character) {
-            ' '
-        } else {
-            character
-        })?;
-    }
-    Ok(output)
-}
 /// The direct attribute-copy path in Expat checks raw token spelling before
 /// decoding, so a converted space alone does not require tokenized normalization.
 fn attribute_needs_normalization(value: &str) -> bool {

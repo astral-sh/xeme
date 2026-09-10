@@ -1753,7 +1753,6 @@ impl Parser {
                 normalized
                     .as_deref()
                     .map_or_else(|| cursor.lexical.for_slice(raw), Slice::plain),
-                &mut Vec::new_in(self.allocator),
                 attribute_type != "CDATA",
             )?;
             Some(value)

@@ -422,7 +422,7 @@ fn every_allocation_can_fail_and_all_memory_uses_the_selected_suite() {
 fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
     fn frames(allocator: Allocator) -> Result<(), Error> {
         let mut parser = Parser::try_new_in(Config::default(), allocator)?;
-        parser.feed(b"<r>inline\nabcdefghijklmnopqrstuvwxyz1234567890<n a='first' b='value'/><![CDATA[abcdefghijklmnopqrstuvwxyz1234567890]]><n a='second' b='new'/>fallback\r\n<n a='literal' b='other'/><n a='&amp;'/><n a='last'/>abcdefghijklmnopqrstuvwxyz1234567890</r>", true)?;
+        parser.feed(b"<r>inline\nabcdefghijklmnopqrstuvwxyz1234567890<n a='first' b='value'/><![CDATA[abcdefghijklmnopqrstuvwxyz1234567890]]><n a='second' b='new'/>fallback\r\n<n a='literal' b='other'/><n a='&amp;'/><n a='last'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/>abcdefghijklmnopqrstuvwxyz1234567890</r>", true)?;
         let mut frame = parser.adapter_frame();
         let result = (|| {
             loop {

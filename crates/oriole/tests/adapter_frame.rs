@@ -138,6 +138,46 @@ fn owned_frames_preserve_events_positions_raw_and_error_order_at_every_chunk_siz
 }
 
 #[test]
+fn literal_frames_keep_duplicate_checks_and_selected_name_rules() {
+    for count in [8, 9] {
+        let attributes = (0..count)
+            .map(|index| format!(" a{index}='{index}'"))
+            .collect::<std::string::String>();
+        for (name, duplicate) in [
+            ("plain", false),
+            ("plain", true),
+            ("p::n", false),
+            ("n\u{200c}", false),
+        ] {
+            let input = format!(
+                "<r><warm{attributes}/><{name}{attributes}{}/></r>",
+                if duplicate { " a0='duplicate'" } else { "" }
+            );
+            for name_rules in [
+                oriole::NameRules::FourthEdition,
+                oriole::NameRules::FifthEdition,
+            ] {
+                for namespace_separator in [None, Some('|')] {
+                    for chunk in [1, 7, input.len()] {
+                        let config = Config {
+                            namespace_separator,
+                            name_rules,
+                            ..Config::default()
+                        };
+                        let owned = collect(input.as_bytes(), chunk, config.clone(), false);
+                        let adapter = collect(input.as_bytes(), chunk, config, true);
+                        assert_eq!(
+                            adapter.0, owned.0,
+                            "{input:?} {name_rules:?} {namespace_separator:?} {chunk}"
+                        );
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn namespace_identity_frames_follow_default_binding_scope() {
     let input = "<r><warm a='v'/><plain b='v'/><n xmlns='urn:default'><plain a='v'/><n xmlns=''><plain a='v'/></n><plain a='v'/></n><plain a='v'/></r>";
     for separator in ['|', '\0', 'x'] {

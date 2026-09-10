@@ -2893,6 +2893,22 @@ impl Parser {
             take_name(body, self.config.name_rules)
                 .ok_or_else(|| self.err_at(ErrorKind::InvalidToken, "invalid element name", 1))?
         };
+        if let Some(frame) = frame.filter(|_| {
+            matches!(planned, tag::Planned::Complete { .. })
+                && token.len() <= arena::MAX_ARENA_BYTES
+                && self.raw_attributes.len() <= arena::MAX_ARENA_ATTRIBUTES
+                // A frame contains final callback spellings. Namespace-aware
+                // tags can share this storage only when expansion is identity.
+                && (self.config.namespace_separator.is_none()
+                    || (!raw_name.contains(':')
+                        && !self.namespaces.contains_key("")
+                        && self.raw_attributes.iter().all(|attribute| {
+                            let name = attribute.name(rest);
+                            name != "xmlns" && !name.contains(':')
+                        })))
+        }) {
+            return self.parse_start_frame(token, position, raw_name, rest, frame);
+        }
         if self.config.namespace_separator.is_some() && !self.config.name_rules.is_qname(raw_name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid qualified element name"));
         }
@@ -2921,38 +2937,16 @@ impl Parser {
         if raw_attrs.len() > self.config.limits.max_attributes {
             return Err(self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded"));
         }
-        let mut frame = frame.filter(|_| {
-            matches!(planned, tag::Planned::Complete { .. })
-                && token.len() <= arena::MAX_ARENA_BYTES
-                && raw_attrs.len() <= arena::MAX_ARENA_ATTRIBUTES
-                // A frame contains final callback spellings. Namespace-aware
-                // tags can share this storage only when expansion is identity.
-                && (self.config.namespace_separator.is_none()
-                    || (!raw_name.contains(':')
-                        && !self.namespaces.contains_key("")
-                        && raw_attrs.iter().all(|attribute| {
-                            let name = attribute.name(rest);
-                            name != "xmlns" && !name.contains(':')
-                        })))
-        });
-        if let Some(frame) = frame.as_deref_mut() {
-            debug_assert!(self.tables.defaults.is_empty());
-            self.event_recycling
-                .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
-            frame.prepare(raw_attrs.len())?;
-        }
         // Empty tags need no attribute buffer and must not evict a warm cache.
-        let mut attrs = if frame.is_some() || raw_attrs.is_empty() {
+        let mut attrs = if raw_attrs.is_empty() {
             Vec::new_in(self.allocator)
         } else {
             self.event_recycling.take()
         };
-        if frame.is_none() {
-            attrs.truncate(raw_attrs.len());
-            attrs
-                .try_reserve(raw_attrs.len().saturating_sub(attrs.len()))
-                .map_err(|_| AllocError::OutOfMemory)?;
-        }
+        attrs.truncate(raw_attrs.len());
+        attrs
+            .try_reserve(raw_attrs.len().saturating_sub(attrs.len()))
+            .map_err(|_| AllocError::OutOfMemory)?;
         let mut decoded_names = Vec::new_in(self.allocator);
         if token.has_ascii_aliases() {
             decoded_names
@@ -2997,10 +2991,6 @@ impl Parser {
                     "duplicate attribute",
                     1 + raw_name.len() + attribute_offset,
                 ));
-            }
-            if let Some(frame) = frame.as_deref_mut() {
-                frame.push_attribute(attr_name, value)?;
-                continue;
             }
             if index == attrs.len() {
                 try_push(
@@ -3168,13 +3158,9 @@ impl Parser {
                     self.expand_name(&attr.name, true, self.config.namespace_triplets, None)?;
             }
         }
-        let expanded_name = if let Some(frame) = frame.as_deref_mut() {
-            frame.set_name(name)?;
-            None
-        } else {
-            let reusable = self.event_recycling.take_name();
-            Some(self.expand_name(name, false, self.config.namespace_triplets, reusable)?)
-        };
+        let reusable = self.event_recycling.take_name();
+        let expanded_name =
+            self.expand_name(name, false, self.config.namespace_triplets, reusable)?;
         let raw_encoding = token.for_slice(raw_name).name_encoding(self.allocator)?;
         let raw_encoding = if raw_encoding.is_empty() {
             None
@@ -3183,10 +3169,8 @@ impl Parser {
         };
         self.seen_root = true;
         self.declaration_allowed = false;
-        let stack_name = expanded_name
-            .as_ref()
-            .filter(|expanded| expanded.as_str() != name)
-            .map(String::try_clone)
+        let stack_name = (expanded_name.as_str() != name)
+            .then(|| expanded_name.try_clone())
             .transpose()?;
         let raw_name = match name_value {
             lexical::Decoded::Borrowed(name) => {
@@ -3204,15 +3188,13 @@ impl Parser {
                 bindings,
             },
         )?;
-        if let Some(name) = expanded_name {
-            self.emit(
-                EventKind::StartElement {
-                    name,
-                    attributes: attrs,
-                },
-                position,
-            )?;
-        }
+        self.emit(
+            EventKind::StartElement {
+                name: expanded_name,
+                attributes: attrs,
+            },
+            position,
+        )?;
         if empty {
             let first_end = self.pending.len();
             let mut end_position = self.source().position_at(token.len(), 0);
@@ -3230,9 +3212,78 @@ impl Parser {
             raw_attrs.clear();
             self.raw_attributes = raw_attrs;
         }
-        if let Some(frame) = frame {
-            frame.publish(position);
+        Ok(())
+    }
+
+    /// Lower a validated literal tag whose names need no namespace expansion.
+    /// Keep fallible copies in semantic order and publish after any end event.
+    fn parse_start_frame(
+        &mut self,
+        token: lexical::Slice<'_>,
+        position: Position,
+        name: &str,
+        rest: &str,
+        frame: &mut AdapterFrame,
+    ) -> Result<(), Error> {
+        debug_assert!(self.tables.defaults.is_empty());
+        debug_assert!(!self.source().has_conversions());
+        debug_assert!(!self.fragment && self.sources.len() == 1);
+        let mut raw_attrs =
+            std::mem::replace(&mut self.raw_attributes, Vec::new_in(self.allocator));
+        if raw_attrs.len() > self.config.limits.max_attributes {
+            return Err(self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded"));
         }
+        self.event_recycling
+            .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
+        frame.prepare(raw_attrs.len())?;
+        let mut names = (raw_attrs.len() > 8)
+            .then(|| HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator));
+        for (index, attribute) in raw_attrs.iter().enumerate() {
+            let (attr_name, value, attribute_offset, _) = attribute.parts(rest);
+            let duplicate = if let Some(names) = &mut names {
+                !try_set_insert(names, attr_name)?
+            } else {
+                raw_attrs[..index]
+                    .iter()
+                    .any(|attribute| attribute.name(rest) == attr_name)
+            };
+            if duplicate {
+                return Err(self.err_at(
+                    ErrorKind::DuplicateAttribute,
+                    "duplicate attribute",
+                    1 + name.len() + attribute_offset,
+                ));
+            }
+            frame.push_attribute(attr_name, value)?;
+        }
+        self.id_attribute_index = None;
+        frame.set_name(name)?;
+        self.seen_root = true;
+        self.declaration_allowed = false;
+        let reusable = self.event_recycling.take_name();
+        let raw_name = recycling::copy_name(name, reusable, self.allocator)?;
+        try_push(
+            &mut self.stack,
+            Element {
+                expanded_name: None,
+                raw_name,
+                raw_encoding: None,
+                bindings: Vec::new_in(self.allocator),
+            },
+        )?;
+        if token.ends_with("/>") {
+            let first_end = self.pending.len();
+            let end_position = self.source().position_at(token.len(), 0);
+            self.end_element(end_position)?;
+            if let Some(pending) = self.pending.get_mut(first_end) {
+                pending.raw = Some(String::new_in(self.allocator));
+            }
+        }
+        if raw_attrs.capacity() <= 128 {
+            raw_attrs.clear();
+            self.raw_attributes = raw_attrs;
+        }
+        frame.publish(position);
         Ok(())
     }
 

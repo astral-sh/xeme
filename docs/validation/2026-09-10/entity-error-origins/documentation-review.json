@@ -1,0 +1,52 @@
+{
+  "status": "passed",
+  "scope": "Saved evidence and documentation audit only; no parser/test/benchmark reruns. Prior b53ea review supplies original API/source and independently executed nested-probe verification. Root-reported controller exits are attributed, not independently observed terminal sessions.",
+  "docs": {
+    "/home/dev-user/code/oss/oriole/README.md": "ae081fc399f827f0e5b6d4065872ec18575d39e4a274d26f7d4682c06ee16da9",
+    "/home/dev-user/code/oss/oriole/docs/review.md": "7dd5c27fe92f8341314db89d51e65df79be1b5b5bdfbc13b2f0131adb91e2165",
+    "/home/dev-user/code/oss/oriole/docs/validation/2026-09-10/entity-error-origins/README.md": "591e039aacf8922a6054104decbad1c45205c790d36aaa8b5969fea51f453ec7"
+  },
+  "archive": {
+    "sha256": "edebcc4ef9422ebe698d9da704bdf70d738d25c4c1e357fe76b7c246d64d14ce",
+    "members_read_and_rehashed": 175,
+    "bytes": 1015267
+  },
+  "integration_source_files_rehashed": 65,
+  "workspace": {
+    "passed_sum_reconstructed": 369,
+    "successful_test_binaries": 30,
+    "clippy_completion_and_no_errors": true,
+    "fmt_log_empty": true,
+    "controller_exit_0": "root recorded in summary.json"
+  },
+  "strict_baseline": {
+    "records_compared": 3318,
+    "all_records_exact": true,
+    "control": "Oriole4b11ace ac6a; not Expat",
+    "candidate": "3a80badd",
+    "library_hashes_stable": true
+  },
+  "api": {
+    "baseline_pass": 4323,
+    "baseline_fail": 417,
+    "candidate_pass": 4335,
+    "candidate_fail": 405,
+    "fixed": 12,
+    "new_failures": 0,
+    "prior_independent_review_sha256": "b53ea9ea8cf1180607e3b02bde342c1359b94441821b4acac61b881def16f0b4"
+  },
+  "review_notes": [
+    "No factual correction requested.",
+    "Remaining 18 nested diagnostic comparisons and historical binary scope are explicit.",
+    "The 369 count is all-target tests for this candidate, distinct from the older 368 plus one doc-test accounting.",
+    "Source identity is 65 integrated runtime/test/manifest files, not a claim that every repository file is unchanged."
+  ],
+  "artifacts": {
+    "/home/dev-user/code/oss/oriole/docs/validation/2026-09-10/entity-error-origins/files.json": "65ee095ba9ec1ac36b5e9eeb53b89415080b16f556c43c4818a4c2d1ff6cf10b",
+    "/home/dev-user/code/oss/oriole/docs/validation/2026-09-10/entity-error-origins/summary.json": "17af3a17cda9877875d3cad77fa0718f6c4cb025c86c23a81f5fc8b13d62c310",
+    "/home/dev-user/code/oss/oriole/docs/validation/2026-09-10/entity-error-origins/source.json": "0fef9fdc0d48f7b5b25abb32b49adcbb7fa1d5bf103ae7a873f4faed1342460c",
+    "/home/dev-user/code/oss/oriole/docs/validation/2026-09-10/entity-error-origins/api-comparison.json": "c2b4182794b4f98e40bbff3c47c557f102059a0a8cfa1a95e3235835017f1a60",
+    "/home/dev-user/code/oss/oriole/docs/validation/2026-09-10/entity-error-origins/independent-review.json": "b53ea9ea8cf1180607e3b02bde342c1359b94441821b4acac61b881def16f0b4"
+  },
+  "audit_script_sha256": "6767d57615eea52b36cadb830689de1cb64e91bc3cb25891cd0d1ea01b7b87c4"
+}

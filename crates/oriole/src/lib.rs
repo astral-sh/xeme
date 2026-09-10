@@ -1816,10 +1816,15 @@ impl Parser {
                     self.finish_conditional_source()?;
                     let source = self.pop_entity_source();
                     if self.stack.len() != source.initial_depth || self.in_cdata {
-                        return Err(self.err(
-                            ErrorKind::AsynchronousEntity,
-                            "entity replacement is not balanced",
-                        ));
+                        // The parent has already consumed the reference. Keep
+                        // the error anchored to the entity that failed to close.
+                        let mut position = source.position(0);
+                        position.byte_count = 0;
+                        return Err(Error {
+                            kind: ErrorKind::AsynchronousEntity,
+                            message: "entity replacement is not balanced",
+                            position,
+                        });
                     }
                     continue;
                 }

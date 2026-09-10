@@ -1,0 +1,194 @@
+{
+  "before_sha256": "7fcbf84ba2e1c09495b5684935add5d0e5e7a76108fc9ef590d576854e0119c3",
+  "after_sha256": "a78a3fc8167206a97787d1570696d92332ca2e5cbb47ae18f5e0c2ba54001cc0",
+  "baseline_library": "ac6a0a6adcabba65ef338d362f438c588ad4a01a9821989bae28f445ba7778ac",
+  "candidate_library": "3a80baddfd3189123378c63d08c85dd756d22b16b3d715abf2e8c2eedbf2e5ea",
+  "same_original_selection_and_bounds": true,
+  "rows": 4740,
+  "before": {
+    "passed": 4323,
+    "failed": 417
+  },
+  "after": {
+    "passed": 4335,
+    "failed": 405
+  },
+  "fixed": 12,
+  "new_failures": 0,
+  "other_outcome_changes": 0,
+  "changes": [
+    {
+      "before": {
+        "context": "chunksize=0 deferral=0",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "fail",
+        "code": 100
+      },
+      "after": {
+        "context": "chunksize=0 deferral=0",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "pass",
+        "code": 0
+      }
+    },
+    {
+      "before": {
+        "context": "chunksize=0 deferral=1",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "fail",
+        "code": 100
+      },
+      "after": {
+        "context": "chunksize=0 deferral=1",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "pass",
+        "code": 0
+      }
+    },
+    {
+      "before": {
+        "context": "chunksize=1 deferral=0",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "fail",
+        "code": 100
+      },
+      "after": {
+        "context": "chunksize=1 deferral=0",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "pass",
+        "code": 0
+      }
+    },
+    {
+      "before": {
+        "context": "chunksize=1 deferral=1",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "fail",
+        "code": 100
+      },
+      "after": {
+        "context": "chunksize=1 deferral=1",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "pass",
+        "code": 0
+      }
+    },
+    {
+      "before": {
+        "context": "chunksize=2 deferral=0",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "fail",
+        "code": 100
+      },
+      "after": {
+        "context": "chunksize=2 deferral=0",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "pass",
+        "code": 0
+      }
+    },
+    {
+      "before": {
+        "context": "chunksize=2 deferral=1",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "fail",
+        "code": 100
+      },
+      "after": {
+        "context": "chunksize=2 deferral=1",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "pass",
+        "code": 0
+      }
+    },
+    {
+      "before": {
+        "context": "chunksize=3 deferral=0",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "fail",
+        "code": 100
+      },
+      "after": {
+        "context": "chunksize=3 deferral=0",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "pass",
+        "code": 0
+      }
+    },
+    {
+      "before": {
+        "context": "chunksize=3 deferral=1",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "fail",
+        "code": 100
+      },
+      "after": {
+        "context": "chunksize=3 deferral=1",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "pass",
+        "code": 0
+      }
+    },
+    {
+      "before": {
+        "context": "chunksize=4 deferral=0",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "fail",
+        "code": 100
+      },
+      "after": {
+        "context": "chunksize=4 deferral=0",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "pass",
+        "code": 0
+      }
+    },
+    {
+      "before": {
+        "context": "chunksize=4 deferral=1",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "fail",
+        "code": 100
+      },
+      "after": {
+        "context": "chunksize=4 deferral=1",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "pass",
+        "code": 0
+      }
+    },
+    {
+      "before": {
+        "context": "chunksize=5 deferral=0",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "fail",
+        "code": 100
+      },
+      "after": {
+        "context": "chunksize=5 deferral=0",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "pass",
+        "code": 0
+      }
+    },
+    {
+      "before": {
+        "context": "chunksize=5 deferral=1",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "fail",
+        "code": 100
+      },
+      "after": {
+        "context": "chunksize=5 deferral=1",
+        "test": "test_misc_async_entity_rejected",
+        "outcome": "pass",
+        "code": 0
+      }
+    }
+  ],
+  "controller": {
+    "session_id": 41618,
+    "exit_code": 1,
+    "expected_nonzero_for_remaining_failures": true
+  }
+}

@@ -34,12 +34,12 @@ Optional [profile-guided builds](tools/pgo/) reduce Oriole’s native project ti
 native C interface and 1.42× across the measured CPython consumers. The [full report](benchmarks/results/2026-09-10/version-consistent-pgo/)
 retains every project, build identity, raw sample, and limitation.
 
-The [current validation report](docs/validation/2026-09-10/version-consistent-runtime/)
-records 369 workspace Rust checks and **4,323 passing / 417 failing upstream API
+The [latest compatibility report](docs/validation/2026-09-10/entity-error-origins/)
+records 369 workspace tests and **4,335 passing / 405 failing upstream API
 configurations**. Remaining allocation, resource, diagnostic, and callback differences
 are explicit in the [compatibility guide](docs/compatibility.md). Six [sustained ASan
 campaigns](docs/validation/2026-09-10/version-consistent-fuzz/) completed 14.50 million
-executions on this runtime without findings. The [PBS distribution report](docs/validation/2026-09-10/version-consistent-pbs/)
+executions on the preceding `4b11ace` runtime without findings. The [PBS distribution report](docs/validation/2026-09-10/version-consistent-pbs/)
 records a successful build and two failing upstream XML assertions, and explains
 a fresh-import coverage gap in the earlier local CPython harness.
 

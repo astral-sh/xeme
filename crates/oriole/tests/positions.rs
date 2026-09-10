@@ -90,6 +90,48 @@ fn line_tracking_survives_source_compaction_and_nonadjacent_crlf() {
     }
 }
 
+#[test]
+fn unbalanced_entity_errors_stay_at_the_reference_after_the_source_is_popped() {
+    for replacement in ["<n>", "<n>&empty;"] {
+        let input = format!(
+            "<!DOCTYPE r [<!ENTITY empty ''><!ENTITY open '{replacement}'>]>\r\n<r>é&open;</n></r>"
+        );
+        let reference = input.rfind("&open;").unwrap();
+        for encoding in ["utf8", "utf16le", "utf16be"] {
+            let bytes = encode(&input, encoding);
+            for width in 1..=bytes.len() {
+                let mut parser = Parser::new(Config::default());
+                let error = 'input: {
+                    for (index, chunk) in bytes.chunks(width).enumerate() {
+                        parser
+                            .feed(chunk, (index + 1) * width >= bytes.len())
+                            .unwrap();
+                        loop {
+                            match parser.next_event() {
+                                Ok(Some(_)) => {}
+                                Ok(None) => break,
+                                Err(error) => break 'input error,
+                            }
+                        }
+                    }
+                    panic!("unbalanced entity was accepted");
+                };
+                assert_eq!(error.kind, oriole::ErrorKind::AsynchronousEntity);
+                assert_eq!(
+                    error.position,
+                    Position {
+                        byte_index: encoded_offset(&input, reference, encoding),
+                        byte_count: 0,
+                        line: 2,
+                        column: 4,
+                    },
+                    "{encoding}, width {width}, replacement {replacement:?}",
+                );
+            }
+        }
+    }
+}
+
 fn encode(input: &str, encoding: &str) -> Vec<u8> {
     if encoding == "utf8" {
         return input.as_bytes().to_vec();

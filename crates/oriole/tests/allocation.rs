@@ -159,6 +159,8 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         true,
     )?;
     while next_event(&mut duplicate)?.is_some() {}
+    // Independent fixture: parameter siblings intentionally share DTD skip state.
+    let parent = Parser::try_new_in(Config::default(), allocator)?;
     let mut child = parent.external_child(None, None)?;
     child.set_default_events(true);
     child.feed(
@@ -166,6 +168,7 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         true,
     )?;
     while next_event(&mut child)?.is_some() {}
+    let parent = Parser::try_new_in(Config::default(), allocator)?;
     let mut missing = parent.external_child(None, None)?;
     missing.set_default_events(true);
     missing.feed(
@@ -173,6 +176,7 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         true,
     )?;
     while next_event(&mut missing)?.is_some() {}
+    let parent = Parser::try_new_in(Config::default(), allocator)?;
     let mut header = parent.external_child(None, None)?;
     header.set_param_entity_parsing(2);
     header.set_default_events(true);
@@ -196,6 +200,7 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
             }
         }
     }
+    let parent = Parser::try_new_in(Config::default(), allocator)?;
     let mut values = parent.external_child(None, None)?;
     values.set_default_events(true);
     values.feed(
@@ -217,6 +222,7 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
             values.merge_external_subset(&child)?;
         }
     }
+    let parent = Parser::try_new_in(Config::default(), allocator)?;
     let mut grammar = parent.external_child(None, None)?;
     grammar.set_param_entity_parsing(2);
     grammar.set_default_events(true);

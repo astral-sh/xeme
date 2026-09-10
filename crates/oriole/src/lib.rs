@@ -18,6 +18,7 @@ use oriole_storage::{
     try_insert, try_push, try_set_insert,
 };
 use std::fmt;
+use std::sync::OnceLock;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use accounting::EntityBudget;
@@ -318,6 +319,14 @@ struct Entity {
     value_open: Option<Shared<AtomicBool>>,
 }
 
+/// Flags shared by the DTD and its external parameter children. General-content
+/// children have independent DTD state even though byte budgets remain shared.
+#[derive(Debug)]
+struct ParameterState {
+    read: AtomicBool,
+    declarations_skipped: AtomicBool,
+}
+
 #[derive(Debug)]
 struct PendingEvent {
     event: Event,
@@ -513,7 +522,7 @@ pub struct Parser {
     external_subset: bool,
     external_depth: usize,
     entity_chain: Vec<String>,
-    parameter_read: Option<Shared<AtomicBool>>,
+    parameter_state: OnceLock<Shared<ParameterState>>,
     parameter_encoding_initialized: bool,
     active_parameter_reference: Option<(String, Position)>,
     inherited_parameter_depth: usize,
@@ -595,7 +604,7 @@ impl Parser {
             external_subset: false,
             external_depth: 0,
             entity_chain: Vec::new_in(allocator),
-            parameter_read: None,
+            parameter_state: OnceLock::new(),
             parameter_encoding_initialized: false,
             active_parameter_reference: None,
             inherited_parameter_depth: 0,
@@ -762,9 +771,9 @@ impl Parser {
         child.external_subset = context.is_none();
         child.external_depth = self.external_depth + 1;
         child.inherited_parameter_depth = self.inherited_parameter_depth;
+        child.declarations_skipped = self.declarations_skipped();
         if context.is_none() {
-            child.parameter_read = self.parameter_read.clone();
-            child.declarations_skipped = self.declarations_skipped;
+            child.parameter_state = OnceLock::from(self.shared_parameter_state()?.clone());
         }
         child.expand_internal_entities = self.expand_internal_entities;
         child.default_events = self.default_events;
@@ -991,7 +1000,7 @@ impl Parser {
                 }
             }
         }
-        self.declarations_skipped |= child.declarations_skipped;
+        self.set_declarations_skipped(self.declarations_skipped() || child.declarations_skipped());
         self.standalone |= child.standalone;
         Ok(())
     }
@@ -1049,11 +1058,48 @@ impl Parser {
         Ok(())
     }
 
+    /// Lazily share DTD flags before returning the first parameter child.
+    /// Allocate outside OnceLock initialization so allocator callbacks cannot
+    /// deadlock its initialization lock. A concurrent initializer may win; its
+    /// state is then used and the losing allocation is freed by the same suite.
+    fn shared_parameter_state(&self) -> Result<&Shared<ParameterState>, Error> {
+        if self.parameter_state.get().is_none() {
+            self.charge_expansion(size_of::<ParameterState>())?;
+            let state = Shared::try_new_in(
+                ParameterState {
+                    read: AtomicBool::new(false),
+                    declarations_skipped: AtomicBool::new(self.declarations_skipped),
+                },
+                self.allocator,
+            )?;
+            let _ = self.parameter_state.set(state);
+        }
+        Ok(self
+            .parameter_state
+            .get()
+            .expect("initialized parameter state"))
+    }
+
+    fn declarations_skipped(&self) -> bool {
+        self.parameter_state
+            .get()
+            .map_or(self.declarations_skipped, |state| {
+                state.declarations_skipped.load(Ordering::Relaxed)
+            })
+    }
+
+    fn set_declarations_skipped(&mut self, skipped: bool) {
+        self.declarations_skipped = skipped;
+        if let Some(state) = self.parameter_state.get() {
+            state.declarations_skipped.store(skipped, Ordering::Relaxed);
+        }
+    }
+
     fn mark_parameter_read(&mut self) {
         if !self.parameter_encoding_initialized && self.decoder.protocol_encoding_ready() {
             self.parameter_encoding_initialized = true;
-            if let Some(read) = &self.parameter_read {
-                read.store(true, Ordering::Relaxed);
+            if let Some(state) = self.parameter_state.get() {
+                state.read.store(true, Ordering::Relaxed);
             }
         }
     }
@@ -1427,9 +1473,10 @@ impl Parser {
         ) && let Some(foreign) = &mut self.foreign_dtd_pending
         {
             foreign.delivered = true;
-            self.parameter_read
-                .as_ref()
+            self.parameter_state
+                .get()
                 .expect("foreign DTD read marker")
+                .read
                 .store(false, Ordering::Relaxed);
         }
         if let Some(raw) = pending.raw {
@@ -1516,16 +1563,16 @@ impl Parser {
         self.account_source(0)?;
         if let Some((_, position)) = self.active_parameter_reference.take() {
             if self
-                .parameter_read
-                .as_ref()
-                .is_some_and(|read| read.load(Ordering::Relaxed))
+                .parameter_state
+                .get()
+                .is_some_and(|state| state.read.load(Ordering::Relaxed))
             {
                 if !self.standalone {
                     self.emit(EventKind::NotStandalone, position)?;
                     self.event_raw("")?;
                 }
             } else {
-                self.declarations_skipped |= !self.standalone;
+                self.set_declarations_skipped(self.declarations_skipped() || !self.standalone);
             }
         }
         loop {
@@ -3407,5 +3454,83 @@ mod hash_salt_tests {
         while child.next_event().unwrap().is_some() {}
         parser.feed(b"<n>&e;</n></r>", true).unwrap();
         while parser.next_event().unwrap().is_some() {}
+    }
+}
+
+#[cfg(test)]
+mod parameter_state_tests {
+    use super::*;
+
+    fn drain(parser: &mut Parser) -> Vec<Event> {
+        let mut events = Vec::new_in(Allocator::System);
+        while let Some(event) = parser.next_event().unwrap() {
+            events.push(event);
+        }
+        events
+    }
+
+    #[test]
+    fn ordinary_parsing_and_general_children_leave_parameter_state_unallocated() {
+        let mut parser = Parser::new(Config::default());
+        parser
+            .feed(b"<!DOCTYPE r [<!ENTITY e 'v'>]><r>&e;</r>", true)
+            .unwrap();
+        drain(&mut parser);
+        assert!(parser.parameter_state.get().is_none());
+        let child = parser.external_child(Some(""), None).unwrap();
+        assert!(parser.parameter_state.get().is_none());
+        assert!(child.parameter_state.get().is_none());
+    }
+
+    #[test]
+    fn precreated_parameter_children_share_skip_state_but_general_children_do_not() {
+        let mut parent = Parser::new(Config::default());
+        parent.set_param_entity_parsing(2);
+        let general = parent.external_child(Some(""), None).unwrap();
+        let mut first = parent.external_child(None, None).unwrap();
+        let mut second = parent.external_child(None, None).unwrap();
+        first.feed(b"%missing;", false).unwrap();
+        drain(&mut first);
+        assert!(parent.declarations_skipped());
+        assert!(second.declarations_skipped());
+        assert!(!general.declarations_skipped());
+        let after_skip = parent.external_child(Some(""), None).unwrap();
+        assert!(after_skip.declarations_skipped());
+        assert!(after_skip.parameter_state.get().is_none());
+        let mut separate = general.external_child(None, None).unwrap();
+        separate.feed(b"<!ENTITY present 'P'>", true).unwrap();
+        assert!(
+            drain(&mut separate)
+                .iter()
+                .any(|event| matches!(event.kind, EventKind::EntityDeclaration(_)))
+        );
+        drop(parent);
+        drop(first);
+        second.feed(b"<!ENTITY ignored 'I'>", true).unwrap();
+        assert!(
+            !drain(&mut second)
+                .iter()
+                .any(|event| matches!(event.kind, EventKind::EntityDeclaration(_)))
+        );
+    }
+
+    #[test]
+    fn lazy_parameter_state_work_is_charged_once_and_limit_failure_keeps_it_uninitialized() {
+        let mut config = Config::default();
+        config.limits.max_entity_expansion_bytes = size_of::<ParameterState>();
+        let parser = Parser::new(config.clone());
+        parser.shared_parameter_state().unwrap();
+        parser.shared_parameter_state().unwrap();
+        assert_eq!(
+            parser.expanded.expanded.load(Ordering::Relaxed),
+            size_of::<ParameterState>()
+        );
+        config.limits.max_entity_expansion_bytes -= 1;
+        let parser = Parser::new(config);
+        assert_eq!(
+            parser.shared_parameter_state().unwrap_err().kind,
+            ErrorKind::LimitExceeded
+        );
+        assert!(parser.parameter_state.get().is_none());
     }
 }

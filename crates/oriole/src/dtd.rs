@@ -7,8 +7,8 @@ use crate::{
     DefaultAttribute, DefaultAttributes, Entity, Error, ErrorKind, EventKind, Parser, Position,
     character_reference, string, take_name, whitespace,
 };
-use oriole_storage::{Allocator, Shared, String, TryClone, Vec, try_insert, try_push};
-use std::sync::atomic::{AtomicBool, Ordering};
+use oriole_storage::{Allocator, String, TryClone, Vec, try_insert, try_push};
+use std::sync::atomic::Ordering;
 
 /// A foreign subset may be declined without making unknown entities skippable.
 #[derive(Debug)]
@@ -295,10 +295,7 @@ impl Parser {
         if !self.parameter_entities_enabled() {
             return Ok(());
         }
-        if self.parameter_read.is_none() {
-            self.charge_expansion(size_of::<AtomicBool>())?;
-            self.parameter_read = Some(Shared::try_new_in(AtomicBool::new(false), self.allocator)?);
-        }
+        self.shared_parameter_state()?;
         self.foreign_dtd_pending = Some(ForeignDtd {
             previous_subset,
             position,
@@ -349,9 +346,9 @@ impl Parser {
             .take()
             .expect("delivered foreign DTD");
         if self
-            .parameter_read
-            .as_ref()
-            .is_some_and(|read| read.load(Ordering::Relaxed))
+            .parameter_state
+            .get()
+            .is_some_and(|state| state.read.load(Ordering::Relaxed))
         {
             if !self.standalone {
                 self.current_raw.clear();
@@ -627,7 +624,7 @@ impl Parser {
         let position = self.source().position(end + 1);
         self.has_external_subset = true;
         if !self.parameter_entities_enabled() {
-            self.declarations_skipped = !self.standalone;
+            self.set_declarations_skipped(!self.standalone);
             let raw = self
                 .default_events
                 .then(|| {
@@ -654,7 +651,7 @@ impl Parser {
             if self.standalone && !self.external_subset && self.sources.len() == 1 {
                 return Err(self.err(ErrorKind::UndefinedEntity, "undefined parameter entity"));
             }
-            self.declarations_skipped |= !self.standalone;
+            self.set_declarations_skipped(self.declarations_skipped() || !self.standalone);
             let raw = self
                 .source()
                 .lexical_remaining()
@@ -716,14 +713,11 @@ impl Parser {
             let mut raw = source_name.try_clone()?;
             raw.push(';')?;
             self.active_parameter_reference = Some((source_name, position));
-            if self.parameter_read.is_none() {
-                self.charge_expansion(size_of::<AtomicBool>())?;
-                self.parameter_read =
-                    Some(Shared::try_new_in(AtomicBool::new(false), self.allocator)?);
-            }
-            self.parameter_read
-                .as_ref()
+            self.shared_parameter_state()?;
+            self.parameter_state
+                .get()
                 .expect("parameter read marker")
+                .read
                 .store(false, Ordering::Relaxed);
             self.emit(
                 EventKind::ExternalEntityReference(oriole_storage::try_box(
@@ -805,7 +799,7 @@ impl Parser {
                     cursor,
                     parameter.raw_start,
                     false,
-                    self.declarations_skipped,
+                    self.declarations_skipped(),
                     parameter.position,
                 )?;
             }
@@ -833,7 +827,7 @@ impl Parser {
                 )?;
             }
             self.has_external_subset = true;
-            self.declarations_skipped |= !self.standalone;
+            self.set_declarations_skipped(self.declarations_skipped() || !self.standalone);
         }
         Ok(())
     }
@@ -998,7 +992,7 @@ impl Parser {
                 end.ok_or_else(|| self.err(ErrorKind::UnclosedToken, "unclosed DTD declaration"))?;
             self.declaration_allowed = false;
             let first_event = self.pending.len();
-            let previously_skipped = self.declarations_skipped;
+            let previously_skipped = self.declarations_skipped();
             let expansion = prepared.take();
             let grammar = expansion
                 .as_ref()
@@ -1084,7 +1078,7 @@ impl Parser {
             }
             if self.default_events && matches!(declaration, "ENTITY" | "ATTLIST") {
                 let closing_default = !previously_skipped
-                    && self.declarations_skipped
+                    && self.declarations_skipped()
                     && (cursor.duplicate_defaults.is_some()
                         || self.pending.iter().skip(first_event).any(|pending| {
                             matches!(pending.event.kind, EventKind::EntityDeclaration(_))
@@ -1109,7 +1103,7 @@ impl Parser {
                 text = &text[end + 1..];
                 continue;
             }
-            if self.declarations_skipped
+            if self.declarations_skipped()
                 && matches!(declaration, "ENTITY" | "ATTLIST")
                 && self.default_events
                 && self
@@ -1122,7 +1116,7 @@ impl Parser {
             }
             let closing_default =
                 !previously_skipped
-                    && self.declarations_skipped
+                    && self.declarations_skipped()
                     && self.default_events
                     && self.pending.iter().skip(first_event).any(|pending| {
                         matches!(pending.event.kind, EventKind::EntityDeclaration(_))
@@ -1186,7 +1180,7 @@ impl Parser {
         cursor.parameters = parameters;
         cursor.parameter_defaults = true;
         cursor.entity_defaults = true;
-        let value_skipped = self.declarations_skipped;
+        let value_skipped = self.declarations_skipped();
         if self.default_events && value_skipped {
             let delimiter = raw.as_bytes()[quote] as char;
             let quoted_end = quote
@@ -1199,7 +1193,7 @@ impl Parser {
         self.declaration_parameters_through(&mut cursor, usize::MAX)?;
         if self.default_events {
             let end = cursor.raw.len();
-            let closing_default = self.declarations_skipped;
+            let closing_default = self.declarations_skipped();
             self.declaration_default_segment(
                 &mut cursor,
                 end,
@@ -1302,7 +1296,7 @@ impl Parser {
             .require_space()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
         if self.default_events
-            && !self.declarations_skipped
+            && !self.declarations_skipped()
             && if parameter {
                 self.parameter_entities.contains_key(&name)
             } else {
@@ -1317,7 +1311,7 @@ impl Parser {
                 .quoted()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
             self.declaration_parameters(cursor)?;
-            if self.declarations_skipped {
+            if self.declarations_skipped() {
                 return Ok(());
             }
             let declaring = (parameter && !self.parameter_entities.contains_key(&name))
@@ -1378,7 +1372,7 @@ impl Parser {
             (None, system_id, public_id, notation)
         };
         self.declaration_parameters(cursor)?;
-        if self.declarations_skipped {
+        if self.declarations_skipped() {
             return Ok(());
         }
         let declaration_count = self.entities.len() + self.parameter_entities.len();
@@ -1431,7 +1425,7 @@ impl Parser {
         // value (including its suffix) is still stored and reported.
         if skipped_parameter {
             self.has_external_subset = true;
-            self.declarations_skipped = !self.standalone;
+            self.set_declarations_skipped(!self.standalone);
         }
         Ok(())
     }
@@ -1735,7 +1729,7 @@ impl Parser {
                 .quoted()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
             self.declaration_parameters(cursor)?;
-            if self.declarations_skipped {
+            if self.declarations_skipped() {
                 return Ok(());
             }
             // A CR/LF pair in a replacement was produced by character
@@ -1765,7 +1759,7 @@ impl Parser {
             Some(value)
         };
         self.declaration_parameters(cursor)?;
-        if self.declarations_skipped {
+        if self.declarations_skipped() {
             return Ok(());
         }
         if !self.defaults.contains_key(element) {

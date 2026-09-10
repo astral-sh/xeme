@@ -167,7 +167,7 @@ impl Parser {
                         .lexical_remaining()
                         .for_slice(&self.source().remaining()[..end + 1])
                         .to_owned(self.allocator)?;
-                    self.declarations_skipped |= !self.standalone;
+                    self.set_declarations_skipped(self.declarations_skipped() || !self.standalone);
                     self.has_external_subset = true;
                     if self.parameter_mode == 0 && !self.standalone {
                         self.charge_expansion(2 * size_of::<crate::PendingEvent>())?;

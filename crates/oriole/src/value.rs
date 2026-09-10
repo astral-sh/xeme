@@ -1,6 +1,7 @@
 //! Owned continuations for external parameter entities in entity values.
 
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::OnceLock;
+use std::sync::atomic::Ordering;
 
 use oriole_storage::{Shared, String, TryClone, TryLock, Vec, try_box, try_push};
 
@@ -59,7 +60,7 @@ pub(crate) struct State {
     pub(crate) declaring: Option<String>,
     pub(crate) parameters: Vec<String>,
     output: Shared<TryLock<Output>>,
-    read: Shared<AtomicBool>,
+    read: Shared<crate::ParameterState>,
     request: Option<Request>,
     scanner: Option<ValueScanner>,
     content_start: usize,
@@ -106,13 +107,7 @@ impl Parser {
             }),
             self.allocator,
         )?;
-        let read = match &self.parameter_read {
-            Some(read) => read.clone(),
-            None => {
-                self.charge_expansion(size_of::<AtomicBool>())?;
-                Shared::try_new_in(AtomicBool::new(false), self.allocator)?
-            }
-        };
+        let read = self.shared_parameter_state()?.clone();
         Ok(try_box(
             State {
                 frames,
@@ -202,7 +197,7 @@ impl Parser {
                 .filter(|frame| frame.name.is_some())
                 .count()
             + state.parameters.len();
-        child.parameter_read = Some(state.read.clone());
+        child.parameter_state = OnceLock::from(state.read.clone());
         child.standalone = state
             .output
             .try_lock()
@@ -342,7 +337,7 @@ impl Parser {
         }
         if let Some(mut request) = state.request.take() {
             if !request.delivered {
-                state.read.store(false, Ordering::Relaxed);
+                state.read.read.store(false, Ordering::Relaxed);
                 self.emit(
                     EventKind::ExternalEntityReference(oriole_storage::try_box(
                         crate::ExternalEntityReference {
@@ -360,7 +355,7 @@ impl Parser {
                 self.value_state = Some(state);
                 return Ok(true);
             }
-            if !state.read.load(Ordering::Relaxed) {
+            if !state.read.read.load(Ordering::Relaxed) {
                 self.value_skip(&state)?;
             }
         }
@@ -582,7 +577,7 @@ impl Parser {
                 declaration.position,
             )?;
         }
-        self.declarations_skipped = skipped;
+        self.set_declarations_skipped(skipped);
         self.has_external_subset = true;
         self.finish_value_raw(
             declaration.raw.view(),

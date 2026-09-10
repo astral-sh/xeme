@@ -3408,3 +3408,137 @@ fn doctype_closing_tokens_follow_each_handler_and_survive_mutation() {
         }
     }
 }
+
+#[test]
+fn precreated_parameter_siblings_observe_skips_before_the_first_child_finishes() {
+    struct State {
+        precreate: bool,
+        final_first: bool,
+        text: std::string::String,
+        later_declarations: usize,
+    }
+    unsafe extern "C" fn text(data: *mut c_void, value: *const c_char, len: c_int) {
+        // SAFETY: State and the callback's UTF-8 input remain live for this call.
+        unsafe {
+            (*data.cast::<State>()).text.push_str(
+                std::str::from_utf8(std::slice::from_raw_parts(value.cast(), len as usize))
+                    .unwrap(),
+            );
+        }
+    }
+    unsafe extern "C" fn declaration(
+        data: *mut c_void,
+        name: *const c_char,
+        _: c_int,
+        _: *const c_char,
+        _: c_int,
+        _: *const c_char,
+        _: *const c_char,
+        _: *const c_char,
+        _: *const c_char,
+    ) {
+        // SAFETY: The synchronous callback receives a terminated name and live State.
+        unsafe {
+            if CStr::from_ptr(name).to_bytes() == b"later" {
+                (*data.cast::<State>()).later_declarations += 1;
+            }
+        }
+    }
+    unsafe extern "C" fn external(
+        parent: XML_Parser,
+        _: *const c_char,
+        _: *const c_char,
+        _: *const c_char,
+        _: *const c_char,
+    ) -> c_int {
+        // SAFETY: Children remain live through parsing; scalar flags are copied
+        // without keeping a State reference across nested callbacks.
+        unsafe {
+            let state = XML_GetUserData(parent).cast::<State>();
+            let precreate = (*state).precreate;
+            let final_first = (*state).final_first;
+            let first = XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null());
+            assert!(!first.is_null());
+            let mut second = if precreate {
+                XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null())
+            } else {
+                ptr::null_mut()
+            };
+            assert_eq!(
+                XML_Parse(first, c"%missing;".as_ptr(), 9, c_int::from(final_first)),
+                OK
+            );
+            if second.is_null() {
+                second = XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null());
+            }
+            assert!(!second.is_null());
+            let declaration = b"<!ENTITY later 'L'>";
+            assert_eq!(
+                XML_Parse(
+                    second,
+                    declaration.as_ptr().cast(),
+                    declaration.len() as c_int,
+                    1
+                ),
+                OK
+            );
+            if !final_first {
+                assert_eq!(XML_Parse(first, ptr::null(), 0, 1), OK);
+            }
+            XML_ParserFree(second);
+            XML_ParserFree(first);
+            OK
+        }
+    }
+    // SAFETY: State, input and both generations of parser live through each call.
+    unsafe {
+        for precreate in [false, true] {
+            for final_first in [false, true] {
+                let parser = XML_ParserCreate(ptr::null());
+                assert!(!parser.is_null());
+                let mut state = State {
+                    precreate,
+                    final_first,
+                    text: std::string::String::new(),
+                    later_declarations: 0,
+                };
+                XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                XML_SetParamEntityParsing(parser, 2);
+                XML_SetExternalEntityRefHandler(parser, Some(external));
+                XML_SetEntityDeclHandler(parser, Some(declaration));
+                XML_SetCharacterDataHandler(parser, Some(text));
+                let xml = b"<!DOCTYPE r SYSTEM 'd'><r>&later;</r>";
+                assert_eq!(
+                    XML_Parse(parser, xml.as_ptr().cast(), xml.len() as c_int, 1),
+                    OK
+                );
+                assert!(state.text.is_empty());
+                assert_eq!(state.later_declarations, 0);
+                let old_child = XML_ExternalEntityParserCreate(parser, ptr::null(), ptr::null());
+                assert!(!old_child.is_null());
+                assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+                let old_declaration = b"<!ENTITY later 'old'>";
+                assert_eq!(
+                    XML_Parse(
+                        old_child,
+                        old_declaration.as_ptr().cast(),
+                        old_declaration.len() as c_int,
+                        1
+                    ),
+                    OK
+                );
+                assert_eq!(state.later_declarations, 0);
+                XML_ParserFree(old_child);
+                XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                XML_SetCharacterDataHandler(parser, Some(text));
+                let fresh = b"<!DOCTYPE r [<!ENTITY later 'fresh'>]><r>&later;</r>";
+                assert_eq!(
+                    XML_Parse(parser, fresh.as_ptr().cast(), fresh.len() as c_int, 1),
+                    OK
+                );
+                assert_eq!(state.text, "fresh");
+                XML_ParserFree(parser);
+            }
+        }
+    }
+}

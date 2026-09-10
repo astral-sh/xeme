@@ -63,7 +63,7 @@ impl State {
             notation_capture: None,
             notation_committed: false,
             notation_final_default: false,
-            previously_skipped: parser.declarations_skipped,
+            previously_skipped: parser.declarations_skipped(),
             waited_prefix: 0,
         }
     }
@@ -113,7 +113,7 @@ impl Parser {
                 notation,
             } => {
                 state.enumeration_seen = true;
-                if self.attlist_handler_enabled && !self.declarations_skipped {
+                if self.attlist_handler_enabled && !self.declarations_skipped() {
                     self.charge_expansion(end - start + 10)?;
                     if let Some(kind) = &mut state.enumeration_type {
                         kind.push('|')?;
@@ -153,14 +153,11 @@ impl Parser {
                         .take()
                         .expect("checked external grammar request");
                     self.active_parameter_reference = Some((request.source_name, request.position));
-                    if self.parameter_read.is_none() {
-                        self.charge_expansion(size_of::<AtomicBool>())?;
-                        self.parameter_read =
-                            Some(Shared::try_new_in(AtomicBool::new(false), self.allocator)?);
-                    }
-                    self.parameter_read
-                        .as_ref()
+                    self.shared_parameter_state()?;
+                    self.parameter_state
+                        .get()
                         .expect("parameter read marker")
+                        .read
                         .store(false, Ordering::Relaxed);
                     let mut raw = self
                         .active_parameter_reference
@@ -230,7 +227,7 @@ impl Parser {
             } else {
                 state.system_prepared = true;
             }
-            if self.declarations_skipped {
+            if self.declarations_skipped() {
                 continue;
             }
             let Some((name, parameter)) = &state.reserved else {
@@ -332,7 +329,7 @@ impl Parser {
         declaration: &composition::Declaration,
         state: &mut State,
     ) -> Result<(), Error> {
-        if state.entity_committed || state.reservation_checked || self.declarations_skipped {
+        if state.entity_committed || state.reservation_checked || self.declarations_skipped() {
             return Ok(());
         }
         let Some((start, end, parameter)) = state.grammar.entity_name() else {
@@ -440,7 +437,7 @@ impl Parser {
         {
             let end = cursor.raw.len();
             self.charge_expansion(end.saturating_sub(cursor.raw_offset) + 3)?;
-            let unconditional = self.declarations_skipped
+            let unconditional = self.declarations_skipped()
                 && matches!(
                     state.grammar.kind(),
                     Some(grammar::Kind::Entity | grammar::Kind::Attlist)
@@ -491,7 +488,7 @@ impl Parser {
             self.semantic_parameters_through(declaration, state, commit.end)?;
         }
         if commit.kind == grammar::Kind::Entity
-            && !self.declarations_skipped
+            && !self.declarations_skipped()
             && let Some((name, parameter)) = state.reserved.take()
         {
             // Child table merges preserve this first slot. Remove only our own
@@ -503,7 +500,7 @@ impl Parser {
             };
             table.remove(&name);
         }
-        let skipped_before = self.declarations_skipped;
+        let skipped_before = self.declarations_skipped();
         let mut cursor =
             self.semantic_cursor(&declaration.expansion, state, commit.start, commit.end);
         let position = declaration.position;

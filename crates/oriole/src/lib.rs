@@ -1721,39 +1721,51 @@ impl Parser {
                 std::mem::replace(&mut self.token_scratch, String::new_in(self.allocator));
             token.clear();
             token.try_push_str(&self.source().remaining()[..end])?;
-            self.save_current_raw(end)?;
-            if let Some((offset, _)) = token
-                .char_indices()
-                .find(|(_, character)| !is_xml_char(*character))
-            {
-                return Err(self.err_at(ErrorKind::InvalidToken, "invalid XML character", offset));
-            }
-            match mode {
-                ScanMode::Comment => {
-                    let text = &token[4..token.len() - 3];
-                    if let Some(offset) = text.find("--") {
-                        return Err(self.err_at(
-                            ErrorKind::InvalidToken,
-                            "double hyphen in comment",
-                            4 + offset + 2,
-                        ));
-                    }
-                    if text.ends_with('-') {
-                        return Err(self.err_at(
-                            ErrorKind::InvalidToken,
-                            "double hyphen in comment",
-                            5 + text.len(),
-                        ));
-                    }
-                    self.declaration_allowed = false;
-                    self.emit(EventKind::Comment(self.markup_text(text)?), position)?;
+            let parsed = (|| {
+                if let Some((offset, _)) = token
+                    .char_indices()
+                    .find(|(_, character)| !is_xml_char(*character))
+                {
+                    return Err(self.err_at(
+                        ErrorKind::InvalidToken,
+                        "invalid XML character",
+                        offset,
+                    ));
                 }
-                ScanMode::Pi => self.parse_pi(&token, position)?,
-                ScanMode::Doctype => self.parse_doctype(&token, position)?,
-                ScanMode::Tag if token.starts_with("</") => self.parse_end(&token, position)?,
-                ScanMode::Tag => self.parse_start(&token, position)?,
-                ScanMode::DtdDeclaration => unreachable!("DTD scanner only runs in DTD context"),
-            }
+                match mode {
+                    ScanMode::Comment => {
+                        let text = &token[4..token.len() - 3];
+                        if let Some(offset) = text.find("--") {
+                            return Err(self.err_at(
+                                ErrorKind::InvalidToken,
+                                "double hyphen in comment",
+                                4 + offset + 2,
+                            ));
+                        }
+                        if text.ends_with('-') {
+                            return Err(self.err_at(
+                                ErrorKind::InvalidToken,
+                                "double hyphen in comment",
+                                5 + text.len(),
+                            ));
+                        }
+                        self.declaration_allowed = false;
+                        self.emit(EventKind::Comment(self.markup_text(text)?), position)?;
+                    }
+                    ScanMode::Pi => self.parse_pi(&token, position)?,
+                    ScanMode::Doctype => self.parse_doctype(&token, position)?,
+                    ScanMode::Tag if token.starts_with("</") => self.parse_end(&token, position)?,
+                    ScanMode::Tag => self.parse_start(&token, position)?,
+                    ScanMode::DtdDeclaration => {
+                        unreachable!("DTD scanner only runs in DTD context")
+                    }
+                }
+                Ok(())
+            })();
+            // Parsing only writes queued raw overrides. Publish the owned token
+            // before returning either its events or its terminal error.
+            std::mem::swap(&mut self.current_raw, &mut token);
+            parsed?;
             self.token_scratch = token;
             self.consume(end)?;
         }

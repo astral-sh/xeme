@@ -119,8 +119,9 @@ impl Parser {
                         if let Some(kind) = &mut state.enumeration_type {
                             kind.push('|')?;
                         } else {
-                            state.enumeration_type = Some(string(
-                                if notation { "NOTATION(" } else { "(" },
+                            state.enumeration_type = Some(enumeration_capture(
+                                &state.token[start + 2..],
+                                notation,
                                 self.allocator,
                             )?);
                         }
@@ -251,6 +252,29 @@ impl Parser {
     }
 }
 
+/// Reserve the remaining enumeration once, when its first callback member is
+/// captured. Whitespace and later attribute defaults do not inflate capacity;
+/// converted ASCII representatives only overestimate their decoded byte length.
+fn enumeration_capture(
+    text: &str,
+    notation: bool,
+    allocator: Allocator,
+) -> Result<String, oriole_storage::AllocError> {
+    let prefix = if notation { "NOTATION(" } else { "(" };
+    let remaining = text
+        .bytes()
+        .take_while(|&byte| byte != b')')
+        .filter(|byte| !matches!(byte, b' ' | b'\r' | b'\n' | b'\t'))
+        .count();
+    // Include the closing parenthesis and the adapter's C string terminator.
+    let capacity = remaining
+        .checked_add(prefix.len() + 2)
+        .ok_or(oriole_storage::AllocError::CapacityOverflow)?;
+    let mut result = String::try_with_capacity_in(capacity, allocator)?;
+    result.push_str(prefix)?;
+    Ok(result)
+}
+
 /// Split lexical fragments without crossing a quote or rescanning a prefix.
 fn fragment_length(text: &str) -> usize {
     let first = text.chars().next().expect("nonempty ATTLIST suffix");
@@ -269,6 +293,42 @@ fn fragment_length(text: &str) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn captured_types_do_not_retain_whitespace_or_later_default_capacity() {
+        let padding = " \t\r\n".repeat(262_144);
+        let later_default = "v".repeat(1_048_576);
+        for late_handler in [false, true] {
+            let mut parser = Parser::new(crate::Config::default());
+            parser.set_default_events(late_handler);
+            parser.set_attlist_handler_enabled(!late_handler);
+            let xml = format!(
+                "<!DOCTYPE r [<!ATTLIST r a (first|{padding}second) 'first' b CDATA '{later_default}'>]><r/>"
+            );
+            parser.feed(xml.as_bytes(), true).unwrap();
+            let mut captured = false;
+            while let Some(event) = parser.next_event().unwrap() {
+                if late_handler && parser.current_raw() == Some("first") {
+                    parser.set_attlist_handler_enabled(true);
+                }
+                if let EventKind::AttlistDeclaration(value) = event.kind
+                    && value.name == "a"
+                {
+                    captured = true;
+                    assert_eq!(
+                        value.attribute_type,
+                        if late_handler {
+                            "(second)"
+                        } else {
+                            "(first|second)"
+                        }
+                    );
+                    assert!(value.attribute_type.capacity() <= 32);
+                }
+            }
+            assert!(captured && parser.is_finished());
+        }
+    }
 
     #[test]
     fn uncaptured_enumerations_keep_ordinary_repeated_name_work() {

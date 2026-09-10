@@ -106,6 +106,7 @@ pub(crate) struct Cursor {
     lookahead: Option<Token>,
     previous_word: bool,
     namespaces: bool,
+    name_rules: crate::NameRules,
     max_depth: usize,
     groups: Vec<Group>,
     element: Option<(usize, usize)>,
@@ -125,7 +126,12 @@ impl Cursor {
         2 * capacity * size_of::<Group>()
     }
 
-    pub(crate) fn new(allocator: Allocator, namespaces: bool, max_depth: usize) -> Self {
+    pub(crate) fn new(
+        allocator: Allocator,
+        namespaces: bool,
+        max_depth: usize,
+        name_rules: crate::NameRules,
+    ) -> Self {
         Self {
             state: State::Keyword,
             kind: None,
@@ -135,6 +141,7 @@ impl Cursor {
             lookahead: None,
             previous_word: false,
             namespaces,
+            name_rules,
             max_depth: max_depth.min(256),
             groups: Vec::new_in(allocator),
             element: None,
@@ -526,8 +533,9 @@ impl Cursor {
     fn name(&self, text: &str, token: Token, ncname: bool) -> Result<()> {
         let name = &text[token.start..token.end];
         if !matches!(token.kind, TokenKind::Word)
-            || !names::is_name(name)
-            || (self.namespaces && (!names::is_qname(name) || (ncname && name.contains(':'))))
+            || !self.name_rules.is_name(name)
+            || (self.namespaces
+                && (!self.name_rules.is_qname(name) || (ncname && name.contains(':'))))
         {
             return Err((ErrorKind::Syntax, token.start));
         }
@@ -577,7 +585,7 @@ impl Cursor {
             return Ok(None);
         };
         if !matches!(first, '?' | '*' | '+')
-            && let Some(offset) = super::invalid_dtd_token(rest, self.namespaces)
+            && let Some(offset) = super::invalid_dtd_token(rest, self.namespaces, self.name_rules)
         {
             return Err((ErrorKind::InvalidToken, self.offset + offset));
         }
@@ -586,11 +594,11 @@ impl Cursor {
                 .find(first)
                 .ok_or((ErrorKind::Syntax, self.offset))?;
             (TokenKind::Literal, end + 2)
-        } else if names::is_name_char(first) || first == '#' {
+        } else if self.name_rules.is_name_char(first) || first == '#' {
             let prefix = usize::from(first == '#');
             let end = rest[prefix..]
                 .char_indices()
-                .find(|(_, c)| !names::is_name_char(*c))
+                .find(|(_, c)| !self.name_rules.is_name_char(*c))
                 .map_or(rest.len(), |(offset, _)| prefix + offset);
             (
                 if prefix == 0 {
@@ -673,10 +681,10 @@ mod tests {
             "ATTLIST r a NOTATION (n|m) #FIXED 'n' b (a|12|:x) 'a'",
             "ATTLIST π:根 π:名 CDATA 'ü'",
         ] {
-            let mut whole = Cursor::new(Allocator::System, true, 64);
+            let mut whole = Cursor::new(Allocator::System, true, 64, crate::NameRules::default());
             let expected =
                 collect(&mut whole, text, true).unwrap_or_else(|error| panic!("{text}: {error:?}"));
-            let mut cursor = Cursor::new(Allocator::System, true, 64);
+            let mut cursor = Cursor::new(Allocator::System, true, 64, crate::NameRules::default());
             let mut actual = std::vec::Vec::new();
             for end in boundaries(text) {
                 actual.extend(
@@ -702,7 +710,7 @@ mod tests {
             ("NOTATION n PUBLIC 'p' 's' ", true),
             ("ELEMENT r (a,b)* ", true),
         ] {
-            let mut cursor = Cursor::new(Allocator::System, false, 64);
+            let mut cursor = Cursor::new(Allocator::System, false, 64, crate::NameRules::default());
             let before = collect(&mut cursor, text, false).unwrap();
             assert_eq!(!before.is_empty(), early, "{text}");
             let after = collect(&mut cursor, text, true).unwrap();
@@ -711,20 +719,20 @@ mod tests {
             assert_eq!(cursor.kind(), Some(commit.kind));
         }
         let text = "ATTLIST root a CDATA 'A' b ID #IMPLIED";
-        let mut cursor = Cursor::new(Allocator::System, false, 64);
+        let mut cursor = Cursor::new(Allocator::System, false, 64, crate::NameRules::default());
         let commits = collect(&mut cursor, text, true).unwrap();
         assert_eq!(cursor.element_span(), Some((8, 12)));
         assert_eq!(&text[commits[0].start..commits[0].end], "a CDATA 'A'");
         assert_eq!(&text[commits[1].start..commits[1].end], "b ID #IMPLIED");
         for (text, span) in [("ENTITY e ", (7, 8, false)), ("ENTITY % e ", (9, 10, true))] {
-            let mut cursor = Cursor::new(Allocator::System, false, 64);
+            let mut cursor = Cursor::new(Allocator::System, false, 64, crate::NameRules::default());
             assert_eq!(cursor.advance(text, false), Ok(Progress::NeedMore));
             assert_eq!(cursor.entity_name(), Some(span));
         }
-        let mut cursor = Cursor::new(Allocator::System, false, 64);
+        let mut cursor = Cursor::new(Allocator::System, false, 64, crate::NameRules::default());
         assert_eq!(cursor.advance("NOTATION n ", false), Ok(Progress::NeedMore));
         assert_eq!(cursor.notation_name(), Some((9, 10)));
-        let mut cursor = Cursor::new(Allocator::System, false, 64);
+        let mut cursor = Cursor::new(Allocator::System, false, 64, crate::NameRules::default());
         assert_eq!(
             cursor.advance("ENTITY e PUBLIC 'p' ", false),
             Ok(Progress::NeedMore)
@@ -747,8 +755,12 @@ mod tests {
             "ENTITY e 'v' *",
             "NOTATION n SYSTEM 's'*",
         ] {
-            let error =
-                collect(&mut Cursor::new(Allocator::System, false, 64), text, true).unwrap_err();
+            let error = collect(
+                &mut Cursor::new(Allocator::System, false, 64, crate::NameRules::default()),
+                text,
+                true,
+            )
+            .unwrap_err();
             assert_eq!(error.0, ErrorKind::InvalidToken, "{text}");
         }
         for text in [
@@ -759,8 +771,12 @@ mod tests {
             "ELEMENT r (#PCDATA|a)+",
             "ELEMENT r (#PCDATA|a) *",
         ] {
-            let error =
-                collect(&mut Cursor::new(Allocator::System, false, 64), text, true).unwrap_err();
+            let error = collect(
+                &mut Cursor::new(Allocator::System, false, 64, crate::NameRules::default()),
+                text,
+                true,
+            )
+            .unwrap_err();
             assert_eq!(error.0, ErrorKind::Syntax, "{text}");
         }
     }
@@ -802,7 +818,7 @@ mod tests {
             "ATTLIST r a NOTATION (:n) 'v'",
             "ATTLIST r a CDATA 'x'b CDATA 'y'",
         ] {
-            let mut cursor = Cursor::new(Allocator::System, true, 64);
+            let mut cursor = Cursor::new(Allocator::System, true, 64, crate::NameRules::default());
             assert!(collect(&mut cursor, text, true).is_err(), "{text}");
         }
     }
@@ -810,7 +826,7 @@ mod tests {
     #[test]
     fn enumeration_members_are_reported_once_before_the_attribute_commit() {
         let text = "ATTLIST r a (x| 12 |z) 'x' b NOTATION (n|m) #IMPLIED";
-        let mut cursor = Cursor::new(Allocator::System, false, 64);
+        let mut cursor = Cursor::new(Allocator::System, false, 64, crate::NameRules::default());
         let mut members = std::vec::Vec::new();
         let mut commits = 0;
         for end in boundaries(text)
@@ -856,8 +872,22 @@ mod tests {
             "NOTATION a:b SYSTEM 's'",
             "ATTLIST r a NOTATION (a:b) 'v'",
         ] {
-            assert!(collect(&mut Cursor::new(Allocator::System, false, 64), text, true).is_ok());
-            assert!(collect(&mut Cursor::new(Allocator::System, true, 64), text, true).is_err());
+            assert!(
+                collect(
+                    &mut Cursor::new(Allocator::System, false, 64, crate::NameRules::default()),
+                    text,
+                    true
+                )
+                .is_ok()
+            );
+            assert!(
+                collect(
+                    &mut Cursor::new(Allocator::System, true, 64, crate::NameRules::default()),
+                    text,
+                    true
+                )
+                .is_err()
+            );
         }
         for (text, depth, valid) in [
             ("ELEMENT r EMPTY", 0, true),
@@ -868,7 +898,7 @@ mod tests {
             ("ELEMENT r ((a))", 2, true),
         ] {
             let result = collect(
-                &mut Cursor::new(Allocator::System, false, depth),
+                &mut Cursor::new(Allocator::System, false, depth, crate::NameRules::default()),
                 text,
                 true,
             );
@@ -882,7 +912,7 @@ mod tests {
     #[test]
     fn repeated_empty_replacements_and_many_attributes_advance_monotonically() {
         let mut text = std::string::String::from("ATTLIST r ");
-        let mut cursor = Cursor::new(Allocator::System, false, 64);
+        let mut cursor = Cursor::new(Allocator::System, false, 64, crate::NameRules::default());
         let mut commits = 0;
         for _ in 0..4096 {
             assert_eq!(cursor.advance(&text, false), Ok(Progress::NeedMore));

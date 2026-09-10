@@ -1,7 +1,7 @@
 //! Incremental lexical validation for external parameter entities in values.
 
 use crate::ErrorKind;
-use crate::names::{is_name_char, is_name_start, is_xml_char, whitespace};
+use crate::names::{NameRules, is_xml_char, whitespace};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum ValueScan {
@@ -50,6 +50,7 @@ enum State {
 #[derive(Debug)]
 pub(crate) struct ValueScanner {
     cursor: usize,
+    name_rules: NameRules,
     token_start: usize,
     state: State,
     declaration_seen: bool,
@@ -58,9 +59,10 @@ pub(crate) struct ValueScanner {
 }
 
 impl ValueScanner {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(name_rules: NameRules) -> Self {
         Self {
             cursor: 0,
+            name_rules,
             token_start: 0,
             state: State::Token,
             declaration_seen: false,
@@ -76,6 +78,7 @@ impl ValueScanner {
         is_final: bool,
         namespaces: bool,
     ) -> Result<ValueScan, (ErrorKind, usize)> {
+        let name_rules = self.name_rules;
         while let Some(character) = text[self.cursor..].chars().next() {
             #[cfg(test)]
             {
@@ -105,11 +108,13 @@ impl ValueScanner {
                         ')' => State::RightParen,
                         ']' => State::RightBracket,
                         ',' | '[' | '(' | '|' | '>' => State::Token,
-                        c if is_name_char(c) => State::Name(if name_start(c, namespaces) {
-                            NameKind::Name
-                        } else {
-                            NameKind::Token
-                        }),
+                        c if name_rules.is_name_char(c) => {
+                            State::Name(if name_start(c, namespaces, name_rules) {
+                                NameKind::Name
+                            } else {
+                                NameKind::Token
+                            })
+                        }
                         _ => return Err((ErrorKind::InvalidToken, self.token_start)),
                     };
                 }
@@ -117,7 +122,7 @@ impl ValueScanner {
                     self.state = match character {
                         '!' => State::DeclarationStart,
                         '?' => State::PiStart,
-                        c if name_start(c, namespaces) || !c.is_ascii() => {
+                        c if name_start(c, namespaces, name_rules) || !c.is_ascii() => {
                             return Err((ErrorKind::Syntax, self.token_start));
                         }
                         _ => return Err((ErrorKind::InvalidToken, self.token_start)),
@@ -127,7 +132,7 @@ impl ValueScanner {
                     self.state = match character {
                         '-' => State::CommentOpen,
                         '[' => State::Token,
-                        c if declaration_name(c, namespaces) => State::DeclarationName,
+                        c if declaration_name(c, namespaces, name_rules) => State::DeclarationName,
                         _ => return Err((ErrorKind::InvalidToken, self.token_start)),
                     };
                 }
@@ -138,7 +143,7 @@ impl ValueScanner {
                     }
                     if character == '%' {
                         self.state = State::DeclarationPercent;
-                    } else if !declaration_name(character, namespaces) {
+                    } else if !declaration_name(character, namespaces, name_rules) {
                         return Err((ErrorKind::InvalidToken, self.token_start));
                     }
                 }
@@ -167,13 +172,13 @@ impl ValueScanner {
                     };
                 }
                 State::PiStart => {
-                    if !name_start(character, namespaces) {
+                    if !name_start(character, namespaces, name_rules) {
                         return Err((ErrorKind::InvalidToken, self.token_start));
                     }
                     self.state = State::PiName;
                 }
                 State::PiName => {
-                    if name_char(character, namespaces) {
+                    if name_char(character, namespaces, name_rules) {
                         self.cursor = next;
                         continue;
                     }
@@ -244,7 +249,7 @@ impl ValueScanner {
                         self.state = State::Token;
                         continue;
                     }
-                    if !name_start(character, namespaces) {
+                    if !name_start(character, namespaces, name_rules) {
                         return Err((ErrorKind::InvalidToken, self.token_start));
                     }
                     self.state = State::PercentName;
@@ -252,12 +257,12 @@ impl ValueScanner {
                 State::PercentName => {
                     if character == ';' {
                         self.state = State::Token;
-                    } else if !name_char(character, namespaces) {
+                    } else if !name_char(character, namespaces, name_rules) {
                         return Err((ErrorKind::InvalidToken, self.token_start));
                     }
                 }
                 State::PoundStart => {
-                    if !name_start(character, namespaces) {
+                    if !name_start(character, namespaces, name_rules) {
                         return Err((ErrorKind::InvalidToken, self.token_start));
                     }
                     self.state = State::PoundName;
@@ -267,13 +272,13 @@ impl ValueScanner {
                         self.state = State::Token;
                         continue;
                     }
-                    if !name_char(character, namespaces) {
+                    if !name_char(character, namespaces, name_rules) {
                         return Err((ErrorKind::InvalidToken, self.token_start));
                     }
                 }
                 State::Name(mut kind) => {
                     if matches!(kind, NameKind::AfterColon) {
-                        kind = if name_char(character, namespaces) {
+                        kind = if name_char(character, namespaces, name_rules) {
                             NameKind::Prefixed
                         } else {
                             NameKind::Token
@@ -286,7 +291,7 @@ impl ValueScanner {
                         } else {
                             NameKind::Token
                         });
-                    } else if name_char(character, namespaces) {
+                    } else if name_char(character, namespaces, name_rules) {
                         // Keep scanning this name or Nmtoken.
                     } else if whitespace(character)
                         || matches!(character, '>' | ')' | ',' | '|' | '[' | '%')
@@ -345,25 +350,25 @@ impl ValueScanner {
     }
 }
 
-fn name_start(character: char, namespaces: bool) -> bool {
-    is_name_start(character) && (!namespaces || character != ':')
+fn name_start(character: char, namespaces: bool, name_rules: NameRules) -> bool {
+    name_rules.is_name_start(character) && (!namespaces || character != ':')
 }
 
-fn name_char(character: char, namespaces: bool) -> bool {
-    is_name_char(character) && (!namespaces || character != ':')
+fn name_char(character: char, namespaces: bool, name_rules: NameRules) -> bool {
+    name_rules.is_name_char(character) && (!namespaces || character != ':')
 }
 
-fn declaration_name(character: char, namespaces: bool) -> bool {
-    character.is_ascii() && name_start(character, namespaces)
+fn declaration_name(character: char, namespaces: bool, name_rules: NameRules) -> bool {
+    character.is_ascii() && name_start(character, namespaces, name_rules)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{ValueScan, ValueScanner};
+    use super::{NameRules, ValueScan, ValueScanner};
     use crate::ErrorKind;
 
     fn scan(text: &str, width: usize, namespaces: bool) -> Result<(), (ErrorKind, usize)> {
-        let mut scanner = ValueScanner::new();
+        let mut scanner = ValueScanner::new(NameRules::default());
         for end in (1..=text.len()).filter(|end| text.is_char_boundary(*end)) {
             if end % width != 0 && end != text.len() {
                 continue;
@@ -435,7 +440,7 @@ mod tests {
     #[test]
     fn first_xml_declaration_is_returned_once_with_original_offsets() {
         let text = "prefix <?xml version='1.0'?><?xml?>";
-        let mut scanner = ValueScanner::new();
+        let mut scanner = ValueScanner::new(NameRules::default());
         assert_eq!(
             scanner.scan(text, true, false),
             Ok(ValueScan::XmlDeclaration { start: 7, end: 28 })

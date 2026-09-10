@@ -3115,3 +3115,46 @@ fn reset_discards_internal_parameter_entities_left_open_by_value_children() {
         XML_ParserFree(parser);
     }
 }
+
+#[test]
+fn c_name_rules_match_fourth_edition_and_survive_reset_and_child_creation() {
+    // SAFETY: Each parser and input remains live through synchronous parsing.
+    unsafe {
+        for namespaces in [false, true] {
+            let parser = if namespaces {
+                XML_ParserCreateNS(ptr::null(), b'|' as c_char)
+            } else {
+                XML_ParserCreate(ptr::null())
+            };
+            assert!(!parser.is_null());
+            for (xml, accepted) in [
+                ("<a\u{901}/>", true),
+                ("<\u{901}/>", false),
+                ("<a\u{10000}/>", false),
+                ("<À/>", true),
+            ] {
+                assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+                assert_eq!(
+                    XML_Parse(parser, xml.as_ptr().cast(), xml.len() as c_int, 1),
+                    if accepted { OK } else { ERROR }
+                );
+                assert_eq!(XML_GetErrorCode(parser), if accepted { 0 } else { 4 });
+            }
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            for (context, xml) in [
+                (c"".as_ptr(), "<\u{10000}/>"),
+                (ptr::null(), "<!ENTITY \u{10000} 'v'>"),
+            ] {
+                let child = XML_ExternalEntityParserCreate(parser, context, ptr::null());
+                assert!(!child.is_null());
+                assert_eq!(
+                    XML_Parse(child, xml.as_ptr().cast(), xml.len() as c_int, 1),
+                    ERROR
+                );
+                assert_eq!(XML_GetErrorCode(child), 4);
+                XML_ParserFree(child);
+            }
+            XML_ParserFree(parser);
+        }
+    }
+}

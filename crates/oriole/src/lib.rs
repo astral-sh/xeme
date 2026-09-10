@@ -28,7 +28,8 @@ pub use recycling::RecyclingToken;
 use recycling::{AttributeRecycling, copy_attribute_string};
 
 use encoding::{Decoder, Source};
-use names::{is_name, is_uri_char, is_xml_char, whitespace};
+pub use names::NameRules;
+use names::{is_uri_char, is_xml_char, whitespace};
 
 /// Bounds applied independently of input chunking.
 #[derive(Clone, Debug)]
@@ -64,6 +65,8 @@ impl Default for Limits {
 /// Parser configuration. Namespace processing is opt-in, as in Expat.
 #[derive(Clone, Debug, Default)]
 pub struct Config {
+    /// XML edition used for all names. Defaults to Fifth Edition.
+    pub name_rules: NameRules,
     pub namespace_separator: Option<char>,
     pub namespace_triplets: bool,
     pub encoding: Option<std::string::String>,
@@ -553,7 +556,7 @@ impl Parser {
             string("http://www.w3.org/XML/1998/namespace", allocator)?,
         )?;
         let mut sources = Vec::new_in(allocator);
-        try_push(&mut sources, Source::new(allocator))?;
+        try_push(&mut sources, Source::new(allocator, config.name_rules))?;
         Ok(Self {
             config,
             allocator,
@@ -1680,7 +1683,7 @@ impl Parser {
                 && remaining[2..]
                     .chars()
                     .next()
-                    .is_some_and(|character| !names::is_name_start(character))
+                    .is_some_and(|character| !self.config.name_rules.is_name_start(character))
             {
                 return Err(self.err_at(
                     ErrorKind::InvalidToken,
@@ -1691,7 +1694,7 @@ impl Parser {
             if mode == ScanMode::Tag {
                 let name_offset = if remaining.starts_with("</") { 2 } else { 1 };
                 if let Some(character) = remaining[name_offset..].chars().next()
-                    && !names::is_name_start(character)
+                    && !self.config.name_rules.is_name_start(character)
                 {
                     return Err(self.err_at(
                         ErrorKind::InvalidToken,
@@ -1967,7 +1970,10 @@ impl Parser {
         }
         let text = &text[..end];
         if self.stack.is_empty() && !self.fragment && !text.chars().all(whitespace) {
-            if !self.seen_root && is_name(text) && end == self.source().remaining().len() {
+            if !self.seen_root
+                && self.config.name_rules.is_name(text)
+                && end == self.source().remaining().len()
+            {
                 if end > self.config.limits.max_token_bytes {
                     return Err(self.err(ErrorKind::LimitExceeded, "oversized prolog token"));
                 }
@@ -1980,14 +1986,14 @@ impl Parser {
                 }
             }
             if !self.seen_root
-                && is_name(text)
+                && self.config.name_rules.is_name(text)
                 && end == self.source().remaining().len()
                 && let Some((kind, message)) = self.decoding_error
             {
                 return Err(self.err_at(kind, message, end));
             }
             if !self.seen_root
-                && is_name(text)
+                && self.config.name_rules.is_name(text)
                 && self.source().remaining().as_bytes().get(end) == Some(&b'<')
             {
                 return Err(self.err_at(ErrorKind::InvalidToken, "invalid prolog token", end));
@@ -2144,7 +2150,7 @@ impl Parser {
         }
         let name = name.expect("general entity references have an owned name");
         let raw_name = &self.source().remaining()[1..end];
-        if !is_name(raw_name) {
+        if !self.config.name_rules.is_name(raw_name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid entity name"));
         }
         if self.config.namespace_separator.is_some()
@@ -2269,7 +2275,13 @@ impl Parser {
         self.consume(end + 1)?;
         try_push(
             &mut self.sources,
-            Source::entity(value, name, position, self.stack.len()),
+            Source::entity(
+                value,
+                name,
+                position,
+                self.stack.len(),
+                self.config.name_rules,
+            ),
         )?;
         Ok(true)
     }
@@ -2279,7 +2291,7 @@ impl Parser {
             .strip_prefix("<?")
             .and_then(|body| body.strip_suffix("?>"))
             .ok_or_else(|| self.err(ErrorKind::InvalidToken, "invalid processing instruction"))?;
-        let (target, rest) = take_name(body).ok_or_else(|| {
+        let (target, rest) = take_name(body, self.config.name_rules).ok_or_else(|| {
             self.err(
                 ErrorKind::InvalidToken,
                 "invalid processing instruction target",
@@ -2299,17 +2311,19 @@ impl Parser {
                 ));
             }
             let mut attrs = Vec::new_in(self.allocator);
-            parse_raw_attributes(rest, false, &mut attrs, 3).map_err(|error| {
-                self.err_at(
-                    if error.kind == ErrorKind::NoMemory {
-                        ErrorKind::NoMemory
-                    } else {
-                        ErrorKind::XmlDeclaration
-                    },
-                    error.message,
-                    2 + target.len() + error.position.byte_index,
-                )
-            })?;
+            parse_raw_attributes(rest, false, &mut attrs, 3, self.config.name_rules).map_err(
+                |error| {
+                    self.err_at(
+                        if error.kind == ErrorKind::NoMemory {
+                            ErrorKind::NoMemory
+                        } else {
+                            ErrorKind::XmlDeclaration
+                        },
+                        error.message,
+                        2 + target.len() + error.position.byte_index,
+                    )
+                },
+            )?;
             if self.fragment && !self.is_external_value() {
                 let mut attrs = attrs.into_iter().map(|attribute| attribute.parts(rest));
                 let first = attrs
@@ -2455,9 +2469,9 @@ impl Parser {
         }
         let empty = token.ends_with("/>");
         let body = &token[1..token.len() - if empty { 2 } else { 1 }];
-        let (raw_name, rest) = take_name(body)
+        let (raw_name, rest) = take_name(body, self.config.name_rules)
             .ok_or_else(|| self.err_at(ErrorKind::InvalidToken, "invalid element name", 1))?;
-        if self.config.namespace_separator.is_some() && !names::is_qname(raw_name) {
+        if self.config.namespace_separator.is_some() && !self.config.name_rules.is_qname(raw_name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid qualified element name"));
         }
         let name_value = token.for_slice(raw_name).decoded(self.allocator)?;
@@ -2471,6 +2485,7 @@ impl Parser {
             true,
             &mut raw_attrs,
             self.config.limits.max_attributes,
+            self.config.name_rules,
         )
         .map_err(|error| {
             self.err_at(
@@ -2511,7 +2526,9 @@ impl Parser {
             .then(|| HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator));
         for (index, attribute) in raw_attrs.iter().enumerate() {
             let (attr_name, value, attribute_offset, _) = attribute.parts(rest);
-            if self.config.namespace_separator.is_some() && !names::is_qname(attr_name) {
+            if self.config.namespace_separator.is_some()
+                && !self.config.name_rules.is_qname(attr_name)
+            {
                 return Err(self.err(ErrorKind::InvalidToken, "invalid qualified attribute name"));
             }
             let attr_name = decoded_names.get(index).map_or(attr_name, |name| &**name);
@@ -2751,8 +2768,8 @@ impl Parser {
             ));
         }
         let body = &token[2..token.len() - 1];
-        let (name, rest) =
-            take_name(body).ok_or_else(|| self.err(ErrorKind::InvalidToken, "invalid end tag"))?;
+        let (name, rest) = take_name(body, self.config.name_rules)
+            .ok_or_else(|| self.err(ErrorKind::InvalidToken, "invalid end tag"))?;
         let decoded_name = token.for_slice(name).decoded(self.allocator)?;
         if !rest.chars().all(whitespace) {
             return Err(self.err(ErrorKind::InvalidToken, "unexpected text in end tag"));
@@ -3032,7 +3049,7 @@ impl Parser {
             } else {
                 let decoded_name = value.for_slice(raw_name).decoded(self.allocator)?;
                 let name: &str = &decoded_name;
-                if !is_name(raw_name)
+                if !self.config.name_rules.is_name(raw_name)
                     || (self.config.namespace_separator.is_some() && raw_name.contains(':'))
                 {
                     return Err(self.err(ErrorKind::InvalidToken, "invalid entity name"));
@@ -3092,13 +3109,13 @@ pub(crate) enum ScanMode {
     DtdDeclaration,
 }
 
-fn take_name(input: &str) -> Option<(&str, &str)> {
+fn take_name(input: &str, name_rules: NameRules) -> Option<(&str, &str)> {
     let mut chars = input.char_indices();
-    if !names::is_name_start(chars.next()?.1) {
+    if !name_rules.is_name_start(chars.next()?.1) {
         return None;
     }
     let end = chars
-        .find(|(_, c)| !names::is_name_char(*c))
+        .find(|(_, c)| !name_rules.is_name_char(*c))
         .map_or(input.len(), |(index, _)| index);
     Some((&input[..end], &input[end..]))
 }
@@ -3136,6 +3153,7 @@ fn parse_raw_attributes(
     allow_refs: bool,
     result: &mut Vec<RawAttribute>,
     limit: usize,
+    name_rules: NameRules,
 ) -> Result<(), Error> {
     let original_len = text.len();
     let mut text = text;
@@ -3171,7 +3189,7 @@ fn parse_raw_attributes(
             ));
         }
         let name_offset = original_len - text.len();
-        let (name, rest) = take_name(text).ok_or(error_at(
+        let (name, rest) = take_name(text, name_rules).ok_or(error_at(
             ErrorKind::InvalidToken,
             "invalid attribute name",
             text,

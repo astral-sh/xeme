@@ -45,6 +45,13 @@ chunk sizes, successful semantic callbacks, and remaining default-handler and
 diagnostic differences. Its bounded differential grids do not establish complete
 Expat compatibility.
 
+The C interface selects XML 1.0 Fourth Edition name rules to match Expat;
+the Rust interface defaults to Fifth Edition and exposes `Config::name_rules`.
+Name validation uses the selected edition in element and attribute names, DTD
+grammar, entity references, incremental scanners, and external children.
+Custom-encoding PUBLIC identifiers classify the original bytes with that same
+edition before reporting decoded callback text.
+
 ## Native consumer tests
 
 `tests/c/integration.c` compiles against the public header and exercises:

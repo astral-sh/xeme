@@ -33,9 +33,9 @@ impl Conversion {
 pub(crate) fn representative(scalar: char) -> char {
     if !scalar.is_ascii() {
         scalar
-    } else if crate::names::is_name_start(scalar) {
+    } else if crate::NameRules::FifthEdition.is_name_start(scalar) {
         '\u{c0}'
-    } else if crate::names::is_name_char(scalar) {
+    } else if crate::NameRules::FifthEdition.is_name_char(scalar) {
         '\u{b7}'
     } else {
         '\u{e000}'

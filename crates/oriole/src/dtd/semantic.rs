@@ -43,6 +43,7 @@ impl State {
                 parser.allocator,
                 parser.config.namespace_separator.is_some(),
                 parser.config.limits.max_depth,
+                parser.config.name_rules,
             ),
             raw_offset: 0,
             raw_started: false,
@@ -393,6 +394,7 @@ impl Parser {
         let mut cursor = Cursor::new(
             expansion.text.view().for_slice(&expansion.text[start..end]),
             self.config.namespace_separator.is_some(),
+            self.config.name_rules,
         );
         cursor.initial_len = end;
         cursor.literals = &expansion.literals;

@@ -74,7 +74,9 @@ fn main() -> Result<(), oriole::Error> {
 Pass `false` until the final chunk. A parse error is terminal. Events own their
 strings, so callers can retain them independently of subsequent input. Namespace
 processing is opt-in through `Config::namespace_separator`; namespace triplets
-are optional. The parser core forbids unsafe Rust.
+are optional. Names use XML 1.0 Fifth Edition rules by default;
+`Config::name_rules` can select Fourth Edition rules. The C interface selects
+Fourth Edition to match Expat. The parser core forbids unsafe Rust.
 
 ### Expat interface
 

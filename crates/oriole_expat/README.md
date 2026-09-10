@@ -78,10 +78,11 @@ retains those differences alongside the complete upstream API matrix. Invalid
 maps, supplementary converted characters, and forbidden XML characters remain
 errors; the external value-child declaration restrictions below also apply.
 
-Name validation accepts a broader Unicode range than the pinned Expat 2.8.4
-reference, including CJK Extension A and supplementary name characters. Some
-well-formed names accepted by Oriole therefore fail in Expat. Compatibility
-reports retain these acceptance and diagnostic differences.
+The C interface uses XML 1.0 Fourth Edition name rules to match the pinned
+Expat 2.8.4 reference, including in DTDs, references, and custom-encoding byte
+classification. Resets and external children retain those rules. The Rust
+interface defaults to Fifth Edition and can select either edition through
+`Config::name_rules`.
 
 Internal parameter entities can supply complete lexical tokens and grammar
 delimiters inside declarations in external DTDs and parameter entities.

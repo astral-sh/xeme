@@ -17,7 +17,7 @@ use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::ptr;
 use std::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
 
-use oriole::{Config, ErrorKind, EventKind, Parser, Position, RecyclingToken};
+use oriole::{Config, ErrorKind, EventKind, NameRules, Parser, Position, RecyclingToken};
 use oriole_storage::{
     AllocError, AllocationTracker, Allocator, Box as XmlBox, CString, MemorySuite, Queue, Shared,
     String as XmlString, Vec as XmlVec, in_allocator_callback, with_tracking, without_tracking,
@@ -287,6 +287,7 @@ unsafe fn create(
             let encoding = unsafe { input_string(encoding)? };
             let config = Config {
                 namespace_separator: separator,
+                name_rules: NameRules::FourthEdition,
                 ..Config::default()
             };
             let mut core = Parser::try_new_with_encoding_in(config.clone(), encoding, allocator)

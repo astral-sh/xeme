@@ -213,7 +213,8 @@ impl Parser {
         }
         let has_internal_subset = token.ends_with('[');
         if !token[9..].starts_with(whitespace) {
-            let offset = 2 + take_name(&token[2..]).map_or(0, |(name, _)| name.len());
+            let offset = 2 + take_name(&token[2..], self.config.name_rules)
+                .map_or(0, |(name, _)| name.len());
             return Err(self.err_at(
                 ErrorKind::InvalidToken,
                 "whitespace required after DOCTYPE",
@@ -223,6 +224,7 @@ impl Parser {
         let mut cursor = Cursor::new(
             token.for_slice(&token[9..token.len() - 1]),
             self.config.namespace_separator.is_some(),
+            self.config.name_rules,
         );
         cursor
             .require_space()
@@ -441,7 +443,7 @@ impl Parser {
             && text[2..]
                 .chars()
                 .next()
-                .is_some_and(|character| !crate::names::is_name_start(character))
+                .is_some_and(|character| !self.config.name_rules.is_name_start(character))
         {
             return Err(self.err_at(ErrorKind::InvalidToken, "invalid DTD declaration name", 2));
         }
@@ -503,7 +505,13 @@ impl Parser {
         } else if text.starts_with(['\'', '"']) {
             return self.parse_prolog_literal();
         } else {
-            if invalid_dtd_token(text, self.config.namespace_separator.is_some()).is_some() {
+            if invalid_dtd_token(
+                text,
+                self.config.namespace_separator.is_some(),
+                self.config.name_rules,
+            )
+            .is_some()
+            {
                 return Err(self.err(ErrorKind::InvalidToken, "invalid token in DTD"));
             }
             return Err(self.err(ErrorKind::Syntax, "unexpected text in DTD"));
@@ -513,7 +521,7 @@ impl Parser {
             && text[2..]
                 .chars()
                 .next()
-                .is_some_and(|character| !crate::names::is_name_start(character))
+                .is_some_and(|character| !self.config.name_rules.is_name_start(character))
         {
             return Err(self.err_at(
                 ErrorKind::InvalidToken,
@@ -595,7 +603,7 @@ impl Parser {
             .lexical_remaining()
             .for_slice(raw_name)
             .decode(self.allocator)?;
-        if !crate::names::is_name(raw_name) {
+        if !self.config.name_rules.is_name(raw_name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid parameter entity name"));
         }
         if self.config.namespace_separator.is_some()
@@ -668,7 +676,13 @@ impl Parser {
             self.consume(end + 1)?;
             try_push(
                 &mut self.sources,
-                crate::encoding::Source::entity(value, source_name, position, self.stack.len()),
+                crate::encoding::Source::entity(
+                    value,
+                    source_name,
+                    position,
+                    self.stack.len(),
+                    self.config.name_rules,
+                ),
             )?;
         } else {
             self.charge_external_identifiers(entity)?;
@@ -965,7 +979,11 @@ impl Parser {
             let grammar = expansion
                 .as_ref()
                 .map_or(lexical.for_slice(&text[2..end]), |value| value.text.view());
-            let mut cursor = Cursor::new(grammar, self.config.namespace_separator.is_some());
+            let mut cursor = Cursor::new(
+                grammar,
+                self.config.namespace_separator.is_some(),
+                self.config.name_rules,
+            );
             cursor.raw = grammar;
             cursor.raw_event = first_event;
             if let Some(expansion) = &expansion {
@@ -1131,7 +1149,11 @@ impl Parser {
         position: Position,
         closes_declaration: bool,
     ) -> Result<(), Error> {
-        let mut cursor = Cursor::new(Slice::plain(""), self.config.namespace_separator.is_some());
+        let mut cursor = Cursor::new(
+            Slice::plain(""),
+            self.config.namespace_separator.is_some(),
+            self.config.name_rules,
+        );
         cursor.raw = raw.for_slice(&raw[2..raw.len() - usize::from(closes_declaration)]);
         cursor.closes_declaration = closes_declaration;
         cursor.raw_offset = quote - 2;
@@ -1191,7 +1213,7 @@ impl Parser {
                     error_offset + cursor.offset(),
                 )
             } else {
-                self.err(ErrorKind::Syntax, message)
+                self.dtd_grammar_error(cursor, message)
             }
         })?;
         let model = cursor
@@ -1451,7 +1473,7 @@ impl Parser {
                 current.rest = current.rest.for_slice(&current.rest.as_str()[end + 1..]);
                 continue;
             }
-            if !crate::names::is_name(reference)
+            if !self.config.name_rules.is_name(reference)
                 || (self.config.namespace_separator.is_some() && reference.contains(':'))
             {
                 return Err(self.err(ErrorKind::InvalidToken, "invalid reference in entity value"));
@@ -1643,9 +1665,10 @@ impl Parser {
             cursor
                 .require_space()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-            enumeration(cursor, true).map_err(|message| self.err(ErrorKind::Syntax, message))?;
+            enumeration(cursor, true).map_err(|message| self.dtd_grammar_error(cursor, message))?;
         } else if cursor.starts("(") {
-            enumeration(cursor, false).map_err(|message| self.err(ErrorKind::Syntax, message))?;
+            enumeration(cursor, false)
+                .map_err(|message| self.dtd_grammar_error(cursor, message))?;
         } else {
             self.check_dtd_token(cursor)?;
             let attribute_type = cursor
@@ -1777,8 +1800,19 @@ impl Parser {
         Ok(())
     }
 
+    /// Keep malformed name bytes distinct from a valid token in the wrong role.
+    fn dtd_grammar_error(&self, cursor: &Cursor<'_>, message: &'static str) -> Error {
+        let kind =
+            if invalid_dtd_token(cursor.rest(), cursor.namespaces, cursor.name_rules).is_some() {
+                ErrorKind::InvalidToken
+            } else {
+                ErrorKind::Syntax
+            };
+        self.err(kind, message)
+    }
+
     fn check_dtd_token(&self, cursor: &Cursor<'_>) -> Result<(), Error> {
-        if invalid_dtd_token(cursor.rest(), cursor.namespaces).is_some() {
+        if invalid_dtd_token(cursor.rest(), cursor.namespaces, cursor.name_rules).is_some() {
             return Err(self.err(ErrorKind::InvalidToken, "invalid DTD token"));
         }
         Ok(())
@@ -1786,18 +1820,18 @@ impl Parser {
 }
 
 /// Distinguish a malformed prolog token from a valid token in the wrong role.
-fn invalid_dtd_token(text: &str, namespaces: bool) -> Option<usize> {
+fn invalid_dtd_token(text: &str, namespaces: bool, name_rules: crate::NameRules) -> Option<usize> {
     let first = text.chars().next()?;
     let pound = first == '#';
     let start = usize::from(pound);
     let rest = &text[start..];
     if pound {
         if rest.chars().next().is_none_or(|character| {
-            !crate::names::is_name_start(character) || (namespaces && character == ':')
+            !name_rules.is_name_start(character) || (namespaces && character == ':')
         }) {
             return Some(start);
         }
-    } else if !crate::names::is_name_char(first) {
+    } else if !name_rules.is_name_char(first) {
         return (!matches!(
             first,
             '\'' | '"' | '(' | ')' | '[' | ']' | ',' | '|' | '%' | '<' | '>'
@@ -1806,7 +1840,7 @@ fn invalid_dtd_token(text: &str, namespaces: bool) -> Option<usize> {
     }
     let (end, next) = rest
         .char_indices()
-        .find(|(_, character)| !crate::names::is_name_char(*character))?;
+        .find(|(_, character)| !name_rules.is_name_char(*character))?;
     if whitespace(next)
         || matches!(next, ')' | '>' | '%' | '|')
         || (!pound && matches!(next, ',' | '['))
@@ -1815,8 +1849,8 @@ fn invalid_dtd_token(text: &str, namespaces: bool) -> Option<usize> {
     }
     if !pound
         && matches!(next, '?' | '*' | '+')
-        && crate::names::is_name(&rest[..end])
-        && (!namespaces || crate::names::is_qname(&rest[..end]))
+        && name_rules.is_name(&rest[..end])
+        && (!namespaces || name_rules.is_qname(&rest[..end]))
     {
         return None;
     }
@@ -1827,6 +1861,7 @@ struct Cursor<'a> {
     lexical: Slice<'a>,
     text: &'a str,
     namespaces: bool,
+    name_rules: crate::NameRules,
     initial_len: usize,
     literals: &'a [DeclarationLiteral],
     literal_index: usize,
@@ -1847,12 +1882,13 @@ struct Cursor<'a> {
     raw: Slice<'a>,
 }
 impl<'a> Cursor<'a> {
-    fn new(lexical: Slice<'a>, namespaces: bool) -> Self {
+    fn new(lexical: Slice<'a>, namespaces: bool, name_rules: crate::NameRules) -> Self {
         let text = lexical.as_str();
         Self {
             lexical,
             text,
             namespaces,
+            name_rules,
             initial_len: text.len(),
             literals: &[],
             literal_index: 0,
@@ -1904,8 +1940,9 @@ impl<'a> Cursor<'a> {
         }
     }
     fn name(&mut self) -> Result<&'a str, &'static str> {
-        let (name, rest) = take_name(self.text).ok_or("name required in DTD declaration")?;
-        if self.namespaces && !crate::names::is_qname(name) {
+        let (name, rest) =
+            take_name(self.text, self.name_rules).ok_or("name required in DTD declaration")?;
+        if self.namespaces && !self.name_rules.is_qname(name) {
             return Err("invalid namespace-qualified name in DTD declaration");
         }
         self.text = rest;
@@ -2028,7 +2065,7 @@ fn enumeration(cursor: &mut Cursor<'_>, names: bool) -> Result<(), &'static str>
             let end = cursor
                 .rest()
                 .char_indices()
-                .find(|(_, c)| !crate::names::is_name_char(*c))
+                .find(|(_, c)| !cursor.name_rules.is_name_char(*c))
                 .map_or(cursor.rest().len(), |(index, _)| index);
             if end == 0 {
                 return Err("empty enumeration value");

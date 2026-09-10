@@ -138,7 +138,7 @@ impl Parser {
                     return Ok(false);
                 };
                 let name = &self.source().remaining()[1..end];
-                if !crate::names::is_name(name)
+                if !self.config.name_rules.is_name(name)
                     || (self.config.namespace_separator.is_some() && name.contains(':'))
                 {
                     return Err(self.err(
@@ -231,8 +231,13 @@ impl Parser {
                 source_name.push_str(name)?;
                 let position = self.source().position(end + 1);
                 self.consume(end + 1)?;
-                let mut source =
-                    crate::encoding::Source::entity(value, source_name, position, self.stack.len());
+                let mut source = crate::encoding::Source::entity(
+                    value,
+                    source_name,
+                    position,
+                    self.stack.len(),
+                    self.config.name_rules,
+                );
                 source.dtd_fragment = true;
                 try_push(&mut self.sources, source)?;
                 continue;
@@ -500,7 +505,7 @@ impl Parser {
                         return Ok(false);
                     };
                     let name = &self.source().remaining()[1..end];
-                    if !crate::names::is_name(name)
+                    if !self.config.name_rules.is_name(name)
                         || (self.config.namespace_separator.is_some() && name.contains(':'))
                     {
                         return Err(self.err(
@@ -627,6 +632,7 @@ impl Parser {
                         source_name,
                         position,
                         self.stack.len(),
+                        self.config.name_rules,
                     );
                     source.dtd_fragment = true;
                     try_push(&mut self.sources, source)?;
@@ -665,6 +671,7 @@ impl Parser {
             source_name,
             state.position,
             self.stack.len(),
+            self.config.name_rules,
         );
         let original = std::mem::replace(self.sources.last_mut().expect("source"), anchored);
         let result = self.parse_subset_expanded(token.view(), 0, Some(state.expansion));

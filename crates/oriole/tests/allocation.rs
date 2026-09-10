@@ -107,13 +107,14 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         Config {
             namespace_separator: Some('|'),
             namespace_triplets: true,
+            name_rules: oriole::NameRules::FourthEdition,
             ..Config::default()
         },
         None,
         allocator,
     )?;
     parser.set_default_events(true);
-    parser.feed(b"\r\n<!DOCTYPE r [ \n<!ENTITY internal '<p:n/>'><!ENTITY external SYSTEM 'child'><!NOTATION n SYSTEM 'notation'><!ATTLIST r a NMTOKENS ' a  b '>\t]>\n<r xmlns:p='urn:p' p:attr='v'>a\r\nb\nc&internal;&external;<!--c--><![CDATA[x]]></r>\r\n", true)?;
+    parser.feed("\r\n<!DOCTYPE r [ \n<!ENTITY internal '<p:À/>'><!ENTITY external SYSTEM 'child'><!NOTATION n SYSTEM 'notation'><!ATTLIST r a NMTOKENS ' a  b '>\t]>\n<r xmlns:p='urn:p' p:attr='v'>a\r\nb\nc&internal;&external;<!--c--><![CDATA[x]]></r>\r\n".as_bytes(), true)?;
     while let Some(event) = next_event(&mut parser)? {
         if let EventKind::ExternalEntityReference(reference) = event.kind {
             let mut child =

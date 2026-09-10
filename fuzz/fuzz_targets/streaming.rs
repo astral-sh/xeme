@@ -1,11 +1,17 @@
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;
-use oriole::{Config, EventKind, Limits, Parser};
+use oriole::{Config, EventKind, Limits, NameRules, Parser};
 
-fn parse(data: &[u8], chunk: usize, namespaces: bool) -> Result<Vec<EventKind>, ()> {
+fn parse(
+    data: &[u8],
+    chunk: usize,
+    namespaces: bool,
+    name_rules: NameRules,
+) -> Result<Vec<EventKind>, ()> {
     let config = Config {
         namespace_separator: namespaces.then_some('|'),
+        name_rules,
         limits: Limits {
             max_total_bytes: 65_536,
             max_token_bytes: 65_536,
@@ -68,8 +74,13 @@ fuzz_target!(|data: &[u8]| {
         return;
     }
     let namespaces = control & 128 != 0;
-    let contiguous = parse(xml, xml.len().max(1), namespaces);
-    let incremental = parse(xml, usize::from(control & 127) + 1, namespaces);
+    let name_rules = if control & 64 != 0 {
+        NameRules::FourthEdition
+    } else {
+        NameRules::FifthEdition
+    };
+    let contiguous = parse(xml, xml.len().max(1), namespaces, name_rules);
+    let incremental = parse(xml, usize::from(control & 63) + 1, namespaces, name_rules);
     assert_eq!(
         contiguous, incremental,
         "chunking changed acceptance or normalized events"

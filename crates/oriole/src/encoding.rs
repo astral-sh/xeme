@@ -165,8 +165,10 @@ impl Decoder {
                                 "undefined byte in custom encoding",
                             ))?;
                     let byte = self.pending[consumed];
-                    let spelling = (u32::from(character) != u32::from(byte))
-                        .then_some(([byte, 0, 0, 0], custom_public_byte(map, byte)));
+                    let spelling = (u32::from(character) != u32::from(byte)).then_some((
+                        [byte, 0, 0, 0],
+                        custom_public_byte(map, byte, source.name_rules),
+                    ));
                     source.push_custom(character, 1, spelling)?;
                     consumed += 1;
                 }
@@ -517,7 +519,7 @@ impl Decoder {
         let map = self.custom_map.as_ref().expect("custom encoding has a map");
         let public_valid = bytes[..usize::from(width)]
             .iter()
-            .all(|byte| custom_public_byte(map, *byte));
+            .all(|byte| custom_public_byte(map, *byte, source.name_rules));
         source.push_custom(character, width, Some((bytes, public_valid)))?;
         self.pending_cursor += usize::from(width);
         self.conversion = None;
@@ -611,7 +613,7 @@ impl Decoder {
 /// inside a converter sequence. Mapped ASCII bytes classified as XML name
 /// characters remain allowed; the two ordinary punctuation exceptions use raw
 /// `$`/`@` values. Required ASCII syntax is fixed by map installation.
-fn custom_public_byte(map: &[i32; 256], byte: u8) -> bool {
+fn custom_public_byte(map: &[i32; 256], byte: u8, name_rules: crate::NameRules) -> bool {
     let scalar = char::from(byte);
     scalar.is_ascii_alphanumeric()
         || " \r\n-'()+,./:=?;!*#@$_%".contains(scalar)
@@ -620,7 +622,7 @@ fn custom_public_byte(map: &[i32; 256], byte: u8) -> bool {
                 .ok()
                 .filter(|value| *value > 0x7f)
                 .and_then(char::from_u32)
-                .is_some_and(crate::names::is_name_char))
+                .is_some_and(|character| name_rules.is_name_char(character)))
 }
 
 /// ASCII characters that Expat requires custom encodings to preserve exactly.
@@ -661,9 +663,10 @@ pub(crate) struct Source {
     pub(crate) dtd_fragment: bool,
     scan: Scan,
     deferred_size: usize,
+    name_rules: crate::NameRules,
 }
 impl Source {
-    pub(crate) fn new(allocator: Allocator) -> Self {
+    pub(crate) fn new(allocator: Allocator, name_rules: crate::NameRules) -> Self {
         Self {
             text: crate::lexical::Buffer::new_in(allocator),
             cursor: 0,
@@ -685,6 +688,7 @@ impl Source {
             dtd_fragment: false,
             scan: Scan::default(),
             deferred_size: 0,
+            name_rules,
         }
     }
     pub(crate) fn entity(
@@ -692,6 +696,7 @@ impl Source {
         name: String,
         position: Position,
         initial_depth: usize,
+        name_rules: crate::NameRules,
     ) -> Self {
         let allocator = text.allocator();
         Self {
@@ -699,7 +704,7 @@ impl Source {
             anchor: Some(position),
             initial_depth,
             entity_name: Some(name),
-            ..Self::new(allocator)
+            ..Self::new(allocator, name_rules)
         }
     }
     pub(crate) fn remaining(&self) -> &str {
@@ -890,7 +895,7 @@ impl Source {
                 return Ok(Some(index));
             }
             let valid = if index == 1 {
-                numeric || crate::names::is_name_start(character)
+                numeric || self.name_rules.is_name_start(character)
             } else if numeric {
                 (index == 2 && character == 'x')
                     || if hexadecimal {
@@ -899,7 +904,7 @@ impl Source {
                         character.is_ascii_digit()
                     }
             } else {
-                crate::names::is_name_char(character)
+                self.name_rules.is_name_char(character)
             };
             if !valid {
                 return Err((ErrorKind::InvalidToken, index));
@@ -989,7 +994,7 @@ impl Source {
                     }
                     if crate::names::whitespace(character) {
                         after_name = true;
-                    } else if after_name || !crate::names::is_name_char(character) {
+                    } else if after_name || !self.name_rules.is_name_char(character) {
                         return Err((ErrorKind::InvalidToken, index));
                     }
                 }

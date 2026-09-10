@@ -223,7 +223,7 @@ impl Parser {
                 output: state.output.clone(),
                 read: state.read.clone(),
                 request: None,
-                scanner: Some(ValueScanner::new()),
+                scanner: Some(ValueScanner::new(self.config.name_rules)),
                 content_start: 0,
                 child: true,
             },
@@ -416,7 +416,7 @@ impl Parser {
                 state.frames.last_mut().expect("value frame").offset += end + 1;
                 continue;
             }
-            if !crate::names::is_name(name)
+            if !self.config.name_rules.is_name(name)
                 || (self.config.namespace_separator.is_some() && name.contains(':'))
             {
                 return Err(self.err(ErrorKind::InvalidToken, "invalid entity value reference"));

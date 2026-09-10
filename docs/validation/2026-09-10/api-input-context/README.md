@@ -90,3 +90,7 @@ every individual outcome and adapted test-source hash is unchanged.
 [retention evidence](retention-evidence.tar.gz) preserve the reproducer,
 independent review, source hashes, full upstream observations and native/gate
 logs. The initial over-retaining candidate and its evidence remain recorded.
+
+## Integration after the throughput changes
+
+The compatibility fixes were replayed onto the first event/buffer throughput layer. All 225 core/FFI checks and six C ASan/UBSan runs pass, including 349 selected-allocation failure scenarios per linkage. The lower allocation count reflects the earlier throughput changes. Rust is uninstrumented in these native C runs, and leak detection is disabled. [integrated-throughput.json](integrated-throughput.json) records the source/library hashes, commands and native output; [the compressed test log](integrated-throughput-tests.log.gz) retains the Rust results. The upstream matrix counts above describe the isolated compatibility layer, before throughput integration.

@@ -151,9 +151,68 @@ unsafe extern "C" fn convert(data: *mut c_void, bytes: *const c_char) -> c_int {
                 assert_eq!(XML_GetErrorCode(parser), 37);
             }
             3 => assert_eq!(XML_StopParser(parser, 0), 1),
+            5 => {
+                assert_eq!(XML_StopParser(parser, 0), 1);
+                exercise_encoding_setter(state);
+            }
             _ => {}
         }
         scalar
+    }
+}
+
+/// Exercise the finished-state setter without borrowing a callback-owned slot.
+unsafe fn exercise_encoding_setter(state: *mut State) {
+    // SAFETY: Callers retain the live slot, parser, and family for this serialized
+    // operation. Only copied scalars and raw pointers survive the C API calls.
+    unsafe {
+        let parser = (*state).parser;
+        let controls = (*(*state).family).controls;
+        let active = (*state).active;
+        let handlers = (*state).handlers;
+        let releases = (*state).releases;
+        let encoding = match controls[30] & 3 {
+            0 => ptr::null(),
+            1 => c"UTF-8".as_ptr(),
+            2 => c"multibyte".as_ptr(),
+            _ => c"unused-completed-protocol-name".as_ptr(),
+        };
+        let mut status = XML_ParsingStatus {
+            parsing: -1,
+            finalBuffer: 0,
+        };
+        XML_GetParsingStatus(parser, &mut status);
+        let error = XML_GetErrorCode(parser);
+        let index = XML_GetCurrentByteIndex(parser);
+        // Scope an additional failure to this setter; retain the original
+        // per-input failure schedule for every subsequent parse and destructor.
+        let force_failure = controls[29] & 4 != 0 && !encoding.is_null();
+        let previous_failure = FAIL_AT.get();
+        if force_failure {
+            FAIL_AT.set(CALLS.get() + 1);
+        }
+        let result = XML_SetEncoding(parser, encoding);
+        FAIL_AT.set(previous_failure);
+        assert!(matches!(result, 0 | 1));
+        if !matches!(status.parsing, 0 | 2) || force_failure {
+            assert_eq!(result, 0);
+        } else if encoding.is_null() {
+            assert_eq!(result, 1);
+        }
+        assert_eq!(XML_GetErrorCode(parser), error);
+        assert_eq!(XML_GetCurrentByteIndex(parser), index);
+        assert_eq!((*state).active, active);
+        assert_eq!((*state).handlers, handlers);
+        assert_eq!((*state).releases, releases);
+        if controls[31] & 1 != 0 {
+            // Clearing requires no allocation and must work after a failed copy
+            // whenever the parser state permits protocol metadata changes.
+            assert_eq!(
+                XML_SetEncoding(parser, ptr::null()),
+                c_int::from(matches!(status.parsing, 0 | 2))
+            );
+            assert_eq!(XML_GetErrorCode(parser), error);
+        }
     }
 }
 
@@ -507,6 +566,9 @@ fuzz_target!(|data: &[u8]| {
                 usize::from(data[3]) + 1,
                 true,
             );
+            if data[29] & 1 != 0 {
+                exercise_encoding_setter(ptr::addr_of_mut!(family.states[0]));
+            }
             if data[15] & 1 != 0 {
                 XML_ParserFree(root);
                 family.states[0].parser = ptr::null_mut();
@@ -530,6 +592,9 @@ fuzz_target!(|data: &[u8]| {
                     usize::from(data[27]) + 1,
                     true,
                 );
+                if data[29] & 2 != 0 {
+                    exercise_encoding_setter(ptr::addr_of_mut!(family.states[index]));
+                }
             }
         }
         for offset in 0..family.used {

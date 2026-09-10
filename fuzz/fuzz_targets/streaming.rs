@@ -17,24 +17,43 @@ fn parse(data: &[u8], chunk: usize, namespaces: bool) -> Result<Vec<EventKind>, 
     };
     let mut parser = Parser::new(config);
     let mut events = Vec::new();
+    let mut text = None;
     for piece in data.chunks(chunk) {
         parser.feed(piece, false).map_err(|_| ())?;
-        drain(&mut parser, &mut events)?;
+        drain(&mut parser, &mut events, &mut text)?;
     }
     parser.feed(&[], true).map_err(|_| ())?;
-    drain(&mut parser, &mut events)?;
+    drain(&mut parser, &mut events, &mut text)?;
+    flush_text(&parser, &mut events, &mut text)?;
     Ok(events)
 }
 
-fn drain(parser: &mut Parser, events: &mut Vec<EventKind>) -> Result<(), ()> {
+// Accumulate character data across input chunks with amortized growth, then
+// freeze one immutable Text payload when the next nontext event arrives.
+fn flush_text(
+    parser: &Parser,
+    events: &mut Vec<EventKind>,
+    pending: &mut Option<String>,
+) -> Result<(), ()> {
+    if let Some(text) = pending.take() {
+        let text = oriole::Text::try_from_str_in(&text, parser.allocator()).map_err(|_| ())?;
+        events.push(EventKind::Text(text));
+    }
+    Ok(())
+}
+
+fn drain(
+    parser: &mut Parser,
+    events: &mut Vec<EventKind>,
+    pending: &mut Option<String>,
+) -> Result<(), ()> {
     while let Some(event) = parser.next_event().map_err(|_| ())? {
         if let EventKind::Text(text) = event.kind {
-            if let Some(EventKind::Text(previous)) = events.last_mut() {
-                previous.try_push_str(&text).map_err(|_| ())?;
-            } else {
-                events.push(EventKind::Text(text));
-            }
+            let previous = pending.get_or_insert_with(String::new);
+            previous.try_reserve(text.len()).map_err(|_| ())?;
+            previous.push_str(&text);
         } else {
+            flush_text(parser, events, pending)?;
             events.push(event.kind);
         }
     }

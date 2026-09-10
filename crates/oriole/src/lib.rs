@@ -15,6 +15,8 @@ use oriole_storage::{
 use std::fmt;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
+pub use oriole_storage::Text;
+
 use encoding::{Decoder, Source};
 use names::{is_name, is_xml_char, whitespace};
 
@@ -172,7 +174,8 @@ pub enum EventKind {
     EndElement {
         name: String,
     },
-    Text(String),
+    /// Owned immutable character data. Short values are stored inline.
+    Text(Text),
     Comment(String),
     ProcessingInstruction {
         target: String,
@@ -1529,7 +1532,7 @@ impl Parser {
         }
         let position = self.source().position(end);
         let value = if !self.stack.is_empty() || self.fragment {
-            Some(self.source_text(text)?)
+            Some(self.character_data(text)?)
         } else {
             None
         };
@@ -1598,7 +1601,7 @@ impl Parser {
         }
         let text = &text[..end];
         let position = self.source().position(end);
-        let value = self.source_text(text)?;
+        let value = self.character_data(text)?;
         self.save_current_raw(end)?;
         self.consume(end);
         self.emit(EventKind::Text(value), position)?;
@@ -1651,7 +1654,10 @@ impl Parser {
         {
             self.consume(end + 1);
             self.emit(
-                EventKind::Text(string(character.encode_utf8(&mut [0; 4]), self.allocator)?),
+                EventKind::Text(Text::try_from_str_in(
+                    character.encode_utf8(&mut [0; 4]),
+                    self.allocator,
+                )?),
                 position,
             )?;
             return Ok(true);
@@ -2288,6 +2294,15 @@ impl Parser {
                 )
             })?;
         Ok(())
+    }
+
+    fn character_data(&self, text: &str) -> Result<Text, Error> {
+        if self.sources.len() == 1 && text.contains('\r') {
+            // Preserve the existing fallible normalization of physical newlines.
+            self.source_text(text).map(Text::from)
+        } else {
+            Text::try_from_str_in(text, self.allocator).map_err(Into::into)
+        }
     }
 
     fn source_text(&self, text: &str) -> Result<String, Error> {

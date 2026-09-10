@@ -230,3 +230,111 @@ impl fmt::Debug for CString {
         self.as_c_str().fmt(f)
     }
 }
+
+/// Immutable UTF-8 character data with inline storage for short values.
+///
+/// Heap values keep the selected allocator. Inline values allocate no memory and
+/// expose no growth operation; copying them never needs an allocator. Pointers
+/// into an inline value remain valid only while that value remains in place.
+pub struct Text {
+    buffer: TextBuffer,
+}
+
+enum TextBuffer {
+    Inline { bytes: [u8; 23], len: u8 },
+    Heap(String),
+}
+
+impl Text {
+    /// Copy a UTF-8 value, allocating through `allocator` only beyond 23 bytes.
+    #[inline]
+    pub fn try_from_str_in(text: &str, allocator: Allocator) -> Result<Self, AllocError> {
+        if text.len() <= 23 {
+            let mut bytes = [0; 23];
+            bytes[..text.len()].copy_from_slice(text.as_bytes());
+            Ok(Self {
+                buffer: TextBuffer::Inline {
+                    bytes,
+                    len: text.len() as u8,
+                },
+            })
+        } else {
+            String::try_from_str_in(text, allocator).map(Self::from)
+        }
+    }
+
+    /// Clone heap storage fallibly using its original allocator.
+    pub fn try_clone(&self) -> Result<Self, AllocError> {
+        match &self.buffer {
+            TextBuffer::Inline { bytes, len } => Ok(Self {
+                buffer: TextBuffer::Inline {
+                    bytes: *bytes,
+                    len: *len,
+                },
+            }),
+            TextBuffer::Heap(text) => text.try_clone().map(Self::from),
+        }
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn as_bytes(&self) -> &[u8] {
+        match &self.buffer {
+            TextBuffer::Inline { bytes, len } => &bytes[..usize::from(*len)],
+            TextBuffer::Heap(text) => text.as_bytes(),
+        }
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn as_str(&self) -> &str {
+        // SAFETY: Both variants originate from UTF-8 strings. The inline length
+        // is the complete input's byte length, and Text exposes no mutation.
+        unsafe { std::str::from_utf8_unchecked(self.as_bytes()) }
+    }
+}
+
+impl From<String> for Text {
+    fn from(text: String) -> Self {
+        Self {
+            buffer: TextBuffer::Heap(text),
+        }
+    }
+}
+impl Deref for Text {
+    type Target = str;
+    fn deref(&self) -> &str {
+        self.as_str()
+    }
+}
+impl AsRef<str> for Text {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
+impl fmt::Debug for Text {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Debug::fmt(self.as_str(), f)
+    }
+}
+impl fmt::Display for Text {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+impl PartialEq for Text {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+impl Eq for Text {}
+impl PartialEq<str> for Text {
+    fn eq(&self, other: &str) -> bool {
+        self.as_str() == other
+    }
+}
+impl PartialEq<&str> for Text {
+    fn eq(&self, other: &&str) -> bool {
+        self.as_str() == *other
+    }
+}

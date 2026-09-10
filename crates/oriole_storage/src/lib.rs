@@ -10,7 +10,7 @@ pub use allocator::{Allocator, CustomAllocator, MemorySuite, in_allocator_callba
 pub use allocator_api2::alloc::{Allocator as AllocatorApi, Layout};
 pub use queue::Queue;
 pub use shared::Shared;
-pub use string::{CString, String};
+pub use string::{CString, String, Text};
 pub use tracking::{
     ACTIVATION_THRESHOLD_DEFAULT, AllocationTracker, MAXIMUM_AMPLIFICATION_DEFAULT,
     MAXIMUM_LIVE_BYTES, with_tracking, without_tracking,

@@ -586,7 +586,8 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                     .sum::<usize>()
         }
         EventKind::EndElement { name } | EventKind::SkippedEntity { name, .. } => name.len(),
-        EventKind::Text(value) | EventKind::Comment(value) => value.len(),
+        EventKind::Text(value) => value.len(),
+        EventKind::Comment(value) => value.len(),
         EventKind::ProcessingInstruction { target, data } => target.len() + data.len(),
         EventKind::ElementDeclaration { name, model } => name.len() + model.len(),
         EventKind::XmlDeclaration {

@@ -1591,3 +1591,58 @@ fn external_header_callbacks_preserve_buffer_input_abort_and_parent_suspension()
         }
     }
 }
+
+#[test]
+fn character_data_ownership_survives_nested_calls_and_suspension() {
+    unsafe extern "C" fn callback(data: *mut c_void, bytes: *const c_char, len: c_int) {
+        // SAFETY: Character data remains owned by the dispatch frame until this
+        // callback returns. Nested calls use a separate, independently owned parser.
+        unsafe {
+            let state = &mut *data.cast::<State>();
+            let expected = std::slice::from_raw_parts(bytes.cast::<u8>(), len as usize).to_vec();
+            let nested = XML_ParserCreate(ptr::null());
+            assert!(!nested.is_null());
+            assert_eq!(XML_Parse(nested, c"<nested/>".as_ptr(), 9, 1), OK);
+            XML_ParserFree(nested);
+            if state.events.is_empty() {
+                assert_eq!(XML_StopParser(state.parser, 1), OK);
+            }
+            let actual = std::slice::from_raw_parts(bytes.cast::<u8>(), len as usize);
+            assert_eq!(actual, expected);
+            state
+                .events
+                .push(std::str::from_utf8(actual).unwrap().to_owned());
+        }
+    }
+    // SAFETY: Inputs and state remain alive until all suspended events resume;
+    // event pointers are inspected only within their callback's lifetime.
+    unsafe {
+        for width in [1, 7, 4096] {
+            let mut state = State::default();
+            let parser = XML_ParserCreate(ptr::null());
+            assert!(!parser.is_null());
+            state.parser = parser;
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+            XML_SetCharacterDataHandler(parser, Some(callback));
+            let document = "<r>é中😀&lt;&#x1F600;<![CDATA[short]]>123456789012345678901234</r>";
+            let mut chunks = document.as_bytes().chunks(width).peekable();
+            while let Some(bytes) = chunks.next() {
+                let mut status = XML_Parse(
+                    parser,
+                    bytes.as_ptr().cast(),
+                    bytes.len() as c_int,
+                    c_int::from(chunks.peek().is_none()),
+                );
+                while status == SUSPENDED {
+                    status = XML_ResumeParser(parser);
+                }
+                assert_eq!(status, OK);
+            }
+            assert_eq!(
+                state.events.concat(),
+                "é中😀<😀short123456789012345678901234"
+            );
+            XML_ParserFree(parser);
+        }
+    }
+}

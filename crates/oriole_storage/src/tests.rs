@@ -696,3 +696,44 @@ fn custom_tracking_never_uses_the_rust_global_allocator() {
     assert_eq!(ESCAPED.with(Cell::get), 0);
     assert_eq!(LIVE.with(Cell::get), 0);
 }
+
+#[test]
+fn immutable_short_text_preserves_utf8_without_allocator_calls() {
+    let alloc = allocator(1);
+    for value in ["", "é中😀0123456789", "12345678901234567890123", "\0"] {
+        let text = crate::Text::try_from_str_in(value, alloc).unwrap();
+        assert_eq!(text.as_str(), value);
+        assert_eq!(text.as_bytes(), value.as_bytes());
+        assert_eq!(text.try_clone().unwrap(), text);
+        let moved = std::hint::black_box(text);
+        assert_eq!(moved.as_str(), value);
+    }
+    assert_eq!(CALLS.with(Cell::get), 0);
+    assert_eq!(LIVE.with(Cell::get), 0);
+}
+
+#[test]
+fn immutable_heap_text_uses_its_selected_allocator_and_clones_fallibly() {
+    let value = "123456789012345678901234";
+    let alloc = allocator(1);
+    assert!(crate::Text::try_from_str_in(value, alloc).is_err());
+    assert_eq!(LIVE.with(Cell::get), 0);
+    let alloc = allocator(usize::MAX);
+    let text = crate::Text::try_from_str_in(value, alloc).unwrap();
+    assert!(CALLS.with(Cell::get) > 0);
+    FAIL_AT.with(|fail| fail.set(CALLS.with(Cell::get) + 1));
+    assert!(text.try_clone().is_err());
+    assert_eq!(text.as_str(), value);
+    FAIL_AT.with(|fail| fail.set(usize::MAX));
+    let copy = text.try_clone().unwrap();
+    assert_eq!(copy, text);
+    drop((copy, text));
+    assert_eq!(LIVE.with(Cell::get), 0);
+    // A moved preexisting short heap buffer compares equal to an inline value,
+    // and remains owned by its allocator even though no Text growth API exists.
+    let heap = crate::Text::from(String::try_from_str_in("short", alloc).unwrap());
+    let inline = crate::Text::try_from_str_in("short", alloc).unwrap();
+    assert_eq!(heap, inline);
+    drop((heap, inline));
+    assert_eq!(LIVE.with(Cell::get), 0);
+}

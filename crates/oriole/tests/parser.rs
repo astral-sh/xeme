@@ -1,12 +1,15 @@
 use oriole::{Config, ErrorKind, EventKind, Limits, Parser};
 
-fn text(value: &str) -> oriole_storage::String {
-    oriole_storage::String::try_from_str_in(value, oriole_storage::Allocator::System).unwrap()
+fn text<T: From<oriole_storage::String>>(value: &str) -> T {
+    oriole_storage::String::try_from_str_in(value, oriole_storage::Allocator::System)
+        .unwrap()
+        .into()
 }
 
 fn parse(xml: &[u8], chunk: usize, config: Config) -> Result<Vec<EventKind>, ErrorKind> {
     let mut parser = Parser::new(config);
     let mut events = Vec::new();
+    let mut pending: Option<String> = None;
     let mut input = xml.chunks(chunk).peekable();
     while let Some(bytes) = input.next() {
         parser
@@ -14,15 +17,27 @@ fn parse(xml: &[u8], chunk: usize, config: Config) -> Result<Vec<EventKind>, Err
             .map_err(|error| error.kind)?;
         while let Some(event) = parser.next_event().map_err(|error| error.kind)? {
             if let EventKind::Text(text) = event.kind {
-                if let Some(EventKind::Text(previous)) = events.last_mut() {
-                    previous.push_str(&text).unwrap();
-                } else {
-                    events.push(EventKind::Text(text));
-                }
+                let previous = pending.get_or_insert_with(String::new);
+                previous
+                    .try_reserve(text.len())
+                    .map_err(|_| ErrorKind::NoMemory)?;
+                previous.push_str(&text);
             } else {
+                if let Some(text) = pending.take() {
+                    events.push(EventKind::Text(
+                        oriole::Text::try_from_str_in(&text, parser.allocator())
+                            .map_err(|_| ErrorKind::NoMemory)?,
+                    ));
+                }
                 events.push(event.kind);
             }
         }
+    }
+    if let Some(text) = pending {
+        events.push(EventKind::Text(
+            oriole::Text::try_from_str_in(&text, parser.allocator())
+                .map_err(|_| ErrorKind::NoMemory)?,
+        ));
     }
     assert!(parser.is_finished());
     Ok(events)
@@ -1211,7 +1226,10 @@ fn line_break_callbacks_are_separate_in_text_and_cdata() {
             data.push(value);
         }
     }
-    assert_eq!(data, ["a", "\n", "b", "\n", "c", "d", "\n", "e"].map(text));
+    assert_eq!(
+        data,
+        ["a", "\n", "b", "\n", "c", "d", "\n", "e"].map(text::<oriole::Text>)
+    );
 }
 
 #[test]

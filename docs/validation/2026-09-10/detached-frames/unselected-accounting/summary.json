@@ -1,0 +1,80 @@
+{
+  "allocation_scenarios_per_linkage": 327,
+  "archive_members": 1967,
+  "archive_sha256": "079fe9c2591a198100392f47643bf38becc67d067222a5406af679427f36a396",
+  "archive_uncompressed_bytes": 39239236,
+  "default_mode_gate_library_sha256": "195db6a38344b24d95abe14cb09ef0b14f2cade2fadf298d585de04069b88e7b",
+  "default_mode_native_c_sanitizer_runs": 6,
+  "default_mode_original_api": {
+    "exact_rows_equal": 4740,
+    "fail": 417,
+    "pass": 4323
+  },
+  "default_mode_tests": 391,
+  "fresh_matched_libraries": {
+    "baseline": {
+      "path": "/tmp/oriole-verified-builds/e439/liboriole_expat.so",
+      "sha256": "16dd25ddf3d3782bdafbdd5845180795632875cca04f36457f668f9212c0ec58"
+    },
+    "combined": {
+      "path": "/tmp/oriole-unique-accounting-evidence/verified-builds/combined/liboriole_expat.so",
+      "sha256": "938f6f5f6fbdce56cd5ab7f07f358ca21e191cd6f15f12d23194c2ee759e4db3"
+    }
+  },
+  "instruction_profiles": 40,
+  "limitations": [
+    "Native lifecycle timing on shared host, no application/Expat timing claim.",
+    "Default-mode full gates and fresh-mode attribution are separate artifacts.",
+    "C-only sanitizers; Rust release uninstrumented; LeakSanitizer disabled."
+  ],
+  "reason": "No measured wall-time benefit; no further tuning or integration.",
+  "source_manifest_sha256": "2d7f749d43b524223a01b6fef0f178dfef75ffcfd54f9eec5619400c6dd87546",
+  "status": "unselected",
+  "strict_cross_build_comparisons": 4816,
+  "wall": {
+    "generated": {
+      "candidate_over_baseline_geomean": 1.012451069069627,
+      "conditions": 4,
+      "faster_conditions": 2,
+      "maximum": 1.0405848441992596,
+      "minimum": 0.9810760142660151
+    },
+    "held_child": {
+      "candidate_over_baseline_geomean": 1.0177772153522302,
+      "conditions": 4,
+      "faster_conditions": 0,
+      "maximum": 1.0349615303327726,
+      "minimum": 1.0106768114884395
+    },
+    "real": {
+      "candidate_over_baseline_geomean": 1.0102093725547892,
+      "conditions": 24,
+      "faster_conditions": 4,
+      "maximum": 1.0384773522090578,
+      "minimum": 0.9732638730294064
+    },
+    "real_ns0": {
+      "candidate_over_baseline_geomean": 1.0163526861298517,
+      "conditions": 12,
+      "faster_conditions": 0,
+      "maximum": 1.0384773522090578,
+      "minimum": 1.0066207630642319
+    },
+    "real_ns1": {
+      "candidate_over_baseline_geomean": 1.0041031920558692,
+      "conditions": 12,
+      "faster_conditions": 4,
+      "maximum": 1.019488918730899,
+      "minimum": 0.9732638730294064
+    }
+  },
+  "wall_counts": {
+    "preflight_processes": 120,
+    "preflight_samples": 120,
+    "preflight_warmups": 120,
+    "timed_processes": 448,
+    "timed_samples": 78890,
+    "timed_warmups": 448
+  },
+  "wall_independent_review_sha256": "0752a5755de9544b43cf7c320b9240b5f78b3ce1f3d64986f5202bd5b5015429"
+}

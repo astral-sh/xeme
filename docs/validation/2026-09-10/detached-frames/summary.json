@@ -1,0 +1,163 @@
+{
+  "commit": "5bc806e5fc2a545f22c75f2a1bcbef45cfa3632b",
+  "workspace_tests": 392,
+  "workspace_executables": 33,
+  "fmt_and_strict_clippy": "passed",
+  "api": {
+    "configurations": 4740,
+    "passed": 4347,
+    "failed": 393,
+    "all_outcomes_unchanged_from": "db5a867",
+    "results_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5"
+  },
+  "strict_cases": 3318,
+  "malformed_cases": 2392,
+  "cpython": {
+    "per_linkage": {
+      "run": 802,
+      "failures": 2,
+      "skips": 14,
+      "expected_failures": 3
+    },
+    "linkages": [
+      "shared",
+      "static"
+    ],
+    "original_failures_retained": true
+  },
+  "native_benchmark": {
+    "real": {
+      "candidate_over_published": {
+        "geomean": 0.8168500621958965,
+        "below_one": 24,
+        "conditions": 24
+      },
+      "candidate_over_expat": {
+        "geomean": 2.1321801173244714,
+        "below_one": 0,
+        "conditions": 24
+      },
+      "published_over_expat": {
+        "geomean": 2.611812292215266,
+        "below_one": 0,
+        "conditions": 24
+      }
+    },
+    "namespaces-off": {
+      "candidate_over_published": {
+        "geomean": 0.781073499621435,
+        "below_one": 12,
+        "conditions": 12
+      },
+      "candidate_over_expat": {
+        "geomean": 1.9977468421290647,
+        "below_one": 0,
+        "conditions": 12
+      },
+      "published_over_expat": {
+        "geomean": 2.5613763725688545,
+        "below_one": 0,
+        "conditions": 12
+      }
+    },
+    "namespaces-on": {
+      "candidate_over_published": {
+        "geomean": 0.8542653469012006,
+        "below_one": 12,
+        "conditions": 12
+      },
+      "candidate_over_expat": {
+        "geomean": 2.275659736680535,
+        "below_one": 0,
+        "conditions": 12
+      },
+      "published_over_expat": {
+        "geomean": 2.6632413427493593,
+        "below_one": 0,
+        "conditions": 12
+      }
+    },
+    "generated": {
+      "candidate_over_published": {
+        "geomean": 0.9102877085480686,
+        "below_one": 2,
+        "conditions": 4
+      },
+      "candidate_over_expat": {
+        "geomean": 5.467714568442824,
+        "below_one": 0,
+        "conditions": 4
+      },
+      "published_over_expat": {
+        "geomean": 5.989308286400965,
+        "below_one": 0,
+        "conditions": 4
+      }
+    }
+  },
+  "python_benchmark": {
+    "all": {
+      "candidate_over_published": {
+        "geomean": 0.9176098761260817,
+        "below_one": 24,
+        "conditions": 24
+      },
+      "candidate_over_expat": {
+        "geomean": 1.4777749091593189,
+        "below_one": 2,
+        "conditions": 24
+      },
+      "published_over_expat": {
+        "geomean": 1.6087669060034806,
+        "below_one": 0,
+        "conditions": 24
+      }
+    },
+    "elementtree": {
+      "candidate_over_published": {
+        "geomean": 0.9040332687845595,
+        "below_one": 12,
+        "conditions": 12
+      },
+      "candidate_over_expat": {
+        "geomean": 1.6157677375065165,
+        "below_one": 0,
+        "conditions": 12
+      },
+      "published_over_expat": {
+        "geomean": 1.7811433769771206,
+        "below_one": 0,
+        "conditions": 12
+      }
+    },
+    "pyexpat-events": {
+      "candidate_over_published": {
+        "geomean": 0.9313903744893952,
+        "below_one": 12,
+        "conditions": 12
+      },
+      "candidate_over_expat": {
+        "geomean": 1.3515672032856303,
+        "below_one": 2,
+        "conditions": 12
+      },
+      "published_over_expat": {
+        "geomean": 1.4530727797132623,
+        "below_one": 0,
+        "conditions": 12
+      }
+    }
+  },
+  "measured_shared_sha256": "9277b71c85f3c0345697010eb282a3be18a0144f25bc2f78e2a0cee20c175dcd",
+  "assembled_shared_sha256": "5af2406b17092dad35aa61c086cdfe39e24f51e653441fd9baf50cd12da3b2fe",
+  "shared_elf_difference": "20 build-ID bytes and18 panic-location line bytes; all other bytes identical",
+  "archive": {
+    "members": 2357,
+    "excluded_binaries": 50,
+    "uncompressed_bytes": 88773781,
+    "bytes": 10786733,
+    "sha256": "9da01c97f4d273e3f571687a03859707419e797bc2752b6727fb652e8d9e4f5e",
+    "readback_all_members_verified": true
+  },
+  "scope": "Original failures remain failures. No broad faster-than-Expat, full-application, fresh sustained Rust fuzz or final PBS distribution claim."
+}

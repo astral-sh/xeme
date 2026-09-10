@@ -1,0 +1,64 @@
+{
+  "files": {
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg": {
+      "bytes": 16607,
+      "literal_attlist_openers": 0,
+      "literal_doctype_openers": 1,
+      "literal_entity_declaration_openers": 0,
+      "named_reference_spellings": {},
+      "sha256": "15ab08890f4e57be784d687d3522ef8799486e725826f8abeec29c6cde38050f"
+    },
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl": {
+      "bytes": 17433,
+      "literal_attlist_openers": 0,
+      "literal_doctype_openers": 0,
+      "literal_entity_declaration_openers": 0,
+      "named_reference_spellings": {
+        "gt": 2,
+        "lt": 2
+      },
+      "sha256": "7f13c5f4977faa028462910cf6d3fdeeeab64d87553f1fff12f0afa8f1c49818"
+    },
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui": {
+      "bytes": 26739,
+      "literal_attlist_openers": 0,
+      "literal_doctype_openers": 0,
+      "literal_entity_declaration_openers": 0,
+      "named_reference_spellings": {
+        "gt": 2,
+        "lt": 2
+      },
+      "sha256": "2620a2b6553ce99cc564eb3d359eb9cb9c7b8f259e0ccc1aa49bb3534a38101d"
+    },
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml": {
+      "bytes": 47826,
+      "literal_attlist_openers": 0,
+      "literal_doctype_openers": 0,
+      "literal_entity_declaration_openers": 0,
+      "named_reference_spellings": {},
+      "sha256": "5dbb69898d881458df5735b8c50c5166d21aa2d69659d21eea4d888a295b3b3f"
+    },
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml": {
+      "bytes": 3309653,
+      "literal_attlist_openers": 0,
+      "literal_doctype_openers": 0,
+      "literal_entity_declaration_openers": 0,
+      "named_reference_spellings": {
+        "amp": 14,
+        "gt": 25,
+        "lt": 19,
+        "quot": 1422
+      },
+      "sha256": "cf31c965cf6e788697139601da0c7e02a75a9b6c7ac764e7641f5521ffd9da06"
+    },
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml": {
+      "bytes": 151742,
+      "literal_attlist_openers": 0,
+      "literal_doctype_openers": 0,
+      "literal_entity_declaration_openers": 0,
+      "named_reference_spellings": {},
+      "sha256": "7eb8569529235c85e16d15612fc367da4538b7d515b13e32ec48ba0742c42610"
+    }
+  },
+  "scope": "Static source inventory only; not a parser run or an external-DTD-loaded claim. Native driver has no external loader."
+}

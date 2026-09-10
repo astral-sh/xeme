@@ -1,0 +1,147 @@
+{
+  "__pycache__/build_variants.cpython-312.pyc": {
+    "bytes": 6088,
+    "reason": "generated Python cache",
+    "sha256": "1a0d808b7ed31e7b9dff02c5786abd92b8a0ca62b968f727970a8f45ff95dc24"
+  },
+  "__pycache__/cross_build_checks.cpython-312.pyc": {
+    "bytes": 6921,
+    "reason": "generated Python cache",
+    "sha256": "4ca086a7e5b32ee59bc4734dfa5b93367c18a5146a90b00a843fa8d27e82526b"
+  },
+  "__pycache__/native_wall.cpython-312.pyc": {
+    "bytes": 14873,
+    "reason": "generated Python cache",
+    "sha256": "0e8f9c4ac2e1dd2180587ed3e7be521663e7e6e5728f5f2ebf8e189336e469eb"
+  },
+  "__pycache__/native_wall_final.cpython-312.pyc": {
+    "bytes": 15659,
+    "reason": "generated Python cache",
+    "sha256": "166b098929dcdc574ec16a9022a65bfc5c11d279c3fb77ec5dbb9abd797f8afc"
+  },
+  "__pycache__/profile_variants.cpython-312.pyc": {
+    "bytes": 12874,
+    "reason": "generated Python cache",
+    "sha256": "1c576efdcfc60675fd995734a82efeb940f728edf43e813da616b994d5d9da2c"
+  },
+  "__pycache__/profile_verified_variants.cpython-312.pyc": {
+    "bytes": 13340,
+    "reason": "generated Python cache",
+    "sha256": "95ce1bef4ccbd7d3f55b0276d6762da9cb961d7cf8d9692609f09b55f867e5b1"
+  },
+  "__pycache__/run_api_native.cpython-312.pyc": {
+    "bytes": 9885,
+    "reason": "generated Python cache",
+    "sha256": "4f792d828589f74c066f81e759be2569ce0d765f802b687bbff44a61aeab4a13"
+  },
+  "cross-build/__pycache__/xml_abi.cpython-312.pyc": {
+    "bytes": 9887,
+    "reason": "generated Python cache",
+    "sha256": "a3d7bb9ab853774dcfe0184eba76f1f222bdea39a536114c81c934b93b16f3a1"
+  },
+  "cross-build/baseline/control.so": {
+    "bytes": 1154471,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "e4396b26b6c9e4ebea1e97b3f568199db90d79dc428f91d3c97855229cb484b0"
+  },
+  "cross-build/baseline/liboriole_expat.so": {
+    "bytes": 1167264,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "16dd25ddf3d3782bdafbdd5845180795632875cca04f36457f668f9212c0ec58"
+  },
+  "cross-build/combined/control.so": {
+    "bytes": 1154425,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "195db6a38344b24d95abe14cb09ef0b14f2cade2fadf298d585de04069b88e7b"
+  },
+  "cross-build/combined/liboriole_expat.so": {
+    "bytes": 1167224,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "938f6f5f6fbdce56cd5ab7f07f358ca21e191cd6f15f12d23194c2ee759e4db3"
+  },
+  "liboriole_expat.a": {
+    "bytes": 11835774,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "7e91f7c7f0150e7dd95108db7ddc252f1843f62badc73623a12a0187e59ac1c3"
+  },
+  "liboriole_expat.so": {
+    "bytes": 1154425,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "195db6a38344b24d95abe14cb09ef0b14f2cade2fadf298d585de04069b88e7b"
+  },
+  "native/adversarial-dynamic": {
+    "bytes": 58704,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "f10b008b1eb2d3b227dabce717fe1b345c52c92ac4c6147880507f1948e0d07d"
+  },
+  "native/adversarial-static": {
+    "bytes": 2125752,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "667ce15679ab0893f12753584611498dfb5cc5ea8ee1efa30d632707d8e911a7"
+  },
+  "native/allocations-dynamic": {
+    "bytes": 78352,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "63990aeba65d7b1690bbe9c325877aab6b2a82a28e13fa246a0fdb34d9e28e10"
+  },
+  "native/allocations-static": {
+    "bytes": 2145232,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "21bf047c5eb4ad60eb552604ebf54cb1b6c3292a4fa3dbe488b41edad3a1d976"
+  },
+  "native/integration-dynamic": {
+    "bytes": 118304,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "4574d1871112c39ecf72e45503313da9ac584c115490bb0dcaa102733106866c"
+  },
+  "native/integration-static": {
+    "bytes": 2193024,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "3dcc0bd7503f84dbfa35e1516d61cb51f64302e2023fa9e1d12d20a201e6ec5e"
+  },
+  "shared-driver": {
+    "bytes": 36448,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "f8e80e9de1100498c5efbd8393b6fad4687b9ce4e084ef6d45bd1129003c7e00"
+  },
+  "upstream-api/liboriole_expat.so": {
+    "bytes": 1154425,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "195db6a38344b24d95abe14cb09ef0b14f2cade2fadf298d585de04069b88e7b"
+  },
+  "upstream-api/runtests": {
+    "bytes": 413032,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "7aced82170a92c7a5f8aa723f84958617ec4dabb469153907b4ac8b01c69250e"
+  },
+  "verified-builds/callback/liboriole_expat.a": {
+    "bytes": 11832006,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "0a0f5d3f39ceb01535bf05eddfa3f7fd0c5ac030e83dd4786c775d7b6ec4ece8"
+  },
+  "verified-builds/callback/liboriole_expat.so": {
+    "bytes": 1167144,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "2287f27da18a8d1e1fd122cd04c9f000095e13e788f9ccf52ff6184c1f0d2ac8"
+  },
+  "verified-builds/combined/liboriole_expat.a": {
+    "bytes": 11832782,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "1edc7edd00b3af682df35560c5f2c8e303506806c1cfeb7860b464f80ba7c635"
+  },
+  "verified-builds/combined/liboriole_expat.so": {
+    "bytes": 1167224,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "938f6f5f6fbdce56cd5ab7f07f358ca21e191cd6f15f12d23194c2ee759e4db3"
+  },
+  "verified-builds/core/liboriole_expat.a": {
+    "bytes": 11832036,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "5123f736d15201e771f4908dcdeea92444f16c05c32a25033cb1b5e6236f49cc"
+  },
+  "verified-builds/core/liboriole_expat.so": {
+    "bytes": 1167344,
+    "reason": "executable/shared/static binary; identity retained",
+    "sha256": "1ead4ce01546d2fccfa0ebc3e69d251acaebba919bbb6cd9da8fb3f581119656"
+  }
+}

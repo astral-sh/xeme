@@ -1,0 +1,70 @@
+{
+  "real": {
+    "candidate_over_published": {
+      "geomean": 0.8168500621958965,
+      "below_one": 24,
+      "conditions": 24
+    },
+    "candidate_over_expat": {
+      "geomean": 2.1321801173244714,
+      "below_one": 0,
+      "conditions": 24
+    },
+    "published_over_expat": {
+      "geomean": 2.611812292215266,
+      "below_one": 0,
+      "conditions": 24
+    }
+  },
+  "namespaces-off": {
+    "candidate_over_published": {
+      "geomean": 0.781073499621435,
+      "below_one": 12,
+      "conditions": 12
+    },
+    "candidate_over_expat": {
+      "geomean": 1.9977468421290647,
+      "below_one": 0,
+      "conditions": 12
+    },
+    "published_over_expat": {
+      "geomean": 2.5613763725688545,
+      "below_one": 0,
+      "conditions": 12
+    }
+  },
+  "namespaces-on": {
+    "candidate_over_published": {
+      "geomean": 0.8542653469012006,
+      "below_one": 12,
+      "conditions": 12
+    },
+    "candidate_over_expat": {
+      "geomean": 2.275659736680535,
+      "below_one": 0,
+      "conditions": 12
+    },
+    "published_over_expat": {
+      "geomean": 2.6632413427493593,
+      "below_one": 0,
+      "conditions": 12
+    }
+  },
+  "generated": {
+    "candidate_over_published": {
+      "geomean": 0.9102877085480686,
+      "below_one": 2,
+      "conditions": 4
+    },
+    "candidate_over_expat": {
+      "geomean": 5.467714568442824,
+      "below_one": 0,
+      "conditions": 4
+    },
+    "published_over_expat": {
+      "geomean": 5.989308286400965,
+      "below_one": 0,
+      "conditions": 4
+    }
+  }
+}

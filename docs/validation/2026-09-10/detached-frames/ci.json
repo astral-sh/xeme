@@ -1,0 +1,383 @@
+[
+  {
+    "headRefOid": "ebb9aefd566ad7178b6b869aefdfc231ad45e4e1",
+    "number": 103,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:40:32Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34533276527/job/103058860453",
+        "name": "Test (ubuntu-24.04, stable)",
+        "startedAt": "2026-09-10T21:38:25Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:40:27Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34533276527/job/103058860569",
+        "name": "Test (ubuntu-24.04-arm, stable)",
+        "startedAt": "2026-09-10T21:38:27Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:41:48Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34533276527/job/103058860277",
+        "name": "Test (windows-latest, stable)",
+        "startedAt": "2026-09-10T21:38:24Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:40:01Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34533276527/job/103058860571",
+        "name": "Test (macos-15, stable)",
+        "startedAt": "2026-09-10T21:38:32Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:40:44Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34533276527/job/103058860488",
+        "name": "Test (ubuntu-24.04, 1.96.0)",
+        "startedAt": "2026-09-10T21:38:25Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:39:32Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34533276527/job/103058860421",
+        "name": "lint",
+        "startedAt": "2026-09-10T21:38:25Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:39:28Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34533276527/job/103058860310",
+        "name": "C ABI and callback safety",
+        "startedAt": "2026-09-10T21:38:27Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:42:55Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34533276527/job/103058860074",
+        "name": "Sanitized parser fuzz smoke",
+        "startedAt": "2026-09-10T21:38:27Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:39:30Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34533276527/job/103058860419",
+        "name": "CPython XML consumers (shared)",
+        "startedAt": "2026-09-10T21:38:25Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:39:33Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34533276527/job/103058860424",
+        "name": "CPython XML consumers (static)",
+        "startedAt": "2026-09-10T21:38:25Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:39:00Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34533276527/job/103058860507",
+        "name": "PBS integration recipe",
+        "startedAt": "2026-09-10T21:38:25Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:40:10Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34533276527/job/103058860541",
+        "name": "Profile-guided library",
+        "startedAt": "2026-09-10T21:38:25Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      }
+    ],
+    "url": "https://github.com/astral-sh/oriole/pull/103"
+  },
+  {
+    "headRefOid": "fdb7afb157fb020c9d2fa775d82b9087112c7e0b",
+    "number": 105,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:49:23Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534035052/job/103061338841",
+        "name": "Test (ubuntu-24.04, stable)",
+        "startedAt": "2026-09-10T21:47:02Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:49:14Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534035052/job/103061338703",
+        "name": "Test (ubuntu-24.04-arm, stable)",
+        "startedAt": "2026-09-10T21:47:05Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:50:48Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534035052/job/103061338674",
+        "name": "Test (windows-latest, stable)",
+        "startedAt": "2026-09-10T21:47:03Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:48:53Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534035052/job/103061338862",
+        "name": "Test (macos-15, stable)",
+        "startedAt": "2026-09-10T21:47:11Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:48:57Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534035052/job/103061338932",
+        "name": "Test (ubuntu-24.04, 1.96.0)",
+        "startedAt": "2026-09-10T21:47:02Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:48:31Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534035052/job/103061338887",
+        "name": "lint",
+        "startedAt": "2026-09-10T21:47:04Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:47:56Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534035052/job/103061338848",
+        "name": "C ABI and callback safety",
+        "startedAt": "2026-09-10T21:47:05Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:51:31Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534035052/job/103061338877",
+        "name": "Sanitized parser fuzz smoke",
+        "startedAt": "2026-09-10T21:47:05Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:47:55Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534035052/job/103061338879",
+        "name": "CPython XML consumers (shared)",
+        "startedAt": "2026-09-10T21:47:02Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:48:06Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534035052/job/103061338834",
+        "name": "CPython XML consumers (static)",
+        "startedAt": "2026-09-10T21:47:02Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:47:37Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534035052/job/103061338831",
+        "name": "PBS integration recipe",
+        "startedAt": "2026-09-10T21:47:02Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:48:59Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534035052/job/103061338780",
+        "name": "Profile-guided library",
+        "startedAt": "2026-09-10T21:47:02Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      }
+    ],
+    "url": "https://github.com/astral-sh/oriole/pull/105"
+  },
+  {
+    "headRefOid": "5bc806e5fc2a545f22c75f2a1bcbef45cfa3632b",
+    "number": 106,
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:54:51Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534544572/job/103062982747",
+        "name": "Test (ubuntu-24.04, stable)",
+        "startedAt": "2026-09-10T21:52:57Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:55:08Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534544572/job/103062982962",
+        "name": "Test (ubuntu-24.04-arm, stable)",
+        "startedAt": "2026-09-10T21:52:59Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T22:00:04Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534544572/job/103062983106",
+        "name": "Test (windows-latest, stable)",
+        "startedAt": "2026-09-10T21:55:31Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:56:00Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534544572/job/103062982933",
+        "name": "Test (macos-15, stable)",
+        "startedAt": "2026-09-10T21:53:31Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:55:12Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534544572/job/103062982795",
+        "name": "Test (ubuntu-24.04, 1.96.0)",
+        "startedAt": "2026-09-10T21:52:57Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:54:16Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534544572/job/103062982629",
+        "name": "lint",
+        "startedAt": "2026-09-10T21:52:57Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:53:43Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534544572/job/103062982915",
+        "name": "C ABI and callback safety",
+        "startedAt": "2026-09-10T21:52:59Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:57:17Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534544572/job/103062982688",
+        "name": "Sanitized parser fuzz smoke",
+        "startedAt": "2026-09-10T21:52:59Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:54:00Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534544572/job/103062983103",
+        "name": "CPython XML consumers (shared)",
+        "startedAt": "2026-09-10T21:52:57Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:54:01Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534544572/job/103062982667",
+        "name": "CPython XML consumers (static)",
+        "startedAt": "2026-09-10T21:52:57Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:53:30Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534544572/job/103062982497",
+        "name": "PBS integration recipe",
+        "startedAt": "2026-09-10T21:52:57Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-09-10T21:54:28Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/oriole/actions/runs/34534544572/job/103062983024",
+        "name": "Profile-guided library",
+        "startedAt": "2026-09-10T21:52:57Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      }
+    ],
+    "url": "https://github.com/astral-sh/oriole/pull/106"
+  }
+]

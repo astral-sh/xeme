@@ -1,0 +1,386 @@
+{
+  "status": "passed",
+  "change": "An ordinary parser without shared DTD ownership or an active DOCTYPE calls the unchanged event body directly; all owner-bearing and first-DTD-step calls keep the original scope and initialization path.",
+  "base_source_manifest_sha256": "24f8554557433e1fc0319714711a04e4f84682c3695933b70ad2e6abcc9441c3",
+  "candidate_source_manifest_sha256": "6df36c10f64906e99a350014cb6c594a6b9097de6d744ab46b2c5381a52a389e",
+  "patch_sha256": "0e9e0ede7fd0ec6dd125195525e491d25e1b70d11b4d26df7e9a4e8c498abe99",
+  "candidate_library_sha256": "a9bb484b0b1469a7d767151fa15b59e471eceb9295a13d52abb8a23c5d769c6a",
+  "parent_library_sha256": "cfe373a6a79c874e53fd3bea166514b5e6ca5db0890121afff089d704914eece",
+  "tests": {
+    "scoped_core_ffi_release": 319,
+    "per_suite_pass_counts": [
+      35,
+      7,
+      6,
+      10,
+      12,
+      11,
+      6,
+      12,
+      6,
+      9,
+      7,
+      6,
+      12,
+      2,
+      2,
+      5,
+      12,
+      5,
+      7,
+      54,
+      2,
+      5,
+      1,
+      1,
+      4,
+      78,
+      2,
+      0,
+      0
+    ],
+    "clippy": "passed release all-targets -D warnings",
+    "fmt": "passed"
+  },
+  "validation": {
+    "status": "passed",
+    "publication_cases": 432,
+    "publication_changed": 0,
+    "publication_reference_differences": 9,
+    "doctype_cases": 4104,
+    "doctype_reference_differences": 0,
+    "custom_provenance": {
+      "cases": 15288,
+      "changed_from_baseline": 0,
+      "reference_outcome_differences": 0,
+      "reference_successful_event_differences": 0,
+      "libraries": {
+        "reference": {
+          "path": "/home/dev-user/.cache/oriole/expat-build/libexpat.so",
+          "sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+        },
+        "baseline": {
+          "path": "/tmp/oriole-shared-dtd-implementation/liboriole_expat.so",
+          "sha256": "cfe373a6a79c874e53fd3bea166514b5e6ca5db0890121afff089d704914eece"
+        },
+        "candidate": {
+          "path": "/tmp/oriole-shared-dtd-tiny-profile/split.so",
+          "sha256": "a9bb484b0b1469a7d767151fa15b59e471eceb9295a13d52abb8a23c5d769c6a"
+        }
+      }
+    },
+    "upstream": {
+      "returncode": 1,
+      "selection_complete": true,
+      "library_origin_verified": true,
+      "passed": 4077,
+      "failed": 663,
+      "timed_out": false
+    },
+    "upstream_changed": 0
+  },
+  "timing": [
+    {
+      "input": "text",
+      "namespaces": false,
+      "relative_to_baseline": {
+        "baseline": 1.0,
+        "shared": 1.0546896363139184,
+        "split": 0.9720436119653341,
+        "outlined": 0.9972504811657961
+      },
+      "outlined_over_shared": 0.9429608504018668,
+      "split_over_shared": 0.9278871740287387,
+      "split_over_shared_each_pair": [
+        0.8942629277077436,
+        0.9448798328108674,
+        0.9035862785862785,
+        0.9141820067409906,
+        0.972638526055273,
+        0.9278871740287387,
+        0.9288340336134455
+      ]
+    },
+    {
+      "input": "text",
+      "namespaces": true,
+      "relative_to_baseline": {
+        "baseline": 1.0,
+        "shared": 1.0559918925766405,
+        "split": 0.9740985271711529,
+        "outlined": 0.997255489021956
+      },
+      "outlined_over_shared": 0.9583140342751274,
+      "split_over_shared": 0.9818274891220886,
+      "split_over_shared_each_pair": [
+        0.9349808061420346,
+        0.9818274891220886,
+        0.9924987066735644,
+        0.9244350282485876,
+        1.1181102362204725,
+        0.9871366092101878,
+        0.915218412400188
+      ]
+    },
+    {
+      "input": "gtk",
+      "namespaces": false,
+      "relative_to_baseline": {
+        "baseline": 1.0,
+        "shared": 0.982408175919631,
+        "split": 0.9871261311350098,
+        "outlined": 1.005414488160008
+      },
+      "outlined_over_shared": 1.0213706266364513,
+      "split_over_shared": 0.9973487796963185,
+      "split_over_shared_each_pair": [
+        1.0136390171803222,
+        0.9952030067400522,
+        1.011535744264635,
+        0.9973487796963185,
+        1.012320417091614,
+        0.9927607641802411,
+        0.9865169795486886
+      ]
+    },
+    {
+      "input": "gtk",
+      "namespaces": true,
+      "relative_to_baseline": {
+        "baseline": 1.0,
+        "shared": 0.9834502009223549,
+        "split": 1.004673130343321,
+        "outlined": 1.0078426885371687
+      },
+      "outlined_over_shared": 1.0222945286385001,
+      "split_over_shared": 1.0215800753317876,
+      "split_over_shared_each_pair": [
+        1.0215800753317876,
+        1.0077118798250164,
+        1.0277187250630964,
+        1.00874936460313,
+        1.0265657768607899,
+        1.0223504868897293,
+        0.973469599688202
+      ]
+    },
+    {
+      "input": "attributes",
+      "namespaces": false,
+      "relative_to_baseline": {
+        "baseline": 1.0,
+        "shared": 0.9926873857404022,
+        "split": 0.9524680073126143,
+        "outlined": 0.996316758747698
+      },
+      "outlined_over_shared": 0.9923217550274224,
+      "split_over_shared": 0.9594843462246778,
+      "split_over_shared_each_pair": [
+        0.8592471358428805,
+        0.8655104712041884,
+        0.9594843462246778,
+        0.9737335834896811,
+        0.9524680073126143,
+        0.9630314232902034,
+        0.9671005061460592
+      ]
+    },
+    {
+      "input": "attributes",
+      "namespaces": true,
+      "relative_to_baseline": {
+        "baseline": 1.0,
+        "shared": 0.9872813990461049,
+        "split": 0.9639523656260058,
+        "outlined": 1.0160462130937098
+      },
+      "outlined_over_shared": 1.0293075684380033,
+      "split_over_shared": 0.9835796387520526,
+      "split_over_shared_each_pair": [
+        0.9835796387520526,
+        0.9966953073364178,
+        0.9648953301127215,
+        0.9966722129783694,
+        0.904931669637552,
+        0.989921976592978,
+        0.9807383627608347
+      ]
+    },
+    {
+      "input": "batik",
+      "namespaces": false,
+      "relative_to_baseline": {
+        "baseline": 1.0,
+        "shared": 0.9936923039797143,
+        "split": 0.9911151508894068,
+        "outlined": 0.991295167412716
+      },
+      "outlined_over_shared": 1.0067524810109945,
+      "split_over_shared": 0.9972427184466021,
+      "split_over_shared_each_pair": [
+        0.9972427184466021,
+        0.9942755151111605,
+        1.0589005602371715,
+        0.9807466515310865,
+        1.0120515652660724,
+        1.0144832831028365,
+        0.982151289073567
+      ]
+    },
+    {
+      "input": "batik",
+      "namespaces": true,
+      "relative_to_baseline": {
+        "baseline": 1.0,
+        "shared": 1.0139499902819913,
+        "split": 0.9953978890794932,
+        "outlined": 1.012267698770938
+      },
+      "outlined_over_shared": 1.0032253279083374,
+      "split_over_shared": 0.9858920844914209,
+      "split_over_shared_each_pair": [
+        0.9801345896794801,
+        0.9994480830083156,
+        0.9858920844914209,
+        1.0158361569467724,
+        0.9817031398192148,
+        0.9774242521015833,
+        1.0043753202275978
+      ]
+    },
+    {
+      "input": "empty",
+      "namespaces": false,
+      "relative_to_baseline": {
+        "baseline": 1.0,
+        "shared": 1.0972222222222223,
+        "split": 0.9472016895459345,
+        "outlined": 0.9897119341563787
+      },
+      "outlined_over_shared": 0.8969072164948454,
+      "split_over_shared": 0.8540489642184558,
+      "split_over_shared_each_pair": [
+        0.8540489642184558,
+        0.8402810304449649,
+        0.8499765588373183,
+        0.9994692144373672,
+        0.8580217699952675,
+        0.9428274428274427,
+        0.8495782567947517
+      ]
+    },
+    {
+      "input": "empty",
+      "namespaces": true,
+      "relative_to_baseline": {
+        "baseline": 1.0,
+        "shared": 1.1144688644688643,
+        "split": 0.9676524953789281,
+        "outlined": 1.004139834406624
+      },
+      "outlined_over_shared": 0.8936605316973415,
+      "split_over_shared": 0.8644207066557108,
+      "split_over_shared_each_pair": [
+        0.8566191446028514,
+        0.8535496957403651,
+        0.9208443271767812,
+        0.9286987522281639,
+        0.8644207066557108,
+        0.8721122112211221,
+        0.8605316973415134
+      ]
+    },
+    {
+      "input": "docbook",
+      "namespaces": false,
+      "relative_to_baseline": {
+        "baseline": 1.0,
+        "shared": 0.9881031124180646,
+        "split": 0.9915983772000646,
+        "outlined": 1.0117289681898918
+      },
+      "outlined_over_shared": 1.0192513575587632,
+      "split_over_shared": 0.9989710919540815,
+      "split_over_shared_each_pair": [
+        1.0058423116801154,
+        1.0196986945068054,
+        1.0007481006215775,
+        0.9989710919540815,
+        0.9942127531283929,
+        0.9893279503995334,
+        0.9918773932223124
+      ]
+    },
+    {
+      "input": "docbook",
+      "namespaces": true,
+      "relative_to_baseline": {
+        "baseline": 1.0,
+        "shared": 1.010391220887764,
+        "split": 1.0017711259701654,
+        "outlined": 1.0283885708461449
+      },
+      "outlined_over_shared": 1.017812258842241,
+      "split_over_shared": 0.989390370379701,
+      "split_over_shared_each_pair": [
+        1.0095448681887014,
+        1.0026092718297221,
+        0.989390370379701,
+        1.0068731886062534,
+        0.9634961337618412,
+        0.9807107418285873,
+        0.9853206913502836
+      ]
+    },
+    {
+      "input": "constructor",
+      "namespaces": false,
+      "relative_to_baseline": {
+        "baseline": 1.0,
+        "shared": 1.029930071915195,
+        "split": 1.0179717936705257,
+        "outlined": 1.035738837864469
+      },
+      "outlined_over_shared": 1.0065077532161981,
+      "split_over_shared": 0.984149576127865,
+      "split_over_shared_each_pair": [
+        0.9561349296352678,
+        0.9600653530695552,
+        1.000892595200151,
+        0.9579064827182193,
+        0.9967984185261436,
+        1.0398380979881023,
+        0.984149576127865
+      ]
+    },
+    {
+      "input": "constructor",
+      "namespaces": true,
+      "relative_to_baseline": {
+        "baseline": 1.0,
+        "shared": 1.031784722755014,
+        "split": 1.015205291960742,
+        "outlined": 1.0149680013209923
+      },
+      "outlined_over_shared": 0.9938880810516528,
+      "split_over_shared": 0.993621143147799,
+      "split_over_shared_each_pair": [
+        0.9011200134914217,
+        0.9365491855700863,
+        1.014136554208069,
+        1.0371539903038316,
+        1.026407942640223,
+        0.9666338394607117,
+        0.993621143147799
+      ]
+    }
+  ],
+  "decision": "Select the plain split; retain explicit inline/inline-never comparison as an unselected experiment. No broad project speedup claim.",
+  "limits": [
+    "Four-way microbenchmark on a shared host, seven randomized paired process cohorts. CPU frequency/cache/bandwidth were not fixed. Native parser timings include one timer pair per parse; constructor-only does not.",
+    "Complete parser timing includes creation, handlers, parse, native callback hashing and free; excludes file load, dlopen, process startup and output. Project XML only, not end-to-end applications. Batik external DTD is skipped by every engine.",
+    "Plain split retains five saved registers and 80 stack bytes in next_event in this build. Control-flow/code-layout effects are plausible, but stack-frame elimination is not the demonstrated mechanism. Hardware perf events were unavailable (paranoid4); no settings changed.",
+    "The complete upstream matrix retains663 failing observations and9 publication callback-prefix differences. No limits, chosen allocator policy, upstream assertions or thresholds changed.",
+    "This followup performed no new Rust ASan campaign; selected-allocation sweeps and existing core/FFI lifecycle tests ran in release."
+  ]
+}

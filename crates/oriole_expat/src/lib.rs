@@ -2195,17 +2195,26 @@ pub unsafe extern "C" fn XML_SetReparseDeferralEnabled(parser: XML_Parser, enabl
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn XML_SetBillionLaughsAttackProtectionMaximumAmplification(
-    _parser: XML_Parser,
-    _factor: f32,
+    parser: XML_Parser,
+    factor: f32,
 ) -> u8 {
-    0
+    if parser.is_null() || in_allocator_callback() {
+        return 0;
+    }
+    // SAFETY: Only shared atomic root-family settings change; no core borrow
+    // survives an event callback and no allocation callback can reenter here.
+    unsafe { u8::from((*parser).core.set_entity_maximum_amplification(factor)) }
 }
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn XML_SetBillionLaughsAttackProtectionActivationThreshold(
-    _parser: XML_Parser,
-    _bytes: u64,
+    parser: XML_Parser,
+    bytes: u64,
 ) -> u8 {
-    0
+    if parser.is_null() || in_allocator_callback() {
+        return 0;
+    }
+    // SAFETY: The live parser's shared family settings contain only atomic data.
+    unsafe { u8::from((*parser).core.set_entity_activation_threshold(bytes)) }
 }
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn XML_SetAllocTrackerMaximumAmplification(
@@ -2343,7 +2352,7 @@ pub struct XML_Feature {
 // SAFETY: The feature table is immutable and points only to static C strings.
 unsafe impl Sync for XML_Feature {}
 
-static FEATURES: [XML_Feature; 8] = [
+static FEATURES: [XML_Feature; 10] = [
     XML_Feature {
         feature: 6,
         name: c"sizeof(XML_Char)".as_ptr(),
@@ -2363,6 +2372,16 @@ static FEATURES: [XML_Feature; 8] = [
         feature: 4,
         name: c"XML_CONTEXT_BYTES".as_ptr(),
         value: INPUT_CONTEXT_BYTES as c_long,
+    },
+    XML_Feature {
+        feature: 11,
+        name: c"XML_BLAP_MAX_AMP".as_ptr(),
+        value: 100,
+    },
+    XML_Feature {
+        feature: 12,
+        name: c"XML_BLAP_ACT_THRES".as_ptr(),
+        value: 8 * 1024 * 1024,
     },
     XML_Feature {
         feature: 13,

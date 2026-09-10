@@ -76,6 +76,30 @@ impl Decoder {
         Ok(())
     }
 
+    /// A complete BOM can precede enough input to choose the declaration's
+    /// encoding. Report only that recognized prefix for consumed-byte accounting.
+    pub(crate) fn pending_bom_len(&self, external_content: bool) -> usize {
+        if self.encoding.is_some()
+            // An explicit unknown protocol encoding must first be resolved by
+            // its handler; these bytes have not yet been recognized as a BOM.
+            || self.requested.as_deref().is_some_and(|name| {
+                Encoding::named(name).is_none() && !name.eq_ignore_ascii_case("UTF-16")
+            })
+            || (external_content
+                && self.requested.as_deref().and_then(Encoding::named) == Some(Encoding::Latin1))
+        {
+            return 0;
+        }
+        if self.pending.starts_with(&[0xef, 0xbb, 0xbf]) {
+            3
+        } else if self.pending.starts_with(&[0xff, 0xfe]) || self.pending.starts_with(&[0xfe, 0xff])
+        {
+            2
+        } else {
+            0
+        }
+    }
+
     pub(crate) fn feed(
         &mut self,
         bytes: &[u8],
@@ -606,6 +630,7 @@ pub(crate) struct Source {
     cursor: usize,
     encoding: Encoding,
     raw_index: usize,
+    accounted_raw: usize,
     raw_widths: Vec<u8>,
     decoded_end: Position,
     decoded_end_cr: bool,
@@ -626,6 +651,7 @@ impl Source {
             cursor: 0,
             encoding: Encoding::Utf8,
             raw_index: 0,
+            accounted_raw: 0,
             raw_widths: Vec::new_in(allocator),
             decoded_end: Position {
                 line: 1,
@@ -842,6 +868,19 @@ impl Source {
             Ok(None)
         }
     }
+    pub(crate) fn accounting_bytes(&self, count: usize) -> usize {
+        (self.raw_index + self.raw_len(0, count)).saturating_sub(self.accounted_raw)
+    }
+
+    pub(crate) fn unaccounted_prefix(&self, raw_bytes: usize) -> usize {
+        raw_bytes.saturating_sub(self.accounted_raw)
+    }
+
+    /// Record the delta returned by an accounting query without rescanning text.
+    pub(crate) fn mark_accounted(&mut self, bytes: usize) {
+        self.accounted_raw += bytes;
+    }
+
     pub(crate) fn consume(&mut self, count: usize) {
         self.raw_index += self.raw_len(0, count);
         let text = &self.text[self.cursor..self.cursor + count];

@@ -80,7 +80,7 @@ impl Parser {
             },
             self.allocator,
         )?);
-        self.consume(3);
+        self.consume(3)?;
         self.continue_header_composition()
     }
 
@@ -166,7 +166,7 @@ impl Parser {
                         self.event_raw("")?;
                     }
                     state.raw.push_str(&raw)?;
-                    self.consume(end + 1);
+                    self.consume(end + 1)?;
                     continue;
                 }
                 if entity.expect("declared parameter").value.is_none() {
@@ -219,7 +219,7 @@ impl Parser {
                 let mut source_name = string("%", self.allocator)?;
                 source_name.push_str(name)?;
                 let position = self.source().position(end + 1);
-                self.consume(end + 1);
+                self.consume(end + 1)?;
                 let mut source =
                     crate::encoding::Source::entity(value, source_name, position, self.stack.len());
                 source.dtd_fragment = true;
@@ -243,7 +243,7 @@ impl Parser {
                 return Err(self.err(ErrorKind::Syntax, "missing conditional section keyword"));
             }
             state.raw.push(character)?;
-            self.consume(character.len_utf8());
+            self.consume(character.len_utf8())?;
             if character == '[' {
                 let included = state.selected.expect("complete conditional keyword");
                 if self.conditional.included_sources.len() >= self.config.limits.max_depth {
@@ -318,7 +318,7 @@ impl Parser {
             },
             self.allocator,
         )?);
-        self.consume(2); // The declaration opener is one lexical token.
+        self.consume(2)?; // The declaration opener is one lexical token.
         self.continue_declaration_composition()
     }
 
@@ -371,12 +371,12 @@ impl Parser {
                     state.ready = state.expansion.text.len() + offset + character.len_utf8();
                 }
                 self.append_declaration_token(&mut state.expansion, &text[..end], false)?;
-                self.consume(end);
+                self.consume(end)?;
                 continue;
             }
             match text.as_bytes()[0] {
                 b'>' => {
-                    self.consume(1);
+                    self.consume(1)?;
                     if state.semantic.is_some() {
                         state.complete = true;
                         state.ready = state.expansion.text.len();
@@ -436,7 +436,7 @@ impl Parser {
                         },
                     )?;
                     self.append_declaration_token(&mut state.expansion, &text[..end], false)?;
-                    self.consume(end);
+                    self.consume(end)?;
                     state.quote_checked = 0;
                     state.ready = state.expansion.text.len();
                 }
@@ -447,7 +447,7 @@ impl Parser {
                     }
                     if text[1..].starts_with(whitespace) {
                         self.append_declaration_token(&mut state.expansion, "%", false)?;
-                        self.consume(1);
+                        self.consume(1)?;
                         continue;
                     }
                     let limit = self.config.limits.max_token_bytes;
@@ -514,7 +514,7 @@ impl Parser {
                             .raw
                             .try_push_str(&self.source().remaining()[..end + 1])?;
                         self.declaration_raw_boundary(&mut state.expansion)?;
-                        self.consume(end + 1);
+                        self.consume(end + 1)?;
                         continue;
                     }
                     if self
@@ -556,7 +556,7 @@ impl Parser {
                         let mut source_name = string("%", self.allocator)?;
                         source_name.push_str(name)?;
                         let position = self.source().position(end + 1);
-                        self.consume(end + 1);
+                        self.consume(end + 1)?;
                         state.request = Some(semantic::Request {
                             source_name,
                             system_id,
@@ -581,7 +581,7 @@ impl Parser {
                     let mut source_name = string("%", self.allocator)?;
                     source_name.push_str(name)?;
                     let position = self.source().position(end + 1);
-                    self.consume(end + 1);
+                    self.consume(end + 1)?;
                     let mut source = crate::encoding::Source::entity(
                         value,
                         source_name,

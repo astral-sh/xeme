@@ -1,4 +1,6 @@
 /* Public-header consumer assertions. Run against both Expat and Oriole. */
+#define XML_DTD 1
+#define XML_GE 1
 #include "expat.h"
 #include <assert.h>
 #include <stdio.h>
@@ -136,6 +138,45 @@ static void handler_argument(void) {
     XML_ParserFree(active);
     active = NULL;
 }
+
+static void XMLCALL restrict_expansion(void *data, const char *name,
+                                     const char **attributes) {
+    (void)name;
+    (void)attributes;
+    XML_Parser parser = data;
+    assert(XML_SetBillionLaughsAttackProtectionMaximumAmplification(parser, 1.0f));
+    assert(XML_SetBillionLaughsAttackProtectionActivationThreshold(parser, 0));
+}
+
+static void entity_amplification(void) {
+    const char *prefix = "<!DOCTYPE r [<!ENTITY e 'abcdefghijklmnop'>]><r>&e;</r>";
+    char input[4096];
+    memset(input, ' ', sizeof(input));
+    memcpy(input, prefix, strlen(prefix));
+    for (int buffered = 0; buffered < 2; buffered++) {
+        XML_Parser parser = XML_ParserCreate(NULL);
+        assert(parser);
+        XML_UseParserAsHandlerArg(parser);
+        XML_SetStartElementHandler(parser, restrict_expansion);
+        enum XML_Status status;
+        if (buffered) {
+            void *buffer = XML_GetBuffer(parser, sizeof(input));
+            assert(buffer);
+            memcpy(buffer, input, sizeof(input));
+            status = XML_ParseBuffer(parser, sizeof(input), XML_TRUE);
+        } else {
+            status = XML_Parse(parser, input, sizeof(input), XML_TRUE);
+        }
+        /* A callback can tighten the limit; trailing unparsed bytes cannot
+           dilute the root's already consumed input. */
+        assert(status == XML_STATUS_ERROR);
+        assert(XML_GetErrorCode(parser) == XML_ERROR_AMPLIFICATION_LIMIT_BREACH);
+        assert(XML_ParserReset(parser, NULL));
+        assert(XML_Parse(parser, prefix, (int)strlen(prefix), XML_TRUE) == XML_STATUS_OK);
+        XML_ParserFree(parser);
+    }
+}
+
 int main(void) {
     incremental();
     buffer_api();
@@ -143,6 +184,7 @@ int main(void) {
     handler_argument();
     custom_memory();
     failed_allocation();
+    entity_amplification();
     printf("C ABI full integration passed (%s)\n", XML_ExpatVersion());
     return 0;
 }

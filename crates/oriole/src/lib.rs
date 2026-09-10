@@ -4,6 +4,7 @@
 //! [`Parser::next_event`]. No borrowed parser state crosses an event boundary.
 #![forbid(unsafe_code)]
 
+mod accounting;
 mod dtd;
 mod encoding;
 mod names;
@@ -15,7 +16,9 @@ use oriole_storage::{
     try_insert, try_push, try_set_insert,
 };
 use std::fmt;
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, Ordering};
+
+use accounting::EntityBudget;
 
 pub use oriole_storage::Text;
 
@@ -429,7 +432,7 @@ pub struct Parser {
     error: Option<Error>,
     received: usize,
     feed_start_byte: usize,
-    expanded: Shared<AtomicUsize>,
+    expanded: Shared<EntityBudget>,
     fragment: bool,
     external_subset: bool,
     external_depth: usize,
@@ -509,7 +512,7 @@ impl Parser {
             error: None,
             received: 0,
             feed_start_byte: 0,
-            expanded: Shared::try_new_in(AtomicUsize::new(0), allocator)?,
+            expanded: Shared::try_new_in(EntityBudget::new(), allocator)?,
             fragment: false,
             external_subset: false,
             external_depth: 0,
@@ -887,6 +890,19 @@ impl Parser {
         ) {
             self.decoding_error = Some((error.kind, error.message));
         }
+        // Encoding detection may retain a complete BOM while awaiting a text
+        // declaration. These bytes already form a token, even on a nonfinal feed.
+        let prefix = self
+            .decoder
+            .pending_bom_len(self.fragment && !self.external_subset);
+        let bytes = self.sources[0].unaccounted_prefix(prefix);
+        if !self.expanded.account(bytes, self.fragment, true) {
+            return self.fail(
+                ErrorKind::LimitExceeded,
+                "entity amplification limit exceeded",
+            );
+        }
+        self.sources[0].mark_accounted(bytes);
         Ok(())
     }
 
@@ -1119,6 +1135,22 @@ impl Parser {
     pub fn is_finished(&self) -> bool {
         self.finished
     }
+    /// Set the maximum consumed-input amplification for this root and its children.
+    /// A factor below one or NaN is invalid; infinity disables the relative check.
+    pub fn set_entity_maximum_amplification(&self, factor: f32) -> bool {
+        !self.fragment && self.expanded.set_factor(factor)
+    }
+
+    /// Set the combined direct/indirect byte threshold for relative amplification.
+    /// Absolute input, expansion-work and nesting limits remain independent.
+    pub fn set_entity_activation_threshold(&self, bytes: u64) -> bool {
+        if self.fragment {
+            return false;
+        }
+        self.expanded.set_threshold(bytes);
+        true
+    }
+
     pub fn set_namespace_triplets(&mut self, enabled: bool) {
         self.config.namespace_triplets = enabled;
     }
@@ -1262,8 +1294,35 @@ impl Parser {
         }
         Ok(())
     }
-    fn consume(&mut self, count: usize) {
+    fn account_source(&mut self, count: usize) -> Result<(), Error> {
+        let bytes = self.source().accounting_bytes(count);
+        if !self
+            .expanded
+            .account(bytes, self.fragment || self.sources.len() > 1, true)
+        {
+            return Err(self.err(
+                ErrorKind::LimitExceeded,
+                "entity amplification limit exceeded",
+            ));
+        }
+        self.source_mut().mark_accounted(bytes);
+        Ok(())
+    }
+
+    fn account_entity_bytes(&self, bytes: usize, enforce: bool) -> Result<(), Error> {
+        if !self.expanded.account(bytes, true, enforce) {
+            return Err(self.err(
+                ErrorKind::LimitExceeded,
+                "entity amplification limit exceeded",
+            ));
+        }
+        Ok(())
+    }
+
+    fn consume(&mut self, count: usize) -> Result<(), Error> {
+        self.account_source(count)?;
         self.source_mut().consume(count);
+        Ok(())
     }
     fn is_source_final(&self) -> bool {
         self.sources.len() > 1
@@ -1272,6 +1331,9 @@ impl Parser {
     }
 
     fn next_event_inner(&mut self) -> Result<Option<Event>, Error> {
+        // Encoding detection consumes a BOM without producing a text token.
+        // Charge that prefix even for empty input or an incomplete next token.
+        self.account_source(0)?;
         if let Some((_, position)) = self.active_parameter_reference.take() {
             if self
                 .parameter_read
@@ -1413,7 +1475,7 @@ impl Parser {
                 }
                 let position = self.source().position(9);
                 self.save_current_raw(9)?;
-                self.consume(9);
+                self.consume(9)?;
                 self.in_cdata = true;
                 self.emit(EventKind::StartCdata, position)?;
                 continue;
@@ -1495,6 +1557,7 @@ impl Parser {
                     continue;
                 }
             }
+            self.account_source(end)?;
             let position = self.source().position(end);
             let mut token =
                 std::mem::replace(&mut self.token_scratch, String::new_in(self.allocator));
@@ -1534,7 +1597,7 @@ impl Parser {
                 ScanMode::DtdDeclaration => unreachable!("DTD scanner only runs in DTD context"),
             }
             self.token_scratch = token;
-            self.consume(end);
+            self.consume(end)?;
         }
     }
 
@@ -1713,7 +1776,7 @@ impl Parser {
         } else if self.default_events {
             self.emit(EventKind::Default, position)?;
         }
-        self.consume(end);
+        self.consume(end)?;
         Ok(true)
     }
 
@@ -1725,7 +1788,7 @@ impl Parser {
         if text.starts_with("]]>") {
             let position = self.source().position(3);
             self.save_current_raw(3)?;
-            self.consume(3);
+            self.consume(3)?;
             self.in_cdata = false;
             self.emit(EventKind::EndCdata, position)?;
             return Ok(true);
@@ -1773,7 +1836,7 @@ impl Parser {
         let position = self.source().position(end);
         let value = self.character_data(text)?;
         self.save_current_raw(end)?;
-        self.consume(end);
+        self.consume(end)?;
         self.emit(EventKind::Text(value), position)?;
         Ok(true)
     }
@@ -1819,10 +1882,14 @@ impl Parser {
         };
         let position = self.source().position(end + 1);
         self.save_current_raw(end + 1)?;
+        self.account_source(end + 1)?;
         if let Some(character) = character
             .map_err(|(kind, offset)| self.err_at(kind, "invalid character reference", offset))?
         {
-            self.consume(end + 1);
+            if !self.source().remaining()[1..end].starts_with('#') {
+                self.account_entity_bytes(1, false)?;
+            }
+            self.consume(end + 1)?;
             self.emit(
                 EventKind::Text(Text::try_from_str_in(
                     character.encode_utf8(&mut [0; 4]),
@@ -1847,7 +1914,7 @@ impl Parser {
         }
         let Some(entity) = self.entities.get(&name) else {
             if self.has_external_subset && !self.standalone {
-                self.consume(end + 1);
+                self.consume(end + 1)?;
                 self.emit(
                     EventKind::SkippedEntity {
                         name,
@@ -1924,7 +1991,7 @@ impl Parser {
             }
             self.charge_expansion(name.len())?;
             context.try_push_str(&name)?;
-            self.consume(end + 1);
+            self.consume(end + 1)?;
             self.emit(
                 EventKind::ExternalEntityReference {
                     context: Some(context),
@@ -1936,7 +2003,7 @@ impl Parser {
             return Ok(true);
         }
         if !self.expand_internal_entities {
-            self.consume(end + 1);
+            self.consume(end + 1)?;
             self.emit(
                 EventKind::SkippedEntity {
                     name,
@@ -1952,7 +2019,7 @@ impl Parser {
             .expect("internal entity has replacement text");
         self.charge_expansion(value.len())?;
         let value = value.try_clone()?;
-        self.consume(end + 1);
+        self.consume(end + 1)?;
         try_push(
             &mut self.sources,
             Source::entity(value, name, position, self.stack.len()),
@@ -2478,6 +2545,7 @@ impl Parser {
 
     fn charge_expansion(&self, size: usize) -> Result<(), Error> {
         self.expanded
+            .expanded
             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
                 expanded
                     .checked_add(size)
@@ -2526,12 +2594,18 @@ impl Parser {
 
     fn expand_attribute(&mut self, value: &str, chain: &mut Vec<String>) -> Result<String, Error> {
         if !value.bytes().any(|byte| matches!(byte, b'&' | b'<')) {
+            if !chain.is_empty() {
+                self.account_entity_bytes(value.len(), true)?;
+            }
             return normalize_attribute_whitespace(value, self.allocator);
         }
         let mut output = String::try_with_capacity_in(value.len(), self.allocator)?;
         let mut rest = value;
         while !rest.is_empty() {
             let end = rest.find(['&', '<']).unwrap_or(rest.len());
+            if !chain.is_empty() {
+                self.account_entity_bytes(end, true)?;
+            }
             output.try_push_str(&normalize_attribute_whitespace(
                 &rest[..end],
                 self.allocator,
@@ -2552,10 +2626,16 @@ impl Parser {
                     "unclosed attribute entity reference",
                 )
             })?;
+            if !chain.is_empty() {
+                self.account_entity_bytes(end + 1, true)?;
+            }
             let name = &rest[1..end];
             if let Some(character) = character_reference(name)
                 .map_err(|(kind, _)| self.err(kind, "invalid character reference"))?
             {
+                if !name.starts_with('#') {
+                    self.account_entity_bytes(1, false)?;
+                }
                 output.try_push(character)?;
             } else {
                 if !is_name(name)

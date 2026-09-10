@@ -1,5 +1,62 @@
 use super::*;
 
+#[test]
+fn entity_amplification_controls_apply_after_suspension_and_reset_to_defaults() {
+    unsafe extern "C" fn suspend(data: *mut c_void, _: *const c_char, _: *const *const c_char) {
+        // SAFETY: Parser-as-handler-argument supplies the active test parser.
+        unsafe { assert_eq!(XML_StopParser(data.cast(), 1), OK) };
+    }
+    // SAFETY: Buffers and the parser remain live through each synchronous API call.
+    unsafe {
+        let document = format!("<!DOCTYPE r [<!ENTITY e '{}'>]><r>&e;</r>", "a".repeat(100));
+        for buffered in [false, true] {
+            let parser = XML_ParserCreate(ptr::null());
+            assert!(!parser.is_null());
+            assert_eq!(
+                XML_SetBillionLaughsAttackProtectionMaximumAmplification(ptr::null_mut(), 2.0),
+                0
+            );
+            assert_eq!(
+                XML_SetBillionLaughsAttackProtectionActivationThreshold(ptr::null_mut(), 0),
+                0
+            );
+            for invalid in [f32::NAN, f32::NEG_INFINITY, -1.0, 0.0, 0.5] {
+                assert_eq!(
+                    XML_SetBillionLaughsAttackProtectionMaximumAmplification(parser, invalid),
+                    0
+                );
+            }
+            XML_UseParserAsHandlerArg(parser);
+            XML_SetStartElementHandler(parser, Some(suspend));
+            let status = if buffered {
+                let buffer = XML_GetBuffer(parser, document.len() as c_int);
+                assert!(!buffer.is_null());
+                ptr::copy_nonoverlapping(document.as_ptr(), buffer.cast(), document.len());
+                XML_ParseBuffer(parser, document.len() as c_int, 1)
+            } else {
+                XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1)
+            };
+            assert_eq!(status, SUSPENDED);
+            assert_eq!(
+                XML_SetBillionLaughsAttackProtectionMaximumAmplification(parser, 1.0),
+                1
+            );
+            assert_eq!(
+                XML_SetBillionLaughsAttackProtectionActivationThreshold(parser, 0),
+                1
+            );
+            assert_eq!(XML_ResumeParser(parser), ERROR);
+            assert_eq!(XML_GetErrorCode(parser), 43);
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            assert_eq!(
+                XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1),
+                OK
+            );
+            XML_ParserFree(parser);
+        }
+    }
+}
+
 #[derive(Default)]
 struct State {
     parser: XML_Parser,

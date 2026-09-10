@@ -112,15 +112,21 @@ The following Expat modes are explicitly unsupported:
   declarations. Oriole rejects these aliases before UTF-8 tokenization, including
   in text, names, attributes, DTDs, and CDATA. Custom-encoding compatibility is
   therefore incomplete.
-- Caller-supplied hash salts and relative entity-amplification tuning: those setters
-  return false. Oriole instead applies absolute input, token, nesting, attribute,
-  and entity-expansion limits.
+- Caller-supplied hash salts: those setters return false.
 - Wide-character and `XML_LARGE_SIZE` builds: the header rejects these configurations.
 
 `XML_GetInputContext` exposes original encoded bytes while parsing is active,
 including entity-reference spellings and UTF-16 input. The buffer retains at least
 1,024 bytes before pending input and remains valid for the requesting callback.
 The getter returns null outside parsing and after reset.
+
+Entity amplification supports Expat's maximum-factor and activation-threshold
+controls. Root and child parsers share consumed input and replacement-byte counts;
+unparsed trailing input does not increase the denominator. Defaults are 100 times
+the consumed root input, activated at 8 MiB of combined direct and indirect bytes.
+An external parser used before any root input follows Expat's 22-byte baseline.
+These controls leave Oriole's absolute input, token, nesting, attribute, and
+entity-expansion limits active.
 
 Reparse deferral is configurable, with progressive scanning in both modes. The
 live-allocation tracker supports Expat's maximum-amplification and activation

@@ -128,13 +128,14 @@ impl Parser {
     }
 
     fn conditional_raw(&mut self, count: usize) -> Result<(), Error> {
+        self.account_source(count)?;
         if self.default_events {
             let position = self.source().position(count);
             self.save_current_raw(count)?;
             self.emit(EventKind::Default, position)?;
         }
         self.declaration_allowed = false;
-        self.consume(count);
+        self.consume(count)?;
         Ok(())
     }
 
@@ -383,13 +384,14 @@ impl Parser {
             .find(|(_, character)| !whitespace(*character))
             .map_or(text.len(), |(index, _)| index);
         if whitespace_len > 0 {
+            self.account_source(whitespace_len)?;
             if self.default_events {
                 let position = self.source().position(whitespace_len);
                 self.save_current_raw(whitespace_len)?;
                 self.emit(EventKind::Default, position)?;
             }
             self.declaration_allowed = false;
-            self.consume(whitespace_len);
+            self.consume(whitespace_len)?;
             return Ok(true);
         }
         if text
@@ -461,8 +463,9 @@ impl Parser {
             }
             let position = self.source().position(end);
             let raw = string(&text[..end], self.allocator)?;
+            self.account_source(end)?;
             self.finish_doctype(position, &raw)?;
-            self.consume(end);
+            self.consume(end)?;
             return Ok(true);
         }
         if ["<", "<!", "<!-"].contains(&text) && !self.is_source_final() {
@@ -521,6 +524,7 @@ impl Parser {
         {
             return self.start_declaration_composition();
         }
+        self.account_source(end)?;
         let token = string(&self.source().remaining()[..end], self.allocator)?;
         if let Some((offset, _)) = token
             .char_indices()
@@ -534,7 +538,7 @@ impl Parser {
         }
         self.save_current_raw(end)?;
         self.parse_subset(&token, 0)?;
-        self.consume(end);
+        self.consume(end)?;
         Ok(true)
     }
 
@@ -572,7 +576,7 @@ impl Parser {
         self.has_external_subset = true;
         if !self.parameter_entities_enabled() {
             self.declarations_skipped = !self.standalone;
-            self.consume(end + 1);
+            self.consume(end + 1)?;
             if !self.standalone {
                 self.emit(EventKind::NotStandalone, position)?;
                 self.event_raw("")?;
@@ -585,7 +589,7 @@ impl Parser {
             }
             self.declarations_skipped |= !self.standalone;
             let raw = string(&self.source().remaining()[..end + 1], self.allocator)?;
-            self.consume(end + 1);
+            self.consume(end + 1)?;
             self.emit(
                 EventKind::SkippedEntity {
                     name,
@@ -621,7 +625,7 @@ impl Parser {
         if let Some(value) = &entity.value {
             self.charge_expansion(value.len())?;
             let value = value.try_clone()?;
-            self.consume(end + 1);
+            self.consume(end + 1)?;
             try_push(
                 &mut self.sources,
                 crate::encoding::Source::entity(value, source_name, position, self.stack.len()),
@@ -630,7 +634,7 @@ impl Parser {
             self.charge_external_identifiers(entity)?;
             let system_id = entity.system_id.try_clone()?;
             let public_id = entity.public_id.try_clone()?;
-            self.consume(end + 1);
+            self.consume(end + 1)?;
             let mut raw = source_name.try_clone()?;
             raw.push(';')?;
             self.active_parameter_reference = Some((source_name, position));
@@ -1326,6 +1330,9 @@ impl Parser {
         let mut skipped = false;
         loop {
             let start = current.rest.find(['&', '%']).unwrap_or(current.rest.len());
+            if current.name.is_some() {
+                self.account_entity_bytes(start, true)?;
+            }
             self.append_entity_value(&mut value, &current.rest[..start], current.normalize)?;
             current.rest = &current.rest[start..];
             if current.rest.is_empty() {
@@ -1341,6 +1348,9 @@ impl Parser {
                     "unclosed reference in entity value",
                 )
             })?;
+            if current.name.is_some() {
+                self.account_entity_bytes(end + 1, true)?;
+            }
             let reference = &current.rest[1..end];
             let parameter = current.rest.starts_with('%');
             if !parameter && reference.starts_with('#') {

@@ -268,6 +268,7 @@ impl Parser {
                     self.charge_expansion(end - start)?;
                     let token = string(&text[start..end], self.allocator)?;
                     let position = self.source().position_at(start, end - start);
+                    self.account_source(end)?;
                     state.content_start = end;
                     self.value_state = Some(state);
                     self.parse_pi(&token, position)?;
@@ -363,6 +364,11 @@ impl Parser {
         while let Some(frame) = state.frames.last() {
             let rest = &frame.text[frame.offset..];
             let start = rest.find(['&', '%']).unwrap_or(rest.len());
+            if state.child {
+                self.account_source(state.content_start + frame.offset + start)?;
+            } else if frame.name.is_some() {
+                self.account_entity_bytes(start, true)?;
+            }
             self.value_append(state, &rest[..start], frame.normalize)?;
             state.frames.last_mut().expect("value frame").offset += start;
             let frame = state.frames.last().expect("value frame");
@@ -374,6 +380,11 @@ impl Parser {
             let end = rest.find(';').ok_or_else(|| {
                 self.err(ErrorKind::InvalidToken, "unclosed entity value reference")
             })?;
+            if state.child {
+                self.account_source(state.content_start + frame.offset + end + 1)?;
+            } else if frame.name.is_some() {
+                self.account_entity_bytes(end + 1, true)?;
+            }
             let name = &rest[1..end];
             if rest.starts_with('&') && name.starts_with('#') {
                 let value = character_reference(name)

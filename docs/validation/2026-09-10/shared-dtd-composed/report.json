@@ -1,0 +1,34 @@
+{
+  "runtime_commit": "b93201e8e8cfbb82b9557e6b1fc4055e818e0699",
+  "library_sha256": {
+    "liboriole_expat.so": "cfe373a6a79c874e53fd3bea166514b5e6ca5db0890121afff089d704914eece",
+    "liboriole_expat.a": "42a2be7e01e5a473e6441f1b5c5882ad7f562b5efdb9098013f1ffe22f3c91b2"
+  },
+  "rust_checks": 319,
+  "upstream": {
+    "passed": 4077,
+    "failed": 663,
+    "changed_outcomes": 0
+  },
+  "ordinary_exact": 1518,
+  "attribute_exact_to_baseline": 6468,
+  "custom_attribute_exact": 372,
+  "malformed_attributes": 384,
+  "malformed_text": 2392,
+  "streaming": 32,
+  "custom_exact": 36456,
+  "active_membership": 4680,
+  "doctype_exact": 4104,
+  "missing_parameter_cases": 1944,
+  "child_cases": 6,
+  "publication": {
+    "cases": 432,
+    "baseline_full_differences": 264,
+    "candidate_full_differences": 9,
+    "parent_outcome_differences": 0,
+    "child_outcome_differences": 0
+  },
+  "native_suites": 6,
+  "allocation_scenarios_per_linkage": 336,
+  "scope": "Exact shared-DTD candidate before the ordinary no-owner fast-path followup. Original resource limits retained. No full new fuzz/PBS campaign."
+}

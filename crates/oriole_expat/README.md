@@ -15,11 +15,11 @@ arrays remain valid only for their callback. No Rust reference to the parser cro
 a callback: handlers receive owned event data, and handler changes take effect for
 subsequent events.
 
-Callbacks can suspend, abort, change handlers, or free the parser. A callback's
-`XML_ParserFree` request is deferred until the outer parse returns; that parse returns
-`XML_STATUS_ERROR`, and the handle is then invalid. Recursive parsing, buffer
-requests, and reset on the active parser fail with `XML_ERROR_UNEXPECTED_STATE`.
-Recursive `XML_DefaultCurrent` calls are also rejected. A different parser can be
+Callbacks can suspend, abort, or change handlers. As in Expat 2.8.4, recursive
+parsing, buffer requests, reset, and resume on the active parser fail without
+changing its error state. `XML_ParserFree` during a callback is ignored; the caller
+must free the handle after the outer operation returns. Recursive
+`XML_DefaultCurrent` calls are rejected with `XML_ERROR_UNEXPECTED_STATE`. A different parser can be
 used from a callback. Rust panics in allocating entry points are caught before the C
 boundary. Allocation failures on the C path return errors without allocating an
 error message.

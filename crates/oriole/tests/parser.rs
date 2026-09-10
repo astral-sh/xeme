@@ -92,6 +92,123 @@ fn plain_attributes_and_short_references_keep_normalization_and_errors() {
 }
 
 #[test]
+fn default_events_preserve_whitespace_without_character_data_callbacks() {
+    let xml = "<?test processing instruction?>\r\n<!DOCTYPE r [ \n<!-- comment -->\t<!ELEMENT r EMPTY>\r\n]>\n<r/> \r\n";
+    let ordinary = parse(xml.as_bytes(), 1, Config::default()).unwrap();
+    assert!(
+        !ordinary
+            .iter()
+            .any(|event| matches!(event, EventKind::Default | EventKind::Text(_)))
+    );
+    for chunk in 1..=xml.len() {
+        let mut parser = Parser::new(Config::default());
+        parser.set_default_events(true);
+        let mut raw = String::new();
+        for bytes in xml.as_bytes().chunks(chunk) {
+            parser.feed(bytes, false).unwrap();
+            while let Some(event) = parser.next_event().unwrap() {
+                assert!(!matches!(event.kind, EventKind::Text(_)));
+                raw.push_str(parser.current_raw().unwrap_or_default());
+            }
+        }
+        parser.feed(&[], true).unwrap();
+        while let Some(event) = parser.next_event().unwrap() {
+            assert!(!matches!(event.kind, EventKind::Text(_)));
+            raw.push_str(parser.current_raw().unwrap_or_default());
+        }
+        assert_eq!(raw, xml, "chunk {chunk}");
+    }
+    let mut parser = Parser::new(Config::default());
+    parser.set_default_events(true);
+    parser.feed(b"\n<r/>\n", true).unwrap();
+    assert_eq!(
+        parser.next_event().unwrap().unwrap().kind,
+        EventKind::Default
+    );
+    parser.set_default_events(false);
+    while let Some(event) = parser.next_event().unwrap() {
+        assert!(!matches!(event.kind, EventKind::Default));
+    }
+
+    parser.set_default_events(true);
+    let mut child = parser.external_child(None, None).unwrap();
+    child.feed(b" \r\n", true).unwrap();
+    assert_eq!(
+        child.next_event().unwrap().unwrap().kind,
+        EventKind::Default
+    );
+    assert_eq!(child.current_raw(), Some(" \r\n"));
+    assert!(child.next_event().unwrap().is_none());
+}
+
+#[test]
+fn truncated_cdata_openers_and_utf16_units_have_contextual_errors() {
+    for (xml, kind) in [
+        ("<![", ErrorKind::Syntax),
+        ("<![<a/>", ErrorKind::Syntax),
+        ("<a/><![", ErrorKind::JunkAfterDocumentElement),
+        ("<a/><![<a/>", ErrorKind::JunkAfterDocumentElement),
+        ("<a><![<a/>", ErrorKind::UnclosedToken),
+        ("<a><![C<a/>", ErrorKind::UnclosedToken),
+        ("<a><![CD<a/>", ErrorKind::InvalidToken),
+        ("<a><![CDATA[", ErrorKind::UnclosedCdataSection),
+    ] {
+        for chunk in 1..=xml.len() {
+            assert_eq!(parse(xml.as_bytes(), chunk, Config::default()), Err(kind));
+        }
+    }
+    let mut xml = vec![0xfe, 0xff];
+    for unit in "<a><![CDATA[Z".encode_utf16() {
+        xml.extend_from_slice(&unit.to_be_bytes());
+    }
+    for (tail, kind) in [
+        (&[0][..], ErrorKind::UnclosedCdataSection),
+        (&[0xd8][..], ErrorKind::UnclosedCdataSection),
+        (&[0xd8, 0x34][..], ErrorKind::PartialCharacter),
+        (&[0xd8, 0x34, 0xdd][..], ErrorKind::PartialCharacter),
+    ] {
+        let mut input = xml.clone();
+        input.extend_from_slice(tail);
+        for chunk in 1..=input.len() {
+            assert_eq!(parse(&input, chunk, Config::default()), Err(kind));
+        }
+    }
+}
+
+#[test]
+fn external_fragments_emit_trailing_text_before_reporting_unbalanced_markup() {
+    let parent = Parser::new(Config::default());
+    for xml in ["<tag>\r", "<tag>]", "<tag>]]"] {
+        for chunk in 1..=xml.len() {
+            let mut child = parent.external_child(Some(""), None).unwrap();
+            let mut text = String::new();
+            for bytes in xml.as_bytes().chunks(chunk) {
+                child.feed(bytes, false).unwrap();
+                while let Some(event) = child.next_event().unwrap() {
+                    if let EventKind::Text(value) = event.kind {
+                        text.push_str(&value);
+                    }
+                }
+            }
+            child.feed(&[], true).unwrap();
+            let error = loop {
+                match child.next_event() {
+                    Ok(Some(event)) => {
+                        if let EventKind::Text(value) = event.kind {
+                            text.push_str(&value);
+                        }
+                    }
+                    Err(error) => break error,
+                    Ok(None) => panic!("unbalanced external fragment was accepted"),
+                }
+            };
+            assert_eq!(error.kind, ErrorKind::AsynchronousEntity);
+            assert_eq!(text, xml[5..].replace('\r', "\n"));
+        }
+    }
+}
+
+#[test]
 fn namespaces_apply_to_dtd_names_and_entity_references() {
     let namespaces = Config {
         namespace_separator: Some('|'),

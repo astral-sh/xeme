@@ -148,6 +148,9 @@ pub struct Event {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum EventKind {
+    /// Opt-in whitespace callback outside element content. Read [`Parser::current_raw`]
+    /// before advancing the parser; this event does not own the raw token.
+    Default,
     StartElement {
         name: String,
         attributes: Vec<Attribute>,
@@ -364,6 +367,7 @@ pub struct Parser {
     last_position: Position,
     current_raw: String,
     expand_internal_entities: bool,
+    default_events: bool,
     decoding_error: Option<(ErrorKind, &'static str)>,
     id_attribute_index: Option<usize>,
 }
@@ -436,6 +440,7 @@ impl Parser {
             },
             current_raw: String::new_in(allocator),
             expand_internal_entities: true,
+            default_events: false,
             decoding_error: None,
             id_attribute_index: None,
         })
@@ -524,6 +529,7 @@ impl Parser {
         child.external_subset = context.is_none();
         child.external_depth = self.external_depth + 1;
         child.expand_internal_entities = self.expand_internal_entities;
+        child.default_events = self.default_events;
         child.parameter_mode = self.parameter_mode;
         child.has_external_subset = self.has_external_subset;
         child.standalone = self.standalone;
@@ -740,6 +746,11 @@ impl Parser {
             )
         {
             let source = &self.sources[0];
+            let (kind, message) = if self.in_cdata && kind == ErrorKind::UnclosedToken {
+                (ErrorKind::UnclosedCdataSection, "unclosed CDATA section")
+            } else {
+                (kind, message)
+            };
             result = Err(Error {
                 kind,
                 message,
@@ -805,6 +816,12 @@ impl Parser {
     }
     pub fn set_expand_internal_entities(&mut self, enabled: bool) {
         self.expand_internal_entities = enabled;
+    }
+    /// Include whitespace-only [`EventKind::Default`] events in the prolog, epilog,
+    /// and DTD. Disabled by default; the C interface enables these for its default
+    /// handler. Read [`Self::current_raw`] before the next parser operation.
+    pub fn set_default_events(&mut self, enabled: bool) {
+        self.default_events = enabled;
     }
     /// Index of the declared ID attribute on the current start element, if present.
     #[must_use]
@@ -947,7 +964,14 @@ impl Parser {
                     return Err(self.err(ErrorKind::NoElements, "document contains no element"));
                 }
                 if !self.stack.is_empty() {
-                    return Err(self.err(ErrorKind::NoElements, "unclosed element"));
+                    return Err(self.err(
+                        if self.fragment {
+                            ErrorKind::AsynchronousEntity
+                        } else {
+                            ErrorKind::NoElements
+                        },
+                        "unclosed element",
+                    ));
                 }
                 self.finished = true;
                 return Ok(None);
@@ -984,6 +1008,16 @@ impl Parser {
                 continue;
             }
             let remaining = self.source().remaining();
+            if remaining.starts_with("<![") && self.stack.is_empty() && !self.fragment {
+                return Err(self.err(
+                    if self.closed_root {
+                        ErrorKind::JunkAfterDocumentElement
+                    } else {
+                        ErrorKind::Syntax
+                    },
+                    "CDATA outside the document element",
+                ));
+            }
             let mode = if remaining.starts_with("<!--") {
                 ScanMode::Comment
             } else if remaining.starts_with("<![CDATA[") {
@@ -1003,6 +1037,9 @@ impl Parser {
             } else if remaining.starts_with("</") {
                 ScanMode::Tag
             } else if remaining.len() == 1
+                // Expat requires the complete six-character CDATA opener before
+                // deciding whether text following `<![` is valid markup.
+                || (remaining.starts_with("<![") && remaining.len() < 9)
                 || (remaining.starts_with("<!")
                     && ["<!--", "<![CDATA[", "<!DOCTYPE"]
                         .iter()
@@ -1180,11 +1217,17 @@ impl Parser {
             ));
         }
         let position = self.source().position(end);
-        let value = self.source_text(text)?;
+        let value = if !self.stack.is_empty() || self.fragment {
+            Some(self.source_text(text)?)
+        } else {
+            None
+        };
         self.save_current_raw(end)?;
         self.declaration_allowed = false;
-        if !self.stack.is_empty() || self.fragment {
+        if let Some(value) = value {
             self.emit(EventKind::Text(value), position)?;
+        } else if self.default_events {
+            self.emit(EventKind::Default, position)?;
         }
         self.consume(end);
         Ok(true)

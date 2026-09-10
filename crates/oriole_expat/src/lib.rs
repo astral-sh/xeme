@@ -4,10 +4,11 @@
 //!
 //! As with Expat, callers must provide live parser handles, valid buffers and
 //! callbacks with the declared ABI, and serialize access to each parser family. A
-//! callback may change handlers, stop parsing, or free its parser. Recursive
-//! parsing of the same parser is rejected; freeing during a callback is deferred
-//! until the outer parse call returns. No Rust parser reference crosses an event
-//! callback; allocation callbacks cannot reenter parser APIs.
+//! callback may change handlers or stop parsing. Recursive parsing of the same
+//! parser is rejected without changing its error state. Callback-time Free is
+//! ignored; the caller must free the parser after the outer operation returns.
+//! No Rust parser reference crosses an event callback; allocation callbacks cannot
+//! reenter parser APIs.
 #![allow(non_snake_case, non_camel_case_types)]
 #![allow(clippy::missing_safety_doc)] // The common C ABI contract is documented above.
 
@@ -147,7 +148,7 @@ pub struct XML_ParserStruct {
     handlers: Handlers,
     handler_arg_is_parser: bool,
     busy: bool,
-    pending_free: bool,
+    destroying: bool,
     state: c_int,
     error: c_int,
     final_buffer: bool,
@@ -295,7 +296,7 @@ unsafe fn create(
                     handlers: Handlers::default(),
                     handler_arg_is_parser: false,
                     busy: false,
-                    pending_free: false,
+                    destroying: false,
                     state: 0,
                     error: 0,
                     final_buffer: false,
@@ -414,15 +415,13 @@ pub unsafe extern "C" fn XML_ParserFree(parser: XML_Parser) {
         // SAFETY: Caller provides a live, exclusively accessed handle. Busy parsers
         // remain allocated until dispatch returns; no callback owns a Rust reference.
         unsafe {
-            if (*parser).busy {
-                (*parser).pending_free = true;
-            } else {
+            if !(*parser).busy {
                 destroy(parser);
             }
         }
     };
     // SAFETY: The operation checks the handle before use; its tracker clone owns
-    // the accounting context even when a callback requests parser deletion.
+    // the accounting context even when an operation destroys the parser.
     unsafe { with_parser_tracking(parser, operation) }
 }
 
@@ -440,10 +439,10 @@ unsafe fn release_encoding(parser: XML_Parser) {
 
 unsafe fn destroy(parser: XML_Parser) {
     // SAFETY: Final destruction owns the live handle. A release callback sees a
-    // busy parser, so recursive Free is deferred until this single drop.
+    // busy parser, so recursive Free is ignored during this single drop.
     unsafe {
         (*parser).busy = true;
-        (*parser).pending_free = true;
+        (*parser).destroying = true;
         {
             let lifetime = &(*parser).lifetime;
             *lifetime
@@ -467,7 +466,6 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
         // SAFETY: Guard the optional encoding-release callback like other C callbacks.
         unsafe {
             if (*parser).busy {
-                (*parser).error = UNEXPECTED_STATE;
                 return 0;
             }
             if (*parser).child_depth != 0 {
@@ -492,7 +490,7 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                 let family = Shared::try_new_in(FamilyBudget::default(), allocator)?;
                 let lifetime = Shared::try_new_in(Mutex::new(parser), allocator)?;
                 release_encoding(parser);
-                if (*parser).pending_free {
+                if (*parser).destroying {
                     return Ok(ERROR);
                 }
                 {
@@ -528,11 +526,11 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
             }
             Ok(OK)
         }));
-        // SAFETY: Reset owns the busy guard until completion or deferred destruction.
+        // SAFETY: Reset owns the busy guard until completion.
         unsafe { u8::from(finish_fallible_operation(parser, result) == OK) }
     };
     // SAFETY: The operation checks the handle before use; its tracker clone owns
-    // the accounting context even when a callback requests parser deletion.
+    // the accounting context even when an operation destroys the parser.
     unsafe { with_parser_tracking(parser, operation) }
 }
 
@@ -608,6 +606,7 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
     // signature. C strings and attribute arrays live for the whole callback.
     unsafe {
         match kind {
+            EventKind::Default => handled = false,
             EventKind::StartElement {
                 name,
                 mut attributes,
@@ -873,7 +872,7 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
         // SAFETY: No callback retains parser-owned data. The raw token must be
         // copied since a default callback can change parser configuration.
         unsafe {
-            if !(*parser).pending_free && (*parser).handlers.default.is_some() {
+            if !(*parser).destroying && (*parser).handlers.default.is_some() {
                 let raw = (*parser)
                     .core
                     .current_raw()
@@ -932,9 +931,9 @@ impl<'a> Iterator for DtdFragments<'a> {
 
 unsafe fn dispatch_default_fragment(parser: XML_Parser, raw: &str) -> bool {
     // SAFETY: Called only by the guarded parse loop. Each callback can replace
-    // handlers, stop, or request deletion; re-read scalar state between fragments.
+    // handlers or stop; re-read scalar state between fragments.
     unsafe {
-        if (*parser).pending_free || (*parser).state == 3 || (*parser).error != 0 {
+        if (*parser).destroying || (*parser).state == 3 || (*parser).error != 0 {
             return false;
         }
         let Some(callback) = (*parser).handlers.default else {
@@ -948,7 +947,7 @@ unsafe fn dispatch_default_fragment(parser: XML_Parser, raw: &str) -> bool {
         (*parser).default_dispatch = true;
         callback(arg, raw.as_ptr().cast(), raw.len() as c_int);
         (*parser).default_dispatch = false;
-        !(*parser).pending_free && (*parser).state != 3 && (*parser).error == 0
+        !(*parser).destroying && (*parser).state != 3 && (*parser).error == 0
     }
 }
 
@@ -956,7 +955,7 @@ unsafe fn drain_default_fragments(parser: XML_Parser) {
     // SAFETY: The queue is accessed only outside callbacks; a popped String owns
     // its data during dispatch. Remaining fragments survive suspension/resumption.
     unsafe {
-        while !(*parser).pending_free && (*parser).state != 3 && (*parser).error == 0 {
+        while !(*parser).destroying && (*parser).state != 3 && (*parser).error == 0 {
             if (*parser).handlers.default.is_none() {
                 while (*parser).default_pending.pop_front().is_some() {}
                 return;
@@ -980,7 +979,7 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
         // SAFETY: No references to parser fields escape this scope or cross
         // dispatch. The busy guard prevents freeing or reparsing the core.
         let event = unsafe {
-            if (*parser).pending_free {
+            if (*parser).destroying {
                 return ERROR;
             }
             if (*parser).error != 0 {
@@ -1009,7 +1008,7 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
                     {
                         continue;
                     }
-                    if (*parser).pending_free {
+                    if (*parser).destroying {
                         return ERROR;
                     }
                     if (*parser).error != 0 {
@@ -1046,7 +1045,7 @@ unsafe fn merge_external_subset(parser: XML_Parser) -> bool {
                 .unwrap_or_else(std::sync::PoisonError::into_inner);
             let parent = *parent_guard;
             if !parent.is_null()
-                && !(*parent).pending_free
+                && !(*parent).destroying
                 && let Err(error) = (*parent).core.merge_external_subset(&(*parser).core)
             {
                 (*parser).error = error_code(&error.kind);
@@ -1093,11 +1092,11 @@ unsafe fn try_resolve_unknown_encoding(parser: XML_Parser) -> Result<bool, Alloc
             release: None,
         };
         let accepted = handler(arg, c_name.as_ptr(), &mut info) != 0;
-        if accepted && !(*parser).pending_free && (*parser).error == 0 {
+        if accepted && !(*parser).destroying && (*parser).error == 0 {
             match (*parser).core.set_encoding_map(&name, info.map) {
                 Ok(()) => {
                     release_encoding(parser);
-                    if !(*parser).pending_free && (*parser).error == 0 {
+                    if !(*parser).destroying && (*parser).error == 0 {
                         (*parser).encoding_release = info.release;
                         (*parser).encoding_data = info.data;
                         return Ok(true);
@@ -1119,7 +1118,7 @@ unsafe fn finish_fallible_operation(
     result: Result<Result<c_int, AllocError>, Box<dyn std::any::Any + Send>>,
 ) -> c_int {
     // SAFETY: Allocating operations own the busy guard and can set a scalar error
-    // without allocating; the common finalizer honors any deferred deletion.
+    // without allocating; the common finalizer releases the operation guard.
     unsafe {
         let result = result.map(|result| {
             result.unwrap_or_else(|_| {
@@ -1131,22 +1130,18 @@ unsafe fn finish_fallible_operation(
     }
 }
 
-/// End a guarded operation and honor callback-time deletion exactly once.
+/// End a guarded operation after every callback has returned.
 unsafe fn finish_operation(
     parser: XML_Parser,
     result: Result<c_int, Box<dyn std::any::Any + Send>>,
 ) -> c_int {
-    // SAFETY: Only the outer guarded operation clears busy or frees this handle.
+    // SAFETY: Only the outer guarded operation clears busy; callback-time Free is ignored.
     unsafe {
         let result = result.unwrap_or_else(|_| {
             (*parser).error = UNEXPECTED_STATE;
             ERROR
         });
         (*parser).busy = false;
-        if (*parser).pending_free {
-            destroy(parser);
-            return ERROR;
-        }
         result
     }
 }
@@ -1168,7 +1163,6 @@ pub unsafe extern "C" fn XML_Parse(
         // same-parser recursion before touching the Rust core or its input storage.
         unsafe {
             if (*parser).busy {
-                (*parser).error = UNEXPECTED_STATE;
                 return ERROR;
             }
             if len < 0 || (input.is_null() && len != 0) {
@@ -1214,7 +1208,7 @@ pub unsafe extern "C" fn XML_Parse(
                     {
                         return run_events(parser);
                     }
-                    if (*parser).pending_free {
+                    if (*parser).destroying {
                         return ERROR;
                     }
                     if (*parser).error != 0 {
@@ -1230,7 +1224,7 @@ pub unsafe extern "C" fn XML_Parse(
         }
     };
     // SAFETY: The operation checks the handle before use; its tracker clone owns
-    // the accounting context even when a callback requests parser deletion.
+    // the accounting context even when an operation destroys the parser.
     unsafe { with_parser_tracking(parser, operation) }
 }
 
@@ -1246,7 +1240,6 @@ pub unsafe extern "C" fn XML_GetBuffer(parser: XML_Parser, len: c_int) -> *mut c
             // SAFETY: No callback runs while resizing the exclusively accessed buffer.
             unsafe {
                 if (*parser).busy {
-                    (*parser).error = UNEXPECTED_STATE;
                     return ptr::null_mut();
                 }
                 if len < 0 {
@@ -1288,7 +1281,7 @@ pub unsafe extern "C" fn XML_GetBuffer(parser: XML_Parser, len: c_int) -> *mut c
         .unwrap_or(ptr::null_mut())
     };
     // SAFETY: The operation checks the handle before use; its tracker clone owns
-    // the accounting context even when a callback requests parser deletion.
+    // the accounting context even when an operation destroys the parser.
     unsafe { with_parser_tracking(parser, operation) }
 }
 
@@ -1305,7 +1298,6 @@ pub unsafe extern "C" fn XML_ParseBuffer(
     // the input before any callback can modify or free the parser.
     unsafe {
         if (*parser).busy {
-            (*parser).error = UNEXPECTED_STATE;
             return ERROR;
         }
         if !(*parser).buffer_available {
@@ -1366,7 +1358,6 @@ pub unsafe extern "C" fn XML_ResumeParser(parser: XML_Parser) -> c_int {
         // SAFETY: The busy guard and panic boundary match XML_Parse.
         unsafe {
             if (*parser).busy {
-                (*parser).error = UNEXPECTED_STATE;
                 return ERROR;
             }
             if (*parser).state != 3 {
@@ -1383,7 +1374,7 @@ pub unsafe extern "C" fn XML_ResumeParser(parser: XML_Parser) -> c_int {
         }
     };
     // SAFETY: The operation checks the handle before use; its tracker clone owns
-    // the accounting context even when a callback requests parser deletion.
+    // the accounting context even when an operation destroys the parser.
     unsafe { with_parser_tracking(parser, operation) }
 }
 
@@ -1474,6 +1465,7 @@ pub unsafe extern "C" fn XML_SetDefaultHandler(parser: XML_Parser, handler: Text
         // SAFETY: Scalar updates on the caller's serialized live handle.
         unsafe {
             (*parser).handlers.default = handler;
+            (*parser).core.set_default_events(handler.is_some());
             (*parser).handlers.default_expand = false;
             (*parser)
                 .core
@@ -1488,6 +1480,7 @@ pub unsafe extern "C" fn XML_SetDefaultHandlerExpand(parser: XML_Parser, handler
         // SAFETY: Scalar updates on the caller's serialized live handle.
         unsafe {
             (*parser).handlers.default = handler;
+            (*parser).core.set_default_events(handler.is_some());
             (*parser).handlers.default_expand = true;
             (*parser).core.set_expand_internal_entities(true);
         }
@@ -1504,7 +1497,7 @@ pub unsafe extern "C" fn XML_DefaultCurrent(parser: XML_Parser) {
         }
         // SAFETY: A default callback may only run within an already guarded parse.
         unsafe {
-            if !(*parser).busy || (*parser).pending_free {
+            if !(*parser).busy || (*parser).destroying {
                 return;
             }
             if (*parser).default_dispatch {
@@ -1536,7 +1529,7 @@ pub unsafe extern "C" fn XML_DefaultCurrent(parser: XML_Parser) {
         }
     };
     // SAFETY: The operation checks the handle before use; its tracker clone owns
-    // the accounting context even when a callback requests parser deletion.
+    // the accounting context even when an operation destroys the parser.
     unsafe { with_parser_tracking(parser, operation) }
 }
 
@@ -1614,7 +1607,7 @@ pub unsafe extern "C" fn XML_SetEncoding(parser: XML_Parser, encoding: *const c_
         result.ok().and_then(Result::ok).unwrap_or(ERROR)
     };
     // SAFETY: The operation checks the handle before use; its tracker clone owns
-    // the accounting context even when a callback requests parser deletion.
+    // the accounting context even when an operation destroys the parser.
     unsafe { with_parser_tracking(parser, operation) }
 }
 
@@ -1644,7 +1637,7 @@ pub unsafe extern "C" fn XML_SetBase(parser: XML_Parser, base: *const c_char) ->
         result.ok().and_then(Result::ok).unwrap_or(ERROR)
     };
     // SAFETY: The operation checks the handle before use; its tracker clone owns
-    // the accounting context even when a callback requests parser deletion.
+    // the accounting context even when an operation destroys the parser.
     unsafe { with_parser_tracking(parser, operation) }
 }
 
@@ -1809,7 +1802,7 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
             // SAFETY: The child owns its environment and allocator. Shared budgets and
             // lifetime tokens own their storage; no parser reference crosses a callback.
             unsafe {
-                if (*parser).pending_free || (*parser).child_depth >= MAX_EXTERNAL_DEPTH {
+                if (*parser).destroying || (*parser).child_depth >= MAX_EXTERNAL_DEPTH {
                     (*parser).error = 43;
                     return Ok(ptr::null_mut());
                 }
@@ -1837,7 +1830,7 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                         handlers: (*parser).handlers,
                         handler_arg_is_parser: (*parser).handler_arg_is_parser,
                         busy: false,
-                        pending_free: false,
+                        destroying: false,
                         state: 0,
                         error: 0,
                         final_buffer: false,
@@ -1870,7 +1863,7 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
         result.ok().and_then(Result::ok).unwrap_or(ptr::null_mut())
     };
     // SAFETY: The operation checks the handle before use; its tracker clone owns
-    // the accounting context even when a callback requests parser deletion.
+    // the accounting context even when an operation destroys the parser.
     unsafe { with_parser_tracking(parser, operation) }
 }
 
@@ -1996,7 +1989,7 @@ pub unsafe extern "C" fn XML_MemMalloc(parser: XML_Parser, size: usize) -> *mut 
         }
     };
     // SAFETY: The operation checks the handle before use; its tracker clone owns
-    // the accounting context even when a callback requests parser deletion.
+    // the accounting context even when an operation destroys the parser.
     unsafe { with_parser_tracking(parser, operation) }
 }
 
@@ -2024,7 +2017,7 @@ pub unsafe extern "C" fn XML_MemRealloc(
         }
     };
     // SAFETY: The operation checks the handle before use; its tracker clone owns
-    // the accounting context even when a callback requests parser deletion.
+    // the accounting context even when an operation destroys the parser.
     unsafe { with_parser_tracking(parser, operation) }
 }
 

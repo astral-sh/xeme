@@ -107,6 +107,11 @@ impl Parser {
             .find(|(_, character)| !whitespace(*character))
             .map_or(text.len(), |(index, _)| index);
         if whitespace_len > 0 {
+            if self.default_events {
+                let position = self.source().position(whitespace_len);
+                self.save_current_raw(whitespace_len)?;
+                self.emit(EventKind::Default, position)?;
+            }
             self.declaration_allowed = false;
             self.consume(whitespace_len);
             return Ok(true);

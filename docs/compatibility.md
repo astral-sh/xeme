@@ -50,10 +50,13 @@ gates. Parser storage uses fallible allocator-aware containers. Allocation failu
 must return a null parser or `XML_ERROR_NO_MEMORY`, release all successfully
 allocated blocks, and leave a failed `XML_MemRealloc` block available to its owner.
 
-`tests/c/adversarial.c` independently probes Oriole's callback-time parser deletion,
+`tests/c/adversarial.c` independently probes callback-time parser deletion,
 same-parser reentry rejection, recursive default-handler rejection, independent
-parsers in callbacks, and alias-safe base replacement. Callback-time parser deletion
-is an Oriole guarantee; this test is not presented as equivalent Expat behavior.
+parsers in callbacks, and alias-safe base replacement. Following Expat 2.8.4,
+freeing an actively parsing parser from its callback is ignored; the caller frees
+it after the outer call returns. Forbidden nested parsing, buffer, reset, and
+resume calls fail without poisoning the outer parse. Separate guards protect
+recursive encoding-release callbacks and allocator callbacks.
 
 Compile the same integration source against both libraries. A reference run must pass before
 its assertions are used to judge Oriole. The harness was bootstrapped against

@@ -65,7 +65,6 @@ struct State {
     parser: XML_Parser,
     actions: [u8; 4],
     callbacks: usize,
-    freed: bool,
     models: Vec<*mut XML_Content>,
 }
 
@@ -87,7 +86,6 @@ unsafe fn callback(arg: *mut c_void) {
                 XML_StopParser(parser, 0);
             }
             2 => {
-                (*state).freed = true;
                 XML_ParserFree(parser);
             }
             3 => XML_SetCharacterDataHandler(parser, None),
@@ -175,13 +173,10 @@ unsafe fn document(state: *mut State, input: &[u8], options: u8, chunk: usize) {
             }
         };
         while status == 2 && iterations < 1024 {
-            if unsafe { (*state).freed } {
-                return;
-            }
             status = unsafe { XML_ResumeParser(parser) };
             iterations += 1;
         }
-        if unsafe { (*state).freed } || status != 1 {
+        if status != 1 {
             return;
         }
         position = end;
@@ -220,7 +215,6 @@ fuzz_target!(|data: &[u8]| {
                 parser,
                 actions: data[4..8].try_into().unwrap(),
                 callbacks: 0,
-                freed: false,
                 models: Vec::new(),
             };
             configure(&mut state, data[0]);
@@ -237,13 +231,12 @@ fuzz_target!(|data: &[u8]| {
                 );
             }
             document(&mut state, &data[8..], data[0], usize::from(data[3]) + 1);
-            if !state.freed && data[0] & 128 != 0 && XML_ParserReset(parser, ptr::null()) != 0 {
+            if data[0] & 128 != 0 && XML_ParserReset(parser, ptr::null()) != 0 {
                 configure(&mut state, data[0]);
                 document(&mut state, &data[8..], data[0] ^ 32, 1 + data[2] as usize);
             }
-            if !state.freed {
-                XML_ParserFree(parser);
-            }
+            // Callback-time Free is ignored; the driver retains ownership.
+            XML_ParserFree(parser);
             for model in state.models {
                 XML_FreeContentModel(ptr::null_mut(), model);
             }

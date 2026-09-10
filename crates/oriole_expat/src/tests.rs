@@ -119,6 +119,8 @@ unsafe extern "C" fn stop_on_start(
     unsafe {
         let parser = (*data.cast::<State>()).parser;
         (*data.cast::<State>()).nested_status = XML_StopParser(parser, 1);
+        assert_eq!(XML_ResumeParser(parser), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 0);
         XML_SetStartElementHandler(parser, Some(start));
     }
 }
@@ -155,20 +157,26 @@ unsafe extern "C" fn reenter_parse(
     unsafe {
         let parser = (*data.cast::<State>()).parser;
         (*data.cast::<State>()).nested_status = XML_Parse(parser, c"<x/>".as_ptr(), 4, 1);
+        assert!(XML_GetBuffer(parser, 16).is_null());
+        assert_eq!(XML_ParseBuffer(parser, 0, 0), ERROR);
+        assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
+        assert_eq!(XML_ResumeParser(parser), ERROR);
+        XML_ParserFree(parser);
+        assert_eq!(XML_GetErrorCode(parser), 0);
     }
 }
 
 #[test]
-fn same_parser_reentry_is_an_error() {
+fn forbidden_callback_calls_preserve_the_outer_parse() {
     // SAFETY: Reentry must return before mutating the parser's borrowed core.
     unsafe {
         let mut state = State::default();
         let parser = configured(&mut state);
         XML_SetStartElementHandler(parser, Some(reenter_parse));
-        assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), ERROR);
+        assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), OK);
         assert_eq!(state.nested_status, ERROR);
-        assert_eq!(XML_GetErrorCode(parser), UNEXPECTED_STATE);
-        assert!(state.events.is_empty());
+        assert_eq!(XML_GetErrorCode(parser), 0);
+        assert_eq!(state.events, ["end:r"]);
         XML_ParserFree(parser);
     }
 }
@@ -178,26 +186,28 @@ unsafe extern "C" fn free_on_start(
     _name: *const c_char,
     _attrs: *const *const c_char,
 ) {
-    // SAFETY: Parser deletion during a callback is explicitly supported and deferred.
+    // SAFETY: Callback-time Free is ignored, including repeated calls during one callback.
     unsafe {
         let parser = (*data.cast::<State>()).parser;
         XML_ParserFree(parser);
         XML_ParserFree(parser);
-        // These accesses remain valid until the callback/outer parse has returned.
+        // The caller still owns the live handle after these ignored calls.
         assert_eq!(XML_GetUserData(parser), data);
         XML_SetCharacterDataHandler(parser, None);
     }
 }
 
 #[test]
-fn callback_free_is_deferred_and_stops_dispatch() {
-    // SAFETY: No parser operation occurs after the outer parse releases the handle.
+fn callback_free_is_ignored_and_dispatch_continues() {
+    // SAFETY: The caller retains ownership and frees after the outer parse returns.
     unsafe {
         let mut state = State::default();
         let parser = configured(&mut state);
         XML_SetStartElementHandler(parser, Some(free_on_start));
-        assert_eq!(XML_Parse(parser, c"<r>hello</r>".as_ptr(), 12, 1), ERROR);
-        assert!(state.events.is_empty());
+        assert_eq!(XML_Parse(parser, c"<r>hello</r>".as_ptr(), 12, 1), OK);
+        assert_eq!(state.events, ["end:r"]);
+        assert_eq!(XML_GetErrorCode(parser), 0);
+        XML_ParserFree(parser);
     }
 }
 
@@ -220,9 +230,9 @@ fn callback_reset_cannot_replace_live_core() {
         let mut state = State::default();
         let parser = configured(&mut state);
         XML_SetStartElementHandler(parser, Some(reset_on_start));
-        assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), ERROR);
+        assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), OK);
         assert_eq!(state.nested_status, 0);
-        assert_eq!(XML_GetErrorCode(parser), UNEXPECTED_STATE);
+        assert_eq!(XML_GetErrorCode(parser), 0);
         assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
         assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), OK);
         XML_ParserFree(parser);
@@ -608,7 +618,7 @@ unsafe extern "C" fn free_custom_encoding(
     name: *const c_char,
     info: *mut XML_Encoding,
 ) -> c_int {
-    // SAFETY: Callback-time free is deferred until the outer parse returns.
+    // SAFETY: Callback-time Free is ignored; the caller retains the live parser.
     unsafe {
         custom_encoding(data, name, info);
         XML_ParserFree((*data.cast::<State>()).parser);
@@ -617,8 +627,8 @@ unsafe extern "C" fn free_custom_encoding(
 }
 
 #[test]
-fn freeing_from_unknown_encoding_callback_releases_data_once() {
-    // SAFETY: The parser is not used after the outer parse honors deferred free.
+fn ignored_free_from_unknown_encoding_callback_preserves_map_ownership() {
+    // SAFETY: The outer parse and eventual explicit free retain the encoding map ownership.
     unsafe {
         let mut state = State::default();
         let parser = configured(&mut state);
@@ -628,13 +638,15 @@ fn freeing_from_unknown_encoding_callback_releases_data_once() {
             Some(free_custom_encoding),
             ptr::from_mut(&mut state).cast(),
         );
-        assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), ERROR);
+        assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), OK);
+        assert_eq!(state.releases, 0);
+        XML_ParserFree(parser);
         assert_eq!(state.releases, 1);
     }
 }
 
 unsafe extern "C" fn recursive_encoding_release(data: *mut c_void) {
-    // SAFETY: Recursive free during encoding release is guarded and deferred.
+    // SAFETY: Recursive Free during encoding release is ignored by the busy guard.
     unsafe {
         (*data.cast::<State>()).releases += 1;
         XML_ParserFree((*data.cast::<State>()).parser);
@@ -924,5 +936,53 @@ fn setting_encoding_preserves_default_handler_and_deferral_modes() {
         assert!(state.events.contains(&"text:&e;".to_owned()));
         assert!(!state.events.contains(&"text:expanded".to_owned()));
         XML_ParserFree(parser);
+    }
+}
+
+#[test]
+fn default_handler_receives_outside_root_whitespace_without_character_data() {
+    // SAFETY: Test-owned state remains live through callbacks and parser cleanup.
+    unsafe {
+        for expand in [false, true] {
+            let mut state = State::default();
+            let parser = configured(&mut state);
+            if expand {
+                XML_SetDefaultHandlerExpand(parser, Some(text));
+            } else {
+                XML_SetDefaultHandler(parser, Some(text));
+            }
+            let document = b" \r\n<r/>\t";
+            assert_eq!(
+                XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1),
+                OK
+            );
+            assert_eq!(
+                state
+                    .events
+                    .iter()
+                    .filter_map(|event| event.strip_prefix("text:"))
+                    .collect::<String>(),
+                " \r\n\t"
+            );
+            assert_eq!(
+                state
+                    .events
+                    .iter()
+                    .filter(|event| !event.starts_with("text:"))
+                    .map(String::as_str)
+                    .collect::<Vec<_>>(),
+                ["start:r", "end:r"]
+            );
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            state.events.clear();
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+            XML_SetCharacterDataHandler(parser, Some(text));
+            assert_eq!(
+                XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1),
+                OK
+            );
+            assert!(state.events.is_empty());
+            XML_ParserFree(parser);
+        }
     }
 }

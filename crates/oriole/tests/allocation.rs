@@ -112,7 +112,8 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         None,
         allocator,
     )?;
-    parser.feed(b"<!DOCTYPE r [<!ENTITY internal '<p:n/>'><!ENTITY external SYSTEM 'child'><!ATTLIST r a NMTOKENS ' a  b '>]><r xmlns:p='urn:p' p:attr='v'>&internal;&external;<!--c--><![CDATA[x]]></r>", true)?;
+    parser.set_default_events(true);
+    parser.feed(b"\r\n<!DOCTYPE r [ \n<!ENTITY internal '<p:n/>'><!ENTITY external SYSTEM 'child'><!ATTLIST r a NMTOKENS ' a  b '>\t]>\n<r xmlns:p='urn:p' p:attr='v'>&internal;&external;<!--c--><![CDATA[x]]></r>\r\n", true)?;
     while let Some(event) = next_event(&mut parser)? {
         if let EventKind::ExternalEntityReference { context, .. } = event.kind {
             let mut child = parser.external_child_with_encoding(context.as_deref(), None)?;

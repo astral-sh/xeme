@@ -1,4 +1,4 @@
-/* Oriole's explicit reentry/free guarantees; these exceed the reference contract. */
+/* Public callback guards, plus Oriole's bounded recursive-default rejection. */
 #include "expat.h"
 #include <assert.h>
 #include <stdio.h>
@@ -21,7 +21,7 @@ static void XMLCALL on_start(void *data, const char *name, const char **attribut
     switch (operation) {
     case 0:
         XML_ParserFree(parser);
-        /* Callback arguments remain live after deferred free. */
+        /* Callback-time Free is ignored; the caller still owns the handle. */
         assert(strcmp(name, "r") == 0);
         assert(strcmp(attributes[0], "a") == 0);
         assert(strcmp(attributes[1], "value") == 0);
@@ -63,12 +63,13 @@ int main(void) {
         if (operation == 4) XML_SetDefaultHandler(parser, on_default);
         int status = XML_Parse(parser, "<r a='value'/>", 14, XML_TRUE);
         assert(calls == (operation == 4 ? 2 : 1));
-        if (operation == 5) {
-            assert(status == XML_STATUS_OK);
-        } else {
+        if (operation == 4) {
             assert(status == XML_STATUS_ERROR);
+        } else {
+            assert(status == XML_STATUS_OK);
+            assert(XML_GetErrorCode(parser) == XML_ERROR_NONE);
         }
-        if (operation != 0) XML_ParserFree(parser);
+        XML_ParserFree(parser);
     }
     puts("Oriole native adversarial lifecycle probes passed");
     return 0;

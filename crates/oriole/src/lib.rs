@@ -1378,6 +1378,14 @@ impl Parser {
     /// or parsing is done. Inspect [`Self::encoding_conversion`] before feeding
     /// more input when using a multibyte custom map.
     pub fn next_event(&mut self) -> Result<Option<Event>, Error> {
+        // Keep ordinary documents outside the owned-table publication frame.
+        if self.shared_tables.get().is_none() && !self.in_doctype {
+            return self.next_event_scoped();
+        }
+        self.next_event_with_tables()
+    }
+
+    fn next_event_with_tables(&mut self) -> Result<Option<Event>, Error> {
         // DOCTYPE always yields its start event before parsing any declarations.
         // A child created by that callback may have initialized this owner first.
         if self.error.is_none()

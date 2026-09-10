@@ -10,6 +10,7 @@ repository.workspace = true
 [[bin]]
 name = "oriole"
 path = "src/main.rs"
+doc = false
 
 [features]
 default = ["performance-allocator"]

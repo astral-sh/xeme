@@ -619,15 +619,30 @@ impl Parser {
         self.has_external_subset = true;
         if !self.parameter_entities_enabled() {
             self.declarations_skipped = !self.standalone;
+            let raw = self
+                .default_events
+                .then(|| {
+                    self.source()
+                        .lexical_remaining()
+                        .for_slice(&self.source().remaining()[..end + 1])
+                        .decode(self.allocator)
+                })
+                .transpose()?;
             self.consume(end + 1)?;
             if !self.standalone {
                 self.emit(EventKind::NotStandalone, position)?;
                 self.event_raw("")?;
             }
+            if let Some(raw) = raw {
+                self.emit(EventKind::Default, position)?;
+                self.pending.back_mut().expect("disabled parameter").raw = Some(raw);
+            }
             return Ok(true);
         }
         let Some(entity) = self.parameter_entities.get(&name) else {
-            if !self.external_subset {
+            // Expat checks declaration existence only for a standalone document
+            // reference outside an internal parameter-entity replacement.
+            if self.standalone && !self.external_subset && self.sources.len() == 1 {
                 return Err(self.err(ErrorKind::UndefinedEntity, "undefined parameter entity"));
             }
             self.declarations_skipped |= !self.standalone;

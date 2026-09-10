@@ -3158,3 +3158,46 @@ fn c_name_rules_match_fourth_edition_and_survive_reset_and_child_creation() {
         }
     }
 }
+
+#[test]
+fn resetting_after_a_missing_parameter_restores_declaration_processing() {
+    unsafe extern "C" fn text(data: *mut c_void, value: *const c_char, len: c_int) {
+        // SAFETY: The test installs a live String as user data; callback bytes
+        // remain readable for len bytes and are valid UTF-8 for these inputs.
+        unsafe {
+            let bytes = std::slice::from_raw_parts(value.cast(), len as usize);
+            (*data.cast::<std::string::String>()).push_str(std::str::from_utf8(bytes).unwrap());
+        }
+    }
+    // SAFETY: Each parser, callback state and input remain live until parsing ends.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        assert!(!parser.is_null());
+        for (xml, expected) in [
+            (
+                "<!DOCTYPE r [%missing;<!ENTITY later 'L'>]><r>&later;</r>",
+                "",
+            ),
+            ("<!DOCTYPE r [<!ENTITY later 'L'>]><r>&later;</r>", "L"),
+        ] {
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            assert_eq!(XML_SetParamEntityParsing(parser, 2), 1);
+            let mut result = std::string::String::new();
+            XML_SetUserData(parser, ptr::from_mut(&mut result).cast());
+            XML_SetCharacterDataHandler(parser, Some(text));
+            for (index, byte) in xml.as_bytes().iter().enumerate() {
+                assert_eq!(
+                    XML_Parse(
+                        parser,
+                        ptr::from_ref(byte).cast(),
+                        1,
+                        c_int::from(index + 1 == xml.len())
+                    ),
+                    OK
+                );
+            }
+            assert_eq!(result, expected);
+        }
+        XML_ParserFree(parser);
+    }
+}

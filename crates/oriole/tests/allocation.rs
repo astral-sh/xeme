@@ -335,6 +335,16 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
             }
         }
     }
+    for mode in [0, 2] {
+        let mut missing = Parser::try_new_in(Config::default(), allocator)?;
+        missing.set_default_events(true);
+        missing.set_param_entity_parsing(mode);
+        missing.feed(
+            b"<!DOCTYPE r [%missing;<!ENTITY ignored 'v'>]><r>&ignored;</r>",
+            true,
+        )?;
+        while next_event(&mut missing)?.is_some() {}
+    }
     // Retained metadata must own both its fields and its allocation suite after
     // the originating parser has been destroyed. Every new payload allocation
     // also participates in the fail-at-each-allocation loop below.

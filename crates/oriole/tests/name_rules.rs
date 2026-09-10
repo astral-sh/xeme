@@ -102,11 +102,7 @@ fn edition_applies_to_every_name_context_and_encoding() {
 
 #[test]
 fn invalid_names_precede_entity_lookup_and_namespace_resolution() {
-    for xml in [
-        "<r>&\u{10000};</r>",
-        "<r a='&\u{10000};'/>",
-        "<!DOCTYPE r [%\u{10000};]><r/>",
-    ] {
+    for xml in ["<r>&\u{10000};</r>", "<r a='&\u{10000};'/>"] {
         for chunk in [1, 7, usize::MAX] {
             assert_eq!(
                 parse(xml, NameRules::FourthEdition, false, chunk, false),
@@ -119,6 +115,29 @@ fn invalid_names_precede_entity_lookup_and_namespace_resolution() {
                 "{xml:?}"
             );
         }
+    }
+    let missing_parameter = "<!DOCTYPE r [%\u{10000};]><r/>";
+    for chunk in [1, 7, usize::MAX] {
+        assert_eq!(
+            parse(
+                missing_parameter,
+                NameRules::FourthEdition,
+                false,
+                chunk,
+                false
+            ),
+            Err(ErrorKind::InvalidToken)
+        );
+        assert_eq!(
+            parse(
+                missing_parameter,
+                NameRules::FifthEdition,
+                false,
+                chunk,
+                false
+            ),
+            Ok(())
+        );
     }
     for xml in ["<\u{10000}:r/>", "<r \u{10000}:a='v'/>"] {
         assert_eq!(

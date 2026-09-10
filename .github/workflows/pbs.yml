@@ -1,0 +1,82 @@
+name: PBS distribution
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/pbs.yml'
+      - 'integration/python-build-standalone/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pbs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  distribution:
+    # This expensive integration gate has a dedicated review layer.
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'charlie/codex-oriole-pbs-distribution'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: astral-sh/python-build-standalone
+          ref: a4553880293fe9d1bb62747d34ab0e5121d3554f
+          path: .cache/pbs
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: stable
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+      - name: Build the frozen Oriole bundle
+        run: |
+          rustup component add rust-docs
+          python3 integration/python-build-standalone/prepare.py --output "$RUNNER_TEMP/oriole-bundle"
+          git -C .cache/pbs apply --check "$GITHUB_WORKSPACE/integration/python-build-standalone/pbs-a455388.patch"
+          git -C .cache/pbs apply "$GITHUB_WORKSPACE/integration/python-build-standalone/pbs-a455388.patch"
+      - name: Build CPython 3.12.13 with Oriole
+        run: |
+          set -o pipefail
+          bash integration/python-build-standalone/run.sh "$GITHUB_WORKSPACE/.cache/pbs" "$RUNNER_TEMP/oriole-bundle" 2>&1 | tee "$RUNNER_TEMP/pbs-build.log"
+      - name: Validate the complete distribution
+        working-directory: .cache/pbs
+        run: |
+          set -o pipefail
+          cargo build --release --locked
+          target/release/pythonbuild validate-distribution dist/*.tar.zst 2>&1 | tee "$RUNNER_TEMP/pbs-validate.log"
+          uv run --no-dev test-distribution.py dist/*.tar.zst 2>&1 | tee "$RUNNER_TEMP/pbs-custom-tests.log"
+          uv run --no-dev test-distribution.py --stdlib dist/*.tar.zst \
+            test_pyexpat test_xml_etree test_xml_etree_c test_minidom test_sax test_pulldom \
+            2>&1 | tee "$RUNNER_TEMP/pbs-xml-tests.log"
+      - name: Verify the installed parser identity
+        working-directory: .cache/pbs
+        run: |
+          uv run --no-dev python - <<'PY'
+          import json, os, pathlib, subprocess
+          from pythonbuild.utils import extract_python_archive
+          archive, = pathlib.Path('dist').glob('*.tar.zst')
+          destination = pathlib.Path(os.environ['RUNNER_TEMP']) / 'pbs-extracted'
+          destination.mkdir()
+          root = extract_python_archive(archive, destination)
+          metadata = json.loads((root / 'PYTHON.json').read_text())
+          executable = root / metadata['python_exe']
+          subprocess.run([str(executable), '-I', '-c', "import pyexpat; print(pyexpat.EXPAT_VERSION); assert pyexpat.EXPAT_VERSION.startswith('oriole_')"], check=True)
+          PY
+          sha256sum dist/*.tar.zst > "$RUNNER_TEMP/pbs-archive-sha256.txt"
+      - name: Retain build and validation evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: oriole-pbs-validation
+          path: |
+            ${{ runner.temp }}/pbs-*.log
+            ${{ runner.temp }}/pbs-archive-sha256.txt
+            ${{ runner.temp }}/oriole-bundle/manifest.json
+            ${{ runner.temp }}/oriole-bundle/build.log
+          retention-days: 14

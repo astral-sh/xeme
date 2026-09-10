@@ -14,3 +14,9 @@ The archive retains the adapter, full observations, comparison, compile/test log
 and library/source identities. It extends the older full matrix; the older
 failure classification describes its own frozen runtime and is not silently
 rewritten to count these fixes.
+
+The same release also passes 12,318 generated and named differential cases
+with zero acceptance, error-code, or normalized-callback differences. Six exact
+callback-fragmentation and 450 final-position differences remain, so the exact
+comparison remains failed. Both worker libraries keep identical pre/post hashes;
+the archive retains every input and observation with seed 20260910.

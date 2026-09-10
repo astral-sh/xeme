@@ -104,8 +104,8 @@ bounds aggregate allocation and work across a parser's external-entity family.
 
 ## Validation
 
-The [current integration report](docs/validation/2026-09-10/c-entity-limits-composed/)
-records 322 Rust checks, selected-allocation failure tests, native C sanitizer
+The [current integration report](docs/validation/2026-09-10/attribute-scans-composed/)
+records 323 Rust checks, selected-allocation failure tests, native C sanitizer
 checks, and exact differential comparisons. The full adapted Expat API matrix
 reports **4,113 passing and 627 failing configurations**. Allocation schedules,
 resource limits, diagnostics and some callback behavior still differ from Expat;
@@ -125,7 +125,7 @@ See [fuzzing](fuzz/README.md) for the harnesses and
 
 ## Benchmarks
 
-The [current benchmarks](docs/validation/2026-09-10/hotpaths-composed/) compare
+The [current benchmarks](docs/validation/2026-09-10/attribute-scans-composed/) compare
 Oriole's C interface with Expat 2.8.4 on original, pinned XML files from real
 projects. These results use 4 KiB chunks with namespaces disabled, on a shared
 Linux AMD EPYC-Milan host. Five randomized process pairs each measure seven parses
@@ -133,22 +133,23 @@ after warmup. Complete normalized callbacks are checked before timing.
 
 | Project XML | Oriole | Expat | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 95.009 ms | 29.625 ms | 3.20× |
-| Wayland protocol | 2.112 ms | 1.097 ms | 1.91× |
-| Maven POM | 1.686 ms | 0.461 ms | 3.64× |
-| Batik SVG | 0.286 ms | 0.142 ms | 2.01× |
-| GTK UI | 0.726 ms | 0.222 ms | 3.28× |
-| DocBook XSL | 0.502 ms | 0.201 ms | 2.52× |
+| Vulkan registry | 93.474 ms | 29.017 ms | 3.22× |
+| Wayland protocol | 2.072 ms | 1.076 ms | 1.93× |
+| Maven POM | 1.700 ms | 0.482 ms | 3.54× |
+| Batik SVG | 0.180 ms | 0.145 ms | 1.22× |
+| GTK UI | 0.740 ms | 0.222 ms | 3.32× |
+| DocBook XSL | 0.498 ms | 0.198 ms | 2.49× |
 
 Times are medians of process medians; ratios are medians of paired time ratios.
 Oriole remains slower than Expat. Across both namespace modes and 4 KiB/64 KiB
-chunks, this change improves the preceding Oriole implementation by 13% on
-average. Raw samples, generated controls and exact source/library hashes are
-retained; host load and CPU frequency are uncontrolled.
+chunks, these changes improve the preceding Oriole implementation by 8% on
+average, driven by Batik; several other conditions regress slightly. Raw samples,
+generated controls and exact source/library hashes are retained; host load and
+CPU frequency are uncontrolled.
 
-Separate [actual CPython screens](benchmarks/results/2026-09-10/python-hotpath-screens/)
+Earlier [actual CPython screens](benchmarks/results/2026-09-10/python-hotpath-screens/)
 measure unmodified ElementTree and pyexpat modules over the same six project
-files. The latest isolated candidate takes 1.82× Expat's time in ElementTree and
+files. An earlier isolated candidate takes 1.82× Expat's time in ElementTree and
 1.52× in pyexpat on average; Wayland through pyexpat is within 5%. These are XML
 consumer measurements, not full application execution. See the
 [benchmark guide](benchmarks/README.md) to reproduce the workloads and

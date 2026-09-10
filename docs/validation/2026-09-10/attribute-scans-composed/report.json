@@ -1,0 +1,568 @@
+{
+  "scope": "Attribute whitespace batching and fixed CDATA delimiter search; namespace cache rejected after current-base attribution.",
+  "runtime_commit": "353dc3f19ebe6554b8c224a400c588bdf49e901a",
+  "restack": {
+    "original_build_commit": "353dc3f19ebe6554b8c224a400c588bdf49e901a",
+    "restacked_commit": "a48fcb59cccc35abd7bd5247a46bbd2cf6755f7c",
+    "inserted_ci_commit": "b1d1e493f05657038bbc7cedfa338a7803036216",
+    "source_byte_identity": "All frozen Cargo/manifests/Rust/header/C-test hashes match the restacked runtime. Only prior CI metadata insertion changes the commit IDs.",
+    "library_sha256": {
+      "liboriole_expat.so": "e6849aa2cc0d75c74b42370ecd568c6dd7581dfadbc892244176a6a03acf576d",
+      "liboriole_expat.a": "1cbb974c72984126aab70e9e0ed9bb12bcba456f66840f6c63a13e6d6a5c0373"
+    }
+  },
+  "library_sha256": {
+    "liboriole_expat.so": "e6849aa2cc0d75c74b42370ecd568c6dd7581dfadbc892244176a6a03acf576d",
+    "liboriole_expat.a": "1cbb974c72984126aab70e9e0ed9bb12bcba456f66840f6c63a13e6d6a5c0373"
+  },
+  "rust_checks": 323,
+  "api": {
+    "configurations": 4740,
+    "passed": 4113,
+    "failed": 627,
+    "changed_rows": 0,
+    "selection_complete": true,
+    "library_origin_verified": true
+  },
+  "native": {
+    "runs": 6,
+    "allocation_scenarios_per_linkage": 336,
+    "scope": "C ASan/UBSan; Rust release uninstrumented; leak sanitizer disabled"
+  },
+  "compatibility": {
+    "ordinary_exact": 1518,
+    "attribute_conditions": 6468,
+    "attribute_aliases": 372,
+    "malformed_attributes": 384,
+    "malformed_text": 2392,
+    "streaming_lifecycle": 32,
+    "custom_encoding": 36456,
+    "active_membership": 4680,
+    "doctype": 4104,
+    "missing_parameter": 1944,
+    "child_controls": 6,
+    "shared_publication": 432,
+    "baseline_changes": 0,
+    "retained_shared_publication_reference_differences": 9
+  },
+  "native_projects": {
+    "status": "passed",
+    "project_geomean_speedup": 1.0813672082569534,
+    "project_geomean_oriole_over_expat": 2.6228563357624575,
+    "positive": 13,
+    "rows": [
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.6327092845430602,
+        "oriole_over_expat": 1.2241092490830003,
+        "milliseconds": {
+          "control": 0.296764,
+          "candidate": 0.179545,
+          "expat": 0.144559
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.5428443248093315,
+        "oriole_over_expat": 1.4161929181761315,
+        "milliseconds": {
+          "control": 0.31982700000000003,
+          "candidate": 0.206015,
+          "expat": 0.146523
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.6338956723834885,
+        "oriole_over_expat": 1.3781846551429895,
+        "milliseconds": {
+          "control": 0.282338,
+          "candidate": 0.17144099999999998,
+          "expat": 0.13228700000000002
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.5996881298823717,
+        "oriole_over_expat": 1.5297684885007057,
+        "milliseconds": {
+          "control": 0.319045,
+          "candidate": 0.199442,
+          "expat": 0.128891
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0343690940972068,
+        "oriole_over_expat": 2.488924619502257,
+        "milliseconds": {
+          "control": 0.5045229999999999,
+          "candidate": 0.498251,
+          "expat": 0.197899
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0162270111775689,
+        "oriole_over_expat": 2.641577445448109,
+        "milliseconds": {
+          "control": 0.608596,
+          "candidate": 0.613867,
+          "expat": 0.227254
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0671960866833787,
+        "oriole_over_expat": 2.7111802124962336,
+        "milliseconds": {
+          "control": 0.517987,
+          "candidate": 0.489434,
+          "expat": 0.182511
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.9981404497766749,
+        "oriole_over_expat": 2.8493360816835245,
+        "milliseconds": {
+          "control": 0.612985,
+          "candidate": 0.609989,
+          "expat": 0.209761
+        }
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9692111107287853,
+        "oriole_over_expat": 8.01588795776528,
+        "milliseconds": {
+          "control": 16.625562,
+          "candidate": 17.175579,
+          "expat": 2.142692
+        }
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9996164763041563,
+        "oriole_over_expat": 7.831225550626239,
+        "milliseconds": {
+          "control": 17.051287,
+          "candidate": 16.731721,
+          "expat": 2.1319619999999997
+        }
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9700255582835507,
+        "oriole_over_expat": 5.211370629246257,
+        "milliseconds": {
+          "control": 11.40897,
+          "candidate": 11.720581000000001,
+          "expat": 2.251645
+        }
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9507516015675167,
+        "oriole_over_expat": 5.177987428281221,
+        "milliseconds": {
+          "control": 11.332607,
+          "candidate": 11.942155,
+          "expat": 2.309243
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9730836042401881,
+        "oriole_over_expat": 3.3199861481701824,
+        "milliseconds": {
+          "control": 0.721007,
+          "candidate": 0.740273,
+          "expat": 0.222145
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 0.992303439631299,
+        "oriole_over_expat": 3.50453962345969,
+        "milliseconds": {
+          "control": 0.7773909999999999,
+          "candidate": 0.785026,
+          "expat": 0.222495
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9977124655754461,
+        "oriole_over_expat": 3.614085677401485,
+        "milliseconds": {
+          "control": 0.7291920000000001,
+          "candidate": 0.739661,
+          "expat": 0.20117600000000002
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.970528255637249,
+        "oriole_over_expat": 3.9360302114200763,
+        "milliseconds": {
+          "control": 0.759659,
+          "candidate": 0.7889929999999999,
+          "expat": 0.202659
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9856667209257588,
+        "oriole_over_expat": 3.5369824564304375,
+        "milliseconds": {
+          "control": 1.676672,
+          "candidate": 1.699585,
+          "expat": 0.48155000000000003
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 0.9774615552993099,
+        "oriole_over_expat": 3.475715631670372,
+        "milliseconds": {
+          "control": 1.871135,
+          "candidate": 1.926618,
+          "expat": 0.559586
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9731993926380154,
+        "oriole_over_expat": 3.970276176780316,
+        "milliseconds": {
+          "control": 1.672604,
+          "candidate": 1.711006,
+          "expat": 0.441565
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.984994635832638,
+        "oriole_over_expat": 3.696422520399618,
+        "milliseconds": {
+          "control": 1.872547,
+          "candidate": 1.898076,
+          "expat": 0.51349
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0080992707349685,
+        "oriole_over_expat": 3.2213645580513943,
+        "milliseconds": {
+          "control": 93.519592,
+          "candidate": 93.474097,
+          "expat": 29.016925999999998
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0067868602635226,
+        "oriole_over_expat": 3.4415402193210616,
+        "milliseconds": {
+          "control": 99.711297,
+          "candidate": 98.97769600000001,
+          "expat": 28.738566
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0056047066870855,
+        "oriole_over_expat": 3.201148927128797,
+        "milliseconds": {
+          "control": 93.007395,
+          "candidate": 92.11430700000001,
+          "expat": 28.864121
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0146176140529457,
+        "oriole_over_expat": 3.472879381615837,
+        "milliseconds": {
+          "control": 100.11190500000001,
+          "candidate": 98.691051,
+          "expat": 28.4833
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9998783678118758,
+        "oriole_over_expat": 1.9255548533402729,
+        "milliseconds": {
+          "control": 2.080596,
+          "candidate": 2.0718199999999998,
+          "expat": 1.07596
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0001292853640051,
+        "oriole_over_expat": 2.0643013732167104,
+        "milliseconds": {
+          "control": 2.2196960000000003,
+          "candidate": 2.226027,
+          "expat": 1.078344
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9819716134674812,
+        "oriole_over_expat": 1.972991617924264,
+        "milliseconds": {
+          "control": 2.129568,
+          "candidate": 2.167859,
+          "expat": 1.098903
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0097583226837352,
+        "oriole_over_expat": 2.0969548537534095,
+        "milliseconds": {
+          "control": 2.195921,
+          "candidate": 2.1978750000000002,
+          "expat": 1.0466250000000001
+        }
+      }
+    ]
+  },
+  "marker_attribution": {
+    "status": "passed",
+    "scope": "e684 attribute+marker vs9362 attribute-only, current Cpolicy/sharedDTD base",
+    "project_geomean_speedup": 1.0384289883789968,
+    "positive": 23,
+    "rows": [
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0176405544662805
+      },
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0222328677323382
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0228957965755954
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.012783662320751
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0419450389382117
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 0.9897889698558837
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0306138151953381
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0343171487729872
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0679277777720424
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0653925724074682
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9590692060758883
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9608225168687189
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.022046337443206
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0359582190122398
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.06332134760742
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0562646420059227
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0869257066365254
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.063763245392817
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0735292354239414
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0588918326269094
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0646522291822587
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0385897193092621
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0466253005320554
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0548643336642491
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0242459364040055
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.024411208370698
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0222948473830709
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0194338705758486
+      }
+    ]
+  }
+}

@@ -977,6 +977,9 @@ impl Source {
                 }
                 scan.checked = bytes.len();
             }
+            ScanMode::Tag if bytes.first() == Some(&b'<') && bytes.get(1) != Some(&b'!') => {
+                return scan_element_tag(bytes, scan, limit);
+            }
             ScanMode::Comment | ScanMode::Pi => {
                 let terminator: &[u8] = if mode == ScanMode::Comment {
                     b"-->"
@@ -1082,6 +1085,89 @@ impl Source {
     }
 }
 
+/// Resume a start tag, skipping ordinary name and attribute-value bytes.
+fn scan_element_tag(
+    bytes: &[u8],
+    scan: &mut Scan,
+    limit: usize,
+) -> Result<Option<usize>, (ErrorKind, usize)> {
+    let mut index = scan.checked;
+    if index == 0 {
+        if limit == 0 {
+            return Err((ErrorKind::LimitExceeded, 0));
+        }
+        // The opening '<' is the only one permitted in an element tag.
+        index = 1;
+    }
+    // Short tags avoid setting up a byte search. Resume the bulk scan only
+    // after this fixed prefix, including when a tag spans input chunks.
+    while index < bytes.len().min(64) {
+        let byte = bytes[index];
+        if byte == b'<' {
+            return Err((ErrorKind::InvalidToken, index));
+        }
+        if index >= limit {
+            return Err((ErrorKind::LimitExceeded, limit));
+        }
+        if scan.quote != 0 {
+            if byte == scan.quote {
+                scan.quote = 0;
+            }
+        } else if byte == b'>' {
+            return Ok(Some(index + 1));
+        } else if matches!(byte, b'\'' | b'"') {
+            scan.quote = byte;
+        }
+        index += 1;
+    }
+    while index < bytes.len() {
+        if bytes[index] == b'<' {
+            return Err((ErrorKind::InvalidToken, index));
+        }
+        if index >= limit {
+            return Err((ErrorKind::LimitExceeded, limit));
+        }
+        // Inspect the byte at the limit: a literal '<' there takes precedence
+        // over the limit error. No search needs to read farther than that byte.
+        let end = bytes.len().min(limit.saturating_add(1));
+        let text = &bytes[index..end];
+        let next = if scan.quote != 0 {
+            memchr::memchr2(scan.quote, b'<', text)
+        } else {
+            let syntax = memchr::memchr3(b'>', b'\'', b'"', text);
+            memchr::memchr(b'<', &text[..syntax.unwrap_or(text.len())]).or(syntax)
+        };
+        let Some(next) = next else {
+            if end > limit {
+                return Err((ErrorKind::LimitExceeded, limit));
+            }
+            index = end;
+            break;
+        };
+        index += next;
+        if bytes[index] == b'<' {
+            return Err((ErrorKind::InvalidToken, index));
+        }
+        if index >= limit {
+            return Err((ErrorKind::LimitExceeded, limit));
+        }
+        if scan.quote != 0 {
+            scan.quote = 0;
+        } else if bytes[index] == b'>' {
+            return Ok(Some(index + 1));
+        } else {
+            scan.quote = bytes[index];
+        }
+        index += 1;
+    }
+    scan.checked = index;
+    if bytes.len() > limit {
+        Err((ErrorKind::LimitExceeded, limit))
+    } else {
+        Ok(None)
+    }
+}
+
 /// Advance XML line and character coordinates over decoded UTF-8.
 ///
 /// A line break discards the preceding column, so only count characters after
@@ -1128,5 +1214,68 @@ fn advance_long_position(text: &str, line: &mut usize, column: &mut usize, previ
     if !rest.is_empty() {
         *column += rest.chars().count();
         *previous_cr = false;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn tag_limits_preserve_less_than_precedence_across_feeds() {
+        for (text, limit, expected) in [
+            ("<r a='x<y'/>", 6, Err((ErrorKind::LimitExceeded, 6))),
+            ("<r a='x<y'/>", 7, Err((ErrorKind::InvalidToken, 7))),
+            ("<r a='x<y'/>", 8, Err((ErrorKind::InvalidToken, 7))),
+            ("<r a='xy'/>", 8, Err((ErrorKind::LimitExceeded, 8))),
+            ("<r a='xy'/>", 10, Err((ErrorKind::LimitExceeded, 10))),
+            ("<r a='xy'/>", 11, Ok(Some(11))),
+            ("<r abc<tail", 6, Err((ErrorKind::InvalidToken, 6))),
+        ] {
+            for width in 1..=text.len() {
+                let mut scan = Scan::default();
+                let mut result = Ok(None);
+                for end in (width..text.len() + width).step_by(width) {
+                    result =
+                        scan_element_tag(&text.as_bytes()[..end.min(text.len())], &mut scan, limit);
+                    if result != Ok(None) {
+                        break;
+                    }
+                }
+                assert_eq!(result, expected, "{text:?}, width {width}, limit {limit}");
+            }
+        }
+    }
+
+    #[test]
+    fn tag_prefix_boundary_preserves_limits_inside_quoted_values() {
+        for boundary in [31, 32, 33, 63, 64, 65, 127, 128] {
+            let text = format!("<r a='{}<tail'/>", "x".repeat(boundary - 6));
+            for limit in [boundary - 1, boundary, boundary + 1] {
+                let expected = if limit < boundary {
+                    Err((ErrorKind::LimitExceeded, limit))
+                } else {
+                    Err((ErrorKind::InvalidToken, boundary))
+                };
+                for width in [1, 3, 31, 32, 33, 63, 64, 65, text.len()] {
+                    let mut scan = Scan::default();
+                    let mut result = Ok(None);
+                    for end in (width..text.len() + width).step_by(width) {
+                        result = scan_element_tag(
+                            &text.as_bytes()[..end.min(text.len())],
+                            &mut scan,
+                            limit,
+                        );
+                        if result != Ok(None) {
+                            break;
+                        }
+                    }
+                    assert_eq!(
+                        result, expected,
+                        "boundary {boundary}, width {width}, limit {limit}"
+                    );
+                }
+            }
+        }
     }
 }

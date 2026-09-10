@@ -1,4 +1,30 @@
-# Compatibility checkpoint: 10 September 2026
+# Compatibility and validation: 10 September 2026
+
+## Later validation layers
+
+Each report identifies its own frozen source and binaries. Results below come from
+successive implementations and separate test contracts; they are not combined into
+one claim of Expat equivalence.
+
+| Layer | Result | Evidence |
+|---|---|---|
+| Conditional DTD and multibyte input | 3,455 upstream API configurations pass; 1,285 fail | [Complete API matrix](multibyte/) |
+| Actual consumers for that same runtime | Four CPython shared/static, original/fixed runs pass 803 tests with 31 skips each; six native C suites pass | [Consumer report](newfeatures-consumers/) |
+| Malformed references, prolog, and deferral | 60,159 cases have no acceptance or normalized-callback differences; 39 error, three exact-fragment, and 2,307 position differences remain | [Expanded replay](prolog-deferral/) |
+| Independent stop/resume review | 80 prior differences fixed; two new malformed-input callback differences and 242 existing differences retained | [Suspension review](prolog-suspension/) |
+| Internal parameter entities in values | 256 status/error, 12 inheritance, and 23,328 encoding/chunk summaries match; focused upstream matrix gains 24 configurations | [Parameter-value report](parameter-values/) |
+| C callback allocation optimization | 166 workspace tests and shared/static patched CPython consumers pass; isolated element benchmark improves about 12% | [Allocation and consumer evidence](../../../benchmarks/results/2026-09-10/callback-allocation/) |
+| Ten-minute sanitizer campaigns | 1,165,436 family and 2,564,903 converter executions, plus corpus replays, finish without findings | [Frozen source, corpora, and logs](../../../fuzz/results/2026-09-10/converter-and-family/) |
+| First complete PBS build | Distribution archive produced; validator setup failed before installed-interpreter gates ran | [Build evidence and fix](pbs-distribution-build/) |
+
+[Namespace-enabled and disabled measurements](../../../benchmarks/results/2026-09-10/namespaces/)
+retain complete preflights, seven paired runs, and separate mode results. Oriole
+remains slower than Expat. The full PBS validation gate is rerunning after its
+workspace fix; distribution portability and installed-interpreter validation remain
+open until that gate passes. Current API limitations remain in the
+[C interface documentation](../../../crates/oriole_expat/).
+
+## Earlier checkpoint (PR #22)
 
 These results identify the runtime at PR #22 (`72dbb2a`), after allocator,
 callback-lifecycle, entity-budget, and lexical-diagnostic fixes. They are evidence

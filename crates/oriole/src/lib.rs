@@ -2071,7 +2071,7 @@ impl Parser {
                     attr.name.strip_prefix("xmlns:")
                 };
                 if let Some(prefix) = prefix {
-                    if !prefix.is_empty() && (!is_name(prefix) || prefix.contains(':')) {
+                    if attr.name != "xmlns" && (!is_name(prefix) || prefix.contains(':')) {
                         return Err(self.err(ErrorKind::InvalidToken, "invalid namespace prefix"));
                     }
                     let uri = &attr.value;

@@ -743,6 +743,8 @@ fn reused_namespace_uris_and_declaration_names_consume_the_expansion_budget() {
 fn namespace_constraints() {
     for (xml, kind) in [
         ("<p:r/>", ErrorKind::UndefinedPrefix),
+        ("<r xmlns:='urn:r'/>", ErrorKind::InvalidToken),
+        ("<r xmlns:=''/>", ErrorKind::InvalidToken),
         ("<r xmlns:xml='wrong'/>", ErrorKind::ReservedPrefixXml),
         ("<r xmlns:xmlns='wrong'/>", ErrorKind::ReservedPrefixXmlns),
         (

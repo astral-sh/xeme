@@ -54,8 +54,9 @@ def preflight(path: Path) -> None:
     for name, location in specification["inputs"].items():
         data = Path(location).read_bytes()
         for chunk in specification["chunks"]:
-            expected = engines["expat"].parse(data, chunk)
-            actual = engines["oriole"].parse(data, chunk)
+            namespaces = specification.get("namespaces", False)
+            expected = engines["expat"].parse(data, chunk, namespaces)
+            actual = engines["oriole"].parse(data, chunk, namespaces)
             if (
                 expected["status"] != 1
                 or actual["status"] != 1
@@ -90,6 +91,11 @@ def main() -> int:
     parser.add_argument("--size", type=int, default=10000)
     parser.add_argument("--chunks", type=int, nargs="+", default=[64, 4096, 1048576])
     parser.add_argument("--seed", type=int, default=20260910)
+    parser.add_argument(
+        "--namespaces",
+        action="store_true",
+        help="Enable namespace expansion in both libraries",
+    )
     parser.add_argument("--cc", default="cc")
     parser.add_argument("--build-manifest", type=Path, action="append", default=[])
     args = parser.parse_args()
@@ -158,6 +164,7 @@ def main() -> int:
         "seed": args.seed,
         "pairs": args.pairs,
         "iterations": args.iterations,
+        "namespaces": args.namespaces,
         "sha256_before": hashes,
         "rows": rows,
         "summary": {},
@@ -182,6 +189,7 @@ def main() -> int:
                     "libraries": {name: str(path) for name, path in libraries.items()},
                     "inputs": {name: str(path) for name, path in inputs.items()},
                     "chunks": args.chunks,
+                    "namespaces": args.namespaces,
                 },
                 indent=2,
             )
@@ -211,6 +219,7 @@ def main() -> int:
                         str(inputs[name]),
                         str(chunk),
                         str(args.iterations),
+                        *(["namespaces"] if args.namespaces else []),
                     ]
                     completed = subprocess.run(
                         command, check=True, capture_output=True, text=True, timeout=120

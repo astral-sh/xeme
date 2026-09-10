@@ -19,7 +19,10 @@ handler registration, parsing, callbacks, and parser destruction are included.
 Process startup, library loading, and input loading are excluded. The driver
 hashes names, attributes, and text independently of text callback fragmentation.
 The corpus contains elements, text, entity references, and prefixed names; the
-native timing configuration uses namespace processing disabled in both libraries.
+default timing configuration disables namespace processing in both libraries.
+Pass `--namespaces` to enable namespace expansion in both the complete callback
+preflight and the timed C driver; the report records the selected mode. Keep
+results from the two modes separate.
 All numbers are generated-workload measurements on the recorded host.
 
 ## Allocators and the safe Rust API

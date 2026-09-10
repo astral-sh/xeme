@@ -13,6 +13,7 @@
 typedef void *Parser;
 typedef struct {
     Parser (*create)(const char *);
+    Parser (*create_ns)(const char *, char);
     void (*destroy)(Parser);
     int (*parse)(Parser, const char *, int, int);
     void (*user_data)(Parser, void *);
@@ -72,8 +73,8 @@ static size_t positive(const char *value) {
     memcpy(&api.field, &address, sizeof(address)); \
 } while (0)
 int main(int argc, char **argv) {
-    if (argc != 5) {
-        fprintf(stderr, "usage: %s LIBRARY XML_FILE CHUNK_SIZE ITERATIONS\n", argv[0]);
+    if (argc != 5 && !(argc == 6 && strcmp(argv[5], "namespaces") == 0)) {
+        fprintf(stderr, "usage: %s LIBRARY XML_FILE CHUNK_SIZE ITERATIONS [namespaces]\n", argv[0]);
         return 2;
     }
     size_t chunk_size = positive(argv[3]), iterations = positive(argv[4]);
@@ -89,6 +90,7 @@ int main(int argc, char **argv) {
     if (!library) { fprintf(stderr, "%s\n", dlerror()); return 2; }
     Api api;
     LOAD(create, "XML_ParserCreate");
+    LOAD(create_ns, "XML_ParserCreateNS");
     LOAD(destroy, "XML_ParserFree");
     LOAD(parse, "XML_Parse");
     LOAD(user_data, "XML_SetUserData");
@@ -102,7 +104,7 @@ int main(int argc, char **argv) {
     for (size_t iteration = 0; iteration <= iterations; iteration++) {
         State state = {UINT64_C(14695981039346656037), 0, 0};
         double before = now();
-        Parser parser = api.create(NULL);
+        Parser parser = argc == 6 ? api.create_ns(NULL, '|') : api.create(NULL);
         if (!parser) { fprintf(stderr, "parser allocation failed\n"); return 1; }
         api.user_data(parser, &state);
         api.element_handler(parser, start, end);

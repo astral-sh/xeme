@@ -1537,24 +1537,42 @@ unsafe fn configured_multibyte(state: &mut MultibyteState) -> XML_Parser {
 fn multibyte_converter_reentry_is_guarded_and_release_is_owned_once() {
     // SAFETY: Test-owned state, bytes and handles obey the C API lifetime contract.
     unsafe {
-        let mut state = MultibyteState {
-            value: 'é' as i32,
-            action: 1,
-            ..MultibyteState::default()
-        };
-        let parser = configured_multibyte(&mut state);
-        let document = b"<\x80\0 a='\x80\0'>\x80\0</\x80\0>";
-        for chunk in document.chunks(1) {
-            assert_eq!(XML_Parse(parser, chunk.as_ptr().cast(), 1, 0), OK);
+        for value in ['é', 'A', '<', ' '] {
+            for buffered in [false, true] {
+                let mut state = MultibyteState {
+                    value: value as i32,
+                    action: 1,
+                    ..MultibyteState::default()
+                };
+                let parser = configured_multibyte(&mut state);
+                let document: &[u8] = if matches!(value, 'é' | 'A') {
+                    b"<\x80\0 a='\x80\0'>\x80\0</\x80\0>"
+                } else {
+                    b"<r a='\x80\0'>\x80\0</r>"
+                };
+                for chunk in document.chunks(1) {
+                    if buffered {
+                        let buffer = XML_GetBuffer(parser, 1).cast::<u8>();
+                        assert!(!buffer.is_null());
+                        buffer.write(chunk[0]);
+                        assert_eq!(XML_ParseBuffer(parser, 1, 0), OK);
+                    } else {
+                        assert_eq!(XML_Parse(parser, chunk.as_ptr().cast(), 1, 0), OK);
+                    }
+                }
+                assert_eq!(XML_Parse(parser, ptr::null(), 0, 1), OK);
+                assert_eq!(state.handlers, 1);
+                assert_eq!(
+                    state.conversions,
+                    if matches!(value, 'é' | 'A') { 4 } else { 2 }
+                );
+                assert_eq!(state.releases, 0);
+                assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+                assert_eq!(state.releases, 1);
+                XML_ParserFree(parser);
+                assert_eq!(state.releases, 1);
+            }
         }
-        assert_eq!(XML_Parse(parser, ptr::null(), 0, 1), OK);
-        assert_eq!(state.handlers, 1);
-        assert_eq!(state.conversions, 4);
-        assert_eq!(state.releases, 0);
-        assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
-        assert_eq!(state.releases, 1);
-        XML_ParserFree(parser);
-        assert_eq!(state.releases, 1);
     }
 }
 
@@ -1629,7 +1647,6 @@ fn invalid_multibyte_maps_and_conversion_results_release_once() {
             (0, -1, 4),
             (0, 0xd800, 4),
             (0, 0x10000, 4),
-            (0, 60, 4),
         ] {
             let mut state = MultibyteState {
                 value,

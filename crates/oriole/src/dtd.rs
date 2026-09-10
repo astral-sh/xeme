@@ -2,9 +2,10 @@ mod composition;
 mod grammar;
 mod semantic;
 
+use crate::lexical::{Buffer, Slice};
 use crate::{
     DefaultAttribute, DefaultAttributes, Entity, Error, ErrorKind, EventKind, Parser, Position,
-    character_reference, collapse_spaces, normalize_newlines, string, take_name, whitespace,
+    character_reference, string, take_name, whitespace,
 };
 use oriole_storage::{Allocator, Shared, String, TryClone, Vec, try_insert, try_push};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -43,7 +44,7 @@ impl ConditionalState {
 /// A replacement is a distinct lexical source: references cannot span frames,
 /// and only the original physical source has literal line endings normalized.
 struct EntityValueFrame<'a> {
-    rest: &'a str,
+    rest: Slice<'a>,
     name: Option<&'a str>,
     normalize: bool,
 }
@@ -57,8 +58,8 @@ struct DeclarationLiteral {
 
 #[derive(Debug)]
 struct DeclarationExpansion {
-    text: String,
-    raw: String,
+    text: Buffer,
+    raw: Buffer,
     literals: Vec<DeclarationLiteral>,
     parameters: Vec<DeclarationParameter>,
     capture_raw: bool,
@@ -202,7 +203,11 @@ impl Parser {
 }
 
 impl Parser {
-    pub(crate) fn parse_doctype(&mut self, token: &str, position: Position) -> Result<(), Error> {
+    pub(crate) fn parse_doctype(
+        &mut self,
+        token: Slice<'_>,
+        position: Position,
+    ) -> Result<(), Error> {
         if self.seen_root || self.seen_doctype || self.sources.len() > 1 || self.fragment {
             return Err(self.err(ErrorKind::Syntax, "misplaced document type declaration"));
         }
@@ -216,19 +221,17 @@ impl Parser {
             ));
         }
         let mut cursor = Cursor::new(
-            &token[9..token.len() - 1],
+            token.for_slice(&token[9..token.len() - 1]),
             self.config.namespace_separator.is_some(),
         );
         cursor
             .require_space()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
         self.check_dtd_token(&cursor)?;
-        let name = string(
-            cursor
-                .name()
-                .map_err(|message| self.err(ErrorKind::Syntax, message))?,
-            self.allocator,
-        )?;
+        let raw_name = cursor
+            .name()
+            .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        let name = cursor.lexical.for_slice(raw_name).decode(self.allocator)?;
         let spaced = cursor.space();
         let (system_id, public_id) = if cursor.starts("SYSTEM") || cursor.starts("PUBLIC") {
             if !spaced {
@@ -263,11 +266,15 @@ impl Parser {
             )?),
             position,
         )?;
-        self.event_raw(if has_internal_subset {
-            token
-        } else {
-            &token[..token.len() - 1]
-        })?;
+        self.event_raw(
+            &token
+                .for_slice(if has_internal_subset {
+                    &token
+                } else {
+                    &token[..token.len() - 1]
+                })
+                .decoded(self.allocator)?,
+        )?;
         if !has_internal_subset {
             self.finish_doctype(position, ">")?;
         }
@@ -472,7 +479,11 @@ impl Parser {
                 ));
             }
             let position = self.source().position(end);
-            let raw = string(&text[..end], self.allocator)?;
+            let raw = self
+                .source()
+                .lexical_remaining()
+                .for_slice(&text[..end])
+                .decode(self.allocator)?;
             self.account_source(end)?;
             self.finish_doctype(position, &raw)?;
             self.consume(end)?;
@@ -540,7 +551,11 @@ impl Parser {
             return self.start_declaration_composition();
         }
         self.account_source(end)?;
-        let token = string(&self.source().remaining()[..end], self.allocator)?;
+        let token = self
+            .source()
+            .lexical_remaining()
+            .for_slice(&self.source().remaining()[..end])
+            .to_owned(self.allocator)?;
         if let Some((offset, _)) = token
             .char_indices()
             .find(|(_, character)| !crate::names::is_xml_char(*character))
@@ -552,7 +567,7 @@ impl Parser {
             ));
         }
         self.save_current_raw(end)?;
-        self.parse_subset(&token, 0)?;
+        self.parse_subset(token.view(), 0)?;
         self.consume(end)?;
         Ok(true)
     }
@@ -574,12 +589,17 @@ impl Parser {
             }
             return Ok(false);
         };
-        let name = string(&self.source().remaining()[1..end], self.allocator)?;
-        if !crate::names::is_name(&name) {
+        let raw_name = &self.source().remaining()[1..end];
+        let name = self
+            .source()
+            .lexical_remaining()
+            .for_slice(raw_name)
+            .decode(self.allocator)?;
+        if !crate::names::is_name(raw_name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid parameter entity name"));
         }
         if self.config.namespace_separator.is_some()
-            && let Some(colon) = name.find(':')
+            && let Some(colon) = raw_name.find(':')
         {
             return Err(self.err_at(
                 ErrorKind::InvalidToken,
@@ -603,7 +623,11 @@ impl Parser {
                 return Err(self.err(ErrorKind::UndefinedEntity, "undefined parameter entity"));
             }
             self.declarations_skipped |= !self.standalone;
-            let raw = string(&self.source().remaining()[..end + 1], self.allocator)?;
+            let raw = self
+                .source()
+                .lexical_remaining()
+                .for_slice(&self.source().remaining()[..end + 1])
+                .decode(self.allocator)?;
             self.consume(end + 1)?;
             self.emit(
                 EventKind::SkippedEntity {
@@ -682,7 +706,7 @@ impl Parser {
     fn append_declaration_token(
         &self,
         result: &mut DeclarationExpansion,
-        text: &str,
+        text: Slice<'_>,
         boundary: bool,
     ) -> Result<(), Error> {
         if result.text.len().saturating_add(text.len()) > self.config.limits.max_token_bytes {
@@ -700,9 +724,9 @@ impl Parser {
                 "invalid declaration replacement character",
             ));
         }
-        result.text.try_push_str(text)?;
+        result.text.append(text)?;
         if !boundary && result.capture_raw {
-            result.raw.try_push_str(text)?;
+            result.raw.append(text)?;
         } else if boundary {
             self.declaration_raw_boundary(result)?;
         }
@@ -795,7 +819,12 @@ impl Parser {
             raw.try_push_str("<!")?;
             cursor.raw_started = true;
         }
-        raw.try_push_str(&cursor.raw[cursor.raw_offset..end])?;
+        raw.try_push_str(
+            &cursor
+                .raw
+                .for_slice(&cursor.raw[cursor.raw_offset..end])
+                .decoded(self.allocator)?,
+        )?;
         cursor.raw_offset = end;
         if closing && !cursor.raw_closed {
             raw.try_push('>')?;
@@ -849,16 +878,17 @@ impl Parser {
         Ok(())
     }
 
-    fn parse_subset(&mut self, text: &str, base_offset: usize) -> Result<(), Error> {
+    fn parse_subset(&mut self, text: Slice<'_>, base_offset: usize) -> Result<(), Error> {
         self.parse_subset_expanded(text, base_offset, None)
     }
 
     fn parse_subset_expanded(
         &mut self,
-        mut text: &str,
+        lexical: Slice<'_>,
         base_offset: usize,
         mut prepared: Option<DeclarationExpansion>,
     ) -> Result<(), Error> {
+        let mut text = &*lexical;
         let initial_len = text.len();
         while !text.is_empty() {
             text = text.trim_start_matches(whitespace);
@@ -881,8 +911,15 @@ impl Parser {
                 if value.contains("--") || value.ends_with('-') {
                     return Err(self.err(ErrorKind::InvalidToken, "double hyphen in DTD comment"));
                 }
-                self.emit(EventKind::Comment(self.markup_text(value)?), position)?;
-                self.event_raw(&text[..end + 7])?;
+                self.emit(
+                    EventKind::Comment(self.markup_text(lexical.for_slice(value))?),
+                    position,
+                )?;
+                self.event_raw(
+                    &lexical
+                        .for_slice(&text[..end + 7])
+                        .decoded(self.allocator)?,
+                )?;
                 text = &rest[end + 3..];
                 continue;
             }
@@ -893,8 +930,12 @@ impl Parser {
                         "unclosed DTD processing instruction",
                     )
                 })?;
-                self.parse_pi(&text[..end + 2], position)?;
-                self.event_raw(&text[..end + 2])?;
+                self.parse_pi(lexical.for_slice(&text[..end + 2]), position)?;
+                self.event_raw(
+                    &lexical
+                        .for_slice(&text[..end + 2])
+                        .decoded(self.allocator)?,
+                )?;
                 text = &text[end + 2..];
                 continue;
             }
@@ -923,14 +964,14 @@ impl Parser {
             let expansion = prepared.take();
             let grammar = expansion
                 .as_ref()
-                .map_or(&text[2..end], |value| value.text.as_str());
+                .map_or(lexical.for_slice(&text[2..end]), |value| value.text.view());
             let mut cursor = Cursor::new(grammar, self.config.namespace_separator.is_some());
             cursor.raw = grammar;
             cursor.raw_event = first_event;
             if let Some(expansion) = &expansion {
                 cursor.literals = &expansion.literals;
                 cursor.parameters = &expansion.parameters;
-                cursor.raw = &expansion.raw;
+                cursor.raw = expansion.raw.view();
             }
             let declaration = cursor
                 .name()
@@ -954,13 +995,15 @@ impl Parser {
                     .then(|| self.err(ErrorKind::Syntax, "unexpected text in entity declaration"));
                 let raw = if let Some(expansion) = &expansion {
                     self.charge_expansion(expansion.raw.len() + 3)?;
-                    let mut raw = string("<!", self.allocator)?;
-                    raw.push_str(&expansion.raw)?;
+                    let mut raw = Buffer::plain(string("<!", self.allocator)?);
+                    raw.append(expansion.raw.view())?;
                     raw.push('>')?;
                     raw
                 } else {
                     self.charge_expansion(end + 1)?;
-                    string(&text[..end + 1], self.allocator)?
+                    lexical
+                        .for_slice(&text[..end + 1])
+                        .to_owned(self.allocator)?
                 };
                 let quote = raw.find(['\u{27}', '\u{22}']).expect("entity value quote");
                 let declaration = state.declaration.as_mut().expect("pending declaration");
@@ -1051,13 +1094,15 @@ impl Parser {
                     first_raw = false;
                     if let Some(expansion) = &expansion {
                         let mut raw = string("<!", self.allocator)?;
-                        raw.try_push_str(&expansion.raw)?;
+                        raw.try_push_str(&expansion.raw.view().decoded(self.allocator)?)?;
                         if !closing_default {
                             raw.try_push('>')?;
                         }
                         raw
                     } else {
-                        string(&text[..end + usize::from(!closing_default)], self.allocator)?
+                        lexical
+                            .for_slice(&text[..end + usize::from(!closing_default)])
+                            .decode(self.allocator)?
                     }
                 } else {
                     String::new_in(self.allocator)
@@ -1079,15 +1124,15 @@ impl Parser {
     /// remaining grammar references must observe the child's standalone state.
     pub(crate) fn finish_value_raw(
         &mut self,
-        raw: &str,
+        raw: Slice<'_>,
         quote: usize,
         parameters: &[DeclarationParameter],
         first_event: usize,
         position: Position,
         closes_declaration: bool,
     ) -> Result<(), Error> {
-        let mut cursor = Cursor::new("", self.config.namespace_separator.is_some());
-        cursor.raw = &raw[2..raw.len() - usize::from(closes_declaration)];
+        let mut cursor = Cursor::new(Slice::plain(""), self.config.namespace_separator.is_some());
+        cursor.raw = raw.for_slice(&raw[2..raw.len() - usize::from(closes_declaration)]);
         cursor.closes_declaration = closes_declaration;
         cursor.raw_offset = quote - 2;
         cursor.raw_started = true;
@@ -1133,7 +1178,7 @@ impl Parser {
         let name = cursor
             .name()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-        let name = string(name, self.allocator)?;
+        let name = cursor.lexical.for_slice(name).decode(self.allocator)?;
         cursor
             .require_space()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -1149,10 +1194,10 @@ impl Parser {
                 self.err(ErrorKind::Syntax, message)
             }
         })?;
-        let model = string(
-            &model_start[..model_start.len() - cursor.rest().len()],
-            self.allocator,
-        )?;
+        let model = cursor
+            .lexical
+            .for_slice(&model_start[..model_start.len() - cursor.rest().len()])
+            .decode(self.allocator)?;
         self.declaration_parameters(cursor)?;
         self.emit(EventKind::ElementDeclaration { name, model }, position)
     }
@@ -1167,7 +1212,7 @@ impl Parser {
         let name = cursor
             .ncname()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-        let name = string(name, self.allocator)?;
+        let name = cursor.lexical.for_slice(name).decode(self.allocator)?;
         cursor
             .require_space()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -1206,7 +1251,7 @@ impl Parser {
         let name = cursor
             .ncname()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-        let name = string(name, self.allocator)?;
+        let name = cursor.lexical.for_slice(name).decode(self.allocator)?;
         cursor
             .require_space()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -1232,7 +1277,7 @@ impl Parser {
             let declaring = (parameter && !self.parameter_entities.contains_key(&name))
                 .then_some(name.as_str());
             match self.entity_value(
-                raw,
+                cursor.lexical.for_slice(raw),
                 declaring,
                 cursor
                     .last_literal_normalize
@@ -1250,7 +1295,7 @@ impl Parser {
                         parameter,
                         position,
                         origin: self.external_subset || self.sources.len() > 1,
-                        raw: String::new_in(self.allocator),
+                        raw: Buffer::new_in(self.allocator),
                         quote: 0,
                         prefix_start: 0,
                         tail_parameters: Vec::new_in(self.allocator),
@@ -1274,12 +1319,10 @@ impl Parser {
                 cursor
                     .require_space()
                     .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-                Some(string(
-                    cursor
-                        .ncname()
-                        .map_err(|message| self.err(ErrorKind::Syntax, message))?,
-                    self.allocator,
-                )?)
+                let notation = cursor
+                    .ncname()
+                    .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+                Some(cursor.lexical.for_slice(notation).decode(self.allocator)?)
             } else {
                 None
             };
@@ -1351,7 +1394,7 @@ impl Parser {
     /// references become part of the surrounding declaration's grammar.
     fn entity_value(
         &self,
-        raw: &str,
+        raw: Slice<'_>,
         declaring_parameter: Option<&str>,
         normalize: bool,
         declaration_parameters: &[String],
@@ -1369,8 +1412,12 @@ impl Parser {
             if current.name.is_some() {
                 self.account_entity_bytes(start, true)?;
             }
-            self.append_entity_value(&mut value, &current.rest[..start], current.normalize)?;
-            current.rest = &current.rest[start..];
+            self.append_entity_value(
+                &mut value,
+                current.rest.for_slice(&current.rest.as_str()[..start]),
+                current.normalize,
+            )?;
+            current.rest = current.rest.for_slice(&current.rest.as_str()[start..]);
             if current.rest.is_empty() {
                 if let Some(parent) = parents.pop() {
                     current = parent;
@@ -1387,7 +1434,7 @@ impl Parser {
             if current.name.is_some() {
                 self.account_entity_bytes(end + 1, true)?;
             }
-            let reference = &current.rest[1..end];
+            let reference = &current.rest.as_str()[1..end];
             let parameter = current.rest.starts_with('%');
             if !parameter && reference.starts_with('#') {
                 let character = character_reference(reference)
@@ -1396,8 +1443,12 @@ impl Parser {
                     })?
                     .expect("numeric reference");
                 let mut bytes = [0; 4];
-                self.append_entity_value(&mut value, character.encode_utf8(&mut bytes), false)?;
-                current.rest = &current.rest[end + 1..];
+                self.append_entity_value(
+                    &mut value,
+                    Slice::plain(character.encode_utf8(&mut bytes)),
+                    false,
+                )?;
+                current.rest = current.rest.for_slice(&current.rest.as_str()[end + 1..]);
                 continue;
             }
             if !crate::names::is_name(reference)
@@ -1406,8 +1457,12 @@ impl Parser {
                 return Err(self.err(ErrorKind::InvalidToken, "invalid reference in entity value"));
             }
             if !parameter {
-                self.append_entity_value(&mut value, &current.rest[..end + 1], false)?;
-                current.rest = &current.rest[end + 1..];
+                self.append_entity_value(
+                    &mut value,
+                    current.rest.for_slice(&current.rest.as_str()[..end + 1]),
+                    false,
+                )?;
+                current.rest = current.rest.for_slice(&current.rest.as_str()[end + 1..]);
                 continue;
             }
             if !self.external_subset && self.sources.len() == 1 {
@@ -1416,6 +1471,8 @@ impl Parser {
                     "parameter reference in internal subset entity value",
                 ));
             }
+            let decoded_reference = current.rest.for_slice(reference).decoded(self.allocator)?;
+            let reference = &*decoded_reference;
             // Charge reference work even for empty or missing replacements.
             self.charge_expansion(end + 1 + size_of::<EntityValueFrame<'_>>())?;
             let entity = self.parameter_entities.get(reference);
@@ -1443,8 +1500,8 @@ impl Parser {
                     "recursive parameter entity value",
                 ));
             }
-            current.rest = &current.rest[end + 1..];
-            let Some(entity) = entity else {
+            current.rest = current.rest.for_slice(&current.rest.as_str()[end + 1..]);
+            let Some((name, entity)) = self.parameter_entities.get_key_value(reference) else {
                 skipped = true;
                 continue;
             };
@@ -1476,7 +1533,7 @@ impl Parser {
                     try_push(
                         &mut frames,
                         crate::value::Frame {
-                            text: string(frame.rest, self.allocator)?,
+                            text: frame.rest.to_owned(self.allocator)?,
                             offset: 0,
                             name: frame
                                 .name
@@ -1500,8 +1557,8 @@ impl Parser {
             self.charge_expansion(replacement.len())?;
             try_push(&mut parents, current)?;
             current = EntityValueFrame {
-                rest: replacement,
-                name: Some(reference),
+                rest: Slice::plain(replacement),
+                name: Some(name.as_str()),
                 normalize: false,
             };
         }
@@ -1512,7 +1569,7 @@ impl Parser {
     pub(crate) fn append_entity_value(
         &self,
         value: &mut String,
-        text: &str,
+        text: Slice<'_>,
         normalize: bool,
     ) -> Result<(), Error> {
         if value.len().saturating_add(text.len()) > self.config.limits.max_token_bytes {
@@ -1522,9 +1579,9 @@ impl Parser {
             ));
         }
         if normalize && text.contains('\r') {
-            value.push_str(&normalize_newlines(text, self.allocator)?)?;
+            value.push_str(&text.normalized(self.allocator)?)?;
         } else {
-            value.push_str(text)?;
+            value.push_str(&text.decoded(self.allocator)?)?;
         }
         Ok(())
     }
@@ -1538,7 +1595,7 @@ impl Parser {
         let element = cursor
             .name()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-        let element = string(element, self.allocator)?;
+        let element = cursor.lexical.for_slice(element).decode(self.allocator)?;
         let mut first_attribute = true;
         loop {
             let spaced = cursor.space();
@@ -1577,7 +1634,7 @@ impl Parser {
         let name = cursor
             .name()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-        let name = string(name, self.allocator)?;
+        let name = cursor.lexical.for_slice(name).decode(self.allocator)?;
         cursor
             .require_space()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -1611,7 +1668,7 @@ impl Parser {
         let raw_type = &start[..start.len() - cursor.rest().len()];
         let mut attribute_type = String::try_with_capacity_in(raw_type.len(), self.allocator)?;
         for part in raw_type.split(whitespace) {
-            attribute_type.push_str(part)?;
+            attribute_type.push_str(&cursor.lexical.for_slice(part).decoded(self.allocator)?)?;
         }
         cursor
             .require_space()
@@ -1651,13 +1708,13 @@ impl Parser {
             } else {
                 None
             };
-            let mut value = self.expand_attribute(
-                normalized.as_deref().unwrap_or(raw),
+            let value = self.expand_attribute(
+                normalized
+                    .as_deref()
+                    .map_or_else(|| cursor.lexical.for_slice(raw), Slice::plain),
                 &mut Vec::new_in(self.allocator),
+                attribute_type != "CDATA",
             )?;
-            if attribute_type != "CDATA" {
-                value = collapse_spaces(&value, self.allocator)?;
-            }
             Some(value)
         };
         self.declaration_parameters(cursor)?;
@@ -1767,6 +1824,7 @@ fn invalid_dtd_token(text: &str, namespaces: bool) -> Option<usize> {
 }
 
 struct Cursor<'a> {
+    lexical: Slice<'a>,
     text: &'a str,
     namespaces: bool,
     initial_len: usize,
@@ -1786,11 +1844,13 @@ struct Cursor<'a> {
     raw_closed: bool,
     closes_declaration: bool,
     silent_defaults: bool,
-    raw: &'a str,
+    raw: Slice<'a>,
 }
 impl<'a> Cursor<'a> {
-    fn new(text: &'a str, namespaces: bool) -> Self {
+    fn new(lexical: Slice<'a>, namespaces: bool) -> Self {
+        let text = lexical.as_str();
         Self {
+            lexical,
             text,
             namespaces,
             initial_len: text.len(),
@@ -1810,7 +1870,7 @@ impl<'a> Cursor<'a> {
             raw_closed: false,
             closes_declaration: true,
             silent_defaults: false,
-            raw: "",
+            raw: Slice::plain(""),
         }
     }
     fn offset(&self) -> usize {
@@ -1897,11 +1957,11 @@ fn external_id(
     normalize: bool,
 ) -> Result<(Option<String>, Option<String>), Error> {
     let syntax = |message| Error::bare(ErrorKind::Syntax, message);
-    let system_literal = |value, normalize| {
+    let system_literal = |value: Slice<'_>, normalize| -> Result<String, Error> {
         if normalize {
-            normalize_newlines(value, allocator)
+            Ok(value.normalized(allocator)?)
         } else {
-            string(value, allocator)
+            Ok(value.decode(allocator)?)
         }
     };
     if cursor.eat("SYSTEM") {
@@ -1909,7 +1969,7 @@ fn external_id(
         let value = cursor.quoted().map_err(syntax)?;
         Ok((
             Some(system_literal(
-                value,
+                cursor.lexical.for_slice(value),
                 cursor.last_literal_normalize.unwrap_or(normalize),
             )?),
             None,
@@ -1917,15 +1977,18 @@ fn external_id(
     } else if cursor.eat("PUBLIC") {
         cursor.require_space().map_err(syntax)?;
         let public = cursor.quoted().map_err(syntax)?;
-        if !public
-            .chars()
-            .all(|c| c.is_ascii_alphanumeric() || " \r\n-'()+,./:=?;!*#@$_%".contains(c))
+        if cursor
+            .lexical
+            .for_slice(public)
+            .invalid_public_character()
+            .is_some()
         {
             return Err(Error::bare(
                 ErrorKind::PublicId,
                 "invalid public identifier character",
             ));
         }
+        let public = cursor.lexical.for_slice(public).decoded(allocator)?;
         let mut normalized = String::new_in(allocator);
         for part in public.split_ascii_whitespace() {
             if !normalized.is_empty() {
@@ -1943,7 +2006,7 @@ fn external_id(
         let system = cursor.quoted().map_err(syntax)?;
         Ok((
             Some(system_literal(
-                system,
+                cursor.lexical.for_slice(system),
                 cursor.last_literal_normalize.unwrap_or(normalize),
             )?),
             Some(normalized),

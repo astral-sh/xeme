@@ -4,6 +4,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use oriole_storage::{Shared, String, TryClone, TryLock, Vec, try_box, try_push};
 
+use crate::lexical::{Buffer, Slice};
 use crate::value_lexer::{ValueScan, ValueScanner};
 use crate::{Entity, Error, ErrorKind, EventKind, Parser, Position, character_reference, string};
 
@@ -14,7 +15,7 @@ pub(crate) enum Build {
 
 #[derive(Debug)]
 pub(crate) struct Frame {
-    pub(crate) text: String,
+    pub(crate) text: Buffer,
     pub(crate) offset: usize,
     pub(crate) name: Option<String>,
     pub(crate) normalize: bool,
@@ -26,7 +27,7 @@ pub(crate) struct Declaration {
     pub(crate) parameter: bool,
     pub(crate) origin: bool,
     pub(crate) position: Position,
-    pub(crate) raw: String,
+    pub(crate) raw: Buffer,
     pub(crate) quote: usize,
     pub(crate) prefix_start: usize,
     pub(crate) tail_parameters: Vec<crate::dtd::DeclarationParameter>,
@@ -143,7 +144,7 @@ impl Parser {
         })
     }
 
-    fn value_append(&self, state: &State, text: &str, normalize: bool) -> Result<(), Error> {
+    fn value_append(&self, state: &State, text: Slice<'_>, normalize: bool) -> Result<(), Error> {
         let mut output = state.output.try_lock().ok_or_else(|| {
             self.err(
                 ErrorKind::ExternalEntityHandling,
@@ -266,12 +267,16 @@ impl Parser {
                 }
                 ValueScan::XmlDeclaration { start, end } => {
                     self.charge_expansion(end - start)?;
-                    let token = string(&text[start..end], self.allocator)?;
+                    let token = self
+                        .source()
+                        .lexical_remaining()
+                        .for_slice(&text[start..end])
+                        .to_owned(self.allocator)?;
                     let position = self.source().position_at(start, end - start);
                     self.account_source(end)?;
                     state.content_start = end;
                     self.value_state = Some(state);
-                    self.parse_pi(&token, position)?;
+                    self.parse_pi(token.view(), position)?;
                     let state = self.value_state.as_ref().expect("value declaration");
                     let mut output = state.output.try_lock().ok_or_else(|| {
                         self.err(
@@ -282,7 +287,7 @@ impl Parser {
                     output.standalone |= self.standalone;
                     self.standalone = output.standalone;
                     drop(output);
-                    self.event_raw(&token)?;
+                    self.event_raw(&token.view().decoded(self.allocator)?)?;
                     return Ok(true);
                 }
                 ValueScan::Complete => {
@@ -291,7 +296,11 @@ impl Parser {
                     }
                     self.charge_expansion(text.len() - state.content_start + size_of::<Frame>())?;
                     let frame = Frame {
-                        text: string(&text[state.content_start..], self.allocator)?,
+                        text: self
+                            .source()
+                            .lexical_remaining()
+                            .for_slice(&text[state.content_start..])
+                            .to_owned(self.allocator)?,
                         offset: 0,
                         name: None,
                         normalize: true,
@@ -320,7 +329,13 @@ impl Parser {
                     EventKind::EntityDeclarationPrefix
                 };
                 self.emit(kind, declaration.position)?;
-                self.event_raw(&declaration.raw[declaration.prefix_start..declaration.quote])?;
+                self.event_raw(
+                    &declaration
+                        .raw
+                        .view()
+                        .for_slice(&declaration.raw[declaration.prefix_start..declaration.quote])
+                        .decoded(self.allocator)?,
+                )?;
                 self.value_state = Some(state);
                 return Ok(true);
             }
@@ -372,7 +387,11 @@ impl Parser {
             } else if frame.name.is_some() {
                 self.account_entity_bytes(start, true)?;
             }
-            self.value_append(state, &rest[..start], frame.normalize)?;
+            self.value_append(
+                state,
+                frame.text.view().for_slice(&rest[..start]),
+                frame.normalize,
+            )?;
             state.frames.last_mut().expect("value frame").offset += start;
             let frame = state.frames.last().expect("value frame");
             let rest = &frame.text[frame.offset..];
@@ -393,7 +412,7 @@ impl Parser {
                 let value = character_reference(name)
                     .map_err(|(kind, _)| self.err(kind, "invalid character reference"))?
                     .expect("numeric reference");
-                self.value_append(state, value.encode_utf8(&mut [0; 4]), false)?;
+                self.value_append(state, Slice::plain(value.encode_utf8(&mut [0; 4])), false)?;
                 state.frames.last_mut().expect("value frame").offset += end + 1;
                 continue;
             }
@@ -403,10 +422,12 @@ impl Parser {
                 return Err(self.err(ErrorKind::InvalidToken, "invalid entity value reference"));
             }
             if rest.starts_with('&') {
-                self.value_append(state, &rest[..end + 1], false)?;
+                self.value_append(state, frame.text.view().for_slice(&rest[..end + 1]), false)?;
                 state.frames.last_mut().expect("value frame").offset += end + 1;
                 continue;
             }
+            let decoded_name = frame.text.view().for_slice(name).decoded(self.allocator)?;
+            let name: &str = &decoded_name;
             self.charge_expansion(end + 1 + size_of::<Frame>())?;
             let entity = self.parameter_entities.get(name);
             if entity.is_some_and(Entity::is_value_open)
@@ -472,7 +493,7 @@ impl Parser {
                 }
                 self.charge_expansion(value.len())?;
                 let frame = Frame {
-                    text: value.try_clone()?,
+                    text: Buffer::plain(value.try_clone()?),
                     offset: 0,
                     name: Some(string(name, self.allocator)?),
                     normalize: false,
@@ -564,7 +585,7 @@ impl Parser {
         self.declarations_skipped = skipped;
         self.has_external_subset = true;
         self.finish_value_raw(
-            &declaration.raw,
+            declaration.raw.view(),
             declaration.quote,
             &declaration.tail_parameters,
             first_event,

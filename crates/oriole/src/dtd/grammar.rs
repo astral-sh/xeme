@@ -173,7 +173,17 @@ impl Cursor {
 
     /// Produce one callback boundary, or await another complete lexical prefix.
     /// Previously supplied bytes must not change or be removed.
+    #[cfg(test)]
     pub(crate) fn advance(&mut self, text: &str, final_input: bool) -> Result<Progress> {
+        self.advance_lexical(crate::lexical::Slice::plain(text), final_input)
+    }
+
+    pub(crate) fn advance_lexical(
+        &mut self,
+        lexical: crate::lexical::Slice<'_>,
+        final_input: bool,
+    ) -> Result<Progress> {
+        let text = lexical.as_str();
         loop {
             let token = self.peek(text)?;
             match self.state {
@@ -290,7 +300,7 @@ impl Cursor {
                     self.state = State::EntityTail;
                 }
                 State::EntityPublic => {
-                    Self::public_literal(text, token)?;
+                    Self::public_literal(lexical, token)?;
                     self.entity_public = Some((token.start, token.end));
                     self.state = State::EntityPublicSystem;
                 }
@@ -327,7 +337,7 @@ impl Cursor {
                     return Ok(self.commit(Kind::Notation, 0));
                 }
                 State::NotationPublic => {
-                    Self::public_literal(text, token)?;
+                    Self::public_literal(lexical, token)?;
                     self.state = State::NotationPublicTail;
                 }
                 State::ElementName | State::AttlistElement => {
@@ -541,11 +551,11 @@ impl Cursor {
         }
     }
 
-    fn public_literal(text: &str, token: Token) -> Result<()> {
+    fn public_literal(text: crate::lexical::Slice<'_>, token: Token) -> Result<()> {
         Self::literal(token)?;
-        if let Some((offset, _)) = text[token.start + 1..token.end - 1]
-            .char_indices()
-            .find(|(_, c)| !c.is_ascii_alphanumeric() && !" \r\n-'()+,./:=?;!*#@$_%".contains(*c))
+        if let Some(offset) = text
+            .for_slice(&text[token.start + 1..token.end - 1])
+            .invalid_public_character()
         {
             return Err((ErrorKind::PublicId, token.start + 1 + offset));
         }

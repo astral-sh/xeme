@@ -164,7 +164,10 @@ impl Decoder {
                                 ErrorKind::InvalidToken,
                                 "undefined byte in custom encoding",
                             ))?;
-                    source.push_custom(character, 1)?;
+                    let byte = self.pending[consumed];
+                    let spelling = (u32::from(character) != u32::from(byte))
+                        .then_some(([byte, 0, 0, 0], custom_public_byte(map, byte)));
+                    source.push_custom(character, 1, spelling)?;
                     consumed += 1;
                 }
             }
@@ -498,7 +501,7 @@ impl Decoder {
         value: i32,
         source: &mut Source,
     ) -> Result<(), Error> {
-        let (_, width) = self.conversion.ok_or(Error::bare(
+        let (bytes, width) = self.conversion.ok_or(Error::bare(
             ErrorKind::InvalidToken,
             "no encoding conversion is pending",
         ))?;
@@ -507,16 +510,15 @@ impl Decoder {
             .filter(|value| *value <= 0xffff)
             .and_then(char::from_u32)
             .filter(|character| crate::names::is_xml_char(*character))
-            // XML tokenization distinguishes raw ASCII from multibyte sequences,
-            // even when a converter gives both the same scalar. Reject all ASCII
-            // aliases so decoding cannot synthesize delimiters, keywords, reserved
-            // names, or numeric/predefined references before the UTF-8 tokenizer.
-            .filter(|character| !character.is_ascii())
             .ok_or(Error::bare(
                 ErrorKind::InvalidToken,
                 "invalid custom encoding conversion",
             ))?;
-        source.push_custom(character, width)?;
+        let map = self.custom_map.as_ref().expect("custom encoding has a map");
+        let public_valid = bytes[..usize::from(width)]
+            .iter()
+            .all(|byte| custom_public_byte(map, *byte));
+        source.push_custom(character, width, Some((bytes, public_valid)))?;
         self.pending_cursor += usize::from(width);
         self.conversion = None;
         Ok(())
@@ -605,6 +607,22 @@ impl Decoder {
     }
 }
 
+/// Expat's public-ID scanner checks every original byte's type, even bytes
+/// inside a converter sequence. Mapped ASCII bytes classified as XML name
+/// characters remain allowed; the two ordinary punctuation exceptions use raw
+/// `$`/`@` values. Required ASCII syntax is fixed by map installation.
+fn custom_public_byte(map: &[i32; 256], byte: u8) -> bool {
+    let scalar = char::from(byte);
+    scalar.is_ascii_alphanumeric()
+        || " \r\n-'()+,./:=?;!*#@$_%".contains(scalar)
+        || (byte.is_ascii()
+            && u32::try_from(map[usize::from(byte)])
+                .ok()
+                .filter(|value| *value > 0x7f)
+                .and_then(char::from_u32)
+                .is_some_and(crate::names::is_name_char))
+}
+
 /// ASCII characters that Expat requires custom encodings to preserve exactly.
 /// Ordinary punctuation such as `$`, `@`, and `~` may be remapped; XML markup,
 /// whitespace, and ASCII name characters may not acquire alternate byte forms.
@@ -626,7 +644,7 @@ struct Scan {
 
 #[derive(Debug)]
 pub(crate) struct Source {
-    pub(crate) text: String,
+    pub(crate) text: crate::lexical::Buffer,
     cursor: usize,
     encoding: Encoding,
     raw_index: usize,
@@ -647,7 +665,7 @@ pub(crate) struct Source {
 impl Source {
     pub(crate) fn new(allocator: Allocator) -> Self {
         Self {
-            text: String::new_in(allocator),
+            text: crate::lexical::Buffer::new_in(allocator),
             cursor: 0,
             encoding: Encoding::Utf8,
             raw_index: 0,
@@ -677,7 +695,7 @@ impl Source {
     ) -> Self {
         let allocator = text.allocator();
         Self {
-            text,
+            text: crate::lexical::Buffer::plain(text),
             anchor: Some(position),
             initial_depth,
             entity_name: Some(name),
@@ -688,19 +706,41 @@ impl Source {
         &self.text[self.cursor..]
     }
 
-    fn push_custom(&mut self, character: char, raw_width: u8) -> Result<(), Error> {
+    #[inline]
+    pub(crate) fn has_conversions(&self) -> bool {
+        self.text.has_conversions()
+    }
+
+    pub(crate) fn lexical_remaining(&self) -> crate::lexical::Slice<'_> {
+        self.text.view().for_slice(self.remaining())
+    }
+
+    fn push_custom(
+        &mut self,
+        character: char,
+        raw_width: u8,
+        converted: Option<([u8; 4], bool)>,
+    ) -> Result<(), Error> {
+        let lexical = converted
+            .filter(|_| raw_width > 1)
+            .map_or(character, |_| crate::lexical::representative(character));
         if self.encoding == Encoding::MultiByte {
-            let count = character.len_utf8();
+            let count = lexical.len_utf8();
             self.raw_widths
                 .try_reserve(count)
                 .map_err(oriole_storage::AllocError::from)?;
-            self.text.try_reserve(count)?;
+            if let Some((bytes, public_valid)) = converted {
+                self.text
+                    .push_conversion(character, bytes, raw_width, public_valid)?;
+            } else {
+                self.text.try_push(character)?;
+            }
             // Both reservations precede mutation, so allocation failure preserves
             // the alignment between UTF-8 bytes and original encoded widths.
             self.raw_widths.push(raw_width);
             self.raw_widths.extend(std::iter::repeat_n(0, count - 1));
             self.decoded_end.byte_index += usize::from(raw_width);
-            match character {
+            match lexical {
                 '\r' => {
                     self.decoded_end.line += 1;
                     self.decoded_end.column = 0;
@@ -713,9 +753,13 @@ impl Source {
                 }
                 _ => self.decoded_end.column += 1,
             }
-            self.decoded_end_cr = character == '\r';
+            self.decoded_end_cr = lexical == '\r';
+        } else if let Some((bytes, public_valid)) = converted {
+            self.text
+                .push_conversion(character, bytes, raw_width, public_valid)?;
+        } else {
+            self.text.try_push(character)?;
         }
-        self.text.try_push(character)?;
         Ok(())
     }
 
@@ -908,7 +952,7 @@ impl Source {
         self.scan = Scan::default();
         self.deferred_size = 0;
         if self.cursor >= 64 * 1024 && self.cursor >= self.text.len() / 2 {
-            self.text.drain(..self.cursor);
+            self.text.discard_prefix(self.cursor);
             if self.encoding == Encoding::MultiByte {
                 self.raw_widths.drain(..self.cursor);
             }

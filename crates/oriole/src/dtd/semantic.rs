@@ -92,8 +92,12 @@ impl Parser {
         let mut state = declaration.semantic.take().expect("semantic declaration");
         let progress = state
             .grammar
-            .advance(
-                &declaration.expansion.text[..declaration.ready],
+            .advance_lexical(
+                declaration
+                    .expansion
+                    .text
+                    .view()
+                    .for_slice(&declaration.expansion.text[..declaration.ready]),
                 declaration.complete,
             )
             .map_err(|(kind, _offset)| self.err(kind, "invalid declaration grammar"))?;
@@ -122,7 +126,14 @@ impl Parser {
                         .enumeration_type
                         .as_mut()
                         .expect("enumeration callback")
-                        .push_str(&declaration.expansion.text[start..end])?;
+                        .push_str(
+                            &declaration
+                                .expansion
+                                .text
+                                .view()
+                                .for_slice(&declaration.expansion.text[start..end])
+                                .decoded(self.allocator)?,
+                        )?;
                 }
                 false
             }
@@ -132,7 +143,7 @@ impl Parser {
             }
             grammar::Progress::NeedMore => {
                 state.waited_prefix = declaration.ready;
-                self.classify_declaration_duplicate(declaration, &mut state);
+                self.classify_declaration_duplicate(declaration, &mut state)?;
                 self.project_declaration_prefix(declaration, &mut state, false)?;
                 if self.pending.is_empty() && declaration.request.is_some() {
                     self.reserve_declaration_name(declaration, &mut state)?;
@@ -195,7 +206,7 @@ impl Parser {
         if !state.name_prepared
             && let Some((_, end, _)) = state.grammar.entity_name()
         {
-            self.classify_declaration_duplicate(declaration, state);
+            self.classify_declaration_duplicate(declaration, state)?;
             self.semantic_parameters_through(declaration, state, end)?;
             self.reserve_declaration_name(declaration, state)?;
             state.name_prepared = true;
@@ -225,8 +236,13 @@ impl Parser {
                 continue;
             };
             self.charge_expansion(end - start)?;
-            let value = &declaration.expansion.text[start + 1..end - 1];
+            let value = declaration
+                .expansion
+                .text
+                .view()
+                .for_slice(&declaration.expansion.text[start + 1..end - 1]);
             let value = if is_public {
+                let value = value.decoded(self.allocator)?;
                 let mut normalized = String::new_in(self.allocator);
                 for part in value.split_ascii_whitespace() {
                     if !normalized.is_empty() {
@@ -247,9 +263,9 @@ impl Parser {
                     .filter(|literal| literal.offset == start)
                     .map_or(self.sources.len() == 1, |literal| literal.normalize);
                 if normalize {
-                    normalize_newlines(value, self.allocator)?
+                    value.normalized(self.allocator)?
                 } else {
-                    string(value, self.allocator)?
+                    value.decode(self.allocator)?
                 }
             };
             let table = if *parameter {
@@ -283,9 +299,9 @@ impl Parser {
         &self,
         declaration: &composition::Declaration,
         state: &mut State,
-    ) {
+    ) -> Result<(), Error> {
         if state.entity_committed || state.reservation_checked {
-            return;
+            return Ok(());
         }
         if let Some((start, end, parameter)) = state.grammar.entity_name() {
             let table = if parameter {
@@ -293,11 +309,18 @@ impl Parser {
             } else {
                 &self.entities
             };
-            if table.contains_key(&declaration.expansion.text[start..end]) {
+            let name = declaration
+                .expansion
+                .text
+                .view()
+                .for_slice(&declaration.expansion.text[start..end])
+                .decoded(self.allocator)?;
+            if table.contains_key(&*name) {
                 state.reservation_checked = true;
                 state.duplicate = Some((false, false));
             }
         }
+        Ok(())
     }
 
     /// A parent declaration owns the first table slot before its child parses.
@@ -315,7 +338,13 @@ impl Parser {
             return Ok(());
         };
         state.reservation_checked = true;
-        let name = &declaration.expansion.text[start..end];
+        let decoded_name = declaration
+            .expansion
+            .text
+            .view()
+            .for_slice(&declaration.expansion.text[start..end])
+            .decoded(self.allocator)?;
+        let name: &str = &decoded_name;
         let table = if parameter {
             &self.parameter_entities
         } else {
@@ -362,7 +391,7 @@ impl Parser {
         end: usize,
     ) -> Cursor<'a> {
         let mut cursor = Cursor::new(
-            &expansion.text[start..end],
+            expansion.text.view().for_slice(&expansion.text[start..end]),
             self.config.namespace_separator.is_some(),
         );
         cursor.initial_len = end;
@@ -373,7 +402,10 @@ impl Parser {
             .partition_point(|parameter| parameter.offset <= end);
         cursor.parameters = &expansion.parameters[..parameter_end];
         cursor.parameter_index = state.parameter_index;
-        cursor.raw = &expansion.raw[..expansion.raw_at(end)];
+        cursor.raw = expansion
+            .raw
+            .view()
+            .for_slice(&expansion.raw[..expansion.raw_at(end)]);
         cursor.raw_offset = state.raw_offset;
         cursor.raw_started = state.raw_started;
         cursor.raw_event = self.pending.len();
@@ -477,10 +509,14 @@ impl Parser {
             if state.element.is_none() {
                 let (start, end) = state.grammar.element_span().expect("ATTLIST element");
                 self.charge_expansion(end - start)?;
-                state.element = Some(string(
-                    &declaration.expansion.text[start..end],
-                    self.allocator,
-                )?);
+                state.element = Some(
+                    declaration
+                        .expansion
+                        .text
+                        .view()
+                        .for_slice(&declaration.expansion.text[start..end])
+                        .decode(self.allocator)?,
+                );
             }
             if let Some(kind) = &mut state.enumeration_type {
                 self.charge_expansion(1)?;
@@ -528,8 +564,14 @@ impl Parser {
                 .as_mut()
                 .expect("pending declaration value");
             let raw_end = declaration.expansion.raw_at(commit.end);
-            let mut raw = string("<!", self.allocator)?;
-            raw.push_str(&declaration.expansion.raw[..raw_end])?;
+            let mut raw = Buffer::plain(string("<!", self.allocator)?);
+            raw.append(
+                declaration
+                    .expansion
+                    .raw
+                    .view()
+                    .for_slice(&declaration.expansion.raw[..raw_end]),
+            )?;
             let quote = raw.find(['\'', '"']).expect("entity value quote");
             pending.raw = raw;
             pending.quote = quote;

@@ -7,6 +7,7 @@
 mod accounting;
 mod dtd;
 mod encoding;
+mod lexical;
 mod names;
 mod recycling;
 mod value;
@@ -292,6 +293,7 @@ pub enum EventKind {
 #[derive(Debug)]
 struct Element {
     raw_name: String,
+    raw_encoding: Option<oriole_storage::Box<Vec<lexical::NameEncoding>>>,
     expanded_name: Option<String>,
     bindings: Vec<(String, Option<String>)>,
 }
@@ -513,7 +515,7 @@ pub struct Parser {
     reparse_deferral: bool,
     last_position: Position,
     current_raw: String,
-    token_scratch: String,
+    token_scratch: lexical::Buffer,
     raw_attributes: Vec<RawAttribute>,
     attribute_recycling: AttributeRecycling,
     expand_internal_entities: bool,
@@ -598,7 +600,7 @@ impl Parser {
                 ..Position::default()
             },
             current_raw: String::new_in(allocator),
-            token_scratch: String::new_in(allocator),
+            token_scratch: lexical::Buffer::new_in(allocator),
             raw_attributes: Vec::new_in(allocator),
             attribute_recycling: AttributeRecycling::new(allocator)?,
             expand_internal_entities: true,
@@ -1067,7 +1069,8 @@ impl Parser {
     /// After draining available events, inspect [`Self::encoding_conversion`] and
     /// supply its result using [`Self::resolve_encoding_conversion`]. No callback
     /// runs while the parser is borrowed. Entries `-2` through `-4` give byte widths.
-    /// Converted ASCII aliases are unsupported; ASCII must use direct map entries.
+    /// Converted values may include ASCII. Original encoded spellings retain their
+    /// lexical roles, so a converted `<` is data rather than an opening delimiter.
     pub fn set_multibyte_encoding_map(&mut self, name: &str, map: [i32; 256]) -> Result<(), Error> {
         self.install_encoding_map(name, map, true)
     }
@@ -1131,9 +1134,9 @@ impl Parser {
         })
     }
 
-    /// Resolve the pending sequence to a non-ASCII BMP scalar, or pass `-1` for invalid data.
+    /// Resolve the pending sequence to an XML character in the BMP, or pass `-1` for invalid data.
     ///
-    /// ASCII aliases are rejected so conversion cannot change XML lexical syntax.
+    /// Converted ASCII remains distinct from raw ASCII syntax until semantic decoding.
     pub fn resolve_encoding_conversion(&mut self, value: i32) -> Result<(), Error> {
         if let Some(error) = self.error {
             return Err(error);
@@ -1442,8 +1445,20 @@ impl Parser {
             .sources
             .last()
             .expect("parser always has an input source");
-        self.current_raw
-            .try_push_str(&source.remaining()[..count])?;
+        if !source.has_conversions() {
+            self.current_raw
+                .try_push_str(&source.remaining()[..count])?;
+            return Ok(());
+        }
+        let value = source
+            .lexical_remaining()
+            .for_slice(&source.remaining()[..count]);
+        if value.has_ascii_aliases() {
+            self.current_raw
+                .try_push_str(&value.decode(self.allocator)?)?;
+        } else {
+            self.current_raw.try_push_str(&value)?;
+        }
         Ok(())
     }
     fn event_raw(&mut self, raw: &str) -> Result<(), Error> {
@@ -1717,10 +1732,16 @@ impl Parser {
             }
             self.account_source(end)?;
             let position = self.source().position(end);
-            let mut token =
-                std::mem::replace(&mut self.token_scratch, String::new_in(self.allocator));
+            let mut token = std::mem::replace(
+                &mut self.token_scratch,
+                lexical::Buffer::new_in(self.allocator),
+            );
             token.clear();
-            token.try_push_str(&self.source().remaining()[..end])?;
+            token.append(
+                self.source()
+                    .lexical_remaining()
+                    .for_slice(&self.source().remaining()[..end]),
+            )?;
             let parsed = (|| {
                 if let Some((offset, _)) = token
                     .char_indices()
@@ -1750,12 +1771,17 @@ impl Parser {
                             ));
                         }
                         self.declaration_allowed = false;
-                        self.emit(EventKind::Comment(self.markup_text(text)?), position)?;
+                        self.emit(
+                            EventKind::Comment(self.markup_text(token.view().for_slice(text))?),
+                            position,
+                        )?;
                     }
-                    ScanMode::Pi => self.parse_pi(&token, position)?,
-                    ScanMode::Doctype => self.parse_doctype(&token, position)?,
-                    ScanMode::Tag if token.starts_with("</") => self.parse_end(&token, position)?,
-                    ScanMode::Tag => self.parse_start(&token, position)?,
+                    ScanMode::Pi => self.parse_pi(token.view(), position)?,
+                    ScanMode::Doctype => self.parse_doctype(token.view(), position)?,
+                    ScanMode::Tag if token.starts_with("</") => {
+                        self.parse_end(token.view(), position)?
+                    }
+                    ScanMode::Tag => self.parse_start(token.view(), position)?,
                     ScanMode::DtdDeclaration => {
                         unreachable!("DTD scanner only runs in DTD context")
                     }
@@ -1764,7 +1790,7 @@ impl Parser {
             })();
             // Parsing only writes queued raw overrides. Publish the owned token
             // before returning either its events or its terminal error.
-            std::mem::swap(&mut self.current_raw, &mut token);
+            token.swap_decoded(&mut self.current_raw)?;
             parsed?;
             self.token_scratch = token;
             self.consume(end)?;
@@ -2088,7 +2114,12 @@ impl Parser {
         }
         let character = character_reference(&text[1..end]);
         let name = if matches!(character, Ok(None)) {
-            Some(string(&text[1..end], self.allocator)?)
+            Some(
+                self.source()
+                    .lexical_remaining()
+                    .for_slice(&text[1..end])
+                    .decode(self.allocator)?,
+            )
         } else {
             None
         };
@@ -2112,11 +2143,12 @@ impl Parser {
             return Ok(true);
         }
         let name = name.expect("general entity references have an owned name");
-        if !is_name(&name) {
+        let raw_name = &self.source().remaining()[1..end];
+        if !is_name(raw_name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid entity name"));
         }
         if self.config.namespace_separator.is_some()
-            && let Some(colon) = name.find(':')
+            && let Some(colon) = raw_name.find(':')
         {
             return Err(self.err_at(
                 ErrorKind::InvalidToken,
@@ -2242,7 +2274,7 @@ impl Parser {
         Ok(true)
     }
 
-    fn parse_pi(&mut self, token: &str, position: Position) -> Result<(), Error> {
+    fn parse_pi(&mut self, token: lexical::Slice<'_>, position: Position) -> Result<(), Error> {
         let body = token
             .strip_prefix("<?")
             .and_then(|body| body.strip_suffix("?>"))
@@ -2284,7 +2316,10 @@ impl Parser {
                     .next()
                     .ok_or_else(|| self.err(ErrorKind::XmlDeclaration, "empty text declaration"))?;
                 let (version, encoding_attr) = if first.0 == "version" {
-                    (Some(string(first.1, self.allocator)?), attrs.next())
+                    (
+                        Some(token.for_slice(first.1).decode(self.allocator)?),
+                        attrs.next(),
+                    )
                 } else {
                     (None, Some(first))
                 };
@@ -2294,29 +2329,39 @@ impl Parser {
                         "text declaration requires an encoding",
                     )
                 })?;
-                if name != "encoding" || !valid_encoding_name(encoding) || attrs.next().is_some() {
+                let encoding = token.for_slice(encoding).decoded(self.allocator)?;
+                if name != "encoding" || !valid_encoding_name(&encoding) || attrs.next().is_some() {
                     return Err(self.err(ErrorKind::XmlDeclaration, "invalid text declaration"));
                 }
                 self.decoder
-                    .check_declaration(encoding)
+                    .check_declaration(&encoding)
                     .map_err(|error| self.err(error.kind, error.message))?;
                 self.declaration_allowed = false;
                 self.emit(
                     EventKind::TextDeclaration {
                         version,
-                        encoding: string(encoding, self.allocator)?,
+                        encoding: string(&encoding, self.allocator)?,
                     },
                     position,
                 )?;
                 return Ok(());
             }
+            let version = attrs
+                .first()
+                .map(|attribute| {
+                    token
+                        .for_slice(attribute.value(rest))
+                        .decoded(self.allocator)
+                })
+                .transpose()?;
             if attrs.is_empty()
                 || attrs[0].name(rest) != "version"
-                || attrs[0].value(rest).is_empty()
-                || !attrs[0]
-                    .value(rest)
-                    .bytes()
-                    .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_'))
+                || !version.as_ref().is_some_and(|version| {
+                    !version.is_empty()
+                        && version.bytes().all(|byte| {
+                            byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_')
+                        })
+                })
             {
                 return Err(self.err_at(
                     ErrorKind::XmlDeclaration,
@@ -2324,22 +2369,25 @@ impl Parser {
                     2 + target.len() + attrs.first().map_or(0, |attribute| attribute.name_start),
                 ));
             }
-            let version = string(attrs[0].value(rest), self.allocator)?;
+            let version = version
+                .expect("validated declaration version")
+                .into_owned(self.allocator)?;
             let mut encoding = None;
             let mut standalone = None;
             for attribute in attrs.into_iter().skip(1) {
                 let (name, value, _, _) = attribute.parts(rest);
                 match name {
                     "encoding" if encoding.is_none() && standalone.is_none() => {
-                        if !valid_encoding_name(value) {
+                        let value = token.for_slice(value).decoded(self.allocator)?;
+                        if !valid_encoding_name(&value) {
                             return Err(
                                 self.err(ErrorKind::XmlDeclaration, "invalid encoding name")
                             );
                         }
                         self.decoder
-                            .check_declaration(value)
+                            .check_declaration(&value)
                             .map_err(|error| self.err(error.kind, error.message))?;
-                        encoding = Some(string(value, self.allocator)?);
+                        encoding = Some(value.into_owned(self.allocator)?);
                     }
                     "standalone" if standalone.is_none() => {
                         standalone = Some(match value {
@@ -2385,8 +2433,8 @@ impl Parser {
             }
             self.emit(
                 EventKind::ProcessingInstruction {
-                    target: string(target, self.allocator)?,
-                    data: self.markup_text(rest.trim_start_matches(whitespace))?,
+                    target: token.for_slice(target).decode(self.allocator)?,
+                    data: self.markup_text(token.for_slice(rest.trim_start_matches(whitespace)))?,
                 },
                 position,
             )?;
@@ -2395,7 +2443,7 @@ impl Parser {
         Ok(())
     }
 
-    fn parse_start(&mut self, token: &str, position: Position) -> Result<(), Error> {
+    fn parse_start(&mut self, token: lexical::Slice<'_>, position: Position) -> Result<(), Error> {
         if self.closed_root {
             return Err(self.err(
                 ErrorKind::JunkAfterDocumentElement,
@@ -2407,8 +2455,13 @@ impl Parser {
         }
         let empty = token.ends_with("/>");
         let body = &token[1..token.len() - if empty { 2 } else { 1 }];
-        let (name, rest) = take_name(body)
+        let (raw_name, rest) = take_name(body)
             .ok_or_else(|| self.err_at(ErrorKind::InvalidToken, "invalid element name", 1))?;
+        if self.config.namespace_separator.is_some() && !names::is_qname(raw_name) {
+            return Err(self.err(ErrorKind::InvalidToken, "invalid qualified element name"));
+        }
+        let name_value = token.for_slice(raw_name).decoded(self.allocator)?;
+        let name: &str = &name_value;
         // Offset records retain no references into the reusable lexical buffer.
         // Validate the complete tag before expanding values or emitting callbacks.
         let mut raw_attrs =
@@ -2423,7 +2476,7 @@ impl Parser {
             self.err_at(
                 error.kind,
                 error.message,
-                1 + name.len() + error.position.byte_index,
+                1 + raw_name.len() + error.position.byte_index,
             )
         })?;
         if raw_attrs.len() > self.config.limits.max_attributes {
@@ -2439,24 +2492,47 @@ impl Parser {
         attrs
             .try_reserve(raw_attrs.len().saturating_sub(attrs.len()))
             .map_err(|_| AllocError::OutOfMemory)?;
+        let mut decoded_names = Vec::new_in(self.allocator);
+        if token.has_ascii_aliases() {
+            decoded_names
+                .try_reserve_exact(raw_attrs.len())
+                .map_err(AllocError::from)?;
+            for attribute in &raw_attrs {
+                decoded_names.push(
+                    token
+                        .for_slice(attribute.name(rest))
+                        .decoded(self.allocator)?,
+                );
+            }
+        }
         // Most elements have only a few attributes. Keep the linear scan bounded;
         // larger elements retain a randomized hash table against collision attacks.
         let mut names = (raw_attrs.len() > 8)
             .then(|| HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator));
         for (index, attribute) in raw_attrs.iter().enumerate() {
             let (attr_name, value, attribute_offset, _) = attribute.parts(rest);
+            if self.config.namespace_separator.is_some() && !names::is_qname(attr_name) {
+                return Err(self.err(ErrorKind::InvalidToken, "invalid qualified attribute name"));
+            }
+            let attr_name = decoded_names.get(index).map_or(attr_name, |name| &**name);
             let duplicate = if let Some(names) = &mut names {
                 !try_set_insert(names, attr_name)?
             } else {
                 raw_attrs[..index]
                     .iter()
-                    .any(|attribute| attribute.name(rest) == attr_name)
+                    .enumerate()
+                    .any(|(prior, attribute)| {
+                        decoded_names
+                            .get(prior)
+                            .map_or(attribute.name(rest), |name| &**name)
+                            == attr_name
+                    })
             };
             if duplicate {
                 return Err(self.err_at(
                     ErrorKind::DuplicateAttribute,
                     "duplicate attribute",
-                    1 + name.len() + attribute_offset,
+                    1 + raw_name.len() + attribute_offset,
                 ));
             }
             if index == attrs.len() {
@@ -2469,16 +2545,14 @@ impl Parser {
                     },
                 )?;
             }
-            let attribute = &mut attrs[index];
-            self.expand_attribute_into(value, &mut attribute.value)?;
-            if self
+            let tokenized = self
                 .defaults
                 .get(name)
                 .and_then(|decls| decls.get(attr_name))
                 .is_some_and(|decl| decl.attribute_type != "CDATA")
-            {
-                attribute.value = collapse_spaces(&attribute.value, self.allocator)?;
-            }
+                && attribute_needs_normalization(value);
+            let attribute = &mut attrs[index];
+            self.expand_attribute_into(token.for_slice(value), &mut attribute.value, tokenized)?;
             copy_attribute_string(&mut attribute.name, attr_name)?;
             attribute.specified = true;
         }
@@ -2486,9 +2560,12 @@ impl Parser {
             for default in &defaults.ordered {
                 if !names.as_ref().map_or_else(
                     || {
-                        raw_attrs
-                            .iter()
-                            .any(|attribute| attribute.name(rest) == default.name.as_str())
+                        raw_attrs.iter().enumerate().any(|(index, attribute)| {
+                            decoded_names
+                                .get(index)
+                                .map_or(attribute.name(rest), |name| &**name)
+                                == default.name.as_str()
+                        })
                     },
                     |names| names.contains(default.name.as_str()),
                 ) && let Some(value) = &default.value
@@ -2529,9 +2606,6 @@ impl Parser {
                     attr.name.strip_prefix("xmlns:")
                 };
                 if let Some(prefix) = prefix {
-                    if attr.name != "xmlns" && (!is_name(prefix) || prefix.contains(':')) {
-                        return Err(self.err(ErrorKind::InvalidToken, "invalid namespace prefix"));
-                    }
                     let uri = &attr.value;
                     if prefix == "xmlns" {
                         return Err(self.err(
@@ -2620,17 +2694,24 @@ impl Parser {
             }
         }
         let expanded_name = self.expand_name(name, false, self.config.namespace_triplets)?;
+        let raw_encoding = token.for_slice(raw_name).name_encoding(self.allocator)?;
+        let raw_encoding = if raw_encoding.is_empty() {
+            None
+        } else {
+            Some(oriole_storage::try_box(raw_encoding, self.allocator)?)
+        };
         self.seen_root = true;
         self.declaration_allowed = false;
         try_push(
             &mut self.stack,
             Element {
-                raw_name: string(name, self.allocator)?,
                 expanded_name: if expanded_name == name {
                     None
                 } else {
                     Some(expanded_name.try_clone()?)
                 },
+                raw_name: name_value.into_owned(self.allocator)?,
+                raw_encoding,
                 bindings,
             },
         )?;
@@ -2661,7 +2742,7 @@ impl Parser {
         Ok(())
     }
 
-    fn parse_end(&mut self, token: &str, position: Position) -> Result<(), Error> {
+    fn parse_end(&mut self, token: lexical::Slice<'_>, position: Position) -> Result<(), Error> {
         if self.stack.is_empty() && !self.fragment {
             return Err(self.err_at(
                 ErrorKind::InvalidToken,
@@ -2672,6 +2753,7 @@ impl Parser {
         let body = &token[2..token.len() - 1];
         let (name, rest) =
             take_name(body).ok_or_else(|| self.err(ErrorKind::InvalidToken, "invalid end tag"))?;
+        let decoded_name = token.for_slice(name).decoded(self.allocator)?;
         if !rest.chars().all(whitespace) {
             return Err(self.err(ErrorKind::InvalidToken, "unexpected text in end tag"));
         }
@@ -2681,11 +2763,15 @@ impl Parser {
                 "entity closes an element outside its replacement text",
             ));
         }
-        if self
-            .stack
-            .last()
-            .is_none_or(|element| element.raw_name != name)
-        {
+        if self.stack.last().is_none_or(|element| {
+            element.raw_name != *decoded_name
+                || !token.for_slice(name).same_name_encoding(
+                    element
+                        .raw_encoding
+                        .as_deref()
+                        .map_or(&[], |value| value.as_slice()),
+                )
+        }) {
             return Err(self.err_at(ErrorKind::TagMismatch, "mismatched end tag", 2));
         }
         self.end_element(position)
@@ -2729,17 +2815,10 @@ impl Parser {
             return string(name, self.allocator);
         };
         let (prefix, local) = match name.split_once(':') {
-            Some((prefix, local)) => {
-                if prefix.is_empty()
-                    || local.is_empty()
-                    || local.contains(':')
-                    || !is_name(prefix)
-                    || !is_name(local)
-                {
-                    return Err(self.err(ErrorKind::InvalidToken, "invalid qualified name"));
-                }
-                (Some(prefix), local)
-            }
+            // Raw QNames were validated before custom characters were decoded.
+            // A converted colon can introduce an empty or colon-containing local
+            // name; Expat expands the first decoded colon without retokenizing.
+            Some((prefix, local)) => (Some(prefix), local),
             None => (None, name),
         };
         let uri =
@@ -2810,28 +2889,31 @@ impl Parser {
         Ok(())
     }
 
-    /// Expat normalizes the callback string after comment and PI conversion,
-    /// including carriage returns introduced by entity character references.
-    fn markup_text(&self, text: &str) -> Result<String, Error> {
-        normalize_newlines(text, self.allocator)
+    /// Comments and PI data normalize the converted callback string itself.
+    fn markup_text(&self, text: lexical::Slice<'_>) -> Result<String, Error> {
+        normalize_newlines(&text.decoded(self.allocator)?, self.allocator)
     }
 
     fn character_data(&self, text: &str) -> Result<Text, Error> {
+        if self.source().has_conversions() {
+            let lexical = self.source().lexical_remaining().for_slice(text);
+            if lexical.has_ascii_aliases() {
+                return self.source_text(lexical).map(Text::from);
+            }
+        }
         if self.sources.len() == 1 && text.contains('\r') {
-            // Preserve the existing fallible normalization of physical newlines.
-            self.source_text(text).map(Text::from)
+            normalize_newlines(text, self.allocator).map(Text::from)
         } else {
             Text::try_from_str_in(text, self.allocator).map_err(Into::into)
         }
     }
 
-    fn source_text(&self, text: &str) -> Result<String, Error> {
+    fn source_text(&self, text: lexical::Slice<'_>) -> Result<String, Error> {
         if self.sources.len() > 1 {
             // Literal line endings were normalized when the entity was declared.
-            // Any CR left in replacement text came from a character reference.
-            string(text, self.allocator)
+            text.decode(self.allocator).map_err(Into::into)
         } else {
-            normalize_newlines(text, self.allocator)
+            text.normalized(self.allocator)
         }
     }
 
@@ -2848,38 +2930,74 @@ impl Parser {
         }
     }
 
-    /// Refill common literal values without allocating a new owner. Keep complex
-    /// entity and physical-whitespace normalization on their existing paths.
-    fn expand_attribute_into(&mut self, value: &str, output: &mut String) -> Result<(), Error> {
-        if value
-            .bytes()
-            .any(|byte| matches!(byte, b'&' | b'<' | b'\t' | b'\r' | b'\n'))
+    /// Refill common literal values without allocating a new owner. Keep
+    /// converted aliases and normalization on the provenance-aware expansion path.
+    fn expand_attribute_into(
+        &mut self,
+        value: lexical::Slice<'_>,
+        output: &mut String,
+        tokenized: bool,
+    ) -> Result<(), Error> {
+        if tokenized
+            || value.has_ascii_aliases()
+            || value
+                .bytes()
+                .any(|byte| matches!(byte, b'&' | b'<' | b'\t' | b'\r' | b'\n'))
         {
-            *output = self.expand_attribute(value, &mut Vec::new_in(self.allocator))?;
+            *output = self.expand_attribute(value, &mut Vec::new_in(self.allocator), tokenized)?;
         } else {
-            copy_attribute_string(output, value)?;
+            copy_attribute_string(output, &value)?;
         }
         Ok(())
     }
 
-    fn expand_attribute(&mut self, value: &str, chain: &mut Vec<String>) -> Result<String, Error> {
-        if !value.bytes().any(|byte| matches!(byte, b'&' | b'<')) {
+    fn expand_attribute(
+        &mut self,
+        value: lexical::Slice<'_>,
+        chain: &mut Vec<String>,
+        tokenized: bool,
+    ) -> Result<String, Error> {
+        if !tokenized && !value.bytes().any(|byte| matches!(byte, b'&' | b'<')) {
             if !chain.is_empty() {
                 self.account_entity_bytes(value.len(), true)?;
             }
-            return normalize_attribute_whitespace(value, self.allocator);
+            return normalize_lexical_attribute(value, self.allocator);
         }
         let mut output = String::try_with_capacity_in(value.len(), self.allocator)?;
-        let mut rest = value;
+        self.append_attribute(value, chain, &mut output, tokenized)?;
+        if tokenized && output.ends_with(' ') {
+            output.truncate(output.len() - 1);
+        }
+        Ok(output)
+    }
+
+    /// Expand into one output so normalization spans entity boundaries. Converted
+    /// ASCII remains data while raw whitespace and numeric spaces are normalized.
+    fn append_attribute(
+        &mut self,
+        value: lexical::Slice<'_>,
+        chain: &mut Vec<String>,
+        output: &mut String,
+        tokenized: bool,
+    ) -> Result<(), Error> {
+        let mut rest: &str = &value;
         while !rest.is_empty() {
             let end = rest.find(['&', '<']).unwrap_or(rest.len());
             if !chain.is_empty() {
                 self.account_entity_bytes(end, true)?;
             }
-            output.try_push_str(&normalize_attribute_whitespace(
-                &rest[..end],
-                self.allocator,
-            )?)?;
+            let literal = value.for_slice(&rest[..end]);
+            if tokenized {
+                for (character, raw_ascii) in literal.decoded_chars() {
+                    if raw_ascii && whitespace(character) {
+                        append_attribute_space(output)?;
+                    } else {
+                        output.try_push(character)?;
+                    }
+                }
+            } else {
+                output.try_push_str(&normalize_lexical_attribute(literal, self.allocator)?)?;
+            }
             rest = &rest[end..];
             if rest.is_empty() {
                 break;
@@ -2899,17 +3017,23 @@ impl Parser {
             if !chain.is_empty() {
                 self.account_entity_bytes(end + 1, true)?;
             }
-            let name = &rest[1..end];
-            if let Some(character) = character_reference(name)
+            let raw_name = &rest[1..end];
+            if let Some(character) = character_reference(raw_name)
                 .map_err(|(kind, _)| self.err(kind, "invalid character reference"))?
             {
-                if !name.starts_with('#') {
+                if !raw_name.starts_with('#') {
                     self.account_entity_bytes(1, false)?;
                 }
-                output.try_push(character)?;
+                if tokenized && character == ' ' {
+                    append_attribute_space(output)?;
+                } else {
+                    output.try_push(character)?;
+                }
             } else {
-                if !is_name(name)
-                    || (self.config.namespace_separator.is_some() && name.contains(':'))
+                let decoded_name = value.for_slice(raw_name).decoded(self.allocator)?;
+                let name: &str = &decoded_name;
+                if !is_name(raw_name)
+                    || (self.config.namespace_separator.is_some() && raw_name.contains(':'))
                 {
                     return Err(self.err(ErrorKind::InvalidToken, "invalid entity name"));
                 }
@@ -2950,12 +3074,12 @@ impl Parser {
                 self.charge_expansion(value.len())?;
                 let value = value.try_clone()?;
                 try_push(chain, string(name, self.allocator)?)?;
-                output.try_push_str(&self.expand_attribute(&value, chain)?)?;
+                self.append_attribute(lexical::Slice::plain(&value), chain, output, tokenized)?;
                 chain.pop();
             }
             rest = &rest[end + 1..];
         }
-        Ok(output)
+        Ok(())
     }
 }
 
@@ -3121,6 +3245,30 @@ fn normalize_newlines(text: &str, allocator: Allocator) -> Result<String, Error>
     }
     Ok(output)
 }
+fn normalize_lexical_attribute(
+    text: lexical::Slice<'_>,
+    allocator: Allocator,
+) -> Result<String, Error> {
+    if !text.has_ascii_aliases() {
+        return normalize_attribute_whitespace(&text, allocator);
+    }
+    let mut output = String::try_with_capacity_in(text.len(), allocator)?;
+    let mut previous_cr = false;
+    for (character, ascii) in text.decoded_chars() {
+        if ascii && character == '\n' && previous_cr {
+            previous_cr = false;
+            continue;
+        }
+        previous_cr = ascii && character == '\r';
+        output.try_push(if ascii && whitespace(character) {
+            ' '
+        } else {
+            character
+        })?;
+    }
+    Ok(output)
+}
+
 fn normalize_attribute_whitespace(text: &str, allocator: Allocator) -> Result<String, Error> {
     if !text.contains(['\t', '\r', '\n']) {
         return string(text, allocator);
@@ -3141,16 +3289,22 @@ fn normalize_attribute_whitespace(text: &str, allocator: Allocator) -> Result<St
     }
     Ok(output)
 }
-fn collapse_spaces(text: &str, allocator: Allocator) -> Result<String, Error> {
-    let mut output = String::new_in(allocator);
-    for part in text.split(' ').filter(|part| !part.is_empty()) {
-        if !output.is_empty() {
-            output.try_push(' ')?;
-        }
-        output.try_push_str(part)?;
-    }
-    Ok(output)
+/// The direct attribute-copy path in Expat checks raw token spelling before
+/// decoding, so a converted space alone does not require tokenized normalization.
+fn attribute_needs_normalization(value: &str) -> bool {
+    value.starts_with(' ')
+        || value.ends_with(' ')
+        || value.contains("  ")
+        || value.contains(['\t', '\r', '\n', '&'])
 }
+
+fn append_attribute_space(output: &mut String) -> Result<(), AllocError> {
+    if !output.is_empty() && !output.ends_with(' ') {
+        output.try_push(' ')?;
+    }
+    Ok(())
+}
+
 fn valid_encoding_name(name: &str) -> bool {
     name.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)
         && name

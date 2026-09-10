@@ -20,8 +20,8 @@ pub(super) struct Declaration {
 #[derive(Debug)]
 pub(super) struct Header {
     selected: Option<bool>,
-    word: String,
-    raw: String,
+    word: Buffer,
+    raw: Buffer,
     position: Position,
     bytes: usize,
 }
@@ -73,8 +73,8 @@ impl Parser {
         self.conditional.header = Some(oriole_storage::try_box(
             Header {
                 selected: None,
-                word: String::new_in(self.allocator),
-                raw: string("<![", self.allocator)?,
+                word: Buffer::new_in(self.allocator),
+                raw: Buffer::plain(string("<![", self.allocator)?),
                 position: self.here(),
                 bytes: 3,
             },
@@ -146,6 +146,12 @@ impl Parser {
                         "invalid conditional parameter name",
                     ));
                 }
+                let decoded_name = self
+                    .source()
+                    .lexical_remaining()
+                    .for_slice(name)
+                    .decoded(self.allocator)?;
+                let name: &str = &decoded_name;
                 let entity = self.parameter_entities.get(name);
                 if self.parameter_mode == 0 || entity.is_none() {
                     state.bytes = state.bytes.saturating_add(end + 1);
@@ -156,7 +162,11 @@ impl Parser {
                         ));
                     }
                     let position = self.source().position(end + 1);
-                    let raw = string(&self.source().remaining()[..end + 1], self.allocator)?;
+                    let raw = self
+                        .source()
+                        .lexical_remaining()
+                        .for_slice(&self.source().remaining()[..end + 1])
+                        .to_owned(self.allocator)?;
                     self.declarations_skipped |= !self.standalone;
                     self.has_external_subset = true;
                     if self.parameter_mode == 0 && !self.standalone {
@@ -165,7 +175,7 @@ impl Parser {
                         self.emit(EventKind::NotStandalone, position)?;
                         self.event_raw("")?;
                     }
-                    state.raw.push_str(&raw)?;
+                    state.raw.append(raw.view())?;
                     self.consume(end + 1)?;
                     continue;
                 }
@@ -237,13 +247,21 @@ impl Parser {
             if character == '[' || whitespace(character) {
                 self.header_word(&mut state)?;
             } else {
-                state.word.push(character)?;
+                state.word.append(
+                    self.source()
+                        .lexical_remaining()
+                        .for_slice(&self.source().remaining()[..character.len_utf8()]),
+                )?;
             }
             if character == '[' && state.selected.is_none() {
                 self.flush_header_composition(&mut state)?;
                 return Err(self.err(ErrorKind::Syntax, "missing conditional section keyword"));
             }
-            state.raw.push(character)?;
+            state.raw.append(
+                self.source()
+                    .lexical_remaining()
+                    .for_slice(&self.source().remaining()[..character.len_utf8()]),
+            )?;
             self.consume(character.len_utf8())?;
             if character == '[' {
                 let included = state.selected.expect("complete conditional keyword");
@@ -284,10 +302,11 @@ impl Parser {
     }
 
     fn flush_header_composition(&mut self, state: &mut Header) -> Result<(), Error> {
-        let raw = std::mem::replace(&mut state.raw, String::new_in(self.allocator));
+        let raw = std::mem::replace(&mut state.raw, Buffer::new_in(self.allocator));
         if self.default_events && !raw.is_empty() {
             self.emit(EventKind::Default, state.position)?;
-            self.pending.back_mut().expect("header default").raw = Some(raw);
+            self.pending.back_mut().expect("header default").raw =
+                Some(raw.view().decode(self.allocator)?);
         }
         state.position = self.here();
         Ok(())
@@ -302,8 +321,8 @@ impl Parser {
         self.conditional.declaration = Some(oriole_storage::try_box(
             Declaration {
                 expansion: DeclarationExpansion {
-                    text: String::new_in(self.allocator),
-                    raw: String::new_in(self.allocator),
+                    text: Buffer::new_in(self.allocator),
+                    raw: Buffer::new_in(self.allocator),
                     literals: Vec::new_in(self.allocator),
                     parameters: Vec::new_in(self.allocator),
                     // Value callbacks may install a Default handler later.
@@ -353,7 +372,7 @@ impl Parser {
                         ));
                     }
                     self.sources.pop();
-                    self.append_declaration_token(&mut state.expansion, " ", true)?;
+                    self.append_declaration_token(&mut state.expansion, Slice::plain(" "), true)?;
                     state.ready = state.expansion.text.len();
                     continue;
                 }
@@ -371,7 +390,11 @@ impl Parser {
                 {
                     state.ready = state.expansion.text.len() + offset + character.len_utf8();
                 }
-                self.append_declaration_token(&mut state.expansion, &text[..end], false)?;
+                self.append_declaration_token(
+                    &mut state.expansion,
+                    self.source().lexical_remaining().for_slice(&text[..end]),
+                    false,
+                )?;
                 self.consume(end)?;
                 continue;
             }
@@ -436,7 +459,11 @@ impl Parser {
                             parameters,
                         },
                     )?;
-                    self.append_declaration_token(&mut state.expansion, &text[..end], false)?;
+                    self.append_declaration_token(
+                        &mut state.expansion,
+                        self.source().lexical_remaining().for_slice(&text[..end]),
+                        false,
+                    )?;
                     self.consume(end)?;
                     state.quote_checked = 0;
                     state.ready = state.expansion.text.len();
@@ -447,7 +474,11 @@ impl Parser {
                         return Ok(false);
                     }
                     if text[1..].starts_with(whitespace) {
-                        self.append_declaration_token(&mut state.expansion, "%", false)?;
+                        self.append_declaration_token(
+                            &mut state.expansion,
+                            Slice::plain("%"),
+                            false,
+                        )?;
                         self.consume(1)?;
                         continue;
                     }
@@ -490,8 +521,14 @@ impl Parser {
                         ));
                     }
                     self.charge_expansion(end + 1)?;
-                    self.append_declaration_token(&mut state.expansion, " ", true)?;
+                    self.append_declaration_token(&mut state.expansion, Slice::plain(" "), true)?;
                     state.ready = state.expansion.text.len();
+                    let decoded_name = self
+                        .source()
+                        .lexical_remaining()
+                        .for_slice(name)
+                        .decoded(self.allocator)?;
+                    let name: &str = &decoded_name;
                     let entity = self.parameter_entities.get(name);
                     if self.parameter_mode == 0 || entity.is_none() {
                         self.charge_expansion(
@@ -510,10 +547,11 @@ impl Parser {
                                 disabled: self.parameter_mode == 0,
                             },
                         )?;
-                        state
-                            .expansion
-                            .raw
-                            .try_push_str(&self.source().remaining()[..end + 1])?;
+                        state.expansion.raw.append(
+                            self.source()
+                                .lexical_remaining()
+                                .for_slice(&self.source().remaining()[..end + 1]),
+                        )?;
                         self.declaration_raw_boundary(&mut state.expansion)?;
                         self.consume(end + 1)?;
                         continue;
@@ -603,8 +641,8 @@ impl Parser {
     /// on both success and failure; no callback is dispatched in this scope.
     fn finish_declaration_composition(&mut self, mut state: Declaration) -> Result<bool, Error> {
         self.charge_expansion(state.expansion.text.len() + 3)?;
-        let mut token = string("<!", self.allocator)?;
-        token.push_str(&state.expansion.text)?;
+        let mut token = Buffer::plain(string("<!", self.allocator)?);
+        token.append(state.expansion.text.view())?;
         token.push('>')?;
         for literal in &mut state.expansion.literals {
             literal.parameters.retain(|name| {
@@ -629,7 +667,7 @@ impl Parser {
             self.stack.len(),
         );
         let original = std::mem::replace(self.sources.last_mut().expect("source"), anchored);
-        let result = self.parse_subset_expanded(&token, 0, Some(state.expansion));
+        let result = self.parse_subset_expanded(token.view(), 0, Some(state.expansion));
         *self.sources.last_mut().expect("source") = original;
         result.map(|()| true)
     }

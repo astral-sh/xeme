@@ -62,9 +62,21 @@ Custom encodings support single-byte maps and conversion callbacks for two- to
 four-byte sequences. Each completed sequence is converted once, with original
 byte widths retained for positions. Reset, free, and rejected maps release their
 encoding instance once; external children acquire their own converter instance.
-Converted values must be non-ASCII XML characters in the Basic Multilingual Plane
-(`U+0080` through `U+FFFF`, excluding surrogates and invalid XML characters).
-ASCII characters use direct single-byte map entries.
+Converted values may be any valid XML character in the Basic Multilingual Plane,
+including ASCII. Converted ASCII remains distinct from raw syntax: an encoded
+sequence producing `<` is character data, while a raw `<` starts markup. Names,
+references, declaration keywords, whitespace, and public identifiers retain their
+original lexical roles. End tags compare original encoded name spellings;
+callbacks and semantic lookups receive decoded strings. Sparse provenance uses
+the selected parser allocator and existing memory and work budgets; ordinary
+UTF-8 input does not allocate provenance records.
+
+This support does not imply exact callback or diagnostic compatibility. External
+DTD default-handler prefixes and some malformed-input errors, callback prefixes,
+and positions still differ. The [custom-encoding validation](../../docs/validation/2026-09-10/custom-encoding-provenance/)
+retains those differences alongside the complete upstream API matrix. Invalid
+maps, supplementary converted characters, and forbidden XML characters remain
+errors; the external value-child declaration restrictions below also apply.
 
 Name validation accepts a broader Unicode range than the pinned Expat 2.8.4
 reference, including CJK Extension A and supplementary name characters. Some
@@ -106,12 +118,6 @@ The following Expat modes are explicitly unsupported:
   been decoded. A leading custom-encoding declaration may request its encoding
   handler before delivering the XML-declaration callback; Expat reverses this
   callback order in its value processor.
-- Multibyte sequences that convert to ASCII are rejected with
-  `XML_ERROR_INVALID_TOKEN`. Expat accepts some such aliases and distinguishes
-  their original byte form when recognizing keywords, references, and XML
-  declarations. Oriole rejects these aliases before UTF-8 tokenization, including
-  in text, names, attributes, DTDs, and CDATA. Custom-encoding compatibility is
-  therefore incomplete.
 - Wide-character and `XML_LARGE_SIZE` builds: the header rejects these configurations.
 
 `XML_SetHashSalt` and `XML_SetHashSalt16Bytes` mix the caller salt into randomized

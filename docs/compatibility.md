@@ -37,6 +37,14 @@ namespaces, truncation, and misplaced markup. Resource exhaustion and callback
 lifecycle probes are additional tests, not ordinary differential assertions:
 Oriole's documented resource ceilings intentionally differ from Expat's defaults.
 
+Custom-encoding probes additionally distinguish converted ASCII from raw markup,
+reference syntax, name spellings, namespace separators, whitespace, and DTD
+keywords. The [provenance checkpoint](validation/2026-09-10/custom-encoding-provenance/)
+records the full upstream API results, original byte templates, converter maps,
+chunk sizes, successful semantic callbacks, and remaining default-handler and
+diagnostic differences. Its bounded differential grids do not establish complete
+Expat compatibility.
+
 ## Native consumer tests
 
 `tests/c/integration.c` compiles against the public header and exercises:
@@ -47,6 +55,8 @@ Oriole's documented resource ceilings intentionally differ from Expat's defaults
 - Callback suspension and resumption.
 - Custom memory allocation, reallocation, freeing, and initial allocation failure.
 - Parser pointers as callback arguments.
+- Custom conversion callbacks with ASCII aliases, original-byte end-tag identity,
+  decoded duplicate attributes, incremental buffer input, and encoding release.
 
 Every invocation includes the custom memory suite and initial allocation failure
 gates. Parser storage uses fallible allocator-aware containers. Allocation failure

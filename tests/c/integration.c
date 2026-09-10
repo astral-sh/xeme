@@ -177,6 +177,77 @@ static void entity_amplification(void) {
     }
 }
 
+static int encoding_releases;
+static int XMLCALL alias_convert(void *data, const char *input) {
+    assert(data == &encoding_releases);
+    return (unsigned char)input[1];
+}
+static void XMLCALL alias_release(void *data) {
+    assert(data == &encoding_releases);
+    encoding_releases++;
+}
+static int XMLCALL alias_encoding(void *data, const char *name, XML_Encoding *info) {
+    assert(data == &encoding_releases && strcmp(name, "alias") == 0);
+    for (int i = 0; i < 256; i++) info->map[i] = i < 128 ? i : -1;
+    info->map[128] = info->map[129] = -2;
+    info->data = data;
+    info->convert = alias_convert;
+    info->release = alias_release;
+    return XML_STATUS_OK;
+}
+static void XMLCALL alias_start(void *data, const char *name, const char **attributes) {
+    on_start(data, name, attributes);
+    if (attributes[0]) {
+        assert(strcmp(attributes[0], "a") == 0);
+        assert(strcmp(attributes[1], "<\r\n") == 0);
+        assert(!attributes[2]);
+    }
+}
+static void custom_encoding_aliases(void) {
+    const struct {
+        const char *input;
+        enum XML_Error error;
+        const char *text;
+    } cases[] = {
+        {"<r a='\200<\200\r\200\n'>\200&\200<\200\r\200\n</r>", XML_ERROR_NONE, "&<\r\n"},
+        {"<\200A></\200A>", XML_ERROR_NONE, ""},
+        {"<\200A></\201A>", XML_ERROR_TAG_MISMATCH, ""},
+        {"<r \200A='x' A='y'/>", XML_ERROR_DUPLICATE_ATTRIBUTE, ""},
+    };
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
+        for (int buffered = 0; buffered < 2; buffered++) {
+            for (int incremental_input = 0; incremental_input < 2; incremental_input++) {
+                XML_Parser parser = configured();
+                assert(XML_SetEncoding(parser, "alias"));
+                XML_SetStartElementHandler(parser, alias_start);
+                encoding_releases = 0;
+                XML_SetUnknownEncodingHandler(parser, alias_encoding, &encoding_releases);
+                size_t length = strlen(cases[i].input);
+                enum XML_Status status = XML_STATUS_OK;
+                for (size_t offset = 0; offset < length && status == XML_STATUS_OK;) {
+                    int count = incremental_input ? 1 : (int)length;
+                    int final = offset + (size_t)count == length;
+                    if (buffered) {
+                        void *buffer = XML_GetBuffer(parser, count);
+                        assert(buffer);
+                        memcpy(buffer, cases[i].input + offset, (size_t)count);
+                        status = XML_ParseBuffer(parser, count, final);
+                    } else {
+                        status = XML_Parse(parser, cases[i].input + offset, count, final);
+                    }
+                    offset += (size_t)count;
+                }
+                assert(status == (cases[i].error == XML_ERROR_NONE ? XML_STATUS_OK : XML_STATUS_ERROR));
+                assert(XML_GetErrorCode(parser) == cases[i].error);
+                assert(strcmp(text_output, cases[i].text) == 0);
+                assert(encoding_releases == 0);
+                XML_ParserFree(parser);
+                assert(encoding_releases == 1);
+            }
+        }
+    }
+}
+
 int main(void) {
     incremental();
     buffer_api();
@@ -185,6 +256,7 @@ int main(void) {
     custom_memory();
     failed_allocation();
     entity_amplification();
+    custom_encoding_aliases();
     printf("C ABI full integration passed (%s)\n", XML_ExpatVersion());
     return 0;
 }

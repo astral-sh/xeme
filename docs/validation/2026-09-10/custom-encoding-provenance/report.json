@@ -1,0 +1,233 @@
+{
+  "baseline_commit": "21b76d1",
+  "accounting_api_baseline": "f90038c",
+  "library": {
+    "shared_sha256": "15e04ac1b107f7e2d388a0bad221ac58181612e281a3b410547c27c0a0f151fc",
+    "static_sha256": "5ca5dc4ab22064c39ba91c2861ecb933f8d3bb4d8b8c51b4f030ed5fb641b0d0"
+  },
+  "reference": {
+    "revision": "12cf0b1f25f026a022fe728ad8f7e3d017285b80",
+    "sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+  },
+  "source_freeze": "No runtime edits after freezing. Three Rustdoc comments, additional Rust/native tests, and documentation changed afterward. Frozen runtime source is archived with verified original hashes.",
+  "post_freeze_test_source_changes": {},
+  "upstream": {
+    "total": 4740,
+    "passed": 3823,
+    "failed": 917,
+    "improvements": 48,
+    "regressions": 0,
+    "complete": true,
+    "same_adapted_source_hashes": true
+  },
+  "checks": {
+    "rust_tests": 240,
+    "strict_clippy": "passed",
+    "fmt": "passed",
+    "native_suites": 6,
+    "native_injected_allocations_per_linkage": 358,
+    "native_reference_integration": "passed",
+    "sanitizer_scope": "C ASan/UBSan, uninstrumented Rust release, leak sanitizer disabled"
+  },
+  "probes": [
+    {
+      "name": "compare",
+      "cases": 9300,
+      "library_sha256": "15e04ac1b107f7e2d388a0bad221ac58181612e281a3b410547c27c0a0f151fc",
+      "all_differences": 1851,
+      "acceptance_differences": 0,
+      "successful_callback_differences": 0,
+      "report": "/tmp/oriole-custom-alias-final-probes/initial-comparison.json.gz",
+      "report_sha256": "795716b45e7df2c3d1fd1f56888a0cba58bfb62c45677d7b83fb6ea4c9c1a936",
+      "script_sha256": "a2e5a8f57453699e521e98002067123d0f905390310a6c13b42c44fac53f3888"
+    },
+    {
+      "name": "expanded-compare",
+      "cases": 54096,
+      "library_sha256": "15e04ac1b107f7e2d388a0bad221ac58181612e281a3b410547c27c0a0f151fc",
+      "all_differences": 7860,
+      "acceptance_differences": 0,
+      "successful_callback_differences": 0,
+      "report": "/tmp/oriole-custom-alias-final-probes/expanded-comparison.json.gz",
+      "report_sha256": "2b6be10c6e36e0367fa3f2c88496dd8d8b8d766d5165dbfd7fdf73553c393cea",
+      "script_sha256": "a0b009535d9f01216abb9092b7281503fc20cc1345ad1fe3faf5151784aaf932"
+    },
+    {
+      "name": "full-events",
+      "cases": 28812,
+      "library_sha256": "15e04ac1b107f7e2d388a0bad221ac58181612e281a3b410547c27c0a0f151fc",
+      "all_differences": 5808,
+      "acceptance_differences": 0,
+      "successful_callback_differences": 0,
+      "report": "/tmp/oriole-custom-alias-final-probes/full-events-comparison.json.gz",
+      "report_sha256": "edc9ce3a6026bfd628949beb877c7502e162bd445d6793ec4ce6c308f17958ea",
+      "script_sha256": "9404e1b9a9d248a1d0758cf5989c1cdec260ee2191d16a0cb5e1aca760efcdec"
+    },
+    {
+      "name": "external-compare",
+      "cases": 7644,
+      "library_sha256": "15e04ac1b107f7e2d388a0bad221ac58181612e281a3b410547c27c0a0f151fc",
+      "all_differences": 7644,
+      "acceptance_differences": 0,
+      "successful_callback_differences": 5112,
+      "report": "/tmp/oriole-custom-alias-final-probes/external-comparison.json.gz",
+      "report_sha256": "70e833a819d3db9a4e4897d610b60b809d13f742ed60761fb7c8e928f67597cc",
+      "script_sha256": "18ace2dd09d9930e17ccef421f1f2fbe67d0dc8b5f0ab6ddee4024367676e677"
+    },
+    {
+      "name": "external-semantic-compare",
+      "cases": 7644,
+      "library_sha256": "15e04ac1b107f7e2d388a0bad221ac58181612e281a3b410547c27c0a0f151fc",
+      "all_differences": 2316,
+      "acceptance_differences": 0,
+      "successful_callback_differences": 0,
+      "report": "/tmp/oriole-custom-alias-final-probes/external-semantic-comparison.json.gz",
+      "report_sha256": "a8f9a4c395a16b48bc00d29077fbf8db7113ad1de43b86edd37ea37359788ce0",
+      "script_sha256": "e48c7d779f7e6f03cd27d7820b2f57e39f5ec9a387ebfcf2491e82daebbdeda2"
+    }
+  ],
+  "public_map_probe": {
+    "cases": 7154,
+    "library_sha256": "15e04ac1b107f7e2d388a0bad221ac58181612e281a3b410547c27c0a0f151fc",
+    "all_differences": 6534,
+    "acceptance_differences": 0,
+    "successful_callback_differences": 0
+  },
+  "name_identity_probe": {
+    "cases": 64,
+    "acceptance_differences": 0,
+    "error_differences": 0,
+    "successful_callback_differences": 0
+  },
+  "default_prefix_control": {
+    "cases": 117,
+    "candidate_baseline_differences": 0,
+    "successful_reference_default_differences": 48
+  },
+  "screening_scope": "Screening candidate/control on all six pinned projects and two generated adverse fixtures; CPU1, shared host. Five randomized pairs, seven measured parses plus warmup per subprocess. This is native callback-driver throughput, not actual project process timing.",
+  "screening": [
+    {
+      "workload": "vulkan",
+      "chunk": 4096,
+      "median_candidate_speedup": 0.9404710490549958,
+      "minimum": 0.5710310889561305,
+      "maximum": 0.9561815127438342
+    },
+    {
+      "workload": "wayland",
+      "chunk": 4096,
+      "median_candidate_speedup": 0.9755870914233886,
+      "minimum": 0.9594227320704252,
+      "maximum": 2.028285215995991
+    },
+    {
+      "workload": "maven",
+      "chunk": 4096,
+      "median_candidate_speedup": 0.9510822834244573,
+      "minimum": 0.9218639087605784,
+      "maximum": 0.9828036784791746
+    },
+    {
+      "workload": "batik",
+      "chunk": 4096,
+      "median_candidate_speedup": 0.9929776504775654,
+      "minimum": 0.954044256049632,
+      "maximum": 0.9985503492691827
+    },
+    {
+      "workload": "gtk",
+      "chunk": 4096,
+      "median_candidate_speedup": 0.9942725952359928,
+      "minimum": 0.9570383067204987,
+      "maximum": 1.0065286951951506
+    },
+    {
+      "workload": "docbook",
+      "chunk": 4096,
+      "median_candidate_speedup": 0.9573354503735249,
+      "minimum": 0.95393169851568,
+      "maximum": 0.9914402830413074
+    },
+    {
+      "workload": "generated-rare-declarations",
+      "chunk": 4096,
+      "median_candidate_speedup": 0.971231733591923,
+      "minimum": 0.939214637634252,
+      "maximum": 1.0238028077820192
+    },
+    {
+      "workload": "generated-entities",
+      "chunk": 4096,
+      "median_candidate_speedup": 0.9949074036322468,
+      "minimum": 0.9722952027714433,
+      "maximum": 1.0029268128513293
+    },
+    {
+      "workload": "vulkan",
+      "chunk": 65536,
+      "median_candidate_speedup": 0.9668479455493733,
+      "minimum": 0.9328980124242223,
+      "maximum": 1.07980461879967
+    },
+    {
+      "workload": "wayland",
+      "chunk": 65536,
+      "median_candidate_speedup": 0.983725017018882,
+      "minimum": 0.9754643330218954,
+      "maximum": 0.988792774466869
+    },
+    {
+      "workload": "maven",
+      "chunk": 65536,
+      "median_candidate_speedup": 0.9825054306671526,
+      "minimum": 0.967143600416233,
+      "maximum": 1.0041281740400265
+    },
+    {
+      "workload": "batik",
+      "chunk": 65536,
+      "median_candidate_speedup": 0.9755673070486647,
+      "minimum": 0.8513005814523132,
+      "maximum": 1.033341699900531
+    },
+    {
+      "workload": "gtk",
+      "chunk": 65536,
+      "median_candidate_speedup": 0.9808204654197479,
+      "minimum": 0.28371303607599374,
+      "maximum": 0.9976822670052536
+    },
+    {
+      "workload": "docbook",
+      "chunk": 65536,
+      "median_candidate_speedup": 0.9702973371954111,
+      "minimum": 0.8938891603436067,
+      "maximum": 1.0571534714769255
+    },
+    {
+      "workload": "generated-rare-declarations",
+      "chunk": 65536,
+      "median_candidate_speedup": 0.9807268782306368,
+      "minimum": 0.9575644579174668,
+      "maximum": 1.0072121132748355
+    },
+    {
+      "workload": "generated-entities",
+      "chunk": 65536,
+      "median_candidate_speedup": 0.982222523207015,
+      "minimum": 0.9798064592269574,
+      "maximum": 0.9884668303737972
+    }
+  ],
+  "independent_review": "Bounded source review, no independent test execution, no remaining finding.",
+  "integration_requirements": [
+    "Route custom_public_byte through selected NameRules. Validate raw QName spelling before decoded namespace expansion; do not restore removed decoded-name predicates.",
+    "Merge optional Element.expanded_name independently from optional raw_encoding.",
+    "Keep lexical metadata through composed DTD/value frames and raw name checks. Move plain token text to current_raw only after all projections finish.",
+    "Physical source text/attribute normalization distinguishes alias CR/LF; comments/PI normalize decoded text. Preserve converter boundary ordering."
+  ],
+  "artifacts": {
+    "files": 136,
+    "archive_sha256": "436c6756694aab2db146395ebc2812e16c4ce0e5ec4e32d6ed52e10222ca01d0"
+  }
+}

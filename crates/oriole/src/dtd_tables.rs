@@ -391,6 +391,18 @@ mod tests {
                         sibling.next_event().unwrap_err().kind,
                         ErrorKind::ExternalEntityHandling
                     );
+                    let mut output = Some(Event {
+                        kind: EventKind::Default,
+                        position: Default::default(),
+                    });
+                    assert_eq!(
+                        sibling
+                            .next_event_for_recycling_into(&mut output)
+                            .unwrap_err()
+                            .kind,
+                        ErrorKind::ExternalEntityHandling
+                    );
+                    assert!(output.is_none());
                     assert_eq!(
                         sibling.set_hash_salt([1; 16]).unwrap_err().kind,
                         ErrorKind::ExternalEntityHandling

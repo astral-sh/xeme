@@ -1340,6 +1340,21 @@ impl Parser {
             .map(|event| (event, self.event_recycling.token())))
     }
 
+    /// Write an owned event into adapter storage and return its recycling token.
+    ///
+    /// Clears any previous event before parsing. The slot belongs to the caller;
+    /// no reference into this parser is retained when the operation returns.
+    #[doc(hidden)]
+    #[inline(always)]
+    pub fn next_event_for_recycling_into(
+        &mut self,
+        output: &mut Option<Event>,
+    ) -> Result<Option<RecyclingToken>, Error> {
+        *output = None;
+        self.next_event_into(output)?;
+        Ok(output.as_ref().map(|_| self.event_recycling.token()))
+    }
+
     /// Return the original attribute storage after an adapter finishes its callback.
     ///
     /// The token rejects accidental returns to another parser, including a reset
@@ -1378,14 +1393,20 @@ impl Parser {
     /// or parsing is done. Inspect [`Self::encoding_conversion`] before feeding
     /// more input when using a multibyte custom map.
     pub fn next_event(&mut self) -> Result<Option<Event>, Error> {
-        // Keep ordinary documents outside the owned-table publication frame.
-        if self.shared_tables.get().is_none() && !self.in_doctype {
-            return self.next_event_scoped();
-        }
-        self.next_event_with_tables()
+        let mut output = None;
+        self.next_event_into(&mut output)?;
+        Ok(output)
     }
 
-    fn next_event_with_tables(&mut self) -> Result<Option<Event>, Error> {
+    fn next_event_into(&mut self, output: &mut Option<Event>) -> Result<(), Error> {
+        // Keep ordinary documents outside the owned-table publication frame.
+        if self.shared_tables.get().is_none() && !self.in_doctype {
+            return self.next_event_scoped(output);
+        }
+        self.next_event_with_tables(output)
+    }
+
+    fn next_event_with_tables(&mut self, output: &mut Option<Event>) -> Result<(), Error> {
         // DOCTYPE always yields its start event before parsing any declarations.
         // A child created by that callback may have initialized this owner first.
         if self.error.is_none()
@@ -1397,22 +1418,24 @@ impl Parser {
             self.pending.clear();
             return Err(error);
         }
-        self.with_dtd_tables(Self::next_event_scoped)
+        self.with_dtd_tables(|parser| parser.next_event_scoped(output))
     }
 
-    fn next_event_scoped(&mut self) -> Result<Option<Event>, Error> {
+    fn next_event_scoped(&mut self, output: &mut Option<Event>) -> Result<(), Error> {
         if let Some(event) = self.finish_foreign_dtd() {
             self.last_position = event.position;
-            return Ok(Some(event));
+            *output = Some(event);
+            return Ok(());
         }
         if let Some(event) = self.pop_event() {
             self.last_position = event.position;
-            return Ok(Some(event));
+            *output = Some(event);
+            return Ok(());
         }
         if let Some(error) = &self.error {
             return Err(*error);
         }
-        let mut result = self.next_event_inner();
+        let mut result = self.next_event_inner(output);
         if let (Err(error), Some((kind, message))) = (&result, self.decoding_error)
             && matches!(
                 error.kind,
@@ -1477,10 +1500,13 @@ impl Parser {
                 return Err(error);
             }
             if let Some(event) = self.pop_event() {
-                result = Ok(Some(event));
+                *output = Some(event);
+                result = Ok(());
             }
         }
-        if let Ok(Some(event)) = &result {
+        if result.is_ok()
+            && let Some(event) = output
+        {
             self.last_position = event.position;
         }
         result
@@ -1741,11 +1767,13 @@ impl Parser {
             || self.decoding_error.is_some()
     }
 
-    fn next_event_inner(&mut self) -> Result<Option<Event>, Error> {
+    fn next_event_inner(&mut self, output: &mut Option<Event>) -> Result<(), Error> {
         // Encoding detection consumes a BOM without producing a text token.
         // Charge that prefix even for empty input or an incomplete next token.
         self.account_source(0)?;
-        if let Some((_, position)) = self.active_parameter_reference.take() {
+        if self.active_parameter_reference.is_some()
+            && let Some((_, position)) = self.active_parameter_reference.take()
+        {
             if self
                 .parameter_state
                 .get()
@@ -1761,26 +1789,27 @@ impl Parser {
         }
         loop {
             if let Some(event) = self.pop_event() {
-                return Ok(Some(event));
+                *output = Some(event);
+                return Ok(());
             }
             if self.finished {
-                return Ok(None);
+                return Ok(());
             }
             if self.value_state.is_some() {
                 if !self.continue_value()? {
-                    return Ok(None);
+                    return Ok(());
                 }
                 continue;
             }
             if self.has_header_composition() {
                 if !self.continue_header_composition()? {
-                    return Ok(None);
+                    return Ok(());
                 }
                 continue;
             }
             if self.has_declaration_composition() {
                 if !self.continue_declaration_composition()? {
-                    return Ok(None);
+                    return Ok(());
                 }
                 continue;
             }
@@ -1808,7 +1837,7 @@ impl Parser {
                     return Err(error);
                 }
                 if !self.is_source_final() {
-                    return Ok(None);
+                    return Ok(());
                 }
                 self.finish_conditional_source()?;
                 self.last_position = self.here();
@@ -1834,17 +1863,17 @@ impl Parser {
                     ));
                 }
                 self.finished = true;
-                return Ok(None);
+                return Ok(());
             }
             if self.in_doctype || self.external_subset {
                 if !self.parse_dtd_step()? {
-                    return Ok(None);
+                    return Ok(());
                 }
                 continue;
             }
             if self.in_cdata {
                 if !self.parse_cdata()? {
-                    return Ok(None);
+                    return Ok(());
                 }
                 continue;
             }
@@ -1857,13 +1886,13 @@ impl Parser {
                     ));
                 }
                 if !self.parse_reference()? {
-                    return Ok(None);
+                    return Ok(());
                 }
                 continue;
             }
             if first != b'<' {
                 if !self.parse_text()? {
-                    return Ok(None);
+                    return Ok(());
                 }
                 continue;
             }
@@ -1908,7 +1937,7 @@ impl Parser {
                 if self.is_source_final() {
                     return Err(self.err(ErrorKind::UnclosedToken, "incomplete markup"));
                 }
-                return Ok(None);
+                return Ok(());
             } else if remaining.starts_with("<!") {
                 return Err(self.err(ErrorKind::InvalidToken, "unknown markup declaration"));
             } else {
@@ -1942,7 +1971,7 @@ impl Parser {
             let max_token = self.config.limits.max_token_bytes;
             let deferral = self.reparse_deferral && !final_input;
             if deferral && self.source().should_defer(max_token) {
-                return Ok(None);
+                return Ok(());
             }
             let end = self
                 .source_mut()
@@ -1959,7 +1988,7 @@ impl Parser {
                 if final_input {
                     return Err(self.err(ErrorKind::UnclosedToken, "unclosed XML token"));
                 }
-                return Ok(None);
+                return Ok(());
             };
             if !self.seen_root && mode == ScanMode::Tag && self.foreign_dtd {
                 self.foreign_dtd = false;
@@ -2028,7 +2057,9 @@ impl Parser {
             token.swap_decoded(&mut self.current_raw)?;
             parsed?;
             self.token_scratch = token;
-            self.consume(end)?;
+            // This complete token was accounted before semantic processing.
+            debug_assert_eq!(self.source().accounting_bytes(end), 0);
+            self.source_mut().consume(end);
         }
     }
 
@@ -3261,7 +3292,7 @@ impl Parser {
                 rest = parent;
                 continue;
             }
-            let end = rest.find(['&', '<']).unwrap_or(rest.len());
+            let end = memchr::memchr2(b'&', b'<', rest.as_bytes()).unwrap_or(rest.len());
             if !frames.is_empty() {
                 self.account_entity_bytes(end, true)?;
             }

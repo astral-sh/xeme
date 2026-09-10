@@ -755,3 +755,43 @@ fn shared_tables_workload(allocator: Allocator) -> Result<(), Error> {
 fn shared_dtd_publication_snapshot_rehash_and_retained_siblings_survive_each_failure() {
     check_allocations(shared_tables_workload);
 }
+
+#[test]
+fn output_slots_clear_at_every_selected_allocation_failure() {
+    fn workload(allocator: Allocator) -> Result<(), Error> {
+        let mut parser = Parser::try_new_in(
+            Config {
+                namespace_separator: Some('|'),
+                ..Config::default()
+            },
+            allocator,
+        )?;
+        parser.feed(b"<!DOCTYPE r [<!ENTITY e 'expanded'><!ATTLIST r a CDATA 'default'>]><r xmlns:p='u'><p:child b='&e;'/><p:child b='another value'/></r>", true)?;
+        let mut output = None;
+        loop {
+            match parser.next_event_for_recycling_into(&mut output) {
+                Ok(Some(_)) => assert!(output.is_some()),
+                Ok(None) => {
+                    assert!(output.is_none());
+                    break;
+                }
+                Err(error) => {
+                    assert_eq!(error.kind, ErrorKind::NoMemory);
+                    assert!(output.is_none());
+                    let calls = CALLS.get();
+                    assert_eq!(
+                        parser
+                            .next_event_for_recycling_into(&mut output)
+                            .unwrap_err(),
+                        error
+                    );
+                    assert!(output.is_none());
+                    assert_eq!(calls, CALLS.get());
+                    return Err(error);
+                }
+            }
+        }
+        Ok(())
+    }
+    check_allocations(workload);
+}

@@ -1143,9 +1143,10 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
         unsafe {
             drain_default_fragments(parser);
         }
+        let mut event = None;
         // SAFETY: No references to parser fields escape this scope or cross
         // dispatch. The busy guard prevents freeing or reparsing the core.
-        let (event, recycling) = unsafe {
+        let recycling = unsafe {
             if (*parser).destroying {
                 return ERROR;
             }
@@ -1157,11 +1158,8 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
                 (*parser).error = 0;
                 return SUSPENDED;
             }
-            match (*parser).core.next_event_for_recycling() {
-                Ok(Some((event, recycling))) => {
-                    (*parser).position = event.position;
-                    (event, recycling)
-                }
+            match (*parser).core.next_event_for_recycling_into(&mut event) {
+                Ok(Some(recycling)) => recycling,
                 Ok(None) => {
                     if resolve_pending_conversion(parser) {
                         continue;
@@ -1196,8 +1194,10 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
                 }
             }
         };
+        let event = event.expect("recycling token accompanies an owned event");
         // SAFETY: The event owns its data and the parser remains busy.
         unsafe {
+            (*parser).position = event.position;
             if dispatch(parser, event.kind, recycling).is_err() {
                 fail_parse(parser, 1);
                 return ERROR;

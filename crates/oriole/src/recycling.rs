@@ -310,7 +310,12 @@ mod tests {
             if end {
                 first.next_event().unwrap();
             }
-            let (event, token) = first.next_event_for_recycling().unwrap().unwrap();
+            let mut output = None;
+            let token = first
+                .next_event_for_recycling_into(&mut output)
+                .unwrap()
+                .unwrap();
+            let event = output.unwrap();
             let mut second = if reset {
                 first = Parser::new(Config::default());
                 first

@@ -66,7 +66,7 @@ binaries and results separately.
 
 Each build runs four CPython configurations: shared/static linking, each with the
 original consumer and the cleanup backport. Every configuration reports **803
-tests, 31 existing skips and two strict failures**, exiting with status 2:
+tests, 31 skips and two strict failures**, exiting with status 2:
 
 - `test.test_pyexpat.BufferTextTest.test1`
 - `test.test_sax.CDATAHandlerTest.test_handlers`
@@ -75,6 +75,13 @@ Both concern text callback boundaries. Separate semantic checks pass 2/2 in ever
 configuration; they do not turn the unchanged upstream suite green. The 3,212
 named test records and 32 subtest records agree between normal and optimized
 builds. Module origins, compatibility versions and library identities are checked.
+
+A [subsequent PBS comparison](../version-consistent-pbs/#test-counts-and-earlier-local-coverage)
+found that the local harness's startup origin check did not cover fresh imports:
+19 accelerator-specific tests skipped after loading an incompatible built-in
+`_elementtree`. The original counts and raw results above remain unchanged.
+They do not establish full accelerator coverage. The PBS distribution exercises
+18 of those methods successfully; one retains its actual 2 GiB memory skip.
 
 ## W3C acceptance
 

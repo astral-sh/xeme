@@ -213,22 +213,10 @@ oriole_create_system(const XML_Char *encoding,
             return result.returncode
     env = os.environ.copy()
     env["PYTHONPATH"] = os.pathsep.join([str(output), str(source / "Lib")])
-    # PBS may compile these modules into the interpreter. Builtins precede
-    # PYTHONPATH, so explicitly load our extensions at startup in every worker.
-    (output / "sitecustomize.py").write_text("""
-import importlib.util
-from pathlib import Path
-import sys
-import sysconfig
-root = Path(__file__).resolve().parent
-for name in ('pyexpat', '_elementtree'):
-    path = root / (name + sysconfig.get_config_var('EXT_SUFFIX'))
-    spec = importlib.util.spec_from_file_location(name, path)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-    spec.loader.exec_module(module)
-    assert Path(module.__file__).resolve() == path
-""")
+    # PBS may compile these modules into the interpreter. Keep the override
+    # active for the upstream tests' fresh imports as well as worker startup.
+    loader = Path(__file__).with_name("extension_loader.py")
+    shutil.copy2(loader, output / "sitecustomize.py")
     executable = getattr(sys, "_base_executable", sys.executable)
     probe = subprocess.run(
         [
@@ -249,28 +237,18 @@ for name in ('pyexpat', '_elementtree'):
     )
     (output / "probe.log").write_text(probe.stdout + probe.stderr)
     # Fail closed if startup used a builtin or failed to load an extension.
+    import_check = Path(__file__).with_name("check_extension_imports.py")
+    origin_command = [executable, "-s", str(import_check), str(output)]
     origin_probe = subprocess.run(
-        [
-            executable,
-            "-s",
-            "-c",
-            (
-                "import pyexpat, _elementtree; from pathlib import Path; "
-                f"root=Path({str(output)!r}); "
-                "assert Path(pyexpat.__file__).parent == root; "
-                "assert Path(_elementtree.__file__).parent == root"
-            ),
-        ],
+        origin_command,
         env=env,
         text=True,
         capture_output=True,
         check=False,
     )
+    (output / "origin.log").write_text(origin_probe.stdout + origin_probe.stderr)
     if origin_probe.returncode:
-        (output / "origin-failure.log").write_text(
-            origin_probe.stdout + origin_probe.stderr
-        )
-        print(f"extension origin check failed; see {output / 'origin-failure.log'}")
+        print(f"extension origin check failed; see {output / 'origin.log'}")
         return 1
     env["TMPDIR"] = str(output / "tmp")
     Path(env["TMPDIR"]).mkdir(exist_ok=True)
@@ -336,6 +314,10 @@ for name in ('pyexpat', '_elementtree'):
         "commands": commands,
         "test_command": command,
         "probe_exit_code": probe.returncode,
+        "origin_command": origin_command,
+        "origin_exit_code": origin_probe.returncode,
+        "loader_sha256": hashlib.sha256(loader.read_bytes()).hexdigest(),
+        "import_check_sha256": hashlib.sha256(import_check.read_bytes()).hexdigest(),
         "tests_exit_code": result.returncode,
         "gate_exit_code": gate_exit_code,
         "text_fragmentation": fragmentation,

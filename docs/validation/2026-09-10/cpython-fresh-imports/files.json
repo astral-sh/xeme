@@ -1,0 +1,58 @@
+{
+  "handoff_manifest_sha256": "3bcdad80c3011627a2220b666e1d2e71381fb73776b94dc9e45da887a928233b",
+  "archive_sha256": "99d0ce8ef750d8b631ca63ce43f0ddc57cbbc739e3674c29c5436569daa44659",
+  "members": {
+    "README.md": {
+      "bytes": 1353,
+      "sha256": "35556d6450e0ad1ea10785bcd4a806d71dde1698de4b1dc2289aeeec2145e466"
+    },
+    "evidence-members.json": {
+      "bytes": 3701,
+      "sha256": "5b79c72c3f27287a67330813ce75f819c638b8adc05d152da27777ee2037f4d7"
+    },
+    "evidence.tar.gz": {
+      "bytes": 61153,
+      "sha256": "4609122992e7b9ed3327ba3c47dbe9006cc1b39eca05792fdeb7b3a71e88b4ff"
+    },
+    "fresh-imports.patch": {
+      "bytes": 10095,
+      "sha256": "d7758d907764cb1918d21536809e390fc146a016cb1c669506826e735485212c"
+    },
+    "manifest.json": {
+      "bytes": 1692,
+      "sha256": "3bcdad80c3011627a2220b666e1d2e71381fb73776b94dc9e45da887a928233b"
+    },
+    "oriole-cpython-fresh-import-independent-audit.py": {
+      "bytes": 9004,
+      "sha256": "bff1fb575ee9b50fff662c32a5b1c0a0c9ba157fcad5c8f65a5e2e2ffc42b778"
+    },
+    "oriole-cpython-fresh-import-independent-review.json": {
+      "bytes": 24238,
+      "sha256": "52ff7f237ee4a2bb01e8b1e33d872ab91cf0fda2e7c2df63745d3297b858f109"
+    },
+    "source.json": {
+      "bytes": 506,
+      "sha256": "a660fe4bc6d4546b0079efb1703e23c866ef6f2d6187c53339e3f18347affb86"
+    },
+    "source/tools/cpython/README.md": {
+      "bytes": 1907,
+      "sha256": "f8ccf6df89919b67ca39a94823e61bc6597f9001bd57f66382c4d3b387ee3cb6"
+    },
+    "source/tools/cpython/check_extension_imports.py": {
+      "bytes": 3199,
+      "sha256": "473e00f55f8bc92a69645df109438da1cf8cdb3f7e1ce08c8fdf7d055b14c3d5"
+    },
+    "source/tools/cpython/extension_loader.py": {
+      "bytes": 1153,
+      "sha256": "2116f8972094890d54dbe5fd915ed7eb8619f716ce0dd4e7ff63acf15ef4c5f3"
+    },
+    "source/tools/cpython/run.py": {
+      "bytes": 12658,
+      "sha256": "c682b96574c4cf34873899514873bf13947449a7adb35de404c8b73e96ec7fda"
+    },
+    "summary.json": {
+      "bytes": 1241,
+      "sha256": "cae04d8044c13c5912a2f74c722ffaf734750895249325b2e122f6891ddda4bd"
+    }
+  }
+}

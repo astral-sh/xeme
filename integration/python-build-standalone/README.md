@@ -132,10 +132,11 @@ retain archive hashes and glibc/native-library results. Re-run allocator failure
 callback lifecycle, differential, and sanitizer gates on the same Oriole source.
 The CPython static-extension harness in `tools/cpython/` is a separate local gate.
 
-The [completed Linux x86-64 validation](../../docs/validation/2026-09-10/combined-evidence/pbs/)
+The [completed Linux x86-64 validation](../../docs/validation/2026-09-10/pbs-values/)
 passes the archive validator, custom distribution checks, installed XML suites,
 and the actual CentOS 7/glibc 2.17 runtime. Its manifest identifies the earlier
-`6a6a9ec` runtime; later source checkpoints require their own distribution builds.
+`b68bdca` runtime used for the combined benchmarks and sustained fuzz campaigns;
+later source checkpoints require their own distribution builds.
 The experimental archive is retained as a seven-day CI artifact, with permanent
 hashes and complete compressed logs in the repository. Earlier build failures
 and their corrections remain documented.

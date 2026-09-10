@@ -563,11 +563,13 @@ impl Parser {
         config.encoding = None;
         let decoder = Decoder::new(encoding, allocator)?;
         let mut namespaces = hash_map(allocator);
-        try_insert(
-            &mut namespaces,
-            string("xml", allocator)?,
-            string("http://www.w3.org/XML/1998/namespace", allocator)?,
-        )?;
+        if config.namespace_separator.is_some() {
+            try_insert(
+                &mut namespaces,
+                string("xml", allocator)?,
+                string("http://www.w3.org/XML/1998/namespace", allocator)?,
+            )?;
+        }
         let mut sources = Vec::new_in(allocator);
         try_push(&mut sources, Source::new(allocator, config.name_rules))?;
         Ok(Self {
@@ -3476,7 +3478,10 @@ mod hash_salt_tests {
 
     #[test]
     fn salt_rebuilds_every_table_and_owned_children() {
-        let mut parser = Parser::new(Config::default());
+        let mut parser = Parser::new(Config {
+            namespace_separator: Some('|'),
+            ..Config::default()
+        });
         parser.set_param_entity_parsing(2);
         parser.feed(b"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p \"<!ATTLIST n b CDATA 'v'>\">%p;<!ATTLIST r a CDATA 'v'>]><r>", false).unwrap();
         while parser.next_event().unwrap().is_some() {}
@@ -3507,6 +3512,28 @@ mod hash_salt_tests {
         while child.next_event().unwrap().is_some() {}
         parser.feed(b"<n>&e;</n></r>", true).unwrap();
         while parser.next_event().unwrap().is_some() {}
+    }
+
+    #[test]
+    fn nonnamespace_parsers_keep_salted_empty_bindings() {
+        let mut parser = Parser::new(Config::default());
+        assert!(parser.namespaces.is_empty());
+        let previous = parser.namespaces.hasher().hash_one("xml");
+        parser.set_hash_salt(*b"0123456789abcdef").unwrap();
+        assert_ne!(parser.namespaces.hasher().hash_one("xml"), previous);
+        for context in [None, Some("")] {
+            let child = parser.external_child(context, None).unwrap();
+            assert!(child.namespaces.is_empty());
+            assert_eq!(child.hash_salt(), parser.hash_salt());
+        }
+        let mut child = parser.external_child(Some("xml=urn:custom"), None).unwrap();
+        assert_eq!(child.namespaces.get("xml").unwrap(), "urn:custom");
+        child.feed(b"<xml:r/>", true).unwrap();
+        while let Some(event) = child.next_event().unwrap() {
+            if let EventKind::StartElement { name, .. } = event.kind {
+                assert_eq!(name, "xml:r");
+            }
+        }
     }
 }
 

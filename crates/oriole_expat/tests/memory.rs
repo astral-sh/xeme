@@ -230,3 +230,43 @@ fn custom_parser_never_uses_global_storage_and_blocks_allocator_reentry() {
     assert_eq!(ESCAPES.with(Cell::get), 0);
     assert!(REENTRIES.with(Cell::get) > 20);
 }
+
+#[test]
+fn nonnamespace_children_and_reset_keep_selected_storage() {
+    let suite = XML_Memory_Handling_Suite {
+        malloc_fcn: Some(custom_malloc),
+        realloc_fcn: Some(custom_realloc),
+        free_fcn: Some(custom_free),
+    };
+    ESCAPES.set(0);
+    REENTRIES.set(0);
+    OBSERVE.set(true);
+    // SAFETY: The suite delegates to libc. Each handle is used serially and freed
+    // once; children own their context after reset and destruction of the parent.
+    unsafe {
+        let parser = XML_ParserCreate_MM(ptr::null(), &suite, ptr::null());
+        assert!(!parser.is_null());
+        CALLBACK_PARSER.set(parser);
+        assert_eq!(XML_SetHashSalt(parser, 12345), 1);
+        let child = XML_ExternalEntityParserCreate(parser, c"".as_ptr(), ptr::null());
+        assert!(!child.is_null());
+        FAIL_NEXT.set(true);
+        assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
+        assert!(!FAIL_NEXT.get());
+        assert_eq!(XML_Parse(parser, c"<p:r/>".as_ptr(), 6, 1), 1);
+        assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+        assert_eq!(XML_Parse(parser, c"<xml:r/>".as_ptr(), 8, 1), 1);
+        let explicit =
+            XML_ExternalEntityParserCreate(parser, c"xml=urn:custom".as_ptr(), ptr::null());
+        assert!(!explicit.is_null());
+        XML_ParserFree(parser);
+        CALLBACK_PARSER.set(ptr::null_mut());
+        assert_eq!(XML_Parse(child, c"<xml:r/>".as_ptr(), 8, 1), 1);
+        assert_eq!(XML_Parse(explicit, c"<xml:r/>".as_ptr(), 8, 1), 1);
+        XML_ParserFree(child);
+        XML_ParserFree(explicit);
+    }
+    OBSERVE.set(false);
+    assert_eq!(ESCAPES.get(), 0);
+    assert!(REENTRIES.get() > 0);
+}

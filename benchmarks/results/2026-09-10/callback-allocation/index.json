@@ -8,7 +8,10 @@
     "spare-results.json.gz": "7d881a7eba827db816e8b78ff947a32e945ae5f9b616826f77b3410a25ae9393",
     "spare-source.json.gz": "0ba712f4d1304bad97c95bb4afc3702bdff9e86deb8f55b046401e84c23d393e",
     "spare-threshold-checks.json.gz": "ef5536fb8a09264e2658a2bd395da862b97cdd56e3778152a147d127e8fc8af2",
-    "spare.patch.gz": "770782b0ae18c340f43af7245dd4196231d13b75bcc8c056b8eb8eafbbe1695f"
+    "spare-threshold-probe.py.gz": "07d48415be0be199c60c266083854e8440fa10415e8582038d2ec5bca40a09bf",
+    "spare-threshold-replay.json.gz": "ab5314bf2fd5464b6a595ff8f5bd9ae5d403406a8fe9e23fe250a8e421b345e3",
+    "spare.patch.gz": "770782b0ae18c340f43af7245dd4196231d13b75bcc8c056b8eb8eafbbe1695f",
+    "xml_abi.py.gz": "3d129ae05edc90a8d6fe9d323b4f9e079619f3ee62ae260861f29373279d30d2"
   },
   "combined_library_sha256": "2a969c6f5a6be8e016b820857a235cefd2cccd47f98d0f68fd068fb5fb3aae1c",
   "combined_source_manifest_sha256": "ad316906d9493cfbef549dc613e33b7c86c5de01385204f2bbbed326ac4c03b5",

@@ -13,6 +13,16 @@ static size_t text_length;
 static XML_Parser active;
 static int suspend_once;
 
+static void version_identity(void) {
+    XML_Expat_Version version = XML_ExpatVersionInfo();
+    const char *label = XML_ExpatVersion();
+    const char *digits = label + strcspn(label, "0123456789");
+    int major, minor, micro, consumed = 0;
+    assert(sscanf(digits, "%d.%d.%d%n", &major, &minor, &micro, &consumed) == 3);
+    assert(digits[consumed] == '\0');
+    assert(major == version.major && minor == version.minor && micro == version.micro);
+}
+
 static void XMLCALL on_start(void *data, const char *name, const char **attributes) {
     assert(data == &starts);
     assert(name && attributes);
@@ -249,6 +259,7 @@ static void custom_encoding_aliases(void) {
 }
 
 int main(void) {
+    version_identity();
     incremental();
     buffer_api();
     suspend_resume();

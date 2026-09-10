@@ -2,10 +2,13 @@
 
 This crate exports the ordinary `char` Expat C ABI as a shared library and static
 archive. [The public header](../../include/expat.h) describes that ABI; its Expat
-version macros and `XML_ExpatVersionInfo()` identify the targeted API revision,
-while `XML_ExpatVersion()` reports Oriole's own identity. Reporting an API target
-does not claim every optional capability is supported. The header retains the
-upstream Expat authors' MIT notice.
+version macros, `XML_ExpatVersionInfo()`, and the `oriole_compat_2.8.4` string from
+`XML_ExpatVersion()` identify the same targeted API revision. The separate
+`ORIOLE_VERSION` header macro and Cargo package version identify the Oriole
+implementation, currently `0.0.1`. Reporting an API target does not establish
+complete feature, behavioral, or security equivalence with Expat. Consumers that
+require Expat's literal version string still distinguish Oriole. The header
+retains the upstream Expat authors' MIT notice.
 
 ## Ownership and callbacks
 

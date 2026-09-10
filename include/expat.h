@@ -47,6 +47,9 @@
 #ifndef Expat_INCLUDED
 #  define Expat_INCLUDED 1
 
+/* Oriole implementation version; XML_*_VERSION identifies the API target. */
+#  define ORIOLE_VERSION "0.0.1"
+
 #  include <stdint.h> // for uint8_t
 #  include <stdlib.h>
 /* Oriole supports the ordinary, narrow-character Expat ABI. */
@@ -1039,7 +1042,8 @@ XML_ParserFree(XML_Parser parser);
 XMLPARSEAPI(const XML_LChar *)
 XML_ErrorString(enum XML_Error code);
 
-/* Return a string containing the version number of this expat */
+/* Return the Expat API target as "oriole_compat_M.m.p".
+   ORIOLE_VERSION identifies the Oriole implementation version. */
 XMLPARSEAPI(const XML_LChar *)
 XML_ExpatVersion(void);
 
@@ -1049,8 +1053,8 @@ typedef struct {
   int micro;
 } XML_Expat_Version;
 
-/* Return an XML_Expat_Version structure containing numeric version
-   number information for this version of expat.
+/* Return the targeted Expat API revision, matching XML_ExpatVersion().
+   This does not establish complete feature or behavioral compatibility.
 */
 XMLPARSEAPI(XML_Expat_Version)
 XML_ExpatVersionInfo(void);

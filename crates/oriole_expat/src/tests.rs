@@ -1,6 +1,16 @@
 use super::*;
 
 #[test]
+fn header_implementation_version_matches_package_version() {
+    let definition = format!("#  define ORIOLE_VERSION \"{}\"", env!("CARGO_PKG_VERSION"));
+    assert!(
+        include_str!("../../../include/expat.h")
+            .lines()
+            .any(|line| line == definition)
+    );
+}
+
+#[test]
 fn entity_amplification_controls_apply_after_suspension_and_reset_to_defaults() {
     unsafe extern "C" fn suspend(data: *mut c_void, _: *const c_char, _: *const *const c_char) {
         // SAFETY: Parser-as-handler-argument supplies the active test parser.

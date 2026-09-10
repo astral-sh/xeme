@@ -2423,13 +2423,14 @@ pub unsafe extern "C" fn XML_FreeContentModel(_parser: XML_Parser, model: *mut X
 
 #[unsafe(no_mangle)]
 pub extern "C" fn XML_ExpatVersion() -> *const c_char {
-    c"oriole_0.0.1".as_ptr()
+    c"oriole_compat_2.8.4".as_ptr()
 }
 
 #[unsafe(no_mangle)]
 pub extern "C" fn XML_ExpatVersionInfo() -> XML_Expat_Version {
     // This is the targeted C API revision, matching the header so consumers do
-    // not skip newer compatibility/security tests. ExpatVersion names Oriole.
+    // not skip newer compatibility/security tests. ExpatVersion names the same
+    // target while identifying Oriole as the implementation.
     XML_Expat_Version {
         major: 2,
         minor: 8,

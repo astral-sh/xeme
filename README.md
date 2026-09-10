@@ -37,6 +37,21 @@ against their DTD content models.
 The core forbids unsafe Rust and uses no XML parser dependency. It performs no
 filesystem or network I/O and leaves allocator selection to the application.
 
+## Check XML from the command line
+
+```console
+cargo run --release -p oriole_cli -- document.xml
+cargo run --release -p oriole_cli -- --events --namespaces document.xml
+```
+
+Omit the file to read standard input. Invalid XML exits with a nonzero status;
+`--events` prints the event stream and `--chunk-size` controls input buffering.
+
+The standalone executable uses jemalloc on supported Unix platforms and mimalloc
+on Windows, following uv's allocator configuration. Build with
+`--no-default-features` to use the system allocator. Library users retain control
+over their allocator.
+
 ## Resource limits
 
 `Config::limits` bounds document bytes, unfinished tokens, element depth,

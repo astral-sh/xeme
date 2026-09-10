@@ -143,6 +143,18 @@ An external parser used before any root input follows Expat's 22-byte baseline.
 These controls leave Oriole's absolute input, token, nesting, attribute, and
 entity-expansion limits active.
 
+The C constructors allow up to 100,000 declared entities and 100,000 levels of
+internal entity expansion. Reset preserves these limits and external children
+inherit them. The safe Rust API retains its defaults of 10,000 declarations and
+32 entity levels. Iterative expansion and active-name indexes avoid a matching
+host call stack or repeated scans of the active chain.
+
+The larger C bounds allow more memory use for deep documents that previously
+stopped at the smaller limits. The measured 60,000-entity content fixture used
+about 103 MB of selected allocation; that is a fixture measurement, not a bound
+for every document with 100,000 entities. The shared byte and allocation ceilings
+below remain active.
+
 Reparse deferral is configurable, with progressive scanning in both modes. The
 live-allocation tracker supports Expat's maximum-amplification and activation
 threshold controls, including child allocations. Application-owned blocks requested

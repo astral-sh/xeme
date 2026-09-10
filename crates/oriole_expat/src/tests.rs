@@ -3587,3 +3587,198 @@ fn active_entity_membership_survives_suspend_and_is_discarded_on_reset() {
         XML_ParserFree(parser);
     }
 }
+
+fn policy_entity_declarations(count: usize, chain: usize, parameter: bool) -> String {
+    use std::fmt::Write;
+    let mut dtd = String::new();
+    for index in 0..count {
+        if parameter {
+            if index == 0 {
+                dtd.push_str("<!ENTITY % e0 '<!--leaf-->'>");
+            } else if index < chain {
+                write!(dtd, "<!ENTITY % e{index} '&#37;e{};'>", index - 1).unwrap();
+            } else {
+                write!(dtd, "<!ENTITY % e{index} ''>").unwrap();
+            }
+        } else if index == 0 {
+            dtd.push_str("<!ENTITY e0 'leaf'>");
+        } else if index < chain {
+            write!(dtd, "<!ENTITY e{index} '&e{};'>", index - 1).unwrap();
+        } else {
+            write!(dtd, "<!ENTITY e{index} ''>").unwrap();
+        }
+    }
+    dtd
+}
+
+unsafe extern "C" fn policy_text(data: *mut c_void, value: *const c_char, length: c_int) {
+    // SAFETY: Tests retain their String and the callback buffer is valid for length.
+    unsafe {
+        let bytes = std::slice::from_raw_parts(value.cast(), length as usize);
+        (*data.cast::<String>()).push_str(std::str::from_utf8(bytes).unwrap());
+    }
+}
+
+unsafe extern "C" fn policy_comment(data: *mut c_void, _: *const c_char) {
+    // SAFETY: Tests retain this counter throughout synchronous parsing.
+    unsafe { *data.cast::<usize>() += 1 };
+}
+
+#[test]
+fn c_entity_limits_survive_all_constructors_reset_and_both_child_modes() {
+    let dtd = policy_entity_declarations(10_001, 64, false);
+    let document = format!("<!DOCTYPE r [{dtd}]><r>&e63;&e10000;&e63;</r>");
+    // SAFETY: All parser handles, strings and callback state remain test-owned.
+    unsafe {
+        for constructor in 0..3 {
+            let parser = match constructor {
+                0 => XML_ParserCreate(ptr::null()),
+                1 => XML_ParserCreateNS(ptr::null(), b'|' as c_char),
+                _ => XML_ParserCreate_MM(ptr::null(), ptr::null(), ptr::null()),
+            };
+            assert!(!parser.is_null());
+            for reset in [false, true] {
+                if reset {
+                    assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+                }
+                let mut text = String::new();
+                XML_SetUserData(parser, ptr::from_mut(&mut text).cast());
+                XML_SetCharacterDataHandler(parser, Some(policy_text));
+                assert_eq!(
+                    XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1),
+                    OK
+                );
+                assert_eq!(text, "leafleaf");
+            }
+            let child = XML_ExternalEntityParserCreate(parser, c"".as_ptr(), ptr::null());
+            assert!(!child.is_null());
+            let mut text = String::new();
+            XML_SetUserData(child, ptr::from_mut(&mut text).cast());
+            assert_eq!(XML_Parse(child, c"&e63;&e10000;&e63;".as_ptr(), 18, 1), OK);
+            assert_eq!(text, "leafleaf");
+            XML_ParserFree(child);
+            XML_ParserFree(parser);
+        }
+        let parent = XML_ParserCreate(ptr::null());
+        let child = XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null());
+        assert!(!child.is_null());
+        assert_eq!(XML_SetParamEntityParsing(child, 2), 1);
+        let mut comments = 0_usize;
+        XML_SetUserData(child, ptr::from_mut(&mut comments).cast());
+        XML_SetCommentHandler(child, Some(policy_comment));
+        let dtd = format!(
+            "{}%e63;%e10000;%e63;",
+            policy_entity_declarations(10_001, 64, true)
+        );
+        assert_eq!(
+            XML_Parse(child, dtd.as_ptr().cast(), dtd.len() as c_int, 1),
+            OK
+        );
+        assert_eq!(comments, 2);
+        XML_ParserFree(child);
+        XML_ParserFree(parent);
+    }
+    // The compatibility policy belongs to C constructors. Existing safe callers
+    // still reject the same document at their conservative declaration ceiling.
+    let mut parser = Parser::new(Config::default());
+    parser.feed(document.as_bytes(), true).unwrap();
+    loop {
+        match parser.next_event() {
+            Ok(Some(_)) => {}
+            Err(error) => {
+                assert_eq!(error.kind, ErrorKind::LimitExceeded);
+                break;
+            }
+            Ok(None) => panic!("safe defaults unexpectedly accepted the large DTD"),
+        }
+    }
+}
+
+#[test]
+fn c_entity_count_and_depth_boundaries_remain_finite() {
+    // SAFETY: Each large case owns one bounded parser and frees it before the next.
+    unsafe {
+        for count in [100_000, 100_001] {
+            let document = format!(
+                "<!DOCTYPE r [{}]><r/>",
+                policy_entity_declarations(count, 1, false)
+            );
+            let parser = XML_ParserCreate(ptr::null());
+            assert!(!parser.is_null());
+            let status = XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1);
+            assert_eq!(status, if count == 100_000 { OK } else { ERROR });
+            assert_eq!(
+                XML_GetErrorCode(parser),
+                if count == 100_000 { 0 } else { 43 }
+            );
+            XML_ParserFree(parser);
+        }
+        // A fresh, manually created parameter child uses one external depth level
+        // without consuming a declaration slot. Delayed percent references retain
+        // each frame until the leaf, independently testing depth100000 and100001.
+        for internal_depth in [99_999, 100_000] {
+            let parent = XML_ParserCreate(ptr::null());
+            // Preserve the relative allocation guard while providing real direct
+            // input as its denominator. Child-only input does not increase it.
+            let prime = format!("<!--{}--><r/>", "p".repeat(6 * 1024 * 1024));
+            assert_eq!(
+                XML_Parse(parent, prime.as_ptr().cast(), prime.len() as c_int, 1),
+                OK
+            );
+            let child = XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null());
+            assert!(!child.is_null());
+            assert_eq!(XML_SetParamEntityParsing(child, 2), 1);
+            let dtd = format!(
+                "{}%e{};",
+                policy_entity_declarations(internal_depth, internal_depth, true),
+                internal_depth - 1
+            );
+            let mut comments = 0_usize;
+            XML_SetUserData(child, ptr::from_mut(&mut comments).cast());
+            XML_SetCommentHandler(child, Some(policy_comment));
+            let status = XML_Parse(child, dtd.as_ptr().cast(), dtd.len() as c_int, 1);
+            assert_eq!(status, if internal_depth == 99_999 { OK } else { ERROR });
+            assert_eq!(
+                XML_GetErrorCode(child),
+                if internal_depth == 99_999 { 0 } else { 43 }
+            );
+            assert_eq!(comments, usize::from(internal_depth == 99_999));
+            XML_ParserFree(child);
+            XML_ParserFree(parent);
+        }
+    }
+}
+
+#[test]
+fn wider_c_entity_limits_keep_cycle_and_work_guards() {
+    // SAFETY: Tests own live parsers; the work limit is lowered before any input.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        let cycle = c"<!DOCTYPE r [<!ENTITY e '&e;'>]><r>&e;</r>";
+        assert_eq!(
+            XML_Parse(parser, cycle.as_ptr(), cycle.to_bytes().len() as c_int, 1),
+            ERROR
+        );
+        assert_eq!(XML_GetErrorCode(parser), 12);
+        assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+        let empty = format!(
+            "<!DOCTYPE r [<!ENTITY e ''>]><r>{}</r>",
+            "&e;".repeat(100_000)
+        );
+        assert_eq!(
+            XML_Parse(parser, empty.as_ptr().cast(), empty.len() as c_int, 1),
+            OK
+        );
+        assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+        let mut limits = (*parser).config.limits.clone();
+        limits.max_entity_expansion_bytes = 7;
+        (*parser).core.set_limits(limits).unwrap();
+        let work = c"<!DOCTYPE r [<!ENTITY e 'leaf'>]><r>&e;&e;</r>";
+        assert_eq!(
+            XML_Parse(parser, work.as_ptr(), work.to_bytes().len() as c_int, 1),
+            ERROR
+        );
+        assert_eq!(XML_GetErrorCode(parser), 43);
+        XML_ParserFree(parser);
+    }
+}

@@ -289,6 +289,13 @@ unsafe fn create(
             let config = Config {
                 namespace_separator: separator,
                 name_rules: NameRules::FourthEdition,
+                // Iterative expansion supports Expat's deep-entity workloads.
+                // Shared byte, live-allocation and external-child caps still apply.
+                limits: oriole::Limits {
+                    max_entities: 100_000,
+                    max_entity_depth: 100_000,
+                    ..oriole::Limits::default()
+                },
                 ..Config::default()
             };
             let mut core = Parser::try_new_with_encoding_in(config.clone(), encoding, allocator)

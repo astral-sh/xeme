@@ -889,8 +889,10 @@ XML_GetParsingStatus(XML_Parser parser, XML_ParsingStatus *status);
    particular prefix; a token of the form =uri specifies the default
    namespace.  This can be called at any point after the first call to
    an ExternalEntityRefHandler so longer as the parser has not yet
-   been freed.  The new parser is completely independent and may
-   safely be used in a separate thread.  The handlers and userData are
+   been freed.  Oriole requires serialized access to all related parsers,
+   including parsing, resetting, and freeing parent and child handles.
+   A parser may be transferred between threads with external synchronization.
+   The handlers and userData are
    initialized from the parser argument.  Returns NULL if out of memory.
    Otherwise returns a new XML_Parser object.
 */

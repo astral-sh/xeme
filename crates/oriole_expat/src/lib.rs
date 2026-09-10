@@ -15,8 +15,7 @@
 use std::ffi::{CStr, c_char, c_int, c_long, c_ulong, c_void};
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::ptr;
-use std::sync::Mutex;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
 
 use oriole::{Config, ErrorKind, EventKind, Parser, Position};
 use oriole_storage::{
@@ -166,8 +165,8 @@ pub struct XML_ParserStruct {
     child_depth: usize,
     encoding_release: Option<unsafe extern "C" fn(*mut c_void)>,
     encoding_data: *mut c_void,
-    lifetime: Shared<Mutex<XML_Parser>>,
-    parent_lifetime: Option<Shared<Mutex<XML_Parser>>>,
+    lifetime: Shared<AtomicPtr<XML_ParserStruct>>,
+    parent_lifetime: Option<Shared<AtomicPtr<XML_ParserStruct>>>,
     external_subset_merged: bool,
 }
 
@@ -286,7 +285,7 @@ unsafe fn create(
                 .map_err(|_| AllocError::OutOfMemory)?;
             let position = core.position();
             let family = Shared::try_new_in(FamilyBudget::default(), allocator)?;
-            let lifetime = Shared::try_new_in(Mutex::new(ptr::null_mut()), allocator)?;
+            let lifetime = Shared::try_new_in(AtomicPtr::new(ptr::null_mut()), allocator)?;
             let parser = XmlBox::try_new_in(
                 XML_ParserStruct {
                     user_data: ptr::null_mut(),
@@ -342,9 +341,7 @@ fn activate_handle(parser: XmlBox<XML_ParserStruct>) -> XML_Parser {
     // SAFETY: The new handle is exclusively owned and not yet visible to C.
     unsafe {
         let lifetime = &(*parser).lifetime;
-        *lifetime
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner) = parser;
+        lifetime.store(parser, Ordering::Release);
     }
     parser
 }
@@ -456,9 +453,7 @@ unsafe fn destroy(parser: XML_Parser) {
         (*parser).destroying = true;
         {
             let lifetime = &(*parser).lifetime;
-            *lifetime
-                .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner) = ptr::null_mut();
+            lifetime.store(ptr::null_mut(), Ordering::Release);
         }
         release_encoding(parser);
         let allocator = (*parser).allocator;
@@ -499,7 +494,7 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                 )
                 .map_err(|_| AllocError::OutOfMemory)?;
                 let family = Shared::try_new_in(FamilyBudget::default(), allocator)?;
-                let lifetime = Shared::try_new_in(Mutex::new(parser), allocator)?;
+                let lifetime = Shared::try_new_in(AtomicPtr::new(parser), allocator)?;
                 release_encoding(parser);
                 if (*parser).destroying {
                     return Ok(ERROR);
@@ -508,9 +503,7 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                     // Old DTD children belong to the previous document. Invalidate
                     // their merge destination before replacing the parent's core.
                     let old_lifetime = &(*parser).lifetime;
-                    *old_lifetime
-                        .lock()
-                        .unwrap_or_else(std::sync::PoisonError::into_inner) = ptr::null_mut();
+                    old_lifetime.store(ptr::null_mut(), Ordering::Release);
                 }
                 (*parser).lifetime = lifetime;
                 (*parser).core = core;
@@ -1106,19 +1099,16 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
 }
 
 unsafe fn merge_external_subset(parser: XML_Parser) -> bool {
-    // SAFETY: Related parsers require serialized access. The lifetime token also
-    // prevents parent destruction while its environment is updated; allocator
-    // callbacks cannot reenter a parser while merge borrows either core.
+    // SAFETY: Callers serialize related-parser access, so a loaded parent stays
+    // live throughout this merge. The shared token detects earlier destruction
+    // or reset; allocator callbacks cannot reenter while either core is borrowed.
     unsafe {
         if (*parser).external_subset_merged || !(*parser).core.is_external_subset() {
             return true;
         }
         let parent_lifetime = (*parser).parent_lifetime.clone();
         if let Some(parent_lifetime) = parent_lifetime {
-            let parent_guard = parent_lifetime
-                .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner);
-            let parent = *parent_guard;
+            let parent = parent_lifetime.load(Ordering::Acquire);
             if !parent.is_null()
                 && !(*parent).destroying
                 && let Err(error) = (*parent).core.merge_external_subset(&(*parser).core)
@@ -1904,7 +1894,7 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                     .map_err(|_| AllocError::OutOfMemory)?;
                 let position = core.position();
                 let allocator = (*parser).allocator;
-                let lifetime = Shared::try_new_in(Mutex::new(ptr::null_mut()), allocator)?;
+                let lifetime = Shared::try_new_in(AtomicPtr::new(ptr::null_mut()), allocator)?;
                 let child = XmlBox::try_new_in(
                     XML_ParserStruct {
                         user_data: (*parser).user_data,

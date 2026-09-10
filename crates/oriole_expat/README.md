@@ -85,3 +85,9 @@ These remaining boundaries prevent claiming complete Expat compatibility.
 Unmodified CPython can use its standard custom allocator suite; the actual consumer
 tests and their remaining failures are recorded separately from allocation-failure
 tests. See [the release gates](../../docs/compatibility.md) for the integration plan.
+
+Parent lifetime tokens use an inline atomic pointer. This avoids the hidden
+allocation performed by the standard library's pthread-backed mutex on macOS,
+keeping lifetime storage within the selected memory suite. The token detects a
+parent reset or destruction; callers still serialize related-parser operations
+while a child uses its parent. It does not make concurrent parent destruction safe.

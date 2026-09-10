@@ -388,6 +388,23 @@ impl Decoder {
         source.encoding = Encoding::SingleByte;
         Ok(())
     }
+    /// Payload copied by `inherit_map` for a matching requested encoding.
+    pub(crate) fn inherited_map_bytes(&self, requested: Option<&str>) -> (usize, usize) {
+        if requested
+            .zip(self.unknown_name.as_deref())
+            .is_some_and(|(requested, name)| requested.eq_ignore_ascii_case(name))
+        {
+            (
+                self.unknown_name.as_ref().map_or(0, |name| name.len()),
+                self.custom_map
+                    .as_ref()
+                    .map_or(0, |_| size_of::<[i32; 256]>()),
+            )
+        } else {
+            (0, 0)
+        }
+    }
+
     pub(crate) fn inherit_map(&mut self, parent: &Self, source: &mut Source) -> Result<(), Error> {
         if self
             .requested

@@ -263,7 +263,7 @@ fn repeated_external_entity_identifiers_consume_the_shared_expansion_budget() {
 }
 
 #[test]
-fn external_entity_namespace_context_is_charged_before_child_inheritance() {
+fn external_entity_namespace_context_consumes_the_expansion_budget() {
     let mut parser = Parser::new(Config {
         namespace_separator: Some('|'),
         limits: Limits {
@@ -273,7 +273,7 @@ fn external_entity_namespace_context_is_charged_before_child_inheritance() {
         ..Config::default()
     });
     let xml = format!(
-        "<!DOCTYPE r [<!ENTITY e SYSTEM 'sys'><!ENTITY other SYSTEM 'sys'>]><r xmlns:p='urn:{}'>&e;</r>",
+        "<!DOCTYPE r [<!ENTITY e SYSTEM 'sys'>]><r xmlns:p='urn:{}'>&e;&e;</r>",
         "x".repeat(64)
     );
     parser.feed(xml.as_bytes(), true).unwrap();
@@ -284,10 +284,8 @@ fn external_entity_namespace_context_is_charged_before_child_inheritance() {
         }
     };
     assert!(context.contains("p=urn:"));
-    let mut child = parser.external_child(Some(&context), None).unwrap();
-    child.feed(b"&other;", true).unwrap();
     assert_eq!(
-        child.next_event().unwrap_err().kind,
+        parser.next_event().unwrap_err().kind,
         ErrorKind::LimitExceeded
     );
 }
@@ -730,9 +728,9 @@ fn external_entity_children_inherit_namespaces_and_declarations() {
 fn external_entity_cycles_and_expansion_budgets_are_shared() {
     let mut parent = Parser::new(Config {
         limits: Limits {
-            // Ten bytes describe the external reference; the remaining sixteen
-            // are shared by all externally supplied replacement text.
-            max_entity_expansion_bytes: 26,
+            // Inherited declarations, callback metadata, and externally supplied
+            // replacement text consume the same budget across all children.
+            max_entity_expansion_bytes: 16 * 1024,
             ..Limits::default()
         },
         ..Config::default()
@@ -752,11 +750,11 @@ fn external_entity_cycles_and_expansion_budgets_are_shared() {
                 ErrorKind::RecursiveEntityReference
             );
             let mut sibling = parent.external_child(Some(""), None).unwrap();
-            sibling.feed(b"1234567890", true).unwrap();
+            sibling.feed(&[b'x'; 8 * 1024], true).unwrap();
             while sibling.next_event().unwrap().is_some() {}
             let mut sibling = parent.external_child(Some(""), None).unwrap();
             assert_eq!(
-                sibling.feed(b"1234", true).unwrap_err().kind,
+                sibling.feed(&[b'x'; 8 * 1024], true).unwrap_err().kind,
                 ErrorKind::LimitExceeded
             );
         }

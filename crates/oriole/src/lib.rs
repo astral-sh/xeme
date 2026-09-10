@@ -26,7 +26,9 @@ pub struct Limits {
     pub max_total_bytes: usize,
     /// Total indirect bytes from entities, reused defaults, namespace URI expansion,
     /// repeated declaration callback names, and external reference identifiers and
-    /// namespace contexts. Shared with external entity children.
+    /// namespace contexts. Child construction also charges inherited declaration,
+    /// namespace, encoding, and context storage, including per-entry structural
+    /// work. Shared with external entity children.
     pub max_entity_expansion_bytes: usize,
     pub max_entity_depth: usize,
     pub max_attributes: usize,
@@ -496,6 +498,7 @@ impl Parser {
                 "external entity nesting limit exceeded",
             ));
         }
+        self.charge_external_child_storage(context, encoding)?;
         // The constructor consumes Config.encoding into the allocator-owned decoder.
         // The stored config contains only inline values, so this clone cannot allocate.
         debug_assert!(self.config.encoding.is_none());
@@ -551,11 +554,85 @@ impl Parser {
                         )?;
                     }
                 } else if !child.entity_chain.iter().any(|name| name == part) {
+                    if child.entity_chain.len() >= child.config.limits.max_entity_depth {
+                        return Err(self.err(
+                            ErrorKind::LimitExceeded,
+                            "external entity context nesting limit exceeded",
+                        ));
+                    }
                     try_push(&mut child.entity_chain, string(part, self.allocator)?)?;
                 }
             }
         }
         Ok(child)
+    }
+
+    /// Bound inherited copies before allocating a child, including work for empty
+    /// declarations. Repeated empty external references must not repeatedly clone
+    /// an otherwise unused large declaration environment for free.
+    fn charge_external_child_storage(
+        &self,
+        context: Option<&str>,
+        encoding: Option<&str>,
+    ) -> Result<(), Error> {
+        for (name, entity) in self.entities.iter().chain(&self.parameter_entities) {
+            self.charge_expansion(size_of::<(String, Entity)>())?;
+            self.charge_expansion(name.len())?;
+            for value in [
+                &entity.value,
+                &entity.system_id,
+                &entity.public_id,
+                &entity.notation,
+            ]
+            .into_iter()
+            .flatten()
+            {
+                self.charge_expansion(value.len())?;
+            }
+        }
+        for (element, attributes) in &self.defaults {
+            self.charge_expansion(size_of::<(String, DefaultAttributes)>())?;
+            self.charge_expansion(element.len())?;
+            for attribute in &attributes.ordered {
+                self.charge_expansion(size_of::<DefaultAttribute>())?;
+                self.charge_expansion(attribute.name.len())?;
+                self.charge_expansion(attribute.attribute_type.len())?;
+                if let Some(value) = &attribute.value {
+                    self.charge_expansion(value.len())?;
+                }
+                // The ordered declaration and its lookup index each own a name.
+                self.charge_expansion(size_of::<(String, usize)>())?;
+                self.charge_expansion(attribute.name.len())?;
+            }
+        }
+        for (prefix, uri) in &self.namespaces {
+            self.charge_expansion(size_of::<(String, String)>())?;
+            self.charge_expansion(prefix.len())?;
+            self.charge_expansion(uri.len())?;
+        }
+        for name in &self.entity_chain {
+            self.charge_expansion(size_of::<String>())?;
+            self.charge_expansion(name.len())?;
+        }
+        if let Some(context) = context {
+            // Also account for delimiter scanning and entries that remove or
+            // replace a binding, rather than allocating a distinct final entry.
+            self.charge_expansion(context.len())?;
+            for part in context.split('\u{c}').filter(|part| !part.is_empty()) {
+                self.charge_expansion(if part.contains('=') {
+                    size_of::<(String, String)>()
+                } else {
+                    size_of::<String>()
+                })?;
+            }
+        }
+        if let Some(encoding) = encoding {
+            self.charge_expansion(encoding.len())?;
+        }
+        let (encoding_name, encoding_map) = self.decoder.inherited_map_bytes(encoding);
+        self.charge_expansion(encoding_name)?;
+        self.charge_expansion(encoding_map)?;
+        Ok(())
     }
 
     /// Select parameter entity processing: 0 never, 1 unless standalone, 2 always.

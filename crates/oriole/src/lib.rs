@@ -2158,7 +2158,7 @@ impl Parser {
             return Ok(false);
         }
         let invalid = invalid_xml_char(&text[..end]);
-        let forbidden = text[..end].find("]]>");
+        let forbidden = memchr::memmem::find(&text.as_bytes()[..end], b"]]>");
         if let Some(forbidden) =
             forbidden.filter(|forbidden| invalid.is_none_or(|invalid| invalid > *forbidden))
         {

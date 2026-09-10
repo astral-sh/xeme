@@ -1847,6 +1847,33 @@ impl Parser {
             || self.decoding_error.is_some()
     }
 
+    /// Recognize a complete native root end tag using its validated opening name.
+    /// Incomplete and ineligible tags keep the resumable lexical scanner.
+    fn matching_root_end_tag(&self, limit: usize) -> Option<usize> {
+        if self.fragment || self.sources.len() != 1 {
+            return None;
+        }
+        let source = self.source();
+        source.native_utf8_byte_index()?;
+        if source.has_conversions() {
+            return None;
+        }
+        let element = self.stack.last()?;
+        if element.raw_encoding.is_some() {
+            return None;
+        }
+        let end = element.raw_name.len().checked_add(3)?;
+        let bytes = source.remaining().as_bytes();
+        // Check the closing delimiter before comparing a potentially long name.
+        // Otherwise, one-byte feeds without deferral could repeat a long prefix
+        // comparison while the resumable scanner has no new complete token.
+        if end > limit || bytes.get(end - 1) != Some(&b'>') {
+            return None;
+        }
+        (bytes.starts_with(b"</") && bytes.get(2..end - 1) == Some(element.raw_name.as_bytes()))
+            .then_some(end)
+    }
+
     fn next_event_inner(&mut self, output: &mut EventOutput<'_>) -> Result<(), Error> {
         // Encoding detection consumes a BOM without producing a text token.
         // Charge that prefix even for empty input or an incomplete next token.
@@ -2059,6 +2086,11 @@ impl Parser {
             if deferral && self.source().should_defer(max_token) {
                 return Ok(());
             }
+            let matched_end = if mode == ScanMode::Tag && remaining.starts_with("</") {
+                self.matching_root_end_tag(max_token)
+            } else {
+                None
+            };
             let planned = if mode == ScanMode::Tag
                 && !self.source().remaining().starts_with("</")
                 && !self.seen_doctype
@@ -2079,15 +2111,18 @@ impl Parser {
             } else {
                 tag::Planned::Fallback
             };
-            let end = match planned {
-                tag::Planned::Complete { end, .. } => Some(end),
-                tag::Planned::Incomplete => None,
-                tag::Planned::Fallback => {
-                    self.source_mut()
+            let end = if matched_end.is_some() {
+                matched_end
+            } else {
+                match planned {
+                    tag::Planned::Complete { end, .. } => Some(end),
+                    tag::Planned::Incomplete => None,
+                    tag::Planned::Fallback => self
+                        .source_mut()
                         .scan_token(mode, max_token)
                         .map_err(|(kind, offset)| {
                             self.err_at(kind, "invalid or oversized XML token", offset)
-                        })?
+                        })?,
                 }
             };
             let Some(end) = end else {
@@ -2121,7 +2156,8 @@ impl Parser {
                     .for_slice(&self.source().remaining()[..end]),
             )?;
             let parsed = (|| {
-                if !matches!(planned, tag::Planned::Complete { .. })
+                if matched_end.is_none()
+                    && !matches!(planned, tag::Planned::Complete { .. })
                     && let Some(offset) = invalid_xml_char(&token)
                 {
                     return Err(self.err_at(
@@ -2155,6 +2191,7 @@ impl Parser {
                     }
                     ScanMode::Pi => self.parse_pi(token.view(), position)?,
                     ScanMode::Doctype => self.parse_doctype(token.view(), position)?,
+                    ScanMode::Tag if matched_end.is_some() => self.end_element(position)?,
                     ScanMode::Tag if token.starts_with("</") => {
                         self.parse_end(token.view(), position)?
                     }
@@ -3807,6 +3844,75 @@ fn character_reference(name: &str) -> Result<Option<char>, (ErrorKind, usize)> {
             Ok(Some(value))
         }
         _ => Ok(None),
+    }
+}
+
+#[cfg(test)]
+mod matching_end_tests {
+    use super::*;
+
+    #[test]
+    fn matching_end_tags_resume_across_every_byte_split() {
+        for name in ["r", "prefix:local", "é", "雪", "a·b", &"n".repeat(1024)] {
+            let opening = format!("<{name}>");
+            let closing = format!("</{name}>");
+            for split in 0..closing.len() {
+                let mut parser = Parser::new(Config::default());
+                parser.set_reparse_deferral_enabled(false);
+                parser.feed(opening.as_bytes(), false).unwrap();
+                assert!(matches!(
+                    parser.next_event().unwrap().unwrap().kind,
+                    EventKind::StartElement { .. }
+                ));
+                parser.feed(&closing.as_bytes()[..split], false).unwrap();
+                assert_eq!(parser.matching_root_end_tag(usize::MAX), None);
+                assert!(parser.next_event().unwrap().is_none());
+                parser.feed(&closing.as_bytes()[split..], true).unwrap();
+                assert_eq!(
+                    parser.matching_root_end_tag(closing.len()),
+                    Some(closing.len())
+                );
+                assert!(matches!(
+                    parser.next_event().unwrap().unwrap().kind,
+                    EventKind::EndElement { name: actual } if actual.as_str() == name
+                ));
+                assert!(parser.next_event().unwrap().is_none());
+            }
+        }
+    }
+
+    #[test]
+    fn matching_end_tags_keep_limits_and_fallback_syntax() {
+        for closing in ["</r >", "</r\r\n>", "</other>", "</r:other>", "</r<>"] {
+            let mut parser = Parser::new(Config::default());
+            parser.feed(b"<r>", false).unwrap();
+            parser.next_event().unwrap().unwrap();
+            parser.feed(closing.as_bytes(), true).unwrap();
+            assert_eq!(parser.matching_root_end_tag(usize::MAX), None);
+        }
+        let mut config = Config::default();
+        config.limits.max_token_bytes = 3;
+        let mut parser = Parser::new(config);
+        parser.feed(b"<r></r>", true).unwrap();
+        parser.next_event().unwrap().unwrap();
+        assert_eq!(parser.matching_root_end_tag(3), None);
+        assert_eq!(
+            parser.next_event().unwrap_err().kind,
+            ErrorKind::LimitExceeded
+        );
+
+        let mut parser = Parser::new(Config::default());
+        let utf16: std::vec::Vec<u8> = "<r></r>"
+            .encode_utf16()
+            .flat_map(u16::to_le_bytes)
+            .collect();
+        parser.feed(&utf16, true).unwrap();
+        parser.next_event().unwrap().unwrap();
+        assert_eq!(parser.matching_root_end_tag(usize::MAX), None);
+        assert!(matches!(
+            parser.next_event().unwrap().unwrap().kind,
+            EventKind::EndElement { .. }
+        ));
     }
 }
 

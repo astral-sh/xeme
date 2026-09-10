@@ -642,7 +642,7 @@ impl Parser {
             }
             return Ok(true);
         }
-        let Some(entity) = self.parameter_entities.get(&name) else {
+        let Some(entity) = self.tables.parameter_entities.get(&name) else {
             // Expat checks declaration existence only for a standalone document
             // reference outside an internal parameter-entity replacement.
             if self.standalone && !self.external_subset && self.sources.len() == 1 {
@@ -1286,9 +1286,9 @@ impl Parser {
         if self.default_events
             && !self.declarations_skipped()
             && if parameter {
-                self.parameter_entities.contains_key(&name)
+                self.tables.parameter_entities.contains_key(&name)
             } else {
-                self.entities.contains_key(&name)
+                self.tables.entities.contains_key(&name)
             }
         {
             cursor.duplicate_defaults = Some((!cursor.starts("\"") && !cursor.starts("'"), false));
@@ -1302,7 +1302,7 @@ impl Parser {
             if self.declarations_skipped() {
                 return Ok(());
             }
-            let declaring = (parameter && !self.parameter_entities.contains_key(&name))
+            let declaring = (parameter && !self.tables.parameter_entities.contains_key(&name))
                 .then_some(name.as_str());
             match self.entity_value(
                 cursor.lexical.for_slice(raw),
@@ -1363,14 +1363,14 @@ impl Parser {
         if self.declarations_skipped() {
             return Ok(());
         }
-        let declaration_count = self.entities.len() + self.parameter_entities.len();
+        let declaration_count = self.tables.entities.len() + self.tables.parameter_entities.len();
         let declarations = if parameter {
-            &self.parameter_entities
+            &self.tables.parameter_entities
         } else {
-            &self.entities
+            &self.tables.entities
         };
         if !declarations.contains_key(&name) {
-            if declaration_count >= self.config.limits.max_entities {
+            if declaration_count >= self.entity_limit() {
                 return Err(self.err(
                     ErrorKind::LimitExceeded,
                     "entity declaration count limit exceeded",
@@ -1378,9 +1378,9 @@ impl Parser {
             }
             let value_open = self.new_parameter_value_open(parameter && value.is_some())?;
             let declarations = if parameter {
-                &mut self.parameter_entities
+                &mut self.tables.parameter_entities
             } else {
-                &mut self.entities
+                &mut self.tables.entities
             };
             try_insert(
                 declarations,
@@ -1430,11 +1430,11 @@ impl Parser {
         let mut value = String::try_with_capacity_in(raw.len(), self.allocator)?;
         let mut parents = Vec::new_in(self.allocator);
         let mut active = oriole_storage::HashSet::with_hasher_in(
-            self.parameter_entities.hasher().clone(),
+            self.tables.parameter_entities.hasher().clone(),
             self.allocator,
         );
         let mut blockers = oriole_storage::HashSet::with_hasher_in(
-            self.parameter_entities.hasher().clone(),
+            self.tables.parameter_entities.hasher().clone(),
             self.allocator,
         );
         // Allocate only when a parameter reference is actually visited. These
@@ -1523,7 +1523,7 @@ impl Parser {
                 }
                 blockers_initialized = true;
             }
-            let entity = self.parameter_entities.get(reference);
+            let entity = self.tables.parameter_entities.get(reference);
             if entity.is_some_and(Entity::is_value_open)
                 || declaring_parameter == Some(reference)
                 || blockers.contains(reference)
@@ -1536,7 +1536,8 @@ impl Parser {
                 ));
             }
             current.rest = current.rest.for_slice(&current.rest.as_str()[end + 1..]);
-            let Some((name, entity)) = self.parameter_entities.get_key_value(reference) else {
+            let Some((name, entity)) = self.tables.parameter_entities.get_key_value(reference)
+            else {
                 skipped = true;
                 continue;
             };
@@ -1744,19 +1745,21 @@ impl Parser {
         if self.declarations_skipped() {
             return Ok(());
         }
-        if !self.defaults.contains_key(element) {
+        if !self.tables.defaults.contains_key(element) {
             try_insert(
-                &mut self.defaults,
+                &mut self.tables.defaults,
                 element.try_clone()?,
-                DefaultAttributes::new(self.allocator, self.namespaces.hasher().salt()),
+                DefaultAttributes::new(self.allocator, self.tables.salt),
             )?;
         }
+        let attribute_limit = self.default_attribute_limit();
         let declarations = self
+            .tables
             .defaults
             .get_mut(element)
             .expect("default list was inserted");
         if declarations.get(&name).is_none() {
-            if declarations.ordered.len() >= self.config.limits.max_attributes {
+            if declarations.ordered.len() >= attribute_limit {
                 return Err(self.err(
                     ErrorKind::LimitExceeded,
                     "default attribute count limit exceeded",
@@ -1767,6 +1770,10 @@ impl Parser {
                 attribute_type: attribute_type.try_clone()?,
                 value: value.try_clone()?,
             })?;
+            self.tables.max_default_attributes = self
+                .tables
+                .max_default_attributes
+                .max(declarations.ordered.len());
         }
         let attribute_type = match callback {
             AttributeCallback::Complete => attribute_type,

@@ -7,6 +7,7 @@
 mod accounting;
 mod active;
 mod dtd;
+mod dtd_tables;
 mod encoding;
 mod lexical;
 mod names;
@@ -23,6 +24,7 @@ use std::sync::OnceLock;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use accounting::EntityBudget;
+use dtd_tables::DtdTables;
 
 pub use oriole_storage::Text;
 pub use recycling::RecyclingToken;
@@ -43,7 +45,8 @@ pub struct Limits {
     /// repeated declaration callback names, skipped conditional-reference callback
     /// storage, and external reference identifiers and namespace contexts. Child construction also charges inherited declaration,
     /// namespace, encoding, and context storage, including per-entry structural
-    /// work. Shared with external entity children.
+    /// work. Parameter children share definitions without copying them. Shared
+    /// with external entity children.
     pub max_entity_expansion_bytes: usize,
     pub max_entity_depth: usize,
     pub max_attributes: usize,
@@ -497,8 +500,8 @@ pub struct Parser {
     pending: Queue<PendingEvent>,
     stack: Vec<Element>,
     namespaces: HashMap<String, String>,
-    entities: HashMap<String, Entity>,
-    parameter_entities: HashMap<String, Entity>,
+    tables: DtdTables,
+    shared_tables: OnceLock<Shared<oriole_storage::TryLock<DtdTables>>>,
     parameter_mode: u8,
     foreign_dtd: bool,
     foreign_dtd_pending: Option<dtd::ForeignDtd>,
@@ -507,7 +510,6 @@ pub struct Parser {
     value_state: Option<oriole_storage::Box<value::State>>,
     declarations_skipped: bool,
     doctype_external: Option<(Option<String>, Option<String>)>,
-    defaults: HashMap<String, DefaultAttributes>,
     seen_root: bool,
     closed_root: bool,
     seen_doctype: bool,
@@ -574,8 +576,8 @@ impl Parser {
         }
         let mut sources = Vec::new_in(allocator);
         try_push(&mut sources, Source::new(allocator, config.name_rules))?;
-        let entities = hash_map(allocator);
-        let active_entities = active::ActiveEntities::new(allocator, entities.hasher());
+        let tables = DtdTables::new(allocator, &config.limits);
+        let active_entities = active::ActiveEntities::new(allocator, tables.entities.hasher());
         Ok(Self {
             config,
             allocator,
@@ -584,8 +586,8 @@ impl Parser {
             namespaces,
             pending: Queue::new_in(allocator),
             stack: Vec::new_in(allocator),
-            entities,
-            parameter_entities: hash_map(allocator),
+            tables,
+            shared_tables: OnceLock::new(),
             parameter_mode: 0,
             foreign_dtd: false,
             foreign_dtd_pending: None,
@@ -594,7 +596,6 @@ impl Parser {
             value_state: None,
             declarations_skipped: false,
             doctype_external: None,
-            defaults: hash_map(allocator),
             seen_root: false,
             closed_root: false,
             seen_doctype: false,
@@ -640,7 +641,9 @@ impl Parser {
         self.allocator
     }
 
-    /// Return the public caller salt, without exposing secret randomized keys.
+    /// Return this parser's local caller salt, without exposing secret randomized keys.
+    /// Parameter children share their DTD seed separately from local namespace and
+    /// active-name indexes, so changing another parser's seed does not change this value.
     #[must_use]
     pub fn hash_salt(&self) -> [u8; 16] {
         self.namespaces.hasher().salt()
@@ -649,18 +652,22 @@ impl Parser {
     /// Replace the caller salt while retaining randomized hash protection.
     ///
     /// Every table is prepared before changing any table, so allocation failure
-    /// preserves all contents and the previous salt. Owned external children
-    /// retain their existing hash state; subsequently created children inherit
-    /// the new salt. Adapters enforce their own configuration timing rules.
+    /// preserves all contents and the previous salt. Parameter children share
+    /// the DTD seed; namespace and active-name indexes retain parser-local seeds.
+    /// General children retain independent snapshots. Adapters enforce timing rules.
     #[doc(hidden)]
     pub fn set_hash_salt(&mut self, salt: [u8; 16]) -> Result<(), Error> {
-        if self.hash_salt() == salt {
+        self.with_dtd_tables(|parser| parser.set_hash_salt_inner(salt))
+    }
+
+    fn set_hash_salt_inner(&mut self, salt: [u8; 16]) -> Result<(), Error> {
+        if self.hash_salt() == salt && self.tables.salt == salt {
             return Ok(());
         }
         let namespaces = prepare_salted_map(&self.namespaces, salt)?;
-        let entities = prepare_salted_map(&self.entities, salt)?;
-        let parameters = prepare_salted_map(&self.parameter_entities, salt)?;
-        let defaults = prepare_salted_map(&self.defaults, salt)?;
+        let entities = prepare_salted_map(&self.tables.entities, salt)?;
+        let parameters = prepare_salted_map(&self.tables.parameter_entities, salt)?;
+        let defaults = prepare_salted_map(&self.tables.defaults, salt)?;
         let active = prepare_salted_map(&self.active_entities.names, salt)?;
         let value_active = self
             .value_state
@@ -669,25 +676,26 @@ impl Parser {
             .transpose()?;
         let mut indexes = Vec::new_in(self.allocator);
         indexes
-            .try_reserve_exact(self.defaults.len())
+            .try_reserve_exact(self.tables.defaults.len())
             .map_err(AllocError::from)?;
-        for attributes in self.defaults.values() {
+        for attributes in self.tables.defaults.values() {
             indexes.push(prepare_salted_map(&attributes.by_name, salt)?);
         }
         // No growth can fail after preparation. Rebuild inner indexes before
         // changing the outer table's iteration order; drops return old table
         // storage through its original allocator.
-        for (attributes, index) in self.defaults.values_mut().zip(indexes) {
+        for (attributes, index) in self.tables.defaults.values_mut().zip(indexes) {
             replace_hash_map(&mut attributes.by_name, index);
         }
         replace_hash_map(&mut self.namespaces, namespaces);
-        replace_hash_map(&mut self.entities, entities);
-        replace_hash_map(&mut self.parameter_entities, parameters);
-        replace_hash_map(&mut self.defaults, defaults);
+        replace_hash_map(&mut self.tables.entities, entities);
+        replace_hash_map(&mut self.tables.parameter_entities, parameters);
+        replace_hash_map(&mut self.tables.defaults, defaults);
         replace_hash_map(&mut self.active_entities.names, active);
         if let (Some(state), Some(active)) = (&mut self.value_state, value_active) {
             replace_hash_map(&mut state.active.names, active);
         }
+        self.tables.salt = salt;
         Ok(())
     }
 
@@ -745,14 +753,14 @@ impl Parser {
         self.decoder.set_completed_encoding(encoding)
     }
 
-    /// Construct an independent parser for an application-provided external entity.
+    /// Construct a parser for an application-provided external entity.
     ///
     /// Pass the context from [`EventKind::ExternalEntityReference`]. Namespace
     /// bindings, declarations, recursion tracking, and the expansion budget are
     /// inherited. The parser never opens a path or performs a network request.
     /// A `None` context creates an external DTD parser, or a value parser when
-    /// resolving a reference inside an entity value. DTD children import their
-    /// declarations through [`Self::merge_external_subset`]; value children share
+    /// resolving a reference inside an entity value. DTD children immediately share
+    /// committed declarations, including declarations preceding an error; value children share
     /// an owned output channel with the suspended declaration. Every child must
     /// be processed before requesting the parent's next event.
     pub fn external_child(
@@ -775,36 +783,67 @@ impl Parser {
                 "external entity nesting limit exceeded",
             ));
         }
+        // Parameter children publish into one family immediately. General-content
+        // children copy a snapshot while the parent's tables are briefly guarded.
+        let owner = if context.is_none() {
+            Some(self.ensure_shared_tables()?.clone())
+        } else {
+            self.shared_tables.get().cloned()
+        };
+        let snapshot = if context.is_some() {
+            owner
+                .as_ref()
+                .map(|owner| owner.try_lock().ok_or_else(|| self.dtd_busy()))
+                .transpose()?
+        } else {
+            None
+        };
+        let tables = snapshot.as_deref().unwrap_or(&self.tables);
         self.charge_external_child_storage(context, encoding)?;
-        // The constructor consumes Config.encoding into the allocator-owned decoder.
-        // The stored config contains only inline values, so this clone cannot allocate.
+        if context.is_some() {
+            self.charge_dtd_snapshot(tables)?;
+        }
+        // The stored config contains only inline values, so this cannot allocate.
         debug_assert!(self.config.encoding.is_none());
         let mut child =
             Self::try_new_with_encoding_in(self.config.clone(), encoding, self.allocator)?;
-        child.set_hash_salt(self.hash_salt())?;
+        child.set_hash_salt_inner(self.hash_salt())?;
         child
             .decoder
             .inherit_map(&self.decoder, &mut child.sources[0])?;
-        for (name, entity) in &self.entities {
-            try_insert(
-                &mut child.entities,
-                name.try_clone()?,
-                entity.clone_for_child(context.is_none(), false, self.allocator)?,
-            )?;
+        if context.is_some() && owner.is_some() {
+            // The DTD family's salt may differ from this parser's local index salt.
+            child.tables = tables.empty_like();
+            for (name, entity) in &tables.entities {
+                try_insert(
+                    &mut child.tables.entities,
+                    name.try_clone()?,
+                    entity.clone_for_child(false, false, self.allocator)?,
+                )?;
+            }
+            for (name, attributes) in &tables.defaults {
+                try_insert(
+                    &mut child.tables.defaults,
+                    name.try_clone()?,
+                    attributes.try_clone()?,
+                )?;
+            }
+            for (name, entity) in &tables.parameter_entities {
+                try_insert(
+                    &mut child.tables.parameter_entities,
+                    name.try_clone()?,
+                    entity.clone_for_child(false, true, self.allocator)?,
+                )?;
+            }
+            child.tables.max_default_attributes = tables.max_default_attributes;
+            // General-content children form independent families, with their own caps.
+            child.tables.max_entities = child.config.limits.max_entities;
+            child.tables.max_attributes = child.config.limits.max_attributes;
+            child.publish_copied_tables()?;
         }
-        for (name, attributes) in &self.defaults {
-            try_insert(
-                &mut child.defaults,
-                name.try_clone()?,
-                attributes.try_clone()?,
-            )?;
-        }
-        for (name, entity) in &self.parameter_entities {
-            try_insert(
-                &mut child.parameter_entities,
-                name.try_clone()?,
-                entity.clone_for_child(context.is_none(), true, self.allocator)?,
-            )?;
+        drop(snapshot);
+        if context.is_none() {
+            child.shared_tables = OnceLock::from(owner.expect("parameter DTD owner"));
         }
         child.namespaces.clear();
         for (prefix, uri) in &self.namespaces {
@@ -873,21 +912,16 @@ impl Parser {
     /// Bound inherited copies before allocating a child, including work for empty
     /// declarations. Repeated empty external references must not repeatedly clone
     /// an otherwise unused large declaration environment for free.
-    fn charge_external_child_storage(
-        &self,
-        context: Option<&str>,
-        encoding: Option<&str>,
-    ) -> Result<(), Error> {
-        if context.is_some() {
-            for entity in self.parameter_entities.values() {
-                if entity.value.is_none() && entity.system_id.is_none() {
-                    self.charge_expansion(size_of::<AtomicBool>())?;
-                }
+    /// Charge only copies that a general-content child will actually perform.
+    fn charge_dtd_snapshot(&self, tables: &DtdTables) -> Result<(), Error> {
+        for entity in tables.parameter_entities.values() {
+            if entity.value.is_none() && entity.system_id.is_none() {
+                self.charge_expansion(size_of::<AtomicBool>())?;
             }
         }
-        for (name, entity) in self.entities.iter().chain(&self.parameter_entities) {
+        for (name, entity) in tables.entities.iter().chain(&tables.parameter_entities) {
             self.charge_expansion(size_of::<(String, Entity)>())?;
-            if context.is_some() && entity.value_open.is_some() {
+            if entity.value_open.is_some() {
                 self.charge_expansion(size_of::<AtomicBool>())?;
             }
             self.charge_expansion(name.len())?;
@@ -903,7 +937,7 @@ impl Parser {
                 self.charge_expansion(value.len())?;
             }
         }
-        for (element, attributes) in &self.defaults {
+        for (element, attributes) in &tables.defaults {
             self.charge_expansion(size_of::<(String, DefaultAttributes)>())?;
             self.charge_expansion(element.len())?;
             for attribute in &attributes.ordered {
@@ -918,6 +952,14 @@ impl Parser {
                 self.charge_expansion(attribute.name.len())?;
             }
         }
+        Ok(())
+    }
+
+    fn charge_external_child_storage(
+        &self,
+        context: Option<&str>,
+        encoding: Option<&str>,
+    ) -> Result<(), Error> {
         for (prefix, uri) in &self.namespaces {
             self.charge_expansion(size_of::<(String, String)>())?;
             self.charge_expansion(prefix.len())?;
@@ -970,7 +1012,8 @@ impl Parser {
     pub fn is_external_subset(&self) -> bool {
         self.external_subset
     }
-    /// Import successfully parsed external DTD declarations. Existing declarations win.
+    /// Validate a completed external DTD. Same-family definitions are already visible;
+    /// unrelated DTDs are imported with existing declarations taking precedence.
     pub fn merge_external_subset(&mut self, child: &Self) -> Result<(), Error> {
         if let Some(error) = self.error {
             return Err(error);
@@ -993,23 +1036,30 @@ impl Parser {
                 "external subset has not completed",
             ));
         }
-        for (name, entity) in &child.entities {
-            if !self.entities.contains_key(name) {
-                if self.entities.len() + self.parameter_entities.len()
-                    >= self.config.limits.max_entities
-                {
-                    return self.fail(
-                        ErrorKind::LimitExceeded,
-                        "entity declaration count limit exceeded",
-                    );
-                }
-                try_insert(&mut self.entities, name.try_clone()?, entity.try_clone()?)?;
-            }
+        let same_family = self
+            .shared_tables
+            .get()
+            .zip(child.shared_tables.get())
+            .is_some_and(|(left, right)| std::ptr::eq(&**left, &**right));
+        if !same_family {
+            self.ensure_shared_tables()?;
+            let child_owner = child.shared_tables.get();
+            let child_guard = child_owner
+                .map(|owner| owner.try_lock().ok_or_else(|| self.dtd_busy()))
+                .transpose()?;
+            let tables = child_guard.as_deref().unwrap_or(&child.tables);
+            self.with_dtd_tables(|parser| parser.import_dtd_tables(tables))?;
         }
-        for (name, entity) in &child.parameter_entities {
-            if !self.parameter_entities.contains_key(name) {
-                if self.entities.len() + self.parameter_entities.len()
-                    >= self.config.limits.max_entities
+        self.set_declarations_skipped(self.declarations_skipped() || child.declarations_skipped());
+        self.standalone |= child.standalone;
+        Ok(())
+    }
+
+    fn import_dtd_tables(&mut self, tables: &DtdTables) -> Result<(), Error> {
+        for (name, entity) in &tables.entities {
+            if !self.tables.entities.contains_key(name) {
+                if self.tables.entities.len() + self.tables.parameter_entities.len()
+                    >= self.entity_limit()
                 {
                     return self.fail(
                         ErrorKind::LimitExceeded,
@@ -1017,35 +1067,57 @@ impl Parser {
                     );
                 }
                 try_insert(
-                    &mut self.parameter_entities,
+                    &mut self.tables.entities,
                     name.try_clone()?,
                     entity.try_clone()?,
                 )?;
             }
         }
-        for (name, attributes) in &child.defaults {
-            if !self.defaults.contains_key(name) {
+        for (name, entity) in &tables.parameter_entities {
+            if !self.tables.parameter_entities.contains_key(name) {
+                if self.tables.entities.len() + self.tables.parameter_entities.len()
+                    >= self.entity_limit()
+                {
+                    return self.fail(
+                        ErrorKind::LimitExceeded,
+                        "entity declaration count limit exceeded",
+                    );
+                }
                 try_insert(
-                    &mut self.defaults,
+                    &mut self.tables.parameter_entities,
                     name.try_clone()?,
-                    DefaultAttributes::new(self.allocator, self.namespaces.hasher().salt()),
+                    entity.try_clone()?,
                 )?;
             }
-            let target = self.defaults.get_mut(name).expect("default list exists");
+        }
+        let attribute_limit = self.default_attribute_limit();
+        for (name, attributes) in &tables.defaults {
+            if !self.tables.defaults.contains_key(name) {
+                try_insert(
+                    &mut self.tables.defaults,
+                    name.try_clone()?,
+                    DefaultAttributes::new(self.allocator, self.tables.salt),
+                )?;
+            }
+            let target = self
+                .tables
+                .defaults
+                .get_mut(name)
+                .expect("default list exists");
             for attribute in &attributes.ordered {
                 if target.get(&attribute.name).is_none() {
-                    if target.ordered.len() >= self.config.limits.max_attributes {
+                    if target.ordered.len() >= attribute_limit {
                         return Err(self.err(
                             ErrorKind::LimitExceeded,
                             "default attribute count limit exceeded",
                         ));
                     }
                     target.try_insert(attribute.try_clone()?)?;
+                    self.tables.max_default_attributes =
+                        self.tables.max_default_attributes.max(target.ordered.len());
                 }
             }
         }
-        self.set_declarations_skipped(self.declarations_skipped() || child.declarations_skipped());
-        self.standalone |= child.standalone;
         Ok(())
     }
 
@@ -1306,6 +1378,21 @@ impl Parser {
     /// or parsing is done. Inspect [`Self::encoding_conversion`] before feeding
     /// more input when using a multibyte custom map.
     pub fn next_event(&mut self) -> Result<Option<Event>, Error> {
+        // DOCTYPE always yields its start event before parsing any declarations.
+        // A child created by that callback may have initialized this owner first.
+        if self.error.is_none()
+            && self.in_doctype
+            && self.shared_tables.get().is_none()
+            && let Err(error) = self.ensure_shared_tables()
+        {
+            self.error = Some(error);
+            self.pending.clear();
+            return Err(error);
+        }
+        self.with_dtd_tables(Self::next_event_scoped)
+    }
+
+    fn next_event_scoped(&mut self) -> Result<Option<Event>, Error> {
         if let Some(event) = self.finish_foreign_dtd() {
             self.last_position = event.position;
             return Ok(Some(event));
@@ -1493,8 +1580,23 @@ impl Parser {
         if self.received != 0 {
             return self.fail(ErrorKind::Syntax, "limits must be set before parsing");
         }
-        self.config.limits = limits;
-        Ok(())
+        self.with_dtd_tables(|parser| {
+            if parser.tables.entities.len() + parser.tables.parameter_entities.len()
+                > limits.max_entities
+                || parser.tables.max_default_attributes > limits.max_attributes
+            {
+                return Err(parser.err(
+                    ErrorKind::LimitExceeded,
+                    "existing declarations exceed new limits",
+                ));
+            }
+            if !parser.external_subset {
+                parser.tables.max_entities = limits.max_entities;
+                parser.tables.max_attributes = limits.max_attributes;
+            }
+            parser.config.limits = limits;
+            Ok(())
+        })
     }
 
     fn source(&self) -> &Source {
@@ -2278,7 +2380,7 @@ impl Parser {
                 colon + 1,
             ));
         }
-        let Some(entity) = self.entities.get(&name) else {
+        let Some(entity) = self.tables.entities.get(&name) else {
             if self.has_external_subset && !self.standalone {
                 self.consume(end + 1)?;
                 self.emit(
@@ -2671,6 +2773,7 @@ impl Parser {
                 )?;
             }
             let tokenized = self
+                .tables
                 .defaults
                 .get(name)
                 .and_then(|decls| decls.get(attr_name))
@@ -2686,7 +2789,7 @@ impl Parser {
             copy_attribute_string(&mut attribute.name, attr_name)?;
             attribute.specified = true;
         }
-        if let Some(defaults) = self.defaults.get(name) {
+        if let Some(defaults) = self.tables.defaults.get(name) {
             for default in &defaults.ordered {
                 if !names.as_ref().map_or_else(
                     || {
@@ -2722,7 +2825,8 @@ impl Parser {
             }
         }
         self.id_attribute_index = attrs.iter().position(|attribute| {
-            self.defaults
+            self.tables
+                .defaults
                 .get(name)
                 .and_then(|declarations| declarations.get(&attribute.name))
                 .is_some_and(|declaration| declaration.attribute_type == "ID")
@@ -3137,7 +3241,8 @@ impl Parser {
             name: &'a str,
         }
         let mut frames = Vec::new_in(self.allocator);
-        let mut active = HashSet::with_hasher_in(self.entities.hasher().clone(), self.allocator);
+        let mut active =
+            HashSet::with_hasher_in(self.tables.entities.hasher().clone(), self.allocator);
         let mut rest = value;
         loop {
             if rest.is_empty() {
@@ -3220,7 +3325,7 @@ impl Parser {
             if frames.len() >= self.config.limits.max_entity_depth {
                 return Err(self.err(ErrorKind::LimitExceeded, "entity nesting limit exceeded"));
             }
-            let Some((key, entity)) = self.entities.get_key_value(name) else {
+            let Some((key, entity)) = self.tables.entities.get_key_value(name) else {
                 if !self.requires_internal_entity_declaration() {
                     rest = rest.for_slice(&rest.as_str()[end + 1..]);
                     continue;
@@ -3525,24 +3630,29 @@ mod hash_salt_tests {
         let previous = parser.namespaces.hasher().hash_one("xml");
         parser.set_hash_salt(*b"0123456789abcdef").unwrap();
         assert_ne!(parser.namespaces.hasher().hash_one("xml"), previous);
-        assert_eq!(parser.entities.hasher().salt(), parser.hash_salt());
-        assert_eq!(
-            parser.parameter_entities.hasher().salt(),
-            parser.hash_salt()
-        );
-        assert_eq!(parser.defaults.hasher().salt(), parser.hash_salt());
-        assert_eq!(
-            parser.namespaces.get("xml").unwrap(),
-            "http://www.w3.org/XML/1998/namespace"
-        );
-        assert!(parser.entities.contains_key("e"));
-        assert!(parser.parameter_entities.contains_key("p"));
-        for attributes in parser.defaults.values() {
-            assert_eq!(attributes.by_name.hasher().salt(), parser.hash_salt());
-            for attribute in &attributes.ordered {
-                assert!(attributes.get(&attribute.name).is_some());
-            }
-        }
+        parser
+            .with_dtd_tables(|parser| {
+                assert_eq!(parser.tables.entities.hasher().salt(), parser.hash_salt());
+                assert_eq!(
+                    parser.tables.parameter_entities.hasher().salt(),
+                    parser.hash_salt()
+                );
+                assert_eq!(parser.tables.defaults.hasher().salt(), parser.hash_salt());
+                assert_eq!(
+                    parser.namespaces.get("xml").unwrap(),
+                    "http://www.w3.org/XML/1998/namespace"
+                );
+                assert!(parser.tables.entities.contains_key("e"));
+                assert!(parser.tables.parameter_entities.contains_key("p"));
+                for attributes in parser.tables.defaults.values() {
+                    assert_eq!(attributes.by_name.hasher().salt(), parser.hash_salt());
+                    for attribute in &attributes.ordered {
+                        assert!(attributes.get(&attribute.name).is_some());
+                    }
+                }
+                Ok(())
+            })
+            .unwrap();
         let mut child = parser.external_child(Some(""), None).unwrap();
         assert_eq!(child.hash_salt(), parser.hash_salt());
         child.feed(b"<n>&e;</n>", true).unwrap();

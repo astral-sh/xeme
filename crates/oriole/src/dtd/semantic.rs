@@ -267,9 +267,9 @@ impl Parser {
                 }
             };
             let table = if *parameter {
-                &mut self.parameter_entities
+                &mut self.tables.parameter_entities
             } else {
-                &mut self.entities
+                &mut self.tables.entities
             };
             let entity = table.get_mut(name).expect("owned reserved entity");
             if is_public {
@@ -303,9 +303,9 @@ impl Parser {
         }
         if let Some((start, end, parameter)) = state.grammar.entity_name() {
             let table = if parameter {
-                &self.parameter_entities
+                &self.tables.parameter_entities
             } else {
-                &self.entities
+                &self.tables.entities
             };
             let name = declaration
                 .expansion
@@ -344,15 +344,16 @@ impl Parser {
             .decoded(self.allocator)?;
         let name: &str = &decoded_name;
         let table = if parameter {
-            &self.parameter_entities
+            &self.tables.parameter_entities
         } else {
-            &self.entities
+            &self.tables.entities
         };
         if table.contains_key(name) {
             state.duplicate = Some((false, false));
             return Ok(());
         }
-        if self.entities.len() + self.parameter_entities.len() >= self.config.limits.max_entities {
+        if self.tables.entities.len() + self.tables.parameter_entities.len() >= self.entity_limit()
+        {
             return Err(self.err(
                 ErrorKind::LimitExceeded,
                 "entity declaration count limit exceeded",
@@ -361,9 +362,9 @@ impl Parser {
         self.charge_expansion(2 * name.len() + size_of::<Entity>())?;
         let name = string(name, self.allocator)?;
         let table = if parameter {
-            &mut self.parameter_entities
+            &mut self.tables.parameter_entities
         } else {
-            &mut self.entities
+            &mut self.tables.entities
         };
         try_insert(
             table,
@@ -488,9 +489,9 @@ impl Parser {
             // Child table merges preserve this first slot. Remove only our own
             // reservation before the ordinary declaration commit fills it.
             let table = if parameter {
-                &mut self.parameter_entities
+                &mut self.tables.parameter_entities
             } else {
-                &mut self.entities
+                &mut self.tables.entities
             };
             table.remove(&name);
         }

@@ -129,8 +129,10 @@ impl Parser {
             self.charge_expansion(size_of::<String>() + parameter.len())?;
             try_push(&mut inherited, parameter.try_clone()?)?;
         }
-        let mut active =
-            crate::active::ActiveEntities::new(self.allocator, self.parameter_entities.hasher());
+        let mut active = crate::active::ActiveEntities::new(
+            self.allocator,
+            self.tables.parameter_entities.hasher(),
+        );
         for name in parameters {
             active.insert(name, true, false)?;
         }
@@ -254,7 +256,7 @@ impl Parser {
                 frames: Vec::new_in(self.allocator),
                 active: crate::active::ActiveEntities::new(
                     self.allocator,
-                    self.parameter_entities.hasher(),
+                    child.active_entities.names.hasher(),
                 ),
                 named_frames: 0,
                 declaration: None,
@@ -356,9 +358,9 @@ impl Parser {
             declaration.prefix_sent = true;
             if self.default_events && declaration.prefix_start < declaration.quote {
                 let declarations = if declaration.parameter {
-                    &self.parameter_entities
+                    &self.tables.parameter_entities
                 } else {
-                    &self.entities
+                    &self.tables.entities
                 };
                 let kind = if declarations.contains_key(&declaration.name) {
                     EventKind::EntityDeclarationDuplicate {
@@ -469,7 +471,7 @@ impl Parser {
             let decoded_name = frame.text.view().for_slice(name).decoded(self.allocator)?;
             let name: &str = &decoded_name;
             self.charge_expansion(end + 1 + size_of::<Frame>())?;
-            let entity = self.parameter_entities.get(name);
+            let entity = self.tables.parameter_entities.get(name);
             if entity.is_some_and(Entity::is_value_open)
                 || state.declaring.as_deref() == Some(name)
                 || state.active.contains(name, true)
@@ -550,14 +552,14 @@ impl Parser {
         self.standalone = output.standalone;
         drop(output);
         let first_event = self.pending.len();
-        let count = self.entities.len() + self.parameter_entities.len();
+        let count = self.tables.entities.len() + self.tables.parameter_entities.len();
         let declarations = if declaration.parameter {
-            &self.parameter_entities
+            &self.tables.parameter_entities
         } else {
-            &self.entities
+            &self.tables.entities
         };
         if !declarations.contains_key(&declaration.name) {
-            if count >= self.config.limits.max_entities {
+            if count >= self.entity_limit() {
                 return Err(self.err(
                     ErrorKind::LimitExceeded,
                     "entity declaration count limit exceeded",
@@ -565,9 +567,9 @@ impl Parser {
             }
             let value_open = self.new_parameter_value_open(declaration.parameter)?;
             let declarations = if declaration.parameter {
-                &mut self.parameter_entities
+                &mut self.tables.parameter_entities
             } else {
-                &mut self.entities
+                &mut self.tables.entities
             };
             oriole_storage::try_insert(
                 declarations,

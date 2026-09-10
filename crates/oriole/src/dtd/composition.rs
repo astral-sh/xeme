@@ -152,7 +152,7 @@ impl Parser {
                     .for_slice(name)
                     .decoded(self.allocator)?;
                 let name: &str = &decoded_name;
-                let entity = self.parameter_entities.get(name);
+                let entity = self.tables.parameter_entities.get(name);
                 if self.parameter_mode == 0 || entity.is_none() {
                     state.bytes = state.bytes.saturating_add(end + 1);
                     if state.bytes > self.config.limits.max_token_bytes {
@@ -524,7 +524,7 @@ impl Parser {
                         .for_slice(name)
                         .decoded(self.allocator)?;
                     let name: &str = &decoded_name;
-                    let entity = self.parameter_entities.get(name);
+                    let entity = self.tables.parameter_entities.get(name);
                     if self.parameter_mode == 0 || entity.is_none() {
                         self.charge_expansion(
                             2 * size_of::<crate::PendingEvent>()

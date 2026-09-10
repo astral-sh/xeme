@@ -342,7 +342,7 @@ fn header_continuations_share_expansion_and_nesting_limits() {
     );
     let dtd = format!(
         "<!ENTITY % p SYSTEM 'p'><![INCLUDE{}[]]>",
-        "%p;".repeat(100)
+        "%p;".repeat(1000)
     );
     let config = Config {
         limits: Limits {

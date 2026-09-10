@@ -471,6 +471,7 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
         let mut parser = Parser::try_new_in(Config::default(), allocator).unwrap();
         parser.feed(b"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p 'unused'><!ATTLIST r a CDATA 'v'><!ATTLIST n b CDATA 'w'>]><r/>", true).unwrap();
         while parser.next_event().unwrap().is_some() {}
+        let retained = parser.external_child(None, None).unwrap();
         let before = CALLS.get();
         if failure != 0 {
             FAIL_AT.set(before + failure);
@@ -485,7 +486,8 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
         }
         FAIL_AT.set(0);
         // Existing declarations and defaults still resolve after every failure.
-        let mut child = parser.external_child(Some(""), None).unwrap();
+        assert_eq!(retained.hash_salt(), [0; 16]);
+        let mut child = retained.external_child(Some(""), None).unwrap();
         child.feed(b"<n>&e;</n>", true).unwrap();
         let mut text_seen = false;
         let mut default_seen = false;
@@ -508,6 +510,7 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
         parser.set_hash_salt(*b"0123456789abcdef").unwrap();
         assert_eq!(parser.hash_salt(), *b"0123456789abcdef");
         drop(child);
+        drop(retained);
         drop(parser);
         TRACK_GLOBAL.set(false);
         assert_eq!(LIVE.get(), 0, "failure {failure}");
@@ -687,4 +690,68 @@ fn inherited_attribute_workload(allocator: Allocator) -> Result<(), Error> {
 #[test]
 fn inherited_attribute_index_survives_parent_drop_rekey_and_every_allocation_failure() {
     check_allocations(inherited_attribute_workload);
+}
+
+fn shared_tables_workload(allocator: Allocator) -> Result<(), Error> {
+    let mut parent = Parser::try_new_in(Config::default(), allocator)?;
+    parent.feed(b"<!DOCTYPE r SYSTEM 'd'>", false)?;
+    while next_event(&mut parent)?.is_some() {}
+    let mut first = parent.external_child(None, None)?;
+    let mut retained = parent.external_child(None, None)?;
+    first.feed(b"<!ENTITY e 'E'><!ATTLIST r a CDATA 'A'>", false)?;
+    while next_event(&mut first)?.is_some() {}
+    let mut snapshot = parent.external_child(Some(""), None)?;
+    // The hidden core setter rehashes the shared family plus this parser's local
+    // indexes. A retained child's different local seed is coherent and usable.
+    parent.set_hash_salt([17; 16])?;
+    retained.set_hash_salt([29; 16])?;
+    first.feed(b"<!", true)?;
+    match next_event(&mut first) {
+        Err(error) if error.kind == ErrorKind::UnclosedToken => {}
+        Err(error) => return Err(error),
+        _ => panic!("unfinished markup must fail"),
+    }
+    drop(first);
+    drop(parent);
+    retained.feed(
+        b"<!ENTITY e 'duplicate'><!ENTITY x 'X'><!ATTLIST r b CDATA 'B'>",
+        true,
+    )?;
+    while let Some(event) = next_event(&mut retained)? {
+        if let EventKind::EntityDeclaration(declaration) = event.kind {
+            assert_eq!(declaration.name, "x");
+        }
+    }
+    let mut current = retained.external_child(Some(""), None)?;
+    drop(retained);
+    current.feed(b"<r>&e;&x;</r>", true)?;
+    let mut text_count = 0;
+    while let Some(event) = next_event(&mut current)? {
+        match event.kind {
+            EventKind::StartElement { attributes, .. } => {
+                assert_eq!(attributes.len(), 2);
+                assert_eq!(attributes[0].value, "A");
+                assert_eq!(attributes[1].value, "B");
+            }
+            EventKind::Text(value) => {
+                assert!(value == "E" || value == "X");
+                text_count += 1;
+            }
+            _ => {}
+        }
+    }
+    assert_eq!(text_count, 2);
+    snapshot.feed(b"<r>&e;</r>", true)?;
+    while let Some(event) = next_event(&mut snapshot)? {
+        if let EventKind::StartElement { attributes, .. } = event.kind {
+            assert_eq!(attributes.len(), 1);
+            assert_eq!(attributes[0].value, "A");
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn shared_dtd_publication_snapshot_rehash_and_retained_siblings_survive_each_failure() {
+    check_allocations(shared_tables_workload);
 }

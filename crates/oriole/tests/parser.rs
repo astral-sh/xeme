@@ -523,6 +523,104 @@ fn external_dtd_declarations_merge_before_document_content() {
 }
 
 #[test]
+fn indexed_declarations_preserve_order_types_ids_and_external_precedence() {
+    let mut parser = Parser::new(Config::default());
+    assert!(parser.set_param_entity_parsing(2));
+    parser.feed(b"<!DOCTYPE r SYSTEM 'test.dtd' [<!ATTLIST r second CDATA 'b' first NMTOKENS 'a' id ID #IMPLIED><!ATTLIST r first CDATA 'ignored' third CDATA 'c'>]><r id='identifier' first=' x  y '/>", true).unwrap();
+    let mut seen = false;
+    while let Some(event) = parser.next_event().unwrap() {
+        match event.kind {
+            EventKind::ExternalEntityReference { context: None, .. } => {
+                let mut child = parser.external_child_with_encoding(None, None).unwrap();
+                child
+                    .feed(
+                        b"<!ATTLIST r second CDATA 'ignored' fourth CDATA 'd'>",
+                        true,
+                    )
+                    .unwrap();
+                while child.next_event().unwrap().is_some() {}
+                parser.merge_external_subset(&child).unwrap();
+            }
+            EventKind::StartElement { attributes, .. } => {
+                assert_eq!(parser.id_attribute_index(), Some(0));
+                let actual: Vec<_> = attributes
+                    .iter()
+                    .map(|attribute| {
+                        (
+                            attribute.name.as_str(),
+                            attribute.value.as_str(),
+                            attribute.specified,
+                        )
+                    })
+                    .collect();
+                assert_eq!(
+                    actual,
+                    [
+                        ("id", "identifier", true),
+                        ("first", "x y", true),
+                        ("second", "b", false),
+                        ("third", "c", false),
+                        ("fourth", "d", false)
+                    ]
+                );
+                seen = true;
+            }
+            _ => {}
+        }
+    }
+    assert!(seen);
+}
+
+#[test]
+fn many_declared_attributes_can_be_repeated_without_indirect_expansion() {
+    use std::fmt::Write;
+    let mut xml = std::string::String::from("<!DOCTYPE r [<!ATTLIST item");
+    for index in 0..2_000 {
+        write!(xml, " a{index} NMTOKENS #IMPLIED").unwrap();
+    }
+    xml.push_str(">]><r>");
+    for _ in 0..4 {
+        xml.push_str("<item");
+        for index in (0..2_000).rev() {
+            write!(xml, " a{index}=' x  y '").unwrap();
+        }
+        xml.push_str("/>");
+    }
+    xml.push_str("</r>");
+    // Only repeated ATTLIST callback names consume the indirect-byte budget;
+    // all document attributes are supplied directly and normalized by indexed type.
+    let config = Config {
+        limits: Limits {
+            max_entity_expansion_bytes: 8_000,
+            ..Limits::default()
+        },
+        ..Config::default()
+    };
+    let events = parse(xml.as_bytes(), 4_096, config).unwrap();
+    let elements: Vec<_> = events
+        .iter()
+        .filter_map(|event| {
+            if let EventKind::StartElement { name, attributes } = event {
+                (name == "item").then_some(attributes)
+            } else {
+                None
+            }
+        })
+        .collect();
+    assert_eq!(elements.len(), 4);
+    for attributes in elements {
+        assert_eq!(attributes.len(), 2_000);
+        assert_eq!(attributes.first().unwrap().name, "a1999");
+        assert_eq!(attributes.last().unwrap().name, "a0");
+        assert!(
+            attributes
+                .iter()
+                .all(|attribute| attribute.value == "x y" && attribute.specified)
+        );
+    }
+}
+
+#[test]
 fn parameter_entities_expand_declarations_with_explicit_processing() {
     let mut parser = Parser::new(Config::default());
     assert!(parser.set_param_entity_parsing(2));

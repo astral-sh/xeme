@@ -1,6 +1,6 @@
 use crate::{
-    DefaultAttribute, Entity, Error, ErrorKind, EventKind, Parser, Position, character_reference,
-    collapse_spaces, normalize_newlines, string, take_name, whitespace,
+    DefaultAttribute, DefaultAttributes, Entity, Error, ErrorKind, EventKind, Parser, Position,
+    character_reference, collapse_spaces, normalize_newlines, string, take_name, whitespace,
 };
 use oriole_storage::{Allocator, String, TryClone, Vec, try_insert, try_push};
 
@@ -639,31 +639,25 @@ impl Parser {
                 try_insert(
                     &mut self.defaults,
                     element.try_clone()?,
-                    Vec::new_in(self.allocator),
+                    DefaultAttributes::new(self.allocator),
                 )?;
             }
             let declarations = self
                 .defaults
                 .get_mut(&element)
                 .expect("default list was inserted");
-            if !declarations
-                .iter()
-                .any(|declaration| declaration.name == name)
-            {
-                if declarations.len() >= self.config.limits.max_attributes {
+            if declarations.get(&name).is_none() {
+                if declarations.ordered.len() >= self.config.limits.max_attributes {
                     return Err(self.err(
                         ErrorKind::LimitExceeded,
                         "default attribute count limit exceeded",
                     ));
                 }
-                try_push(
-                    declarations,
-                    DefaultAttribute {
-                        name: name.try_clone()?,
-                        attribute_type: attribute_type.try_clone()?,
-                        value: value.try_clone()?,
-                    },
-                )?;
+                declarations.try_insert(DefaultAttribute {
+                    name: name.try_clone()?,
+                    attribute_type: attribute_type.try_clone()?,
+                    value: value.try_clone()?,
+                })?;
             }
             if first_attribute {
                 first_attribute = false;

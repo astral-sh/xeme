@@ -251,6 +251,54 @@ struct DefaultAttribute {
     value: Option<String>,
 }
 
+/// Declaration order determines the order of omitted attributes in callbacks.
+/// The index keeps repeated type, ID, and duplicate checks independent of that order.
+#[derive(Debug)]
+struct DefaultAttributes {
+    ordered: Vec<DefaultAttribute>,
+    by_name: HashMap<String, usize>,
+}
+
+impl DefaultAttributes {
+    fn new(allocator: Allocator) -> Self {
+        Self {
+            ordered: Vec::new_in(allocator),
+            by_name: hash_map(allocator),
+        }
+    }
+
+    fn get(&self, name: &str) -> Option<&DefaultAttribute> {
+        self.by_name.get(name).map(|&index| &self.ordered[index])
+    }
+
+    fn try_insert(&mut self, attribute: DefaultAttribute) -> Result<(), AllocError> {
+        debug_assert!(self.get(&attribute.name).is_none());
+        let name = attribute.name.try_clone()?;
+        // Reserve both containers before changing their logical contents so an
+        // allocation failure cannot leave an index without its declaration.
+        self.ordered
+            .try_reserve(1)
+            .map_err(|_| AllocError::OutOfMemory)?;
+        self.by_name
+            .try_reserve(1)
+            .map_err(|_| AllocError::OutOfMemory)?;
+        let index = self.ordered.len();
+        self.ordered.push(attribute);
+        self.by_name.insert(name, index);
+        Ok(())
+    }
+}
+
+impl TryClone for DefaultAttributes {
+    fn try_clone(&self) -> Result<Self, AllocError> {
+        let mut cloned = Self::new(*self.ordered.allocator());
+        for attribute in &self.ordered {
+            cloned.try_insert(attribute.try_clone()?)?;
+        }
+        Ok(cloned)
+    }
+}
+
 impl TryClone for Entity {
     fn try_clone(&self) -> Result<Self, AllocError> {
         Ok(Self {
@@ -294,7 +342,7 @@ pub struct Parser {
     in_doctype: bool,
     declarations_skipped: bool,
     doctype_external: Option<(Option<String>, Option<String>)>,
-    defaults: HashMap<String, Vec<DefaultAttribute>>,
+    defaults: HashMap<String, DefaultAttributes>,
     seen_root: bool,
     closed_root: bool,
     seen_doctype: bool,
@@ -454,11 +502,11 @@ impl Parser {
             try_insert(&mut child.entities, name.try_clone()?, entity.try_clone()?)?;
         }
         for (name, attributes) in &self.defaults {
-            let mut cloned = Vec::new_in(self.allocator);
-            for attribute in attributes {
-                try_push(&mut cloned, attribute.try_clone()?)?;
-            }
-            try_insert(&mut child.defaults, name.try_clone()?, cloned)?;
+            try_insert(
+                &mut child.defaults,
+                name.try_clone()?,
+                attributes.try_clone()?,
+            )?;
         }
         for (name, entity) in &self.parameter_entities {
             try_insert(
@@ -577,19 +625,19 @@ impl Parser {
                 try_insert(
                     &mut self.defaults,
                     name.try_clone()?,
-                    Vec::new_in(self.allocator),
+                    DefaultAttributes::new(self.allocator),
                 )?;
             }
             let target = self.defaults.get_mut(name).expect("default list exists");
-            for attribute in attributes {
-                if !target.iter().any(|old| old.name == attribute.name) {
-                    if target.len() >= self.config.limits.max_attributes {
+            for attribute in &attributes.ordered {
+                if target.get(&attribute.name).is_none() {
+                    if target.ordered.len() >= self.config.limits.max_attributes {
                         return Err(self.err(
                             ErrorKind::LimitExceeded,
                             "default attribute count limit exceeded",
                         ));
                     }
-                    try_push(target, attribute.try_clone()?)?;
+                    target.try_insert(attribute.try_clone()?)?;
                 }
             }
         }
@@ -1528,7 +1576,7 @@ impl Parser {
             if self
                 .defaults
                 .get(name)
-                .and_then(|decls| decls.iter().find(|decl| decl.name == attr_name))
+                .and_then(|decls| decls.get(attr_name))
                 .is_some_and(|decl| decl.attribute_type != "CDATA")
             {
                 value = collapse_spaces(&value, self.allocator)?;
@@ -1543,7 +1591,7 @@ impl Parser {
             )?;
         }
         if let Some(defaults) = self.defaults.get(name) {
-            for default in defaults {
+            for default in &defaults.ordered {
                 if !names.contains(default.name.as_str())
                     && let Some(value) = &default.value
                 {
@@ -1569,11 +1617,10 @@ impl Parser {
             }
         }
         self.id_attribute_index = attrs.iter().position(|attribute| {
-            self.defaults.get(name).is_some_and(|declarations| {
-                declarations.iter().any(|declaration| {
-                    declaration.name == attribute.name && declaration.attribute_type == "ID"
-                })
-            })
+            self.defaults
+                .get(name)
+                .and_then(|declarations| declarations.get(&attribute.name))
+                .is_some_and(|declaration| declaration.attribute_type == "ID")
         });
         let mut bindings = Vec::new_in(self.allocator);
         if self.config.namespace_separator.is_some() {

@@ -68,3 +68,27 @@ copy build manifests, and isolate preflight in a process with a timeout.
 
 These are local development results. They do not establish performance on other
 architectures, production toolchains, real application corpora, or a PBS build.
+
+## DTD declaration index
+
+With 16 elements specifying every declared attribute, 4 KiB chunks, and the system
+allocator:
+
+| Declared attributes | Before, ms | Indexed, ms | Paired speedup |
+| ---: | ---: | ---: | ---: |
+| 128 | 3.25 | 1.59 | 2.02× |
+| 256 | 10.11 | 3.15 | 3.22× |
+| 512 | 33.61 | 6.34 | 5.28× |
+| 1,024 | 120.88 | 12.98 | 9.32× |
+
+The index removes repeated scans for type and ID lookup, as well as duplicate
+declaration checks. Declaration order and first-declaration-wins behavior remain
+unchanged. The largest input is 237,770 bytes; the corpus stays below the attribute,
+token, and expansion limits. No resource ceiling was raised for measurement.
+
+Seven paired processes each timed five parses after a warmup. The
+[DTD results](bench-index-dtd.json.gz) include declaration-only inputs and both
+4 KiB and 1 MiB chunks. The 128-attribute declaration-only case was about 6% slower;
+the extra index has a setup cost. The [ordinary workloads](bench-index-common.json.gz)
+stayed within about 2% of their parent. The [build manifest](index-build.json)
+and [source hashes](index-source.json) identify the measured candidate.

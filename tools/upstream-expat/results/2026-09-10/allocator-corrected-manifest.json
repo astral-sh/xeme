@@ -1,0 +1,19 @@
+{
+  "compile_command": [
+    "clang",
+    "-fsanitize=address",
+    "-g",
+    "-I/home/dev-user/.cache/oriole/upstream/expat-2.8.4/expat/tests",
+    "tools/upstream-expat/allocator_repro.c",
+    "/home/dev-user/.cache/oriole/upstream-api/allocator-correction/memcheck.c",
+    "-o",
+    "/home/dev-user/.cache/oriole/upstream-api/allocator-correction/repro"
+  ],
+  "returncode": 0,
+  "sources": {
+    "tools/upstream-expat/allocator_repro.c": "3cf09315824eec37bc2df1f4e9ee8ebfb9bf48c9d09facb81f6bb50763ba70ce",
+    "/home/dev-user/.cache/oriole/upstream-api/allocator-correction/memcheck.c": "840f793c1dcc568e01ded5b9552edf071cff3c1ef00c6940917ce6e4db8794fb",
+    "/home/dev-user/.cache/oriole/upstream-api/allocator-correction/repro": "073d614ddced421877914ce56ef03bf971b6fc527eba131ef14ece57715dfc13"
+  },
+  "original_crash_log": "/home/dev-user/.cache/oriole/upstream-api/allocator-only.log"
+}

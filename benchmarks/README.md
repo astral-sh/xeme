@@ -1,6 +1,7 @@
 # Benchmarks
 
-See the [initial measurements](results/2026-09-10/README.md) for results, source
+See the [validated checkpoint](results/2026-09-10/checkpoint/) and
+[initial optimization comparisons](results/2026-09-10/README.md) for results, source
 archives, raw observations, and limitations.
 
 The native C driver compares the Expat-compatible ABI against system Expat with

@@ -64,6 +64,18 @@ Incremental token scanning retains its progress across chunks to avoid repeatedl
 scanning a growing unfinished token. Internal entity replacement must remain
 balanced and is bounded separately from document input.
 
+## Compatibility and performance
+
+The [validation report](docs/validation/2026-09-10/) records differential testing,
+actual CPython consumers, native C allocation and callback probes, and sanitizer
+campaigns. It retains the upstream Expat failures alongside passing results.
+The [PBS integration](integration/python-build-standalone/) is opt-in.
+
+[Benchmarks](benchmarks/results/2026-09-10/checkpoint/) compare Expat and Oriole,
+including system, jemalloc, and mimalloc configurations. Oriole remains slower
+than Expat on the generated C workloads; measured optimizations and their tradeoffs
+are retained as separate comparisons.
+
 ## Development
 
 Build with Rust 1.96 or later:

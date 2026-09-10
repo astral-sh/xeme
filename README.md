@@ -104,10 +104,10 @@ bounds aggregate allocation and work across a parser's external-entity family.
 
 ## Validation
 
-The [current integration report](docs/validation/2026-09-10/hotpaths-composed/)
-records 300 Rust checks, selected-allocation failure tests, native C sanitizer
+The [current integration report](docs/validation/2026-09-10/constructor-composed/)
+records 302 Rust checks, selected-allocation failure tests, native C sanitizer
 checks, and exact differential comparisons. The full adapted Expat API matrix
-reports **4,065 passing and 675 failing configurations**. Allocation schedules,
+reports **4,077 passing and 663 failing configurations**. Allocation schedules,
 resource limits, diagnostics and some callback behavior still differ from Expat;
 these failures remain recorded.
 

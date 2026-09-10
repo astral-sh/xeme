@@ -1,0 +1,206 @@
+{
+  "runtime_commit": "a96b69899158c57469d4f7e0b1067b1dd00b63f0",
+  "parent_commit": "bf4e678fe6ba3ee53ebbdaa22719e34cc4085b33",
+  "library_sha256": {
+    "liboriole_expat.so": "810e9fa684e6b2b073f39481e008133b37fb200ce937bf95308dda6e608f16fc",
+    "liboriole_expat.a": "9701c3e0e9c18fff942555e6024b3d3bf7fef5d4a16ff4e40ec265c9e1e3a7b2"
+  },
+  "rust_checks": 302,
+  "ordinary_cases": 1518,
+  "ordinary_exact": true,
+  "attribute_cases": 6468,
+  "attribute_changes": 0,
+  "custom_attribute_cases": 372,
+  "malformed_attribute_cases": 384,
+  "malformed_text_cases": 2392,
+  "streaming_cases": 32,
+  "custom_cases": 36456,
+  "compatibility_deltas": 0,
+  "counted_public_api_cases": 237,
+  "selected_live_after_free": 0,
+  "namespace_context_cases": 144,
+  "namespace_context_baseline_changes": 0,
+  "constructor_malloc": {
+    "reference": 4,
+    "baseline": 9,
+    "candidate": 6
+  },
+  "upstream": {
+    "passed": 4077,
+    "failed": 663,
+    "changed_outcomes": 12,
+    "changes": [
+      {
+        "before": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "before": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_misc_alloc_create_parser_with_encoding",
+          "outcome": "pass",
+          "code": 0
+        }
+      }
+    ]
+  },
+  "native_suites": 6,
+  "allocation_scenarios_per_linkage": 327,
+  "scope": "Constructor optimization on complete root performance/attribute stack. Original tiny-input timing remains a separate older-base cohort; no new broad benchmark or PBS/fuzz claim."
+}

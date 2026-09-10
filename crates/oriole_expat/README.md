@@ -70,7 +70,7 @@ reports retain these acceptance and diagnostic differences.
 The following Expat modes are explicitly unsupported:
 
 - Declaration start/end delimiters split across parameter entities and external
-  parameter references inside declarations or entity values are rejected.
+  parameter references between declaration grammar tokens are rejected.
   Internal parameter entities can supply complete lexical tokens inside
   declarations in external DTDs and parameter entities. Replacement frames
   preserve name and quote boundaries, attribute whitespace, and entity-value
@@ -82,7 +82,18 @@ The following Expat modes are explicitly unsupported:
   nesting limits. Conditional nesting uses the element-depth ceiling; a whole
   ignored section uses the token-byte ceiling. External references in conditional
   headers load separate DTDs and import their declarations before the header
-  resumes; they do not supply keyword text.
+  resumes; they do not supply keyword text. External references inside entity
+  values create separate value children and resume the pending declaration with
+  their output. Children validate complete lexical tokens before storing value
+  text, preserve quote/reference boundaries, and share the family's expansion
+  and depth limits. They distinguish unread children from initialized empty or
+  failed children, including partial value output before a storage error.
+  A value child's encoding declaration must be first, apart from its byte-order
+  mark. Expat also permits the first declaration after value content, including
+  whitespace or a comment; Oriole cannot switch encoding after that prefix has
+  been decoded. A leading custom-encoding declaration may request its encoding
+  handler before delivering the XML-declaration callback; Expat reverses this
+  callback order in its value processor.
 - Multibyte sequences that convert to ASCII are rejected with
   `XML_ERROR_INVALID_TOKEN`. Expat accepts some such aliases and distinguishes
   their original byte form when recognizing keywords, references, and XML

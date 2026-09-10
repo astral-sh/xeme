@@ -1782,3 +1782,219 @@ fn character_data_ownership_survives_nested_calls_and_suspension() {
         }
     }
 }
+
+#[derive(Default)]
+struct ValueCallbackState {
+    root: XML_Parser,
+    action: u8,
+    requests: usize,
+    events: Vec<String>,
+    encoding: MultibyteState,
+}
+
+unsafe extern "C" fn value_entity_decl(
+    data: *mut c_void,
+    name: *const c_char,
+    _: c_int,
+    value: *const c_char,
+    length: c_int,
+    _: *const c_char,
+    _: *const c_char,
+    _: *const c_char,
+    _: *const c_char,
+) {
+    // SAFETY: Callback state outlives the parser family; the value is readable
+    // for exactly length bytes during this callback and is copied immediately.
+    unsafe {
+        if !value.is_null() {
+            let name = CStr::from_ptr(name).to_str().unwrap();
+            let value =
+                std::str::from_utf8(std::slice::from_raw_parts(value.cast(), length as usize))
+                    .unwrap();
+            (*data.cast::<ValueCallbackState>())
+                .events
+                .push(format!("entity:{name}:{value}"));
+        }
+    }
+}
+
+unsafe extern "C" fn value_default(data: *mut c_void, text: *const c_char, length: c_int) {
+    // SAFETY: Input is readable for length bytes and callback state stays live.
+    unsafe {
+        let text =
+            std::str::from_utf8(std::slice::from_raw_parts(text.cast(), length as usize)).unwrap();
+        (*data.cast::<ValueCallbackState>())
+            .events
+            .push(format!("raw:{text}"));
+    }
+}
+
+unsafe extern "C" fn value_external(
+    parser: XML_Parser,
+    context: *const c_char,
+    _: *const c_char,
+    system: *const c_char,
+    _: *const c_char,
+) -> c_int {
+    // SAFETY: Raw state access avoids retaining a reference across recursive
+    // callbacks. Each child and encoding instance is freed exactly once.
+    unsafe {
+        let state = XML_GetUserData(parser).cast::<ValueCallbackState>();
+        let value = CStr::from_ptr(system).to_bytes() == b"p";
+        if value {
+            (*state).requests += 1;
+            (*state).events.push("external:p".into());
+            assert_eq!(XML_StopParser(parser, 1), ERROR);
+            assert_eq!(XML_GetErrorCode(parser), 37);
+            match (*state).action {
+                1 => return OK,
+                2 => assert_eq!(XML_StopParser((*state).root, 1), OK),
+                3 => {
+                    assert_eq!(XML_StopParser(parser, 0), OK);
+                    return OK;
+                }
+                4 => XML_SetEntityDeclHandler(parser, None),
+                5 => XML_SetEntityDeclHandler(parser, Some(value_entity_decl)),
+                _ => {}
+            }
+        }
+        let encoding = if value {
+            c"multibyte".as_ptr()
+        } else {
+            ptr::null()
+        };
+        let child = XML_ExternalEntityParserCreate(parser, context, encoding);
+        assert!(!child.is_null());
+        if value {
+            (*state).encoding.parser = child;
+            (*state).encoding.value = 'é' as i32;
+            (*state).encoding.action = 1;
+            XML_SetUnknownEncodingHandler(
+                child,
+                Some(encoding_multibyte),
+                ptr::addr_of_mut!((*state).encoding).cast(),
+            );
+        }
+        let bytes: &[u8] = if value {
+            b"\"\x80\0&#13;\""
+        } else if (*state).action >= 6 {
+            b"<!ENTITY % p SYSTEM 'p'><!ENTITY e 'OLD'><!ENTITY e 'L%p;R'><!ENTITY after 'A'>"
+        } else {
+            b"<!ENTITY % p SYSTEM 'p'><!ENTITY e 'L%p;R'><!ENTITY after 'A'>"
+        };
+        let mut status = OK;
+        for (index, byte) in bytes.iter().enumerate() {
+            let buffer = XML_GetBuffer(child, 1).cast::<u8>();
+            assert!(!buffer.is_null());
+            buffer.write(*byte);
+            status = XML_ParseBuffer(child, 1, c_int::from(index + 1 == bytes.len()));
+            if status != OK {
+                break;
+            }
+        }
+        XML_ParserFree(child);
+        c_int::from(status == OK)
+    }
+}
+
+#[test]
+fn external_values_keep_callback_order_encoding_ownership_and_stop_semantics() {
+    // SAFETY: State remains fixed on the stack until all synchronous children
+    // and the root are freed; input and buffer lengths obey the public API.
+    unsafe {
+        for action in 0..=7 {
+            let root = XML_ParserCreate(ptr::null());
+            assert!(!root.is_null());
+            let mut state = ValueCallbackState {
+                root,
+                action,
+                ..ValueCallbackState::default()
+            };
+            XML_SetUserData(root, ptr::from_mut(&mut state).cast());
+            XML_SetParamEntityParsing(root, 2);
+            XML_SetExternalEntityRefHandler(root, Some(value_external));
+            XML_SetDefaultHandler(root, Some(value_default));
+            if !matches!(action, 5 | 7) {
+                XML_SetEntityDeclHandler(root, Some(value_entity_decl));
+            }
+            let bytes = b"<!DOCTYPE r SYSTEM 'd'><r/>";
+            let status = XML_Parse(root, bytes.as_ptr().cast(), bytes.len() as c_int, 1);
+            assert_eq!(state.requests, 1);
+            if action == 3 {
+                assert_eq!(status, ERROR);
+                assert_eq!(XML_GetErrorCode(root), 21);
+            } else {
+                assert_eq!(status, if action == 2 { SUSPENDED } else { OK });
+                if action == 2 {
+                    assert_eq!(XML_ResumeParser(root), OK);
+                    assert_eq!(state.requests, 1);
+                }
+                if action == 1 {
+                    assert!(state.events.iter().any(|event| event == "entity:e:LR"));
+                    assert!(!state.events.iter().any(|event| event == "entity:after:A"));
+                } else if action == 4 {
+                    assert!(
+                        state
+                            .events
+                            .windows(2)
+                            .any(|events| events == ["raw:'L%p;R'", "raw:>"])
+                    );
+                } else if action >= 6 {
+                    let external = state
+                        .events
+                        .iter()
+                        .position(|event| event == "external:p")
+                        .unwrap();
+                    let suffix = state
+                        .events
+                        .iter()
+                        .position(|event| event == "raw:'L%p;R'")
+                        .unwrap();
+                    assert!(external < suffix);
+                    if action == 6 {
+                        assert!(
+                            state.events[..external]
+                                .iter()
+                                .any(|event| event == "raw:e")
+                        );
+                        assert_eq!(
+                            state
+                                .events
+                                .iter()
+                                .filter(|event| event.starts_with("entity:e:"))
+                                .collect::<Vec<_>>(),
+                            ["entity:e:OLD"]
+                        );
+                    } else {
+                        assert_eq!(state.events[suffix + 1], "raw:>");
+                    }
+                } else {
+                    assert!(
+                        state
+                            .events
+                            .iter()
+                            .any(|event| event == "entity:e:L\"é\r\"R")
+                    );
+                    assert!(state.events.iter().any(|event| event == "entity:after:A"));
+                }
+                if action == 5 {
+                    let external = state
+                        .events
+                        .iter()
+                        .position(|event| event == "external:p")
+                        .unwrap();
+                    let before = state.events[..external]
+                        .iter()
+                        .filter_map(|event| event.strip_prefix("raw:"))
+                        .collect::<String>();
+                    assert!(before.ends_with("<!ENTITY e "));
+                }
+            }
+            XML_ParserFree(root);
+            let count = usize::from(!matches!(action, 1 | 3));
+            assert_eq!(state.encoding.handlers, count);
+            assert_eq!(state.encoding.conversions, count);
+            assert_eq!(state.encoding.releases, count);
+        }
+    }
+}

@@ -186,6 +186,27 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
             }
         }
     }
+    let mut values = parent.external_child(None, None)?;
+    values.set_default_events(true);
+    values.feed(
+        b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ENTITY e 'L%p;R'><!ENTITY after 'A'>",
+        true,
+    )?;
+    while let Some(event) = next_event(&mut values)? {
+        if let EventKind::ExternalEntityReference { .. } = event.kind {
+            let mut child = values.external_child(None, None)?;
+            child.feed(b"<?xml version='1.0'?>X%q;Y", true)?;
+            while let Some(event) = next_event(&mut child)? {
+                if let EventKind::ExternalEntityReference { .. } = event.kind {
+                    let mut nested = child.external_child(None, None)?;
+                    nested.feed(b"\"&#13;Q\"", true)?;
+                    while next_event(&mut nested)?.is_some() {}
+                    child.merge_external_subset(&nested)?;
+                }
+            }
+            values.merge_external_subset(&child)?;
+        }
+    }
     let mut parser =
         Parser::try_new_with_encoding_in(Config::default(), Some("custom"), allocator)?;
     parser.feed(b"<r>\x80</r>", true)?;

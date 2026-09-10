@@ -7,6 +7,8 @@
 mod dtd;
 mod encoding;
 mod names;
+mod value;
+mod value_lexer;
 
 use oriole_storage::{
     AllocError, Allocator, HashMap, Queue, Shared, String, TryClone, Vec, hash_map, hash_set,
@@ -357,10 +359,13 @@ impl TryClone for DefaultAttribute {
 /// the parser never performs I/O. Parameter entity processing is opt-in and supports
 /// references between declarations and nested INCLUDE/IGNORE sections in external
 /// DTDs. Internal parameter entities may select a conditional keyword or expand
-/// inside entity values in external DTDs and parameter entities. Arbitrary
-/// declaration fragments and external references inside entity values remain
-/// unsupported. External references in conditional headers load separate DTDs;
-/// their declarations are available before the header resumes.
+/// inside entity values in external DTDs and parameter entities, and supply
+/// complete lexical tokens inside declarations. Declaration delimiters cannot
+/// span replacement boundaries. External references in conditional headers load
+/// separate DTDs; their declarations are available before the header resumes.
+/// External references inside entity values create value children whose output
+/// continues the pending declaration, preserving each child's lexical boundary.
+/// Encoding declarations in value children must appear before any value content.
 #[derive(Debug)]
 pub struct Parser {
     config: Config,
@@ -376,6 +381,7 @@ pub struct Parser {
     foreign_dtd: bool,
     in_doctype: bool,
     conditional: dtd::ConditionalState,
+    value_state: Option<oriole_storage::Box<value::State>>,
     declarations_skipped: bool,
     doctype_external: Option<(Option<String>, Option<String>)>,
     defaults: HashMap<String, DefaultAttributes>,
@@ -451,6 +457,7 @@ impl Parser {
             foreign_dtd: false,
             in_doctype: false,
             conditional: dtd::ConditionalState::new(allocator),
+            value_state: None,
             declarations_skipped: false,
             doctype_external: None,
             defaults: hash_map(allocator),
@@ -515,8 +522,11 @@ impl Parser {
     /// Pass the context from [`EventKind::ExternalEntityReference`]. Namespace
     /// bindings, declarations, recursion tracking, and the expansion budget are
     /// inherited. The parser never opens a path or performs a network request.
-    /// A `None` context creates an external DTD parser. After its input has parsed
-    /// successfully, use [`Self::merge_external_subset`] to import its declarations.
+    /// A `None` context creates an external DTD parser, or a value parser when
+    /// resolving a reference inside an entity value. DTD children import their
+    /// declarations through [`Self::merge_external_subset`]; value children share
+    /// an owned output channel with the suspended declaration. Every child must
+    /// be processed before requesting the parent's next event.
     pub fn external_child(
         &self,
         context: Option<&str>,
@@ -585,7 +595,7 @@ impl Parser {
         for name in &self.entity_chain {
             try_push(&mut child.entity_chain, name.try_clone()?)?;
         }
-        if context.is_none() {
+        if context.is_none() && !self.inherit_value_context(&mut child)? {
             self.inherit_parameter_context(&mut child)?;
         }
         if let Some(context) = context {
@@ -718,6 +728,9 @@ impl Parser {
     }
 
     fn merge_external_subset_inner(&mut self, child: &Self) -> Result<(), Error> {
+        if child.is_external_value() && child.finished {
+            return Ok(());
+        }
         if !child.external_subset || !child.finished {
             return Err(self.err(
                 ErrorKind::ExternalEntityHandling,
@@ -776,6 +789,7 @@ impl Parser {
             }
         }
         self.declarations_skipped |= child.declarations_skipped;
+        self.standalone |= child.standalone;
         Ok(())
     }
 
@@ -1150,6 +1164,12 @@ impl Parser {
             }
             if self.finished {
                 return Ok(None);
+            }
+            if self.value_state.is_some() {
+                if !self.continue_value()? {
+                    return Ok(None);
+                }
+                continue;
             }
             if self.source().remaining().is_empty() {
                 if self.sources.len() > 1 {
@@ -1837,7 +1857,7 @@ impl Parser {
                     2 + target.len() + error.position.byte_index,
                 )
             })?;
-            if self.fragment {
+            if self.fragment && !self.is_external_value() {
                 let mut attrs = attrs.into_iter();
                 let first = attrs
                     .next()
@@ -1915,8 +1935,9 @@ impl Parser {
                     }
                 }
             }
-            self.standalone = standalone == Some(true);
-            if self.standalone && self.parameter_mode == 1 {
+            self.standalone =
+                standalone == Some(true) || (self.is_external_value() && self.standalone);
+            if standalone == Some(true) && self.parameter_mode == 1 {
                 // Children inherit the effective mode after a standalone root
                 // disables conditional parameter processing, as in Expat.
                 self.parameter_mode = 0;

@@ -163,10 +163,6 @@ fn references_must_be_complete_within_each_replacement() {
             "<!ENTITY % p \"<!ENTITY e '&#37;p;'>\">%p;",
             ErrorKind::RecursiveEntityReference,
         ),
-        (
-            "<!ENTITY % p SYSTEM 'p'><!ENTITY e '%p;'>",
-            ErrorKind::ExternalEntityHandling,
-        ),
     ] {
         for chunk in 1..=dtd.len() {
             assert_eq!(

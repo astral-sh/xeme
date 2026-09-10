@@ -114,6 +114,30 @@ unsafe extern "C" fn unknown(_: *mut c_void, _: *const c_char, encoding: *mut XM
     1
 }
 
+unsafe extern "C" fn external_value(
+    parser: XML_Parser,
+    context: *const c_char,
+    _: *const c_char,
+    system: *const c_char,
+    _: *const c_char,
+) -> i32 {
+    // SAFETY: The callback receives live handles and identifiers; each child is
+    // used serially and freed exactly once. Static inputs outlive every parse.
+    unsafe {
+        let value = std::ffi::CStr::from_ptr(system).to_bytes() == b"p";
+        let child = XML_ExternalEntityParserCreate(parser, context, ptr::null());
+        assert!(!child.is_null());
+        let input: &[u8] = if value {
+            b"\"&#13;ok\""
+        } else {
+            b"<!ENTITY % p SYSTEM 'p'><!ENTITY e 'L%p;R'>"
+        };
+        let status = XML_Parse(child, input.as_ptr().cast(), input.len() as i32, 1);
+        XML_ParserFree(child);
+        status
+    }
+}
+
 #[test]
 fn custom_parser_never_uses_global_storage_and_blocks_allocator_reentry() {
     let suite = XML_Memory_Handling_Suite {
@@ -164,6 +188,14 @@ fn custom_parser_never_uses_global_storage_and_blocks_allocator_reentry() {
         assert!(!child.is_null());
         assert_eq!(XML_Parse(child, [0x80_u8, 0].as_ptr().cast(), 2, 1), 1);
         XML_ParserFree(child);
+        assert_eq!(XML_ParserReset(parser, c"UTF-8".as_ptr()), 1);
+        XML_SetExternalEntityRefHandler(parser, Some(external_value));
+        assert_eq!(XML_SetParamEntityParsing(parser, 2), 1);
+        let input = b"<!DOCTYPE r SYSTEM 'd'><r>&e;</r>";
+        assert_eq!(
+            XML_Parse(parser, input.as_ptr().cast(), input.len() as i32, 1),
+            1
+        );
         XML_ParserFree(parser);
         CALLBACK_PARSER.with(|value| value.set(ptr::null_mut()));
     }

@@ -86,10 +86,11 @@ struct DeclarationExpansion {
     raw: String,
     literals: Vec<DeclarationLiteral>,
     parameters: Vec<DeclarationParameter>,
+    capture_raw: bool,
 }
 
-#[derive(Clone, Copy)]
-struct DeclarationParameter {
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct DeclarationParameter {
     offset: usize,
     position: Position,
     raw_start: usize,
@@ -614,8 +615,7 @@ impl Parser {
     }
 
     pub(crate) fn parameter_entities_enabled(&self) -> bool {
-        self.parameter_mode == 2
-            || (self.parameter_mode == 1 && (!self.standalone || self.external_subset))
+        self.parameter_mode != 0
     }
 
     fn finish_doctype(&mut self, position: Position, raw: &str) -> Result<(), Error> {
@@ -945,6 +945,9 @@ impl Parser {
             raw: String::new_in(self.allocator),
             literals: Vec::new_in(self.allocator),
             parameters: Vec::new_in(self.allocator),
+            // An external value callback can install a Default handler while
+            // an ENTITY declaration is suspended. Keep its future raw suffix.
+            capture_raw: self.default_events || text.starts_with("ENTITY"),
         };
         let mut parents: Vec<DeclarationFrame<'_>> = Vec::new_in(self.allocator);
         let mut current = DeclarationFrame {
@@ -1066,11 +1069,11 @@ impl Parser {
                         offset: result.text.len(),
                         position: self.source().position_at(current.source_offset, end + 1),
                         raw_start: result.raw.len(),
-                        raw_end: result.raw.len() + if self.default_events { end + 1 } else { 0 },
+                        raw_end: result.raw.len() + if result.capture_raw { end + 1 } else { 0 },
                         disabled: self.parameter_mode == 0,
                     },
                 )?;
-                if self.default_events {
+                if result.capture_raw {
                     result.raw.try_push_str(&current.rest[..end + 1])?;
                 }
                 current.rest = &current.rest[end + 1..];
@@ -1160,7 +1163,7 @@ impl Parser {
             ));
         }
         result.text.try_push_str(text)?;
-        if !boundary && self.default_events {
+        if !boundary && result.capture_raw {
             result.raw.try_push_str(text)?;
         }
         Ok(())
@@ -1168,6 +1171,14 @@ impl Parser {
 
     fn declaration_parameters(&mut self, cursor: &mut Cursor<'_>) -> Result<(), Error> {
         let offset = cursor.offset();
+        self.declaration_parameters_through(cursor, offset)
+    }
+
+    fn declaration_parameters_through(
+        &mut self,
+        cursor: &mut Cursor<'_>,
+        offset: usize,
+    ) -> Result<(), Error> {
         while let Some(&parameter) = cursor.parameters.get(cursor.parameter_index) {
             if parameter.offset > offset {
                 break;
@@ -1178,7 +1189,7 @@ impl Parser {
                     cursor,
                     parameter.raw_start,
                     false,
-                    false,
+                    self.declarations_skipped,
                     parameter.position,
                 )?;
             }
@@ -1415,6 +1426,40 @@ impl Parser {
                 }
                 _ => return Err(self.err(ErrorKind::Syntax, "unsupported DTD declaration")),
             }
+            if let Some(mut state) = self.value_state.take() {
+                cursor.space();
+                let suffix_error = (!cursor.rest().is_empty())
+                    .then(|| self.err(ErrorKind::Syntax, "unexpected text in entity declaration"));
+                let raw = if let Some(expansion) = &expansion {
+                    self.charge_expansion(expansion.raw.len() + 3)?;
+                    let mut raw = string("<!", self.allocator)?;
+                    raw.push_str(&expansion.raw)?;
+                    raw.push('>')?;
+                    raw
+                } else {
+                    self.charge_expansion(end + 1)?;
+                    string(&text[..end + 1], self.allocator)?
+                };
+                let quote = raw.find(['\u{27}', '\u{22}']).expect("entity value quote");
+                let declaration = state.declaration.as_mut().expect("pending declaration");
+                declaration.raw = raw;
+                declaration.quote = quote;
+                declaration.prefix_start = if cursor.raw_started {
+                    cursor.raw_offset + 2
+                } else {
+                    0
+                };
+                for parameter in &cursor.parameters[cursor.parameter_index..] {
+                    if parameter.offset > cursor.offset() {
+                        break;
+                    }
+                    self.charge_expansion(size_of::<DeclarationParameter>())?;
+                    try_push(&mut declaration.tail_parameters, *parameter)?;
+                }
+                declaration.suffix_error = suffix_error;
+                self.value_state = Some(state);
+                return Ok(());
+            }
             cursor.space();
             self.declaration_parameters(&mut cursor)?;
             if !cursor.rest().is_empty() {
@@ -1507,6 +1552,52 @@ impl Parser {
         Ok(())
     }
 
+    /// Resume the declaration's raw projection after its value callbacks. The
+    /// remaining grammar references must observe the child's standalone state.
+    pub(crate) fn finish_value_raw(
+        &mut self,
+        raw: &str,
+        quote: usize,
+        parameters: &[DeclarationParameter],
+        first_event: usize,
+        position: Position,
+    ) -> Result<(), Error> {
+        let mut cursor = Cursor::new("", self.config.namespace_separator.is_some());
+        cursor.raw = &raw[2..raw.len() - 1];
+        cursor.raw_offset = quote - 2;
+        cursor.raw_started = true;
+        cursor.raw_event = first_event;
+        cursor.parameters = parameters;
+        cursor.parameter_defaults = true;
+        cursor.entity_defaults = true;
+        let value_skipped = self.declarations_skipped;
+        if self.default_events && value_skipped {
+            let delimiter = raw.as_bytes()[quote] as char;
+            let quoted_end = quote
+                + 2
+                + raw[quote + 1..]
+                    .find(delimiter)
+                    .expect("closed entity value");
+            self.declaration_default_segment(&mut cursor, quoted_end - 2, false, false, position)?;
+        }
+        self.declaration_parameters_through(&mut cursor, usize::MAX)?;
+        if self.default_events {
+            let end = cursor.raw.len();
+            let closing_default = self.declarations_skipped;
+            self.declaration_default_segment(
+                &mut cursor,
+                end,
+                !closing_default,
+                value_skipped,
+                position,
+            )?;
+            if closing_default {
+                self.declaration_default_segment(&mut cursor, end, true, true, position)?;
+            }
+        }
+        Ok(())
+    }
+
     fn entity_declaration(
         &mut self,
         cursor: &mut Cursor<'_>,
@@ -1546,16 +1637,36 @@ impl Parser {
             }
             let declaring = (parameter && !self.parameter_entities.contains_key(&name))
                 .then_some(name.as_str());
-            let (value, skipped) = self.entity_value(
+            match self.entity_value(
                 raw,
                 declaring,
                 cursor
                     .last_literal_normalize
                     .unwrap_or(self.sources.len() == 1),
                 cursor.last_literal_parameters,
-            )?;
-            skipped_parameter = skipped;
-            (Some(value), None, None, None)
+            )? {
+                crate::value::Build::Complete(value, skipped) => {
+                    skipped_parameter = skipped;
+                    (Some(value), None, None, None)
+                }
+                crate::value::Build::Pending(mut state) => {
+                    self.charge_expansion(size_of::<crate::value::Declaration>())?;
+                    state.declaration = Some(crate::value::Declaration {
+                        name,
+                        parameter,
+                        position,
+                        origin: self.external_subset || self.sources.len() > 1,
+                        raw: String::new_in(self.allocator),
+                        quote: 0,
+                        prefix_start: 0,
+                        tail_parameters: Vec::new_in(self.allocator),
+                        prefix_sent: false,
+                        suffix_error: None,
+                    });
+                    self.value_state = Some(state);
+                    return Ok(());
+                }
+            }
         } else {
             let (system_id, public_id) =
                 external_id(cursor, false, self.allocator, self.sources.len() == 1)
@@ -1639,7 +1750,7 @@ impl Parser {
         declaring_parameter: Option<&str>,
         normalize: bool,
         declaration_parameters: &[String],
-    ) -> Result<(String, bool), Error> {
+    ) -> Result<crate::value::Build, Error> {
         let mut value = String::try_with_capacity_in(raw.len(), self.allocator)?;
         let mut parents = Vec::new_in(self.allocator);
         let mut current = EntityValueFrame {
@@ -1657,7 +1768,7 @@ impl Parser {
                     current = parent;
                     continue;
                 }
-                return Ok((value, skipped));
+                return Ok(crate::value::Build::Complete(value, skipped));
             }
             let end = current.rest.find(';').ok_or_else(|| {
                 self.err(
@@ -1736,12 +1847,38 @@ impl Parser {
                     "parameter entity value nesting limit exceeded",
                 ));
             }
-            let replacement = entity.value.as_deref().ok_or_else(|| {
-                self.err(
-                    ErrorKind::ExternalEntityHandling,
-                    "external parameter reference in entity value is unsupported",
-                )
-            })?;
+            let Some(replacement) = entity.value.as_deref() else {
+                let mut frames = Vec::new_in(self.allocator);
+                for frame in parents.into_iter().chain(std::iter::once(current)) {
+                    self.charge_expansion(
+                        size_of::<crate::value::Frame>()
+                            + frame.rest.len()
+                            + frame.name.map_or(0, str::len),
+                    )?;
+                    try_push(
+                        &mut frames,
+                        crate::value::Frame {
+                            text: string(frame.rest, self.allocator)?,
+                            offset: 0,
+                            name: frame
+                                .name
+                                .map(|name| string(name, self.allocator))
+                                .transpose()?,
+                            normalize: frame.normalize,
+                        },
+                    )?;
+                }
+                return self
+                    .begin_external_value(
+                        (value, skipped),
+                        frames,
+                        declaring_parameter,
+                        declaration_parameters,
+                        reference,
+                        entity,
+                    )
+                    .map(crate::value::Build::Pending);
+            };
             self.charge_expansion(replacement.len())?;
             try_push(&mut parents, current)?;
             current = EntityValueFrame {
@@ -1754,7 +1891,7 @@ impl Parser {
 
     /// Append with a bound before allocating, retaining character-reference CRs
     /// in replacement frames and normalizing physical CR/CRLF exactly once.
-    fn append_entity_value(
+    pub(crate) fn append_entity_value(
         &self,
         value: &mut String,
         text: &str,

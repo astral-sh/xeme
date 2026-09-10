@@ -209,6 +209,40 @@ fn resource_limits_cannot_be_bypassed_by_chunking() {
 }
 
 #[test]
+fn reused_default_attributes_consume_the_expansion_budget() {
+    let documents = [
+        "<!DOCTYPE r [<!ATTLIST item a CDATA '12345678'>]><r><item/><item/></r>",
+        "<!DOCTYPE r [<!ENTITY e '12345678'><!ATTLIST item a CDATA '&e;'>]><r><item/><item/></r>",
+        "<!DOCTYPE r [<!ATTLIST item abcdefghij CDATA ''>]><r><item/><item/></r>",
+    ];
+    for xml in documents {
+        for chunk in [1, 7, xml.len()] {
+            let config = Config {
+                limits: Limits {
+                    max_entity_expansion_bytes: 16,
+                    ..Limits::default()
+                },
+                ..Config::default()
+            };
+            assert_eq!(
+                parse(xml.as_bytes(), chunk, config),
+                Err(ErrorKind::LimitExceeded),
+                "{xml}, chunk {chunk}"
+            );
+        }
+    }
+    // Explicit attributes do not reuse the declared default and must not be charged.
+    let config = Config {
+        limits: Limits {
+            max_entity_expansion_bytes: 0,
+            ..Limits::default()
+        },
+        ..Config::default()
+    };
+    assert!(parse(b"<!DOCTYPE r [<!ATTLIST item a CDATA 'default'>]><r><item a='own'/><item a='own'/></r>", 1, config).is_ok());
+}
+
+#[test]
 fn namespace_constraints() {
     for (xml, kind) in [
         ("<p:r/>", ErrorKind::UndefinedPrefix),
@@ -271,14 +305,14 @@ fn external_entities_require_application_supplied_content() {
         Config::default(),
     )
     .unwrap();
-    assert!(events.iter().any(|event| matches!(event, EventKind::ExternalEntityReference { system_id, .. } if system_id == "file:///etc/passwd")));
-    assert_eq!(
+    assert!(events.iter().any(|event| matches!(event, EventKind::ExternalEntityReference { system_id, .. } if system_id.as_deref() == Some("file:///etc/passwd"))));
+    assert!(
         parse(
             b"<!DOCTYPE r [<!ENTITY % x SYSTEM 'https://example.com'>%x;]><r/>",
             1,
             Config::default()
-        ),
-        Err(ErrorKind::ExternalEntityHandling)
+        )
+        .is_ok()
     );
 }
 
@@ -419,4 +453,268 @@ fn unread_external_subsets_allow_skipped_entities_without_loading_them() {
             .any(|event| matches!(event, EventKind::SkippedEntity {name, ..} if name == "unknown"))
     );
     assert!(events.iter().any(|event| matches!(event, EventKind::StartElement {attributes, ..} if attributes[0].value == "12")));
+}
+
+#[test]
+fn external_dtd_declarations_merge_before_document_content() {
+    let mut parser = Parser::new(Config::default());
+    assert!(parser.set_param_entity_parsing(2));
+    parser
+        .feed(b"<!DOCTYPE r SYSTEM 'test.dtd'><r>&external;</r>", true)
+        .unwrap();
+    let mut seen = false;
+    while let Some(event) = parser.next_event().unwrap() {
+        match event.kind {
+            EventKind::ExternalEntityReference { context: None, .. } => {
+                let mut child = parser.external_child_with_encoding(None, None).unwrap();
+                child.feed(b"<?xml encoding='UTF-8'?><!ENTITY external 'loaded'><!ATTLIST r default CDATA 'yes'>", true).unwrap();
+                while child.next_event().unwrap().is_some() {}
+                parser.merge_external_subset(&child).unwrap();
+            }
+            EventKind::StartElement { attributes, .. } => assert_eq!(attributes[0].value, "yes"),
+            EventKind::Text(value) => {
+                assert_eq!(value, "loaded");
+                seen = true;
+            }
+            _ => {}
+        }
+    }
+    assert!(seen);
+}
+
+#[test]
+fn parameter_entities_expand_declarations_with_explicit_processing() {
+    let mut parser = Parser::new(Config::default());
+    assert!(parser.set_param_entity_parsing(2));
+    let xml = b"<!DOCTYPE r [<!ENTITY % defs '<!ENTITY text \"expanded\">'>%defs;]><r>&text;</r>";
+    for (index, byte) in xml.iter().enumerate() {
+        parser.feed(&[*byte], index + 1 == xml.len()).unwrap();
+        while let Some(event) = parser.next_event().unwrap() {
+            if let EventKind::Text(value) = event.kind {
+                assert_eq!(value, "expanded");
+            }
+        }
+    }
+    assert!(parser.is_finished());
+}
+
+#[test]
+fn foreign_dtd_requests_have_null_identifiers() {
+    let mut parser = Parser::new(Config::default());
+    assert!(parser.set_param_entity_parsing(2));
+    assert!(parser.set_use_foreign_dtd(true));
+    parser.feed(b"<r/>", true).unwrap();
+    assert!(matches!(
+        parser.next_event().unwrap().unwrap().kind,
+        EventKind::ExternalEntityReference {
+            context: None,
+            system_id: None,
+            public_id: None
+        }
+    ));
+    while parser.next_event().unwrap().is_some() {}
+}
+
+#[test]
+fn partial_token_after_progress_is_retried_without_deferral() {
+    let mut parser = Parser::new(Config::default());
+    parser.feed(b"<root><element>text</element", false).unwrap();
+    while parser.next_event().unwrap().is_some() {}
+    parser.feed(b">", false).unwrap();
+    assert!(
+        matches!(parser.next_event().unwrap().unwrap().kind, EventKind::EndElement {name} if name == "element")
+    );
+    parser.feed(b"</root>", true).unwrap();
+    while parser.next_event().unwrap().is_some() {}
+}
+
+#[test]
+fn line_break_callbacks_are_separate_in_text_and_cdata() {
+    let mut parser = Parser::new(Config::default());
+    parser
+        .feed(b"<r>a\nb\r\nc<![CDATA[d\ne]]></r>", true)
+        .unwrap();
+    let mut data = Vec::new();
+    while let Some(event) = parser.next_event().unwrap() {
+        if let EventKind::Text(value) = event.kind {
+            data.push(value);
+        }
+    }
+    assert_eq!(data, ["a", "\n", "b", "\n", "c", "d", "\n", "e"].map(text));
+}
+
+#[test]
+fn non_xml_whitespace_in_a_declaration_has_a_declaration_error() {
+    let mut parser = Parser::new(Config::default());
+    parser
+        .feed(b"<?xml version\xc2\x85='1.0'?>\r\n", true)
+        .unwrap();
+    assert_eq!(
+        parser.next_event().unwrap_err().kind,
+        ErrorKind::XmlDeclaration
+    );
+}
+
+#[test]
+fn external_subset_callback_occurs_before_a_root_is_available() {
+    let mut parser = Parser::new(Config::default());
+    assert!(parser.set_param_entity_parsing(1));
+    parser
+        .feed(
+            b"<!DOCTYPE external SYSTEM 'unsupported://non-existing'>\n",
+            false,
+        )
+        .unwrap();
+    let mut requested = false;
+    while let Some(event) = parser.next_event().unwrap() {
+        if let EventKind::ExternalEntityReference {
+            context: None,
+            system_id,
+            ..
+        } = event.kind
+        {
+            assert_eq!(system_id.as_deref(), Some("unsupported://non-existing"));
+            requested = true;
+        }
+    }
+    assert!(requested);
+}
+
+#[test]
+fn changing_the_encoding_preserves_entity_and_deferral_options() {
+    let mut parser = Parser::new(Config::default());
+    assert!(parser.set_param_entity_parsing(2));
+    assert!(parser.set_use_foreign_dtd(true));
+    parser.set_expand_internal_entities(false);
+    parser.set_reparse_deferral_enabled(false);
+    parser.set_encoding(Some("UTF-8")).unwrap();
+    assert!(!parser.reparse_deferral_enabled());
+    parser
+        .feed(b"<!DOCTYPE r [<!ENTITY e 'value'>]><r>&e;</r>", true)
+        .unwrap();
+    let mut foreign = false;
+    let mut skipped = false;
+    while let Some(event) = parser.next_event().unwrap() {
+        match event.kind {
+            EventKind::ExternalEntityReference {
+                context: None,
+                system_id: None,
+                ..
+            } => foreign = true,
+            EventKind::SkippedEntity {
+                name,
+                parameter: false,
+            } if name == "e" => skipped = true,
+            _ => {}
+        }
+    }
+    assert!(foreign && skipped);
+}
+
+#[test]
+fn a_failed_encoding_setter_preserves_autodetection() {
+    use oriole_storage::{AllocationTracker, Allocator, with_tracking};
+    let allocator = Allocator::System.trackable();
+    let tracker = AllocationTracker::try_new_in(allocator).unwrap();
+    let mut parser = with_tracking(&tracker, || {
+        Parser::try_new_in(Config::default(), allocator)
+    })
+    .unwrap();
+    assert!(tracker.set_maximum_amplification(10_000.0));
+    tracker.set_activation_threshold(0);
+    let error = with_tracking(&tracker, || parser.set_encoding(Some("UTF-8"))).unwrap_err();
+    assert_eq!(error.kind, ErrorKind::NoMemory);
+    let xml = b"<r/>";
+    assert!(tracker.add_direct_bytes(xml.len() as u64));
+    with_tracking(&tracker, || {
+        parser.feed(xml, true).unwrap();
+        while parser.next_event().unwrap().is_some() {}
+    });
+    assert!(parser.is_finished());
+}
+
+#[test]
+fn many_newlines_and_a_fragmented_dtd_closer_are_streamed() {
+    for cdata in [false, true] {
+        let mut xml = std::string::String::from("<r>");
+        if cdata {
+            xml.push_str("<![CDATA[");
+        }
+        xml.push_str(&"x\n".repeat(32_768));
+        if cdata {
+            xml.push_str("]]>");
+        }
+        xml.push_str("</r>");
+        let mut parser = Parser::new(Config::default());
+        parser.feed(xml.as_bytes(), true).unwrap();
+        let mut callbacks = 0;
+        while let Some(event) = parser.next_event().unwrap() {
+            if matches!(event.kind, EventKind::Text(_)) {
+                callbacks += 1;
+            }
+        }
+        assert_eq!(callbacks, 65_536);
+    }
+    let mut parser = Parser::new(Config::default());
+    parser.feed(b"<!DOCTYPE r []", false).unwrap();
+    while parser.next_event().unwrap().is_some() {}
+    for _ in 0..32_768 {
+        parser.feed(b" ", false).unwrap();
+        assert!(parser.next_event().unwrap().is_none());
+    }
+    parser.feed(b"><r/>", true).unwrap();
+    while parser.next_event().unwrap().is_some() {}
+    assert!(parser.is_finished());
+}
+
+#[test]
+fn malformed_tokens_report_the_offending_byte() {
+    for (xml, kind, byte) in [
+        ("<\n", ErrorKind::InvalidToken, 1),
+        ("<r><<", ErrorKind::InvalidToken, 4),
+        ("<r a='x\u{1}'/>", ErrorKind::InvalidToken, 7),
+        ("<r><!-- a---></r>", ErrorKind::InvalidToken, 11),
+        ("<!DOCTYPEdoc><doc/>", ErrorKind::InvalidToken, 12),
+        ("<!DOCTYPE r [<!]>", ErrorKind::InvalidToken, 15),
+        ("<!DOCTYPE r [<![", ErrorKind::Syntax, 13),
+        ("<!DOCTYPE r [<!ELEMENT r ANY>", ErrorKind::NoElements, 29),
+    ] {
+        let mut parser = Parser::new(Config::default());
+        parser.feed(xml.as_bytes(), true).unwrap();
+        let error = loop {
+            match parser.next_event() {
+                Err(error) => break error,
+                Ok(Some(_)) => {}
+                Ok(None) => panic!("accepted {xml:?}"),
+            }
+        };
+        assert_eq!(
+            (error.kind, error.position.byte_index),
+            (kind, byte),
+            "{xml:?}"
+        );
+    }
+}
+
+#[test]
+fn conversion_buffer_boundaries_preserve_utf8_and_cdata_delimiters() {
+    let mut xml = std::string::String::from("<r><![CDATA[");
+    xml.push_str(&"x".repeat(1023));
+    xml.push_str("]]>");
+    xml.push_str(&"é".repeat(1025));
+    xml.push_str("</r>");
+    let mut utf16 = vec![0xff, 0xfe];
+    utf16.extend(xml.encode_utf16().flat_map(u16::to_le_bytes));
+    let mut parser = Parser::new(Config::default());
+    parser.feed(&utf16, true).unwrap();
+    let mut lengths = Vec::new();
+    let mut content = std::string::String::new();
+    while let Some(event) = parser.next_event().unwrap() {
+        if let EventKind::Text(value) = event.kind {
+            lengths.push(value.len());
+            content.push_str(&value);
+        }
+    }
+    assert_eq!(lengths, [1023, 1024, 1024, 2]);
+    assert_eq!(content, "x".repeat(1023) + &"é".repeat(1025));
 }

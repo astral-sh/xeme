@@ -9,63 +9,283 @@ impl Parser {
         if self.seen_root || self.seen_doctype || self.sources.len() > 1 || self.fragment {
             return Err(self.err(ErrorKind::Syntax, "misplaced document type declaration"));
         }
+        let has_internal_subset = token.ends_with('[');
+        if !token[9..].starts_with(whitespace) {
+            let offset = 2 + take_name(&token[2..]).map_or(0, |(name, _)| name.len());
+            return Err(self.err_at(
+                ErrorKind::InvalidToken,
+                "whitespace required after DOCTYPE",
+                offset,
+            ));
+        }
         let mut cursor = Cursor::new(&token[9..token.len() - 1]);
         cursor
             .require_space()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-        let name = cursor
-            .name()
-            .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-        let name = string(name, self.allocator)?;
-        let had_space = cursor.space();
+        let name = string(
+            cursor
+                .name()
+                .map_err(|message| self.err(ErrorKind::Syntax, message))?,
+            self.allocator,
+        )?;
+        let spaced = cursor.space();
         let (system_id, public_id) = if cursor.starts("SYSTEM") || cursor.starts("PUBLIC") {
-            if !had_space {
-                return Err(self.err(
-                    ErrorKind::Syntax,
-                    "document type identifiers require whitespace",
-                ));
+            if !spaced {
+                return Err(self.err(ErrorKind::Syntax, "external identifier requires whitespace"));
             }
-            external_id(&mut cursor, false, self.allocator)
-                .map_err(|error| self.err(error.kind, error.message))?
+            external_id(&mut cursor, false, self.allocator)?
         } else {
             (None, None)
         };
         cursor.space();
-        let subset = if cursor.eat("[") {
-            let rest = cursor.rest();
-            let end = rest
-                .rfind(']')
-                .ok_or_else(|| self.err(ErrorKind::Syntax, "unclosed internal subset"))?;
-            if !rest[end + 1..].chars().all(whitespace) {
-                return Err(self.err(ErrorKind::Syntax, "trailing text after internal subset"));
-            }
-            Some(&rest[..end])
-        } else {
-            if !cursor.rest().is_empty() {
-                return Err(self.err(ErrorKind::Syntax, "invalid document type declaration"));
-            }
-            None
-        };
-        self.has_external_subset = system_id.is_some();
+        if !cursor.rest().is_empty() {
+            return Err(self.err(ErrorKind::Syntax, "invalid document type declaration"));
+        }
         self.seen_doctype = true;
         self.declaration_allowed = false;
+        self.has_external_subset = system_id.is_some();
+        self.doctype_external = Some((system_id.try_clone()?, public_id.try_clone()?));
+        self.in_doctype = has_internal_subset;
+        if system_id.is_some() && !self.standalone {
+            self.emit(EventKind::NotStandalone, position)?;
+            self.event_raw("")?;
+        }
         self.emit(
             EventKind::StartDoctype {
                 name,
                 system_id,
                 public_id,
-                has_internal_subset: subset.is_some(),
+                has_internal_subset,
             },
             position,
         )?;
-        let header_end = subset.map_or(token.len() - 1, |_| token.len() - 1 - cursor.rest().len());
-        self.event_raw(&token[..header_end])?;
-        if let Some(subset) = subset {
-            self.parse_subset(subset, header_end)?;
+        self.event_raw(if has_internal_subset {
+            token
+        } else {
+            &token[..token.len() - 1]
+        })?;
+        if !has_internal_subset {
+            self.finish_doctype(position, ">")?;
         }
-        self.emit(EventKind::EndDoctype, position)?;
-        self.event_raw(if subset.is_some() { "]>" } else { ">" })?;
         Ok(())
+    }
+
+    pub(crate) fn parameter_entities_enabled(&self) -> bool {
+        self.parameter_mode == 2 || (self.parameter_mode == 1 && !self.standalone)
+    }
+
+    fn finish_doctype(&mut self, position: Position, raw: &str) -> Result<(), Error> {
+        self.in_doctype = false;
+        if let Some((system_id, public_id)) = self.doctype_external.take()
+            && self.parameter_entities_enabled()
+            && (system_id.is_some() || self.foreign_dtd)
+        {
+            self.has_external_subset = true;
+            self.emit(
+                EventKind::ExternalEntityReference {
+                    context: None,
+                    system_id,
+                    public_id,
+                },
+                position,
+            )?;
+            self.event_raw("")?;
+        }
+        self.foreign_dtd = false;
+        self.emit(EventKind::EndDoctype, position)?;
+        self.event_raw(raw)?;
+        Ok(())
+    }
+
+    pub(crate) fn parse_dtd_step(&mut self) -> Result<bool, Error> {
+        let text = self.source().remaining();
+        let whitespace_len = text
+            .char_indices()
+            .find(|(_, character)| !whitespace(*character))
+            .map_or(text.len(), |(index, _)| index);
+        if whitespace_len > 0 {
+            self.declaration_allowed = false;
+            self.consume(whitespace_len);
+            return Ok(true);
+        }
+        if text
+            .chars()
+            .next()
+            .is_some_and(|character| !crate::names::is_xml_char(character))
+        {
+            return Err(self.err(ErrorKind::InvalidToken, "invalid XML character in DTD"));
+        }
+        if text.starts_with("<![") {
+            return Err(self.err(
+                ErrorKind::Syntax,
+                "conditional DTD sections are unsupported",
+            ));
+        }
+        if text.starts_with("<!")
+            && text != "<!"
+            && !text.starts_with("<!-")
+            && text[2..]
+                .chars()
+                .next()
+                .is_some_and(|character| !crate::names::is_name_start(character))
+        {
+            return Err(self.err_at(ErrorKind::InvalidToken, "invalid DTD declaration name", 2));
+        }
+        if text.starts_with('%') {
+            return self.parse_parameter_reference();
+        }
+        if self.in_doctype && text.starts_with(']') {
+            if self.sources.len() > 1 {
+                return Err(self.err(
+                    ErrorKind::AsynchronousEntity,
+                    "parameter entity closes its containing subset",
+                ));
+            }
+            let limit = self.config.limits.max_token_bytes;
+            let end = self
+                .source_mut()
+                .scan_token(crate::ScanMode::Tag, limit)
+                .map_err(|kind| self.err(kind, "DTD token limit exceeded"))?;
+            let Some(end) = end else {
+                if self.is_source_final() {
+                    return Err(self.err(
+                        ErrorKind::UnclosedToken,
+                        "unclosed document type declaration",
+                    ));
+                }
+                return Ok(false);
+            };
+            let text = self.source().remaining();
+            if !text[1..end - 1].chars().all(whitespace) {
+                return Err(self.err(
+                    ErrorKind::Syntax,
+                    "invalid internal subset closing delimiter",
+                ));
+            }
+            let position = self.source().position(end);
+            let raw = string(&text[..end], self.allocator)?;
+            self.finish_doctype(position, &raw)?;
+            self.consume(end);
+            return Ok(true);
+        }
+        if ["<", "<!", "<!-"].contains(&text) && !self.is_source_final() {
+            return Ok(false);
+        }
+        let mode = if text.starts_with("<!--") {
+            crate::ScanMode::Comment
+        } else if text.starts_with("<?") {
+            crate::ScanMode::Pi
+        } else if text.starts_with("<!") {
+            crate::ScanMode::Tag
+        } else if text == "<" && !self.is_source_final() {
+            return Ok(false);
+        } else {
+            return Err(self.err(ErrorKind::Syntax, "unexpected text in DTD"));
+        };
+        let limit = self.config.limits.max_token_bytes;
+        let end = self
+            .source_mut()
+            .scan_token(mode, limit)
+            .map_err(|kind| self.err(kind, "DTD token limit exceeded"))?;
+        let Some(end) = end else {
+            if self.is_source_final() {
+                return Err(self.err(ErrorKind::UnclosedToken, "unclosed DTD declaration"));
+            }
+            return Ok(false);
+        };
+        let token = string(&self.source().remaining()[..end], self.allocator)?;
+        if let Some((offset, _)) = token
+            .char_indices()
+            .find(|(_, character)| !crate::names::is_xml_char(*character))
+        {
+            return Err(self.err_at(
+                ErrorKind::InvalidToken,
+                "invalid XML character in DTD",
+                offset,
+            ));
+        }
+        self.current_raw = token.try_clone()?;
+        self.parse_subset(&token, 0)?;
+        self.consume(end);
+        Ok(true)
+    }
+
+    fn parse_parameter_reference(&mut self) -> Result<bool, Error> {
+        let limit = self.config.limits.max_token_bytes;
+        let end = self
+            .source_mut()
+            .scan_reference(limit)
+            .map_err(|kind| self.err(kind, "invalid parameter entity reference"))?;
+        let Some(end) = end else {
+            if self.is_source_final() {
+                return Err(self.err(
+                    ErrorKind::UnclosedToken,
+                    "unclosed parameter entity reference",
+                ));
+            }
+            return Ok(false);
+        };
+        let name = string(&self.source().remaining()[1..end], self.allocator)?;
+        if !crate::names::is_name(&name) {
+            return Err(self.err(ErrorKind::InvalidToken, "invalid parameter entity name"));
+        }
+        let position = self.source().position(end + 1);
+        if !self.parameter_entities_enabled() {
+            self.has_external_subset = true;
+            self.declarations_skipped = !self.standalone;
+            self.consume(end + 1);
+            if !self.standalone {
+                self.emit(EventKind::NotStandalone, position)?;
+                self.event_raw("")?;
+            }
+            return Ok(true);
+        }
+        let entity = self
+            .parameter_entities
+            .get(&name)
+            .ok_or_else(|| self.err(ErrorKind::UndefinedEntity, "undefined parameter entity"))?;
+        let mut source_name = String::new_in(self.allocator);
+        source_name.push('%')?;
+        source_name.push_str(&name)?;
+        if self
+            .sources
+            .iter()
+            .any(|source| source.entity_name.as_ref() == Some(&source_name))
+        {
+            return Err(self.err(
+                ErrorKind::RecursiveEntityReference,
+                "recursive parameter entity",
+            ));
+        }
+        if self.sources.len() + self.external_depth > self.config.limits.max_entity_depth {
+            return Err(self.err(
+                ErrorKind::LimitExceeded,
+                "parameter entity nesting limit exceeded",
+            ));
+        }
+        if let Some(value) = &entity.value {
+            self.charge_expansion(value.len())?;
+            let value = value.try_clone()?;
+            self.consume(end + 1);
+            try_push(
+                &mut self.sources,
+                crate::encoding::Source::entity(value, source_name, position, self.stack.len()),
+            )?;
+        } else {
+            let system_id = entity.system_id.try_clone()?;
+            let public_id = entity.public_id.try_clone()?;
+            self.consume(end + 1);
+            self.emit(
+                EventKind::ExternalEntityReference {
+                    context: None,
+                    system_id,
+                    public_id,
+                },
+                position,
+            )?;
+            self.event_raw("")?;
+        }
+        Ok(true)
     }
 
     fn parse_subset(&mut self, mut text: &str, base_offset: usize) -> Result<(), Error> {
@@ -130,6 +350,7 @@ impl Parser {
             }
             let end =
                 end.ok_or_else(|| self.err(ErrorKind::UnclosedToken, "unclosed DTD declaration"))?;
+            self.declaration_allowed = false;
             let first_event = self.pending.len();
             let mut cursor = Cursor::new(&text[2..end]);
             let declaration = cursor
@@ -278,15 +499,24 @@ impl Parser {
             };
             (None, system_id, public_id, notation)
         };
-        if !parameter && !self.entities.contains_key(&name) {
-            if self.entities.len() >= self.config.limits.max_entities {
+        if self.declarations_skipped {
+            return Ok(());
+        }
+        let declaration_count = self.entities.len() + self.parameter_entities.len();
+        let declarations = if parameter {
+            &mut self.parameter_entities
+        } else {
+            &mut self.entities
+        };
+        if !declarations.contains_key(&name) {
+            if declaration_count >= self.config.limits.max_entities {
                 return Err(self.err(
                     ErrorKind::LimitExceeded,
                     "entity declaration count limit exceeded",
                 ));
             }
             try_insert(
-                &mut self.entities,
+                declarations,
                 name.try_clone()?,
                 Entity {
                     value: value.try_clone()?,
@@ -295,18 +525,6 @@ impl Parser {
                     notation: notation.try_clone()?,
                 },
             )?;
-            self.emit(
-                EventKind::EntityDeclaration {
-                    name,
-                    value,
-                    parameter,
-                    system_id,
-                    public_id,
-                    notation,
-                },
-                position,
-            )?;
-        } else if parameter {
             self.emit(
                 EventKind::EntityDeclaration {
                     name,
@@ -401,6 +619,9 @@ impl Parser {
                 }
                 Some(value)
             };
+            if self.declarations_skipped {
+                continue;
+            }
             if !self.defaults.contains_key(&element) {
                 try_insert(
                     &mut self.defaults,

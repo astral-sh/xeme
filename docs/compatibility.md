@@ -60,8 +60,12 @@ its assertions are used to judge Oriole. The harness was bootstrapped against
 system Expat 2.6.1. These C allocation counts validate public ownership. Separate
 Rust tests inject failure at each allocation, detect allocations escaping the
 supplied suite, force reallocations to move across alignment offsets, and exercise
-concurrent shared ownership. Allocation ownership is retained across parser,
-child, callback, and content-model lifetimes.
+concurrent shared ownership. The allocation tracker counts live backing bytes,
+including adapter metadata, across a parser family. Resizing and freeing a block
+use the tracker owned by that block, including after the parser that created it
+has been freed. A 512 MiB ceiling on live backing allocations applies to each
+parser family, independently of its configured amplification factor and threshold.
+Crossing this ceiling returns `XML_ERROR_NO_MEMORY`.
 
 ## CPython integration
 

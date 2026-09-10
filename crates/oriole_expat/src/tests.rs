@@ -443,17 +443,14 @@ fn child_survives_parent_deletion() {
 }
 
 #[test]
-fn external_dtd_construction_does_not_taint_parent() {
-    // SAFETY: Unsupported DTD content reports an ordinary parse failure in child.
+fn external_dtd_construction_and_parsing_do_not_taint_parent() {
+    // SAFETY: The child parses DTD declarations and merges them into its live parent.
     unsafe {
         let parent = XML_ParserCreate(ptr::null());
         let child = XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null());
         assert!(!child.is_null());
         assert_eq!(XML_GetErrorCode(parent), 0);
-        assert_eq!(
-            XML_Parse(child, c"<!ELEMENT r EMPTY>".as_ptr(), 18, 1),
-            ERROR
-        );
+        assert_eq!(XML_Parse(child, c"<!ELEMENT r EMPTY>".as_ptr(), 18, 1), OK);
         assert_eq!(XML_GetErrorCode(parent), 0);
         XML_ParserFree(child);
         assert_eq!(XML_Parse(parent, c"<r/>".as_ptr(), 4, 1), OK);
@@ -668,6 +665,217 @@ fn default_doctype_fragments_survive_suspension() {
                 .collect::<String>(),
             std::str::from_utf8(input).unwrap()
         );
+        XML_ParserFree(parser);
+    }
+}
+
+#[test]
+fn external_dtd_declarations_are_available_to_the_parent() {
+    // SAFETY: The child is parsed synchronously before the parent continues.
+    unsafe {
+        let mut state = State::default();
+        let parent = configured(&mut state);
+        let child = XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null());
+        assert!(!child.is_null());
+        let dtd = b"<!ENTITY e 'works'><!ATTLIST r a CDATA 'default'>";
+        assert_eq!(
+            XML_Parse(child, dtd.as_ptr().cast(), dtd.len() as c_int, 1),
+            OK
+        );
+        XML_ParserFree(child);
+        assert_eq!(XML_Parse(parent, c"<r>&e;</r>".as_ptr(), 10, 1), OK);
+        assert_eq!(
+            state.events,
+            ["start:r", "a=default", "text:works", "end:r"]
+        );
+        XML_ParserFree(parent);
+    }
+}
+
+unsafe extern "C" fn foreign_dtd(
+    parent: XML_Parser,
+    context: *const c_char,
+    _base: *const c_char,
+    system: *const c_char,
+    public: *const c_char,
+) -> c_int {
+    // SAFETY: UseForeignDTD supplies null identifiers for an implicit external DTD.
+    unsafe {
+        assert!(context.is_null());
+        assert!(system.is_null());
+        assert!(public.is_null());
+        (*XML_GetUserData(parent).cast::<State>()).nested_status += 1;
+        let child = XML_ExternalEntityParserCreate(parent, context, ptr::null());
+        if child.is_null() {
+            return 0;
+        }
+        let dtd = b"<!ENTITY supplied 'yes'>";
+        let result = XML_Parse(child, dtd.as_ptr().cast(), dtd.len() as c_int, 1);
+        XML_ParserFree(child);
+        result
+    }
+}
+
+#[test]
+fn foreign_dtd_callback_runs_before_document_content() {
+    // SAFETY: The callback creates and frees its own child while the parent pauses.
+    unsafe {
+        let mut state = State::default();
+        let parser = configured(&mut state);
+        assert_eq!(XML_UseForeignDTD(parser, 1), 0);
+        assert_eq!(XML_SetParamEntityParsing(parser, 2), 1);
+        XML_SetExternalEntityRefHandler(parser, Some(foreign_dtd));
+        // CPython sets this immediately before the first Unicode Parse call.
+        assert_eq!(XML_SetEncoding(parser, c"UTF-8".as_ptr()), OK);
+        let document = b"<r>&supplied;</r>";
+        assert_eq!(
+            XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1),
+            OK
+        );
+        assert_eq!(state.nested_status, 1);
+        assert_eq!(state.events, ["start:r", "text:yes", "end:r"]);
+        XML_ParserFree(parser);
+    }
+}
+
+#[test]
+fn allocation_tracker_enforces_live_memory_amplification() {
+    // SAFETY: These limits exercise small allocations, not process exhaustion.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        assert_eq!(XML_SetAllocTrackerActivationThreshold(parser, 0), 1);
+        assert_eq!(XML_SetAllocTrackerMaximumAmplification(parser, 1.0), 1);
+        assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 1);
+        XML_ParserFree(parser);
+
+        let parser = XML_ParserCreate(ptr::null());
+        assert_eq!(XML_SetAllocTrackerActivationThreshold(parser, 100_000), 1);
+        assert_eq!(XML_SetAllocTrackerMaximumAmplification(parser, 1.0), 1);
+        assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), OK);
+        XML_ParserFree(parser);
+    }
+}
+
+#[test]
+fn allocation_tracker_accepts_infinity_and_rejects_child_settings() {
+    // SAFETY: Root and child remain live until their final frees below.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        assert_eq!(XML_SetAllocTrackerMaximumAmplification(parser, f32::NAN), 0);
+        assert_eq!(XML_SetAllocTrackerMaximumAmplification(parser, 0.0), 0);
+        assert_eq!(
+            XML_SetAllocTrackerMaximumAmplification(parser, f32::INFINITY),
+            1
+        );
+        assert_eq!(XML_SetAllocTrackerActivationThreshold(parser, 0), 1);
+        let child = XML_ExternalEntityParserCreate(parser, c"".as_ptr(), ptr::null());
+        assert!(!child.is_null());
+        assert_eq!(XML_SetAllocTrackerMaximumAmplification(child, 2.0), 0);
+        assert_eq!(XML_SetAllocTrackerActivationThreshold(child, 0), 0);
+        assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), OK);
+        XML_ParserFree(child);
+        XML_ParserFree(parser);
+    }
+}
+
+#[test]
+fn public_memory_helpers_account_for_and_release_live_bytes() {
+    // SAFETY: Each pointer is used only through its original parser's memory API.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        let tracker = Shared::clone(&(*parser).tracker);
+        let initial = tracker.live_bytes();
+        let memory = XML_MemMalloc(parser, 1000);
+        assert!(!memory.is_null());
+        assert!(tracker.live_bytes() >= initial + 1000);
+        let memory = XML_MemRealloc(parser, memory, 2000);
+        assert!(!memory.is_null());
+        assert!(tracker.live_bytes() >= initial + 2000);
+        XML_MemFree(parser, memory);
+        assert_eq!(tracker.live_bytes(), initial);
+        XML_ParserFree(parser);
+        assert_eq!(tracker.live_bytes(), 0);
+    }
+}
+
+#[test]
+fn content_model_outlives_parent_and_retains_its_tracker() {
+    // SAFETY: A model owns its allocator and can be freed after its parser.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        let tracker = Shared::clone(&(*parser).tracker);
+        let model = with_parser_tracking(parser, || {
+            content_model::allocate("(a,b+)", (*parser).allocator)
+        })
+        .unwrap();
+        XML_ParserFree(parser);
+        assert!(tracker.live_bytes() > 0);
+        assert_eq!((*model).numchildren, 2);
+        XML_FreeContentModel(ptr::null_mut(), model);
+        assert_eq!(tracker.live_bytes(), 0);
+    }
+}
+
+#[test]
+fn an_old_dtd_child_cannot_modify_a_reset_parent_document() {
+    // SAFETY: The old child remains independently usable, but reset invalidates
+    // its parent-generation token before constructing the new document state.
+    unsafe {
+        let parent = XML_ParserCreate(ptr::null());
+        let child = XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null());
+        assert!(!child.is_null());
+        assert_eq!(XML_ParserReset(parent, ptr::null()), 1);
+        let dtd = b"<!ENTITY stale 'must not leak'>";
+        assert_eq!(
+            XML_Parse(child, dtd.as_ptr().cast(), dtd.len() as c_int, 1),
+            OK
+        );
+        XML_ParserFree(child);
+        let document = b"<r>&stale;</r>";
+        assert_eq!(
+            XML_Parse(parent, document.as_ptr().cast(), document.len() as c_int, 1),
+            ERROR
+        );
+        assert_eq!(XML_GetErrorCode(parent), 11);
+        XML_ParserFree(parent);
+    }
+}
+
+#[test]
+fn unresolved_external_general_entity_reaches_the_default_handler() {
+    // SAFETY: The default callback owns no parser references and records raw input.
+    unsafe {
+        let mut state = State::default();
+        let parser = configured(&mut state);
+        XML_SetDefaultHandlerExpand(parser, Some(text));
+        let document = b"<!DOCTYPE r [<!ENTITY ext SYSTEM 'external'>]><r>&ext;</r>";
+        assert_eq!(
+            XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1),
+            OK
+        );
+        assert!(state.events.contains(&"text:&ext;".to_owned()));
+        XML_ParserFree(parser);
+    }
+}
+
+#[test]
+fn setting_encoding_preserves_default_handler_and_deferral_modes() {
+    // SAFETY: The settings are applied before parsing, as CPython does for strings.
+    unsafe {
+        let mut state = State::default();
+        let parser = configured(&mut state);
+        XML_SetDefaultHandler(parser, Some(text));
+        assert_eq!(XML_SetReparseDeferralEnabled(parser, 0), 1);
+        assert_eq!(XML_SetEncoding(parser, c"UTF-8".as_ptr()), OK);
+        assert!(!(*parser).core.reparse_deferral_enabled());
+        let document = b"<!DOCTYPE r [<!ENTITY e 'expanded'>]><r>&e;</r>";
+        assert_eq!(
+            XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1),
+            OK
+        );
+        assert!(state.events.contains(&"text:&e;".to_owned()));
+        assert!(!state.events.contains(&"text:expanded".to_owned()));
         XML_ParserFree(parser);
     }
 }

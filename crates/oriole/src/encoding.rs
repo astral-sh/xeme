@@ -174,10 +174,14 @@ impl Decoder {
         }
         self.pending.drain(..consumed);
         if final_input && !self.pending.is_empty() {
-            return Err(Error::bare(
-                ErrorKind::PartialCharacter,
-                "incomplete encoded character",
-            ));
+            let kind = if matches!(encoding, Encoding::Utf16Le | Encoding::Utf16Be)
+                && self.pending.len() == 1
+            {
+                ErrorKind::UnclosedToken
+            } else {
+                ErrorKind::PartialCharacter
+            };
+            return Err(Error::bare(kind, "incomplete encoded character"));
         }
         Ok(())
     }
@@ -204,10 +208,10 @@ impl Decoder {
             (Encoding::Utf16Le, 2)
         } else if bytes.starts_with(&[0xfe, 0xff]) {
             (Encoding::Utf16Be, 2)
-        } else if bytes.starts_with(&[b'<', 0]) {
-            (Encoding::Utf16Le, 0)
-        } else if bytes.starts_with(&[0, b'<']) {
+        } else if bytes.first() == Some(&0) && bytes.len() >= 2 {
             (Encoding::Utf16Be, 0)
+        } else if bytes.get(1) == Some(&0) {
+            (Encoding::Utf16Le, 0)
         } else {
             (Encoding::Utf8, 0)
         };
@@ -285,9 +289,7 @@ impl Decoder {
                                 "unsupported declared encoding",
                             ));
                         };
-                        if matches!(encoding, Encoding::Utf16Le | Encoding::Utf16Be)
-                            || (skip > 0 && encoding != Encoding::Utf8)
-                        {
+                        if matches!(encoding, Encoding::Utf16Le | Encoding::Utf16Be) {
                             return Err(Error::bare(
                                 ErrorKind::IncorrectEncoding,
                                 "declared encoding conflicts with input bytes",
@@ -325,29 +327,31 @@ impl Decoder {
             ));
         }
         for (byte, value) in map.iter().copied().enumerate() {
-            if (matches!(byte, 9 | 10 | 13) || (32..128).contains(&byte)) && value != byte as i32 {
+            if required_ascii(byte as i32) && value != byte as i32 {
                 return Err(Error::bare(
                     ErrorKind::UnknownEncoding,
                     "custom encoding changes an ASCII markup character",
                 ));
             }
-            if value < -1
-                || (value >= 0
-                    && (char::from_u32(value as u32).is_none() || map[..byte].contains(&value)))
-            {
+            if !(-1..=0xffff).contains(&value) || (required_ascii(value) && value != byte as i32) {
                 return Err(Error::bare(
                     ErrorKind::UnknownEncoding,
-                    "encoding map requires unique Unicode scalar values or -1",
+                    "custom encoding changes XML syntax or requires multibyte conversion",
                 ));
             }
         }
-        if self.pending.starts_with(&[0xef, 0xbb, 0xbf]) {
+        if self.requested.is_some() && self.pending.starts_with(&[0xef, 0xbb, 0xbf]) {
             return Err(Error::bare(
                 ErrorKind::IncorrectEncoding,
                 "custom encoding conflicts with byte order mark",
             ));
         }
         self.custom_map = Some(try_box(map, self.allocator)?);
+        if self.pending.starts_with(&[0xef, 0xbb, 0xbf]) {
+            self.pending.drain(..3);
+            source.raw_index = 3;
+            source.column = 1;
+        }
         self.encoding = Some(Encoding::SingleByte);
         source.encoding = Encoding::SingleByte;
         Ok(())
@@ -409,6 +413,15 @@ impl Decoder {
     }
 }
 
+/// ASCII characters that Expat requires custom encodings to preserve exactly.
+/// Ordinary punctuation such as `$`, `@`, and `~` may be remapped; XML markup,
+/// whitespace, and ASCII name characters may not acquire alternate byte forms.
+fn required_ascii(value: i32) -> bool {
+    matches!(value, 9 | 10 | 13)
+        || ((32..127).contains(&value)
+            && !matches!(value, 36 | 64 | 92 | 94 | 96 | 123 | 125 | 126))
+}
+
 #[derive(Debug, Default)]
 struct Scan {
     mode: Option<ScanMode>,
@@ -468,6 +481,16 @@ impl Source {
     }
     pub(crate) fn remaining(&self) -> &str {
         &self.text[self.cursor..]
+    }
+
+    /// Expat emits converted character data through a 1 KiB UTF-8 buffer.
+    /// Its native UTF-8 and ASCII paths do not need that conversion buffer.
+    pub(crate) fn converted_text_limit(&self) -> usize {
+        if matches!(self.encoding, Encoding::Utf8 | Encoding::Ascii) {
+            self.remaining().len()
+        } else {
+            self.remaining().floor_char_boundary(1024)
+        }
     }
     pub(crate) fn position(&self, count: usize) -> Position {
         if let Some(anchor) = self.anchor {
@@ -663,7 +686,7 @@ impl Source {
                     } else {
                         match bytes[index] {
                             b'\'' | b'"' => scan.quote = bytes[index],
-                            b'[' if mode == ScanMode::Doctype => scan.brackets += 1,
+                            b'[' if mode == ScanMode::Doctype => return Ok(Some(index + 1)),
                             b']' if mode == ScanMode::Doctype => {
                                 scan.brackets = scan.brackets.saturating_sub(1);
                             }

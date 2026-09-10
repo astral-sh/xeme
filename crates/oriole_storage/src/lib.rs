@@ -4,12 +4,17 @@ mod allocator;
 mod queue;
 mod shared;
 mod string;
+mod tracking;
 
 pub use allocator::{Allocator, CustomAllocator, MemorySuite, in_allocator_callback};
 pub use allocator_api2::alloc::{Allocator as AllocatorApi, Layout};
 pub use queue::Queue;
 pub use shared::Shared;
 pub use string::{CString, String};
+pub use tracking::{
+    ACTIVATION_THRESHOLD_DEFAULT, AllocationTracker, MAXIMUM_AMPLIFICATION_DEFAULT,
+    MAXIMUM_LIVE_BYTES, with_tracking, without_tracking,
+};
 
 /// An allocation failure that can be reported without allocating another object.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

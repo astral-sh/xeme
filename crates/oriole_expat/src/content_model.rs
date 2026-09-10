@@ -173,7 +173,7 @@ pub(super) fn allocate(text: &str, allocator: Allocator) -> Result<*mut XML_Cont
     // SAFETY: malloc is aligned for XML_Content and the checked size covers every
     // node and name. The returned block transfers ownership to the C callback.
     unsafe {
-        let owner = allocator.malloc(size).cast::<u8>();
+        let owner = allocator.tracked_malloc(size).cast::<u8>();
         if owner.is_null() {
             return Err(1);
         }
@@ -197,7 +197,7 @@ pub(super) unsafe fn free(model: *mut XML_Content) {
     unsafe {
         let owner = model.cast::<u8>().sub(OWNER_BYTES);
         let allocator = owner.cast::<Allocator>().read();
-        allocator.free(owner.cast());
+        allocator.tracked_free(owner.cast());
     }
 }
 

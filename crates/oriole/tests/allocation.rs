@@ -85,6 +85,23 @@ unsafe extern "C" fn checked_free(pointer: *mut c_void) {
     }
 }
 
+fn next_event(parser: &mut Parser) -> Result<Option<oriole::Event>, Error> {
+    let result = parser.next_event();
+    if let Err(error) = &result
+        && error.kind == ErrorKind::NoMemory
+    {
+        let calls = CALLS.get();
+        assert_eq!(parser.next_event().unwrap_err(), *error);
+        assert_eq!(parser.feed(b"<ignored/>", true).unwrap_err(), *error);
+        assert_eq!(
+            CALLS.get(),
+            calls,
+            "a terminal error must not allocate on retry"
+        );
+    }
+    result
+}
+
 fn workload(allocator: Allocator) -> Result<(), Error> {
     let mut parser = Parser::try_new_with_encoding_in(
         Config {
@@ -96,11 +113,32 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         allocator,
     )?;
     parser.feed(b"<!DOCTYPE r [<!ENTITY internal '<p:n/>'><!ENTITY external SYSTEM 'child'><!ATTLIST r a NMTOKENS ' a  b '>]><r xmlns:p='urn:p' p:attr='v'>&internal;&external;<!--c--><![CDATA[x]]></r>", true)?;
-    while let Some(event) = parser.next_event()? {
+    while let Some(event) = next_event(&mut parser)? {
         if let EventKind::ExternalEntityReference { context, .. } = event.kind {
             let mut child = parser.external_child_with_encoding(context.as_deref(), None)?;
             child.feed(b"<?xml encoding='UTF-8'?><p:x a='value'/>text", true)?;
-            while child.next_event()?.is_some() {}
+            while next_event(&mut child)?.is_some() {}
+        }
+    }
+    let mut parser = Parser::try_new_in(Config::default(), allocator)?;
+    assert!(parser.set_param_entity_parsing(2));
+    parser.feed(b"<!DOCTYPE r SYSTEM 'test.dtd'><r>&external;</r>", true)?;
+    while let Some(event) = next_event(&mut parser)? {
+        if let EventKind::ExternalEntityReference { context: None, .. } = event.kind {
+            let mut child = parser.external_child_with_encoding(None, None)?;
+            child.feed(
+                b"<!ENTITY external 'loaded'><!ATTLIST r default CDATA 'yes'>",
+                true,
+            )?;
+            while next_event(&mut child)?.is_some() {}
+            if let Err(error) = parser.merge_external_subset(&child) {
+                let calls = CALLS.get();
+                assert_eq!(parser.merge_external_subset(&child).unwrap_err(), error);
+                assert_eq!(parser.next_event().unwrap_err(), error);
+                assert_eq!(parser.feed(&[], true).unwrap_err(), error);
+                assert_eq!(CALLS.get(), calls);
+                return Err(error);
+            }
         }
     }
     let mut parser =
@@ -115,7 +153,7 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         Err(error) => return Err(error),
         _ => panic!("custom encoding unexpectedly resolved without its map"),
     }
-    while parser.next_event()?.is_some() {}
+    while next_event(&mut parser)?.is_some() {}
     Ok(())
 }
 

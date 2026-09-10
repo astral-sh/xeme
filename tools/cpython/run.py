@@ -37,6 +37,12 @@ def main() -> int:
     parser.add_argument("--library", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--system-allocator", action="store_true")
+    parser.add_argument(
+        "--native-library",
+        action="append",
+        default=[],
+        help="Native library name required by a Rust static archive; repeat in linker order",
+    )
     parser.add_argument("--tests", nargs="+", default=TESTS)
     args = parser.parse_args()
     if sys.version_info[:3] != (3, 12, 13):
@@ -59,7 +65,11 @@ def main() -> int:
     # The dynamic loader resolves ELF SONAMEs, not necessarily the path supplied
     # to the linker. Preserve that alias beside the frozen library so a system
     # libexpat cannot silently satisfy the extension's dependency instead.
-    dynamic = subprocess.check_output(["readelf", "-d", str(library)], text=True)
+    dynamic = (
+        subprocess.check_output(["readelf", "-d", str(library)], text=True)
+        if library.suffix != ".a"
+        else ""
+    )
     soname = re.search(r"\(SONAME\).*\[([^]]+)\]", dynamic)
     if soname:
         name = soname.group(1)
@@ -113,6 +123,7 @@ oriole_create_system(const XML_Char *encoding,
             + [
                 str(path),
                 str(library),
+                *[f"-l{name}" for name in args.native_library],
                 f"-Wl,-rpath,{library.parent}",
                 "-o",
                 str(output / f"{name}{suffix}"),
@@ -212,6 +223,7 @@ for name in ('pyexpat', '_elementtree'):
         "cpython_revision": revision,
         "python": sys.version,
         "library_sha256": hashlib.sha256(library.read_bytes()).hexdigest(),
+        "linkage": "static" if library.suffix == ".a" else "shared",
         "consumer_adaptation": "system allocator" if args.system_allocator else None,
         "commands": commands,
         "test_command": command,

@@ -171,7 +171,7 @@ pub enum EventKind {
     },
     ExternalEntityReference {
         context: Option<String>,
-        system_id: String,
+        system_id: Option<String>,
         public_id: Option<String>,
     },
     StartDoctype {
@@ -181,6 +181,7 @@ pub enum EventKind {
         has_internal_subset: bool,
     },
     EndDoctype,
+    NotStandalone,
     StartNamespace {
         prefix: Option<String>,
         uri: Option<String>,
@@ -268,8 +269,10 @@ impl TryClone for DefaultAttribute {
 
 /// An incremental, non-validating XML 1.0 parser.
 ///
-/// External entities are never fetched. Referencing one produces an explicit error.
-/// Parameter entity references are unsupported and rejected, including in DTDs.
+/// External entity references produce events for application-controlled resolution;
+/// the parser never performs I/O. Parameter entity processing is opt-in and supports
+/// references between declarations. Inline references and conditional DTD sections
+/// are rejected explicitly.
 #[derive(Debug)]
 pub struct Parser {
     config: Config,
@@ -280,6 +283,12 @@ pub struct Parser {
     stack: Vec<Element>,
     namespaces: HashMap<String, String>,
     entities: HashMap<String, Entity>,
+    parameter_entities: HashMap<String, Entity>,
+    parameter_mode: u8,
+    foreign_dtd: bool,
+    in_doctype: bool,
+    declarations_skipped: bool,
+    doctype_external: Option<(Option<String>, Option<String>)>,
     defaults: HashMap<String, Vec<DefaultAttribute>>,
     seen_root: bool,
     closed_root: bool,
@@ -290,6 +299,7 @@ pub struct Parser {
     finished: bool,
     error: Option<Error>,
     received: usize,
+    feed_start_byte: usize,
     expanded: Shared<AtomicUsize>,
     fragment: bool,
     external_subset: bool,
@@ -342,6 +352,12 @@ impl Parser {
             pending: Queue::new_in(allocator),
             stack: Vec::new_in(allocator),
             entities: hash_map(allocator),
+            parameter_entities: hash_map(allocator),
+            parameter_mode: 0,
+            foreign_dtd: false,
+            in_doctype: false,
+            declarations_skipped: false,
+            doctype_external: None,
             defaults: hash_map(allocator),
             seen_root: false,
             closed_root: false,
@@ -352,6 +368,7 @@ impl Parser {
             finished: false,
             error: None,
             received: 0,
+            feed_start_byte: 0,
             expanded: Shared::try_new_in(AtomicUsize::new(0), allocator)?,
             fragment: false,
             external_subset: false,
@@ -376,13 +393,30 @@ impl Parser {
         self.allocator
     }
 
+    /// Change the protocol encoding before receiving input, preserving parser options.
+    pub fn set_encoding(&mut self, encoding: Option<&str>) -> Result<(), Error> {
+        if let Some(error) = self.error {
+            return Err(error);
+        }
+        if self.received != 0 || self.final_input {
+            return Err(self.err(
+                ErrorKind::Finished,
+                "encoding cannot change after input begins",
+            ));
+        }
+        // This initialization setter is transactional: an allocation failure must
+        // leave the previous decoder available for autodetection during parsing.
+        self.decoder = Decoder::new(encoding, self.allocator)?;
+        Ok(())
+    }
+
     /// Construct an independent parser for an application-provided external entity.
     ///
     /// Pass the context from [`EventKind::ExternalEntityReference`]. Namespace
     /// bindings, declarations, recursion tracking, and the expansion budget are
     /// inherited. The parser never opens a path or performs a network request.
-    /// A `None` context creates an external-DTD parser, whose input is currently
-    /// rejected explicitly because external DTD processing is not implemented.
+    /// A `None` context creates an external DTD parser. After its input has parsed
+    /// successfully, use [`Self::merge_external_subset`] to import its declarations.
     pub fn external_child(
         &self,
         context: Option<&str>,
@@ -421,6 +455,13 @@ impl Parser {
             }
             try_insert(&mut child.defaults, name.try_clone()?, cloned)?;
         }
+        for (name, entity) in &self.parameter_entities {
+            try_insert(
+                &mut child.parameter_entities,
+                name.try_clone()?,
+                entity.try_clone()?,
+            )?;
+        }
         child.namespaces.clear();
         for (prefix, uri) in &self.namespaces {
             try_insert(&mut child.namespaces, prefix.try_clone()?, uri.try_clone()?)?;
@@ -430,6 +471,7 @@ impl Parser {
         child.external_subset = context.is_none();
         child.external_depth = self.external_depth + 1;
         child.expand_internal_entities = self.expand_internal_entities;
+        child.parameter_mode = self.parameter_mode;
         child.has_external_subset = self.has_external_subset;
         child.standalone = self.standalone;
         child.reparse_deferral = self.reparse_deferral;
@@ -456,20 +498,108 @@ impl Parser {
         Ok(child)
     }
 
+    /// Select parameter entity processing: 0 never, 1 unless standalone, 2 always.
+    pub fn set_param_entity_parsing(&mut self, mode: u8) -> bool {
+        if mode > 2 || self.received != 0 {
+            return false;
+        }
+        self.parameter_mode = mode;
+        true
+    }
+    pub fn set_use_foreign_dtd(&mut self, enabled: bool) -> bool {
+        if self.received != 0 {
+            return false;
+        }
+        self.foreign_dtd = enabled;
+        true
+    }
+    #[must_use]
+    pub fn is_external_subset(&self) -> bool {
+        self.external_subset
+    }
+    /// Import successfully parsed external DTD declarations. Existing declarations win.
+    pub fn merge_external_subset(&mut self, child: &Self) -> Result<(), Error> {
+        if let Some(error) = self.error {
+            return Err(error);
+        }
+        let result = self.merge_external_subset_inner(child);
+        if let Err(error) = result {
+            self.error = Some(error);
+            self.pending.clear();
+        }
+        result
+    }
+
+    fn merge_external_subset_inner(&mut self, child: &Self) -> Result<(), Error> {
+        if !child.external_subset || !child.finished {
+            return Err(self.err(
+                ErrorKind::ExternalEntityHandling,
+                "external subset has not completed",
+            ));
+        }
+        for (name, entity) in &child.entities {
+            if !self.entities.contains_key(name) {
+                if self.entities.len() + self.parameter_entities.len()
+                    >= self.config.limits.max_entities
+                {
+                    return self.fail(
+                        ErrorKind::LimitExceeded,
+                        "entity declaration count limit exceeded",
+                    );
+                }
+                try_insert(&mut self.entities, name.try_clone()?, entity.try_clone()?)?;
+            }
+        }
+        for (name, entity) in &child.parameter_entities {
+            if !self.parameter_entities.contains_key(name) {
+                if self.entities.len() + self.parameter_entities.len()
+                    >= self.config.limits.max_entities
+                {
+                    return self.fail(
+                        ErrorKind::LimitExceeded,
+                        "entity declaration count limit exceeded",
+                    );
+                }
+                try_insert(
+                    &mut self.parameter_entities,
+                    name.try_clone()?,
+                    entity.try_clone()?,
+                )?;
+            }
+        }
+        for (name, attributes) in &child.defaults {
+            if !self.defaults.contains_key(name) {
+                try_insert(
+                    &mut self.defaults,
+                    name.try_clone()?,
+                    Vec::new_in(self.allocator),
+                )?;
+            }
+            let target = self.defaults.get_mut(name).expect("default list exists");
+            for attribute in attributes {
+                if !target.iter().any(|old| old.name == attribute.name) {
+                    if target.len() >= self.config.limits.max_attributes {
+                        return Err(self.err(
+                            ErrorKind::LimitExceeded,
+                            "default attribute count limit exceeded",
+                        ));
+                    }
+                    try_push(target, attribute.try_clone()?)?;
+                }
+            }
+        }
+        Ok(())
+    }
+
     /// Append input without calling user code. Drain events before feeding more data.
     pub fn feed(&mut self, bytes: &[u8], is_final: bool) -> Result<(), Error> {
         if let Some(error) = &self.error {
             return Err(*error);
         }
-        if self.external_subset {
-            return self.fail(
-                ErrorKind::ExternalEntityHandling,
-                "external DTD subsets are not supported",
-            );
-        }
         if self.final_input {
             return self.fail(ErrorKind::Finished, "input has already been finalized");
         }
+        self.feed_start_byte = self.sources[0].position(0).byte_index;
         self.received = match self.received.checked_add(bytes.len()) {
             Some(size) if size <= self.config.limits.max_total_bytes => size,
             _ => return self.fail(ErrorKind::LimitExceeded, "input byte limit exceeded"),
@@ -656,6 +786,13 @@ impl Parser {
             position: self.here(),
         }
     }
+    fn err_at(&self, kind: ErrorKind, message: &'static str, offset: usize) -> Error {
+        Error {
+            kind,
+            message,
+            position: self.source().position_at(offset, 0),
+        }
+    }
     fn fail<T>(&mut self, kind: ErrorKind, message: &'static str) -> Result<T, Error> {
         let error = self.err(kind, message);
         self.error = Some(error);
@@ -714,6 +851,11 @@ impl Parser {
                     return Ok(None);
                 }
                 self.last_position = self.here();
+                if self.in_doctype {
+                    return Err(
+                        self.err(ErrorKind::NoElements, "unclosed document type declaration")
+                    );
+                }
                 if self.in_cdata {
                     return Err(self.err(ErrorKind::UnclosedCdataSection, "unclosed CDATA section"));
                 }
@@ -725,6 +867,12 @@ impl Parser {
                 }
                 self.finished = true;
                 return Ok(None);
+            }
+            if self.in_doctype || self.external_subset {
+                if !self.parse_dtd_step()? {
+                    return Ok(None);
+                }
+                continue;
             }
             if self.in_cdata {
                 if !self.parse_cdata()? {
@@ -785,6 +933,18 @@ impl Parser {
             } else {
                 ScanMode::Tag
             };
+            if mode == ScanMode::Tag {
+                let name_offset = if remaining.starts_with("</") { 2 } else { 1 };
+                if let Some(character) = remaining[name_offset..].chars().next()
+                    && !names::is_name_start(character)
+                {
+                    return Err(self.err_at(
+                        ErrorKind::InvalidToken,
+                        "invalid element name",
+                        name_offset,
+                    ));
+                }
+            }
             let final_input = self.is_source_final();
             let max_token = self.config.limits.max_token_bytes;
             let deferral = self.reparse_deferral && !final_input;
@@ -796,21 +956,56 @@ impl Parser {
                 .scan_token(mode, max_token)
                 .map_err(|kind| self.err(kind, "XML token byte limit exceeded"))?;
             let Some(end) = end else {
-                self.source_mut().mark_deferred();
+                if self.sources.len() == 1
+                    && self.source().position(0).byte_index == self.feed_start_byte
+                {
+                    self.source_mut().mark_deferred();
+                }
                 if final_input {
                     return Err(self.err(ErrorKind::UnclosedToken, "unclosed XML token"));
                 }
                 return Ok(None);
             };
+            if !self.seen_root && mode == ScanMode::Tag && self.foreign_dtd {
+                self.foreign_dtd = false;
+                self.has_external_subset = true;
+                if self.parameter_entities_enabled() {
+                    self.emit(
+                        EventKind::ExternalEntityReference {
+                            context: None,
+                            system_id: None,
+                            public_id: None,
+                        },
+                        self.here(),
+                    )?;
+                    continue;
+                }
+            }
             let position = self.source().position(end);
             let token = string(&self.source().remaining()[..end], self.allocator)?;
             self.current_raw = token.try_clone()?;
-            validate_chars(&token).map_err(|kind| self.err(kind, "invalid XML character"))?;
+            if let Some((offset, _)) = token
+                .char_indices()
+                .find(|(_, character)| !is_xml_char(*character))
+            {
+                return Err(self.err_at(ErrorKind::InvalidToken, "invalid XML character", offset));
+            }
             match mode {
                 ScanMode::Comment => {
                     let text = &token[4..token.len() - 3];
-                    if text.contains("--") || text.ends_with('-') {
-                        return Err(self.err(ErrorKind::InvalidToken, "double hyphen in comment"));
+                    if let Some(offset) = text.find("--") {
+                        return Err(self.err_at(
+                            ErrorKind::InvalidToken,
+                            "double hyphen in comment",
+                            4 + offset + 2,
+                        ));
+                    }
+                    if text.ends_with('-') {
+                        return Err(self.err_at(
+                            ErrorKind::InvalidToken,
+                            "double hyphen in comment",
+                            5 + text.len(),
+                        ));
                     }
                     self.declaration_allowed = false;
                     self.emit(
@@ -828,12 +1023,20 @@ impl Parser {
     }
 
     fn parse_text(&mut self) -> Result<bool, Error> {
-        let text = self.source().remaining();
+        let limit = self.source().converted_text_limit();
+        let text = &self.source().remaining()[..limit];
+        let final_text = self.is_source_final() && limit == self.source().remaining().len();
         let mut end = text
             .bytes()
-            .position(|byte| byte == b'<' || byte == b'&')
-            .unwrap_or(text.len());
-        if end == text.len() && !self.is_source_final() {
+            .position(|byte| matches!(byte, b'<' | b'&' | b'\r' | b'\n'))
+            .map_or(text.len(), |index| {
+                if index == 0 && matches!(text.as_bytes()[0], b'\r' | b'\n') {
+                    if text.starts_with("\r\n") { 2 } else { 1 }
+                } else {
+                    index
+                }
+            });
+        if end == text.len() && !final_text {
             if text.ends_with('\r') {
                 end -= 1;
             }
@@ -845,15 +1048,43 @@ impl Parser {
         if end == 0 {
             return Ok(false);
         }
-        let text = &text[..end];
-        validate_chars(text).map_err(|kind| self.err(kind, "invalid XML character"))?;
-        if text.contains("]]>") {
-            return Err(self.err(
+        if let Some(newline) = text[..end].find(['\r', '\n']) {
+            end = if newline > 0 {
+                newline
+            } else if text.starts_with("\r\n") {
+                2
+            } else {
+                1
+            };
+        }
+        let invalid = text[..end]
+            .char_indices()
+            .find(|(_, character)| !is_xml_char(*character))
+            .map(|(index, _)| index);
+        let forbidden = text[..end].find("]]>");
+        if let Some(forbidden) =
+            forbidden.filter(|forbidden| invalid.is_none_or(|invalid| invalid > *forbidden))
+        {
+            return Err(self.err_at(
                 ErrorKind::InvalidToken,
                 "CDATA terminator in character data",
+                forbidden + 2,
             ));
         }
+        if let Some(stop) = invalid {
+            if stop == 0 {
+                return Err(self.err_at(ErrorKind::InvalidToken, "invalid XML character data", 0));
+            }
+            end = stop;
+        }
+        let text = &text[..end];
         if self.stack.is_empty() && !self.fragment && !text.chars().all(whitespace) {
+            if !self.seen_root
+                && is_name(text)
+                && self.source().remaining().as_bytes().get(end) == Some(&b'<')
+            {
+                return Err(self.err_at(ErrorKind::InvalidToken, "invalid prolog token", end));
+            }
             return Err(self.err(
                 if self.closed_root && !self.fragment {
                     ErrorKind::JunkAfterDocumentElement
@@ -875,7 +1106,9 @@ impl Parser {
     }
 
     fn parse_cdata(&mut self) -> Result<bool, Error> {
-        let text = self.source().remaining();
+        let limit = self.source().converted_text_limit();
+        let text = &self.source().remaining()[..limit];
+        let final_text = self.is_source_final() && limit == self.source().remaining().len();
         if text.starts_with("]]>") {
             let position = self.source().position(3);
             self.current_raw = string("]]>", self.allocator)?;
@@ -884,25 +1117,55 @@ impl Parser {
             self.emit(EventKind::EndCdata, position)?;
             return Ok(true);
         }
-        let end = if let Some(end) = text.find("]]>") {
-            end
-        } else if self.is_source_final() {
-            text.len()
-        } else {
-            let mut end = text.len();
+        // Stop on the first callback boundary in a single pass. Looking for the
+        // closing delimiter across all remaining input for each newline is quadratic.
+        let mut end = text
+            .bytes()
+            .enumerate()
+            .find_map(|(index, byte)| {
+                if matches!(byte, b'\r' | b'\n') {
+                    Some(if index == 0 {
+                        if text.starts_with("\r\n") { 2 } else { 1 }
+                    } else {
+                        index
+                    })
+                } else if byte == b']' && text[index..].starts_with("]]>") {
+                    Some(index)
+                } else {
+                    None
+                }
+            })
+            .unwrap_or(text.len());
+        if end == text.len() && !final_text {
             if text.ends_with('\r') {
                 end -= 1;
             }
             while end > 0 && end + 2 >= text.len() && text.as_bytes()[end - 1] == b']' {
                 end -= 1;
             }
-            end
-        };
+        }
         if end == 0 {
             return Ok(false);
         }
+        if let Some(newline) = text[..end].find(['\r', '\n']) {
+            end = if newline > 0 {
+                newline
+            } else if text.starts_with("\r\n") {
+                2
+            } else {
+                1
+            };
+        }
+        if let Some((invalid, _)) = text[..end]
+            .char_indices()
+            .find(|(_, character)| !is_xml_char(*character))
+        {
+            if invalid == 0 {
+                return Err(self.err(ErrorKind::InvalidToken, "invalid XML character"));
+            }
+            end = invalid;
+        }
         let text = &text[..end];
-        validate_chars(text).map_err(|kind| self.err(kind, "invalid XML character"))?;
         let position = self.source().position(end);
         let value = normalize_newlines(text, self.allocator)?;
         self.current_raw = string(text, self.allocator)?;
@@ -913,10 +1176,18 @@ impl Parser {
 
     fn parse_reference(&mut self) -> Result<bool, Error> {
         let limit = self.config.limits.max_token_bytes;
-        let end = self
-            .source_mut()
-            .scan_reference(limit)
-            .map_err(|kind| self.err(kind, "entity reference byte limit exceeded"))?;
+        let end = self.source_mut().scan_reference(limit).map_err(|kind| {
+            let offset = self
+                .source()
+                .remaining()
+                .char_indices()
+                .skip(1)
+                .find(|(_, character)| {
+                    whitespace(*character) || matches!(*character, '<' | '&' | '\'' | '"' | '\0')
+                })
+                .map_or(0, |(index, _)| index);
+            self.err_at(kind, "invalid entity reference", offset)
+        })?;
         let text = self.source().remaining();
         let Some(end) = end else {
             if text.len() > self.config.limits.max_token_bytes {
@@ -1021,17 +1292,13 @@ impl Parser {
             self.emit(
                 EventKind::ExternalEntityReference {
                     context: Some(context),
-                    system_id,
+                    system_id: Some(system_id),
                     public_id,
                 },
                 position,
             )?;
             return Ok(true);
         }
-        let value = entity
-            .value
-            .try_clone()?
-            .expect("internal entity has replacement text");
         if !self.expand_internal_entities {
             self.consume(end + 1);
             self.emit(
@@ -1043,7 +1310,12 @@ impl Parser {
             )?;
             return Ok(true);
         }
+        let value = entity
+            .value
+            .as_ref()
+            .expect("internal entity has replacement text");
         self.charge_expansion(value.len())?;
+        let value = value.try_clone()?;
         self.consume(end + 1);
         try_push(
             &mut self.sources,
@@ -1073,8 +1345,17 @@ impl Parser {
                     "XML declaration is not at the beginning",
                 ));
             }
-            let attrs = parse_raw_attributes(rest, false, self.allocator)
-                .map_err(|error| self.err(error.kind, error.message))?;
+            let attrs = parse_raw_attributes(rest, false, self.allocator, 3).map_err(|error| {
+                self.err_at(
+                    if error.kind == ErrorKind::NoMemory {
+                        ErrorKind::NoMemory
+                    } else {
+                        ErrorKind::XmlDeclaration
+                    },
+                    error.message,
+                    2 + target.len() + error.position.byte_index,
+                )
+            })?;
             if self.fragment {
                 let mut attrs = attrs.into_iter();
                 let first = attrs
@@ -1085,7 +1366,7 @@ impl Parser {
                 } else {
                     (None, Some(first))
                 };
-                let (name, encoding) = encoding_attr.ok_or_else(|| {
+                let (name, encoding, _, _) = encoding_attr.ok_or_else(|| {
                     self.err(
                         ErrorKind::XmlDeclaration,
                         "text declaration requires an encoding",
@@ -1108,9 +1389,10 @@ impl Parser {
                 return Ok(());
             }
             if attrs.is_empty() || attrs[0].0 != "version" || !matches!(attrs[0].1, "1.0" | "1.1") {
-                return Err(self.err(
+                return Err(self.err_at(
                     ErrorKind::XmlDeclaration,
                     "XML declaration must begin with a version",
+                    2 + target.len() + attrs.first().map_or(0, |attribute| attribute.2),
                 ));
             }
             let version = string(attrs[0].1, self.allocator)?;
@@ -1119,7 +1401,7 @@ impl Parser {
             }
             let mut encoding = None;
             let mut standalone = None;
-            for (name, value) in attrs.into_iter().skip(1) {
+            for (name, value, _, _) in attrs.into_iter().skip(1) {
                 match name {
                     "encoding" if encoding.is_none() && standalone.is_none() => {
                         if !valid_encoding_name(value) {
@@ -1193,9 +1475,20 @@ impl Parser {
         let empty = token.ends_with("/>");
         let body = &token[1..token.len() - if empty { 2 } else { 1 }];
         let (name, rest) = take_name(body)
-            .ok_or_else(|| self.err(ErrorKind::InvalidToken, "invalid element name"))?;
-        let raw_attrs = parse_raw_attributes(rest, true, self.allocator)
-            .map_err(|error| self.err(error.kind, error.message))?;
+            .ok_or_else(|| self.err_at(ErrorKind::InvalidToken, "invalid element name", 1))?;
+        let raw_attrs = parse_raw_attributes(
+            rest,
+            true,
+            self.allocator,
+            self.config.limits.max_attributes,
+        )
+        .map_err(|error| {
+            self.err_at(
+                error.kind,
+                error.message,
+                1 + name.len() + error.position.byte_index,
+            )
+        })?;
         if raw_attrs.len() > self.config.limits.max_attributes {
             return Err(self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded"));
         }
@@ -1204,9 +1497,13 @@ impl Parser {
             .try_reserve(raw_attrs.len())
             .map_err(|_| AllocError::OutOfMemory)?;
         let mut names = hash_set(self.allocator);
-        for (attr_name, value) in raw_attrs {
+        for (attr_name, value, attribute_offset, _) in raw_attrs {
             if !try_set_insert(&mut names, attr_name)? {
-                return Err(self.err(ErrorKind::DuplicateAttribute, "duplicate attribute"));
+                return Err(self.err_at(
+                    ErrorKind::DuplicateAttribute,
+                    "duplicate attribute",
+                    1 + name.len() + attribute_offset,
+                ));
             }
             let mut value = self.expand_attribute(value, &mut Vec::new_in(self.allocator))?;
             if self
@@ -1226,26 +1523,26 @@ impl Parser {
                 },
             )?;
         }
-        if let Some(defaults) = self
-            .defaults
-            .get(name)
-            .map(TryClone::try_clone)
-            .transpose()?
-        {
+        if let Some(defaults) = self.defaults.get(name) {
             for default in defaults {
                 if !names.contains(default.name.as_str())
-                    && let Some(value) = default.value
+                    && let Some(value) = &default.value
                 {
                     if attrs.len() >= self.config.limits.max_attributes {
                         return Err(
                             self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded")
                         );
                     }
+                    // Each reused declaration produces indirect output, even when
+                    // its value contains no entity references. Charge before cloning
+                    // so repeated empty elements cannot bypass expansion limits.
+                    self.charge_expansion(default.name.len())?;
+                    self.charge_expansion(value.len())?;
                     try_push(
                         &mut attrs,
                         Attribute {
-                            name: default.name,
-                            value,
+                            name: default.name.try_clone()?,
+                            value: value.try_clone()?,
                             specified: false,
                         },
                     )?;
@@ -1403,7 +1700,7 @@ impl Parser {
             .last()
             .is_none_or(|element| element.raw_name != name)
         {
-            return Err(self.err(ErrorKind::TagMismatch, "mismatched end tag"));
+            return Err(self.err_at(ErrorKind::TagMismatch, "mismatched end tag", 2));
         }
         self.end_element(position)
     }
@@ -1494,7 +1791,7 @@ impl Parser {
         Ok(result)
     }
 
-    fn charge_expansion(&mut self, size: usize) -> Result<(), Error> {
+    fn charge_expansion(&self, size: usize) -> Result<(), Error> {
         self.expanded
             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
                 expanded
@@ -1564,17 +1861,14 @@ impl Parser {
                         self.err(ErrorKind::UndefinedEntity, "undefined entity in attribute")
                     );
                 };
-                let value = entity
-                    .value
-                    .as_ref()
-                    .ok_or_else(|| {
-                        self.err(
-                            ErrorKind::ExternalEntityInAttribute,
-                            "external entity in attribute",
-                        )
-                    })?
-                    .try_clone()?;
+                let value = entity.value.as_ref().ok_or_else(|| {
+                    self.err(
+                        ErrorKind::ExternalEntityInAttribute,
+                        "external entity in attribute",
+                    )
+                })?;
                 self.charge_expansion(value.len())?;
+                let value = value.try_clone()?;
                 try_push(chain, string(name, self.allocator)?)?;
                 output.try_push_str(&self.expand_attribute(&value, chain)?)?;
                 chain.pop();
@@ -1606,70 +1900,96 @@ fn parse_raw_attributes(
     text: &str,
     allow_refs: bool,
     allocator: Allocator,
-) -> Result<Vec<(&str, &str)>, Error> {
+    limit: usize,
+) -> Result<Vec<(&str, &str, usize, usize)>, Error> {
+    let original_len = text.len();
     let mut text = text;
     let mut result = Vec::new_in(allocator);
+    let error_at = |kind, message, remaining: &str| Error {
+        kind,
+        message,
+        position: Position {
+            byte_index: original_len - remaining.len(),
+            line: 1,
+            column: 0,
+            byte_count: 0,
+        },
+    };
     while !text.is_empty() {
         let trimmed = text.trim_start_matches(whitespace);
         if trimmed.len() == text.len() {
-            return Err(Error::bare(
+            return Err(error_at(
                 ErrorKind::InvalidToken,
                 "attributes must be separated by whitespace",
+                text,
             ));
         }
         text = trimmed;
         if text.is_empty() {
             break;
         }
-        let (name, rest) = take_name(text).ok_or(Error::bare(
+        if result.len() >= limit {
+            return Err(error_at(
+                ErrorKind::LimitExceeded,
+                "attribute count limit exceeded",
+                text,
+            ));
+        }
+        let name_offset = original_len - text.len();
+        let (name, rest) = take_name(text).ok_or(error_at(
             ErrorKind::InvalidToken,
             "invalid attribute name",
+            text,
         ))?;
+        let rest = rest.trim_start_matches(whitespace);
         let rest = rest
-            .trim_start_matches(whitespace)
             .strip_prefix('=')
-            .ok_or(Error::bare(
+            .ok_or(error_at(
                 ErrorKind::InvalidToken,
                 "attribute is missing equals sign",
+                rest,
             ))?
             .trim_start_matches(whitespace);
         let quote = rest
             .chars()
             .next()
             .filter(|c| matches!(c, '\'' | '"'))
-            .ok_or(Error::bare(
+            .ok_or(error_at(
                 ErrorKind::InvalidToken,
                 "attribute value must be quoted",
+                rest,
             ))?;
         let rest = &rest[1..];
-        let end = rest.find(quote).ok_or(Error::bare(
+        let end = rest.find(quote).ok_or(error_at(
             ErrorKind::UnclosedToken,
             "unclosed attribute value",
+            rest,
         ))?;
         let value = &rest[..end];
-        if value.contains('<') || (!allow_refs && value.contains('&')) {
-            return Err(Error::bare(
+        let value_offset = original_len - rest.len();
+        if let Some(offset) = value
+            .find('<')
+            .or_else(|| (!allow_refs).then(|| value.find('&')).flatten())
+        {
+            return Err(error_at(
                 ErrorKind::InvalidToken,
                 "invalid character in attribute value",
+                &rest[offset..],
             ));
         }
-        try_push(&mut result, (name, value))?;
+        try_push(&mut result, (name, value, name_offset, value_offset))?;
         text = &rest[end + 1..];
     }
     Ok(result)
 }
 
-fn validate_chars(text: &str) -> Result<(), ErrorKind> {
-    if text.chars().all(is_xml_char) {
-        Ok(())
-    } else {
-        Err(ErrorKind::InvalidToken)
-    }
-}
 fn string(text: &str, allocator: Allocator) -> Result<String, Error> {
     Ok(String::try_from_str_in(text, allocator)?)
 }
 fn normalize_newlines(text: &str, allocator: Allocator) -> Result<String, Error> {
+    if !text.contains('\r') {
+        return string(text, allocator);
+    }
     let mut output = String::try_with_capacity_in(text.len(), allocator)?;
     let mut previous_cr = false;
     for character in text.chars() {
@@ -1683,9 +2003,17 @@ fn normalize_newlines(text: &str, allocator: Allocator) -> Result<String, Error>
     Ok(output)
 }
 fn normalize_attribute_whitespace(text: &str, allocator: Allocator) -> Result<String, Error> {
-    let normalized = normalize_newlines(text, allocator)?;
-    let mut output = String::try_with_capacity_in(normalized.len(), allocator)?;
-    for character in normalized.chars() {
+    if !text.contains(['\t', '\r', '\n']) {
+        return string(text, allocator);
+    }
+    let mut output = String::try_with_capacity_in(text.len(), allocator)?;
+    let mut previous_cr = false;
+    for character in text.chars() {
+        if character == '\n' && previous_cr {
+            previous_cr = false;
+            continue;
+        }
+        previous_cr = character == '\r';
         output.try_push(if whitespace(character) {
             ' '
         } else {

@@ -355,3 +355,73 @@ fn every_allocation_can_fail_and_all_memory_uses_the_selected_suite() {
     }
     FAIL_AT.set(0);
 }
+
+#[test]
+fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
+    // SAFETY: The complete libc-backed suite retains ownership on failure and
+    // frees each successful allocation through the same callbacks.
+    let allocator = unsafe {
+        Allocator::from_callbacks(MemorySuite {
+            malloc: Some(checked_malloc),
+            realloc: Some(checked_realloc),
+            free: Some(checked_free),
+        })
+        .unwrap()
+    };
+    let attempt = |failure| {
+        FAIL_AT.set(0);
+        CALLS.set(0);
+        GLOBAL_CALLS.set(0);
+        TRACK_GLOBAL.set(true);
+        let mut parser = Parser::try_new_in(Config::default(), allocator).unwrap();
+        parser.feed(b"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p 'unused'><!ATTLIST r a CDATA 'v'><!ATTLIST n b CDATA 'w'>]><r/>", true).unwrap();
+        while parser.next_event().unwrap().is_some() {}
+        let before = CALLS.get();
+        if failure != 0 {
+            FAIL_AT.set(before + failure);
+        }
+        let result = parser.set_hash_salt(*b"0123456789abcdef");
+        let count = CALLS.get() - before;
+        if failure == 0 {
+            assert!(result.is_ok());
+        } else {
+            assert_eq!(result.unwrap_err().kind, ErrorKind::NoMemory);
+            assert_eq!(parser.hash_salt(), [0; 16]);
+        }
+        FAIL_AT.set(0);
+        // Existing declarations and defaults still resolve after every failure.
+        let mut child = parser.external_child(Some(""), None).unwrap();
+        child.feed(b"<n>&e;</n>", true).unwrap();
+        let mut text_seen = false;
+        let mut default_seen = false;
+        while let Some(event) = child.next_event().unwrap() {
+            match event.kind {
+                EventKind::Text(value) => {
+                    assert_eq!(value, "ok");
+                    text_seen = true;
+                }
+                EventKind::StartElement { attributes, .. } => {
+                    assert_eq!(attributes.len(), 1);
+                    assert_eq!(attributes[0].name, "b");
+                    assert_eq!(attributes[0].value, "w");
+                    default_seen = true;
+                }
+                _ => {}
+            }
+        }
+        assert!(text_seen && default_seen);
+        parser.set_hash_salt(*b"0123456789abcdef").unwrap();
+        assert_eq!(parser.hash_salt(), *b"0123456789abcdef");
+        drop(child);
+        drop(parser);
+        TRACK_GLOBAL.set(false);
+        assert_eq!(LIVE.get(), 0, "failure {failure}");
+        assert_eq!(GLOBAL_CALLS.get(), 0, "failure {failure}");
+        count
+    };
+    let count = attempt(0);
+    assert!(count > 4, "exercise populated tables and nested indexes");
+    for failure in 1..=count {
+        attempt(failure);
+    }
+}

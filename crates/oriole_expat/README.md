@@ -112,8 +112,16 @@ The following Expat modes are explicitly unsupported:
   declarations. Oriole rejects these aliases before UTF-8 tokenization, including
   in text, names, attributes, DTDs, and CDATA. Custom-encoding compatibility is
   therefore incomplete.
-- Caller-supplied hash salts: those setters return false.
 - Wide-character and `XML_LARGE_SIZE` builds: the header rejects these configurations.
+
+`XML_SetHashSalt` and `XML_SetHashSalt16Bytes` mix the caller salt into randomized
+hashing; a predictable salt does not replace the secret random keys. They update
+the root parser before parsing or after completion, including when called through
+a child. They reject roots that are parsing, suspended, or executing a callback,
+and children whose parent was freed or reset. Allocation failure preserves the old
+salt and all tables. Reset preserves the configured salt. Newly created children
+inherit it; existing children retain their independently owned hash states, so
+changing the root never invalidates a child's populated tables.
 
 `XML_GetInputContext` exposes original encoded bytes while parsing is active,
 including entity-reference spellings and UTF-16 input. The buffer retains at least

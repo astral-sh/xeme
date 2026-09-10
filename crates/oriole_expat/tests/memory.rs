@@ -72,6 +72,11 @@ fn attempt_reentry() {
             assert!(XML_GetBuffer(parser, 1).is_null());
             assert_eq!(XML_SetBase(parser, c"wrong".as_ptr()), 0);
             assert_eq!(XML_SetEncoding(parser, c"wrong".as_ptr()), 0);
+            assert_eq!(XML_SetHashSalt(parser, 1), 0);
+            assert_eq!(
+                XML_SetHashSalt16Bytes(parser, b"0123456789abcdef".as_ptr()),
+                0
+            );
             assert!(XML_MemMalloc(parser, 1).is_null());
             XML_SetUserData(parser, ptr::null_mut());
         }
@@ -163,6 +168,14 @@ fn custom_parser_never_uses_global_storage_and_blocks_allocator_reentry() {
         assert!(!parser.is_null());
         CALLBACK_PARSER.with(|value| value.set(parser));
         XML_SetUserData(parser, parser.cast());
+        FAIL_NEXT.set(true);
+        assert_eq!(XML_SetHashSalt(parser, 1), 0);
+        assert!(!FAIL_NEXT.get());
+        assert_eq!(XML_GetErrorCode(parser), 0);
+        assert_eq!(
+            XML_SetHashSalt16Bytes(parser, b"0123456789abcdef".as_ptr()),
+            1
+        );
         XML_SetElementDeclHandler(parser, Some(model));
         assert_eq!(XML_SetBase(parser, c"urn:base".as_ptr()), 1);
         let xml = c"<!DOCTYPE r [<!ELEMENT r (#PCDATA|n)*><!ELEMENT n EMPTY><!ENTITY e 'text'><!ATTLIST r a CDATA 'default'>]><r xmlns:p='urn:p' p:a='b'>&e;<n/></r>";

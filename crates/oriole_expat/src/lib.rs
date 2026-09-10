@@ -507,6 +507,8 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                     allocator,
                 )
                 .map_err(|_| AllocError::OutOfMemory)?;
+                core.set_hash_salt((*parser).core.hash_salt())
+                    .map_err(|_| AllocError::OutOfMemory)?;
                 let family = Shared::try_new_in(FamilyBudget::default(), allocator)?;
                 let lifetime = Shared::try_new_in(AtomicPtr::new(parser), allocator)?;
                 release_encoding(parser);
@@ -2169,15 +2171,50 @@ pub unsafe extern "C" fn XML_UseForeignDTD(parser: XML_Parser, enabled: u8) -> c
     }
 }
 
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn XML_SetHashSalt(_parser: XML_Parser, _salt: c_ulong) -> c_int {
-    // The core's randomized hash tables do not support caller-supplied seeds.
-    0
+/// Configure the live root while retaining independent child table hash states.
+unsafe fn set_hash_salt(mut parser: XML_Parser, salt: [u8; 16]) -> c_int {
+    if parser.is_null() || in_allocator_callback() {
+        return 0;
+    }
+    // SAFETY: Family operations are serialized. Lifetime tokens prevent walking
+    // into a parent freed or replaced by reset; allocator reentry is rejected
+    // before any parser reference is created.
+    unsafe {
+        while let Some(parent) = &(*parser).parent_lifetime {
+            parser = parent.load(Ordering::Acquire);
+            if parser.is_null() {
+                return 0;
+            }
+        }
+        if (*parser).destroying || (*parser).busy || !matches!((*parser).state, 0 | 2) {
+            return 0;
+        }
+        with_parser_tracking(parser, || {
+            catch_unwind(AssertUnwindSafe(|| (*parser).core.set_hash_salt(salt)))
+                .ok()
+                .and_then(Result::ok)
+                .map_or(0, |()| 1)
+        })
+    }
 }
 
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn XML_SetHashSalt16Bytes(_parser: XML_Parser, _entropy: *const u8) -> u8 {
-    0
+pub unsafe extern "C" fn XML_SetHashSalt(parser: XML_Parser, salt: c_ulong) -> c_int {
+    let mut entropy = [0; 16];
+    let salt = salt.to_le_bytes();
+    entropy[8..8 + salt.len()].copy_from_slice(&salt);
+    // SAFETY: Forward the live, serialized parser contract to the common setter.
+    unsafe { set_hash_salt(parser, entropy) }
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn XML_SetHashSalt16Bytes(parser: XML_Parser, entropy: *const u8) -> u8 {
+    if parser.is_null() || entropy.is_null() || in_allocator_callback() {
+        return 0;
+    }
+    // SAFETY: The caller provides sixteen readable bytes, copied before any
+    // allocation callback. The common setter checks the parser family state.
+    unsafe { set_hash_salt(parser, *entropy.cast::<[u8; 16]>()) as u8 }
 }
 
 #[unsafe(no_mangle)]

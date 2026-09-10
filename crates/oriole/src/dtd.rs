@@ -1626,7 +1626,7 @@ impl Parser {
             try_insert(
                 &mut self.defaults,
                 element.try_clone()?,
-                DefaultAttributes::new(self.allocator),
+                DefaultAttributes::new(self.allocator, self.namespaces.hasher().salt()),
             )?;
         }
         let declarations = self

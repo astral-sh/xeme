@@ -1,6 +1,7 @@
 //! Fallible storage that carries its allocator through parser and callback lifetimes.
 
 mod allocator;
+mod hashing;
 mod queue;
 mod shared;
 mod string;
@@ -9,6 +10,7 @@ mod try_lock;
 
 pub use allocator::{Allocator, CustomAllocator, MemorySuite, in_allocator_callback};
 pub use allocator_api2::alloc::{Allocator as AllocatorApi, Layout};
+pub use hashing::SaltedRandomState;
 pub use queue::Queue;
 pub use shared::Shared;
 pub use string::{CString, String, Text};
@@ -65,17 +67,16 @@ impl From<hashbrown::TryReserveError> for AllocError {
 
 pub type Vec<T> = allocator_api2::vec::Vec<T, Allocator>;
 pub type Box<T> = allocator_api2::boxed::Box<T, Allocator>;
-pub type HashMap<K, V> =
-    hashbrown::HashMap<K, V, std::collections::hash_map::RandomState, Allocator>;
-pub type HashSet<K> = hashbrown::HashSet<K, std::collections::hash_map::RandomState, Allocator>;
+pub type HashMap<K, V> = hashbrown::HashMap<K, V, SaltedRandomState, Allocator>;
+pub type HashSet<K> = hashbrown::HashSet<K, SaltedRandomState, Allocator>;
 
 #[must_use]
 pub fn hash_map<K, V>(allocator: Allocator) -> HashMap<K, V> {
-    HashMap::with_hasher_in(std::collections::hash_map::RandomState::new(), allocator)
+    HashMap::with_hasher_in(SaltedRandomState::default(), allocator)
 }
 #[must_use]
 pub fn hash_set<K>(allocator: Allocator) -> HashSet<K> {
-    HashSet::with_hasher_in(std::collections::hash_map::RandomState::new(), allocator)
+    HashSet::with_hasher_in(SaltedRandomState::default(), allocator)
 }
 pub fn try_box<T>(value: T, allocator: Allocator) -> Result<Box<T>, AllocError> {
     Box::try_new_in(value, allocator).map_err(Into::into)

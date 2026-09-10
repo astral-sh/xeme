@@ -12,7 +12,7 @@ mod value;
 mod value_lexer;
 
 use oriole_storage::{
-    AllocError, Allocator, HashMap, Queue, Shared, String, TryClone, Vec, hash_map, hash_set,
+    AllocError, Allocator, HashMap, HashSet, Queue, Shared, String, TryClone, Vec, hash_map,
     try_insert, try_push, try_set_insert,
 };
 use std::fmt;
@@ -286,6 +286,28 @@ struct PendingEvent {
     raw: Option<String>,
 }
 
+/// Reserve a replacement table without changing the live table or its secret keys.
+fn prepare_salted_map<K: Eq + std::hash::Hash, V>(
+    map: &HashMap<K, V>,
+    salt: [u8; 16],
+) -> Result<HashMap<K, V>, AllocError> {
+    let mut replacement = HashMap::with_hasher_in(map.hasher().with_salt(salt), *map.allocator());
+    replacement.try_reserve(map.len())?;
+    Ok(replacement)
+}
+
+/// Move entries into a fully reserved table; keys and values retain their allocator.
+fn replace_hash_map<K: Eq + std::hash::Hash, V>(
+    map: &mut HashMap<K, V>,
+    mut replacement: HashMap<K, V>,
+) {
+    debug_assert!(replacement.is_empty() && replacement.capacity() >= map.len());
+    for (key, value) in map.drain() {
+        replacement.insert(key, value);
+    }
+    *map = replacement;
+}
+
 #[derive(Debug)]
 struct DefaultAttribute {
     name: String,
@@ -302,10 +324,11 @@ struct DefaultAttributes {
 }
 
 impl DefaultAttributes {
-    fn new(allocator: Allocator) -> Self {
+    fn new(allocator: Allocator, salt: [u8; 16]) -> Self {
+        let map: HashMap<String, usize> = hash_map(allocator);
         Self {
             ordered: Vec::new_in(allocator),
-            by_name: hash_map(allocator),
+            by_name: HashMap::with_hasher_in(map.hasher().with_salt(salt), allocator),
         }
     }
 
@@ -333,7 +356,7 @@ impl DefaultAttributes {
 
 impl TryClone for DefaultAttributes {
     fn try_clone(&self) -> Result<Self, AllocError> {
-        let mut cloned = Self::new(*self.ordered.allocator());
+        let mut cloned = Self::new(*self.ordered.allocator(), self.by_name.hasher().salt());
         for attribute in &self.ordered {
             cloned.try_insert(attribute.try_clone()?)?;
         }
@@ -544,6 +567,47 @@ impl Parser {
         self.allocator
     }
 
+    /// Return the public caller salt, without exposing secret randomized keys.
+    #[must_use]
+    pub fn hash_salt(&self) -> [u8; 16] {
+        self.namespaces.hasher().salt()
+    }
+
+    /// Replace the caller salt while retaining randomized hash protection.
+    ///
+    /// Every table is prepared before changing any table, so allocation failure
+    /// preserves all contents and the previous salt. Owned external children
+    /// retain their existing hash state; subsequently created children inherit
+    /// the new salt. Adapters enforce their own configuration timing rules.
+    #[doc(hidden)]
+    pub fn set_hash_salt(&mut self, salt: [u8; 16]) -> Result<(), Error> {
+        if self.hash_salt() == salt {
+            return Ok(());
+        }
+        let namespaces = prepare_salted_map(&self.namespaces, salt)?;
+        let entities = prepare_salted_map(&self.entities, salt)?;
+        let parameters = prepare_salted_map(&self.parameter_entities, salt)?;
+        let defaults = prepare_salted_map(&self.defaults, salt)?;
+        let mut indexes = Vec::new_in(self.allocator);
+        indexes
+            .try_reserve_exact(self.defaults.len())
+            .map_err(AllocError::from)?;
+        for attributes in self.defaults.values() {
+            indexes.push(prepare_salted_map(&attributes.by_name, salt)?);
+        }
+        // No growth can fail after preparation. Rebuild inner indexes before
+        // changing the outer table's iteration order; drops return old table
+        // storage through its original allocator.
+        for (attributes, index) in self.defaults.values_mut().zip(indexes) {
+            replace_hash_map(&mut attributes.by_name, index);
+        }
+        replace_hash_map(&mut self.namespaces, namespaces);
+        replace_hash_map(&mut self.entities, entities);
+        replace_hash_map(&mut self.parameter_entities, parameters);
+        replace_hash_map(&mut self.defaults, defaults);
+        Ok(())
+    }
+
     /// Change the protocol encoding before receiving input, preserving parser options.
     pub fn set_encoding(&mut self, encoding: Option<&str>) -> Result<(), Error> {
         if let Some(error) = self.error {
@@ -607,6 +671,7 @@ impl Parser {
         debug_assert!(self.config.encoding.is_none());
         let mut child =
             Self::try_new_with_encoding_in(self.config.clone(), encoding, self.allocator)?;
+        child.set_hash_salt(self.hash_salt())?;
         child
             .decoder
             .inherit_map(&self.decoder, &mut child.sources[0])?;
@@ -832,7 +897,7 @@ impl Parser {
                 try_insert(
                     &mut self.defaults,
                     name.try_clone()?,
-                    DefaultAttributes::new(self.allocator),
+                    DefaultAttributes::new(self.allocator, self.namespaces.hasher().salt()),
                 )?;
             }
             let target = self.defaults.get_mut(name).expect("default list exists");
@@ -2212,7 +2277,8 @@ impl Parser {
             .map_err(|_| AllocError::OutOfMemory)?;
         // Most elements have only a few attributes. Keep the linear scan bounded;
         // larger elements retain a randomized hash table against collision attacks.
-        let mut names = (raw_attrs.len() > 8).then(|| hash_set(self.allocator));
+        let mut names = (raw_attrs.len() > 8)
+            .then(|| HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator));
         for (index, &(attr_name, value, attribute_offset, _)) in raw_attrs.iter().enumerate() {
             let duplicate = if let Some(names) = &mut names {
                 !try_set_insert(names, attr_name)?
@@ -2364,7 +2430,8 @@ impl Parser {
             attrs.retain(|attr| attr.name != "xmlns" && !attr.name.starts_with("xmlns:"));
             self.id_attribute_index =
                 id_name.and_then(|name| attrs.iter().position(|attribute| attribute.name == name));
-            let mut expanded = hash_set(self.allocator);
+            let mut expanded =
+                HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator);
             for attr in &mut attrs {
                 // An unprefixed attribute has no namespace. Its raw name was
                 // already checked for duplicates, and may legitimately equal
@@ -2884,5 +2951,46 @@ fn character_reference(name: &str) -> Result<Option<char>, (ErrorKind, usize)> {
             Ok(Some(value))
         }
         _ => Ok(None),
+    }
+}
+
+#[cfg(test)]
+mod hash_salt_tests {
+    use super::*;
+    use std::hash::BuildHasher;
+
+    #[test]
+    fn salt_rebuilds_every_table_and_owned_children() {
+        let mut parser = Parser::new(Config::default());
+        parser.set_param_entity_parsing(2);
+        parser.feed(b"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p \"<!ATTLIST n b CDATA 'v'>\">%p;<!ATTLIST r a CDATA 'v'>]><r>", false).unwrap();
+        while parser.next_event().unwrap().is_some() {}
+        let previous = parser.namespaces.hasher().hash_one("xml");
+        parser.set_hash_salt(*b"0123456789abcdef").unwrap();
+        assert_ne!(parser.namespaces.hasher().hash_one("xml"), previous);
+        assert_eq!(parser.entities.hasher().salt(), parser.hash_salt());
+        assert_eq!(
+            parser.parameter_entities.hasher().salt(),
+            parser.hash_salt()
+        );
+        assert_eq!(parser.defaults.hasher().salt(), parser.hash_salt());
+        assert_eq!(
+            parser.namespaces.get("xml").unwrap(),
+            "http://www.w3.org/XML/1998/namespace"
+        );
+        assert!(parser.entities.contains_key("e"));
+        assert!(parser.parameter_entities.contains_key("p"));
+        for attributes in parser.defaults.values() {
+            assert_eq!(attributes.by_name.hasher().salt(), parser.hash_salt());
+            for attribute in &attributes.ordered {
+                assert!(attributes.get(&attribute.name).is_some());
+            }
+        }
+        let mut child = parser.external_child(Some(""), None).unwrap();
+        assert_eq!(child.hash_salt(), parser.hash_salt());
+        child.feed(b"<n>&e;</n>", true).unwrap();
+        while child.next_event().unwrap().is_some() {}
+        parser.feed(b"<n>&e;</n></r>", true).unwrap();
+        while parser.next_event().unwrap().is_some() {}
     }
 }

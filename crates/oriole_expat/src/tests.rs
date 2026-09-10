@@ -2883,3 +2883,61 @@ fn input_context_keeps_split_dtd_and_parameter_entity_anchors() {
         }
     }
 }
+
+#[test]
+fn hash_salt_changes_root_configuration_and_preserves_owned_children() {
+    // SAFETY: All handles are live, accessed serially, and freed once. Entropy
+    // arrays and static XML bytes remain readable for their entire C calls.
+    unsafe {
+        let entropy = *b"0123456789abcdef";
+        assert_eq!(XML_SetHashSalt(ptr::null_mut(), 1), 0);
+        assert_eq!(XML_SetHashSalt16Bytes(ptr::null_mut(), entropy.as_ptr()), 0);
+        let root = XML_ParserCreateNS(ptr::null(), b'|' as c_char);
+        assert!(!root.is_null());
+        assert_eq!(XML_SetHashSalt16Bytes(root, ptr::null()), 0);
+        assert_eq!(XML_SetHashSalt16Bytes(root, entropy.as_ptr()), 1);
+        assert_eq!(XML_SetHashSalt16Bytes(root, entropy.as_ptr()), 1);
+        assert_eq!((*root).core.hash_salt(), entropy);
+        let child = XML_ExternalEntityParserCreate(root, c"p=urn:p".as_ptr(), ptr::null());
+        assert!(!child.is_null());
+        assert_eq!((*child).core.hash_salt(), entropy);
+        assert_eq!(XML_SetHashSalt(child, 0x12345678), 1);
+        let mut integer_salt = [0; 16];
+        integer_salt[8..].copy_from_slice(&0x12345678_u64.to_le_bytes());
+        assert_eq!((*root).core.hash_salt(), integer_salt);
+        assert_eq!((*child).core.hash_salt(), entropy);
+        let xml = c"<p:r xml:lang='en'/>";
+        assert_eq!(
+            XML_Parse(child, xml.as_ptr(), xml.to_bytes().len() as c_int, 1),
+            1
+        );
+        XML_ParserFree(child);
+        let child = XML_ExternalEntityParserCreate(root, c"".as_ptr(), ptr::null());
+        assert!(!child.is_null());
+        assert_eq!((*child).core.hash_salt(), integer_salt);
+        assert_eq!(XML_Parse(root, ptr::null(), 0, 0), 1);
+        assert_eq!(XML_SetHashSalt(root, 9), 0);
+        assert_eq!(XML_SetHashSalt16Bytes(child, entropy.as_ptr()), 0);
+        assert_eq!((*root).core.hash_salt(), integer_salt);
+        let xml = c"<!DOCTYPE r [<!ENTITY e 'ok'><!ATTLIST r a CDATA 'default'>]><r xml:lang='en'>&e;</r>";
+        assert_eq!(
+            XML_Parse(root, xml.as_ptr(), xml.to_bytes().len() as c_int, 1),
+            1
+        );
+        // Expat permits configuration again after successful completion.
+        assert_eq!(XML_SetHashSalt16Bytes(root, entropy.as_ptr()), 1);
+        assert_eq!((*root).core.hash_salt(), entropy);
+        assert_eq!(XML_Parse(root, ptr::null(), 0, 1), 0);
+        assert_eq!(XML_ParserReset(root, ptr::null()), 1);
+        assert_eq!((*root).core.hash_salt(), entropy);
+        // Reset invalidates old parent lifetime tokens, even at the same address.
+        assert_eq!(XML_SetHashSalt(child, 7), 0);
+        XML_ParserFree(child);
+        let xml = c"<r xml:lang='en'/>";
+        assert_eq!(
+            XML_Parse(root, xml.as_ptr(), xml.to_bytes().len() as c_int, 1),
+            1
+        );
+        XML_ParserFree(root);
+    }
+}

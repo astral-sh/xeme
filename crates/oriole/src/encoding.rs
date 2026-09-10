@@ -73,13 +73,15 @@ impl Decoder {
         final_input: bool,
         source: &mut Source,
         max_token: usize,
+        external_content: bool,
     ) -> Result<(), Error> {
         try_extend_from_slice(&mut self.pending, bytes)?;
         if self.conversion.is_some() {
             return Ok(());
         }
         if self.encoding.is_none() {
-            let Some((encoding, skip)) = self.detect(final_input, max_token)? else {
+            let Some((encoding, skip)) = self.detect(final_input, max_token, external_content)?
+            else {
                 return Ok(());
             };
             self.encoding = Some(encoding);
@@ -221,7 +223,15 @@ impl Decoder {
         &mut self,
         final_input: bool,
         max_token: usize,
+        external_content: bool,
     ) -> Result<Option<(Encoding, usize)>, Error> {
+        // An explicitly labelled external text entity can begin with ordinary
+        // Latin-1 bytes that happen to spell a Unicode byte-order mark.
+        if external_content
+            && self.requested.as_deref().and_then(Encoding::named) == Some(Encoding::Latin1)
+        {
+            return Ok(Some((Encoding::Latin1, 0)));
+        }
         let bytes = &self.pending;
         if bytes.len() < 4
             && !final_input
@@ -241,7 +251,12 @@ impl Decoder {
             (Encoding::Utf16Be, 2)
         } else if bytes.first() == Some(&0) && bytes.len() >= 2 {
             (Encoding::Utf16Be, 0)
-        } else if bytes.get(1) == Some(&0) {
+        } else if bytes.get(1) == Some(&0)
+            && (!external_content || self.requested.is_some() || bytes[0] == b'<')
+        {
+            // In external content, a plain ASCII character can be complete
+            // before the next byte arrives. Only a markup opener selects
+            // unlabelled little-endian UTF-16; document/DTD detection differs.
             (Encoding::Utf16Le, 0)
         } else {
             (Encoding::Utf8, 0)

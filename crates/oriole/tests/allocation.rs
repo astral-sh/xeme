@@ -121,6 +121,10 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
             while next_event(&mut child)?.is_some() {}
         }
     }
+    let mut content = parser.external_child_with_encoding(Some(""), None)?;
+    content.set_encoding(Some("ISO-8859-1"))?;
+    content.feed(b"\xff\xfe\xef\xbb\xbftext", true)?;
+    while next_event(&mut content)?.is_some() {}
     let mut parser = Parser::try_new_in(Config::default(), allocator)?;
     assert!(parser.set_param_entity_parsing(2));
     parser.feed(b"<!DOCTYPE r SYSTEM 'test.dtd'><r>&external;</r>", true)?;

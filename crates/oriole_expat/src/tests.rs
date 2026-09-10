@@ -2104,3 +2104,72 @@ fn foreign_dtd_policy_rejection_and_suspension_precede_document_callbacks() {
         }
     }
 }
+
+#[test]
+fn external_content_encoding_initialization_survives_buffer_input_and_parent_free() {
+    // SAFETY: Handles and callback state remain live through each call; GetBuffer
+    // provides each writable span, and both parsers are freed exactly once.
+    unsafe {
+        for namespaces in [false, true] {
+            for setter in [false, true] {
+                for (input, protocol, expected, error) in [
+                    (&b"\xff\xfeL "[..], Some(c"ISO-8859-1"), "ÿþL ", 0),
+                    (&b"\xfe\xff L"[..], Some(c"ISO-8859-1"), "þÿ L", 0),
+                    (&b"\xef\xbb\xbfX"[..], Some(c"ISO-8859-1"), "ï»¿X", 0),
+                    (&b"a\0b\0c\0"[..], None, "", 4),
+                    (&b"<\0r\0/\0>\0"[..], None, "", 0),
+                ] {
+                    for width in 1..=input.len() {
+                        let parent = if namespaces {
+                            XML_ParserCreateNS(ptr::null(), b'|' as c_char)
+                        } else {
+                            XML_ParserCreate(ptr::null())
+                        };
+                        assert!(!parent.is_null());
+                        let encoding = protocol.map_or(ptr::null(), CStr::as_ptr);
+                        let child = XML_ExternalEntityParserCreate(
+                            parent,
+                            c"".as_ptr(),
+                            if setter { ptr::null() } else { encoding },
+                        );
+                        assert!(!child.is_null());
+                        XML_ParserFree(parent);
+                        if setter {
+                            assert_eq!(XML_SetEncoding(child, encoding), OK);
+                        }
+                        let mut state = State::default();
+                        XML_SetUserData(child, ptr::from_mut(&mut state).cast());
+                        XML_SetCharacterDataHandler(child, Some(text));
+                        let mut status = OK;
+                        for (index, bytes) in input.chunks(width).enumerate() {
+                            let buffer = XML_GetBuffer(child, bytes.len() as c_int);
+                            assert!(!buffer.is_null());
+                            ptr::copy_nonoverlapping(bytes.as_ptr(), buffer.cast(), bytes.len());
+                            status = XML_ParseBuffer(
+                                child,
+                                bytes.len() as c_int,
+                                c_int::from((index + 1) * width >= input.len()),
+                            );
+                            if status == ERROR {
+                                break;
+                            }
+                        }
+                        assert_eq!(XML_GetErrorCode(child), error);
+                        if error == 0 {
+                            assert_eq!(status, OK);
+                            let text: String = state
+                                .events
+                                .iter()
+                                .filter_map(|event| event.strip_prefix("text:"))
+                                .collect();
+                            assert_eq!(text, expected);
+                        } else {
+                            assert_eq!(status, ERROR);
+                        }
+                        XML_ParserFree(child);
+                    }
+                }
+            }
+        }
+    }
+}

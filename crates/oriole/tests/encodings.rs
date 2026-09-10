@@ -149,3 +149,116 @@ fn an_unknown_declared_encoding_reports_its_value_location() {
         );
     }
 }
+
+fn encoded_content(parser: &mut Parser, input: &[u8], width: usize) -> Result<String, ErrorKind> {
+    let mut text = String::new();
+    for (index, piece) in input.chunks(width).enumerate() {
+        parser
+            .feed(piece, (index + 1) * width >= input.len())
+            .map_err(|error| error.kind)?;
+        while let Some(event) = parser.next_event().map_err(|error| error.kind)? {
+            if let EventKind::Text(value) = event.kind {
+                text.push_str(&value);
+            }
+        }
+    }
+    assert!(parser.is_finished());
+    Ok(text)
+}
+
+#[test]
+fn external_latin1_content_preserves_bom_shaped_bytes() {
+    for (input, expected) in [
+        (&b"\xff\xfeL "[..], "ÿþL "),
+        (&b"\xfe\xff L"[..], "þÿ L"),
+        (&b"\xef\xbb\xbfX"[..], "ï»¿X"),
+    ] {
+        for setter in [false, true] {
+            for width in 1..=input.len() {
+                let parent = Parser::new(Config::default());
+                let mut child = parent
+                    .external_child_with_encoding(Some(""), (!setter).then_some("ISO-8859-1"))
+                    .unwrap();
+                drop(parent);
+                if setter {
+                    child.set_encoding(Some("ISO-8859-1")).unwrap();
+                }
+                assert_eq!(encoded_content(&mut child, input, width).unwrap(), expected);
+            }
+        }
+    }
+}
+
+#[test]
+fn unlabelled_external_content_does_not_infer_utf16_from_a_later_nul() {
+    for input in [&b"a\0b\0c\0"[..], &b" \0X\0"[..], &b"X\0"[..]] {
+        for width in 1..=input.len() {
+            let parent = Parser::new(Config::default());
+            let mut child = parent.external_child(None, None).unwrap();
+            // An external DTD has separate prolog rules; construct a content
+            // child from it to ensure the mode belongs to the new child.
+            child = child.external_child(Some(""), None).unwrap();
+            assert_eq!(
+                encoded_content(&mut child, input, width),
+                Err(ErrorKind::InvalidToken)
+            );
+        }
+    }
+}
+
+#[test]
+fn external_content_retains_explicit_encodings_and_utf16_signatures() {
+    for (input, protocol, expected) in [
+        (&b"\0a\0b\0c"[..], None, "abc"),
+        (&b"<\0r\0/\0>\0"[..], None, ""),
+        (&b"\0<\0r\0/\0>"[..], None, ""),
+        (&b"\xff\xfea\0b\0c\0"[..], None, "abc"),
+        (&b"a\0b\0c\0"[..], Some("UTF-16LE"), "abc"),
+        (&b"a\0b\0c\0"[..], Some("UTF-16"), "abc"),
+    ] {
+        for width in 1..=input.len() {
+            let parent = Parser::new(Config::default());
+            let mut child = parent
+                .external_child_with_encoding(Some(""), protocol)
+                .unwrap();
+            assert_eq!(encoded_content(&mut child, input, width).unwrap(), expected);
+        }
+    }
+}
+
+#[test]
+fn dtd_and_value_children_keep_prolog_encoding_detection() {
+    let declaration: Vec<_> = " <!ELEMENT r ANY>"
+        .encode_utf16()
+        .flat_map(u16::to_le_bytes)
+        .collect();
+    for width in 1..=declaration.len() {
+        let parent = Parser::new(Config::default());
+        let mut dtd = parent.external_child(None, None).unwrap();
+        encoded_content(&mut dtd, &declaration, width).unwrap();
+    }
+    let parent = Parser::new(Config::default());
+    let mut dtd = parent.external_child(None, None).unwrap();
+    dtd.set_param_entity_parsing(2);
+    dtd.feed(b"<!ENTITY % p SYSTEM 'p'><!ENTITY e 'L%p;R'>", true)
+        .unwrap();
+    let mut value = None;
+    while let Some(event) = dtd.next_event().unwrap() {
+        match event.kind {
+            EventKind::ExternalEntityReference { .. } => {
+                let mut child = dtd.external_child(None, None).unwrap();
+                // The whole-buffer prolog signature selects UTF-16LE for an
+                // entity value, whereas the same content child is invalid.
+                encoded_content(&mut child, b"X\0", 2).unwrap();
+                dtd.merge_external_subset(&child).unwrap();
+            }
+            EventKind::EntityDeclaration {
+                name, value: text, ..
+            } if name == "e" => {
+                value = text.map(|text| text.to_string());
+            }
+            _ => {}
+        }
+    }
+    assert_eq!(value.as_deref(), Some("LXR"));
+}

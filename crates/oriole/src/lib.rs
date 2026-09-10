@@ -828,6 +828,7 @@ impl Parser {
             is_final,
             &mut self.sources[0],
             self.config.limits.max_token_bytes,
+            self.fragment && !self.external_subset,
         ) {
             self.decoding_error = Some((error.kind, error.message));
         }
@@ -901,6 +902,7 @@ impl Parser {
             self.final_input,
             &mut self.sources[0],
             self.config.limits.max_token_bytes,
+            self.fragment && !self.external_subset,
         ) {
             self.decoding_error = Some((error.kind, error.message));
         }
@@ -941,6 +943,7 @@ impl Parser {
             self.final_input,
             &mut self.sources[0],
             self.config.limits.max_token_bytes,
+            self.fragment && !self.external_subset,
         ) {
             self.decoding_error = Some((error.kind, error.message));
         }

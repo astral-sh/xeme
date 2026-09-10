@@ -1,6 +1,7 @@
 # Benchmarks
 
-See the [validated checkpoint](results/2026-09-10/checkpoint/) and
+See the [validated checkpoint](results/2026-09-10/checkpoint/),
+[explicit namespace measurements](results/2026-09-10/namespaces/), and
 [initial optimization comparisons](results/2026-09-10/README.md) for results, source
 archives, raw observations, and limitations.
 

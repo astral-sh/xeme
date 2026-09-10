@@ -21,6 +21,8 @@ The earlier [full runtime report](validation/2026-09-10/final-runtime/) and [ben
 
 The [current sanitizer report](validation/2026-09-10/version-consistent-fuzz/) records six completed ASan campaigns on `4b11ace`: 14,502,453 executions, 26,689 initial seed files and 15,876 evolved corpus files. Every corpus byte, origin transformation, build identity and raw log is retained. The original incomplete review and later complete-results review are both preserved; no crash or timeout was observed in these bounded campaigns.
 
+The subsequent [DTD reparse-deferral fix](validation/2026-09-10/dtd-reparse-deferral/) corrects another 12 original API configurations. Combined with the entity-origin fix, it passes 4,347 configurations with 393 failures remaining, plus 373 workspace tests. Its report separates isolated and combined native validation, preserves nine focused feed-timing differences, and explains the local test-precondition corrections without changing upstream assertions or bounds.
+
 ## Interpreting the gates
 
 Early layers retain CI failures discovered during implementation. Later layers contain their fixes, including selected-allocation behavior on macOS and PBS validator/glibc integration. Historical failure logs and negative experiments remain part of the review history. A passing final head does not mean every intermediate layer passed independently.

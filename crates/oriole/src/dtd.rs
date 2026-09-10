@@ -545,6 +545,10 @@ impl Parser {
                 2,
             ));
         }
+        let final_input = self.is_source_final();
+        if self.reparse_deferral && !final_input && self.source().should_defer(limit) {
+            return Ok(false);
+        }
         let end = self
             .source_mut()
             .scan_token(mode, limit)
@@ -564,8 +568,13 @@ impl Parser {
                 }
                 return self.start_declaration_composition();
             }
-            if self.is_source_final() {
+            if final_input {
                 return Err(self.err(ErrorKind::UnclosedToken, "unclosed DTD declaration"));
+            }
+            if self.sources.len() == 1
+                && self.source().position(0).byte_index == self.feed_start_byte
+            {
+                self.source_mut().mark_deferred();
             }
             return Ok(false);
         };

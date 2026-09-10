@@ -394,6 +394,8 @@ mod tests {
         let mut observations = std::vec::Vec::new();
         for enabled in [false, true] {
             let mut parser = Parser::new(crate::Config::default());
+            // Sample committed work at the closing delimiter, before final input.
+            parser.set_reparse_deferral_enabled(false);
             parser.set_attlist_handler_enabled(enabled);
             for byte in xml {
                 parser.feed(std::slice::from_ref(byte), false).unwrap();
@@ -409,6 +411,7 @@ mod tests {
                 limits,
                 ..crate::Config::default()
             });
+            parser.set_reparse_deferral_enabled(false);
             parser.set_attlist_handler_enabled(enabled);
             parser.feed(xml, false).unwrap();
             while parser.next_event().unwrap().is_some() {}

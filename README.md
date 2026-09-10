@@ -34,8 +34,8 @@ Optional [profile-guided builds](tools/pgo/) reduce Oriole’s native project ti
 native C interface and 1.42× across the measured CPython consumers. The [full report](benchmarks/results/2026-09-10/version-consistent-pgo/)
 retains every project, build identity, raw sample, and limitation.
 
-The [latest compatibility report](docs/validation/2026-09-10/entity-error-origins/)
-records 369 workspace tests and **4,335 passing / 405 failing upstream API
+The [latest compatibility report](docs/validation/2026-09-10/dtd-reparse-deferral/)
+records 373 workspace tests and **4,347 passing / 393 failing upstream API
 configurations**. Remaining allocation, resource, diagnostic, and callback differences
 are explicit in the [compatibility guide](docs/compatibility.md). Six [sustained ASan
 campaigns](docs/validation/2026-09-10/version-consistent-fuzz/) completed 14.50 million

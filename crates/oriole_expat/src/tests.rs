@@ -1358,6 +1358,12 @@ unsafe extern "C" fn convert_multibyte(data: *mut c_void, _: *const c_char) -> c
             }
             2 => assert_eq!(XML_StopParser(parser, 1), OK),
             3 => assert_eq!(XML_StopParser(parser, 0), OK),
+            5 => {
+                let pending = (*parser).core.encoding_conversion().unwrap();
+                assert_eq!(XML_StopParser(parser, 0), OK);
+                assert_eq!(XML_SetEncoding(parser, c"changed".as_ptr()), OK);
+                assert_eq!((*parser).core.encoding_conversion().unwrap(), pending);
+            }
             _ => {}
         }
         (*state).value
@@ -1445,7 +1451,7 @@ fn multibyte_converter_reentry_is_guarded_and_release_is_owned_once() {
 fn multibyte_converter_can_suspend_or_abort_without_repeating_conversion() {
     // SAFETY: The converter acts only on its own active parser.
     unsafe {
-        for action in [2, 3] {
+        for action in [2, 3, 5] {
             let mut state = MultibyteState {
                 value: 'é' as i32,
                 action,
@@ -1462,6 +1468,13 @@ fn multibyte_converter_can_suspend_or_abort_without_repeating_conversion() {
                 assert_eq!(XML_GetErrorCode(parser), 35);
             }
             assert_eq!(state.conversions, 1);
+            assert_eq!(state.releases, 0);
+            if action == 5 {
+                assert_eq!(XML_SetEncoding(parser, ptr::null()), OK);
+                assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+                assert_eq!(state.releases, 1);
+                assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), OK);
+            }
             XML_ParserFree(parser);
             assert_eq!(state.releases, 1);
         }
@@ -2171,5 +2184,137 @@ fn external_content_encoding_initialization_survives_buffer_input_and_parent_fre
                 }
             }
         }
+    }
+}
+
+#[test]
+fn finished_encoding_updates_preserve_decoder_and_reset_ownership() {
+    // SAFETY: Test state and every C string outlive all callbacks and owned handles.
+    unsafe {
+        let mut state = State::default();
+        let parser = configured(&mut state);
+        assert_eq!(XML_SetEncoding(parser, c"test-map".as_ptr()), OK);
+        XML_SetUnknownEncodingHandler(
+            parser,
+            Some(custom_encoding),
+            ptr::from_mut(&mut state).cast(),
+        );
+        let input = b"<r>\x80</r>";
+        assert_eq!(
+            XML_Parse(parser, input.as_ptr().cast(), input.len() as c_int, 1),
+            OK
+        );
+        let index = XML_GetCurrentByteIndex(parser);
+        for encoding in [c"unused-name".as_ptr(), ptr::null(), c"ISO-8859-1".as_ptr()] {
+            assert_eq!(XML_SetEncoding(parser, encoding), OK);
+            assert_eq!(XML_GetErrorCode(parser), 0);
+            assert_eq!(XML_GetCurrentByteIndex(parser), index);
+            assert_eq!(state.releases, 0);
+        }
+        // The finished metadata setter must not discard the active custom map.
+        let child = XML_ExternalEntityParserCreate(parser, c"".as_ptr(), c"test-map".as_ptr());
+        assert!(!child.is_null());
+        assert_eq!(XML_Parse(child, b"\x80".as_ptr().cast(), 1, 1), OK);
+        XML_ParserFree(child);
+        assert_eq!(state.releases, 0);
+        assert_eq!(XML_Parse(parser, ptr::null(), 0, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 36);
+        assert_eq!(XML_SetEncoding(parser, ptr::null()), OK);
+        assert_eq!(XML_GetErrorCode(parser), 36);
+        assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+        assert_eq!(state.releases, 1);
+        XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+        XML_SetCharacterDataHandler(parser, Some(text));
+        let input = "<r>é</r>".as_bytes();
+        assert_eq!(
+            XML_Parse(parser, input.as_ptr().cast(), input.len() as c_int, 1),
+            OK
+        );
+        assert_eq!(state.events.last().unwrap(), "text:é");
+        XML_ParserFree(parser);
+        assert_eq!(state.releases, 1);
+    }
+}
+
+#[test]
+fn encoding_setter_observes_abort_and_suspension_inside_callbacks() {
+    unsafe extern "C" fn stop_and_set(
+        data: *mut c_void,
+        _: *const c_char,
+        _: *const *const c_char,
+    ) {
+        // SAFETY: The test owns this state until the parser has finished or resumed.
+        unsafe {
+            let state = data.cast::<State>();
+            let parser = (*state).parser;
+            assert_eq!(XML_ParseBuffer(parser, 0, 1), ERROR);
+            assert_eq!(XML_StopParser(parser, (*state).nested_status as u8), OK);
+            assert_eq!(
+                XML_SetEncoding(parser, c"next".as_ptr()),
+                i32::from((*state).nested_status == 0)
+            );
+        }
+    }
+    // SAFETY: Each parser and its callback state are used serially and freed once.
+    unsafe {
+        for resumable in [0, 1] {
+            let mut state = State {
+                nested_status: resumable,
+                ..State::default()
+            };
+            let parser = configured(&mut state);
+            XML_SetElementHandler(parser, Some(stop_and_set), None);
+            assert_eq!(
+                XML_Parse(parser, c"<r/>".as_ptr(), 4, 1),
+                if resumable == 0 { ERROR } else { SUSPENDED }
+            );
+            if resumable == 1 {
+                assert_eq!(XML_SetEncoding(parser, ptr::null()), ERROR);
+                assert_eq!(XML_ParseBuffer(parser, 0, 1), ERROR);
+                assert_eq!(XML_GetErrorCode(parser), 33);
+                assert_eq!(XML_ResumeParser(parser), OK);
+            }
+            assert_eq!(XML_SetEncoding(parser, c"UTF-8".as_ptr()), OK);
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            assert_eq!(XML_Parse(parser, c"<r>".as_ptr(), 3, 1), ERROR);
+            assert_eq!(XML_SetEncoding(parser, c"UTF-8".as_ptr()), ERROR);
+            assert_eq!(XML_GetErrorCode(parser), 3);
+            XML_ParserFree(parser);
+        }
+    }
+}
+
+#[test]
+fn zero_length_parse_buffer_finishes_owned_input_without_a_reservation() {
+    // SAFETY: Every input is readable for its explicit length; buffer writes stay
+    // within a successful reservation, and each parser is freed exactly once.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        assert_eq!(XML_ParseBuffer(parser, 0, 0), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 42);
+        assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 0), OK);
+        assert_eq!(XML_ParseBuffer(parser, 1, 0), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 42);
+        assert_eq!(XML_ParseBuffer(parser, 0, 1), OK);
+        assert_eq!(XML_ParseBuffer(parser, 0, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 36);
+        assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+        let input = b"<r/>\xe2\x82";
+        assert_eq!(
+            XML_Parse(parser, input.as_ptr().cast(), input.len() as c_int, 0),
+            OK
+        );
+        assert_eq!(XML_ParseBuffer(parser, 0, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 6);
+        assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+        let buffer = XML_GetBuffer(parser, 1).cast::<u8>();
+        assert!(!buffer.is_null());
+        buffer.write(b'<');
+        assert_eq!(XML_ParseBuffer(parser, 2, 0), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), INVALID_ARGUMENT);
+        assert_eq!(XML_ParseBuffer(parser, 1, 0), OK);
+        assert_eq!(XML_Parse(parser, c"r/>".as_ptr(), 3, 0), OK);
+        assert_eq!(XML_ParseBuffer(parser, 0, 1), OK);
+        XML_ParserFree(parser);
     }
 }

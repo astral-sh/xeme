@@ -243,6 +243,11 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         _ => panic!("custom encoding unexpectedly resolved without its map"),
     }
     while next_event(&mut parser)?.is_some() {}
+    parser.set_completed_encoding(Some("finished-protocol-name"))?;
+    parser.set_completed_encoding(None)?;
+    let mut child = parser.external_child_with_encoding(Some(""), Some("custom"))?;
+    child.feed(b"\x80", true)?;
+    while next_event(&mut child)?.is_some() {}
     let mut parser =
         Parser::try_new_with_encoding_in(Config::default(), Some("multibyte"), allocator)?;
     parser.feed(b"<\x80\0 a='\x80\0'>\x80\0</\x80\0>", true)?;

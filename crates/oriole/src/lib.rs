@@ -519,6 +519,16 @@ impl Parser {
         Ok(())
     }
 
+    /// Update protocol metadata for an adapter that has finished or irreversibly
+    /// aborted parsing. This leaves the active decoder, custom map, buffered input,
+    /// and positions intact; it does not make the parser accept further input.
+    /// The adapter must have finished or irreversibly aborted and must never
+    /// resume feeding this parser. The core cannot verify the adapter state.
+    #[doc(hidden)]
+    pub fn set_completed_encoding(&mut self, encoding: Option<&str>) -> Result<(), Error> {
+        self.decoder.set_completed_encoding(encoding)
+    }
+
     /// Construct an independent parser for an application-provided external entity.
     ///
     /// Pass the context from [`EventKind::ExternalEntityReference`]. Namespace

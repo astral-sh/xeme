@@ -1460,6 +1460,12 @@ pub unsafe extern "C" fn XML_ParseBuffer(
             (*parser).error = 36;
             return ERROR;
         }
+        // Once parsing has started, a zero-length call finishes already-owned
+        // input without requiring a caller-visible writable buffer reservation.
+        // Initialized parsers and all positive lengths retain that requirement.
+        if len == 0 && (*parser).state == 1 {
+            return XML_Parse(parser, ptr::null(), 0, final_input);
+        }
         if !(*parser).buffer_available {
             (*parser).error = 42;
             return ERROR;
@@ -1750,17 +1756,20 @@ pub unsafe extern "C" fn XML_SetEncoding(parser: XML_Parser, encoding: *const c_
             return ERROR;
         }
         let result = catch_unwind(AssertUnwindSafe(|| -> Result<c_int, AllocError> {
-            // SAFETY: Before parsing starts there is no in-flight core operation;
-            // allocator callbacks are barred from C API reentry.
+            // SAFETY: A finished parser may be inside a callback that aborted it.
+            // Dispatch owns its event, so no core borrow crosses that callback.
+            // Only protocol metadata changes; allocator reentry remains barred.
             unsafe {
-                if (*parser).state != 0 {
+                if (*parser).destroying || !matches!((*parser).state, 0 | 2) {
                     return Ok(ERROR);
                 }
                 let encoding = input_string(encoding)?;
-                (*parser)
-                    .core
-                    .set_encoding(encoding)
-                    .map_err(|_| AllocError::OutOfMemory)?;
+                let result = if (*parser).state == 0 {
+                    (*parser).core.set_encoding(encoding)
+                } else {
+                    (*parser).core.set_completed_encoding(encoding)
+                };
+                result.map_err(|_| AllocError::OutOfMemory)?;
             }
             Ok(OK)
         }));

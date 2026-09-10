@@ -67,6 +67,15 @@ impl Decoder {
             conversion: None,
         })
     }
+    /// Replace only the protocol name after the adapter has stopped parsing.
+    pub(crate) fn set_completed_encoding(&mut self, requested: Option<&str>) -> Result<(), Error> {
+        let requested = requested
+            .map(|name| String::try_from_str_in(name, self.allocator))
+            .transpose()?;
+        self.requested = requested;
+        Ok(())
+    }
+
     pub(crate) fn feed(
         &mut self,
         bytes: &[u8],

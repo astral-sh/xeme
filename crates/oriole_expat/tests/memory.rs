@@ -11,6 +11,7 @@ thread_local! {
     static ESCAPES: Cell<usize> = const { Cell::new(0) };
     static CALLBACK_PARSER: Cell<XML_Parser> = const { Cell::new(ptr::null_mut()) };
     static REENTRIES: Cell<usize> = const { Cell::new(0) };
+    static FAIL_NEXT: Cell<bool> = const { Cell::new(false) };
 }
 
 struct Global;
@@ -70,6 +71,7 @@ fn attempt_reentry() {
             assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
             assert!(XML_GetBuffer(parser, 1).is_null());
             assert_eq!(XML_SetBase(parser, c"wrong".as_ptr()), 0);
+            assert_eq!(XML_SetEncoding(parser, c"wrong".as_ptr()), 0);
             assert!(XML_MemMalloc(parser, 1).is_null());
             XML_SetUserData(parser, ptr::null_mut());
         }
@@ -78,12 +80,18 @@ fn attempt_reentry() {
 
 unsafe extern "C" fn custom_malloc(size: usize) -> *mut c_void {
     attempt_reentry();
+    if FAIL_NEXT.replace(false) {
+        return ptr::null_mut();
+    }
     // SAFETY: The C allocator accepts the requested size and returns NULL on failure.
     unsafe { malloc(size) }
 }
 
 unsafe extern "C" fn custom_realloc(pointer: *mut c_void, size: usize) -> *mut c_void {
     attempt_reentry();
+    if FAIL_NEXT.replace(false) {
+        return ptr::null_mut();
+    }
     // SAFETY: Oriole returns this suite's original allocation and a positive size.
     unsafe { realloc(pointer, size) }
 }
@@ -164,6 +172,12 @@ fn custom_parser_never_uses_global_storage_and_blocks_allocator_reentry() {
         ptr::copy_nonoverlapping(bytes.as_ptr(), buffer.cast(), bytes.len());
         assert_eq!(XML_ParseBuffer(parser, bytes.len() as i32, 1), 1);
         assert_eq!(XML_GetUserData(parser), parser.cast());
+        FAIL_NEXT.set(true);
+        assert_eq!(XML_SetEncoding(parser, c"finished-metadata".as_ptr()), 0);
+        assert!(!FAIL_NEXT.get());
+        assert_eq!(XML_GetErrorCode(parser), 0);
+        assert_eq!(XML_SetEncoding(parser, c"finished-metadata".as_ptr()), 1);
+        assert_eq!(XML_SetEncoding(parser, ptr::null()), 1);
         let child = XML_ExternalEntityParserCreate(parser, c"".as_ptr(), ptr::null());
         assert!(!child.is_null());
         assert_eq!(XML_Parse(child, c"<n>&e;</n>".as_ptr(), 10, 1), 1);

@@ -264,7 +264,7 @@ pub enum EventKind {
 #[derive(Debug)]
 struct Element {
     raw_name: String,
-    expanded_name: String,
+    expanded_name: Option<String>,
     bindings: Vec<(String, Option<String>)>,
 }
 
@@ -2299,6 +2299,12 @@ impl Parser {
                 id_name.and_then(|name| attrs.iter().position(|attribute| attribute.name == name));
             let mut expanded = hash_set(self.allocator);
             for attr in &mut attrs {
+                // An unprefixed attribute has no namespace. Its raw name was
+                // already checked for duplicates, and may legitimately equal
+                // another attribute's serialized expanded name.
+                if !attr.name.contains(':') {
+                    continue;
+                }
                 let key = self.expand_name(&attr.name, true, false)?;
                 if !try_set_insert(&mut expanded, key)? {
                     return Err(self.err(
@@ -2316,7 +2322,11 @@ impl Parser {
             &mut self.stack,
             Element {
                 raw_name: string(name, self.allocator)?,
-                expanded_name: expanded_name.try_clone()?,
+                expanded_name: if expanded_name == name {
+                    None
+                } else {
+                    Some(expanded_name.try_clone()?)
+                },
                 bindings,
             },
         )?;
@@ -2371,7 +2381,7 @@ impl Parser {
             .ok_or_else(|| self.err(ErrorKind::TagMismatch, "unexpected end tag"))?;
         self.emit(
             EventKind::EndElement {
-                name: element.expanded_name,
+                name: element.expanded_name.unwrap_or(element.raw_name),
             },
             position,
         )?;
@@ -2444,10 +2454,11 @@ impl Parser {
             result.try_push(separator)?;
         }
         result.try_push_str(local)?;
-        if triplets && let Some(prefix) = prefix {
-            if separator != '\0' {
-                result.try_push(separator)?;
-            }
+        if triplets
+            && separator != '\0'
+            && let Some(prefix) = prefix
+        {
+            result.try_push(separator)?;
             result.try_push_str(prefix)?;
         }
         Ok(result)
@@ -2608,12 +2619,14 @@ pub(crate) enum ScanMode {
 }
 
 fn take_name(input: &str) -> Option<(&str, &str)> {
-    let end = input
-        .char_indices()
+    let mut chars = input.char_indices();
+    if !names::is_name_start(chars.next()?.1) {
+        return None;
+    }
+    let end = chars
         .find(|(_, c)| !names::is_name_char(*c))
         .map_or(input.len(), |(index, _)| index);
-    let name = &input[..end];
-    is_name(name).then_some((name, &input[end..]))
+    Some((&input[..end], &input[end..]))
 }
 
 fn parse_raw_attributes(

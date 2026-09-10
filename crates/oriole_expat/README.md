@@ -51,8 +51,8 @@ the documented operations above.
 
 Namespace separators must be ASCII bytes. The C constructors reject bytes
 `0x80` through `0xff`, which cannot be represented as a single UTF-8 byte by the
-Rust parser. ASCII separators retain their exact byte value; `\0` is supported
-without namespace triplets.
+Rust parser. ASCII separators retain their exact byte value; `\0` concatenates
+the URI and local name and ignores namespace triplet mode, as in Expat.
 Choose a separator outside the URI character set, such as `|`, to keep expanded
 names unambiguous. Following Expat, URI characters such as `:` are also supported
 as legacy separators; collisions are rejected for non-URI separators, including

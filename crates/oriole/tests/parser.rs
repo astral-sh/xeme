@@ -840,6 +840,40 @@ fn namespace_constraints() {
 }
 
 #[test]
+fn unprefixed_attributes_can_match_serialized_namespace_names() {
+    let accepted = "<r xmlns:p='a' p:b='1' axb='2'/>";
+    let rejected = "<r xmlns:p='ax' xmlns:q='a' p:b='1' q:xb='2'/>";
+    for triplets in [false, true] {
+        let config = Config {
+            namespace_separator: Some('x'),
+            namespace_triplets: triplets,
+            ..Config::default()
+        };
+        for chunk in 1..=accepted.len() {
+            let events = parse(accepted.as_bytes(), chunk, config.clone()).unwrap();
+            let attributes = events
+                .iter()
+                .find_map(|event| match event {
+                    EventKind::StartElement { attributes, .. } => Some(attributes),
+                    _ => None,
+                })
+                .unwrap();
+            assert_eq!(attributes.len(), 2);
+            assert_eq!(attributes[0].name, if triplets { "axbxp" } else { "axb" });
+            assert_eq!(attributes[1].name, "axb");
+        }
+        // Expat compares serialized expanded names among prefixed attributes,
+        // even when the separator also appears in their URIs or local names.
+        for chunk in 1..=rejected.len() {
+            assert_eq!(
+                parse(rejected.as_bytes(), chunk, config.clone()),
+                Err(ErrorKind::DuplicateAttribute),
+            );
+        }
+    }
+}
+
+#[test]
 fn newer_minor_versions_keep_xml_10_character_rules() {
     for version in ["1.0", "1.1", "1.7", "1.01", "1.000"] {
         let xml = format!("<?xml version='{version}'?><r/>");

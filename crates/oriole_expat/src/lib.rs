@@ -1786,10 +1786,6 @@ pub unsafe extern "C" fn XML_SetReturnNSTriplet(parser: XML_Parser, enabled: c_i
         if (*parser).state != 0 {
             return;
         }
-        if enabled != 0 && (*parser).config.namespace_separator == Some('\0') {
-            fail_parse(parser, INVALID_ARGUMENT);
-            return;
-        }
         (*parser).config.namespace_triplets = enabled != 0;
         (*parser).core.set_namespace_triplets(enabled != 0);
     }

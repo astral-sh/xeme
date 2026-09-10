@@ -531,6 +531,26 @@ fn namespace_triplets_and_specified_attributes() {
 }
 
 #[test]
+fn nul_namespace_separator_ignores_triplet_mode() {
+    // SAFETY: Callback state and input remain live until the parser is freed.
+    unsafe {
+        let mut state = State::default();
+        let parser = XML_ParserCreateNS(ptr::null(), 0);
+        state.parser = parser;
+        XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+        XML_SetElementHandler(parser, Some(start), Some(end));
+        XML_SetReturnNSTriplet(parser, 1);
+        let document = b"<p:r xmlns:p='a' p:b='1' ab='2'/>";
+        assert_eq!(
+            XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1),
+            OK,
+        );
+        assert_eq!(state.events, ["start:ar", "ab=1", "ab=2", "end:ar"]);
+        XML_ParserFree(parser);
+    }
+}
+
+#[test]
 fn late_encoding_change_does_not_poison_incremental_parse() {
     // SAFETY: CPython performs this pattern for successive Unicode Parse calls.
     unsafe {

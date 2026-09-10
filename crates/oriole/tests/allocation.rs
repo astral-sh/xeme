@@ -144,6 +144,13 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         }
     }
     let parent = Parser::try_new_in(Config::default(), allocator)?;
+    let mut duplicate = parent.external_child(None, None)?;
+    duplicate.set_default_events(true);
+    duplicate.feed(
+        b"<!ENTITY e 'first'><!ENTITY e 'second'><!ENTITY e PUBLIC 'pub' 'sys'><!ENTITY e SYSTEM 'sys' NDATA n>",
+        true,
+    )?;
+    while next_event(&mut duplicate)?.is_some() {}
     let mut child = parent.external_child(None, None)?;
     child.set_default_events(true);
     child.feed(

@@ -88,6 +88,7 @@ struct DeclarationExpansion {
     parameters: Vec<DeclarationParameter>,
 }
 
+#[derive(Clone, Copy)]
 struct DeclarationParameter {
     offset: usize,
     position: Position,
@@ -1167,11 +1168,20 @@ impl Parser {
 
     fn declaration_parameters(&mut self, cursor: &mut Cursor<'_>) -> Result<(), Error> {
         let offset = cursor.offset();
-        while let Some(parameter) = cursor.parameters.get(cursor.parameter_index) {
+        while let Some(&parameter) = cursor.parameters.get(cursor.parameter_index) {
             if parameter.offset > offset {
                 break;
             }
             cursor.parameter_index += 1;
+            if self.default_events && cursor.parameter_defaults {
+                self.declaration_default_segment(
+                    cursor,
+                    parameter.raw_start,
+                    false,
+                    false,
+                    parameter.position,
+                )?;
+            }
             if parameter.disabled && !self.standalone {
                 self.emit(EventKind::NotStandalone, parameter.position)?;
                 self.event_raw("")?;
@@ -1185,16 +1195,85 @@ impl Parser {
                         .get(cursor.parameter_index)
                         .map_or(cursor.raw.len(), |next| next.raw_start)
                 };
-                self.emit(EventKind::Default, parameter.position)?;
-                let mut raw = string(&cursor.raw[parameter.raw_start..end], self.allocator)?;
-                if !self.standalone && cursor.parameter_index == cursor.parameters.len() {
-                    raw.try_push('>')?;
-                }
-                self.pending.back_mut().expect("default event").raw = Some(raw);
+                self.declaration_default_segment(
+                    cursor,
+                    end,
+                    !self.standalone && cursor.parameter_index == cursor.parameters.len(),
+                    true,
+                    parameter.position,
+                )?;
             }
             self.has_external_subset = true;
             self.declarations_skipped |= !self.standalone;
         }
+        Ok(())
+    }
+
+    /// Assign each raw byte once, keeping skipped references between the
+    /// declaration callbacks before and after them. Handler-dependent prefixes
+    /// are evaluated by the consumer when their events are dispatched.
+    fn declaration_default_segment(
+        &mut self,
+        cursor: &mut Cursor<'_>,
+        end: usize,
+        closing: bool,
+        unconditional: bool,
+        position: Position,
+    ) -> Result<(), Error> {
+        if end < cursor.raw_offset {
+            return Ok(());
+        }
+        let mut raw = String::new_in(self.allocator);
+        if !cursor.raw_started {
+            raw.try_push_str("<!")?;
+            cursor.raw_started = true;
+        }
+        raw.try_push_str(&cursor.raw[cursor.raw_offset..end])?;
+        cursor.raw_offset = end;
+        if closing && !cursor.raw_closed {
+            raw.try_push('>')?;
+            cursor.raw_closed = true;
+        }
+        if raw.is_empty() {
+            return Ok(());
+        }
+        let mut assigned = false;
+        if !unconditional {
+            for pending in self.pending.iter_mut().skip(cursor.raw_event) {
+                if pending.raw.is_none()
+                    && matches!(
+                        pending.event.kind,
+                        EventKind::EntityDeclaration { .. }
+                            | EventKind::AttlistDeclaration { .. }
+                            | EventKind::EntityDeclarationDuplicate { .. }
+                    )
+                {
+                    pending.raw = Some(if assigned {
+                        String::new_in(self.allocator)
+                    } else {
+                        assigned = true;
+                        std::mem::replace(&mut raw, String::new_in(self.allocator))
+                    });
+                }
+            }
+        }
+        if !assigned {
+            self.charge_expansion(size_of::<crate::PendingEvent>())?;
+            self.emit(
+                if unconditional {
+                    EventKind::Default
+                } else if let Some((external, unparsed)) = cursor.duplicate_defaults {
+                    EventKind::EntityDeclarationDuplicate { external, unparsed }
+                } else if cursor.entity_defaults {
+                    EventKind::EntityDeclarationPrefix
+                } else {
+                    EventKind::AttlistDeclarationPrefix
+                },
+                position,
+            )?;
+            self.pending.back_mut().expect("default fragment").raw = Some(raw);
+        }
+        cursor.raw_event = self.pending.len();
         Ok(())
     }
 
@@ -1265,6 +1344,8 @@ impl Parser {
                 .as_ref()
                 .map_or(&text[2..end], |value| value.text.as_str());
             let mut cursor = Cursor::new(grammar, self.config.namespace_separator.is_some());
+            cursor.raw = grammar;
+            cursor.raw_event = first_event;
             if let Some(expansion) = &expansion {
                 cursor.literals = &expansion.literals;
                 cursor.parameters = &expansion.parameters;
@@ -1275,6 +1356,7 @@ impl Parser {
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
             cursor.parameter_defaults =
                 !previously_skipped && matches!(declaration, "ENTITY" | "ATTLIST");
+            cursor.entity_defaults = declaration == "ENTITY";
             cursor
                 .require_space()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -1348,6 +1430,33 @@ impl Parser {
                 }
                 return Err(self.err(ErrorKind::Syntax, "unexpected text in DTD declaration"));
             }
+            if self.default_events && matches!(declaration, "ENTITY" | "ATTLIST") {
+                let closing_default = !previously_skipped
+                    && self.declarations_skipped
+                    && (cursor.duplicate_defaults.is_some()
+                        || self.pending.iter().skip(first_event).any(|pending| {
+                            matches!(pending.event.kind, EventKind::EntityDeclaration { .. })
+                        }));
+                let raw_end = cursor.raw.len();
+                self.declaration_default_segment(
+                    &mut cursor,
+                    raw_end,
+                    !closing_default,
+                    previously_skipped,
+                    position,
+                )?;
+                if closing_default {
+                    self.declaration_default_segment(
+                        &mut cursor,
+                        raw_end,
+                        true,
+                        true,
+                        self.source().position_at(offset + end, 1),
+                    )?;
+                }
+                text = &text[end + 1..];
+                continue;
+            }
             if self.declarations_skipped
                 && matches!(declaration, "ENTITY" | "ATTLIST")
                 && self.default_events
@@ -1416,6 +1525,16 @@ impl Parser {
         cursor
             .require_space()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        if self.default_events
+            && !self.declarations_skipped
+            && if parameter {
+                self.parameter_entities.contains_key(&name)
+            } else {
+                self.entities.contains_key(&name)
+            }
+        {
+            cursor.duplicate_defaults = Some((!cursor.starts("\"") && !cursor.starts("'"), false));
+        }
         let mut skipped_parameter = false;
         let (value, system_id, public_id, notation) = if cursor.starts("\"") || cursor.starts("'") {
             let raw = cursor
@@ -1458,6 +1577,9 @@ impl Parser {
             } else {
                 None
             };
+            if let Some((_, unparsed)) = &mut cursor.duplicate_defaults {
+                *unparsed = notation.is_some();
+            }
             (None, system_id, public_id, notation)
         };
         self.declaration_parameters(cursor)?;
@@ -1822,6 +1944,12 @@ struct Cursor<'a> {
     parameters: &'a [DeclarationParameter],
     parameter_index: usize,
     parameter_defaults: bool,
+    entity_defaults: bool,
+    duplicate_defaults: Option<(bool, bool)>,
+    raw_offset: usize,
+    raw_event: usize,
+    raw_started: bool,
+    raw_closed: bool,
     raw: &'a str,
 }
 impl<'a> Cursor<'a> {
@@ -1837,6 +1965,12 @@ impl<'a> Cursor<'a> {
             parameters: &[],
             parameter_index: 0,
             parameter_defaults: false,
+            entity_defaults: false,
+            duplicate_defaults: None,
+            raw_offset: 0,
+            raw_event: 0,
+            raw_started: false,
+            raw_closed: false,
             raw: "",
         }
     }

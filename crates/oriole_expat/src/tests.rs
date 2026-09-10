@@ -8,6 +8,142 @@ struct State {
     releases: usize,
 }
 
+unsafe extern "C" fn ignore_entity_declaration(
+    _: *mut c_void,
+    _: *const c_char,
+    _: c_int,
+    _: *const c_char,
+    _: c_int,
+    _: *const c_char,
+    _: *const c_char,
+    _: *const c_char,
+    _: *const c_char,
+) {
+}
+
+unsafe extern "C" fn ignore_attlist_declaration(
+    _: *mut c_void,
+    _: *const c_char,
+    _: *const c_char,
+    _: *const c_char,
+    _: *const c_char,
+    _: c_int,
+) {
+}
+
+fn declaration_default_text(
+    input: &str,
+    standalone: bool,
+    mode: c_int,
+    handlers: bool,
+    width: usize,
+) -> String {
+    // SAFETY: All handles, buffers and callback state are test-owned until cleanup.
+    unsafe {
+        let root = XML_ParserCreate(ptr::null());
+        let declaration = if standalone {
+            c"<?xml version='1.0' standalone='yes'?>"
+        } else {
+            c"<?xml version='1.0'?>"
+        };
+        assert_eq!(
+            XML_Parse(
+                root,
+                declaration.as_ptr(),
+                declaration.to_bytes().len() as c_int,
+                0
+            ),
+            OK
+        );
+        let child = XML_ExternalEntityParserCreate(root, ptr::null(), ptr::null());
+        assert!(!child.is_null());
+        let mut state = State::default();
+        XML_SetUserData(child, ptr::from_mut(&mut state).cast());
+        XML_SetDefaultHandlerExpand(child, Some(text));
+        assert_eq!(XML_SetParamEntityParsing(child, mode), 1);
+        if handlers {
+            XML_SetEntityDeclHandler(child, Some(ignore_entity_declaration));
+            XML_SetAttlistDeclHandler(child, Some(ignore_attlist_declaration));
+        }
+        let count = input.len().div_ceil(width);
+        for (index, bytes) in input.as_bytes().chunks(width).enumerate() {
+            assert_eq!(
+                XML_Parse(
+                    child,
+                    bytes.as_ptr().cast(),
+                    bytes.len() as c_int,
+                    c_int::from(index + 1 == count)
+                ),
+                OK,
+                "{input}"
+            );
+        }
+        XML_ParserFree(child);
+        XML_ParserFree(root);
+        state
+            .events
+            .iter()
+            .filter_map(|event| event.strip_prefix("text:"))
+            .collect()
+    }
+}
+
+#[test]
+fn skipped_declaration_references_deliver_each_default_byte_once() {
+    for (input, skipped) in [
+        ("<!ENTITY e %missing;\"X\">", "%missing;\"X\">"),
+        (
+            "<!ATTLIST r %missing;a CDATA \"X\">",
+            "%missing;a CDATA \"X\">",
+        ),
+        (
+            "<!ATTLIST r a CDATA \"X\" %missing; b CDATA \"Y\">",
+            "%missing; b CDATA \"Y\">",
+        ),
+    ] {
+        for standalone in [false, true] {
+            for handlers in [false, true] {
+                for mode in [0, 2] {
+                    for width in 1..=input.len() {
+                        let expected = if !handlers {
+                            input
+                        } else if standalone {
+                            "%missing;"
+                        } else {
+                            skipped
+                        };
+                        assert_eq!(
+                            declaration_default_text(input, standalone, mode, handlers, width),
+                            expected
+                        );
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn duplicate_entities_preserve_handler_dependent_default_tokens() {
+    for (second, sparse) in [
+        ("<!ENTITY e 'second'>", "e'second'"),
+        ("<!ENTITY e SYSTEM 'sys'>", "e'sys'>"),
+        ("<!ENTITY e PUBLIC 'pub' 'sys'>", "e'pub''sys'>"),
+        ("<!ENTITY e SYSTEM 'sys' NDATA n>", "e'sys'n"),
+        ("<!ENTITY e 'L%missing;R'>", "e'L%missing;R'>"),
+    ] {
+        let input = format!("<!ENTITY e 'first'>{second}");
+        for handlers in [false, true] {
+            for width in 1..=input.len() {
+                assert_eq!(
+                    declaration_default_text(&input, false, 2, handlers, width),
+                    if handlers { sparse } else { &input }
+                );
+            }
+        }
+    }
+}
+
 unsafe extern "C" fn start(data: *mut c_void, name: *const c_char, attrs: *const *const c_char) {
     // SAFETY: Tests install a State user pointer and receive valid callback strings.
     unsafe {

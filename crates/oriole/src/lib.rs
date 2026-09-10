@@ -167,6 +167,17 @@ pub enum EventKind {
     /// Opt-in whitespace callback outside element content. Read [`Parser::current_raw`]
     /// before advancing the parser; this event does not own the raw token.
     Default,
+    /// Raw declaration bytes delivered only when no entity declaration handler
+    /// is installed by a compatibility consumer.
+    EntityDeclarationPrefix,
+    /// Raw declaration bytes delivered only when no attribute declaration
+    /// handler is installed by a compatibility consumer.
+    AttlistDeclarationPrefix,
+    /// An ignored duplicate entity declaration, available with default events.
+    EntityDeclarationDuplicate {
+        external: bool,
+        unparsed: bool,
+    },
     StartElement {
         name: String,
         attributes: Vec<Attribute>,

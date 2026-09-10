@@ -574,7 +574,10 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
     };
     let optional_len = |value: &Option<XmlString>| value.as_ref().map_or(0, |value| value.len());
     let callback_bytes = match &kind {
-        EventKind::Default => {
+        EventKind::Default
+        | EventKind::EntityDeclarationPrefix
+        | EventKind::AttlistDeclarationPrefix
+        | EventKind::EntityDeclarationDuplicate { .. } => {
             // SAFETY: Only the copied length survives this read, before any callback.
             unsafe { (*parser).core.current_raw().map_or(0, str::len) }
         }
@@ -671,13 +674,25 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
             | EventKind::AttlistDeclaration { .. }
             | EventKind::ElementDeclaration { .. }
             | EventKind::NotationDeclaration { .. }
+            | EventKind::EntityDeclarationPrefix
+            | EventKind::AttlistDeclarationPrefix
+            | EventKind::EntityDeclarationDuplicate { .. }
     );
+    let duplicate_default = match &kind {
+        EventKind::EntityDeclarationDuplicate { external, unparsed } if h.entity_decl.is_some() => {
+            Some(*external && !*unparsed)
+        }
+        _ => None,
+    };
     let mut handled = true;
     // SAFETY: Handlers were installed by the caller with the corresponding C
     // signature. C strings and attribute arrays live for the whole callback.
     unsafe {
         match kind {
             EventKind::Default => handled = false,
+            EventKind::EntityDeclarationPrefix => handled = h.entity_decl.is_some(),
+            EventKind::AttlistDeclarationPrefix => handled = h.attlist_decl.is_some(),
+            EventKind::EntityDeclarationDuplicate { .. } => handled = false,
             EventKind::StartElement {
                 name,
                 mut attributes,
@@ -958,7 +973,25 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                     .transpose()?;
                 if let Some(raw) = raw {
                     if split_default {
+                        let mut duplicate_name = raw.starts_with("<!ENTITY");
                         for fragment in DtdFragments(raw.as_str()) {
+                            if let Some(closing) = duplicate_default {
+                                if fragment.chars().all(char::is_whitespace)
+                                    || matches!(fragment, "<!ENTITY" | "%")
+                                {
+                                    continue;
+                                }
+                                if duplicate_name {
+                                    duplicate_name = false;
+                                } else if fragment == "NDATA" {
+                                    duplicate_name = true;
+                                    continue;
+                                } else if matches!(fragment, "SYSTEM" | "PUBLIC")
+                                    || (fragment == ">" && !closing)
+                                {
+                                    continue;
+                                }
+                            }
                             (*parser)
                                 .default_pending
                                 .try_push_back(XmlString::try_from_str_in(

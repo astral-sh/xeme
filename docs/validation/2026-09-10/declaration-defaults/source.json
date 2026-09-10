@@ -1,0 +1,30 @@
+{
+  "base": "/tmp/oriole-combined-dtd",
+  "candidate": "/tmp/oriole-default-declarations",
+  "files": {
+    "crates/oriole/src/lib.rs": {
+      "base_sha256": "fcbbff0d5510a29d7f27e43be8a070d59178a790852796444b213d704b5522f1",
+      "candidate_sha256": "225bd5494f6626c0558a5c47a14cd3eb958dcb0c2e889dec0785472a41518f4f"
+    },
+    "crates/oriole/src/dtd.rs": {
+      "base_sha256": "66cfa98b3a806f4e1897efde534f6e766dfe0a7e2893a480b9df20c2d3e2ab08",
+      "candidate_sha256": "8c526d886f9a1896e8718c4cfe92babbf19c59b7dab738a9544344ac09fa1dbf"
+    },
+    "crates/oriole/tests/allocation.rs": {
+      "base_sha256": "0ea32f058e3e7fd31a27a438da41a82f739eb9fbc1d00d365bf6657b1393ca56",
+      "candidate_sha256": "bc369c0823b25632ae9895bc9cc11b8f045d7d920e5ffa8297ed5b5fa5dd5007"
+    },
+    "crates/oriole_expat/src/lib.rs": {
+      "base_sha256": "eab5bf07b203d0312f98265759bd4eda1a808d33105b8e2ff440ee6e396c4b24",
+      "candidate_sha256": "5a56728a3c5b8e49958cd95dade419cbca9d6409684ce7067c8e4dd85c723ca9"
+    },
+    "crates/oriole_expat/src/tests.rs": {
+      "base_sha256": "009b974db2c4f2eff01d815c0295507a6d59075ecdc18192a35423fa9372c050",
+      "candidate_sha256": "97075e190f9f7436e083f671136f5ab161932477ec1182dc192e32750f476e1e"
+    }
+  },
+  "library": "/home/dev-user/.cache/oriole/default-declarations-target/debug/liboriole_expat.so",
+  "library_sha256": "f5fa56ab86b634fb84704d7bc07f2d8da04e815232a9d3bf981e3cfb035975b4",
+  "patch_sha256": "f83b8bc88a3e05aceba42e8c88d6970193a8a58564fe2a60bfa81261adf2f2d2",
+  "patch_check": "git apply --check passed against base"
+}

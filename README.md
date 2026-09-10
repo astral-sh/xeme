@@ -16,18 +16,23 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole | Expat | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 89.987 ms | 29.108 ms | 3.09× |
-| Wayland protocol | 1.983 ms | 1.070 ms | 1.87× |
-| Maven POM | 1.585 ms | 0.454 ms | 3.45× |
-| Batik SVG | 0.154 ms | 0.133 ms | 1.15× |
-| GTK UI | 0.677 ms | 0.213 ms | 3.19× |
-| DocBook XSL | 0.453 ms | 0.186 ms | 2.38× |
+| Vulkan registry | 89.795 ms | 30.275 ms | 2.97× |
+| Wayland protocol | 2.011 ms | 1.094 ms | 1.84× |
+| Maven POM | 1.599 ms | 0.462 ms | 3.46× |
+| Batik SVG | 0.155 ms | 0.135 ms | 1.14× |
+| GTK UI | 0.684 ms | 0.217 ms | 3.12× |
+| DocBook XSL | 0.459 ms | 0.189 ms | 2.43× |
 
-Oriole remains slower than Expat. These [native measurements](docs/validation/2026-09-10/buffer-reservations/)
+Oriole remains slower than Expat. These [native measurements](benchmarks/results/2026-09-10/version-consistent-pgo/)
 use original XML from six pinned projects, Expat 2.8.4, 4 KiB chunks, and namespaces
 disabled on a shared Linux AMD EPYC-Milan host. Times are medians of process medians;
 ratios are medians of paired ratios. See the [benchmark guide](benchmarks/README.md)
 for methodology, complete results, and separately identified actual-consumer timings.
+
+Optional [profile-guided builds](tools/pgo/) reduce Oriole’s native project time by
+22.7%. With both libraries trained, Oriole still takes 2.23× Expat’s time through the
+native C interface and 1.42× across the measured CPython consumers. The [full report](benchmarks/results/2026-09-10/version-consistent-pgo/)
+retains every project, build identity, raw sample, and limitation.
 
 The [current validation report](docs/validation/2026-09-10/version-consistent-runtime/)
 records 369 workspace Rust checks and **4,323 passing / 417 failing upstream API

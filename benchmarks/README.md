@@ -1,6 +1,7 @@
 # Benchmarks
 
-See the [final runtime measurements](results/2026-09-10/final-runtime/),
+See the [current native and consumer measurements](results/2026-09-10/version-consistent-pgo/),
+[earlier full runtime measurements](results/2026-09-10/final-runtime/),
 [DTD runtime checkpoint](results/2026-09-10/dtd-checkpoint/),
 [earlier combined runtime measurements](results/2026-09-10/combined-runtime/),
 [inline text experiment](results/2026-09-10/inline-text/),
@@ -112,6 +113,14 @@ The optional [PGO workflow](../tools/pgo/) builds an instrumented library, train
 a fixed generated corpus, and rebuilds with a fresh profile. It preserves runtime
 configuration and keeps real project XML out of training. Every run records source,
 compiler, profile and library identities.
+
+The [current matched-build study](results/2026-09-10/version-consistent-pgo/) measures
+runtime `4b11ace` through native callbacks, unchanged CPython consumers and the
+Wayland scanner. PGO reduces Oriole's native time by 22.7% and Expat's by 13.4%;
+with both trained, Oriole takes 2.23× Expat's time overall. The corresponding
+comparisons are 1.55× for ElementTree, 1.30× for pyexpat's event interface and 1.25×
+for Wayland code generation. All output gates, raw samples, independent arithmetic
+reviews, invalid overlapping attempts and exact build identities are preserved.
 
 The [initial paired study](results/2026-09-10/profile-guided-study/) improves Oriole
 by 22.2% geometrically on held-out native project workloads. Expat trained on the

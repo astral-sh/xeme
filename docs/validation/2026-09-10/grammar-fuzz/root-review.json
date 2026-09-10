@@ -1,0 +1,12 @@
+{
+  "target_sha256": "ccc605c3f0ae465a65e3cb1ce8151c646dd022d071a40516498545c79b14dbb3",
+  "status": "source_review_pass",
+  "reviewer": "root",
+  "findings": [
+    "Marker and selector are checked before changing the unmarked payload split; immutable input spans outlive the family.",
+    "Content-model traversal uses length <= queued <= 512 and frees the whole model before state-changing callbacks.",
+    "New handler bits are confined to marked inputs; existing fixed parser slots, recursion, request, feed and allocation limits are retained.",
+    "Foreign-DTD integration probes match combined ff5d outcomes and non-Default events, including the reference shared-read-marker behavior."
+  ],
+  "sanitizer": "Pending final combined snapshot replay and campaigns."
+}

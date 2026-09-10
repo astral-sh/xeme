@@ -2,6 +2,7 @@
 
 //! Callback-driven external value children with bounded parser slots and recursion.
 //! Thirty-two control bytes precede separately owned p/q input slices.
+//! A marked payload adds declaration-grammar templates without changing old controls.
 
 use std::cell::Cell;
 use std::ffi::{c_char, c_int, c_void};
@@ -9,6 +10,25 @@ use std::ptr;
 
 use libfuzzer_sys::fuzz_target;
 use oriole_expat::*;
+
+const GRAMMAR_MARKER: &[u8] = b"ORIOLE-DTD-GRAMMAR\0";
+
+fn grammar_document(selector: u8) -> &'static [u8] {
+    match selector % 12 {
+        0 => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ENTITY e %p; 'P'><!ENTITY after 'A'>",
+        1 => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ENTITY e PUBLIC ' public id ' %p; 's'><!ENTITY after 'A'>",
+        2 => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ENTITY e 'P' %p;><!ENTITY after 'A'>",
+        3 => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ATTLIST r a CDATA 'A' %p; b CDATA 'B'><!ENTITY after 'A'>",
+        4 => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ATTLIST r a (x|%p;y) 'x'><!ENTITY after 'A'>",
+        5 => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ATTLIST r a NOTATION (%p;x|y) 'x'><!ENTITY after 'A'>",
+        6 => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ELEMENT r (%p;a,(b|c)*)><!ENTITY after 'A'>",
+        7 => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!NOTATION n PUBLIC 'public' %p;><!ENTITY after 'A'>",
+        8 => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ENTITY e %p; 'L%q;R'><!ENTITY after 'A'>",
+        9 => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ENTITY e 'FIRST'><!ENTITY e %missing;%p; 'L%q;R' %missing;><!ENTITY after 'A'>",
+        10 => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ENTITY % e PUBLIC ' public id ' %p; 's'><!ENTITY after 'A'>",
+        _ => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!NOTATION n SYSTEM 's' %p;><!ENTITY after 'A'>",
+    }
+}
 
 unsafe extern "C" {
     fn malloc(size: usize) -> *mut c_void;
@@ -263,6 +283,7 @@ struct Family {
     states: [State; 8],
     controls: [u8; 32],
     payload: [(*const u8, usize); 2],
+    grammar_template: Option<u8>,
     used: usize,
     requests: usize,
 }
@@ -340,6 +361,82 @@ unsafe extern "C" fn declaration(data: *mut c_void, _: *const c_char, _: *const 
     unsafe { callback(data.cast()) };
 }
 
+unsafe extern "C" fn attribute(
+    data: *mut c_void,
+    element: *const c_char,
+    name: *const c_char,
+    kind: *const c_char,
+    value: *const c_char,
+    _: c_int,
+) {
+    // These borrowed strings are validated before callback actions can mutate state.
+    unsafe {
+        assert!(!element.is_null() && !name.is_null() && !kind.is_null());
+        for text in [element, name, kind, value] {
+            if !text.is_null() {
+                assert!(std::ffi::CStr::from_ptr(text).to_str().is_ok());
+            }
+        }
+        callback(data.cast());
+    }
+}
+
+unsafe extern "C" fn notation(
+    data: *mut c_void,
+    name: *const c_char,
+    base: *const c_char,
+    system: *const c_char,
+    public: *const c_char,
+) {
+    unsafe {
+        assert!(!name.is_null());
+        for text in [name, base, system, public] {
+            if !text.is_null() {
+                assert!(std::ffi::CStr::from_ptr(text).to_str().is_ok());
+            }
+        }
+        callback(data.cast());
+    }
+}
+
+unsafe extern "C" fn element_model(
+    data: *mut c_void,
+    name: *const c_char,
+    model: *mut XML_Content,
+) {
+    // Inspect at most 512 owned nodes, then free through the emitting parser
+    // before callback actions can change its state. No node reference escapes.
+    unsafe {
+        assert!(std::ffi::CStr::from_ptr(name).to_str().is_ok());
+        assert!(!model.is_null());
+        let state = data.cast::<State>();
+        let parser = (*state).parser;
+        let mut stack = [ptr::null_mut(); 512];
+        stack[0] = model;
+        let mut length = 1;
+        let mut queued = 1;
+        while length != 0 {
+            length -= 1;
+            let node = stack[length];
+            assert!((1..=6).contains(&(*node).kind));
+            assert!((0..=3).contains(&(*node).quant));
+            if !(*node).name.is_null() {
+                assert!(std::ffi::CStr::from_ptr((*node).name).to_str().is_ok());
+            }
+            let children = (*node).numchildren as usize;
+            assert!(children == 0 || !(*node).children.is_null());
+            let count = children.min(stack.len() - queued);
+            for index in 0..count {
+                stack[length] = (*node).children.add(index);
+                length += 1;
+            }
+            queued += count;
+        }
+        XML_FreeContentModel(parser, model);
+        callback(state);
+    }
+}
+
 unsafe fn configure(state: *mut State) {
     unsafe {
         let parser = (*state).parser;
@@ -356,6 +453,32 @@ unsafe fn configure(state: *mut State) {
                 None
             },
         );
+        if (*(*state).family).grammar_template.is_some() {
+            XML_SetAttlistDeclHandler(
+                parser,
+                if controls[11] & 8 != 0 {
+                    Some(attribute)
+                } else {
+                    None
+                },
+            );
+            XML_SetElementDeclHandler(
+                parser,
+                if controls[11] & 16 != 0 {
+                    Some(element_model)
+                } else {
+                    None
+                },
+            );
+            XML_SetNotationDeclHandler(
+                parser,
+                if controls[11] & 32 != 0 {
+                    Some(notation)
+                } else {
+                    None
+                },
+            );
+        }
         XML_SetDefaultHandler(
             parser,
             if controls[11] & 2 != 0 {
@@ -445,7 +568,24 @@ unsafe extern "C" fn external(
         let index = (*family).used;
         (*family).used += 1;
         let controls = (*family).controls;
+        let grammar_template = (*family).grammar_template;
         let value = !system.is_null() && std::ffi::CStr::from_ptr(system).to_bytes() != b"d";
+        if grammar_template.is_some() && value {
+            match (controls[24] >> 3) & 7 {
+                1 => XML_SetAttlistDeclHandler(parser, None),
+                2 => XML_SetAttlistDeclHandler(parser, Some(attribute)),
+                3 => XML_SetNotationDeclHandler(parser, None),
+                4 => XML_SetNotationDeclHandler(parser, Some(notation)),
+                5 => XML_SetElementDeclHandler(parser, None),
+                6 => XML_SetElementDeclHandler(parser, Some(element_model)),
+                7 => {
+                    XML_SetAttlistDeclHandler(parser, Some(attribute));
+                    XML_SetElementDeclHandler(parser, Some(element_model));
+                    XML_SetNotationDeclHandler(parser, Some(notation));
+                }
+                _ => {}
+            }
+        }
         let action = if value { controls[16 + index] & 7 } else { 0 };
         if action == 1 {
             return 1;
@@ -476,6 +616,8 @@ unsafe extern "C" fn external(
             // Both spans refer to the fuzzer-owned input, which outlives this
             // complete parser family. They do not borrow mutable Family storage.
             std::slice::from_raw_parts(bytes, length)
+        } else if let Some(selector) = grammar_template {
+            grammar_document(selector)
         } else {
             match controls[25] & 7 {
                 0 => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ENTITY % i 'I'><!ENTITY e 'L%p;R'><!ENTITY after 'A'>",
@@ -519,7 +661,13 @@ fuzz_target!(|data: &[u8]| {
         usize::from(u16::from_le_bytes([data[1], data[2]])) % 2048 + 1
     });
     let controls: [u8; 32] = data[..32].try_into().unwrap();
-    let body = &data[32..];
+    let (grammar_template, body) = match data[32..]
+        .strip_prefix(GRAMMAR_MARKER)
+        .and_then(|body| body.split_first())
+    {
+        Some((&selector, body)) => (Some(selector), body),
+        None => (None, &data[32..]),
+    };
     let split = usize::from(u16::from_le_bytes([data[13], data[14]])) % (body.len() + 1);
     let mut family = Family {
         states: std::array::from_fn(|_| State::new(data, data[8])),
@@ -528,6 +676,7 @@ fuzz_target!(|data: &[u8]| {
             (body[..split].as_ptr(), split),
             (body[split..].as_ptr(), body.len() - split),
         ],
+        grammar_template,
         used: 1,
         requests: 0,
     };

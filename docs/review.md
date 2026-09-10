@@ -1,6 +1,6 @@
 # Reviewing Oriole
 
-The implementation is published in native GitHub Stack 3, starting at [PR #1](https://github.com/astral-sh/oriole/pull/1). Each layer uses the preceding layer as its base. The PRs remain drafts for review; none has been merged or released.
+The implementation is published in native GitHub Stack 3, starting at [PR #1](https://github.com/astral-sh/oriole/pull/1). Each layer uses the preceding layer as its base, keeping implementation changes and their evidence reviewable together.
 
 ## Review order
 
@@ -13,8 +13,9 @@ The implementation is published in native GitHub Stack 3, starting at [PR #1](ht
 | Callback and external-value behavior | [Callback allocation](https://github.com/astral-sh/oriole/pull/36) through [value-family fuzzing](https://github.com/astral-sh/oriole/pull/46) | Handler mutation, declaration visibility, child ownership and continuation state |
 | Conformance and final grammar | [Combined measurements](https://github.com/astral-sh/oriole/pull/47) through [grammar fuzzing](https://github.com/astral-sh/oriole/pull/61) | W3C acceptance, namespaces, versions, foreign DTD policy and external declaration grammar |
 | Final evidence | [Validation and benchmarks](https://github.com/astral-sh/oriole/pull/62), [full PBS gate](https://github.com/astral-sh/oriole/pull/60) | Source identity across consumers, fuzzing, benchmarks and installed-distribution validation |
+| Subsequent compatibility and performance | [Constructor allocation](https://github.com/astral-sh/oriole/pull/86), [entity limits](https://github.com/astral-sh/oriole/pull/89), [attribute scans](https://github.com/astral-sh/oriole/pull/91), [event output](https://github.com/astral-sh/oriole/pull/92), [ATTLIST publication](https://github.com/astral-sh/oriole/pull/93) | Original API outcomes, ownership across callbacks, work limits and measured project performance |
 
-The [final runtime report](validation/2026-09-10/final-runtime/) and [benchmarks](../benchmarks/results/2026-09-10/final-runtime/) identify the measured parser at `1262888`. Later evidence-only layers do not change that runtime. Every earlier report retains its own source identity; historical results are not silently assigned to newer code.
+The earlier [full runtime report](validation/2026-09-10/final-runtime/) and [benchmarks](../benchmarks/results/2026-09-10/final-runtime/) identify the parser at `1262888`. Subsequent implementation layers change that runtime. The [current ATTLIST report](validation/2026-09-10/streaming-attlist-composed/) identifies source `41d13ba`, its exact shared/static libraries, original API results, independent review and native project measurements. Every report retains its own source identity; historical fuzzing and distribution results do not certify newer code.
 
 ## Interpreting the gates
 

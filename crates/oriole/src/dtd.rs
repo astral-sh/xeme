@@ -1732,28 +1732,15 @@ impl Parser {
             if self.declarations_skipped() {
                 return Ok(());
             }
-            // A CR/LF pair in a replacement was produced by character
-            // references, so it represents two attribute whitespace
-            // characters rather than one physical line ending.
-            let normalized = if cursor.last_literal_normalize == Some(false) && raw.contains("\r\n")
-            {
-                let mut value = String::try_with_capacity_in(raw.len(), self.allocator)?;
-                for character in raw.chars() {
-                    value.try_push(if whitespace(character) {
-                        ' '
-                    } else {
-                        character
-                    })?;
-                }
-                Some(value)
-            } else {
-                None
-            };
+            // Keep the lexical view: materializing proxy text here would lose
+            // converted ASCII provenance. Replacement CR/LF is independent data.
+            let normalize_line_endings = cursor
+                .last_literal_normalize
+                .unwrap_or(self.sources.len() == 1);
             let value = self.expand_attribute(
-                normalized
-                    .as_deref()
-                    .map_or_else(|| cursor.lexical.for_slice(raw), Slice::plain),
+                cursor.lexical.for_slice(raw),
                 attribute_type != "CDATA",
+                normalize_line_endings,
             )?;
             Some(value)
         };

@@ -4,13 +4,16 @@ use oriole::{Config, ErrorKind, EventKind, Limits, Parser};
 
 fn attribute(document: &str, config: Config) -> Result<std::string::String, ErrorKind> {
     let mut parser = Parser::new(config);
+    assert!(parser.set_param_entity_parsing(2));
     parser.feed(document.as_bytes(), true).unwrap();
     let mut result = None;
     loop {
         match parser.next_event() {
             Ok(Some(event)) => {
-                if let EventKind::StartElement { attributes, .. } = event.kind {
-                    result = Some(attributes[0].value.as_str().to_owned());
+                if let EventKind::StartElement { attributes, .. } = event.kind
+                    && let Some(attribute) = attributes.first()
+                {
+                    result = Some(attribute.value.as_str().to_owned());
                 }
             }
             Ok(None) => return Ok(result.unwrap()),
@@ -139,4 +142,125 @@ fn external_context_entity_names_are_active_during_attribute_expansion() {
         child.next_event().unwrap_err().kind,
         ErrorKind::RecursiveEntityReference
     );
+}
+
+#[test]
+fn replacement_crlf_is_two_spaces_but_physical_crlf_is_one() {
+    for document in [
+        "<!DOCTYPE r [<!ENTITY e 'A&#13;&#10;B'>]><r a='&e;'/>",
+        "<!DOCTYPE r [<!ENTITY % p \"<!ATTLIST r a CDATA 'A&#13;&#10;B'>\">%p;]><r/>",
+        "<!DOCTYPE r [<!ENTITY e 'A&#13;&#10;B'><!ATTLIST r a CDATA '&e;'>]><r/>",
+        "<!DOCTYPE r [<!ENTITY e \"<r a='A&#13;&#10;B'/>\">]><outer>&e;</outer>",
+        "<!DOCTYPE r [<!ENTITY e 'A&#13;&#10;B'><!ENTITY body \"<r a='&e;'/>\">]><outer>&body;</outer>",
+    ] {
+        assert_eq!(attribute(document, Config::default()).unwrap(), "A  B");
+    }
+    for document in [
+        "<r a='A\r\nB'/>",
+        "<!DOCTYPE r [<!ENTITY % p \"<!ATTLIST r a CDATA 'A\r\nB'>\">%p;]><r/>",
+        "<!DOCTYPE r [<!ENTITY e 'A\r\nB'>]><r a='&e;'/>",
+        "<!DOCTYPE r [<!ENTITY e \"<r a='A\r\nB'/>\">]><outer>&e;</outer>",
+    ] {
+        assert_eq!(attribute(document, Config::default()).unwrap(), "A B");
+    }
+    // Numeric references in the attribute itself bypass whitespace replacement.
+    assert_eq!(
+        attribute("<r a='A&#13;&#10;B'/>", Config::default()).unwrap(),
+        "A\r\nB"
+    );
+}
+
+#[test]
+fn unparsed_entities_report_the_binary_reference_error_in_attributes() {
+    for standalone in ["", "<?xml version='1.0' standalone='yes'?>"] {
+        for (default, body) in [("", "<r a='&e;'/>"), ("<!ATTLIST r a CDATA '&e;'>", "<r/>")] {
+            let document = format!(
+                "{standalone}<!DOCTYPE r [<!NOTATION n SYSTEM 'n'><!ENTITY e SYSTEM 'unused' NDATA n>{default}]>{body}"
+            );
+            assert_eq!(
+                attribute(&document, Config::default()),
+                Err(ErrorKind::BinaryEntityReference)
+            );
+        }
+    }
+}
+
+#[test]
+fn converted_line_endings_keep_their_literal_or_replacement_origin() {
+    for (document, expected) in [
+        (
+            b"<!DOCTYPE r [<!ATTLIST r a CDATA 'A\x80R\r\n\x80NB'>]><r/>".as_slice(),
+            "A\r \nB",
+        ),
+        (
+            b"<!DOCTYPE r [<!ENTITY e 'A\x80R\r\n\x80NB'><!ATTLIST r a CDATA '&e;'>]><r/>",
+            "A   B",
+        ),
+        (
+            b"<!DOCTYPE r [<!ENTITY % p \"<!ATTLIST r a CDATA 'A\x80R\r\n\x80NB'>\">%p;]><r/>",
+            "A   B",
+        ),
+        (
+            b"<!DOCTYPE r [<!ENTITY e \"<r a='A\x80R\r\n\x80NB'/>\">]><outer>&e;</outer>",
+            "A   B",
+        ),
+    ] {
+        for width in [1, 2, document.len()] {
+            for namespace_separator in [None, Some('|')] {
+                let mut parser = Parser::new(Config {
+                    encoding: Some("custom".into()),
+                    namespace_separator,
+                    ..Config::default()
+                });
+                assert!(parser.set_param_entity_parsing(2));
+                let mut values = Vec::new();
+                for (index, bytes) in document.chunks(width).enumerate() {
+                    parser
+                        .feed(bytes, (index + 1) * width >= document.len())
+                        .unwrap();
+                    loop {
+                        match parser.next_event() {
+                            Ok(Some(event)) => {
+                                if let EventKind::StartElement { attributes, .. } = event.kind {
+                                    values.extend(
+                                        attributes
+                                            .iter()
+                                            .map(|attribute| attribute.value.to_string()),
+                                    );
+                                }
+                            }
+                            Ok(None) => {
+                                let Some(request) = parser.encoding_conversion() else {
+                                    break;
+                                };
+                                let character = match request.bytes[1] {
+                                    b'R' => b'\r',
+                                    b'N' => b'\n',
+                                    _ => panic!("unexpected conversion"),
+                                };
+                                parser
+                                    .resolve_encoding_conversion(i32::from(character))
+                                    .unwrap();
+                            }
+                            Err(error) if error.kind == ErrorKind::UnknownEncoding => {
+                                let mut map =
+                                    std::array::from_fn(
+                                        |byte| if byte < 128 { byte as i32 } else { -1 },
+                                    );
+                                map[128] = -2;
+                                parser.set_multibyte_encoding_map("custom", map).unwrap();
+                            }
+                            Err(error) => panic!("{document:?}: {error}"),
+                        }
+                    }
+                }
+                assert!(parser.is_finished());
+                assert_eq!(
+                    values,
+                    [expected],
+                    "{document:?}/{width}/{namespace_separator:?}"
+                );
+            }
+        }
+    }
 }

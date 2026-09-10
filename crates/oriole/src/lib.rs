@@ -2620,7 +2620,12 @@ impl Parser {
                 .is_some_and(|decl| decl.attribute_type != "CDATA")
                 && attribute_needs_normalization(value);
             let attribute = &mut attrs[index];
-            self.expand_attribute_into(token.for_slice(value), &mut attribute.value, tokenized)?;
+            self.expand_attribute_into(
+                token.for_slice(value),
+                &mut attribute.value,
+                tokenized,
+                self.sources.len() == 1,
+            )?;
             copy_attribute_string(&mut attribute.name, attr_name)?;
             attribute.specified = true;
         }
@@ -3005,6 +3010,7 @@ impl Parser {
         value: lexical::Slice<'_>,
         output: &mut String,
         tokenized: bool,
+        normalize_line_endings: bool,
     ) -> Result<(), Error> {
         if tokenized
             || value.has_ascii_aliases()
@@ -3014,7 +3020,7 @@ impl Parser {
         {
             output.try_reserve(value.len().saturating_sub(output.len()))?;
             output.clear();
-            self.append_attribute(value, output, tokenized)?;
+            self.append_attribute(value, output, tokenized, normalize_line_endings)?;
             if tokenized && output.ends_with(' ') {
                 output.truncate(output.len() - 1);
             }
@@ -3028,9 +3034,10 @@ impl Parser {
         &self,
         value: lexical::Slice<'_>,
         tokenized: bool,
+        normalize_line_endings: bool,
     ) -> Result<String, Error> {
         let mut output = String::try_with_capacity_in(value.len(), self.allocator)?;
-        self.append_attribute(value, &mut output, tokenized)?;
+        self.append_attribute(value, &mut output, tokenized, normalize_line_endings)?;
         if tokenized && output.ends_with(' ') {
             output.truncate(output.len() - 1);
         }
@@ -3045,6 +3052,7 @@ impl Parser {
         value: lexical::Slice<'_>,
         output: &mut String,
         tokenized: bool,
+        normalize_line_endings: bool,
     ) -> Result<(), Error> {
         struct Frame<'a> {
             rest: lexical::Slice<'a>,
@@ -3077,7 +3085,13 @@ impl Parser {
                     }
                 }
             } else {
-                append_lexical_attribute(output, literal)?;
+                // Stored replacements have already normalized their physical line
+                // endings; remaining CR and LF are independent data characters.
+                append_lexical_attribute(
+                    output,
+                    literal,
+                    normalize_line_endings && frames.is_empty(),
+                )?;
             }
             rest = rest.for_slice(&rest.as_str()[end..]);
             if rest.is_empty() {
@@ -3146,6 +3160,12 @@ impl Parser {
                 return Err(self.err(
                     ErrorKind::EntityDeclaredInParameterEntity,
                     "entity was declared in a parameter entity",
+                ));
+            }
+            if entity.notation.is_some() {
+                return Err(self.err(
+                    ErrorKind::BinaryEntityReference,
+                    "unparsed entity in attribute",
                 ));
             }
             let value = entity.value.as_ref().ok_or_else(|| {
@@ -3334,7 +3354,11 @@ fn normalize_newlines(text: &str, allocator: Allocator) -> Result<String, Error>
     }
     Ok(output)
 }
-fn append_lexical_attribute(output: &mut String, text: lexical::Slice<'_>) -> Result<(), Error> {
+fn append_lexical_attribute(
+    output: &mut String,
+    text: lexical::Slice<'_>,
+    normalize_line_endings: bool,
+) -> Result<(), Error> {
     if !text.has_ascii_aliases() && !text.contains(['\t', '\r', '\n']) {
         output.try_push_str(&text)?;
         return Ok(());
@@ -3345,7 +3369,7 @@ fn append_lexical_attribute(output: &mut String, text: lexical::Slice<'_>) -> Re
             previous_cr = false;
             continue;
         }
-        previous_cr = raw_ascii && character == '\r';
+        previous_cr = normalize_line_endings && raw_ascii && character == '\r';
         output.try_push(if raw_ascii && whitespace(character) {
             ' '
         } else {

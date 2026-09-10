@@ -209,6 +209,38 @@ fn external_fragments_emit_trailing_text_before_reporting_unbalanced_markup() {
 }
 
 #[test]
+fn attribute_declaration_types_omit_grammar_whitespace() {
+    let events = every_chunk(
+        "<!DOCTYPE r [<!ATTLIST r a ( one | two | three ) #REQUIRED b NOTATION \t( foo | bar ) #IMPLIED c NOTATION (foo) 'bar' d CDATA 'é'>]><r a='two'/>",
+    );
+    let declarations: Vec<_> = events
+        .iter()
+        .filter_map(|event| {
+            if let EventKind::AttlistDeclaration {
+                attribute_type,
+                default,
+                required,
+                ..
+            } = event
+            {
+                Some((attribute_type.as_str(), default.as_deref(), *required))
+            } else {
+                None
+            }
+        })
+        .collect();
+    assert_eq!(
+        declarations,
+        [
+            ("(one|two|three)", None, true),
+            ("NOTATION(foo|bar)", None, false),
+            ("NOTATION(foo)", Some("bar"), false),
+            ("CDATA", Some("é"), false),
+        ]
+    );
+}
+
+#[test]
 fn namespaces_apply_to_dtd_names_and_entity_references() {
     let namespaces = Config {
         namespace_separator: Some('|'),

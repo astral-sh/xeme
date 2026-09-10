@@ -24,6 +24,11 @@ used from a callback. Rust panics in allocating entry points are caught before t
 boundary. Allocation failures on the C path return errors without allocating an
 error message.
 
+A failed API request, such as requesting a negative buffer size or resuming an
+unsuspended parser, updates the reported error without invalidating pending input.
+A later valid parse or resume can proceed. XML syntax errors and failures while
+processing input remain terminal until reset.
+
 Content-model callbacks receive one C allocation containing the entire model and
 its names. The consumer owns that allocation and releases it with
 `XML_FreeContentModel`, including after freeing the parser.

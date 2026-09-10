@@ -627,8 +627,11 @@ impl Parser {
                     return Err(self.err(ErrorKind::Syntax, "invalid attribute type"));
                 }
             }
-            let attribute_type =
-                string(&start[..start.len() - cursor.rest().len()], self.allocator)?;
+            let raw_type = &start[..start.len() - cursor.rest().len()];
+            let mut attribute_type = String::try_with_capacity_in(raw_type.len(), self.allocator)?;
+            for part in raw_type.split(whitespace) {
+                attribute_type.push_str(part)?;
+            }
             cursor
                 .require_space()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;

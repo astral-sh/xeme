@@ -151,6 +151,7 @@ pub struct XML_ParserStruct {
     destroying: bool,
     state: c_int,
     error: c_int,
+    parse_error: c_int,
     final_buffer: bool,
     position: Position,
     specified_attributes: c_int,
@@ -299,6 +300,7 @@ unsafe fn create(
                     destroying: false,
                     state: 0,
                     error: 0,
+                    parse_error: 0,
                     final_buffer: false,
                     position,
                     specified_attributes: 0,
@@ -425,6 +427,15 @@ pub unsafe extern "C" fn XML_ParserFree(parser: XML_Parser) {
     unsafe { with_parser_tracking(parser, operation) }
 }
 
+/// Record a processor failure separately from a recoverable API diagnostic.
+unsafe fn fail_parse(parser: XML_Parser, error: c_int) {
+    // SAFETY: The caller owns the live handle and no parser reference crosses a callback.
+    unsafe {
+        (*parser).parse_error = error;
+        (*parser).error = error;
+    }
+}
+
 unsafe fn release_encoding(parser: XML_Parser) {
     // SAFETY: Take ownership of the release callback before invoking it, so
     // callback reentry cannot release the same encoding data a second time.
@@ -513,6 +524,7 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                 (*parser).handler_arg_is_parser = false;
                 (*parser).state = 0;
                 (*parser).error = 0;
+                (*parser).parse_error = 0;
                 (*parser).final_buffer = false;
                 (*parser).specified_attributes = 0;
                 (*parser).base = None;
@@ -564,6 +576,10 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
         )
     };
     let callback_bytes = match &kind {
+        EventKind::Default => {
+            // SAFETY: Only the copied length survives this read, before any callback.
+            unsafe { (*parser).core.current_raw().map_or(0, str::len) }
+        }
         EventKind::StartElement { name, attributes } => {
             name.len()
                 + attributes
@@ -588,7 +604,7 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
             callback_bytes,
             MAX_FAMILY_CALLBACK_BYTES,
         ) {
-            (*parser).error = 43;
+            fail_parse(parser, 43);
             return Ok(());
         }
     }
@@ -723,7 +739,7 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                         cptr(&optional_cstring(public_id)?),
                     ) == 0
                     {
-                        (*parser).error = 21;
+                        fail_parse(parser, 21);
                     }
                 } else {
                     handled = false;
@@ -733,7 +749,7 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                 if let Some(callback) = h.not_standalone
                     && callback(arg) == 0
                 {
-                    (*parser).error = 22;
+                    fail_parse(parser, 22);
                 }
             }
             EventKind::StartDoctype {
@@ -853,7 +869,7 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                     let name = cstring(name)?;
                     match content_model::allocate(&model, (*parser).allocator) {
                         Ok(model) => callback(arg, name.as_ptr(), model),
-                        Err(error) => (*parser).error = error,
+                        Err(error) => fail_parse(parser, error),
                     }
                 } else {
                     handled = false;
@@ -933,7 +949,7 @@ unsafe fn dispatch_default_fragment(parser: XML_Parser, raw: &str) -> bool {
     // SAFETY: Called only by the guarded parse loop. Each callback can replace
     // handlers or stop; re-read scalar state between fragments.
     unsafe {
-        if (*parser).destroying || (*parser).state == 3 || (*parser).error != 0 {
+        if (*parser).destroying || (*parser).state == 3 || (*parser).parse_error != 0 {
             return false;
         }
         let Some(callback) = (*parser).handlers.default else {
@@ -947,7 +963,7 @@ unsafe fn dispatch_default_fragment(parser: XML_Parser, raw: &str) -> bool {
         (*parser).default_dispatch = true;
         callback(arg, raw.as_ptr().cast(), raw.len() as c_int);
         (*parser).default_dispatch = false;
-        !(*parser).destroying && (*parser).state != 3 && (*parser).error == 0
+        !(*parser).destroying && (*parser).state != 3 && (*parser).parse_error == 0
     }
 }
 
@@ -955,7 +971,7 @@ unsafe fn drain_default_fragments(parser: XML_Parser) {
     // SAFETY: The queue is accessed only outside callbacks; a popped String owns
     // its data during dispatch. Remaining fragments survive suspension/resumption.
     unsafe {
-        while !(*parser).destroying && (*parser).state != 3 && (*parser).error == 0 {
+        while !(*parser).destroying && (*parser).state != 3 && (*parser).parse_error == 0 {
             if (*parser).handlers.default.is_none() {
                 while (*parser).default_pending.pop_front().is_some() {}
                 return;
@@ -982,10 +998,12 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
             if (*parser).destroying {
                 return ERROR;
             }
-            if (*parser).error != 0 {
+            if (*parser).parse_error != 0 {
+                (*parser).error = (*parser).parse_error;
                 return ERROR;
             }
             if (*parser).state == 3 {
+                (*parser).error = 0;
                 return SUSPENDED;
             }
             match (*parser).core.next_event() {
@@ -1001,6 +1019,7 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
                         }
                         (*parser).state = 2;
                     }
+                    (*parser).error = 0;
                     return OK;
                 }
                 Err(error) => {
@@ -1011,10 +1030,10 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
                     if (*parser).destroying {
                         return ERROR;
                     }
-                    if (*parser).error != 0 {
+                    if (*parser).parse_error != 0 {
                         return ERROR;
                     }
-                    (*parser).error = error_code(&error.kind);
+                    fail_parse(parser, error_code(&error.kind));
                     (*parser).position = error.position;
                     return ERROR;
                 }
@@ -1023,7 +1042,7 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
         // SAFETY: The event owns its data and the parser remains busy.
         unsafe {
             if dispatch(parser, event.kind).is_err() {
-                (*parser).error = 1;
+                fail_parse(parser, 1);
                 return ERROR;
             }
         }
@@ -1048,7 +1067,7 @@ unsafe fn merge_external_subset(parser: XML_Parser) -> bool {
                 && !(*parent).destroying
                 && let Err(error) = (*parent).core.merge_external_subset(&(*parser).core)
             {
-                (*parser).error = error_code(&error.kind);
+                fail_parse(parser, error_code(&error.kind));
                 (*parser).position = error.position;
                 return false;
             }
@@ -1066,7 +1085,7 @@ unsafe fn resolve_unknown_encoding(parser: XML_Parser) -> bool {
         Err(_) => {
             // SAFETY: Error reporting is a scalar write and does not allocate.
             unsafe {
-                (*parser).error = 1;
+                fail_parse(parser, 1);
             }
             false
         }
@@ -1092,17 +1111,17 @@ unsafe fn try_resolve_unknown_encoding(parser: XML_Parser) -> Result<bool, Alloc
             release: None,
         };
         let accepted = handler(arg, c_name.as_ptr(), &mut info) != 0;
-        if accepted && !(*parser).destroying && (*parser).error == 0 {
+        if accepted && !(*parser).destroying && (*parser).parse_error == 0 {
             match (*parser).core.set_encoding_map(&name, info.map) {
                 Ok(()) => {
                     release_encoding(parser);
-                    if !(*parser).destroying && (*parser).error == 0 {
+                    if !(*parser).destroying && (*parser).parse_error == 0 {
                         (*parser).encoding_release = info.release;
                         (*parser).encoding_data = info.data;
                         return Ok(true);
                     }
                 }
-                Err(error) if error.kind == ErrorKind::NoMemory => (*parser).error = 1,
+                Err(error) if error.kind == ErrorKind::NoMemory => fail_parse(parser, 1),
                 Err(_) => {}
             }
         }
@@ -1138,7 +1157,7 @@ unsafe fn finish_operation(
     // SAFETY: Only the outer guarded operation clears busy; callback-time Free is ignored.
     unsafe {
         let result = result.unwrap_or_else(|_| {
-            (*parser).error = UNEXPECTED_STATE;
+            fail_parse(parser, UNEXPECTED_STATE);
             ERROR
         });
         (*parser).busy = false;
@@ -1177,21 +1196,22 @@ pub unsafe extern "C" fn XML_Parse(
                 (*parser).error = 36;
                 return ERROR;
             }
-            if (*parser).error != 0 {
+            if (*parser).parse_error != 0 {
                 return ERROR;
             }
+            (*parser).error = 0;
             let family = &(*parser).family;
             if !charge(
                 &family.input_bytes,
                 len as usize,
                 (*parser).config.limits.max_total_bytes,
             ) {
-                (*parser).error = 43;
+                fail_parse(parser, 43);
                 return ERROR;
             }
             let tracker = &(*parser).tracker;
             if (*parser).child_depth == 0 && !tracker.add_direct_bytes(len as u64) {
-                (*parser).error = 1;
+                fail_parse(parser, 1);
                 return ERROR;
             }
             (*parser).busy = true;
@@ -1211,10 +1231,10 @@ pub unsafe extern "C" fn XML_Parse(
                     if (*parser).destroying {
                         return ERROR;
                     }
-                    if (*parser).error != 0 {
+                    if (*parser).parse_error != 0 {
                         return ERROR;
                     }
-                    (*parser).error = error_code(&error.kind);
+                    fail_parse(parser, error_code(&error.kind));
                     (*parser).position = error.position;
                     return ERROR;
                 }
@@ -1243,7 +1263,7 @@ pub unsafe extern "C" fn XML_GetBuffer(parser: XML_Parser, len: c_int) -> *mut c
                     return ptr::null_mut();
                 }
                 if len < 0 {
-                    (*parser).error = INVALID_ARGUMENT;
+                    (*parser).error = 1;
                     return ptr::null_mut();
                 }
                 if (*parser).state == 2 {
@@ -1252,9 +1272,6 @@ pub unsafe extern "C" fn XML_GetBuffer(parser: XML_Parser, len: c_int) -> *mut c
                 }
                 if (*parser).state == 3 {
                     (*parser).error = 33;
-                    return ptr::null_mut();
-                }
-                if (*parser).error != 0 {
                     return ptr::null_mut();
                 }
                 let len = len as usize;
@@ -1300,16 +1317,27 @@ pub unsafe extern "C" fn XML_ParseBuffer(
         if (*parser).busy {
             return ERROR;
         }
+        if len < 0 {
+            (*parser).error = INVALID_ARGUMENT;
+            return ERROR;
+        }
+        if (*parser).state == 3 {
+            (*parser).error = 33;
+            return ERROR;
+        }
+        if (*parser).state == 2 {
+            (*parser).error = 36;
+            return ERROR;
+        }
         if !(*parser).buffer_available {
             (*parser).error = 42;
             return ERROR;
         }
-        if len < 0 || len as usize > (*parser).buffer.len() {
+        if len as usize > (*parser).buffer.len() {
             (*parser).error = INVALID_ARGUMENT;
             return ERROR;
         }
         let input = (*parser).buffer.as_ptr();
-        (*parser).buffer_available = false;
         XML_Parse(parser, input.cast(), len, final_input)
     }
 }
@@ -1340,7 +1368,7 @@ pub unsafe extern "C" fn XML_StopParser(parser: XML_Parser, resumable: u8) -> c_
         if resumable != 0 {
             (*parser).state = 3;
         } else {
-            (*parser).error = 35;
+            fail_parse(parser, 35);
             (*parser).state = 2;
         }
         OK
@@ -1364,9 +1392,10 @@ pub unsafe extern "C" fn XML_ResumeParser(parser: XML_Parser) -> c_int {
                 (*parser).error = 34;
                 return ERROR;
             }
-            if (*parser).error != 0 {
+            if (*parser).parse_error != 0 {
                 return ERROR;
             }
+            (*parser).error = 0;
             (*parser).busy = true;
             (*parser).state = 1;
             let result = catch_unwind(AssertUnwindSafe(|| run_events(parser)));
@@ -1501,7 +1530,7 @@ pub unsafe extern "C" fn XML_DefaultCurrent(parser: XML_Parser) {
                 return;
             }
             if (*parser).default_dispatch {
-                (*parser).error = UNEXPECTED_STATE;
+                fail_parse(parser, UNEXPECTED_STATE);
                 return;
             }
             let callback = (*parser).handlers.default;
@@ -1524,7 +1553,7 @@ pub unsafe extern "C" fn XML_DefaultCurrent(parser: XML_Parser) {
                 Ok(())
             }));
             if !matches!(result, Ok(Ok(()))) {
-                (*parser).error = 1;
+                fail_parse(parser, 1);
             }
         }
     };
@@ -1573,7 +1602,7 @@ pub unsafe extern "C" fn XML_SetReturnNSTriplet(parser: XML_Parser, enabled: c_i
             return;
         }
         if enabled != 0 && (*parser).config.namespace_separator == Some('\0') {
-            (*parser).error = INVALID_ARGUMENT;
+            fail_parse(parser, INVALID_ARGUMENT);
             return;
         }
         (*parser).config.namespace_triplets = enabled != 0;
@@ -1833,6 +1862,7 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                         destroying: false,
                         state: 0,
                         error: 0,
+                        parse_error: 0,
                         final_buffer: false,
                         position,
                         specified_attributes: 0,

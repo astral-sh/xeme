@@ -986,3 +986,107 @@ fn default_handler_receives_outside_root_whitespace_without_character_data() {
         }
     }
 }
+
+#[test]
+fn invalid_api_requests_do_not_poison_subsequent_input() {
+    // SAFETY: All handles and input buffers are test-owned; no invalid pointer is read.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        assert_eq!(XML_ParseBuffer(parser, 0, 0), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 42);
+        assert!(!XML_GetBuffer(parser, 4).is_null());
+        assert_eq!(XML_GetErrorCode(parser), 42);
+        assert_eq!(XML_ParseBuffer(parser, 0, 0), OK);
+        assert_eq!(XML_ParseBuffer(parser, 0, 0), OK);
+        assert!(XML_GetBuffer(parser, -1).is_null());
+        assert_eq!(XML_GetErrorCode(parser), 1);
+        assert!(XML_GetBuffer(parser, c_int::MAX).is_null());
+        assert!(!XML_GetBuffer(parser, 4).is_null());
+        assert_eq!(XML_Parse(parser, ptr::null(), 1, 0), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), INVALID_ARGUMENT);
+        assert_eq!(XML_ResumeParser(parser), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 34);
+        assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), OK);
+        assert_eq!(XML_GetErrorCode(parser), 0);
+        XML_ParserFree(parser);
+    }
+}
+
+unsafe extern "C" fn suspend_twice(data: *mut c_void, _text: *const c_char, _length: c_int) {
+    // SAFETY: The callback owns no parser reference across API calls.
+    unsafe {
+        let parser = (*data.cast::<State>()).parser;
+        assert_eq!(XML_StopParser(parser, 1), OK);
+        assert_eq!(XML_StopParser(parser, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 33);
+    }
+}
+
+#[test]
+fn rejected_suspended_operations_preserve_resumable_input() {
+    // SAFETY: Test-owned state and parser stay live until explicit cleanup.
+    unsafe {
+        let mut state = State::default();
+        let parser = configured(&mut state);
+        assert_eq!(XML_StopParser(parser, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 44);
+        XML_SetCharacterDataHandler(parser, Some(suspend_twice));
+        assert_eq!(XML_Parse(parser, c"<r>text</r>".as_ptr(), 11, 1), SUSPENDED);
+        assert_eq!(XML_GetErrorCode(parser), 0);
+        assert_eq!(XML_Parse(parser, ptr::null(), 0, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 33);
+        assert!(XML_GetBuffer(parser, 1).is_null());
+        assert_eq!(XML_ParseBuffer(parser, 0, 0), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 33);
+        XML_SetCharacterDataHandler(parser, None);
+        assert_eq!(XML_ResumeParser(parser), OK);
+        assert_eq!(XML_GetErrorCode(parser), 0);
+        assert_eq!(state.events, ["start:r", "end:r"]);
+        XML_ParserFree(parser);
+    }
+}
+
+#[test]
+fn syntax_errors_remain_terminal_after_successful_buffer_requests() {
+    // SAFETY: All buffers are readable for their stated lengths.
+    unsafe {
+        let mut state = State::default();
+        let parser = configured(&mut state);
+        assert_eq!(XML_Parse(parser, c"<r></s>".as_ptr(), 7, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 7);
+        let emitted = state.events.len();
+        let buffer = XML_GetBuffer(parser, 4);
+        assert!(!buffer.is_null());
+        ptr::copy_nonoverlapping(b"<x/>".as_ptr(), buffer.cast(), 4);
+        assert_eq!(XML_ParseBuffer(parser, 4, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 7);
+        assert_eq!(state.events.len(), emitted);
+        XML_ParserFree(parser);
+    }
+}
+
+#[test]
+fn default_whitespace_counts_toward_the_shared_event_budget() {
+    // SAFETY: The test controls the parser family counter before parsing starts.
+    unsafe {
+        for remaining in [1, 2] {
+            let mut state = State::default();
+            let parser = configured(&mut state);
+            XML_SetDefaultHandlerExpand(parser, Some(text));
+            let family = &(*parser).family;
+            family
+                .callback_bytes
+                .store(MAX_FAMILY_CALLBACK_BYTES - remaining, Ordering::Relaxed);
+            let status = XML_Parse(parser, c"  ".as_ptr(), 2, 0);
+            if remaining == 1 {
+                assert_eq!(status, ERROR);
+                assert_eq!(XML_GetErrorCode(parser), 43);
+                assert!(state.events.is_empty());
+            } else {
+                assert_eq!(status, OK);
+                assert_eq!(state.events, ["text:  "]);
+            }
+            XML_ParserFree(parser);
+        }
+    }
+}

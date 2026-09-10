@@ -2,8 +2,8 @@
 """Build real CPython XML extensions against Oriole and run upstream tests.
 
 Run with a CPython 3.12.13 interpreter and its development headers. Sources are
-pinned and never edited in place. The optional system-allocator adaptation is an
-explicit consumer change; results from it are not drop-in compatibility evidence.
+pinned and never edited in place. Optional consumer adaptations are recorded
+explicitly; their results are separate from unmodified-consumer compatibility.
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ import shutil
 import subprocess
 import sys
 import sysconfig
+import tempfile
 from pathlib import Path
 
 REVISION = "3bb231a6a5dc02b95658877318bf61501a7209e9"
@@ -31,12 +32,47 @@ TESTS = [
 ]
 
 
+def apply_consumer_fix(text: str, root: Path, output: Path) -> tuple[str, dict]:
+    """Apply the pinned upstream allocation-failure backport to a temporary copy."""
+    directory = root / "integration/python-build-standalone/consumer-fix"
+    patch = directory / "cpython-3.12.13-external-parser.patch"
+    provenance = json.loads((directory / "provenance.json").read_text())
+    if hashlib.sha256(text.encode()).hexdigest() != provenance["source_sha256"]:
+        raise ValueError("consumer fix requires the pinned unmodified pyexpat.c")
+    if hashlib.sha256(patch.read_bytes()).hexdigest() != provenance["patch_sha256"]:
+        raise ValueError("consumer fix patch does not match its provenance")
+    with tempfile.TemporaryDirectory(prefix="consumer-fix-", dir=output) as temporary:
+        tree = Path(temporary)
+        copied = tree / "Modules/pyexpat.c"
+        copied.parent.mkdir()
+        copied.write_text(text)
+        command = ["patch", "--batch", "--forward", "--fuzz=0", "-p1", "-i", str(patch)]
+        result = subprocess.run(
+            command, cwd=tree, text=True, capture_output=True, check=False
+        )
+        (output / "consumer-fix.log").write_text(result.stdout + result.stderr)
+        if result.returncode:
+            raise ValueError("consumer fix failed; see consumer-fix.log")
+        fixed = copied.read_text()
+    if (
+        hashlib.sha256(fixed.encode()).hexdigest()
+        != provenance["patched_source_sha256"]
+    ):
+        raise ValueError("patched pyexpat.c does not match the pinned backport")
+    return fixed, provenance
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--library", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--system-allocator", action="store_true")
+    parser.add_argument(
+        "--consumer-fix",
+        action="store_true",
+        help="Explicitly backport CPython's upstream pyexpat allocation-failure fix",
+    )
     parser.add_argument(
         "--native-library",
         action="append",
@@ -80,7 +116,13 @@ def main() -> int:
             alias.symlink_to(library.name)
     module_source = source / "Modules" / "pyexpat.c"
     text = module_source.read_text()
+    consumer_fix = None
+    adaptations = []
+    if args.consumer_fix:
+        text, consumer_fix = apply_consumer_fix(text, root, output)
+        adaptations.append("CPython upstream allocation-failure fix")
     if args.system_allocator:
+        adaptations.append("system allocator")
         marker = '#include "pyexpat.h"'
         assert text.count(marker) == 1
         text = text.replace(
@@ -224,7 +266,8 @@ for name in ('pyexpat', '_elementtree'):
         "python": sys.version,
         "library_sha256": hashlib.sha256(library.read_bytes()).hexdigest(),
         "linkage": "static" if library.suffix == ".a" else "shared",
-        "consumer_adaptation": "system allocator" if args.system_allocator else None,
+        "consumer_adaptation": ", ".join(adaptations) or None,
+        "consumer_fix": consumer_fix,
         "commands": commands,
         "test_command": command,
         "probe_exit_code": probe.returncode,

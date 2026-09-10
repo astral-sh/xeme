@@ -25,6 +25,11 @@ def main() -> None:
     parser.add_argument(
         "--pbs", type=Path, required=True, help="Clean pinned PBS source directory"
     )
+    parser.add_argument(
+        "--cpython",
+        type=Path,
+        help="Also apply the consumer backport to pinned CPython source",
+    )
     args = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix="oriole-pbs-validation-") as temporary:
         checkout = Path(temporary) / "pbs"
@@ -107,6 +112,9 @@ def main() -> None:
             "expat.pc": b"fixture pkg-config",
             "native-static-libs.txt": b"-lgcc_s -lpthread -ldl -lm -lc\n",
             "LICENSE.oriole.txt": b"fixture notices",
+            "cpython-external-parser.patch": (
+                DIRECTORY / "consumer-fix/cpython-3.12.13-external-parser.patch"
+            ).read_bytes(),
         }
         manifest = {
             "format": 1,
@@ -132,6 +140,10 @@ def main() -> None:
             )
             assert env.copies["/tools/deps/lib", "libexpat.a"] == files["libexpat.a"]
             assert env.copies["/tools/deps/include", "expat.h"] == files["expat.h"]
+            assert (
+                env.copies["/tools/deps/share/oriole", "cpython-external-parser.patch"]
+                == files["cpython-external-parser.patch"]
+            )
             assert (
                 namespace["DOWNLOADS"]["expat"]["license_file"] == "LICENSE.oriole.txt"
             )
@@ -166,6 +178,44 @@ def main() -> None:
                 f"-I{tools}/deps/include",
                 f"-L{tools}/deps/lib -lexpat -lgcc_s -lpthread -ldl -lm -lc",
             ]
+            if args.cpython:
+                consumer = Path(temporary) / "consumer"
+                (consumer / "Modules").mkdir(parents=True)
+                shutil.copyfile(
+                    args.cpython / "Modules/pyexpat.c", consumer / "Modules/pyexpat.c"
+                )
+                backport = shell[
+                    shell.index("# Oriole's bounded allocations") : shell.index(
+                        "# configure doesn't support cross-compiling on Apple."
+                    )
+                ]
+                # No overlay leaves the exact source untouched.
+                original = (consumer / "Modules/pyexpat.c").read_bytes()
+                subprocess.run(
+                    ["bash", "-eu", "-c", backport],
+                    cwd=consumer,
+                    env={**probe_env, "PYTHON_VERSION": "3.12.13"},
+                    check=True,
+                )
+                assert (consumer / "Modules/pyexpat.c").read_bytes() == original
+                (tools / "deps/share/oriole").mkdir(parents=True)
+                (tools / "deps/share/oriole/cpython-external-parser.patch").write_bytes(
+                    files["cpython-external-parser.patch"]
+                )
+                subprocess.run(
+                    ["bash", "-eu", "-c", backport],
+                    cwd=consumer,
+                    env={**probe_env, "PYTHON_VERSION": "3.12.13"},
+                    check=True,
+                )
+                # Source hash checks reject reapplication or an unexpected source revision.
+                repeated = subprocess.run(
+                    ["bash", "-eu", "-c", backport],
+                    cwd=consumer,
+                    env={**probe_env, "PYTHON_VERSION": "3.12.13"},
+                    check=False,
+                )
+                assert repeated.returncode != 0
             for target, version, options in [
                 ("aarch64-unknown-linux-gnu", "3.12.13", "noopt"),
                 ("x86_64-unknown-linux-gnu", "3.13.7", "noopt"),

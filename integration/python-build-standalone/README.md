@@ -35,6 +35,8 @@ The bundle contains:
   the `implementation` variable identifies Oriole.
 - `native-static-libs.txt`: native libraries reported by this exact Rust toolchain.
 - `LICENSE.oriole.txt`: Oriole, dependency, Expat-header, and Rust runtime notices.
+- `cpython-external-parser.patch`: the upstream CPython child-parser cleanup fix,
+  backported to 3.12.13 with recorded source and patch hashes.
 - `manifest.json`: source and file hashes, target, toolchain, and build command.
 
 The archive is built for the GNU target, but target compatibility remains a PBS
@@ -67,6 +69,13 @@ patch sets those variables from the verified bundle before configure runs.
 `pyexpat` links the archive and native libraries; `_elementtree` accesses it through
 pyexpat's C API capsule, as in upstream CPython.
 
+The overlay also applies the [upstream CPython cleanup fix](consumer-fix/) before
+configure. CPython 3.12.13 can crash or decrement the parent reference twice when
+an external parser allocation fails, including when linked to reference Expat.
+Oriole's resource limits make this failure path relevant. The recipe verifies the
+original source hash, applies the backport without fuzzy matching, and verifies
+the resulting hash. The ordinary PBS build path does not apply this backport.
+
 The installer verifies every bundled file's hash before modifying the container.
 PBS retains the combined notices and build manifest in the distribution's existing
 license directory, and its extension metadata references Oriole's notices.
@@ -76,7 +85,8 @@ license directory, and its extension metadata references Oriole's notices.
 Check the patch and staging logic against a clean pinned PBS source tree:
 
 ```sh
-python3 integration/python-build-standalone/validate.py --pbs /absolute/clean-pbs
+python3 integration/python-build-standalone/validate.py --pbs /absolute/clean-pbs \
+  --cpython /absolute/cpython-3.12.13
 ```
 
 [The recorded local results](validation.json) include a real PIC archive build,
@@ -87,6 +97,8 @@ bundle manifest. These checks passed on the development host.
 This checks clean patch application, Python compilation, shell syntax, the unchanged
 default path, native-linker propagation, target restrictions, and rejection of a
 mismatched header. Fixture checks do not compile a Python distribution.
+With `--cpython`, validation also runs the actual backport shell block against
+the pinned consumer source and verifies that reapplication is rejected.
 
 Before deployment, run the actual resulting interpreter's XML test suites, confirm
 `pyexpat.EXPAT_VERSION` identifies Oriole, run PBS's distribution validator, and

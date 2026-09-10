@@ -32,6 +32,9 @@ def sources() -> dict[str, str]:
             "include/expat.h",
             "LICENSE-MIT",
             "LICENSE-APACHE",
+            "licenses/cpython.txt",
+            "integration/python-build-standalone/consumer-fix/cpython-3.12.13-external-parser.patch",
+            "integration/python-build-standalone/consumer-fix/provenance.json",
         )
     ]
     for crate in ("oriole", "oriole_storage", "oriole_expat"):
@@ -106,6 +109,12 @@ def main() -> None:
         target_dir / TARGET / "release/liboriole_expat.a", output / "libexpat.a"
     )
     shutil.copyfile(ROOT / "include/expat.h", output / "expat.h")
+    consumer_fix = Path(__file__).resolve().parent / "consumer-fix"
+    provenance = json.loads((consumer_fix / "provenance.json").read_text())
+    consumer_patch = consumer_fix / "cpython-3.12.13-external-parser.patch"
+    if digest(consumer_patch) != provenance["patch_sha256"]:
+        raise RuntimeError("CPython backport does not match its reviewed provenance")
+    shutil.copyfile(consumer_patch, output / "cpython-external-parser.patch")
     (output / "native-static-libs.txt").write_text(" ".join(libraries) + "\n")
     header = (output / "expat.h").read_text()
     version_parts = []
@@ -166,6 +175,12 @@ def main() -> None:
     notices.append(
         "\n=== Expat header notice ===\n" + header.split("*/", 1)[0] + "*/\n"
     )
+    notices.append(
+        "\n=== CPython cleanup backport / "
+        + provenance["upstream_commit"]
+        + " ===\n"
+        + (ROOT / "licenses/cpython.txt").read_text()
+    )
     sysroot = Path(
         subprocess.check_output([*rustc, "--print", "sysroot"], text=True).strip()
     )
@@ -195,6 +210,7 @@ def main() -> None:
         "command": command,
         "rustflags": env["RUSTFLAGS"],
         "sources": before,
+        "consumer_adaptation": provenance,
         "files": {
             name: digest(output / name)
             for name in (
@@ -203,6 +219,7 @@ def main() -> None:
                 "expat.pc",
                 "native-static-libs.txt",
                 "LICENSE.oriole.txt",
+                "cpython-external-parser.patch",
             )
         },
         "validation": "Archive built locally; PBS target-sysroot linking and complete distribution validation remain required.",

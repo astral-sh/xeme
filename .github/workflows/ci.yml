@@ -127,6 +127,28 @@ jobs:
       - name: Show consumer test results
         if: always()
         run: cat /tmp/oriole-cpython-*/probe.log /tmp/oriole-cpython-*/tests.log
+      - name: Run consumers with upstream cleanup backport
+        run: |
+          if [ '${{ matrix.linkage }}' = shared ]; then
+            uv run --no-project --python 3.12.13 python tools/cpython/run.py \
+              --source .cache/cpython --library target/release/liboriole_expat.so \
+              --output /tmp/oriole-cpython-fixed --consumer-fix
+          else
+            uv run --no-project --python 3.12.13 python tools/cpython/run.py \
+              --source .cache/cpython --library target/release/liboriole_expat.a \
+              --native-library gcc_s --native-library util --native-library rt \
+              --native-library pthread --native-library m --native-library dl \
+              --native-library c --output /tmp/oriole-cpython-fixed --consumer-fix
+          fi
+      - name: Check CPython cleanup under child allocation failure
+        run: |
+          uv run --no-project --python 3.12.13 python integration/python-build-standalone/consumer-fix/run.py \
+            --original-extension /tmp/oriole-cpython-${{ matrix.linkage }}/pyexpat*.so \
+            --fixed-extension /tmp/oriole-cpython-fixed/pyexpat*.so \
+            --output /tmp/oriole-cpython-fault
+      - name: Show patched consumer results
+        if: always()
+        run: cat /tmp/oriole-cpython-*/probe.log /tmp/oriole-cpython-*/tests.log
 
   pbs-recipe:
     name: PBS integration recipe
@@ -139,4 +161,9 @@ jobs:
           repository: astral-sh/python-build-standalone
           ref: a4553880293fe9d1bb62747d34ab0e5121d3554f
           path: .cache/pbs
-      - run: python3 integration/python-build-standalone/validate.py --pbs .cache/pbs
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: python/cpython
+          ref: 3bb231a6a5dc02b95658877318bf61501a7209e9
+          path: .cache/cpython
+      - run: python3 integration/python-build-standalone/validate.py --pbs .cache/pbs --cpython .cache/cpython

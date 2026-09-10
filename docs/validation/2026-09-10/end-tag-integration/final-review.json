@@ -1,0 +1,18 @@
+{
+  "status": "final_docs_and_package_reviews_passed",
+  "scope": "Final503a closing-tag human documentation and package readback; no parser/compiler/benchmark reruns or repository edits. Parent may append these independent receipts and refresh files.json without changing already sealed evidence.",
+  "reviews": {
+    "human": {
+      "path": "/tmp/oriole-end-tag-docs-independent-review/review.json",
+      "sha256": "ef8e08f7b124154620da32bb87e05293336408df54849fd5e034050b27da7130",
+      "status": "human_document_audit_passed"
+    },
+    "package": {
+      "path": "/tmp/oriole-end-tag-docs-package-independent-review/review.json",
+      "sha256": "50fd99b575cea6890bb7abba41b939c304019a6acb4e61579d3ee6ac63eaf197",
+      "status": "independent_docs_package_audit_passed"
+    }
+  },
+  "main_archive_sha256": "bf518d52a5a1c5a2e47d209e1e2f1b33f5f2c1d257cc928300783668f322ecbb",
+  "findings": []
+}

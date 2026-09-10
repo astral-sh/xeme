@@ -1,0 +1,249 @@
+{
+  "baseline_log": "/tmp/oriole-scanner-integration-gates/workspace-checks/tests.log",
+  "baseline_sha256": "4e854f1a824c6f80511e4784d65cf77946f48250d4ea8d40db77fefa33a85f8b",
+  "baseline_profile": "release --workspace --all-targets",
+  "candidate_profile": "release --workspace --all-targets; separate release --workspace --doc",
+  "all_target_rows": [
+    {
+      "target": "oriole",
+      "passed": 56,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "adapter_frame",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "allocation",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "amplification",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "attribute_entities",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "conditional",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "declaration_tokens",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "diagnostics",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "encodings",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "entity_depth",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "event_output",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "external_grammar",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "external_headers",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "external_limits",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "external_values",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "foreign_dtd",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "malformed_dtd",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "missing_parameters",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "multibyte",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "name_rules",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "parameter_values",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "parser",
+      "passed": 54,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "positions",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "prolog",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "raw_tokens",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "recycling",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "reparse_deferral",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "text_coalescing",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "frame_coverage",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "oriole",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "oriole_expat",
+      "passed": 88,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "memory",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "oriole_storage",
+      "passed": 29,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "doc_rows": [
+    {
+      "target": "doc:oriole",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "doc:oriole_expat",
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "target": "doc:oriole_storage",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "all_target_passed": 397,
+  "doc_passed": 1,
+  "same_per_target_counts_as_baseline": false,
+  "changes": [
+    {
+      "baseline": {
+        "target": "oriole",
+        "passed": 54,
+        "failed": 0,
+        "ignored": 0
+      },
+      "candidate": {
+        "target": "oriole",
+        "passed": 56,
+        "failed": 0,
+        "ignored": 0
+      }
+    }
+  ],
+  "expected_added_tests": [
+    "matching_end_tests::matching_end_tags_keep_limits_and_fallback_syntax",
+    "matching_end_tests::matching_end_tags_resume_across_every_byte_split"
+  ]
+}

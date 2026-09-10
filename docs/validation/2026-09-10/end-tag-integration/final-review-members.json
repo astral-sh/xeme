@@ -1,0 +1,179 @@
+{
+  "members": [
+    {
+      "path": "human/audit-run.log",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/audit-run.log",
+      "bytes": 162,
+      "sha256": "1d1a28755a53e6fd51884a9a53ab656f28b3b48b2355af968d454964f1c2b334"
+    },
+    {
+      "path": "human/audit.py",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/audit.py",
+      "bytes": 15313,
+      "sha256": "3dc6da283d7d9d9fb3ffff618f9f5b7c396dbede25cf70bbf370f94017e87249"
+    },
+    {
+      "path": "human/checked-files.json",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/checked-files.json",
+      "bytes": 26900,
+      "sha256": "90ed34a1791a7500efdd0dfc778b155df1dd5b2ff184c632dac56572ba97a1b8"
+    },
+    {
+      "path": "human/checks.json",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/checks.json",
+      "bytes": 30487,
+      "sha256": "5dc29561e2825feee0eb47431fa378d137522062067a697c78f6cb56325a3905"
+    },
+    {
+      "path": "human/complete.json",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/complete.json",
+      "bytes": 901,
+      "sha256": "3f270bd219f943934f31388b1949643e00c5e6ecd3cd4c4c5844156b458fc650"
+    },
+    {
+      "path": "human/documents/README.md",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/documents/README.md",
+      "bytes": 4455,
+      "sha256": "e06c53d76c55909ed2b4380dde3df3ea4a791e742adf521b9eddefbb7c0a8756"
+    },
+    {
+      "path": "human/documents/benchmarks/README.md",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/documents/benchmarks/README.md",
+      "bytes": 7643,
+      "sha256": "21ad789b71f38853acd9d2d3db5a22964c39f63b80b9917c3eaf642fa336b6b3"
+    },
+    {
+      "path": "human/documents/benchmarks/results/2026-09-10/end-tag-integration/README.md",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/documents/benchmarks/results/2026-09-10/end-tag-integration/README.md",
+      "bytes": 1115,
+      "sha256": "a0e03915085461074b3500694a15e0ab0434687551fb8cff55f1ceb080151816"
+    },
+    {
+      "path": "human/documents/docs/compatibility.md",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/documents/docs/compatibility.md",
+      "bytes": 9590,
+      "sha256": "17cf9836e448385f0cbfefeabc0f7ac29536ba8b836848feb71a5daa493ba454"
+    },
+    {
+      "path": "human/documents/docs/review.md",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/documents/docs/review.md",
+      "bytes": 9127,
+      "sha256": "3bcf16c813df1751ede4a88cab64c7c120620b17fcfef5ac49fab2a45f7af782"
+    },
+    {
+      "path": "human/documents/docs/validation/2026-09-10/end-tag-integration/README.md",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/documents/docs/validation/2026-09-10/end-tag-integration/README.md",
+      "bytes": 8243,
+      "sha256": "d93c2ffa2a4d8446ed33cfd5bba437a3881238073fb79e47342ee6959403327b"
+    },
+    {
+      "path": "human/initial-audit-run.log",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/initial-audit-run.log",
+      "bytes": 546,
+      "sha256": "7ba330468815432eca180985f7b59d5fbe0006af474c639c20bb1fed8c7d2f6f"
+    },
+    {
+      "path": "human/initial-audit.py",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/initial-audit.py",
+      "bytes": 14902,
+      "sha256": "d32f24aef56a19e59ee07fbf532d3e3f589d5365ff3ebfd016e7905d6a9c5ea1"
+    },
+    {
+      "path": "human/initial-case-audit-run.log",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/initial-case-audit-run.log",
+      "bytes": 471,
+      "sha256": "4a382bef878781c48bef4c47c0ac81143275b6acbc3728c25803e0ce81d3aa30"
+    },
+    {
+      "path": "human/initial-case-audit.py",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/initial-case-audit.py",
+      "bytes": 15167,
+      "sha256": "477c651a14fe9fee378c2ee8b39acc8f38d0ee67fd61802587533d70268e8814"
+    },
+    {
+      "path": "human/links.json",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/links.json",
+      "bytes": 12971,
+      "sha256": "44df3c12f1fc13b9c8091438b375e19d1f55ed1fcf9a2719da0152c3b47d8295"
+    },
+    {
+      "path": "human/review.json",
+      "source": "/tmp/oriole-end-tag-docs-independent-review/review.json",
+      "bytes": 3710,
+      "sha256": "ef8e08f7b124154620da32bb87e05293336408df54849fd5e034050b27da7130"
+    },
+    {
+      "path": "package/archive-members-observed.json",
+      "source": "/tmp/oriole-end-tag-docs-package-independent-review/archive-members-observed.json",
+      "bytes": 1606907,
+      "sha256": "bab24b200c569399342f039cd8a0dcf6c35dc399b0133fe6d526beb89838ac88"
+    },
+    {
+      "path": "package/audit-run.json",
+      "source": "/tmp/oriole-end-tag-docs-package-independent-review/audit-run.json",
+      "bytes": 1490,
+      "sha256": "557a81d54de97f361091d823eb2e0d3ac72fae707f089deaa662962011fd075c"
+    },
+    {
+      "path": "package/audit.py",
+      "source": "/tmp/oriole-end-tag-docs-package-independent-review/audit.py",
+      "bytes": 16629,
+      "sha256": "fb119755fa8bab129a9c4c93528f7b49bc53283d371a8e8ea8859107c8697bfa"
+    },
+    {
+      "path": "package/audit.stderr",
+      "source": "/tmp/oriole-end-tag-docs-package-independent-review/audit.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "package/audit.stdout",
+      "source": "/tmp/oriole-end-tag-docs-package-independent-review/audit.stdout",
+      "bytes": 196,
+      "sha256": "9c9316002da77de4bae01c4bbdb338064e231540716c34e9f97d258c3f3e1f48"
+    },
+    {
+      "path": "package/checked-files.json",
+      "source": "/tmp/oriole-end-tag-docs-package-independent-review/checked-files.json",
+      "bytes": 884228,
+      "sha256": "7b5f8156540bfc4045bcde8c4b5a090e6be5ae1f137004345efba4bcfb1936bb"
+    },
+    {
+      "path": "package/excluded-binaries-verified.json",
+      "source": "/tmp/oriole-end-tag-docs-package-independent-review/excluded-binaries-verified.json",
+      "bytes": 10051,
+      "sha256": "5d19931afa0d44ff57d02addc874a201f865183aee070d473a67d3da282245be"
+    },
+    {
+      "path": "package/final-index-after.json",
+      "source": "/tmp/oriole-end-tag-docs-package-independent-review/final-index-after.json",
+      "bytes": 2848,
+      "sha256": "42b39a0e22fdbedd79c39cf6b7da16c97c4b9352c6f427f4f0a97baf14934fec"
+    },
+    {
+      "path": "package/final-index-observed.json",
+      "source": "/tmp/oriole-end-tag-docs-package-independent-review/final-index-observed.json",
+      "bytes": 2848,
+      "sha256": "42b39a0e22fdbedd79c39cf6b7da16c97c4b9352c6f427f4f0a97baf14934fec"
+    },
+    {
+      "path": "package/index-refresh-notes.json",
+      "source": "/tmp/oriole-end-tag-docs-package-independent-review/index-refresh-notes.json",
+      "bytes": 431,
+      "sha256": "4e3e61bbc309fa2b3d1ee4f30f9e999a7e581d4adb1eab9ca9d32d67c7a52c06"
+    },
+    {
+      "path": "package/initial-index-observed.json",
+      "source": "/tmp/oriole-end-tag-docs-package-independent-review/initial-index-observed.json",
+      "bytes": 2003,
+      "sha256": "191ac6ece72ad31a18eb09199d76956155a18a1004342eac319e684d4eb392f8"
+    },
+    {
+      "path": "package/review.json",
+      "source": "/tmp/oriole-end-tag-docs-package-independent-review/review.json",
+      "bytes": 9150,
+      "sha256": "50fd99b575cea6890bb7abba41b939c304019a6acb4e61579d3ee6ac63eaf197"
+    }
+  ],
+  "archive_sha256": "61a878a22a250c355ffe34c666398a0254ff6dadc3cc533b86a23aaa66b83303"
+}

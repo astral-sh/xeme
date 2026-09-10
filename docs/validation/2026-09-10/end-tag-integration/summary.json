@@ -1,0 +1,132 @@
+{
+  "runtime_commit": "503a55957f7cdebcc0b3fb3ada2751ffdb8cb9c9",
+  "source_files": 70,
+  "source_manifest_sha256": "0ef92ef42771c3a9ec7af34faae6b4049a6431bad1c7b15312ace4d36086bef7",
+  "libraries": {
+    "liboriole_expat.so": "dd16d23e4ab67938c195970bd845b2a159d7f062beda265bb673c85b79f73fc6",
+    "liboriole_expat.a": "fbbef92d1c22b71850016a12e6c71c2ba1adcf20430e8934696d3dee07485a28"
+  },
+  "workspace": {
+    "all_targets": 397,
+    "doc_tests": 1,
+    "fmt_and_strict_clippy": "passed"
+  },
+  "api": {
+    "passed": 4347,
+    "failed": 393,
+    "original_configurations": 4740,
+    "canonical_bounds_verified": true
+  },
+  "cpython_each_linkage": {
+    "tests": 802,
+    "failures": 2,
+    "skips": 14,
+    "expected_failures": 3
+  },
+  "native": {
+    "scope": "All fixed conditions and samples; geometric means of per-condition paired median time ratios. Shared host.",
+    "groups": {
+      "real": {
+        "conditions": 24,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9494346726453999,
+            "below_one": 24
+          },
+          "candidate_over_expat": {
+            "geomean": 1.9057575291723619,
+            "below_one": 0
+          },
+          "published_over_expat": {
+            "geomean": 2.0021294368751086,
+            "below_one": 0
+          }
+        }
+      },
+      "generated": {
+        "conditions": 4,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9673063031246453,
+            "below_one": 4
+          },
+          "candidate_over_expat": {
+            "geomean": 5.300319829230808,
+            "below_one": 0
+          },
+          "published_over_expat": {
+            "geomean": 5.468778905543186,
+            "below_one": 0
+          }
+        }
+      }
+    },
+    "regressions": []
+  },
+  "python": {
+    "scope": "All fixed conditions and samples; geometric means of per-condition paired median time ratios. Shared host.",
+    "groups": {
+      "all": {
+        "conditions": 24,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9724528090681105,
+            "below_one": 24
+          },
+          "candidate_over_expat": {
+            "geomean": 1.3835423859870346,
+            "below_one": 2
+          },
+          "published_over_expat": {
+            "geomean": 1.4205119306098144,
+            "below_one": 2
+          }
+        }
+      },
+      "elementtree": {
+        "conditions": 12,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9704290201658391,
+            "below_one": 12
+          },
+          "candidate_over_expat": {
+            "geomean": 1.4923280616466454,
+            "below_one": 0
+          },
+          "published_over_expat": {
+            "geomean": 1.5344253058789858,
+            "below_one": 0
+          }
+        }
+      },
+      "pyexpat-events": {
+        "conditions": 12,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9744808184970106,
+            "below_one": 12
+          },
+          "candidate_over_expat": {
+            "geomean": 1.2826868186815212,
+            "below_one": 2
+          },
+          "published_over_expat": {
+            "geomean": 1.3150553091594817,
+            "below_one": 2
+          }
+        }
+      }
+    },
+    "regressions": []
+  },
+  "archive": {
+    "sha256": "bf518d52a5a1c5a2e47d209e1e2f1b33f5f2c1d257cc928300783668f322ecbb",
+    "members": 5205,
+    "excluded_binaries": 34,
+    "raw_bytes": 85682048,
+    "bytes": 11060116,
+    "all_members_and_origins_readback_verified": true
+  },
+  "scope": "Selected combined dd16 library exactly assembled as503a above doc-only71bf parent. Integrated behavior and performance controls use3694; isolated fdea uses5af. All conditions retained; component gains are not additive. Later timing/consumer/assembly and final documentation audits are separate indexed outer receipts."
+}

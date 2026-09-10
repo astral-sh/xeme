@@ -1,0 +1,21 @@
+{
+  "status": "complete",
+  "files": {
+    "archive-members.json": {
+      "sha256": "c4d3716377cb2db62a6579acfe64948cad84bf9b3a33fbd5b44418201f63e610",
+      "bytes": 5120
+    },
+    "package.py": {
+      "sha256": "db669afe7865c95476b6ac892b99a042c40af599392e18bb04041b8a0bcb30a8",
+      "bytes": 4279
+    },
+    "reviews.tar.gz": {
+      "sha256": "c6776c32192079aca37989f099216492264aeea5845c30b4b3c65c34b6cec88d",
+      "bytes": 213403
+    },
+    "summary.json": {
+      "sha256": "5040bd6c39612e0550dbe4803ad46ea2d00e28cc744f43b29ae5c2361b848cc9",
+      "bytes": 7321
+    }
+  }
+}

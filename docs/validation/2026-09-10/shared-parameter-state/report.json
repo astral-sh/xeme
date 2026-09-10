@@ -1,0 +1,80 @@
+{
+  "source_commit": "d7686d2d0692b9163625905c62d758692b87abd8",
+  "base_commit": "57e613c",
+  "shared_sha256": "0407c70733d4d44fa9b590c45ccde13b9ae2e8dbb527f3087fea078c988420b4",
+  "static_sha256": "92f24f835d7f409c24f3dbd8fe4e2538fd9a631d16946c20d48d52b9588cf3f7",
+  "checks": {
+    "rust_tests": 283,
+    "strict_clippy": "passed",
+    "native_suites": 6,
+    "allocation_scenarios_per_linkage": 333,
+    "native_scope": "C ASan/UBSan with uninstrumented release Rust; leak sanitizer disabled.",
+    "ordinary_exact_differential_cases": 3918
+  },
+  "upstream": {
+    "before": {
+      "passed": 4065,
+      "failed": 675
+    },
+    "after": {
+      "passed": 4065,
+      "failed": 675
+    },
+    "changes": [],
+    "identical_adapted_sources": true
+  },
+  "missing_oracle": {
+    "conditions": 1944,
+    "acceptance": 0,
+    "errors": 24,
+    "events": 162
+  },
+  "missing_oracle_disposition": "All remaining 24 child-execution and 162 event differences are identical to direct missing-PE baseline.",
+  "family_oracles": {
+    "siblings": {
+      "cases": 4,
+      "baseline_differences": 3,
+      "candidate_differences": 0
+    },
+    "general": {
+      "cases": 2,
+      "baseline_differences": 1,
+      "candidate_differences": 0
+    }
+  },
+  "standalone_creation_oracle": {
+    "cases": 27,
+    "baseline_differences": 0,
+    "candidate_differences": 0,
+    "scope": "Parent standalone absent/yes/no, precreated/read-before/created-after child, independently selected parent and child PE processing modes; valid setter returns asserted."
+  },
+  "independent_review": {
+    "reviewer": "root, independent of shared-state implementation author",
+    "base": "3e4d006",
+    "scope": "Lazy parameter-family read/skip state and all declaration skip access sites",
+    "source_sha256": {
+      "crates/oriole/src/lib.rs": "52b695332b040f7063a99c0d17276602ee2987cad11b5a048b71b25764d5d72e",
+      "crates/oriole/src/dtd.rs": "bd249adb00961bfaf992c0e88f9d459abb0bf035c0bf7d6a3e6e677bdc5d5a4c",
+      "crates/oriole/src/dtd/composition.rs": "2d6e5becf3a71efecf05d82e65b749ebaac87b22d46190c002bc56809dbe17e0",
+      "crates/oriole/src/dtd/semantic.rs": "4f87a53055ede19a263892ce41bdc58179a53af7126f99448a182aa40cd4fbaf",
+      "crates/oriole/src/value.rs": "a5197b195ae3752dab68c30d311a8e47fc206c9813f79faf8464c88761e7daea"
+    },
+    "execution": "Read-only source review; author validation considered separately",
+    "findings": [],
+    "checks": [
+      "Ordinary construction remains allocation-free for ParameterState; first parameter child initializes selected shared state before returning, including precreated siblings.",
+      "Allocation occurs outside OnceLock initialization; only complete state is installed and losing concurrent allocations drop via their selected allocator.",
+      "All active declaration processing checks consult the getter; direct local fields are limited to initialization, snapshot, backing storage and setters.",
+      "General children snapshot current state independently; parameter children and owned value continuations share state, and reset replaces parent ownership without invalidating old children.",
+      "Existing read marker operations retain order and acquire the .read field; sticky Entity.value_open remains independently owned and checked.",
+      "Logical conditions remain unchanged, including deliberate non-monotonic disabled-processing assignment; author verified Expat assignment and27 creation-order conditions.",
+      "Metadata charge uses both flags and checks before allocation; no default limits, raw-name decoding or namespace validation changes."
+    ]
+  },
+  "limits": "Both shared flags are charged before the first lazy allocation. Limits remain unchanged; selected-allocator OOM and lazy ordinary-path tests pass.",
+  "separate_work": "Iterative attribute expansion and attribute replacement semantics are not included.",
+  "artifacts": {
+    "files": 154,
+    "archive_sha256": "fa923531e6506b6900a42953f4c7004f4f5ee27e2c39ac385544c6e430a4a0d8"
+  }
+}

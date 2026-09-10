@@ -1219,6 +1219,38 @@ unsafe fn dispatch_start_frame(
     Ok(())
 }
 
+unsafe fn dispatch_text_frame(parser: XML_Parser, bytes: &[u8]) -> Result<(), AllocError> {
+    // SAFETY: The busy guard pins the parser. The bytes belong to the detached
+    // frame, and only scalar callback/argument copies cross the callback.
+    let (callback, arg) = unsafe {
+        let family = &(*parser).family;
+        if !charge(
+            &family.callback_bytes,
+            bytes.len(),
+            MAX_FAMILY_CALLBACK_BYTES,
+        ) {
+            fail_parse(parser, 43);
+            return Ok(());
+        }
+        (
+            (*parser).handlers.text,
+            if (*parser).handler_arg_is_parser {
+                parser.cast()
+            } else {
+                (*parser).user_data
+            },
+        )
+    };
+    if let Some(callback) = callback {
+        // SAFETY: The independent owned frame remains live through the callback.
+        unsafe { callback(arg, bytes.as_ptr().cast(), bytes.len() as c_int) };
+        Ok(())
+    } else {
+        // SAFETY: The default path uses the core's independently owned raw token.
+        unsafe { dispatch_unhandled(parser, false, None) }
+    }
+}
+
 unsafe fn run_events(parser: XML_Parser) -> c_int {
     // SAFETY: Called under the busy guard. The frame owns all storage outside
     // CParser, so callback-time setters may access the core independently.
@@ -1297,7 +1329,12 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterF
             // SAFETY: Both the frame and its position are owned outside CParser.
             unsafe {
                 (*parser).position = frame.position();
-                if dispatch_start_frame(parser, frame).is_err() {
+                let result = if let Some(bytes) = frame.text_bytes() {
+                    dispatch_text_frame(parser, bytes)
+                } else {
+                    dispatch_start_frame(parser, frame)
+                };
+                if result.is_err() {
                     fail_parse(parser, 1);
                     return ERROR;
                 }

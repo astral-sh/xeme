@@ -69,6 +69,10 @@ impl String {
     pub fn try_reserve(&mut self, additional: usize) -> Result<(), AllocError> {
         self.bytes.try_reserve(additional).map_err(Into::into)
     }
+    /// Reserve bytes without amortized growth, for explicitly bounded buffers.
+    pub fn try_reserve_exact(&mut self, additional: usize) -> Result<(), AllocError> {
+        self.bytes.try_reserve_exact(additional).map_err(Into::into)
+    }
     /// Allocated byte capacity, including room reserved for C terminators.
     #[must_use]
     pub fn capacity(&self) -> usize {

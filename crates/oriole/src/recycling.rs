@@ -230,7 +230,7 @@ mod tests {
             use std::fmt::Write;
             write!(&mut xml, " a{index}='{}'", "x".repeat(1024)).unwrap();
         }
-        xml.push_str("/><n a='v'/><fallback a='&amp;'/><n a='again'/></r>");
+        xml.push_str("/>abcdefghijklmnopqrstuvwxyz0123456789<n a='v'/>x<fallback a='&amp;'/>abcdefghijklmnopqrstuvwxyz0123456789<n a='again'/></r>");
         let mut parser = Parser::new(Config::default());
         parser.feed(xml.as_bytes(), true).unwrap();
         parser.next_event().unwrap().unwrap();
@@ -247,6 +247,7 @@ mod tests {
         assert_eq!(parser.event_recycling.adapter_bytes, 0);
         let mut frame = parser.adapter_frame();
         let mut frames = 0;
+        let mut texts = 0;
         let mut fallbacks = 0;
         loop {
             let mut event = None;
@@ -257,7 +258,11 @@ mod tests {
                 break;
             };
             if frame.is_active() {
-                frames += 1;
+                if frame.text_bytes().is_some() {
+                    texts += 1;
+                } else {
+                    frames += 1;
+                }
                 assert_eq!(
                     parser.event_recycling.adapter_bytes,
                     crate::arena::RETAINED_ARENA_BYTES
@@ -274,7 +279,7 @@ mod tests {
             }
             check(&parser);
         }
-        assert_eq!((frames, fallbacks), (2, 1));
+        assert_eq!((frames, fallbacks, texts), (2, 1, 3));
         parser.finish_adapter_frame(frame);
         assert_eq!(parser.event_recycling.adapter_bytes, 0);
         check(&parser);

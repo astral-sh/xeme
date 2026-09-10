@@ -26,6 +26,9 @@ fn main() {
                 break;
             };
             events += 1;
+            if frame.text_bytes().is_some() {
+                continue;
+            }
             if frame.is_active() {
                 starts += 1;
                 framed += 1;

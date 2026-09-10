@@ -422,7 +422,7 @@ fn every_allocation_can_fail_and_all_memory_uses_the_selected_suite() {
 fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
     fn frames(allocator: Allocator) -> Result<(), Error> {
         let mut parser = Parser::try_new_in(Config::default(), allocator)?;
-        parser.feed(b"<r><n a='first' b='value'/><n a='second' b='new'/><n a='literal' b='other'/><n a='&amp;'/><n a='last'/></r>", true)?;
+        parser.feed(b"<r>inline\nabcdefghijklmnopqrstuvwxyz1234567890<n a='first' b='value'/><![CDATA[abcdefghijklmnopqrstuvwxyz1234567890]]><n a='second' b='new'/>fallback\r\n<n a='literal' b='other'/><n a='&amp;'/><n a='last'/>abcdefghijklmnopqrstuvwxyz1234567890</r>", true)?;
         let mut frame = parser.adapter_frame();
         let result = (|| {
             loop {
@@ -447,10 +447,15 @@ fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
                 };
                 if frame.is_active() {
                     assert!(event.is_none());
-                    assert_eq!(frame.name_bytes().last(), Some(&0));
-                    for (name, value) in frame.attributes() {
-                        assert_eq!(name.last(), Some(&0));
-                        assert_eq!(value.last(), Some(&0));
+                    if let Some(bytes) = frame.text_bytes() {
+                        assert_eq!(frame.callback_bytes(), bytes.len());
+                        assert!(!bytes.is_empty());
+                    } else {
+                        assert_eq!(frame.name_bytes().last(), Some(&0));
+                        for (name, value) in frame.attributes() {
+                            assert_eq!(name.last(), Some(&0));
+                            assert_eq!(value.last(), Some(&0));
+                        }
                     }
                 } else {
                     match event.unwrap().kind {

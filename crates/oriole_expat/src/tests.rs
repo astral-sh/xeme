@@ -4129,3 +4129,132 @@ fn ordinary_attlist_handlers_change_at_tokens_and_resume_between_attributes() {
         }
     }
 }
+
+#[test]
+fn arena_text_enforces_exact_callback_budget_with_default_fallback() {
+    for value in ["abc", "abcdefghijklmnopqrstuvwxyz0123456789"] {
+        for handler in [false, true] {
+            for remaining in [value.len() - 1, value.len()] {
+                // SAFETY: The independent frame owns callback bytes; the manual
+                // busy interval matches run_events and state lives until free.
+                unsafe {
+                    let mut state = State::default();
+                    let parser = configured(&mut state);
+                    XML_SetCharacterDataHandler(parser, handler.then_some(text));
+                    XML_SetDefaultHandler(parser, Some(text));
+                    let input = format!("<r>{value}<");
+                    (*parser).core.feed(input.as_bytes(), false).unwrap();
+                    (*parser).core.next_event().unwrap().unwrap();
+                    let mut frame = (*parser).core.adapter_frame();
+                    let mut event = None;
+                    (*parser)
+                        .core
+                        .next_event_for_adapter_into(&mut event, &mut frame)
+                        .unwrap()
+                        .unwrap();
+                    assert!(event.is_none());
+                    assert_eq!(frame.text_bytes(), Some(value.as_bytes()));
+                    let family = &(*parser).family;
+                    family
+                        .callback_bytes
+                        .store(MAX_FAMILY_CALLBACK_BYTES - remaining, Ordering::Relaxed);
+                    (*parser).busy = true;
+                    dispatch_text_frame(parser, frame.text_bytes().unwrap()).unwrap();
+                    (*parser).busy = false;
+                    if remaining < value.len() {
+                        assert_eq!(XML_GetErrorCode(parser), 43);
+                        assert!(state.events.is_empty());
+                    } else {
+                        assert_eq!(XML_GetErrorCode(parser), 0);
+                        assert_eq!(state.events, [format!("text:{value}")]);
+                    }
+                    (*parser).core.finish_adapter_frame(frame);
+                    XML_ParserFree(parser);
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn arena_text_keeps_bytes_raw_context_and_handlers_live_through_suspension() {
+    #[derive(Default)]
+    struct TextState {
+        parser: XML_Parser,
+        first: usize,
+        later: usize,
+        raw: Vec<String>,
+    }
+    unsafe extern "C" fn raw(data: *mut c_void, bytes: *const c_char, len: c_int) {
+        // SAFETY: The caller owns this state; callback bytes remain live.
+        unsafe {
+            (*data.cast::<TextState>()).raw.push(
+                String::from_utf8(std::slice::from_raw_parts(bytes.cast(), len as usize).to_vec())
+                    .unwrap(),
+            );
+        }
+    }
+    unsafe extern "C" fn later(data: *mut c_void, _: *const c_char, _: c_int) {
+        // SAFETY: State is live through the synchronous callback.
+        unsafe {
+            (*data.cast::<TextState>()).later += 1;
+        }
+    }
+    unsafe extern "C" fn first(data: *mut c_void, bytes: *const c_char, len: c_int) {
+        // SAFETY: Raw state access avoids a mutable reference across the nested
+        // DefaultCurrent callback. Detached payload bytes remain independently owned.
+        unsafe {
+            let state = data.cast::<TextState>();
+            let parser = (*state).parser;
+            (*state).first += 1;
+            let original = std::slice::from_raw_parts(bytes.cast::<u8>(), len as usize).to_vec();
+            XML_DefaultCurrent(parser);
+            let mut offset = 0;
+            let mut size = 0;
+            let context = XML_GetInputContext(parser, &mut offset, &mut size);
+            assert!(!context.is_null());
+            let context = std::slice::from_raw_parts(context.cast::<u8>(), size as usize);
+            assert!(context[offset as usize..].starts_with(&original));
+            assert_eq!(XML_SetBase(parser, c"changed".as_ptr()), OK);
+            XML_ParserFree(parser);
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
+            assert_eq!(XML_Parse(parser, c"<bad/>".as_ptr(), 6, 1), ERROR);
+            XML_SetCharacterDataHandler(parser, Some(later));
+            assert_eq!(XML_StopParser(parser, 1), OK);
+            assert_eq!(
+                std::slice::from_raw_parts(bytes.cast::<u8>(), len as usize),
+                original
+            );
+        }
+    }
+    // SAFETY: Parser and user state stay live through parse, nested callbacks,
+    // suspended getters, resume, and the final parser free.
+    unsafe {
+        for value in ["abc", "abcdefghijklmnopqrstuvwxyz0123456789"] {
+            let content = format!("{value}\nend");
+            let input = format!("<r>{content}&amp;tail</r>");
+            let parser = XML_ParserCreate(ptr::null());
+            let mut state = TextState {
+                parser,
+                ..TextState::default()
+            };
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+            XML_SetCharacterDataHandler(parser, Some(first));
+            XML_SetDefaultHandler(parser, Some(raw));
+            assert_eq!(
+                XML_Parse(parser, input.as_ptr().cast(), input.len() as c_int, 1),
+                SUSPENDED
+            );
+            assert_eq!(XML_GetCurrentByteIndex(parser), 3);
+            assert_eq!(XML_GetCurrentByteCount(parser), content.len() as c_int);
+            assert_eq!((*parser).core.current_raw(), Some(content.as_str()));
+            let raw_count = state.raw.len();
+            XML_DefaultCurrent(parser);
+            assert_eq!(state.raw.len(), raw_count);
+            assert_eq!(XML_ResumeParser(parser), OK);
+            assert_eq!((state.first, state.later), (1, 2));
+            assert!(state.raw.iter().any(|raw| raw == &content));
+            XML_ParserFree(parser);
+        }
+    }
+}

@@ -7,6 +7,7 @@ use oriole_storage::{AllocError, Allocator, String, Vec};
 use crate::{Position, RecyclingToken};
 
 pub(crate) const MAX_ARENA_BYTES: usize = 4 * 1024;
+pub(crate) const INLINE_TEXT_BYTES: usize = 23;
 pub(crate) const MAX_ARENA_ATTRIBUTES: usize = 128;
 pub(crate) const RETAINED_ARENA_BYTES: usize =
     MAX_ARENA_BYTES + MAX_ARENA_ATTRIBUTES * size_of::<ArenaAttribute>();
@@ -17,9 +18,16 @@ struct ArenaAttribute {
     value: Range<usize>,
 }
 
-/// Owned callback storage for one native literal start tag.
+#[derive(Debug)]
+enum Payload {
+    Start,
+    InlineText,
+    HeapText,
+}
+
+/// Owned callback storage for a literal start tag or plain character data.
 ///
-/// Returned byte slices include a trailing NUL. Offsets remain private and no
+/// Start-tag slices include a trailing NUL; text is length-delimited. No
 /// parser borrow escapes. The original raw token remains owned by the parser.
 #[doc(hidden)]
 #[derive(Debug)]
@@ -30,6 +38,8 @@ pub struct AdapterFrame {
     name: Range<usize>,
     position: Position,
     callback_bytes: usize,
+    inline: [u8; INLINE_TEXT_BYTES],
+    payload: Payload,
     pub(crate) active: bool,
 }
 
@@ -48,12 +58,15 @@ impl AdapterFrame {
             name: 0..0,
             position: Position::default(),
             callback_bytes: 0,
+            inline: [0; INLINE_TEXT_BYTES],
+            payload: Payload::Start,
             active: false,
         }
     }
 
     pub(crate) fn clear(&mut self) {
         self.active = false;
+        self.payload = Payload::Start;
         self.name = 0..0;
         self.callback_bytes = 0;
         self.position = Position::default();
@@ -71,6 +84,24 @@ impl AdapterFrame {
         // The old owned-attribute vector also reserves before duplicate/value
         // processing. Arena bytes grow later, in that semantic processing order.
         self.attributes.try_reserve_exact(count)?;
+        Ok(())
+    }
+
+    /// Prepare owned length-delimited bytes without publishing an event.
+    pub(crate) fn prepare_text(&mut self, text: &str) -> Result<(), AllocError> {
+        debug_assert!(!self.active && self.bytes.is_empty());
+        debug_assert!(text.len() <= MAX_ARENA_BYTES);
+        if text.len() <= INLINE_TEXT_BYTES {
+            self.inline[..text.len()].copy_from_slice(text.as_bytes());
+            self.payload = Payload::InlineText;
+        } else {
+            // Reserve exactly the bounded span. Amortized growth from a prior
+            // start tag could otherwise retain more than the 4 KiB byte limit.
+            self.bytes.try_reserve_exact(text.len())?;
+            self.bytes.try_push_str(text)?;
+            self.payload = Payload::HeapText;
+        }
+        self.callback_bytes = text.len();
         Ok(())
     }
 
@@ -121,6 +152,19 @@ impl AdapterFrame {
         self.position
     }
 
+    /// Character data bytes, valid through the callback and until frame reuse.
+    #[must_use]
+    pub fn text_bytes(&self) -> Option<&[u8]> {
+        if !self.active {
+            return None;
+        }
+        match self.payload {
+            Payload::Start => None,
+            Payload::InlineText => Some(&self.inline[..self.callback_bytes]),
+            Payload::HeapText => Some(self.bytes.as_bytes()),
+        }
+    }
+
     /// Name bytes including the final NUL; valid until this owned frame is reused.
     #[must_use]
     pub fn name_bytes(&self) -> &[u8] {
@@ -140,5 +184,43 @@ impl AdapterFrame {
     #[must_use]
     pub fn callback_bytes(&self) -> usize {
         self.callback_bytes
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{Config, Parser};
+
+    #[test]
+    fn text_storage_drops_start_terminators_and_stays_within_the_byte_cap() {
+        let parser = Parser::new(Config::default());
+        let mut frame = parser.adapter_frame();
+        frame.prepare_text("abc").unwrap();
+        frame.publish(Position::default());
+        assert_eq!(frame.bytes.capacity(), 0);
+        assert_eq!(frame.text_bytes(), Some(b"abc".as_slice()));
+        for len in [24, 31, 1000, 3000, 4095, 4096] {
+            let value = "x".repeat(len);
+            frame.clear();
+            frame.prepare_text(&value).unwrap();
+            assert!(!frame.is_active());
+            frame.publish(Position::default());
+            assert_eq!(frame.text_bytes(), Some(value.as_bytes()));
+            assert!(frame.bytes.capacity() <= MAX_ARENA_BYTES);
+        }
+        frame.clear();
+        frame.prepare(0).unwrap();
+        frame.set_name("name").unwrap();
+        frame.publish(Position::default());
+        assert_eq!(frame.name_bytes(), b"name\0");
+        frame.clear();
+        frame.prepare_text("abcdefghijklmnopqrstuvwxyz").unwrap();
+        frame.publish(Position::default());
+        assert_eq!(
+            frame.text_bytes(),
+            Some(b"abcdefghijklmnopqrstuvwxyz".as_slice())
+        );
+        assert!(frame.bytes.capacity() <= MAX_ARENA_BYTES);
     }
 }

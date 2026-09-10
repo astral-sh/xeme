@@ -1529,7 +1529,17 @@ impl Parser {
             });
         }
         if let Err(error) = &result {
-            output.clear_frame();
+            // Ordinary character data publishes before consume. Preserve that
+            // prefix on a subsequent accounting error, as the pending queue did.
+            // CDATA and start frames publish only after their fallible work.
+            let text_prefix = error.kind != ErrorKind::NoMemory
+                && output
+                    .frame
+                    .as_ref()
+                    .is_some_and(|frame| frame.text_bytes().is_some());
+            if !text_prefix {
+                output.clear_frame();
+            }
             self.error = Some(*error);
             // Unknown encodings can be installed after an error and resume
             // parsing. Other terminal failures no longer need copied names;
@@ -1558,11 +1568,15 @@ impl Parser {
                 Ok(())
             })();
             if let Err(error) = cleanup {
+                output.clear_frame();
                 self.error = Some(error);
                 self.pending.clear();
                 return Err(error);
             }
-            if let Some(event) = self.pop_event() {
+            if text_prefix {
+                debug_assert!(self.pending.is_empty());
+                result = Ok(());
+            } else if let Some(event) = self.pop_event() {
                 *output.event = Some(event);
                 result = Ok(());
             }
@@ -1944,7 +1958,7 @@ impl Parser {
                 continue;
             }
             if self.in_cdata {
-                if !self.parse_cdata()? {
+                if !self.parse_cdata(output)? {
                     return Ok(());
                 }
                 continue;
@@ -1963,7 +1977,7 @@ impl Parser {
                 continue;
             }
             if first != b'<' {
-                if !self.parse_text()? {
+                if !self.parse_text(output)? {
                     return Ok(());
                 }
                 continue;
@@ -2201,7 +2215,7 @@ impl Parser {
         Ok(false)
     }
 
-    fn parse_text(&mut self) -> Result<bool, Error> {
+    fn parse_text(&mut self, output: &mut EventOutput<'_>) -> Result<bool, Error> {
         let internal = self.sources.len() > 1;
         if !self.seen_root
             && !self.fragment
@@ -2370,8 +2384,9 @@ impl Parser {
             ));
         }
         let position = self.source().position(end);
-        let value = if !self.stack.is_empty() || self.fragment {
-            Some(self.character_data(text)?)
+        let character_data = !self.stack.is_empty() || self.fragment;
+        let value = if character_data {
+            self.prepare_character_data(end, output.frame.as_deref_mut())?
         } else {
             None
         };
@@ -2379,6 +2394,9 @@ impl Parser {
         self.declaration_allowed = false;
         if let Some(value) = value {
             self.emit(EventKind::Text(value), position)?;
+        } else if character_data {
+            debug_assert!(self.pending.is_empty());
+            output.frame.as_deref_mut().unwrap().publish(position);
         } else if self.default_events {
             self.emit(EventKind::Default, position)?;
         }
@@ -2386,7 +2404,7 @@ impl Parser {
         Ok(true)
     }
 
-    fn parse_cdata(&mut self) -> Result<bool, Error> {
+    fn parse_cdata(&mut self, output: &mut EventOutput<'_>) -> Result<bool, Error> {
         let internal = self.sources.len() > 1;
         let limit = self.source().converted_text_limit();
         let text = &self.source().remaining()[..limit];
@@ -2435,12 +2453,16 @@ impl Parser {
             }
             end = invalid;
         }
-        let text = &text[..end];
         let position = self.source().position(end);
-        let value = self.character_data(text)?;
+        let value = self.prepare_character_data(end, output.frame.as_deref_mut())?;
         self.save_current_raw(end)?;
         self.consume(end)?;
-        self.emit(EventKind::Text(value), position)?;
+        if let Some(value) = value {
+            self.emit(EventKind::Text(value), position)?;
+        } else {
+            debug_assert!(self.pending.is_empty());
+            output.frame.as_deref_mut().unwrap().publish(position);
+        }
         Ok(true)
     }
 
@@ -3335,6 +3357,30 @@ impl Parser {
     /// Comments and PI data normalize the converted callback string itself.
     fn markup_text(&self, text: lexical::Slice<'_>) -> Result<String, Error> {
         normalize_newlines(&text.decoded(self.allocator)?, self.allocator)
+    }
+
+    /// Copy a validated span into detached storage, or keep the owned projection.
+    /// A prepared frame is not visible until the caller reaches its emit point.
+    fn prepare_character_data(
+        &mut self,
+        count: usize,
+        frame: Option<&mut AdapterFrame>,
+    ) -> Result<Option<Text>, Error> {
+        let text = &self.source().remaining()[..count];
+        if let Some(frame) = frame
+            && count <= arena::MAX_ARENA_BYTES
+            && !self.source().has_conversions()
+            && (self.sources.len() > 1 || !text.contains('\r'))
+        {
+            if count > arena::INLINE_TEXT_BYTES {
+                self.event_recycling
+                    .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
+            }
+            frame.prepare_text(&self.source().remaining()[..count])?;
+            Ok(None)
+        } else {
+            self.character_data(text).map(Some)
+        }
     }
 
     fn character_data(&self, text: &str) -> Result<Text, Error> {

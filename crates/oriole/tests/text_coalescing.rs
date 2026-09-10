@@ -147,3 +147,19 @@ fn converted_windows_do_not_emit_part_of_a_later_malformed_line() {
         assert_eq!(joined, format!("a\n{}\n", "x".repeat(65_533)));
     }
 }
+
+#[test]
+fn external_children_preserve_default_coalescing() {
+    let parent = Parser::new(Config::default());
+    for mut parser in [parent.external_child(Some(""), None).unwrap(), parent] {
+        let xml = "<r>a\nb\r\nc</r>";
+        parser.feed(xml.as_bytes(), true).unwrap();
+        let mut values = Vec::new();
+        while let Some(event) = parser.next_event().unwrap() {
+            if let EventKind::Text(text) = event.kind {
+                values.push(text.to_string());
+            }
+        }
+        assert_eq!(values, ["a\nb\nc"]);
+    }
+}

@@ -29,8 +29,8 @@ disabled on a shared Linux AMD EPYC-Milan host. Times are medians of process med
 ratios are medians of paired ratios. See the [benchmark guide](benchmarks/README.md)
 for methodology, complete results, and separately identified actual-consumer timings.
 
-The [current validation report](docs/validation/2026-09-10/buffer-reservations/)
-records 368 workspace Rust checks and **4,323 passing / 417 failing upstream API
+The [current validation report](docs/validation/2026-09-10/version-consistent-runtime/)
+records 369 workspace Rust checks and **4,323 passing / 417 failing upstream API
 configurations**. Remaining allocation, resource, diagnostic, and callback differences
 are explicit in the [compatibility guide](docs/compatibility.md). Earlier fuzzing and
 PBS distribution reports identify their own tested revisions.

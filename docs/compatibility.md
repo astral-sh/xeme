@@ -5,10 +5,16 @@ well-formedness, callback compatibility, and safe resource use are separate gate
 A symbol existing or a document parsing successfully does not establish callback
 or CPython compatibility.
 
-The [current integration report](validation/2026-09-10/buffer-reservations/)
+The [current integration report](validation/2026-09-10/version-consistent-runtime/)
 records the latest bounded validation results, including all remaining upstream
 failures. The [earlier full checkpoint](validation/2026-09-10/) retains its own
 runtime, fuzzing and distribution evidence.
+
+The original API matrix currently passes 4,323 of 4,740 configurations. Its
+[failure classification](validation/2026-09-10/version-consistent-runtime/#why-417-api-configurations-fail)
+distinguishes allocation costs, assertions tied to Expat's allocation schedule,
+literal identity, callback/position differences and resource-policy boundaries.
+No original failing assertion is counted as a pass.
 
 ## Differential testing
 
@@ -58,6 +64,7 @@ edition before reporting decoded callback text.
 
 `tests/c/integration.c` compiles against the public header and exercises:
 
+- Agreement between the version string and numeric compatibility revision.
 - One-byte incremental input, parser finalization, and reset.
 - The public `XML_GetUserData` macro, whose ABI reads the parser's first field.
 - `XML_GetBuffer` and `XML_ParseBuffer`.

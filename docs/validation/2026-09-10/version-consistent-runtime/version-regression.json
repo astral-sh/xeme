@@ -1,0 +1,104 @@
+{
+  "scope": "Exact new version_identity function extracted from the final C integration test. Independent ordinary C executable against three frozen libraries; old mismatch failure is expected and retained.",
+  "function_sha256": "d8371173cfecb6bcf30ee1777dd94e92305c1af6764e978e632562e24015651a",
+  "integration_source_sha256": "13adde9211004fb21e67b786e1294da88f76b07a1deb77f9828f3c7a16ab39fb",
+  "source_sha256": "dc5a792f8a6d996658faa7c684d8b98bc084bc8095cbdd941ef6125dad8d0ab4",
+  "rows": [
+    {
+      "name": "old9cc",
+      "library": "/tmp/oriole-attlist-capture-reserve/liboriole_expat.so",
+      "library_sha256": "9cc87e9bc5c22dfc33eba7bf074908421dd7b1c303920f9c8021eab887793213",
+      "build_command": [
+        "taskset",
+        "-c",
+        "6",
+        "cc",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-I",
+        "/tmp/oriole-version-final/frozen-source/include",
+        "/tmp/oriole-version-final-consumer-validation/version-regression/version.c",
+        "/tmp/oriole-attlist-capture-reserve/liboriole_expat.so",
+        "-Wl,-rpath,/tmp/oriole-attlist-capture-reserve",
+        "-o",
+        "/tmp/oriole-version-final-consumer-validation/version-regression/old9cc"
+      ],
+      "binary_sha256": "a0de3a74519a5dd9c4bef7f4f51c9ceb4a4d96115d70dfca6d1fe1c3f0d5b79f",
+      "command": [
+        "taskset",
+        "-c",
+        "6",
+        "/tmp/oriole-version-final-consumer-validation/version-regression/old9cc"
+      ],
+      "exit_code": -6,
+      "expected_exit_code": -6,
+      "log_sha256": "4f019725a67d5abe309e9b3ba628e7ef23d0d8838b4cae29040a073629967246"
+    },
+    {
+      "name": "reference",
+      "library": "/home/dev-user/.cache/oriole/expat-build/libexpat.so",
+      "library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+      "build_command": [
+        "taskset",
+        "-c",
+        "6",
+        "cc",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-I",
+        "/tmp/oriole-version-final/frozen-source/include",
+        "/tmp/oriole-version-final-consumer-validation/version-regression/version.c",
+        "/home/dev-user/.cache/oriole/expat-build/libexpat.so",
+        "-Wl,-rpath,/home/dev-user/.cache/oriole/expat-build",
+        "-o",
+        "/tmp/oriole-version-final-consumer-validation/version-regression/reference"
+      ],
+      "binary_sha256": "13a94d8751d212ad9b258275e2d7a427f454844c34208f7ce67829151bfcead7",
+      "command": [
+        "taskset",
+        "-c",
+        "6",
+        "/tmp/oriole-version-final-consumer-validation/version-regression/reference"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "final",
+      "library": "/tmp/oriole-version-final/liboriole_expat.so",
+      "library_sha256": "ac6a0a6adcabba65ef338d362f438c588ad4a01a9821989bae28f445ba7778ac",
+      "build_command": [
+        "taskset",
+        "-c",
+        "6",
+        "cc",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-I",
+        "/tmp/oriole-version-final/frozen-source/include",
+        "/tmp/oriole-version-final-consumer-validation/version-regression/version.c",
+        "/tmp/oriole-version-final/liboriole_expat.so",
+        "-Wl,-rpath,/tmp/oriole-version-final",
+        "-o",
+        "/tmp/oriole-version-final-consumer-validation/version-regression/final"
+      ],
+      "binary_sha256": "22d29308ad2bd3260b4c1a43194f0c031859385aab60692450dd682fc683fdbd",
+      "command": [
+        "taskset",
+        "-c",
+        "6",
+        "/tmp/oriole-version-final-consumer-validation/version-regression/final"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

@@ -54,9 +54,11 @@ impl String {
     pub fn as_bytes(&self) -> &[u8] {
         &self.bytes
     }
+    #[inline]
     pub fn try_push_str(&mut self, text: &str) -> Result<(), AllocError> {
         try_extend_from_slice(&mut self.bytes, text.as_bytes())
     }
+    #[inline]
     pub fn try_push(&mut self, character: char) -> Result<(), AllocError> {
         self.try_push_str(character.encode_utf8(&mut [0; 4]))
     }
@@ -66,10 +68,12 @@ impl String {
     pub fn push(&mut self, character: char) -> Result<(), AllocError> {
         self.try_push(character)
     }
+    #[inline]
     pub fn try_reserve(&mut self, additional: usize) -> Result<(), AllocError> {
         self.bytes.try_reserve(additional).map_err(Into::into)
     }
     /// Reserve bytes without amortized growth, for explicitly bounded buffers.
+    #[inline]
     pub fn try_reserve_exact(&mut self, additional: usize) -> Result<(), AllocError> {
         self.bytes.try_reserve_exact(additional).map_err(Into::into)
     }

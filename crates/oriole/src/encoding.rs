@@ -1229,10 +1229,27 @@ fn scan_element_tag(
 /// consumption boundaries so a split CRLF remains one line break.
 #[inline(always)]
 fn advance_position(text: &str, line: &mut usize, column: &mut usize, previous_cr: &mut bool) {
-    // Short tokens use one scalar pass instead of searching for line breaks and
-    // separately counting characters in a second pass.
+    // Short tokens count ordinary ASCII words directly, then scan the suffix
+    // once instead of separately searching for breaks and counting characters.
     if text.len() <= 128 {
-        for character in text.chars() {
+        let mut rest = text;
+        while let Some(chunk) = rest.as_bytes().first_chunk::<8>() {
+            let word = u64::from_le_bytes(*chunk);
+            let high = 0x8080_8080_8080_8080;
+            let low = 0x0101_0101_0101_0101;
+            let cr = word ^ 0x0d0d_0d0d_0d0d_0d0d;
+            let lf = word ^ 0x0a0a_0a0a_0a0a_0a0a;
+            // An ASCII word without CR/LF advances exactly eight columns.
+            // A possible special byte leaves the complete suffix to the scalar
+            // path, so word-borrow false positives only stop this shortcut.
+            if (word | (cr.wrapping_sub(low) & !cr) | (lf.wrapping_sub(low) & !lf)) & high != 0 {
+                break;
+            }
+            *column += 8;
+            *previous_cr = false;
+            rest = &rest[8..];
+        }
+        for character in rest.chars() {
             match character {
                 '\r' => {
                     *line += 1;
@@ -1273,6 +1290,66 @@ fn advance_long_position(text: &str, line: &mut usize, column: &mut usize, previ
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn short_position_words_match_scalar_characters_and_cr_state() {
+        fn check(text: &str) {
+            for initial_cr in [false, true] {
+                let mut expected = (17, 29, initial_cr);
+                for character in text.chars() {
+                    match character {
+                        '\r' => {
+                            expected.0 += 1;
+                            expected.1 = 0;
+                        }
+                        '\n' => {
+                            if !expected.2 {
+                                expected.0 += 1;
+                            }
+                            expected.1 = 0;
+                        }
+                        _ => expected.1 += 1,
+                    }
+                    expected.2 = character == '\r';
+                }
+                let mut actual = (17, 29, initial_cr);
+                advance_position(text, &mut actual.0, &mut actual.1, &mut actual.2);
+                assert_eq!(actual, expected, "{text:?}, previous CR={initial_cr}");
+            }
+        }
+        for length in [0, 1, 7, 8, 9, 15, 16, 17, 63, 64, 65, 127, 128, 129] {
+            check(&"x".repeat(length));
+            for offset in 0..length {
+                for byte in 0..=127 {
+                    let mut text = vec![b'x'; length];
+                    text[offset] = byte;
+                    check(std::str::from_utf8(&text).unwrap());
+                }
+                for special in ["\r\n", "\n\r", "\r\r", "\n\n", "é", "雪", "😀"] {
+                    check(&format!(
+                        "{}{special}{}",
+                        "x".repeat(offset),
+                        "y".repeat(length - offset)
+                    ));
+                }
+            }
+        }
+        // Every valid Unicode scalar can occur on either side of a word boundary.
+        for character in (0..=0x10ffff).filter_map(char::from_u32) {
+            check(&format!("xxxxxxx{character}xxxxxxxx\r\ntail"));
+        }
+        // Adjacent bytes can carry a subtraction borrow between lanes.
+        for first in 0..=127 {
+            for second in 0..=127 {
+                for offset in 0..8 {
+                    let mut text = *b"abcdefghijklmnop";
+                    text[offset] = first;
+                    text[offset + 1] = second;
+                    check(std::str::from_utf8(&text).unwrap());
+                }
+            }
+        }
+    }
 
     #[test]
     fn monotonic_positions_match_source_coordinates_and_anchors() {

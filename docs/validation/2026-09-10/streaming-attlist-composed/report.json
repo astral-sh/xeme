@@ -1,0 +1,674 @@
+{
+  "runtime_commit": "41d13baf24bafb39a6cfe54432584a4801bf420d",
+  "library_sha256": {
+    "liboriole_expat.so": "0546fcf56b146126dacc440c740a610ba36df518d09890badee9a527482ab6c8",
+    "liboriole_expat.a": "c42cc29ab8062f8d4ef287af88edc8ca6063ae84b4a1dc46c2f2b45171eb0667"
+  },
+  "source_files_verified": 66,
+  "reused_exact_binary_evidence": {
+    "status": "exact source and shared/static byte identity verified",
+    "source_comparison": "pre-build-source-comparison.json",
+    "author_handoff": "/tmp/oriole-attlist-9074-handoff",
+    "handoff_manifest_sha256": "264e98b8931914a1f60b564d552e04e42771c0443158d8d85254302d85b4389c",
+    "library_sha256": {
+      "liboriole_expat.so": "0546fcf56b146126dacc440c740a610ba36df518d09890badee9a527482ab6c8",
+      "liboriole_expat.a": "c42cc29ab8062f8d4ef287af88edc8ca6063ae84b4a1dc46c2f2b45171eb0667"
+    },
+    "reused_gates": [
+      "365 complete workspace checks",
+      "strict workspace Clippy and formatting",
+      "all 4740 original API configurations",
+      "six native C sanitizer programs with 327 allocation scenarios per linkage",
+      "1518 strict differential comparisons and 13 broader groups",
+      "independent 3656 complete-record comparisons",
+      "8 repeated-name work-limit boundaries"
+    ],
+    "scope": "These gates ran independently on identical source and exact binaries; root repeated the release build, not the unchanged campaigns."
+  },
+  "author_validation": {
+    "runtime": {
+      "git_base": "9074fbd9d0d53cc7694e97faa776bf0f15b40b57",
+      "source_sha256": "f6219724dd1e6d5a946a02d7f3a0966ff3366cc31ce05ec2fd8d9877709e3989",
+      "patch_sha256": "21d1342d8544eefdd638d18d248db3eae43c1591ad4ef7888113aec93f56072f",
+      "baseline_library_sha256": "fef31ffcaa4988ce470bf81fb86356ed3f25ec8278b9dff5a54e107e919c88c3",
+      "previous_library_sha256": "ce67fa4054e5ad96416eb48a20ea341e8492639ed1596100fa2c5d540482b9ef",
+      "library_sha256": "0546fcf56b146126dacc440c740a610ba36df518d09890badee9a527482ab6c8",
+      "static_sha256": "c42cc29ab8062f8d4ef287af88edc8ca6063ae84b4a1dc46c2f2b45171eb0667",
+      "workspace_checks": 365
+    },
+    "api": {
+      "files": {
+        "fef_baseline": {
+          "path": "/tmp/oriole-attlist-9074/upstream-api-control/results.json",
+          "sha256": "8a31919328ca447bd793e47f6cc7e1f7788f7acec7d2f680374ecda04acb6bc9",
+          "passed": 4113,
+          "failed": 627,
+          "timed_out": false
+        },
+        "candidate": {
+          "path": "/tmp/oriole-attlist-9074/upstream-api/results.json",
+          "sha256": "1da47e097366828998bf33a4e3e5f3a9ceac5fd360d3909669230233fe7def45",
+          "passed": 4115,
+          "failed": 625,
+          "timed_out": false
+        },
+        "ce67": {
+          "path": "/tmp/oriole-attlist-a48-work/upstream-api/results.json",
+          "sha256": "1da47e097366828998bf33a4e3e5f3a9ceac5fd360d3909669230233fe7def45",
+          "passed": 4115,
+          "failed": 625,
+          "timed_out": false
+        },
+        "e684": {
+          "path": "/tmp/oriole-attribute-scans-integrated/upstream-api/results.json",
+          "sha256": "8a31919328ca447bd793e47f6cc7e1f7788f7acec7d2f680374ecda04acb6bc9",
+          "passed": 4113,
+          "failed": 627,
+          "timed_out": false
+        }
+      },
+      "differences": {
+        "fef_baseline": [
+          {
+            "context": "chunksize=0 deferral=0",
+            "test": "test_alloc_realloc_attributes",
+            "before": {
+              "context": "chunksize=0 deferral=0",
+              "test": "test_alloc_realloc_attributes",
+              "outcome": "fail",
+              "code": 100
+            },
+            "after": {
+              "context": "chunksize=0 deferral=0",
+              "test": "test_alloc_realloc_attributes",
+              "outcome": "pass",
+              "code": 0
+            }
+          },
+          {
+            "context": "chunksize=0 deferral=1",
+            "test": "test_alloc_realloc_attributes",
+            "before": {
+              "context": "chunksize=0 deferral=1",
+              "test": "test_alloc_realloc_attributes",
+              "outcome": "fail",
+              "code": 100
+            },
+            "after": {
+              "context": "chunksize=0 deferral=1",
+              "test": "test_alloc_realloc_attributes",
+              "outcome": "pass",
+              "code": 0
+            }
+          }
+        ],
+        "candidate": [],
+        "ce67": [],
+        "e684": [
+          {
+            "context": "chunksize=0 deferral=0",
+            "test": "test_alloc_realloc_attributes",
+            "before": {
+              "context": "chunksize=0 deferral=0",
+              "test": "test_alloc_realloc_attributes",
+              "outcome": "fail",
+              "code": 100
+            },
+            "after": {
+              "context": "chunksize=0 deferral=0",
+              "test": "test_alloc_realloc_attributes",
+              "outcome": "pass",
+              "code": 0
+            }
+          },
+          {
+            "context": "chunksize=0 deferral=1",
+            "test": "test_alloc_realloc_attributes",
+            "before": {
+              "context": "chunksize=0 deferral=1",
+              "test": "test_alloc_realloc_attributes",
+              "outcome": "fail",
+              "code": 100
+            },
+            "after": {
+              "context": "chunksize=0 deferral=1",
+              "test": "test_alloc_realloc_attributes",
+              "outcome": "pass",
+              "code": 0
+            }
+          }
+        ]
+      },
+      "bounds": "Original full4740 cases: no retry ceiling, corpus, timeout or address/RSS limit changes."
+    },
+    "controls": {
+      "oracle.json": {
+        "sha256": "4c03a111a227eafac263c0377e5ed6dd292534ded0a96b3a44a6369b1e764d27",
+        "same_observations_as_ce67": true,
+        "counts": {
+          "conditions": 6468,
+          "baseline_changes": 0,
+          "reference_acceptance": 0,
+          "reference_errors": 0,
+          "reference_events": 0,
+          "reference_positions": 2580
+        }
+      },
+      "alias_oracle.json": {
+        "sha256": "fba73bbc0cdb88ae117dff03f9181518f3707fc03264f0cdf0fb1be425aab50c",
+        "same_observations_as_ce67": true,
+        "conditions": 372,
+        "differences": 0
+      },
+      "malformed_oracle.json": {
+        "sha256": "ab4f39486a9c7b10e156018e58dbb83c013ee9aae1324feb1ad4fdccd206cc9c",
+        "same_observations_as_ce67": true,
+        "counts": {
+          "conditions": 384,
+          "baseline_changes": 0,
+          "reference_result_differences": 0
+        }
+      },
+      "malformed-probe.json": {
+        "sha256": "bda7a3b0bdcd70158d0eee72846fe700644bc74ccf684e87d6d09b972ade94d3",
+        "same_observations_as_ce67": true,
+        "cases": 2392
+      },
+      "streaming-probe.json": {
+        "sha256": "59bb8e0b83c6efe56e70796e5988596c1eaf6da1e114f8914ebcacc37ff97fa4",
+        "same_observations_as_ce67": true
+      },
+      "active-oracles/oracle.json.gz": {
+        "sha256": "630e51e5933aa4c47711bb5590643e14eb20acbb8655c0423eb654e9577d8a6d",
+        "same_observations_as_ce67": true,
+        "cases": 4680,
+        "custom_cases": 72,
+        "baseline_differences": 0,
+        "reference_outcome_differences": 0,
+        "reference_successful_event_differences": 0
+      },
+      "active-oracles/doctype.json": {
+        "sha256": "9a0436ccc33981ce5d0e9cc47d52122c89b5118a71d2ecfc2d1de8ee3c46b104",
+        "same_observations_as_ce67": true,
+        "cases": 4104,
+        "differences": 0
+      },
+      "active-oracles/missing.json": {
+        "sha256": "0e2120c019913367c21ca2110bb6e219e9362fd9d9909329551dea5f78b97b7c",
+        "same_observations_as_ce67": true,
+        "counts": {
+          "conditions": 1944,
+          "acceptance": 0,
+          "errors": 24,
+          "events": 162
+        }
+      },
+      "active-oracles/siblings.json": {
+        "sha256": "c5441e7df880900b25ba01ba73e2f26909a57ea1d01636b1bb1a215af6042e02",
+        "same_observations_as_ce67": true,
+        "cases": 4
+      },
+      "active-oracles/general.json": {
+        "sha256": "92706c3106a57ea793c9cb189b9a01578862b9ad0a3308790ce2fc26404d3834",
+        "same_observations_as_ce67": true,
+        "cases": 2
+      },
+      "publication/observations.json": {
+        "sha256": "25b5948067341309b73f16f70cfbbe162578e55b720b978527f8ce76bb73d87d",
+        "same_observations_as_ce67": true,
+        "cases": 432,
+        "differences": 9
+      },
+      "aliases/full-events-comparison.json.gz": {
+        "sha256": "e8d1c12158c2301db6419204cd6dc3f4743e127f2ff6a60dc40821d98312ee57",
+        "cases": 28812,
+        "differences": 1356,
+        "same_records_as_ce67": true
+      },
+      "aliases/external-semantic-comparison.json.gz": {
+        "sha256": "38356c6a218838847cb9c478772f799183cf1416ce3034bb2e17e12cbebbc99d",
+        "cases": 7644,
+        "differences": 0,
+        "same_records_as_ce67": true
+      }
+    },
+    "native": {
+      "programs": 6,
+      "allocations_scenarios_per_linkage": 327,
+      "scope": "C ASan/UBSan with uninstrumented release Rust; leak sanitizer disabled."
+    },
+    "differential": {
+      "cases": 1518,
+      "exact_differences": 0,
+      "reference": "fef Oriole slot-output baseline, not Expat"
+    },
+    "name_work_boundary": {
+      "cases": 8,
+      "sha256": "7d9ea584f6afc7bfec29c0917a81ffb30d6d0f55302d07a1744932df60c3d4dc"
+    },
+    "prior_source_and_findings": "Immutable ce67 handoff /tmp/oriole-attlist-a48-handoff; no new runtime intent in this mechanical slot-output composition. Root Captured(None) repair and1356 actual-Expat position fixes retained.",
+    "performance": "No timing study on this composed candidate."
+  },
+  "independent_source_review": {
+    "reviewer": "/root/ffi/conditional_review",
+    "verdict": "No additional security, lifetime, accounting or simplification blocker found in this bounded read-only source review.",
+    "scope": "Independent final source review; no runtime edits, builds, tests, sanitizer campaigns, benchmarks or new C API probes. Existing test and review artifacts were read but their executions are not claimed as this reviewer work.",
+    "source": {
+      "path": "/tmp/oriole-attlist-9074",
+      "base": "9074fbd9d0d53cc7694e97faa776bf0f15b40b57",
+      "source_manifest_sha256": "f6219724dd1e6d5a946a02d7f3a0966ff3366cc31ce05ec2fd8d9877709e3989",
+      "verified_file_count": 66,
+      "patch_sha256": "21d1342d8544eefdd638d18d248db3eae43c1591ad4ef7888113aec93f56072f",
+      "library_sha256": "0546fcf56b146126dacc440c740a610ba36df518d09890badee9a527482ab6c8"
+    },
+    "reviewed_changed_files": {
+      "crates/oriole/src/dtd.rs": "74c145bc1d79e047097691370ee55bded92e616919f41eed2b769aa86397cc02",
+      "crates/oriole/src/dtd/attlist.rs": "9e587969b41feb3b301df064fe4cd5aec77ccf21023c36cc5a2b43d5598313f5",
+      "crates/oriole/src/encoding.rs": "469c67f9769a2951809fae9da9c81c471f7b99847137916eb9a5c65509ff58f9",
+      "crates/oriole/tests/allocation.rs": "7983a3f8f434a4625a270401da588701f2d3ceae3f02046cac40f11bb337b253",
+      "crates/oriole_expat/src/lib.rs": "2385c2a613468bf8d24ac6de3135f65661f811800b537e45b7bafbbd9137ae32",
+      "crates/oriole_expat/src/tests.rs": "842490fe627fb3bec1893a815ee2ed29ed48cf1d5855ce1e963cb70399bca632"
+    },
+    "findings": [],
+    "checked_invariants": [
+      {
+        "area": "Repeated-name work",
+        "evidence": "dtd.rs::attlist_attribute charges element.len() after the first committed attribute before both Captured(None) and Silent returns. This preserves ordinary repeated-name work independently of handler presence. Default definitions, attribute count limits, default-value expansion and selected allocator fallibility remain before callback suppression. The older Enumeration(None) branch belongs to the unchanged external grammar path and is not used by the new ordinary continuation."
+      },
+      {
+        "area": "Bounded progressive work",
+        "evidence": "attlist.rs advances a lexical fragment boundary, advances the grammar cursor, or returns a queued event; the empty suffix is handled before fragment_length. Enumeration members are consumed before their metadata yield. PositionCursor scans only the delta since its last offset; raw counts cover the current fragment, so it does not repeatedly scan a complete prior token prefix. Attribute semantic parsing rescans only its own commit span. Captured enumeration storage is one attribute at a time and uses the selected allocator."
+      },
+      {
+        "area": "Continuation and shared tables",
+        "evidence": "The complete lexical Buffer, element name, cursor and captured enum string are owned in the boxed state. The owner is restored before successful callback yields and drops on errors. No table entry or input slice survives a core operation. parse_dtd_step resumes the state before inspecting or consuming source input; the source remains unconsumed until final closure. Appended feeds retain offsets; source compaction occurs on consume. The ordinary input context therefore retains the declaration anchor. Shared DTD scope ends before returning owned events to the C adapter."
+      },
+      {
+        "area": "Source and alias provenance",
+        "evidence": "The initial scanner accounts and bounds the complete token before creating the continuation. Grammar consumes the lexical view, while element/type/default/raw payloads decode only their original Slice spans. PositionCursor retains raw-width, CR/LF and anchored entity semantics. Error offsets still use the unchanged source view; the token is consumed once after the closing delimiter."
+      },
+      {
+        "area": "Callback mutation and reentry",
+        "evidence": "Default and ATTLIST availability are read at each semantic/fragment boundary. Member capture is separate from the full stored attribute type; absent members suppress only the callback. Event payloads and C strings are owned before callback invocation. attlist_dispatch is set after all fallible CString conversions and cleared after the synchronous callback, and starts false for creation/reset/children. XML_DefaultCurrent creates an allocation-free empty String only during that ATTLIST dispatch; existing busy/default-recursion and allocator-reentry guards remain. The single-fragment Default optimization preserves the same owned queue/drain path and bypasses duplicate filtering only when duplicate_default is absent."
+      },
+      {
+        "area": "No unsafe simplification recommended",
+        "evidence": "The apparent repeated grammar parse serves distinct lexical callback boundaries versus semantic definition construction. Combining it or treating Silent and Captured(None) as interchangeable would alter member-capture, position or Default behavior. No larger rewrite is needed to accept this bounded patch."
+      }
+    ],
+    "test_source_observations": [
+      "Inspected the exact-work boundary matrix including handler installation/removal and captured-none enums; it asserts both final outcome and expansion counter.",
+      "Inspected owned-token feed/compaction, child publication, malformed later attributes and bounded pending-queue regressions.",
+      "Inspected selected-allocation workload additions and C lifecycle tests for handler installation, DefaultCurrent, suspension, reset/free rejection during callbacks, and UTF16/chunk variants."
+    ],
+    "limits": [
+      "This is a source review, not an independent rerun of the author 365 tests, 4740 upstream cases or existing 3656-record oracle.",
+      "The complete declaration token is still buffered and lexically validated before its first attribute callback; partial-token timing and malformed-prefix callback parity are not newly claimed.",
+      "Existing Default fragmentation and negative-input coordinate differences remain separately classified by the author.",
+      "Unused declaration callback payload no longer contributes to the adapter callback-byte counter. Actual selected allocations, XML work limits and retained/default/start-element payload limits remain enforced; identical peak usage or counter schedules are not claimed."
+    ],
+    "generator_sha256": "794147ab8f72a3c2c905a61633984260de6d92a3663e6167d79b56b0d0d3ee8c"
+  },
+  "native_projects": {
+    "status": "passed",
+    "project_geomean_speedup": 1.0002094699242101,
+    "project_geomean_oriole_over_expat": 2.542108131607332,
+    "positive": 11,
+    "rows": [
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0009517538999093,
+        "oriole_over_expat": 1.1248643099216586,
+        "milliseconds": {
+          "control": 0.1529605,
+          "candidate": 0.1528105,
+          "expat": 0.1339955
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 0.9716102059091803,
+        "oriole_over_expat": 1.2873019668585584,
+        "milliseconds": {
+          "control": 0.17528749999999998,
+          "candidate": 0.18034650000000002,
+          "expat": 0.14009649999999998
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0059386618663884,
+        "oriole_over_expat": 1.2833322586885034,
+        "milliseconds": {
+          "control": 0.14948499999999998,
+          "candidate": 0.14885750000000003,
+          "expat": 0.1163175
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.9988407632949052,
+        "oriole_over_expat": 1.4198348529158784,
+        "milliseconds": {
+          "control": 0.1733385,
+          "candidate": 0.1733235,
+          "expat": 0.122073
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0063174188237407,
+        "oriole_over_expat": 2.402525502009658,
+        "milliseconds": {
+          "control": 0.453137,
+          "candidate": 0.445021,
+          "expat": 0.1843995
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 0.9831661675852829,
+        "oriole_over_expat": 2.603208609201131,
+        "milliseconds": {
+          "control": 0.556183,
+          "candidate": 0.565706,
+          "expat": 0.21594799999999997
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0541825095057036,
+        "oriole_over_expat": 2.660212682022235,
+        "milliseconds": {
+          "control": 0.46498900000000004,
+          "candidate": 0.4583915,
+          "expat": 0.1701575
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.9787844746718788,
+        "oriole_over_expat": 2.8815434096859986,
+        "milliseconds": {
+          "control": 0.549356,
+          "candidate": 0.5619945000000001,
+          "expat": 0.194794
+        }
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9773622783671462,
+        "oriole_over_expat": 7.0953391204497365,
+        "milliseconds": {
+          "control": 15.009007500000001,
+          "candidate": 15.356647,
+          "expat": 2.160536
+        }
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.980454002570327,
+        "oriole_over_expat": 7.133524842456344,
+        "milliseconds": {
+          "control": 15.0494135,
+          "candidate": 15.931882000000002,
+          "expat": 2.1718515
+        }
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9817109069073965,
+        "oriole_over_expat": 5.017000536430069,
+        "milliseconds": {
+          "control": 11.1302185,
+          "candidate": 11.3600025,
+          "expat": 2.271492
+        }
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9625850005449882,
+        "oriole_over_expat": 5.213036925428809,
+        "milliseconds": {
+          "control": 11.266462500000001,
+          "candidate": 11.686377,
+          "expat": 2.2370185
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9968398453009426,
+        "oriole_over_expat": 3.187700918315755,
+        "milliseconds": {
+          "control": 0.681368,
+          "candidate": 0.68003,
+          "expat": 0.2126175
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0142425628797225,
+        "oriole_over_expat": 3.382215000638092,
+        "milliseconds": {
+          "control": 0.747371,
+          "candidate": 0.735549,
+          "expat": 0.2172055
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9908224765838405,
+        "oriole_over_expat": 3.6603461747295096,
+        "milliseconds": {
+          "control": 0.676489,
+          "candidate": 0.6909909999999999,
+          "expat": 0.1908415
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.9829613442012849,
+        "oriole_over_expat": 3.7928530247445016,
+        "milliseconds": {
+          "control": 0.7158965,
+          "candidate": 0.7261209999999999,
+          "expat": 0.191828
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0048765561829225,
+        "oriole_over_expat": 3.5255288642768674,
+        "milliseconds": {
+          "control": 1.603084,
+          "candidate": 1.5712294999999998,
+          "expat": 0.44567199999999996
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 0.9839052935670466,
+        "oriole_over_expat": 3.4825519351166765,
+        "milliseconds": {
+          "control": 1.853922,
+          "candidate": 1.8562625,
+          "expat": 0.5271195
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9947586132047105,
+        "oriole_over_expat": 3.9137829057443896,
+        "milliseconds": {
+          "control": 1.576484,
+          "candidate": 1.5913519999999999,
+          "expat": 0.39250250000000003
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.9934130352153793,
+        "oriole_over_expat": 3.7168957467260904,
+        "milliseconds": {
+          "control": 1.7748945,
+          "candidate": 1.786407,
+          "expat": 0.481039
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0255063223191259,
+        "oriole_over_expat": 3.0789236277853944,
+        "milliseconds": {
+          "control": 91.099602,
+          "candidate": 88.773617,
+          "expat": 28.881855
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0210843372259661,
+        "oriole_over_expat": 3.30727334484325,
+        "milliseconds": {
+          "control": 99.43241499999999,
+          "candidate": 96.745868,
+          "expat": 29.252456
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.002438335826753,
+        "oriole_over_expat": 3.0177311430546894,
+        "milliseconds": {
+          "control": 89.386912,
+          "candidate": 88.997585,
+          "expat": 29.642195
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.9962139841087183,
+        "oriole_over_expat": 3.3677961779661763,
+        "milliseconds": {
+          "control": 96.471566,
+          "candidate": 97.666106,
+          "expat": 29.261393
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9833462849833982,
+        "oriole_over_expat": 1.9175796554039228,
+        "milliseconds": {
+          "control": 1.997651,
+          "candidate": 2.0171175000000003,
+          "expat": 1.0719115
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0167544498822418,
+        "oriole_over_expat": 1.9935633524795953,
+        "milliseconds": {
+          "control": 2.1806385,
+          "candidate": 2.1387799999999997,
+          "expat": 1.0732294999999998
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.00990997693624,
+        "oriole_over_expat": 1.9107270901359694,
+        "milliseconds": {
+          "control": 2.0021945000000003,
+          "candidate": 1.9825475000000001,
+          "expat": 1.0402935
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.9917832262929258,
+        "oriole_over_expat": 2.075090531629754,
+        "milliseconds": {
+          "control": 2.123781,
+          "candidate": 2.1325279999999998,
+          "expat": 1.04126
+        }
+      }
+    ],
+    "iterations": {
+      "vulkan": 7,
+      "wayland": 64,
+      "maven": 128,
+      "batik": 512,
+      "gtk": 256,
+      "docbook": 256,
+      "generated-rare-declarations": 32,
+      "generated-entities": 32
+    },
+    "processes": 420
+  },
+  "initial_collection_confound": {
+    "finding": "The normalized project preflight launcher had unrestricted affinity and ran concurrently with the start of timing. Vulkan 4KiB without namespaces took roughly twice as long for all three engines in the first four cohorts; the fifth returned to previous speeds. The parent did not reserve CPU0 against its own preflight child.",
+    "decision": "Retain every original sample, report this collection confound and repeat all 28 conditions after preflights have completed. Use a fresh prespecified random seed, unchanged iterations, inputs, libraries and driver.",
+    "primary_seed": 20260913,
+    "preflight_repeat": false
+  },
+  "actual_consumers": "Previous event-output library measurements remain separately identified; no actual consumer timing, new CPython suite, W3C, sustained fuzz or PBS campaign was run locally for this composition."
+}

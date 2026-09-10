@@ -104,10 +104,10 @@ bounds aggregate allocation and work across a parser's external-entity family.
 
 ## Validation
 
-The [current integration report](docs/validation/2026-09-10/event-output-final/)
-records 326 Rust checks, selected-allocation failure tests, native C sanitizer
-checks, and exact differential comparisons. The full adapted Expat API matrix
-reports **4,113 passing and 627 failing configurations**. Allocation schedules,
+The [current integration report](docs/validation/2026-09-10/streaming-attlist-composed/)
+records 365 workspace Rust checks, selected-allocation failure tests, native C
+sanitizer checks, and exact differential comparisons. The full adapted Expat API matrix
+reports **4,115 passing and 625 failing configurations**. Allocation schedules,
 resource limits, diagnostics and some callback behavior still differ from Expat;
 these failures remain recorded.
 
@@ -125,7 +125,7 @@ See [fuzzing](fuzz/README.md) for the harnesses and
 
 ## Benchmarks
 
-The [current benchmarks](docs/validation/2026-09-10/event-output-final/) compare
+The [current benchmarks](docs/validation/2026-09-10/streaming-attlist-composed/) compare
 Oriole's C interface with Expat 2.8.4 on original, pinned XML files from real
 projects. These results use 4 KiB chunks with namespaces disabled, on a shared
 Linux AMD EPYC-Milan host. Five randomized process pairs use 7–512 measured
@@ -134,23 +134,23 @@ callbacks are checked before timing.
 
 | Project XML | Oriole | Expat | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 90.414 ms | 29.136 ms | 3.09× |
-| Wayland protocol | 1.996 ms | 1.073 ms | 1.87× |
-| Maven POM | 1.626 ms | 0.456 ms | 3.53× |
-| Batik SVG | 0.153 ms | 0.134 ms | 1.14× |
-| GTK UI | 0.686 ms | 0.214 ms | 3.20× |
-| DocBook XSL | 0.463 ms | 0.183 ms | 2.51× |
+| Vulkan registry | 88.774 ms | 28.882 ms | 3.08× |
+| Wayland protocol | 2.017 ms | 1.072 ms | 1.92× |
+| Maven POM | 1.571 ms | 0.446 ms | 3.53× |
+| Batik SVG | 0.153 ms | 0.134 ms | 1.12× |
+| GTK UI | 0.680 ms | 0.213 ms | 3.19× |
+| DocBook XSL | 0.445 ms | 0.184 ms | 2.40× |
 
 Times are medians of process medians; ratios are medians of paired time ratios.
 Oriole remains slower than Expat. Across both namespace modes and 4 KiB/64 KiB
-chunks, the longer confirmation measures a 2.3% average speedup over the
-preceding implementation, with 22 of 24 conditions improving. Raw samples,
-earlier screens, generated controls and exact source/library hashes are retained;
-host load and CPU frequency are uncontrolled.
+chunks, the ATTLIST change is near parity overall, with 11 of 24 conditions
+improving. Its benefits are callback publication and lower memory use. Raw samples,
+generated controls and exact source/library hashes are retained; host load and CPU
+frequency are uncontrolled.
 
 Matched [CPython and Wayland measurements](docs/validation/2026-09-10/event-output-final/)
-use the same library. It takes 1.71× Expat's time in ElementTree and 1.46× in
-pyexpat on average; Wayland through pyexpat takes 1.06×. Actual Wayland client-header
+use the preceding event-output library. It takes 1.71× Expat's time in ElementTree
+and 1.46× in pyexpat on average; Wayland through pyexpat takes 1.06×. Actual Wayland client-header
 and private-code generation take 1.24× and 1.31× respectively, with identical output.
 See the [benchmark guide](benchmarks/README.md) to reproduce the workloads and
 [allocator comparison](benchmarks/results/2026-09-10/real-project-allocators/)

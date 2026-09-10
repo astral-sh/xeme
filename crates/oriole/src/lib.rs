@@ -1306,6 +1306,15 @@ impl Parser {
         if !is_name(&name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid entity name"));
         }
+        if self.config.namespace_separator.is_some()
+            && let Some(colon) = name.find(':')
+        {
+            return Err(self.err_at(
+                ErrorKind::InvalidToken,
+                "entity names cannot contain colons with namespaces enabled",
+                colon + 1,
+            ));
+        }
         let Some(entity) = self.entities.get(&name) else {
             if self.has_external_subset && !self.standalone {
                 self.consume(end + 1);
@@ -1958,7 +1967,9 @@ impl Parser {
             {
                 output.try_push(character)?;
             } else {
-                if !is_name(name) {
+                if !is_name(name)
+                    || (self.config.namespace_separator.is_some() && name.contains(':'))
+                {
                     return Err(self.err(ErrorKind::InvalidToken, "invalid entity name"));
                 }
                 if chain.iter().any(|item| item == name)

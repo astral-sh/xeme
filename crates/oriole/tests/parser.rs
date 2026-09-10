@@ -92,6 +92,72 @@ fn plain_attributes_and_short_references_keep_normalization_and_errors() {
 }
 
 #[test]
+fn namespaces_apply_to_dtd_names_and_entity_references() {
+    let namespaces = Config {
+        namespace_separator: Some('|'),
+        ..Config::default()
+    };
+    // These are XML Names in a parser without namespaces. Namespace-aware
+    // declarations instead require QNames, or NCNames for entities/notations.
+    for xml in [
+        "<!DOCTYPE a:b:c><r/>",
+        "<!DOCTYPE :r><r/>",
+        "<!DOCTYPE r:><r/>",
+        "<!DOCTYPE p:1r><r/>",
+        "<!DOCTYPE r [<!ENTITY a:b 'x'>]><r/>",
+        "<!DOCTYPE r [<!ENTITY % a:b 'x'>]><r/>",
+        "<!DOCTYPE r [<!NOTATION a:b SYSTEM 'x'>]><r/>",
+        "<!DOCTYPE r [<!ENTITY e SYSTEM 'x' NDATA a:b>]><r/>",
+        "<!DOCTYPE r [<!ATTLIST r a NOTATION (a:b) #IMPLIED>]><r/>",
+        "<!DOCTYPE r [<!ELEMENT a:b:c EMPTY>]><r/>",
+        "<!DOCTYPE r [<!ELEMENT r (a:b:c)>]><r/>",
+        "<!DOCTYPE r [<!ELEMENT r (#PCDATA|a:b:c)*>]><r/>",
+        "<!DOCTYPE r [<!ATTLIST a:b:c a CDATA #IMPLIED>]><r/>",
+        "<!DOCTYPE r [<!ATTLIST r a:b:c CDATA #IMPLIED>]><r/>",
+    ] {
+        assert!(parse(xml.as_bytes(), 1, Config::default()).is_ok(), "{xml}");
+        for chunk in 1..=xml.len() {
+            assert_eq!(
+                parse(xml.as_bytes(), chunk, namespaces.clone()),
+                Err(ErrorKind::Syntax),
+                "{xml}, chunk {chunk}"
+            );
+        }
+    }
+    // Validate before skipping an unresolved entity in an unread external DTD.
+    for xml in [
+        "<!DOCTYPE r SYSTEM 'x'><r>&a:b;</r>",
+        "<!DOCTYPE r SYSTEM 'x'><r a='&a:b;'/>",
+        "<!DOCTYPE r [%a:b;]><r/>",
+        "<!DOCTYPE r [<!ENTITY e '&a:b;'>]><r/>",
+        "<!DOCTYPE r SYSTEM 'x' [<!ATTLIST r a CDATA '&a:b;'>]><r/>",
+    ] {
+        assert!(parse(xml.as_bytes(), 1, Config::default()).is_ok(), "{xml}");
+        for chunk in 1..=xml.len() {
+            assert_eq!(
+                parse(xml.as_bytes(), chunk, namespaces.clone()),
+                Err(ErrorKind::InvalidToken),
+                "{xml}, chunk {chunk}"
+            );
+        }
+    }
+    // DTD prefixes need no binding until use. Ordinary enumerations are
+    // NMTOKENs and can contain colons; NOTATION enumerations are NCNames.
+    let xml = "<!DOCTYPE p:r [<!ELEMENT p:r (p:child)><!ATTLIST p:r p:a (a:b|:c:) 'a:b'><!NOTATION n SYSTEM 'x'><!ATTLIST p:r kind NOTATION (n) #IMPLIED>]><p:r xmlns:p='urn:p'/>";
+    let expected = parse(xml.as_bytes(), xml.len(), namespaces.clone()).unwrap();
+    for chunk in 1..=xml.len() {
+        assert_eq!(
+            parse(xml.as_bytes(), chunk, namespaces.clone()).unwrap(),
+            expected
+        );
+    }
+    assert!(expected.iter().any(|event| matches!(event,
+        EventKind::StartElement { name, attributes }
+        if name == "urn:p|r" && attributes.iter().any(|attribute|
+            attribute.name == "urn:p|a" && attribute.value == "a:b"))));
+}
+
+#[test]
 fn namespaces_and_triplets() {
     let xml = b"<r xmlns='urn:r' xmlns:a='urn:a' a:x='1' x='2'><a:c xmlns=''/></r>";
     let config = Config {

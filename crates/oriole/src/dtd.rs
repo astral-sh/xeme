@@ -18,7 +18,10 @@ impl Parser {
                 offset,
             ));
         }
-        let mut cursor = Cursor::new(&token[9..token.len() - 1]);
+        let mut cursor = Cursor::new(
+            &token[9..token.len() - 1],
+            self.config.namespace_separator.is_some(),
+        );
         cursor
             .require_space()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -241,6 +244,15 @@ impl Parser {
         if !crate::names::is_name(&name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid parameter entity name"));
         }
+        if self.config.namespace_separator.is_some()
+            && let Some(colon) = name.find(':')
+        {
+            return Err(self.err_at(
+                ErrorKind::InvalidToken,
+                "parameter entity names cannot contain colons with namespaces enabled",
+                colon + 1,
+            ));
+        }
         let position = self.source().position(end + 1);
         self.has_external_subset = true;
         if !self.parameter_entities_enabled() {
@@ -361,7 +373,7 @@ impl Parser {
                 end.ok_or_else(|| self.err(ErrorKind::UnclosedToken, "unclosed DTD declaration"))?;
             self.declaration_allowed = false;
             let first_event = self.pending.len();
-            let mut cursor = Cursor::new(&text[2..end]);
+            let mut cursor = Cursor::new(&text[2..end], self.config.namespace_separator.is_some());
             let declaration = cursor
                 .name()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
@@ -390,7 +402,7 @@ impl Parser {
                 }
                 "NOTATION" => {
                     let name = cursor
-                        .name()
+                        .ncname()
                         .map_err(|message| self.err(ErrorKind::Syntax, message))?;
                     let name = string(name, self.allocator)?;
                     cursor
@@ -438,7 +450,7 @@ impl Parser {
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
         }
         let name = cursor
-            .name()
+            .ncname()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
         let name = string(name, self.allocator)?;
         cursor
@@ -475,7 +487,9 @@ impl Parser {
                             .expect("numeric reference"),
                     )?;
                 } else {
-                    if !crate::names::is_name(reference) {
+                    if !crate::names::is_name(reference)
+                        || (self.config.namespace_separator.is_some() && reference.contains(':'))
+                    {
                         return Err(self.err(
                             ErrorKind::InvalidToken,
                             "invalid entity reference in entity value",
@@ -501,7 +515,7 @@ impl Parser {
                     .map_err(|message| self.err(ErrorKind::Syntax, message))?;
                 Some(string(
                     cursor
-                        .name()
+                        .ncname()
                         .map_err(|message| self.err(ErrorKind::Syntax, message))?,
                     self.allocator,
                 )?)
@@ -684,10 +698,11 @@ impl Parser {
 
 struct Cursor<'a> {
     text: &'a str,
+    namespaces: bool,
 }
 impl<'a> Cursor<'a> {
-    fn new(text: &'a str) -> Self {
-        Self { text }
+    fn new(text: &'a str, namespaces: bool) -> Self {
+        Self { text, namespaces }
     }
     fn rest(&self) -> &'a str {
         self.text
@@ -718,7 +733,17 @@ impl<'a> Cursor<'a> {
     }
     fn name(&mut self) -> Result<&'a str, &'static str> {
         let (name, rest) = take_name(self.text).ok_or("name required in DTD declaration")?;
+        if self.namespaces && !crate::names::is_qname(name) {
+            return Err("invalid namespace-qualified name in DTD declaration");
+        }
         self.text = rest;
+        Ok(name)
+    }
+    fn ncname(&mut self) -> Result<&'a str, &'static str> {
+        let name = self.name()?;
+        if self.namespaces && name.contains(':') {
+            return Err("this DTD name cannot contain a colon with namespaces enabled");
+        }
         Ok(name)
     }
     fn quoted(&mut self) -> Result<&'a str, &'static str> {
@@ -790,7 +815,7 @@ fn enumeration(cursor: &mut Cursor<'_>, names: bool) -> Result<(), &'static str>
     loop {
         cursor.space();
         if names {
-            cursor.name()?;
+            cursor.ncname()?;
         } else {
             let end = cursor
                 .rest()

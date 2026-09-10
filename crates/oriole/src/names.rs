@@ -16,3 +16,12 @@ pub(crate) fn is_name(name: &str) -> bool {
     let mut chars = name.chars();
     chars.next().is_some_and(is_name_start) && chars.all(is_name_char)
 }
+
+/// Namespace-qualified names allow one colon between two nonempty XML names.
+pub(crate) fn is_qname(name: &str) -> bool {
+    if let Some((prefix, local)) = name.split_once(':') {
+        is_name(prefix) && is_name(local) && !local.contains(':')
+    } else {
+        is_name(name)
+    }
+}

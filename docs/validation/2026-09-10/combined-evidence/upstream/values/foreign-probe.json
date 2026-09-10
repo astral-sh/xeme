@@ -1,0 +1,1376 @@
+[
+  {
+    "body": "<r/>",
+    "reject": false,
+    "dtd": "",
+    "reference": {
+      "standalone": null,
+      "mode": 2,
+      "data": "",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 0
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "parent",
+          "not-standalone",
+          0
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ]
+      ],
+      "default": ""
+    },
+    "candidate": {
+      "standalone": null,
+      "mode": 2,
+      "data": "",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 0
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ]
+      ],
+      "default": ""
+    }
+  },
+  {
+    "body": "<r/>",
+    "reject": false,
+    "dtd": "<!ELEMENT r ANY>",
+    "reference": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ELEMENT r ANY>",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 16
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "<!ELEMENT"
+        ],
+        [
+          "d",
+          "default",
+          9,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          10,
+          "r"
+        ],
+        [
+          "d",
+          "default",
+          11,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          12,
+          "ANY"
+        ],
+        [
+          "d",
+          "default",
+          15,
+          ">"
+        ],
+        [
+          "parent",
+          "not-standalone",
+          0
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ]
+      ],
+      "default": "<!ELEMENT r ANY>"
+    },
+    "candidate": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ELEMENT r ANY>",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 16
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "<!ELEMENT"
+        ],
+        [
+          "d",
+          "default",
+          0,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "r"
+        ],
+        [
+          "d",
+          "default",
+          0,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "ANY"
+        ],
+        [
+          "d",
+          "default",
+          0,
+          ">"
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ]
+      ],
+      "default": "<!ELEMENT r ANY>"
+    }
+  },
+  {
+    "body": "<r/>",
+    "reject": false,
+    "dtd": "<!ENTITY entity \"X\">",
+    "reference": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ENTITY entity \"X\">",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 20
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "entity",
+          16,
+          "entity",
+          0,
+          "X",
+          null
+        ],
+        [
+          "parent",
+          "not-standalone",
+          0
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ]
+      ],
+      "default": ""
+    },
+    "candidate": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ENTITY entity \"X\">",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 20
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "entity",
+          0,
+          "entity",
+          0,
+          "X",
+          null
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ]
+      ],
+      "default": ""
+    }
+  },
+  {
+    "body": "<r/>",
+    "reject": true,
+    "dtd": "",
+    "reference": {
+      "standalone": null,
+      "mode": 2,
+      "data": "",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 0
+        }
+      ],
+      "status": 0,
+      "error": 22,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "parent",
+          "not-standalone",
+          0
+        ]
+      ],
+      "default": ""
+    },
+    "candidate": {
+      "standalone": null,
+      "mode": 2,
+      "data": "",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 0
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ]
+      ],
+      "default": ""
+    }
+  },
+  {
+    "body": "<r/>",
+    "reject": true,
+    "dtd": "<!ELEMENT r ANY>",
+    "reference": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ELEMENT r ANY>",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 16
+        }
+      ],
+      "status": 0,
+      "error": 22,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "<!ELEMENT"
+        ],
+        [
+          "d",
+          "default",
+          9,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          10,
+          "r"
+        ],
+        [
+          "d",
+          "default",
+          11,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          12,
+          "ANY"
+        ],
+        [
+          "d",
+          "default",
+          15,
+          ">"
+        ],
+        [
+          "parent",
+          "not-standalone",
+          0
+        ]
+      ],
+      "default": "<!ELEMENT r ANY>"
+    },
+    "candidate": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ELEMENT r ANY>",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 16
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "<!ELEMENT"
+        ],
+        [
+          "d",
+          "default",
+          0,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "r"
+        ],
+        [
+          "d",
+          "default",
+          0,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "ANY"
+        ],
+        [
+          "d",
+          "default",
+          0,
+          ">"
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ]
+      ],
+      "default": "<!ELEMENT r ANY>"
+    }
+  },
+  {
+    "body": "<r/>",
+    "reject": true,
+    "dtd": "<!ENTITY entity \"X\">",
+    "reference": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ENTITY entity \"X\">",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 20
+        }
+      ],
+      "status": 0,
+      "error": 22,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "entity",
+          16,
+          "entity",
+          0,
+          "X",
+          null
+        ],
+        [
+          "parent",
+          "not-standalone",
+          0
+        ]
+      ],
+      "default": ""
+    },
+    "candidate": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ENTITY entity \"X\">",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 20
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "entity",
+          0,
+          "entity",
+          0,
+          "X",
+          null
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ]
+      ],
+      "default": ""
+    }
+  },
+  {
+    "body": "<r>&entity;</r>",
+    "reject": false,
+    "dtd": "",
+    "reference": {
+      "standalone": null,
+      "mode": 2,
+      "data": "",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 0
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "parent",
+          "not-standalone",
+          0
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ],
+        [
+          "parent",
+          "skipped",
+          3,
+          "entity",
+          0
+        ],
+        [
+          "parent",
+          "default",
+          11,
+          "</r>"
+        ]
+      ],
+      "default": ""
+    },
+    "candidate": {
+      "standalone": null,
+      "mode": 2,
+      "data": "",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 0
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ],
+        [
+          "parent",
+          "skipped",
+          3,
+          "entity",
+          0
+        ],
+        [
+          "parent",
+          "default",
+          11,
+          "</r>"
+        ]
+      ],
+      "default": ""
+    }
+  },
+  {
+    "body": "<r>&entity;</r>",
+    "reject": false,
+    "dtd": "<!ELEMENT r ANY>",
+    "reference": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ELEMENT r ANY>",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 16
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "<!ELEMENT"
+        ],
+        [
+          "d",
+          "default",
+          9,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          10,
+          "r"
+        ],
+        [
+          "d",
+          "default",
+          11,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          12,
+          "ANY"
+        ],
+        [
+          "d",
+          "default",
+          15,
+          ">"
+        ],
+        [
+          "parent",
+          "not-standalone",
+          0
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ],
+        [
+          "parent",
+          "skipped",
+          3,
+          "entity",
+          0
+        ],
+        [
+          "parent",
+          "default",
+          11,
+          "</r>"
+        ]
+      ],
+      "default": "<!ELEMENT r ANY>"
+    },
+    "candidate": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ELEMENT r ANY>",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 16
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "<!ELEMENT"
+        ],
+        [
+          "d",
+          "default",
+          0,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "r"
+        ],
+        [
+          "d",
+          "default",
+          0,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "ANY"
+        ],
+        [
+          "d",
+          "default",
+          0,
+          ">"
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ],
+        [
+          "parent",
+          "skipped",
+          3,
+          "entity",
+          0
+        ],
+        [
+          "parent",
+          "default",
+          11,
+          "</r>"
+        ]
+      ],
+      "default": "<!ELEMENT r ANY>"
+    }
+  },
+  {
+    "body": "<r>&entity;</r>",
+    "reject": false,
+    "dtd": "<!ENTITY entity \"X\">",
+    "reference": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ENTITY entity \"X\">",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 20
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "entity",
+          16,
+          "entity",
+          0,
+          "X",
+          null
+        ],
+        [
+          "parent",
+          "not-standalone",
+          0
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ],
+        [
+          "parent",
+          "text",
+          3,
+          "X"
+        ],
+        [
+          "parent",
+          "default",
+          11,
+          "</r>"
+        ]
+      ],
+      "default": ""
+    },
+    "candidate": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ENTITY entity \"X\">",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 20
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "entity",
+          0,
+          "entity",
+          0,
+          "X",
+          null
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ],
+        [
+          "parent",
+          "text",
+          3,
+          "X"
+        ],
+        [
+          "parent",
+          "default",
+          11,
+          "</r>"
+        ]
+      ],
+      "default": ""
+    }
+  },
+  {
+    "body": "<r>&entity;</r>",
+    "reject": true,
+    "dtd": "",
+    "reference": {
+      "standalone": null,
+      "mode": 2,
+      "data": "",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 0
+        }
+      ],
+      "status": 0,
+      "error": 22,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "parent",
+          "not-standalone",
+          0
+        ]
+      ],
+      "default": ""
+    },
+    "candidate": {
+      "standalone": null,
+      "mode": 2,
+      "data": "",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 0
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ],
+        [
+          "parent",
+          "skipped",
+          3,
+          "entity",
+          0
+        ],
+        [
+          "parent",
+          "default",
+          11,
+          "</r>"
+        ]
+      ],
+      "default": ""
+    }
+  },
+  {
+    "body": "<r>&entity;</r>",
+    "reject": true,
+    "dtd": "<!ELEMENT r ANY>",
+    "reference": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ELEMENT r ANY>",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 16
+        }
+      ],
+      "status": 0,
+      "error": 22,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "<!ELEMENT"
+        ],
+        [
+          "d",
+          "default",
+          9,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          10,
+          "r"
+        ],
+        [
+          "d",
+          "default",
+          11,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          12,
+          "ANY"
+        ],
+        [
+          "d",
+          "default",
+          15,
+          ">"
+        ],
+        [
+          "parent",
+          "not-standalone",
+          0
+        ]
+      ],
+      "default": "<!ELEMENT r ANY>"
+    },
+    "candidate": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ELEMENT r ANY>",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 16
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "<!ELEMENT"
+        ],
+        [
+          "d",
+          "default",
+          0,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "r"
+        ],
+        [
+          "d",
+          "default",
+          0,
+          " "
+        ],
+        [
+          "d",
+          "default",
+          0,
+          "ANY"
+        ],
+        [
+          "d",
+          "default",
+          0,
+          ">"
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ],
+        [
+          "parent",
+          "skipped",
+          3,
+          "entity",
+          0
+        ],
+        [
+          "parent",
+          "default",
+          11,
+          "</r>"
+        ]
+      ],
+      "default": "<!ELEMENT r ANY>"
+    }
+  },
+  {
+    "body": "<r>&entity;</r>",
+    "reject": true,
+    "dtd": "<!ENTITY entity \"X\">",
+    "reference": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ENTITY entity \"X\">",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 20
+        }
+      ],
+      "status": 0,
+      "error": 22,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "entity",
+          16,
+          "entity",
+          0,
+          "X",
+          null
+        ],
+        [
+          "parent",
+          "not-standalone",
+          0
+        ]
+      ],
+      "default": ""
+    },
+    "candidate": {
+      "standalone": null,
+      "mode": 2,
+      "data": "<!ENTITY entity \"X\">",
+      "external_data": "",
+      "action": "parse",
+      "chunk": 0,
+      "children": [
+        {
+          "name": "d",
+          "status": 1,
+          "error": 0,
+          "index": 20
+        }
+      ],
+      "status": 1,
+      "error": 0,
+      "events": [
+        [
+          "parent",
+          "external",
+          0,
+          "d",
+          null
+        ],
+        [
+          "d",
+          "entity",
+          0,
+          "entity",
+          0,
+          "X",
+          null
+        ],
+        [
+          "parent",
+          "start",
+          0,
+          "r"
+        ],
+        [
+          "parent",
+          "text",
+          3,
+          "X"
+        ],
+        [
+          "parent",
+          "default",
+          11,
+          "</r>"
+        ]
+      ],
+      "default": ""
+    }
+  }
+]

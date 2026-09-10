@@ -1,0 +1,26 @@
+{
+  "harness": "/tmp/oriole-w3c-run.py",
+  "harness_sha256": "6e3a3362dbbfa677740459a7f8e9ef19f26dd1574e74d8870cc67d26ce830d5c",
+  "conclusion": "Reviewed CLI reporting corrections; no remaining blocker in scoped catalog/worker/reporting design. Resolver failures are recorded as inconclusive with no mandatory or optional conformance credit, and are excluded from acceptance-difference comparisons. Failed or timed-out workers persist command and failure summaries before returning1.",
+  "prior_engine_review": "/tmp/oriole-w3c-independent-review.json",
+  "checks": {
+    "catalog_resolver_engine": "AST identical to previously reviewed prototype",
+    "tiny_fixture": "7descriptors/5selected; each engine9mandatorypass/0mandatoryfail/3optional/3inconclusive/3resolvererrors; exit1;3inconclusivecomparisons retained",
+    "worker_failure_reports": "5 injected boundary cases passed: TimeoutExpired, launchOSError, nonzeroexit17, missing worker output, malformedJSON; all persisted summary/command andreturned1 without giving conformance credit",
+    "ruff": "check and format --check pass",
+    "ty": "ty check passes"
+  },
+  "limits": "Actual child RLIMIT_AS1GiB andRLIMIT_CORE0; parent120s timeout; trusted-suite per-file2MiB afterread,externaldepth32,requests1024. Catalog/sourcehash collection outsideworker budget. No canonical-output validation; legacy/custom encodings outside installed handler scope.",
+  "artifacts": {
+    "/tmp/oriole-w3c-reporting-tests.py": "a97ed76400aeed473c542f3b82e093c84b8685fd42b000773ab50d9217fbdf94",
+    "/tmp/oriole-w3c-reporting-tests.json": "562bfd16d2369cbf7d700eb83105e71bac55781cb1d37726ddecc022429a130f",
+    "/tmp/oriole-w3c-cli-fixed-output/catalog.json": "c9f096a781ecdefa1ff3e4199033f0d08091e0d18191bdd6e0b4c34358c855b8",
+    "/tmp/oriole-w3c-cli-fixed-output/oriole.json": "3ddc39cc25e48160bc97c778d54b5fe2fc979eccf48b7c5c9a7b38f9fdf268ad",
+    "/tmp/oriole-w3c-cli-fixed-output/reference-progress.json": "703a43cc75ec279d785f06a5f3b91ff52300e2c042df66e113fe86db27a06eb6",
+    "/tmp/oriole-w3c-cli-fixed-output/oriole.log": "d646ee328073658d91e3b88f1721c8aeea02454317da0ab49acb51a7f665f6f8",
+    "/tmp/oriole-w3c-cli-fixed-output/reference.json": "c879cf326afc8c2421d88699b829621b32b2f715f9775a24d4890a6ec7852f97",
+    "/tmp/oriole-w3c-cli-fixed-output/reference.log": "19f3a78160a19c19142d9fac373c1920b71eef90fd5de6ae48255cfa43df8ccd",
+    "/tmp/oriole-w3c-cli-fixed-output/oriole-progress.json": "703a43cc75ec279d785f06a5f3b91ff52300e2c042df66e113fe86db27a06eb6",
+    "/tmp/oriole-w3c-cli-fixed-output/summary.json": "f52350807efb926bf402ac72421aea75347db8d4ee335127a131b90c8646c3e6"
+  }
+}

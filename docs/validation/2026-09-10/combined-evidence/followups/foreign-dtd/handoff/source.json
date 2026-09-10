@@ -1,0 +1,14 @@
+{
+  "base_git": "b68bdca6f61e932c45ce076d6ec0bdb7aadd95b4",
+  "files": {
+    "crates/oriole/src/dtd.rs": "e6ecfdd620a0a7092faf5e4d9e397353048c684ed548d9517b385fe5fb28601d",
+    "crates/oriole/src/lib.rs": "ece28b265dd46a3bad5e6c5ae72fd84d243f181567ce240bb2ad70ba222e3593",
+    "crates/oriole/tests/allocation.rs": "982d3a90b5be9d8aaebc007e84a4e93cd584cdcec6118f4d34938749b1c1b813",
+    "crates/oriole/tests/foreign_dtd.rs": "dd0884512a60a43b25df5051b1d1308cdd168e62c2a671490e018d38eefe0937",
+    "crates/oriole_expat/src/lib.rs": "444b1dd0f9cd065d35d1ec7d54bc9d71db2808105a750dbcd5d6ca73e0b05af6",
+    "crates/oriole_expat/src/tests.rs": "ec58c0c8916a4acc47a4c60965faf96dcd815cd50e6a715213390531cade61d7"
+  },
+  "library": "/home/dev-user/.cache/oriole/foreign-dtd-target/debug/liboriole_expat.so",
+  "library_sha256": "f8c07e08bd7b5960942ef2e5140d24209d3343eb0293e64a7dae7a6a83f407b2",
+  "patch_sha256": "00491edbaf771fb711d12afb77565732e83656670aa3b59b0861668b92c8d03f"
+}

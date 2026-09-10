@@ -1,0 +1,24 @@
+{
+  "conclusion": "No blocker in bounded XML VersionNum acceptance change. Prefix1. plus nonempty ASCII digit suffix exactly recognizes the requested1.[0-9]+ grammar. Existing XML1.0 character validation and decoder paths remain unchanged.",
+  "candidate_sha256": "28c99a9520689339588cde62a83235cd7b5c9270beb1321e710214667e935d07",
+  "reviewed_files": {
+    "/home/dev-user/code/oss/oriole/crates/oriole/src/lib.rs": "789cffcc07c9df7f0ffc6e84a67588e88dbcb47a493e4febb5e67710ef78aa03",
+    "/home/dev-user/code/oss/oriole/crates/oriole/tests/parser.rs": "ba744d37c5f2fb02caeca262c4957ca3a2d268579f44c9dce97feb525d765c2e",
+    "/home/dev-user/code/oss/oriole/crates/oriole/tests/external_values.rs": "6f416ec1d724b3f329c4bae6b26934abfc3b2c997a5c182c5d2923d576b03a8f"
+  },
+  "checks": [
+    "strip_prefix and bytes predicates allocate nothing, terminate linearly, and reject empty/nonASCII numeric suffixes. Existing max-token bound limits version length.",
+    "Original version value is retained unchanged for callback metadata; leading minor zeroes remain allowed.",
+    "Fragment text-declaration branch precedes this change and is unaffected. External-value child uses document-style declaration validation and inherits new behavior.",
+    "Root fixture covers accepted1.0/1.1/1.7/1.01/1.000, rejects malformedprefix/nonASCII digits, preserves BadCharacterReference forU+0001.",
+    "Independent135 public C API cases acrossUTF8/UTF16LE/BE, whole/1/3byte feeds and XML1.0 U+0001 rejection/NEL literal output: zero differences with pinnedExpat."
+  ],
+  "retained_limits": "This does not enable XML1.1 character repertoire/normalization. Root360-case oracle still retains174 prior malformed-version/text-declaration behavior differences; no new cases were reported.",
+  "artifacts": {
+    "/tmp/oriole-version-independent.py": "8a98dcdd75e4aa931cdfe6171e816ac483a817d8f34b0ce0debb3df9cc487e95",
+    "/tmp/oriole-version-independent.json": "768fb3266eaedebb4acb2e751ee7e4fe1737550b20e5250defecf7dd02535d54",
+    "/tmp/oriole-xml-versions-review.py": "059ea4baf593079e3a27077d63d430a9fc04241cecabc651cfee0b7fc428d1bd",
+    "/tmp/oriole-xml-versions-version-review.json": "dc5924d733943952f46bee003706c4fc8dc28d7235719d89c4677100e9b2ca71",
+    "/tmp/oriole-xml-versions-namespace-review.json": "415e60d15cbb8b4e3cec44a451114242d8fea58acd1a6dcdc184ae7a141f9ece"
+  }
+}

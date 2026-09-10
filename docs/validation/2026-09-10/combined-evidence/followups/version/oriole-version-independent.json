@@ -1,0 +1,2170 @@
+{
+  "libraries": {
+    "/home/dev-user/.cache/oriole/expat-build/libexpat.so": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "/tmp/oriole-xml-versions.so": "28c99a9520689339588cde62a83235cd7b5c9270beb1321e710214667e935d07"
+  },
+  "cases": 135,
+  "differences": 0,
+  "rows": [
+    {
+      "version": "1.0",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.0",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.1",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.7",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.01",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r/>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r/>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r/>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>&#1;</r>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      },
+      "candidate": {
+        "status": 0,
+        "error": 14,
+        "text": ""
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-8",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-le",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 0,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 1,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    },
+    {
+      "version": "1.000",
+      "body": "<r>\u0085</r>",
+      "encoding": "utf-16-be",
+      "width": 3,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "\u0085"
+      }
+    }
+  ]
+}

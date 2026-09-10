@@ -1,0 +1,43 @@
+{
+  "harness": "/tmp/oriole-w3c-run.py",
+  "harness_sha256": "18b75252f34eaad493e2de12934211d1d26519d89e1421849b685c9863722a9b",
+  "conclusion": "Catalog/resolver/Engine AST are identical to prior reviewed prototype; CLI hashing, explicit local paths, nonvalidating mandatory vs optional interpretation and worker budget setup are sound. Two reporting follow-ups identified; prior zero-resolver-error6003-row evidence unaffected.",
+  "inherited_review": "/tmp/oriole-w3c-independent-review.json",
+  "findings": [
+    {
+      "priority": "medium",
+      "location": "main per-row resolver_errors branch before mandatory scoring",
+      "issue": "Resolver error is counted separately but same not-wf row increments mandatory_pass. Missing external-file fixture records12mandatory_pass where only9 have determined XML outcomes;3shouldbe blocked. Overall exit remains1, so this cannot produce a false green exit.",
+      "fix": "Retain failed-resolution row as blocked/inconclusive and skip mandatory/optional semantic scoring."
+    },
+    {
+      "priority": "low",
+      "location": "main subprocess.run timeout=120",
+      "issue": "TimeoutExpired bypasses command/result/summary writing; progress file and worker log remain, but portable summary is absent.",
+      "fix": "Record timeout, command and partial report before returning failure."
+    }
+  ],
+  "verified": [
+    "AST resolve/catalog/Engine exactly equal prior prototype",
+    "Requested library resolved to absolute realpath, actual shared-object hash and version recorded by worker",
+    "All suite file hashes and per-loaded-input hashes retained; no suite files mutated",
+    "Address-space1GiB andcore0 are applied in child preexec, timeout120 enforced by parent; depth32/request1024/per-file2MiB remain explicit",
+    "Worker child callback context is pointer-sized, Pythonbytes+explicitlength preserveNUL, callbacks outlive parsers, finally freeschild/root",
+    "7-descriptor fixture selects5 afteredition/XML1.1 filters;three mandatory types eachrun3chunks,optionalerror3observations,missingresolver3rows;reference andcandidate bothexit1 aggregate"
+  ],
+  "scope": "Read-only source/AST review and tiny synthetic CLI fixture. No live/runtime/harness edits. Original full W3C worker observations reviewed by prior independent reviewer, not rerun here.",
+  "artifacts": {
+    "/tmp/oriole-w3c-cli-review-fixture/valid.xml": "5382511e672645156e2889ebc21c72a0e59377fcbe774abaa703e0a42b3d2006",
+    "/tmp/oriole-w3c-cli-review-fixture/bad.xml": "f7112bece0ea7face6db0bee71c72c279e38ae2ccb8a0c6866852a58ad7846bc",
+    "/tmp/oriole-w3c-cli-review-fixture/resolver.xml": "f279eba8b1f2a3c7b545b87a2cad5bfabba1437b054d6b3b838928c453deaa43",
+    "/tmp/oriole-w3c-cli-review-fixture/xmlconf.xml": "a6783c6aebace655698065f01e300d53a718cfe096a93ca0ccee56e9444bf24e",
+    "/tmp/oriole-w3c-cli-review-output/catalog.json": "c9f096a781ecdefa1ff3e4199033f0d08091e0d18191bdd6e0b4c34358c855b8",
+    "/tmp/oriole-w3c-cli-review-output/oriole.json": "3ddc39cc25e48160bc97c778d54b5fe2fc979eccf48b7c5c9a7b38f9fdf268ad",
+    "/tmp/oriole-w3c-cli-review-output/reference-progress.json": "703a43cc75ec279d785f06a5f3b91ff52300e2c042df66e113fe86db27a06eb6",
+    "/tmp/oriole-w3c-cli-review-output/oriole.log": "d646ee328073658d91e3b88f1721c8aeea02454317da0ab49acb51a7f665f6f8",
+    "/tmp/oriole-w3c-cli-review-output/reference.json": "c879cf326afc8c2421d88699b829621b32b2f715f9775a24d4890a6ec7852f97",
+    "/tmp/oriole-w3c-cli-review-output/reference.log": "19f3a78160a19c19142d9fac373c1920b71eef90fd5de6ae48255cfa43df8ccd",
+    "/tmp/oriole-w3c-cli-review-output/oriole-progress.json": "703a43cc75ec279d785f06a5f3b91ff52300e2c042df66e113fe86db27a06eb6",
+    "/tmp/oriole-w3c-cli-review-output/summary.json": "aee8d569ad551339c7737d7655dc5fab88364e1e114e8323dcf48ddffdc53993"
+  }
+}

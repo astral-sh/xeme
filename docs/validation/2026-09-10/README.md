@@ -1,6 +1,35 @@
 # Compatibility and validation: 10 September 2026
 
-## Later validation layers
+## Current evidence
+
+The [combined evidence package](combined-evidence/) preserves full reports, input
+and source hashes, commands, skipped tests, and failures. Its main runtime is
+`b68bdca`; subsequent fixes have their own independent reviews and combined checks.
+
+| Gate | Result | Evidence |
+| --- | --- | --- |
+| Full Expat public API matrix | 3,621 pass, 1,119 fail; reference 4,740 pass; no candidate crashes/timeouts | [Matrix and failure classification](combined-evidence/) |
+| CPython 3.12.13 | Four shared/static, original/fixed consumers each pass 803 tests, 31 skips | [Consumer reports](combined-evidence/consumers/) |
+| Native allocation and callback probes | Six shared/static runs pass, including 353 allocation-failure scenarios per linkage | [Native report](combined-evidence/native/) |
+| Three ten-minute Rust ASan campaigns | 4,240,573 executions without findings, plus corpus and large-input replays | [Frozen source and corpora](combined-evidence/campaigns/final/) |
+| Full PBS distribution | Archive validator, custom checks, and installed XML suites pass; pinned CentOS 7/glibc 2.17 also passes 802 tests, 13 skips | [Successful build and runtime evidence](combined-evidence/pbs/) |
+| W3C acceptance corpus | 5,901 required checks pass, 21 fail; 81 optional observations; no resolver errors | [Original catalog and full results](w3c/) |
+| External entity values and declaration callbacks | 18,468 positive observations match; malformed-input differences retained | [Implementation and review](external-values/) |
+| Foreign DTD policy | 4,632 outcomes and 480 nested observations match; 24 upstream configurations fixed | [Policy review](foreign-dtd-policy/) |
+| External content encoding | Five upstream tests fixed across all 12 configurations; context oracles add no differences | [Encoding review](content-encoding/) |
+| Namespace/version syntax | Empty namespace prefix and forward-compatible XML declarations corrected | [Namespaces](empty-namespace-prefix/), [versions](xml-versions/) |
+
+The successful PBS archive uses an earlier runtime (`6a6a9ec`), explicitly
+identified in its bundle manifest. The later complete build is tracked separately;
+local consumer passes are not substituted for installed-distribution validation.
+
+[Combined benchmarks](../../../benchmarks/results/2026-09-10/combined-runtime/)
+measure the `b68bdca` runtime with namespaces enabled and disabled, plus system,
+jemalloc, and mimalloc configurations. The C interface remains roughly 6–11 times
+slower than Expat on those 4 KiB generated workloads. Measurements retain raw runs,
+semantic preflights, allocation counts, and regressions.
+
+## Earlier validation layers
 
 Each report identifies its own frozen source and binaries. Results below come from
 successive implementations and separate test contracts; they are not combined into
@@ -19,9 +48,8 @@ one claim of Expat equivalence.
 
 [Namespace-enabled and disabled measurements](../../../benchmarks/results/2026-09-10/namespaces/)
 retain complete preflights, seven paired runs, and separate mode results. Oriole
-remains slower than Expat. The full PBS validation gate is rerunning after its
-workspace fix; distribution portability and installed-interpreter validation remain
-open until that gate passes. Current API limitations remain in the
+remains slower than Expat. The earlier PBS failures and their corrections remain
+available alongside the subsequent successful run above. Current API limitations remain in the
 [C interface documentation](../../../crates/oriole_expat/).
 
 ## Earlier checkpoint (PR #22)
@@ -47,7 +75,7 @@ library/source hashes, failures, and logs; `index.json` records their file hashe
 The generated differential run still has 34 exact callback-fragmentation differences
 and 357 final-location differences. Its semantic gate coalesces adjacent text
 fragments; its strict gate remains failed. The libxml2 run does not establish
-callback equivalence. No W3C conformance run is claimed.
+callback equivalence. That earlier checkpoint did not run the W3C corpus.
 
 The upstream matrix uses 12 chunk/deferral contexts. It excludes 12 explicitly
 listed tests of private Expat implementation details and corrects a separately
@@ -80,12 +108,12 @@ atomic lifetime tokens. Related parser operations still require serialization.
 
 The [PBS recipe](../../../integration/python-build-standalone/) has a real PIC
 archive, native static consumer checks, and complete-archive shared-link validation.
-A dedicated CI job now attempts the complete distribution, its metadata/linkage
-validator, and the resulting interpreter's XML tests. A successful local archive
-link does not establish PBS's older-glibc target baseline.
+A dedicated CI job has passed the complete Linux x86-64 distribution, its
+metadata/linkage validator, and the resulting interpreter's XML tests, including
+the actual glibc 2.17 baseline. Other distribution targets need separate validation.
 
 Complete Expat compatibility, unsupported DTD/custom-encoding modes, strict callback
-and position equivalence, sustained sanitizer campaigns, and target distribution
-validation remain open. The README keeps the experimental status while these gates
+and position equivalence, and broader target distribution validation remain open.
+The README keeps the experimental status while these gates
 remain open. The [benchmark report](../../../benchmarks/results/2026-09-10/checkpoint/)
 also records the remaining C interface performance gap.

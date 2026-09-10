@@ -1,0 +1,14 @@
+{
+  "fuzz/Cargo.toml": {
+    "base_sha256": "33042649e84a85bb5d6f38ffdd54e3811efa6827ac4327099e967ec690f40b32",
+    "candidate_sha256": "1d7299d54cbed252075ce4c25380cab21407229106e07721bda27f430e913ef2"
+  },
+  "fuzz/README.md": {
+    "base_sha256": "9d38348cd8fbfc4e8103491acfc01198c9fc7fe7c7e875461c070834e24d4735",
+    "candidate_sha256": "d9ae89a083d5aa8c9a7f63f68a2e3dc5395184c46116a6e28ea71e52e98c3084"
+  },
+  "fuzz/fuzz_targets/value_family.rs": {
+    "base_sha256": null,
+    "candidate_sha256": "8ff2555325b0908d11fb9779d5cc653c901bf0e5611188f58ae7b7fc7d31691c"
+  }
+}

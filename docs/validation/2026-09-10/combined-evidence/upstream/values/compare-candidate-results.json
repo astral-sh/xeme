@@ -1,0 +1,8 @@
+{
+  "baseline": "/home/dev-user/code/oss/oriole/docs/validation/2026-09-10/multibyte/candidate-results.json.gz",
+  "final": "/tmp/oriole-upstream-final-values/results.json",
+  "common": 252,
+  "regressions": [],
+  "improvements": [],
+  "changed_outcomes": []
+}

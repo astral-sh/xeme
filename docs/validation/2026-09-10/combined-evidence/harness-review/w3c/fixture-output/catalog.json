@@ -1,0 +1,48 @@
+[
+  {
+    "ID": "valid",
+    "URI": "valid.xml",
+    "TYPE": "valid",
+    "path": "valid.xml"
+  },
+  {
+    "ID": "invalid",
+    "URI": "valid.xml",
+    "TYPE": "invalid",
+    "path": "valid.xml"
+  },
+  {
+    "ID": "not-wf",
+    "URI": "bad.xml",
+    "TYPE": "not-wf",
+    "path": "bad.xml"
+  },
+  {
+    "ID": "optional",
+    "URI": "bad.xml",
+    "TYPE": "error",
+    "path": "bad.xml"
+  },
+  {
+    "ID": "resolver",
+    "URI": "resolver.xml",
+    "TYPE": "not-wf",
+    "path": "resolver.xml"
+  },
+  {
+    "ID": "old",
+    "URI": "valid.xml",
+    "TYPE": "valid",
+    "EDITION": "1 2 3 4",
+    "path": "valid.xml",
+    "skip": "Earlier XML edition only"
+  },
+  {
+    "ID": "new",
+    "URI": "valid.xml",
+    "TYPE": "valid",
+    "RECOMMENDATION": "XML1.1",
+    "path": "valid.xml",
+    "skip": "XML 1.1"
+  }
+]

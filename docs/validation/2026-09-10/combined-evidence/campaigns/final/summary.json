@@ -1,0 +1,235 @@
+{
+  "source_manifest_sha256": "577f164cf357c529b386c5db2194e2e442bba8916b2c8f75d36db17c022a94b2",
+  "root_source_manifest_sha256": "cc0f008866bc6b76c1a7cba72cb7b245d2a4eb26275a8928ead7dbd723afdd3b",
+  "targets": {
+    "value_family": {
+      "target": "value_family",
+      "binary_sha256": "35daefc22f1cc2fe2b7e417017303e889f5d7f07225b1fbd27137f6575e8087a",
+      "source_manifest_sha256": "577f164cf357c529b386c5db2194e2e442bba8916b2c8f75d36db17c022a94b2",
+      "initial_inputs": 60,
+      "input_directories": [
+        "/tmp/oriole-value-fuzz/fuzz/seeds/value_family"
+      ],
+      "sanitizer": "AddressSanitizer with external Clang runtime",
+      "runtime_environment": {
+        "ASAN_OPTIONS": "detect_leaks=0"
+      },
+      "replay_command": [
+        "taskset",
+        "-c",
+        "1",
+        "/home/dev-user/.cache/oriole/value-fuzz-target/x86_64-unknown-linux-gnu/release/value_family",
+        "-seed=20260910",
+        "-max_len=65536",
+        "-timeout=10",
+        "-rss_limit_mb=1536",
+        "-artifact_prefix=/tmp/oriole-value-fuzz/final-evidence/value_family/artifacts/",
+        "-runs=0",
+        "/tmp/oriole-value-fuzz/final-evidence/value_family/initial-corpus"
+      ],
+      "replay_exit_code": 0,
+      "campaign_command": [
+        "taskset",
+        "-c",
+        "1",
+        "/home/dev-user/.cache/oriole/value-fuzz-target/x86_64-unknown-linux-gnu/release/value_family",
+        "-seed=20260910",
+        "-max_len=65536",
+        "-timeout=10",
+        "-rss_limit_mb=1536",
+        "-artifact_prefix=/tmp/oriole-value-fuzz/final-evidence/value_family/artifacts/",
+        "-max_total_time=600",
+        "-print_final_stats=1",
+        "/tmp/oriole-value-fuzz/final-evidence/value_family/corpus",
+        "/tmp/oriole-value-fuzz/final-evidence/value_family/initial-corpus"
+      ],
+      "started_at_utc": "2026-09-10T06:14:54Z",
+      "campaign_exit_code": 0,
+      "campaign_elapsed_seconds": 601.1161828709883,
+      "source_unchanged": true,
+      "binary_unchanged": true,
+      "stats": {
+        "number_of_executed_units": 913601,
+        "average_exec_per_sec": 1520,
+        "new_units_added": 3773,
+        "slowest_unit_time_sec": 0,
+        "peak_rss_mb": 455
+      },
+      "artifacts": [],
+      "local_compressed_binary": "/tmp/oriole-value-fuzz/final-evidence/value_family/value_family.gz",
+      "compressed_binary_sha256": "646ddaa156e6a7a71413dc0d0a37d1962e2197fb00a4bc46d2df2c52fc0cbe3c",
+      "build_command": [
+        "taskset",
+        "-c",
+        "3",
+        "cargo",
+        "+ohm",
+        "fuzz",
+        "build",
+        "value_family"
+      ]
+    },
+    "multibyte": {
+      "target": "multibyte",
+      "binary_sha256": "82423a743c2632dec535e04498b6605e71e2294c426b03a0f4885e177ebcd0ad",
+      "source_manifest_sha256": "577f164cf357c529b386c5db2194e2e442bba8916b2c8f75d36db17c022a94b2",
+      "initial_inputs": 5188,
+      "input_directories": [
+        "/tmp/oriole-value-fuzz/fuzz/seeds/multibyte",
+        "/home/dev-user/.cache/oriole/fuzz-newfeatures-final/multibyte-evidence/corpus",
+        "/home/dev-user/.cache/oriole/fuzz-newfeatures-final/multibyte-evidence/initial-corpus"
+      ],
+      "sanitizer": "AddressSanitizer with external Clang runtime",
+      "runtime_environment": {
+        "ASAN_OPTIONS": "detect_leaks=0"
+      },
+      "replay_command": [
+        "taskset",
+        "-c",
+        "2",
+        "/home/dev-user/.cache/oriole/value-fuzz-target/x86_64-unknown-linux-gnu/release/multibyte",
+        "-seed=20260910",
+        "-max_len=65536",
+        "-timeout=10",
+        "-rss_limit_mb=1536",
+        "-artifact_prefix=/tmp/oriole-value-fuzz/final-evidence/multibyte/artifacts/",
+        "-runs=0",
+        "/tmp/oriole-value-fuzz/final-evidence/multibyte/initial-corpus"
+      ],
+      "replay_exit_code": 0,
+      "campaign_command": [
+        "taskset",
+        "-c",
+        "2",
+        "/home/dev-user/.cache/oriole/value-fuzz-target/x86_64-unknown-linux-gnu/release/multibyte",
+        "-seed=20260910",
+        "-max_len=65536",
+        "-timeout=10",
+        "-rss_limit_mb=1536",
+        "-artifact_prefix=/tmp/oriole-value-fuzz/final-evidence/multibyte/artifacts/",
+        "-max_total_time=600",
+        "-print_final_stats=1",
+        "/tmp/oriole-value-fuzz/final-evidence/multibyte/corpus",
+        "/tmp/oriole-value-fuzz/final-evidence/multibyte/initial-corpus"
+      ],
+      "started_at_utc": "2026-09-10T06:15:10Z",
+      "campaign_exit_code": 0,
+      "campaign_elapsed_seconds": 601.1178839599888,
+      "source_unchanged": true,
+      "binary_unchanged": true,
+      "stats": {
+        "number_of_executed_units": 2297235,
+        "average_exec_per_sec": 3822,
+        "new_units_added": 4220,
+        "slowest_unit_time_sec": 0,
+        "peak_rss_mb": 485
+      },
+      "artifacts": [],
+      "local_compressed_binary": "/tmp/oriole-value-fuzz/final-evidence/multibyte/multibyte.gz",
+      "compressed_binary_sha256": "77a050f25279de58a426518f43f3c6d8afef0e7778e4524bea340bc93dbceeca",
+      "build_command": [
+        "taskset",
+        "-c",
+        "3",
+        "cargo",
+        "+ohm",
+        "fuzz",
+        "build",
+        "multibyte"
+      ]
+    },
+    "ffi_family": {
+      "target": "ffi_family",
+      "binary_sha256": "35a170b5c6a7c69969d2719aa9816323cb7cdafdcca95bade252ab595c2fda16",
+      "source_manifest_sha256": "577f164cf357c529b386c5db2194e2e442bba8916b2c8f75d36db17c022a94b2",
+      "initial_inputs": 4359,
+      "input_directories": [
+        "/tmp/oriole-value-fuzz/fuzz/seeds/ffi_family",
+        "/home/dev-user/.cache/oriole/fuzz-newfeatures-final/ffi_family-evidence/corpus",
+        "/home/dev-user/.cache/oriole/fuzz-newfeatures-final/ffi_family-evidence/initial-corpus"
+      ],
+      "sanitizer": "AddressSanitizer with external Clang runtime",
+      "runtime_environment": {
+        "ASAN_OPTIONS": "detect_leaks=0"
+      },
+      "replay_command": [
+        "taskset",
+        "-c",
+        "2",
+        "/home/dev-user/.cache/oriole/value-fuzz-target/x86_64-unknown-linux-gnu/release/ffi_family",
+        "-seed=20260910",
+        "-max_len=65536",
+        "-timeout=10",
+        "-rss_limit_mb=1536",
+        "-artifact_prefix=/tmp/oriole-value-fuzz/final-evidence/ffi_family/artifacts/",
+        "-runs=0",
+        "/tmp/oriole-value-fuzz/final-evidence/ffi_family/initial-corpus"
+      ],
+      "replay_exit_code": 0,
+      "campaign_command": [
+        "taskset",
+        "-c",
+        "2",
+        "/home/dev-user/.cache/oriole/value-fuzz-target/x86_64-unknown-linux-gnu/release/ffi_family",
+        "-seed=20260910",
+        "-max_len=65536",
+        "-timeout=10",
+        "-rss_limit_mb=1536",
+        "-artifact_prefix=/tmp/oriole-value-fuzz/final-evidence/ffi_family/artifacts/",
+        "-max_total_time=600",
+        "-print_final_stats=1",
+        "/tmp/oriole-value-fuzz/final-evidence/ffi_family/corpus",
+        "/tmp/oriole-value-fuzz/final-evidence/ffi_family/initial-corpus"
+      ],
+      "started_at_utc": "2026-09-10T06:25:29Z",
+      "campaign_exit_code": 0,
+      "campaign_elapsed_seconds": 601.1181215779798,
+      "source_unchanged": true,
+      "binary_unchanged": true,
+      "stats": {
+        "number_of_executed_units": 1029737,
+        "average_exec_per_sec": 1713,
+        "new_units_added": 2956,
+        "slowest_unit_time_sec": 0,
+        "peak_rss_mb": 458
+      },
+      "artifacts": [],
+      "local_compressed_binary": "/tmp/oriole-value-fuzz/final-evidence/ffi_family/ffi_family.gz",
+      "compressed_binary_sha256": "1401aa1cb6e4f0dd12951802badd962bcd8e9819fee8930ca19f309295e67268",
+      "build_command": [
+        "taskset",
+        "-c",
+        "3",
+        "cargo",
+        "+ohm",
+        "fuzz",
+        "build",
+        "ffi_family"
+      ]
+    }
+  },
+  "toolchain": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+  "clang": "Ubuntu clang version 18.1.3 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/bin\n",
+  "build_environment": {
+    "CARGO_HOME": "/home/dev-user/.cache/toucan/cargo",
+    "CARGO_TARGET_DIR": "/home/dev-user/.cache/oriole/value-fuzz-target",
+    "CARGO_BUILD_BUILD_DIR": "/home/dev-user/.cache/ohm/build",
+    "CARGO_UNSTABLE_OHM_NATIVE_TOOL_TRUST": "all",
+    "RUSTFLAGS": "-Zexternal-clangrt -Clinker=clang -Clink-arg=-fsanitize=address"
+  },
+  "runtime_environment": {
+    "ASAN_OPTIONS": "detect_leaks=0"
+  },
+  "limitations": [
+    "LeakSanitizer disabled because ptrace prevents it from operating in this environment.",
+    "Custom allocator balance and encoding release assertions remain enabled on each input.",
+    "Bounded campaigns do not establish absence of defects."
+  ],
+  "large_input_replay": {
+    "inputs": 18,
+    "max_bytes": 65536,
+    "exit_code": 0,
+    "scope": "ASCII, UTF-16, character/general references and custom multibyte values at widths1/64/256; allocation failures1/2/5/100/512/2048."
+  },
+  "source_unchanged_after_campaigns": true
+}

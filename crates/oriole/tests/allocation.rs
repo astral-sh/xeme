@@ -210,11 +210,14 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
     let mut values = parent.external_child(None, None)?;
     values.set_default_events(true);
     values.feed(
-        b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ENTITY e 'L%p;R'><!ENTITY after 'A'>",
+        b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ENTITY % wrapper 'L&#37;p;R'><!ENTITY e '%wrapper;'><!ENTITY after 'A'>",
         true,
     )?;
     while let Some(event) = next_event(&mut values)? {
         if let EventKind::ExternalEntityReference(_) = event.kind {
+            // The wrapper frame is still live: rekey its owned membership table
+            // under every selected-allocation failure before child creation.
+            values.set_hash_salt([23; 16])?;
             let mut child = values.external_child(None, None)?;
             child.feed(b"<?xml version='1.0'?>X%q;Y", true)?;
             while let Some(event) = next_event(&mut child)? {
@@ -657,4 +660,31 @@ fn open_value_workload(allocator: Allocator) -> Result<(), Error> {
 #[test]
 fn shared_open_value_state_survives_every_allocation_failure_and_parent_drop() {
     check_allocations(open_value_workload);
+}
+
+fn inherited_attribute_workload(allocator: Allocator) -> Result<(), Error> {
+    let mut root = Parser::try_new_in(Config::default(), allocator)?;
+    root.feed(b"<!DOCTYPE r [<!ENTITY leaf 'value'>]><r/>", true)?;
+    while next_event(&mut root)?.is_some() {}
+    let mut child = root.external_child(Some("a\u{c}b\u{c}c\u{c}d\u{c}e\u{c}f\u{c}g\u{c}h\u{c}i\u{c}j\u{c}k\u{c}l\u{c}m\u{c}n\u{c}o\u{c}p\u{c}q\u{c}r\u{c}s\u{c}t\u{c}u\u{c}v\u{c}w\u{c}x\u{c}a\u{c}%leaf"), None)?;
+    drop(root);
+    child.set_hash_salt([43; 16])?;
+    child.feed(b"<r a='&leaf;&leaf;' b='&leaf;'/><r a='&leaf;'/>", true)?;
+    let mut count = 0;
+    while let Some(event) = next_event(&mut child)? {
+        if let EventKind::StartElement { attributes, .. } = event.kind {
+            assert_eq!(
+                attributes[0].value,
+                if count == 0 { "valuevalue" } else { "value" }
+            );
+            count += 1;
+        }
+    }
+    assert_eq!(count, 2);
+    Ok(())
+}
+
+#[test]
+fn inherited_attribute_index_survives_parent_drop_rekey_and_every_allocation_failure() {
+    check_allocations(inherited_attribute_workload);
 }

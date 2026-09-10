@@ -3542,3 +3542,48 @@ fn precreated_parameter_siblings_observe_skips_before_the_first_child_finishes()
         }
     }
 }
+
+unsafe extern "C" fn suspend_entity_comment(data: *mut c_void, _: *const c_char) {
+    // SAFETY: The test passes its live parser as user data and only suspends it
+    // during this synchronous callback. The surrounding test owns final cleanup.
+    unsafe {
+        assert_eq!(XML_StopParser(data.cast(), 1), OK);
+    }
+}
+
+#[test]
+fn active_entity_membership_survives_suspend_and_is_discarded_on_reset() {
+    // SAFETY: The parser and input bytes outlive each synchronous callback;
+    // resumption/reset occur after callbacks return and the handle is freed once.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        assert!(!parser.is_null());
+        let bytes = b"<!DOCTYPE r [<!ENTITY a '<!--pause-->text'>]><r>&a;&a;</r>";
+        for reset_suspended in [false, true] {
+            XML_SetUserData(parser, parser.cast());
+            XML_SetCommentHandler(parser, Some(suspend_entity_comment));
+            assert_eq!(
+                XML_Parse(parser, bytes.as_ptr().cast(), bytes.len() as c_int, 1),
+                SUSPENDED
+            );
+            if !reset_suspended {
+                assert_eq!(XML_ResumeParser(parser), SUSPENDED);
+                assert_eq!(XML_ResumeParser(parser), OK);
+            }
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+        }
+        let cycle = b"<!DOCTYPE r [<!ENTITY a '&a;'>]><r>&a;</r>";
+        assert_eq!(
+            XML_Parse(parser, cycle.as_ptr().cast(), cycle.len() as c_int, 1),
+            ERROR
+        );
+        assert_eq!(XML_GetErrorCode(parser), 12);
+        assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+        let fresh = b"<!DOCTYPE r [<!ENTITY a 'new'>]><r>&a;</r>";
+        assert_eq!(
+            XML_Parse(parser, fresh.as_ptr().cast(), fresh.len() as c_int, 1),
+            OK
+        );
+        XML_ParserFree(parser);
+    }
+}

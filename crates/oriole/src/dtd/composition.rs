@@ -98,7 +98,7 @@ impl Parser {
                         ));
                     }
                     self.header_word(&mut state)?;
-                    self.sources.pop();
+                    self.pop_entity_source();
                     continue;
                 }
                 if self.is_source_final() {
@@ -193,17 +193,7 @@ impl Parser {
                     return Ok(true);
                 }
                 if entity.is_some_and(Entity::is_value_open)
-                    || self
-                        .entity_chain
-                        .iter()
-                        .any(|entry| entry.strip_prefix('%') == Some(name))
-                    || self.sources.iter().any(|source| {
-                        source
-                            .entity_name
-                            .as_deref()
-                            .and_then(|name| name.strip_prefix('%'))
-                            == Some(name)
-                    })
+                    || self.active_entities.contains(name, true)
                 {
                     return Err(self.err(
                         ErrorKind::RecursiveEntityReference,
@@ -239,7 +229,7 @@ impl Parser {
                     self.config.name_rules,
                 );
                 source.dtd_fragment = true;
-                try_push(&mut self.sources, source)?;
+                self.push_entity_source(source)?;
                 continue;
             }
             state.bytes = state.bytes.saturating_add(character.len_utf8());
@@ -376,7 +366,7 @@ impl Parser {
                             "declaration crosses a between-declaration parameter boundary",
                         ));
                     }
-                    self.sources.pop();
+                    self.pop_entity_source();
                     self.append_declaration_token(&mut state.expansion, Slice::plain(" "), true)?;
                     state.ready = state.expansion.text.len();
                     continue;
@@ -562,17 +552,7 @@ impl Parser {
                         continue;
                     }
                     if entity.is_some_and(Entity::is_value_open)
-                        || self
-                            .entity_chain
-                            .iter()
-                            .any(|entry| entry.strip_prefix('%') == Some(name))
-                        || self.sources.iter().any(|source| {
-                            source
-                                .entity_name
-                                .as_deref()
-                                .and_then(|name| name.strip_prefix('%'))
-                                == Some(name)
-                        })
+                        || self.active_entities.contains(name, true)
                     {
                         return Err(self.err(
                             ErrorKind::RecursiveEntityReference,
@@ -635,7 +615,7 @@ impl Parser {
                         self.config.name_rules,
                     );
                     source.dtd_fragment = true;
-                    try_push(&mut self.sources, source)?;
+                    self.push_entity_source(source)?;
                 }
                 _ => unreachable!("declaration delimiter"),
             }
@@ -651,15 +631,9 @@ impl Parser {
         token.append(state.expansion.text.view())?;
         token.push('>')?;
         for literal in &mut state.expansion.literals {
-            literal.parameters.retain(|name| {
-                !self.sources.iter().any(|source| {
-                    source
-                        .entity_name
-                        .as_deref()
-                        .and_then(|value| value.strip_prefix('%'))
-                        == Some(name.as_str())
-                })
-            });
+            literal
+                .parameters
+                .retain(|name| !self.active_entities.source_contains(name, true));
         }
         let source_name = self
             .source()

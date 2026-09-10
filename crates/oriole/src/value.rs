@@ -56,6 +56,8 @@ struct Request {
 #[derive(Debug)]
 pub(crate) struct State {
     pub(crate) frames: Vec<Frame>,
+    pub(crate) active: crate::active::ActiveEntities,
+    named_frames: usize,
     pub(crate) declaration: Option<Declaration>,
     pub(crate) declaring: Option<String>,
     pub(crate) parameters: Vec<String>,
@@ -65,6 +67,34 @@ pub(crate) struct State {
     scanner: Option<ValueScanner>,
     content_start: usize,
     child: bool,
+}
+
+impl State {
+    fn push_frame(&mut self, frame: Frame) -> Result<(), Error> {
+        self.frames
+            .try_reserve(1)
+            .map_err(oriole_storage::AllocError::from)?;
+        if let Some(name) = frame.name.as_deref() {
+            self.active.insert(name, true, true)?;
+            self.named_frames += 1;
+        }
+        self.frames.push(frame);
+        Ok(())
+    }
+
+    fn pop_frame(&mut self) {
+        let frame = self.frames.pop().expect("value frame");
+        if let Some(name) = frame.name.as_deref() {
+            self.active.remove_source(name, true);
+            self.named_frames -= 1;
+        }
+    }
+
+    fn clear_frames(&mut self) {
+        while !self.frames.is_empty() {
+            self.pop_frame();
+        }
+    }
 }
 
 impl Parser {
@@ -99,6 +129,18 @@ impl Parser {
             self.charge_expansion(size_of::<String>() + parameter.len())?;
             try_push(&mut inherited, parameter.try_clone()?)?;
         }
+        let mut active =
+            crate::active::ActiveEntities::new(self.allocator, self.parameter_entities.hasher());
+        for name in parameters {
+            active.insert(name, true, false)?;
+        }
+        let mut named_frames = 0;
+        for frame in &frames {
+            if let Some(name) = frame.name.as_deref() {
+                active.insert(name, true, true)?;
+                named_frames += 1;
+            }
+        }
         let output = Shared::try_new_in(
             TryLock::new(Output {
                 text: ready.0,
@@ -111,6 +153,8 @@ impl Parser {
         Ok(try_box(
             State {
                 frames,
+                active,
+                named_frames,
                 declaration: None,
                 declaring: declaring
                     .map(|name| string(name, self.allocator))
@@ -188,14 +232,10 @@ impl Parser {
             self.charge_expansion(size_of::<String>() + name.len() + 1)?;
             let mut name_copy = string("%", self.allocator)?;
             name_copy.push_str(name)?;
-            try_push(&mut child.entity_chain, name_copy)?;
+            child.inherit_entity_name(name_copy)?;
         }
         child.inherited_parameter_depth = self.inherited_parameter_depth + self.sources.len() - 1
-            + state
-                .frames
-                .iter()
-                .filter(|frame| frame.name.is_some())
-                .count()
+            + state.named_frames
             + state.parameters.len();
         child.parameter_state = OnceLock::from(state.read.clone());
         child.standalone = state
@@ -212,6 +252,11 @@ impl Parser {
         child.value_state = Some(try_box(
             State {
                 frames: Vec::new_in(self.allocator),
+                active: crate::active::ActiveEntities::new(
+                    self.allocator,
+                    self.parameter_entities.hasher(),
+                ),
+                named_frames: 0,
                 declaration: None,
                 declaring: None,
                 parameters: Vec::new_in(self.allocator),
@@ -300,7 +345,7 @@ impl Parser {
                         name: None,
                         normalize: true,
                     };
-                    try_push(&mut state.frames, frame)?;
+                    state.push_frame(frame)?;
                     state.scanner = None;
                 }
             }
@@ -391,7 +436,7 @@ impl Parser {
             let frame = state.frames.last().expect("value frame");
             let rest = &frame.text[frame.offset..];
             if rest.is_empty() {
-                state.frames.pop();
+                state.pop_frame();
                 continue;
             }
             let end = rest.find(';').ok_or_else(|| {
@@ -427,22 +472,8 @@ impl Parser {
             let entity = self.parameter_entities.get(name);
             if entity.is_some_and(Entity::is_value_open)
                 || state.declaring.as_deref() == Some(name)
-                || state.parameters.iter().any(|parameter| parameter == name)
-                || state
-                    .frames
-                    .iter()
-                    .any(|frame| frame.name.as_deref() == Some(name))
-                || self
-                    .entity_chain
-                    .iter()
-                    .any(|entry| entry.strip_prefix('%') == Some(name))
-                || self.sources.iter().any(|source| {
-                    source
-                        .entity_name
-                        .as_deref()
-                        .and_then(|name| name.strip_prefix('%'))
-                        == Some(name)
-                })
+                || state.active.contains(name, true)
+                || self.active_entities.contains(name, true)
             {
                 return Err(self.err(
                     ErrorKind::RecursiveEntityReference,
@@ -453,15 +484,11 @@ impl Parser {
                 self.value_skip(state)?;
                 state.frames.last_mut().expect("value frame").offset += end + 1;
                 if state.child {
-                    state.frames.clear();
+                    state.clear_frames();
                 }
                 continue;
             };
-            if state
-                .frames
-                .iter()
-                .filter(|frame| frame.name.is_some())
-                .count()
+            if state.named_frames
                 + self.sources.len()
                 + self.external_depth
                 + self.inherited_parameter_depth
@@ -483,7 +510,7 @@ impl Parser {
                         .as_ref()
                         .expect("internal parameter entity open state")
                         .store(true, Ordering::Relaxed);
-                    state.frames.clear();
+                    state.clear_frames();
                     continue;
                 }
                 self.charge_expansion(value.len())?;
@@ -494,11 +521,11 @@ impl Parser {
                     normalize: false,
                 };
                 state.frames.last_mut().expect("value frame").offset += end + 1;
-                try_push(&mut state.frames, frame)?;
+                state.push_frame(frame)?;
             } else if entity.system_id.is_none() {
                 state.frames.last_mut().expect("value frame").offset += end + 1;
                 if state.child {
-                    state.frames.clear();
+                    state.clear_frames();
                 }
             } else {
                 let request = self.value_request(name, entity)?;

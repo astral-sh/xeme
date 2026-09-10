@@ -474,15 +474,9 @@ impl Parser {
             if literal.offset >= commit.end {
                 break;
             }
-            literal.parameters.retain(|name| {
-                !self.sources.iter().any(|source| {
-                    source
-                        .entity_name
-                        .as_deref()
-                        .and_then(|value| value.strip_prefix('%'))
-                        == Some(name.as_str())
-                })
-            });
+            literal
+                .parameters
+                .retain(|name| !self.active_entities.source_contains(name, true));
         }
         if commit.kind == grammar::Kind::Entity {
             self.semantic_parameters_through(declaration, state, commit.end)?;

@@ -104,7 +104,7 @@ impl Parser {
             self.charge_expansion(size_of::<String>() + name.len() + 1)?;
             let mut active = string("%", self.allocator)?;
             active.push_str(name)?;
-            try_push(&mut child.entity_chain, active)?;
+            child.inherit_entity_name(active)?;
         }
         child.inherited_parameter_depth = self.inherited_parameter_depth + self.sources.len() - 1;
         Ok(())
@@ -668,13 +668,7 @@ impl Parser {
         let mut source_name = String::new_in(self.allocator);
         source_name.push('%')?;
         source_name.push_str(&name)?;
-        if entity.is_value_open()
-            || self
-                .sources
-                .iter()
-                .any(|source| source.entity_name.as_ref() == Some(&source_name))
-            || self.entity_chain.iter().any(|name| name == &source_name)
-        {
+        if entity.is_value_open() || self.active_entities.contains(&name, true) {
             return Err(self.err(
                 ErrorKind::RecursiveEntityReference,
                 "recursive parameter entity",
@@ -692,16 +686,13 @@ impl Parser {
             self.charge_expansion(value.len())?;
             let value = value.try_clone()?;
             self.consume(end + 1)?;
-            try_push(
-                &mut self.sources,
-                crate::encoding::Source::entity(
-                    value,
-                    source_name,
-                    position,
-                    self.stack.len(),
-                    self.config.name_rules,
-                ),
-            )?;
+            self.push_entity_source(crate::encoding::Source::entity(
+                value,
+                source_name,
+                position,
+                self.stack.len(),
+                self.config.name_rules,
+            ))?;
         } else {
             self.charge_external_identifiers(entity)?;
             let system_id = entity.system_id.try_clone()?;
@@ -1438,6 +1429,17 @@ impl Parser {
     ) -> Result<crate::value::Build, Error> {
         let mut value = String::try_with_capacity_in(raw.len(), self.allocator)?;
         let mut parents = Vec::new_in(self.allocator);
+        let mut active = oriole_storage::HashSet::with_hasher_in(
+            self.parameter_entities.hasher().clone(),
+            self.allocator,
+        );
+        let mut blockers = oriole_storage::HashSet::with_hasher_in(
+            self.parameter_entities.hasher().clone(),
+            self.allocator,
+        );
+        // Allocate only when a parameter reference is actually visited. These
+        // lexical provenance names can be deep even when no replacement runs.
+        let mut blockers_initialized = false;
         let mut current = EntityValueFrame {
             rest: raw,
             name: None,
@@ -1456,6 +1458,9 @@ impl Parser {
             )?;
             current.rest = current.rest.for_slice(&current.rest.as_str()[start..]);
             if current.rest.is_empty() {
+                if let Some(name) = current.name {
+                    active.remove(name);
+                }
                 if let Some(parent) = parents.pop() {
                     current = parent;
                     continue;
@@ -1512,25 +1517,18 @@ impl Parser {
             let reference = &*decoded_reference;
             // Charge reference work even for empty or missing replacements.
             self.charge_expansion(end + 1 + size_of::<EntityValueFrame<'_>>())?;
+            if !blockers_initialized {
+                for name in declaration_parameters {
+                    oriole_storage::try_set_insert(&mut blockers, name.as_str())?;
+                }
+                blockers_initialized = true;
+            }
             let entity = self.parameter_entities.get(reference);
             if entity.is_some_and(Entity::is_value_open)
                 || declaring_parameter == Some(reference)
-                || declaration_parameters.iter().any(|name| name == reference)
-                || current.name == Some(reference)
-                || parents
-                    .iter()
-                    .any(|frame: &EntityValueFrame<'_>| frame.name == Some(reference))
-                || self
-                    .entity_chain
-                    .iter()
-                    .any(|name| name.strip_prefix('%') == Some(reference))
-                || self.sources.iter().any(|source| {
-                    source
-                        .entity_name
-                        .as_deref()
-                        .and_then(|name| name.strip_prefix('%'))
-                        == Some(reference)
-                })
+                || blockers.contains(reference)
+                || active.contains(reference)
+                || self.active_entities.contains(reference, true)
             {
                 return Err(self.err(
                     ErrorKind::RecursiveEntityReference,
@@ -1592,6 +1590,7 @@ impl Parser {
                     .map(crate::value::Build::Pending);
             };
             self.charge_expansion(replacement.len())?;
+            oriole_storage::try_set_insert(&mut active, name.as_str())?;
             try_push(&mut parents, current)?;
             current = EntityValueFrame {
                 rest: Slice::plain(replacement),

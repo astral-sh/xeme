@@ -5,6 +5,7 @@
 #![forbid(unsafe_code)]
 
 mod accounting;
+mod active;
 mod dtd;
 mod encoding;
 mod lexical;
@@ -522,6 +523,7 @@ pub struct Parser {
     external_subset: bool,
     external_depth: usize,
     entity_chain: Vec<String>,
+    active_entities: active::ActiveEntities,
     parameter_state: OnceLock<Shared<ParameterState>>,
     parameter_encoding_initialized: bool,
     active_parameter_reference: Option<(String, Position)>,
@@ -572,6 +574,8 @@ impl Parser {
         }
         let mut sources = Vec::new_in(allocator);
         try_push(&mut sources, Source::new(allocator, config.name_rules))?;
+        let entities = hash_map(allocator);
+        let active_entities = active::ActiveEntities::new(allocator, entities.hasher());
         Ok(Self {
             config,
             allocator,
@@ -580,7 +584,7 @@ impl Parser {
             namespaces,
             pending: Queue::new_in(allocator),
             stack: Vec::new_in(allocator),
-            entities: hash_map(allocator),
+            entities,
             parameter_entities: hash_map(allocator),
             parameter_mode: 0,
             foreign_dtd: false,
@@ -606,6 +610,7 @@ impl Parser {
             external_subset: false,
             external_depth: 0,
             entity_chain: Vec::new_in(allocator),
+            active_entities,
             parameter_state: OnceLock::new(),
             parameter_encoding_initialized: false,
             active_parameter_reference: None,
@@ -656,6 +661,12 @@ impl Parser {
         let entities = prepare_salted_map(&self.entities, salt)?;
         let parameters = prepare_salted_map(&self.parameter_entities, salt)?;
         let defaults = prepare_salted_map(&self.defaults, salt)?;
+        let active = prepare_salted_map(&self.active_entities.names, salt)?;
+        let value_active = self
+            .value_state
+            .as_ref()
+            .map(|state| prepare_salted_map(&state.active.names, salt))
+            .transpose()?;
         let mut indexes = Vec::new_in(self.allocator);
         indexes
             .try_reserve_exact(self.defaults.len())
@@ -673,7 +684,38 @@ impl Parser {
         replace_hash_map(&mut self.entities, entities);
         replace_hash_map(&mut self.parameter_entities, parameters);
         replace_hash_map(&mut self.defaults, defaults);
+        replace_hash_map(&mut self.active_entities.names, active);
+        if let (Some(state), Some(active)) = (&mut self.value_state, value_active) {
+            replace_hash_map(&mut state.active.names, active);
+        }
         Ok(())
+    }
+
+    /// Insert owned membership only after reserving the matching stack entry.
+    fn push_entity_source(&mut self, source: Source) -> Result<(), Error> {
+        self.sources.try_reserve(1).map_err(AllocError::from)?;
+        let name = source.entity_name.as_deref().expect("named entity source");
+        self.active_entities.insert_source_name(name, true)?;
+        self.sources.push(source);
+        Ok(())
+    }
+
+    fn pop_entity_source(&mut self) -> Source {
+        let source = self.sources.pop().expect("entity source exists");
+        let name = source.entity_name.as_deref().expect("named entity source");
+        self.active_entities.remove_source_name(name);
+        source
+    }
+
+    fn inherit_entity_name(&mut self, name: String) -> Result<(), Error> {
+        self.entity_chain.try_reserve(1).map_err(AllocError::from)?;
+        self.active_entities.insert_source_name(&name, false)?;
+        self.entity_chain.push(name);
+        Ok(())
+    }
+
+    fn is_active_source_name(&self, name: &str) -> bool {
+        self.active_entities.contains(name, false)
     }
 
     /// Change the protocol encoding before receiving input, preserving parser options.
@@ -786,7 +828,7 @@ impl Parser {
         child.standalone = self.standalone;
         child.reparse_deferral = self.reparse_deferral;
         for name in &self.entity_chain {
-            try_push(&mut child.entity_chain, name.try_clone()?)?;
+            child.inherit_entity_name(name.try_clone()?)?;
         }
         if context.is_none() && !self.inherit_value_context(&mut child)? {
             self.inherit_parameter_context(&mut child)?;
@@ -803,14 +845,14 @@ impl Parser {
                             string(uri, self.allocator)?,
                         )?;
                     }
-                } else if !child.entity_chain.iter().any(|name| name == part) {
+                } else if !child.is_active_source_name(part) {
                     if child.entity_chain.len() >= child.config.limits.max_entity_depth {
                         return Err(self.err(
                             ErrorKind::LimitExceeded,
                             "external entity context nesting limit exceeded",
                         ));
                     }
-                    try_push(&mut child.entity_chain, string(part, self.allocator)?)?;
+                    child.inherit_entity_name(string(part, self.allocator)?)?;
                 }
             }
         }
@@ -1308,6 +1350,16 @@ impl Parser {
         }
         if let Err(error) = &result {
             self.error = Some(*error);
+            // Unknown encodings can be installed after an error and resume
+            // parsing. Other terminal failures no longer need copied names;
+            // source bytes remain available for diagnostics and child context.
+            if error.kind == ErrorKind::NoMemory
+                || self
+                    .decoding_error
+                    .is_none_or(|(kind, _)| kind != ErrorKind::UnknownEncoding)
+            {
+                self.active_entities.names.clear();
+            }
             if error.kind == ErrorKind::NoMemory {
                 self.pending.clear();
                 return result;
@@ -1625,7 +1677,7 @@ impl Parser {
             if self.source().remaining().is_empty() {
                 if self.sources.len() > 1 {
                     self.finish_conditional_source()?;
-                    let source = self.sources.pop().expect("entity source exists");
+                    let source = self.pop_entity_source();
                     if self.stack.len() != source.initial_depth || self.in_cdata {
                         return Err(self.err(
                             ErrorKind::AsynchronousEntity,
@@ -2252,12 +2304,7 @@ impl Parser {
                 "unparsed entity in content",
             ));
         }
-        if self.entity_chain.iter().any(|item| item == &name)
-            || self
-                .sources
-                .iter()
-                .any(|source| source.entity_name.as_deref() == Some(&name))
-        {
+        if self.active_entities.contains(&name, false) {
             return Err(self.err(
                 ErrorKind::RecursiveEntityReference,
                 "recursive entity reference",
@@ -2337,16 +2384,13 @@ impl Parser {
         self.charge_expansion(value.len())?;
         let value = value.try_clone()?;
         self.consume(end + 1)?;
-        try_push(
-            &mut self.sources,
-            Source::entity(
-                value,
-                name,
-                position,
-                self.stack.len(),
-                self.config.name_rules,
-            ),
-        )?;
+        self.push_entity_source(Source::entity(
+            value,
+            name,
+            position,
+            self.stack.len(),
+            self.config.name_rules,
+        ))?;
         Ok(true)
     }
 
@@ -3094,7 +3138,6 @@ impl Parser {
         }
         let mut frames = Vec::new_in(self.allocator);
         let mut active = HashSet::with_hasher_in(self.entities.hasher().clone(), self.allocator);
-        let mut seeded = false;
         let mut rest = value;
         loop {
             if rest.is_empty() {
@@ -3168,13 +3211,7 @@ impl Parser {
             {
                 return Err(self.err(ErrorKind::InvalidToken, "invalid entity name"));
             }
-            if !seeded {
-                for name in &self.entity_chain {
-                    try_set_insert(&mut active, name.as_str())?;
-                }
-                seeded = true;
-            }
-            if active.contains(name) {
+            if active.contains(name) || self.active_entities.inherited_contains(name, false) {
                 return Err(self.err(
                     ErrorKind::RecursiveEntityReference,
                     "recursive entity in attribute",

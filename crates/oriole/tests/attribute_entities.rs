@@ -264,3 +264,97 @@ fn converted_line_endings_keep_their_literal_or_replacement_origin() {
         }
     }
 }
+
+#[test]
+fn deep_inherited_context_is_indexed_once_for_many_shallow_attributes() {
+    const DEPTH: usize = 60_000;
+    const ATTRIBUTES: usize = 10_000;
+    let mut parent = Parser::new(Config {
+        limits: Limits {
+            max_entity_depth: DEPTH + 1,
+            ..Limits::default()
+        },
+        ..Config::default()
+    });
+    parent
+        .feed(b"<!DOCTYPE r [<!ENTITY v 'leaf'>]><r/>", true)
+        .unwrap();
+    while parent.next_event().unwrap().is_some() {}
+    let mut context = String::new();
+    for i in 0..DEPTH {
+        write!(context, "s{i}\u{c}").unwrap();
+    }
+    let mut child = parent.external_child(Some(&context), None).unwrap();
+    drop(parent);
+    child.set_hash_salt([41; 16]).unwrap();
+    let mut input = String::from("<r");
+    for i in 0..ATTRIBUTES {
+        write!(input, " a{i}='&v;&v;'").unwrap();
+    }
+    input.push_str("/><r a='&v;'/>");
+    let mut elements = 0;
+    for (index, bytes) in input.as_bytes().chunks(4096).enumerate() {
+        child
+            .feed(bytes, (index + 1) * 4096 >= input.len())
+            .unwrap();
+        while let Some(event) = child.next_event().unwrap() {
+            if let EventKind::StartElement { attributes, .. } = event.kind {
+                let (count, value) = if elements == 0 {
+                    (ATTRIBUTES, "leafleaf")
+                } else {
+                    (1, "leaf")
+                };
+                assert_eq!(attributes.len(), count);
+                assert!(attributes.iter().all(|attribute| attribute.value == value));
+                elements += 1;
+            }
+        }
+    }
+    assert_eq!(elements, 2);
+}
+
+#[test]
+fn inherited_attribute_names_preserve_exact_general_membership_and_error_order() {
+    for (context, input, depth, expected) in [
+        (
+            "missing",
+            "<r a='&missing;'/>",
+            0,
+            ErrorKind::RecursiveEntityReference,
+        ),
+        ("missing", "<r a='&bad name;'/>", 0, ErrorKind::InvalidToken),
+        ("%p", "<r a='&p;'/>", 0, ErrorKind::LimitExceeded),
+    ] {
+        let parent = Parser::new(Config::default());
+        let mut child = parent.external_child(Some(context), None).unwrap();
+        child
+            .set_limits(Limits {
+                max_entity_depth: depth,
+                ..Limits::default()
+            })
+            .unwrap();
+        child.feed(input.as_bytes(), true).unwrap();
+        assert_eq!(child.next_event().unwrap_err().kind, expected);
+    }
+    // A live content source contributes no inherited general name. Replaying its
+    // replacement in an attribute reaches the literal '<' error first.
+    assert_eq!(
+        attribute(
+            "<!DOCTYPE r [<!ENTITY e \"<r a='&e;'/>\">]><outer>&e;</outer>",
+            Config::default()
+        ),
+        Err(ErrorKind::InvalidToken)
+    );
+    let mut parent = Parser::new(Config::default());
+    parent
+        .feed(b"<!DOCTYPE r [<!ENTITY p 'ok'>]><r/>", true)
+        .unwrap();
+    while parent.next_event().unwrap().is_some() {}
+    let mut child = parent.external_child(Some("%p"), None).unwrap();
+    child.feed(b"<r a='&p;&p;'/>", true).unwrap();
+    let EventKind::StartElement { attributes, .. } = child.next_event().unwrap().unwrap().kind
+    else {
+        panic!()
+    };
+    assert_eq!(attributes[0].value, "okok");
+}

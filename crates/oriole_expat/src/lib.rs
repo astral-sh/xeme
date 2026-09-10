@@ -221,6 +221,7 @@ fn error_code(kind: &ErrorKind) -> c_int {
         ErrorKind::UndefinedEntity => 11,
         ErrorKind::RecursiveEntityReference => 12,
         ErrorKind::AsynchronousEntity => 13,
+        ErrorKind::IncompleteParameterEntity => 29,
         ErrorKind::BadCharacterReference => 14,
         ErrorKind::BinaryEntityReference => 15,
         ErrorKind::ExternalEntityInAttribute => 16,

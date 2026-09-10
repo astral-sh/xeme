@@ -25,8 +25,8 @@ pub struct Limits {
     pub max_token_bytes: usize,
     pub max_total_bytes: usize,
     /// Total indirect bytes from entities, reused defaults, namespace URI expansion,
-    /// repeated declaration callback names, and external reference identifiers and
-    /// namespace contexts. Child construction also charges inherited declaration,
+    /// repeated declaration callback names, skipped conditional-reference callback
+    /// storage, and external reference identifiers and namespace contexts. Child construction also charges inherited declaration,
     /// namespace, encoding, and context storage, including per-entry structural
     /// work. Shared with external entity children.
     pub max_entity_expansion_bytes: usize,
@@ -89,6 +89,7 @@ pub enum ErrorKind {
     UndefinedEntity,
     RecursiveEntityReference,
     AsynchronousEntity,
+    IncompleteParameterEntity,
     BadCharacterReference,
     BinaryEntityReference,
     ExternalEntityHandling,
@@ -330,8 +331,9 @@ impl TryClone for DefaultAttribute {
 ///
 /// External entity references produce events for application-controlled resolution;
 /// the parser never performs I/O. Parameter entity processing is opt-in and supports
-/// references between declarations. Inline references and conditional DTD sections
-/// are rejected explicitly.
+/// references between declarations and nested INCLUDE/IGNORE sections in external
+/// DTDs. Internal parameter entities may select a conditional keyword. Other inline
+/// parameter references remain unsupported.
 #[derive(Debug)]
 pub struct Parser {
     config: Config,
@@ -346,6 +348,7 @@ pub struct Parser {
     parameter_mode: u8,
     foreign_dtd: bool,
     in_doctype: bool,
+    conditional: dtd::ConditionalState,
     declarations_skipped: bool,
     doctype_external: Option<(Option<String>, Option<String>)>,
     defaults: HashMap<String, DefaultAttributes>,
@@ -416,6 +419,7 @@ impl Parser {
             parameter_mode: 0,
             foreign_dtd: false,
             in_doctype: false,
+            conditional: dtd::ConditionalState::new(allocator),
             declarations_skipped: false,
             doctype_external: None,
             defaults: hash_map(allocator),
@@ -820,7 +824,10 @@ impl Parser {
         if let (Err(error), Some((kind, message))) = (&result, self.decoding_error)
             && matches!(
                 error.kind,
-                ErrorKind::UnclosedToken | ErrorKind::NoElements | ErrorKind::UnclosedCdataSection
+                ErrorKind::UnclosedToken
+                    | ErrorKind::NoElements
+                    | ErrorKind::UnclosedCdataSection
+                    | ErrorKind::IncompleteParameterEntity
             )
         {
             let source = &self.sources[0];
@@ -1008,6 +1015,7 @@ impl Parser {
             }
             if self.source().remaining().is_empty() {
                 if self.sources.len() > 1 {
+                    self.finish_conditional_source()?;
                     let source = self.sources.pop().expect("entity source exists");
                     if self.stack.len() != source.initial_depth || self.in_cdata {
                         return Err(self.err(
@@ -1029,6 +1037,7 @@ impl Parser {
                 if !self.final_input {
                     return Ok(None);
                 }
+                self.finish_conditional_source()?;
                 self.last_position = self.here();
                 if self.in_doctype {
                     return Err(

@@ -4,6 +4,340 @@ use crate::{
 };
 use oriole_storage::{Allocator, String, TryClone, Vec, try_insert, try_push};
 
+#[derive(Debug)]
+pub(crate) struct ConditionalState {
+    included_sources: Vec<usize>,
+    ignored_depth: usize,
+    ignored_source: usize,
+    ignored_bytes: usize,
+    header_checked: usize,
+}
+
+impl ConditionalState {
+    pub(crate) fn new(allocator: Allocator) -> Self {
+        Self {
+            included_sources: Vec::new_in(allocator),
+            ignored_depth: 0,
+            ignored_source: 0,
+            ignored_bytes: 0,
+            header_checked: 0,
+        }
+    }
+}
+
+impl Parser {
+    fn expand_conditional_keyword<'a>(
+        &'a self,
+        text: &'a str,
+        chain: &mut Vec<&'a str>,
+        output: &mut String,
+        selected: &mut Option<bool>,
+        skipped: &mut bool,
+        disabled: &mut Vec<usize>,
+    ) -> Result<(), Error> {
+        let mut rest = text;
+        loop {
+            let offset = rest.find('%').unwrap_or(rest.len());
+            // Parameter replacement adds lexical boundaries even though those
+            // virtual spaces are not delivered to the default handler.
+            let word = rest[..offset].trim_matches(whitespace);
+            if !word.is_empty() {
+                *selected = Some(match (word, *selected) {
+                    ("INCLUDE", None) => true,
+                    ("IGNORE", None) => false,
+                    _ => {
+                        return Err(
+                            self.err(ErrorKind::Syntax, "invalid conditional section keyword")
+                        );
+                    }
+                });
+            }
+            if output.len().saturating_add(offset) > self.config.limits.max_token_bytes {
+                return Err(self.err(
+                    ErrorKind::LimitExceeded,
+                    "expanded conditional header limit exceeded",
+                ));
+            }
+            output.try_push_str(&rest[..offset])?;
+            rest = &rest[offset..];
+            if rest.is_empty() {
+                return Ok(());
+            }
+            let end = rest.find(';').ok_or_else(|| {
+                self.err(
+                    ErrorKind::Syntax,
+                    "unclosed conditional parameter reference",
+                )
+            })?;
+            let name = &rest[1..end];
+            if !crate::names::is_name(name)
+                || (self.config.namespace_separator.is_some() && name.contains(':'))
+            {
+                return Err(self.err(
+                    ErrorKind::InvalidToken,
+                    "invalid conditional parameter name",
+                ));
+            }
+            let entity = self.parameter_entities.get(name);
+            // An external subset that is already being parsed uses mode 1
+            // even when the parent document declared standalone="yes".
+            if self.parameter_mode == 0 || entity.is_none() {
+                if output.len().saturating_add(end + 1) > self.config.limits.max_token_bytes {
+                    return Err(self.err(
+                        ErrorKind::LimitExceeded,
+                        "expanded conditional header limit exceeded",
+                    ));
+                }
+                *skipped = true;
+                if self.parameter_mode == 0 && !self.standalone {
+                    // This reference can queue a NotStandalone event and a
+                    // Default fragment. Charge their structural storage before
+                    // retaining the offset, even when replacement is disabled.
+                    self.charge_expansion(
+                        2 * size_of::<crate::PendingEvent>() + size_of::<usize>(),
+                    )?;
+                    try_push(disabled, 3 + text.len() - rest.len())?;
+                }
+                output.try_push_str(&rest[..end + 1])?;
+                rest = &rest[end + 1..];
+                continue;
+            }
+            if chain.contains(&name) {
+                return Err(self.err(
+                    ErrorKind::RecursiveEntityReference,
+                    "recursive conditional parameter entity",
+                ));
+            }
+            if chain.len() + self.sources.len() + self.external_depth
+                > self.config.limits.max_entity_depth
+            {
+                return Err(self.err(
+                    ErrorKind::LimitExceeded,
+                    "conditional parameter nesting limit exceeded",
+                ));
+            }
+            let entity = entity.expect("enabled, declared parameter entity");
+            let value = entity.value.as_ref().ok_or_else(|| {
+                self.err(
+                    ErrorKind::ExternalEntityHandling,
+                    "external parameter reference inside a conditional header is unsupported",
+                )
+            })?;
+            self.charge_expansion(value.len())?;
+            try_push(chain, name)?;
+            self.expand_conditional_keyword(value, chain, output, selected, skipped, disabled)?;
+            chain.pop();
+            rest = &rest[end + 1..];
+        }
+    }
+
+    pub(crate) fn finish_conditional_source(&self) -> Result<(), Error> {
+        if self.conditional.included_sources.last() == Some(&self.sources.len())
+            || (self.conditional.ignored_depth != 0
+                && self.conditional.ignored_source == self.sources.len())
+        {
+            return Err(self.err(
+                if self.sources.len() > 1 || self.conditional.ignored_depth == 0 {
+                    ErrorKind::IncompleteParameterEntity
+                } else {
+                    ErrorKind::Syntax
+                },
+                "conditional section is not closed in its source entity",
+            ));
+        }
+        Ok(())
+    }
+
+    fn conditional_raw(&mut self, count: usize) -> Result<(), Error> {
+        if self.default_events {
+            let position = self.source().position(count);
+            self.save_current_raw(count)?;
+            self.emit(EventKind::Default, position)?;
+        }
+        self.declaration_allowed = false;
+        self.consume(count);
+        Ok(())
+    }
+
+    fn start_conditional_section(&mut self) -> Result<bool, Error> {
+        if !self.external_subset {
+            return Err(self.err(
+                ErrorKind::Syntax,
+                "conditional section in the internal subset",
+            ));
+        }
+        let text = self.source().remaining();
+        let checked = self.conditional.header_checked.max(3);
+        let limit = self.config.limits.max_token_bytes;
+        let mut end = None;
+        for (offset, character) in text[checked..].char_indices() {
+            let offset = checked + offset;
+            if offset >= limit {
+                return Err(self.err_at(
+                    ErrorKind::LimitExceeded,
+                    "conditional header limit exceeded",
+                    offset,
+                ));
+            }
+            if character == '[' {
+                end = Some(offset + 1);
+                break;
+            }
+            if !crate::names::is_xml_char(character) {
+                return Err(self.err_at(
+                    ErrorKind::InvalidToken,
+                    "invalid conditional header character",
+                    offset,
+                ));
+            }
+        }
+        let Some(end) = end else {
+            self.conditional.header_checked = text.len();
+            if self.is_source_final() {
+                return Err(self.err(
+                    ErrorKind::IncompleteParameterEntity,
+                    "unclosed conditional header",
+                ));
+            }
+            return Ok(false);
+        };
+        let header = &text[3..end - 1];
+        let keyword = header.trim_matches(whitespace);
+        let has_parameter = keyword.contains('%');
+        let mut expanded = String::new_in(self.allocator);
+        let mut skipped = false;
+        let mut disabled = Vec::new_in(self.allocator);
+        let included = if has_parameter {
+            let mut selected = None;
+            self.expand_conditional_keyword(
+                header,
+                &mut Vec::new_in(self.allocator),
+                &mut expanded,
+                &mut selected,
+                &mut skipped,
+                &mut disabled,
+            )?;
+            selected
+                .ok_or_else(|| self.err(ErrorKind::Syntax, "missing conditional section keyword"))?
+        } else {
+            match keyword {
+                "INCLUDE" => true,
+                "IGNORE" => false,
+                _ => return Err(self.err(ErrorKind::Syntax, "invalid conditional section keyword")),
+            }
+        };
+        if self.conditional.included_sources.len() >= self.config.limits.max_depth {
+            return Err(self.err(
+                ErrorKind::LimitExceeded,
+                "conditional section nesting limit exceeded",
+            ));
+        }
+        if included {
+            try_push(&mut self.conditional.included_sources, self.sources.len())?;
+        } else {
+            self.conditional.ignored_depth = 1;
+            self.conditional.ignored_source = self.sources.len();
+            self.conditional.ignored_bytes = end;
+        }
+        self.conditional.header_checked = 0;
+        if skipped {
+            self.has_external_subset = true;
+            self.declarations_skipped |= !self.standalone;
+        }
+        if !disabled.is_empty() && !self.standalone {
+            // Deliver the prefix before the callback: a consumer can stop
+            // parsing from NotStandalone and must not receive later markup.
+            let mut start = 0;
+            for offset in disabled {
+                self.conditional_default_range(start, offset)?;
+                let position = self.source().position_at(offset, 0);
+                self.emit(EventKind::NotStandalone, position)?;
+                self.event_raw("")?;
+                start = offset;
+            }
+            self.conditional_default_range(start, end)?;
+            self.declaration_allowed = false;
+            self.consume(end);
+            return Ok(true);
+        }
+        self.conditional_raw(end)?;
+        if has_parameter && self.default_events {
+            let mut raw = string("<![", self.allocator)?;
+            raw.try_push_str(&expanded)?;
+            raw.try_push('[')?;
+            self.event_raw(&raw)?;
+        }
+        Ok(true)
+    }
+
+    fn conditional_default_range(&mut self, start: usize, end: usize) -> Result<(), Error> {
+        if self.default_events && start != end {
+            let position = self.source().position_at(start, end - start);
+            let raw = string(&self.source().remaining()[start..end], self.allocator)?;
+            self.emit(EventKind::Default, position)?;
+            self.event_raw(&raw)?;
+        }
+        Ok(())
+    }
+
+    fn parse_ignored_section(&mut self) -> Result<bool, Error> {
+        let text = self.source().remaining();
+        let mut offset = 0;
+        let mut depth = self.conditional.ignored_depth;
+        while offset < text.len() {
+            let rest = &text[offset..];
+            let width = if rest.starts_with("<![") {
+                if depth + self.conditional.included_sources.len() >= self.config.limits.max_depth {
+                    return Err(self.err_at(
+                        ErrorKind::LimitExceeded,
+                        "conditional section nesting limit exceeded",
+                        offset,
+                    ));
+                }
+                depth += 1;
+                3
+            } else if rest.starts_with("]]>") {
+                depth -= 1;
+                3
+            } else if !self.is_source_final()
+                && ("<![".starts_with(rest) || "]]>".starts_with(rest))
+            {
+                break;
+            } else {
+                let character = rest.chars().next().expect("nonempty ignored input");
+                if !crate::names::is_xml_char(character) {
+                    return Err(self.err_at(
+                        ErrorKind::InvalidToken,
+                        "invalid XML character in ignored section",
+                        offset,
+                    ));
+                }
+                character.len_utf8()
+            };
+            offset += width;
+            if self.conditional.ignored_bytes.saturating_add(offset)
+                > self.config.limits.max_token_bytes
+            {
+                return Err(self.err_at(
+                    ErrorKind::LimitExceeded,
+                    "ignored conditional section limit exceeded",
+                    offset - width,
+                ));
+            }
+            if depth == 0 || offset >= 64 * 1024 {
+                break;
+            }
+        }
+        if offset == 0 {
+            return Ok(false);
+        }
+        self.conditional.ignored_depth = depth;
+        self.conditional.ignored_bytes += offset;
+        self.conditional_raw(offset)?;
+        Ok(true)
+    }
+}
+
 impl Parser {
     pub(crate) fn parse_doctype(&mut self, token: &str, position: Position) -> Result<(), Error> {
         if self.seen_root || self.seen_doctype || self.sources.len() > 1 || self.fragment {
@@ -101,6 +435,9 @@ impl Parser {
     }
 
     pub(crate) fn parse_dtd_step(&mut self) -> Result<bool, Error> {
+        if self.conditional.ignored_depth != 0 {
+            return self.parse_ignored_section();
+        }
         let text = self.source().remaining();
         let whitespace_len = text
             .char_indices()
@@ -124,10 +461,21 @@ impl Parser {
             return Err(self.err(ErrorKind::InvalidToken, "invalid XML character in DTD"));
         }
         if text.starts_with("<![") {
-            return Err(self.err(
-                ErrorKind::Syntax,
-                "conditional DTD sections are unsupported",
-            ));
+            return self.start_conditional_section();
+        }
+        if self.external_subset && text.starts_with(']') {
+            if "]]>".starts_with(text) && text.len() < 3 && !self.is_source_final() {
+                return Ok(false);
+            }
+            if !text.starts_with("]]>") || self.conditional.included_sources.is_empty() {
+                return Err(self.err(
+                    ErrorKind::Syntax,
+                    "unexpected conditional section closing delimiter",
+                ));
+            }
+            self.conditional.included_sources.pop();
+            self.conditional_raw(3)?;
+            return Ok(true);
         }
         if text.starts_with("<!")
             && text != "<!"
@@ -457,6 +805,13 @@ impl Parser {
                 }
                 return Err(self.err(ErrorKind::Syntax, "unexpected text in DTD declaration"));
             }
+            if self.declarations_skipped
+                && matches!(declaration, "ENTITY" | "ATTLIST")
+                && self.default_events
+                && self.pending.len() == first_event
+            {
+                self.emit(EventKind::Default, position)?;
+            }
             for (index, pending) in self.pending.iter_mut().enumerate().skip(first_event) {
                 pending.raw = Some(if index == first_event {
                     string(&text[..end + 1], self.allocator)?
@@ -491,6 +846,9 @@ impl Parser {
             let raw = cursor
                 .quoted()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+            if self.declarations_skipped {
+                return Ok(());
+            }
             if raw.contains('%') {
                 return Err(self.err(
                     ErrorKind::ExternalEntityHandling,
@@ -674,6 +1032,9 @@ impl Parser {
                 let raw = cursor
                     .quoted()
                     .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+                if self.declarations_skipped {
+                    continue;
+                }
                 let mut value = self.expand_attribute(raw, &mut Vec::new_in(self.allocator))?;
                 if attribute_type != "CDATA" {
                     value = collapse_spaces(&value, self.allocator)?;

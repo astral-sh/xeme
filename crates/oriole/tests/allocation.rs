@@ -127,8 +127,9 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
     while let Some(event) = next_event(&mut parser)? {
         if let EventKind::ExternalEntityReference { context: None, .. } = event.kind {
             let mut child = parser.external_child_with_encoding(None, None)?;
+            child.set_default_events(true);
             child.feed(
-                b"<!ENTITY external 'loaded'><!ATTLIST r default CDATA 'yes'>",
+                b"<!ENTITY % mode 'INCLUDE'><![%mode;[<![INCLUDE[<!ENTITY external 'loaded'>]]><!ATTLIST r default CDATA 'yes'>]]><![IGNORE[ignored %missing; <![ nested ]]>]]>",
                 true,
             )?;
             while next_event(&mut child)?.is_some() {}
@@ -142,6 +143,14 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
             }
         }
     }
+    let parent = Parser::try_new_in(Config::default(), allocator)?;
+    let mut child = parent.external_child(None, None)?;
+    child.set_default_events(true);
+    child.feed(
+        b"<![INCLUDE%a;%b;[<!ENTITY e '&#0;'><!ATTLIST r a CDATA '&;'>]]>",
+        true,
+    )?;
+    while next_event(&mut child)?.is_some() {}
     let mut parser =
         Parser::try_new_with_encoding_in(Config::default(), Some("custom"), allocator)?;
     parser.feed(b"<r>\x80</r>", true)?;

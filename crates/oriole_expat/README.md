@@ -56,8 +56,11 @@ without namespace triplets.
 
 The following Expat modes are explicitly unsupported:
 
-- Parameter entities inside declarations and conditional `INCLUDE`/`IGNORE`
-  sections are rejected. Parameter references between declarations are supported.
+- Parameter entities inside declarations and external parameter references inside
+  conditional headers are rejected. References between declarations, nested
+  `INCLUDE`/`IGNORE` sections in external DTDs, and internal parameter entities
+  selecting conditional keywords are supported. Conditional nesting uses the
+  element-depth ceiling; a whole ignored section uses the token-byte ceiling.
 - Multibyte custom encoding conversion callbacks: single-byte custom maps work,
   including release callbacks on reset/free and on rejected maps. Maps requiring
   multibyte conversion report `XML_ERROR_UNKNOWN_ENCODING`.

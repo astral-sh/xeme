@@ -246,6 +246,7 @@ fn skipped_header_parameters_preserve_markup_and_suppress_declarations() {
                     parent.feed(document.as_bytes(), false).unwrap();
                     while parent.next_event().unwrap().is_some() {}
                     let mut child = parent.external_child(None, None).unwrap();
+                    assert!(child.set_param_entity_parsing(mode));
                     child.set_default_events(true);
                     let mut raw = String::new();
                     let mut notifications = Vec::new();
@@ -307,6 +308,7 @@ fn skipped_header_parameters_still_require_a_complete_keyword() {
                 parent.feed(declaration.as_bytes(), false).unwrap();
                 while parent.next_event().unwrap().is_some() {}
                 let mut child = parent.external_child(None, None).unwrap();
+                assert!(child.set_param_entity_parsing(mode));
                 let prefix = if declared {
                     "<!ENTITY % k 'INCLUDE'>"
                 } else {

@@ -95,6 +95,7 @@ pub enum ErrorKind {
     TagMismatch,
     DuplicateAttribute,
     JunkAfterDocumentElement,
+    ParameterEntityReference,
     UndefinedEntity,
     RecursiveEntityReference,
     AsynchronousEntity,
@@ -341,8 +342,10 @@ impl TryClone for DefaultAttribute {
 /// External entity references produce events for application-controlled resolution;
 /// the parser never performs I/O. Parameter entity processing is opt-in and supports
 /// references between declarations and nested INCLUDE/IGNORE sections in external
-/// DTDs. Internal parameter entities may select a conditional keyword. Other inline
-/// parameter references remain unsupported.
+/// DTDs. Internal parameter entities may select a conditional keyword or expand
+/// inside entity values in external DTDs and parameter entities. Arbitrary
+/// declaration fragments and external references inside entity values or
+/// conditional headers remain unsupported.
 #[derive(Debug)]
 pub struct Parser {
     config: Config,
@@ -648,7 +651,10 @@ impl Parser {
         Ok(())
     }
 
-    /// Select parameter entity processing: 0 never, 1 unless standalone, 2 always.
+    /// Select parameter references between declarations: 0 never, 1 unless the
+    /// root document is standalone, 2 always. Explicitly selecting mode 1 on an
+    /// external DTD child enables its references even for a standalone root.
+    /// Internal references in an external DTD's entity values are always expanded.
     pub fn set_param_entity_parsing(&mut self, mode: u8) -> bool {
         if mode > 2 || self.received != 0 {
             return false;
@@ -1850,6 +1856,11 @@ impl Parser {
                 }
             }
             self.standalone = standalone == Some(true);
+            if self.standalone && self.parameter_mode == 1 {
+                // Children inherit the effective mode after a standalone root
+                // disables conditional parameter processing, as in Expat.
+                self.parameter_mode = 0;
+            }
             self.emit(
                 EventKind::XmlDeclaration {
                     version,

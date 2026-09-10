@@ -25,6 +25,14 @@ impl ConditionalState {
     }
 }
 
+/// A replacement is a distinct lexical source: references cannot span frames,
+/// and only the original physical source has literal line endings normalized.
+struct EntityValueFrame<'a> {
+    rest: &'a str,
+    name: Option<&'a str>,
+    normalize: bool,
+}
+
 impl Parser {
     fn expand_conditional_keyword<'a>(
         &'a self,
@@ -408,7 +416,8 @@ impl Parser {
     }
 
     pub(crate) fn parameter_entities_enabled(&self) -> bool {
-        self.parameter_mode == 2 || (self.parameter_mode == 1 && !self.standalone)
+        self.parameter_mode == 2
+            || (self.parameter_mode == 1 && (!self.standalone || self.external_subset))
     }
 
     fn finish_doctype(&mut self, position: Position, raw: &str) -> Result<(), Error> {
@@ -733,6 +742,7 @@ impl Parser {
                 end.ok_or_else(|| self.err(ErrorKind::UnclosedToken, "unclosed DTD declaration"))?;
             self.declaration_allowed = false;
             let first_event = self.pending.len();
+            let previously_skipped = self.declarations_skipped;
             let mut cursor = Cursor::new(&text[2..end], self.config.namespace_separator.is_some());
             let declaration = cursor
                 .name()
@@ -814,12 +824,25 @@ impl Parser {
             {
                 self.emit(EventKind::Default, position)?;
             }
+            let closing_default = !previously_skipped
+                && self.declarations_skipped
+                && self.default_events
+                && self.pending.iter().skip(first_event).any(|pending| {
+                    matches!(pending.event.kind, EventKind::EntityDeclaration { .. })
+                });
             for (index, pending) in self.pending.iter_mut().enumerate().skip(first_event) {
                 pending.raw = Some(if index == first_event {
-                    string(&text[..end + 1], self.allocator)?
+                    string(&text[..end + usize::from(!closing_default)], self.allocator)?
                 } else {
                     String::new_in(self.allocator)
                 });
+            }
+            if closing_default {
+                self.emit(
+                    EventKind::Default,
+                    self.source().position_at(offset + end, 1),
+                )?;
+                self.event_raw(">")?;
             }
             text = &text[end + 1..];
         }
@@ -844,6 +867,7 @@ impl Parser {
         cursor
             .require_space()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
+        let mut skipped_parameter = false;
         let (value, system_id, public_id, notation) = if cursor.starts("\"") || cursor.starts("'") {
             let raw = cursor
                 .quoted()
@@ -851,46 +875,10 @@ impl Parser {
             if self.declarations_skipped {
                 return Ok(());
             }
-            if raw.contains('%') {
-                return Err(self.err(
-                    ErrorKind::ExternalEntityHandling,
-                    "parameter entities in entity values are unsupported",
-                ));
-            }
-            let mut value = String::try_with_capacity_in(raw.len(), self.allocator)?;
-            let mut rest = raw;
-            while let Some(start) = rest.find('&') {
-                value.push_str(&self.source_text(&rest[..start])?)?;
-                rest = &rest[start..];
-                let end = rest.find(';').ok_or_else(|| {
-                    self.err(
-                        ErrorKind::InvalidToken,
-                        "unclosed entity reference in entity value",
-                    )
-                })?;
-                let reference = &rest[1..end];
-                if reference.starts_with('#') {
-                    value.push(
-                        character_reference(reference)
-                            .map_err(|(kind, _)| {
-                                self.err(kind, "invalid character reference in entity value")
-                            })?
-                            .expect("numeric reference"),
-                    )?;
-                } else {
-                    if !crate::names::is_name(reference)
-                        || (self.config.namespace_separator.is_some() && reference.contains(':'))
-                    {
-                        return Err(self.err(
-                            ErrorKind::InvalidToken,
-                            "invalid entity reference in entity value",
-                        ));
-                    }
-                    value.push_str(&rest[..end + 1])?;
-                }
-                rest = &rest[end + 1..];
-            }
-            value.push_str(&self.source_text(rest)?)?;
+            let declaring = (parameter && !self.parameter_entities.contains_key(&name))
+                .then_some(name.as_str());
+            let (value, skipped) = self.entity_value(raw, declaring)?;
+            skipped_parameter = skipped;
             (Some(value), None, None, None)
         } else {
             let (system_id, public_id) =
@@ -953,6 +941,144 @@ impl Parser {
                 },
                 position,
             )?;
+        }
+        // A missing parameter stops subsequent declarations, but the current
+        // value (including its suffix) is still stored and reported.
+        if skipped_parameter {
+            self.has_external_subset = true;
+            self.declarations_skipped = !self.standalone;
+        }
+        Ok(())
+    }
+
+    /// Build an entity value without letting replacement quotes or unfinished
+    /// references become part of the surrounding declaration's grammar.
+    fn entity_value(
+        &self,
+        raw: &str,
+        declaring_parameter: Option<&str>,
+    ) -> Result<(String, bool), Error> {
+        let mut value = String::try_with_capacity_in(raw.len(), self.allocator)?;
+        let mut parents = Vec::new_in(self.allocator);
+        let mut current = EntityValueFrame {
+            rest: raw,
+            name: None,
+            normalize: self.sources.len() == 1,
+        };
+        let mut skipped = false;
+        loop {
+            let start = current.rest.find(['&', '%']).unwrap_or(current.rest.len());
+            self.append_entity_value(&mut value, &current.rest[..start], current.normalize)?;
+            current.rest = &current.rest[start..];
+            if current.rest.is_empty() {
+                if let Some(parent) = parents.pop() {
+                    current = parent;
+                    continue;
+                }
+                return Ok((value, skipped));
+            }
+            let end = current.rest.find(';').ok_or_else(|| {
+                self.err(
+                    ErrorKind::InvalidToken,
+                    "unclosed reference in entity value",
+                )
+            })?;
+            let reference = &current.rest[1..end];
+            let parameter = current.rest.starts_with('%');
+            if !parameter && reference.starts_with('#') {
+                let character = character_reference(reference)
+                    .map_err(|(kind, _)| {
+                        self.err(kind, "invalid character reference in entity value")
+                    })?
+                    .expect("numeric reference");
+                let mut bytes = [0; 4];
+                self.append_entity_value(&mut value, character.encode_utf8(&mut bytes), false)?;
+                current.rest = &current.rest[end + 1..];
+                continue;
+            }
+            if !crate::names::is_name(reference)
+                || (self.config.namespace_separator.is_some() && reference.contains(':'))
+            {
+                return Err(self.err(ErrorKind::InvalidToken, "invalid reference in entity value"));
+            }
+            if !parameter {
+                self.append_entity_value(&mut value, &current.rest[..end + 1], false)?;
+                current.rest = &current.rest[end + 1..];
+                continue;
+            }
+            if !self.external_subset && self.sources.len() == 1 {
+                return Err(self.err(
+                    ErrorKind::ParameterEntityReference,
+                    "parameter reference in internal subset entity value",
+                ));
+            }
+            // Charge reference work even for empty or missing replacements.
+            self.charge_expansion(end + 1 + size_of::<EntityValueFrame<'_>>())?;
+            if declaring_parameter == Some(reference)
+                || current.name == Some(reference)
+                || parents
+                    .iter()
+                    .any(|frame: &EntityValueFrame<'_>| frame.name == Some(reference))
+                || self.sources.iter().any(|source| {
+                    source
+                        .entity_name
+                        .as_deref()
+                        .and_then(|name| name.strip_prefix('%'))
+                        == Some(reference)
+                })
+            {
+                return Err(self.err(
+                    ErrorKind::RecursiveEntityReference,
+                    "recursive parameter entity value",
+                ));
+            }
+            current.rest = &current.rest[end + 1..];
+            let Some(entity) = self.parameter_entities.get(reference) else {
+                skipped = true;
+                continue;
+            };
+            if parents.len() + self.sources.len() + self.external_depth
+                > self.config.limits.max_entity_depth
+            {
+                return Err(self.err(
+                    ErrorKind::LimitExceeded,
+                    "parameter entity value nesting limit exceeded",
+                ));
+            }
+            let replacement = entity.value.as_deref().ok_or_else(|| {
+                self.err(
+                    ErrorKind::ExternalEntityHandling,
+                    "external parameter reference in entity value is unsupported",
+                )
+            })?;
+            self.charge_expansion(replacement.len())?;
+            try_push(&mut parents, current)?;
+            current = EntityValueFrame {
+                rest: replacement,
+                name: Some(reference),
+                normalize: false,
+            };
+        }
+    }
+
+    /// Append with a bound before allocating, retaining character-reference CRs
+    /// in replacement frames and normalizing physical CR/CRLF exactly once.
+    fn append_entity_value(
+        &self,
+        value: &mut String,
+        text: &str,
+        normalize: bool,
+    ) -> Result<(), Error> {
+        if value.len().saturating_add(text.len()) > self.config.limits.max_token_bytes {
+            return Err(self.err(
+                ErrorKind::LimitExceeded,
+                "expanded entity value limit exceeded",
+            ));
+        }
+        if normalize && text.contains('\r') {
+            value.push_str(&normalize_newlines(text, self.allocator)?)?;
+        } else {
+            value.push_str(text)?;
         }
         Ok(())
     }

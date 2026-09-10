@@ -69,11 +69,14 @@ reports retain these acceptance and diagnostic differences.
 
 The following Expat modes are explicitly unsupported:
 
-- Parameter entities inside declarations and external parameter references inside
-  conditional headers are rejected. References between declarations, nested
-  `INCLUDE`/`IGNORE` sections in external DTDs, and internal parameter entities
-  selecting conditional keywords are supported. Conditional nesting uses the
-  element-depth ceiling; a whole ignored section uses the token-byte ceiling.
+- Arbitrary parameter-entity declaration fragments and external parameter
+  references inside entity values or conditional headers are rejected. References
+  between declarations, nested `INCLUDE`/`IGNORE` sections in external DTDs, and
+  internal parameter entities selecting conditional keywords or expanding entity
+  values in external DTDs and parameter entities are supported. Value replacements
+  preserve quote and reference boundaries and share the entity-expansion and
+  nesting limits. Conditional nesting uses the element-depth ceiling; a whole
+  ignored section uses the token-byte ceiling.
 - Multibyte sequences that convert to ASCII are rejected with
   `XML_ERROR_INVALID_TOKEN`. Expat accepts some such aliases and distinguishes
   their original byte form when recognizing keywords, references, and XML

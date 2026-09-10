@@ -1416,3 +1416,56 @@ fn multibyte_map_allocation_failure_releases_the_callback_instance_once() {
         assert_eq!(state.releases, 1);
     }
 }
+
+#[test]
+fn entity_value_parameters_use_buffer_input_and_merge_into_the_parent() {
+    // SAFETY: Both parsers and callback state are live throughout each parse;
+    // GetBuffer storage is filled only up to the requested length.
+    unsafe {
+        for mode in 0..=2 {
+            let mut state = State::default();
+            let parent = configured(&mut state);
+            let child = XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null());
+            assert!(!child.is_null());
+            assert_eq!(XML_SetParamEntityParsing(child, mode), 1);
+            let dtd = b"<!ENTITY % p 'works'><!ENTITY e '%p;'>";
+            for (index, byte) in dtd.iter().enumerate() {
+                let buffer = XML_GetBuffer(child, 1).cast::<u8>();
+                assert!(!buffer.is_null());
+                buffer.write(*byte);
+                assert_eq!(
+                    XML_ParseBuffer(child, 1, c_int::from(index + 1 == dtd.len())),
+                    OK
+                );
+            }
+            XML_ParserFree(child);
+            let document = b"<!DOCTYPE r SYSTEM 'test.dtd'><r>&e;</r>";
+            assert_eq!(
+                XML_Parse(parent, document.as_ptr().cast(), document.len() as c_int, 1),
+                OK
+            );
+            assert_eq!(state.events, ["start:r", "text:works", "end:r"]);
+            XML_ParserFree(parent);
+        }
+    }
+}
+
+#[test]
+fn entity_value_parameter_context_has_the_expat_error_code() {
+    // SAFETY: Parsers and input buffers are test-owned and freed once after parsing.
+    unsafe {
+        for (document, expected) in [
+            (b"<!DOCTYPE r [<!ENTITY e '%missing;'>]><r/>".as_slice(), 10),
+            (b"<!DOCTYPE r [<!ENTITY e '%missing'>]><r/>", 4),
+        ] {
+            let parser = XML_ParserCreate(ptr::null());
+            assert!(!parser.is_null());
+            assert_eq!(
+                XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1),
+                ERROR
+            );
+            assert_eq!(XML_GetErrorCode(parser), expected);
+            XML_ParserFree(parser);
+        }
+    }
+}

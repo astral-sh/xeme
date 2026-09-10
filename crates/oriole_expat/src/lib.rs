@@ -219,6 +219,7 @@ fn error_code(kind: &ErrorKind) -> c_int {
         ErrorKind::TagMismatch => 7,
         ErrorKind::DuplicateAttribute => 8,
         ErrorKind::JunkAfterDocumentElement => 9,
+        ErrorKind::ParameterEntityReference => 10,
         ErrorKind::UndefinedEntity => 11,
         ErrorKind::RecursiveEntityReference => 12,
         ErrorKind::AsynchronousEntity => 13,

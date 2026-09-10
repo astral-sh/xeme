@@ -43,6 +43,7 @@ pub(crate) struct Decoder {
     pending: Vec<u8>,
     declaration_checked: usize,
     unknown_name: Option<String>,
+    unknown_position: Option<Position>,
     custom_map: Option<Box<[i32; 256]>>,
 }
 impl Decoder {
@@ -56,6 +57,7 @@ impl Decoder {
             pending: Vec::new_in(allocator),
             declaration_checked: 0,
             unknown_name: None,
+            unknown_position: None,
             custom_map: None,
         })
     }
@@ -281,7 +283,34 @@ impl Decoder {
                         && let Some(end) = rest[1..].find(quote)
                     {
                         let name = &rest[1..end + 1];
+                        if !crate::valid_encoding_name(name) {
+                            return Ok(Some((Encoding::Utf8, skip)));
+                        }
                         let Some(encoding) = Encoding::named(name) else {
+                            let offset = declaration.len() - rest.len() + 1;
+                            let mut position = Position {
+                                byte_index: skip + offset,
+                                line: 1,
+                                column: usize::from(skip != 0),
+                                byte_count: 0,
+                            };
+                            let mut previous_cr = false;
+                            for character in declaration[..offset].chars() {
+                                match character {
+                                    '\r' => {
+                                        position.line += 1;
+                                        position.column = 0;
+                                    }
+                                    '\n' if !previous_cr => {
+                                        position.line += 1;
+                                        position.column = 0;
+                                    }
+                                    '\n' => {}
+                                    _ => position.column += 1,
+                                }
+                                previous_cr = character == '\r';
+                            }
+                            self.unknown_position = Some(position);
                             self.unknown_name =
                                 Some(String::try_from_str_in(name, self.allocator)?);
                             return Err(Error::bare(
@@ -305,6 +334,9 @@ impl Decoder {
 
     pub(crate) fn unknown_encoding(&self) -> Option<&str> {
         self.unknown_name.as_deref()
+    }
+    pub(crate) fn unknown_encoding_position(&self) -> Option<Position> {
+        self.unknown_position
     }
     pub(crate) fn append_pending(&mut self, bytes: &[u8]) -> Result<(), Error> {
         try_extend_from_slice(&mut self.pending, bytes)?;

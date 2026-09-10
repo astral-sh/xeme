@@ -230,6 +230,7 @@ fn error_code(kind: &ErrorKind) -> c_int {
         ErrorKind::IncorrectEncoding => 19,
         ErrorKind::UnclosedCdataSection => 20,
         ErrorKind::ExternalEntityHandling => 21,
+        ErrorKind::EntityDeclaredInParameterEntity => 24,
         ErrorKind::UndefinedPrefix => 27,
         ErrorKind::ReservedPrefixXml => 38,
         ErrorKind::ReservedPrefixXmlns => 39,
@@ -266,7 +267,7 @@ unsafe fn create(
     separator: Option<char>,
     allocator: Allocator,
 ) -> XML_Parser {
-    if in_allocator_callback() {
+    if in_allocator_callback() || separator.is_some_and(|separator| !separator.is_ascii()) {
         return ptr::null_mut();
     }
     let result = catch_unwind(AssertUnwindSafe(|| -> Result<XML_Parser, AllocError> {

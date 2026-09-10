@@ -97,6 +97,15 @@ version = "0.0.0"
 dependencies = [
  "libfuzzer-sys",
  "oriole",
+ "oriole_expat",
+]
+
+[[package]]
+name = "oriole_expat"
+version = "0.0.1"
+dependencies = [
+ "oriole",
+ "oriole_storage",
 ]
 
 [[package]]

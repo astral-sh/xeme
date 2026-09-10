@@ -24,6 +24,8 @@ pub struct Limits {
     pub max_depth: usize,
     pub max_token_bytes: usize,
     pub max_total_bytes: usize,
+    /// Total indirect bytes from entities, reused defaults, namespace URI expansion,
+    /// and repeated declaration callback names. Shared with external entity children.
     pub max_entity_expansion_bytes: usize,
     pub max_entity_depth: usize,
     pub max_attributes: usize,
@@ -91,6 +93,7 @@ pub enum ErrorKind {
     IncorrectEncoding,
     UnclosedCdataSection,
     ExternalEntityInAttribute,
+    EntityDeclaredInParameterEntity,
     MisplacedXmlDeclaration,
     XmlDeclaration,
     UndeclaringPrefix,
@@ -232,6 +235,7 @@ struct Entity {
     system_id: Option<String>,
     public_id: Option<String>,
     notation: Option<String>,
+    declared_in_parameter_entity: bool,
 }
 
 #[derive(Debug)]
@@ -254,6 +258,7 @@ impl TryClone for Entity {
             system_id: self.system_id.try_clone()?,
             public_id: self.public_id.try_clone()?,
             notation: self.notation.try_clone()?,
+            declared_in_parameter_entity: self.declared_in_parameter_entity,
         })
     }
 }
@@ -690,7 +695,13 @@ impl Parser {
             result = Err(Error {
                 kind,
                 message,
-                position: source.end_position(),
+                position: if kind == ErrorKind::UnknownEncoding {
+                    self.decoder
+                        .unknown_encoding_position()
+                        .unwrap_or_else(|| source.end_position())
+                } else {
+                    source.end_position()
+                },
             });
         }
         if let Err(error) = &result {
@@ -845,7 +856,13 @@ impl Parser {
                     continue;
                 }
                 if let Some((kind, message)) = self.decoding_error {
-                    return Err(self.err(kind, message));
+                    let mut error = self.err(kind, message);
+                    if kind == ErrorKind::UnknownEncoding
+                        && let Some(position) = self.decoder.unknown_encoding_position()
+                    {
+                        error.position = position;
+                    }
+                    return Err(error);
                 }
                 if !self.final_input {
                     return Ok(None);
@@ -933,6 +950,18 @@ impl Parser {
             } else {
                 ScanMode::Tag
             };
+            if mode == ScanMode::Pi
+                && remaining[2..]
+                    .chars()
+                    .next()
+                    .is_some_and(|character| !names::is_name_start(character))
+            {
+                return Err(self.err_at(
+                    ErrorKind::InvalidToken,
+                    "invalid processing instruction target",
+                    2,
+                ));
+            }
             if mode == ScanMode::Tag {
                 let name_offset = if remaining.starts_with("</") { 2 } else { 1 };
                 if let Some(character) = remaining[name_offset..].chars().next()
@@ -1008,10 +1037,7 @@ impl Parser {
                         ));
                     }
                     self.declaration_allowed = false;
-                    self.emit(
-                        EventKind::Comment(normalize_newlines(text, self.allocator)?),
-                        position,
-                    )?;
+                    self.emit(EventKind::Comment(self.source_text(text)?), position)?;
                 }
                 ScanMode::Pi => self.parse_pi(&token, position)?,
                 ScanMode::Doctype => self.parse_doctype(&token, position)?,
@@ -1023,12 +1049,13 @@ impl Parser {
     }
 
     fn parse_text(&mut self) -> Result<bool, Error> {
+        let internal = self.sources.len() > 1;
         let limit = self.source().converted_text_limit();
         let text = &self.source().remaining()[..limit];
         let final_text = self.is_source_final() && limit == self.source().remaining().len();
         let mut end = text
             .bytes()
-            .position(|byte| matches!(byte, b'<' | b'&' | b'\r' | b'\n'))
+            .position(|byte| matches!(byte, b'<' | b'&' | b'\n') || (!internal && byte == b'\r'))
             .map_or(text.len(), |index| {
                 if index == 0 && matches!(text.as_bytes()[0], b'\r' | b'\n') {
                     if text.starts_with("\r\n") { 2 } else { 1 }
@@ -1047,15 +1074,6 @@ impl Parser {
         }
         if end == 0 {
             return Ok(false);
-        }
-        if let Some(newline) = text[..end].find(['\r', '\n']) {
-            end = if newline > 0 {
-                newline
-            } else if text.starts_with("\r\n") {
-                2
-            } else {
-                1
-            };
         }
         let invalid = text[..end]
             .char_indices()
@@ -1095,7 +1113,7 @@ impl Parser {
             ));
         }
         let position = self.source().position(end);
-        let value = normalize_newlines(text, self.allocator)?;
+        let value = self.source_text(text)?;
         self.current_raw = string(text, self.allocator)?;
         self.declaration_allowed = false;
         if !self.stack.is_empty() || self.fragment {
@@ -1106,6 +1124,7 @@ impl Parser {
     }
 
     fn parse_cdata(&mut self) -> Result<bool, Error> {
+        let internal = self.sources.len() > 1;
         let limit = self.source().converted_text_limit();
         let text = &self.source().remaining()[..limit];
         let final_text = self.is_source_final() && limit == self.source().remaining().len();
@@ -1123,7 +1142,7 @@ impl Parser {
             .bytes()
             .enumerate()
             .find_map(|(index, byte)| {
-                if matches!(byte, b'\r' | b'\n') {
+                if byte == b'\n' || (!internal && byte == b'\r') {
                     Some(if index == 0 {
                         if text.starts_with("\r\n") { 2 } else { 1 }
                     } else {
@@ -1147,15 +1166,6 @@ impl Parser {
         if end == 0 {
             return Ok(false);
         }
-        if let Some(newline) = text[..end].find(['\r', '\n']) {
-            end = if newline > 0 {
-                newline
-            } else if text.starts_with("\r\n") {
-                2
-            } else {
-                1
-            };
-        }
         if let Some((invalid, _)) = text[..end]
             .char_indices()
             .find(|(_, character)| !is_xml_char(*character))
@@ -1167,7 +1177,7 @@ impl Parser {
         }
         let text = &text[..end];
         let position = self.source().position(end);
-        let value = normalize_newlines(text, self.allocator)?;
+        let value = self.source_text(text)?;
         self.current_raw = string(text, self.allocator)?;
         self.consume(end);
         self.emit(EventKind::Text(value), position)?;
@@ -1237,6 +1247,12 @@ impl Parser {
             }
             return Err(self.err(ErrorKind::UndefinedEntity, "undefined entity"));
         };
+        if entity.declared_in_parameter_entity && self.requires_internal_entity_declaration() {
+            return Err(self.err(
+                ErrorKind::EntityDeclaredInParameterEntity,
+                "entity was declared in a parameter entity",
+            ));
+        }
         if entity.notation.is_some() {
             return Err(self.err(
                 ErrorKind::BinaryEntityReference,
@@ -1325,7 +1341,10 @@ impl Parser {
     }
 
     fn parse_pi(&mut self, token: &str, position: Position) -> Result<(), Error> {
-        let body = &token[2..token.len() - 2];
+        let body = token
+            .strip_prefix("<?")
+            .and_then(|body| body.strip_suffix("?>"))
+            .ok_or_else(|| self.err(ErrorKind::InvalidToken, "invalid processing instruction"))?;
         let (target, rest) = take_name(body).ok_or_else(|| {
             self.err(
                 ErrorKind::InvalidToken,
@@ -1453,7 +1472,7 @@ impl Parser {
             self.emit(
                 EventKind::ProcessingInstruction {
                     target: string(target, self.allocator)?,
-                    data: normalize_newlines(rest.trim_start_matches(whitespace), self.allocator)?,
+                    data: self.source_text(rest.trim_start_matches(whitespace))?,
                 },
                 position,
             )?;
@@ -1773,6 +1792,9 @@ impl Parser {
         let Some(uri) = uri else {
             return string(local, self.allocator);
         };
+        // A short qualified name can reuse an arbitrarily long URI on every
+        // element or attribute. Bound that copied output independently of input.
+        self.charge_expansion(uri.len())?;
         let mut result = String::try_with_capacity_in(
             uri.len() + local.len() + prefix.map_or(2, |p| p.len() + 2),
             self.allocator,
@@ -1805,6 +1827,29 @@ impl Parser {
                 )
             })?;
         Ok(())
+    }
+
+    fn source_text(&self, text: &str) -> Result<String, Error> {
+        if self.sources.len() > 1 {
+            // Literal line endings were normalized when the entity was declared.
+            // Any CR left in replacement text came from a character reference.
+            string(text, self.allocator)
+        } else {
+            normalize_newlines(text, self.allocator)
+        }
+    }
+
+    fn requires_internal_entity_declaration(&self) -> bool {
+        if self.external_subset {
+            return false;
+        }
+        if self.in_doctype && self.standalone {
+            // Defaults inside a parameter entity may use its own declarations;
+            // the standalone constraint applies to references in the document.
+            self.sources.len() == 1
+        } else {
+            self.standalone || !self.has_external_subset
+        }
     }
 
     fn expand_attribute(&mut self, value: &str, chain: &mut Vec<String>) -> Result<String, Error> {
@@ -1861,6 +1906,14 @@ impl Parser {
                         self.err(ErrorKind::UndefinedEntity, "undefined entity in attribute")
                     );
                 };
+                if entity.declared_in_parameter_entity
+                    && self.requires_internal_entity_declaration()
+                {
+                    return Err(self.err(
+                        ErrorKind::EntityDeclaredInParameterEntity,
+                        "entity was declared in a parameter entity",
+                    ));
+                }
                 let value = entity.value.as_ref().ok_or_else(|| {
                     self.err(
                         ErrorKind::ExternalEntityInAttribute,

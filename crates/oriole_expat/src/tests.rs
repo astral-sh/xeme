@@ -339,6 +339,28 @@ fn base_can_be_set_from_its_existing_pointer() {
 }
 
 #[test]
+fn namespace_constructors_reject_non_ascii_separator_bytes() {
+    // SAFETY: Both constructors receive NULL encoding/suite pointers and a
+    // readable separator byte; every successfully constructed handle is freed.
+    unsafe {
+        for separator in 0x80_u8..=0xff {
+            let separator = separator as c_char;
+            assert!(XML_ParserCreateNS(ptr::null(), separator).is_null());
+            assert!(XML_ParserCreate_MM(ptr::null(), ptr::null(), &separator).is_null());
+        }
+        for separator in [0, b'\n', b'|', 0x7f] {
+            let separator = separator as c_char;
+            let parser = XML_ParserCreateNS(ptr::null(), separator);
+            assert!(!parser.is_null());
+            XML_ParserFree(parser);
+            let parser = XML_ParserCreate_MM(ptr::null(), ptr::null(), &separator);
+            assert!(!parser.is_null());
+            XML_ParserFree(parser);
+        }
+    }
+}
+
+#[test]
 fn namespace_triplets_and_specified_attributes() {
     // SAFETY: Callback pointers and state have the test's lifetime.
     unsafe {
@@ -683,11 +705,36 @@ fn external_dtd_declarations_are_available_to_the_parent() {
             OK
         );
         XML_ParserFree(child);
-        assert_eq!(XML_Parse(parent, c"<r>&e;</r>".as_ptr(), 10, 1), OK);
+        let document = b"<!DOCTYPE r SYSTEM 'test.dtd'><r>&e;</r>";
+        assert_eq!(
+            XML_Parse(parent, document.as_ptr().cast(), document.len() as c_int, 1),
+            OK
+        );
         assert_eq!(
             state.events,
             ["start:r", "a=default", "text:works", "end:r"]
         );
+        XML_ParserFree(parent);
+    }
+}
+
+#[test]
+fn manually_injected_dtd_requires_an_external_subset_context() {
+    // SAFETY: Both parsers remain live and serialized. Like Expat, importing an
+    // external declaration cannot make it an internal declaration of a document
+    // that has no external subset or parameter entity references.
+    unsafe {
+        let parent = XML_ParserCreate(ptr::null());
+        let child = XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null());
+        assert!(!child.is_null());
+        let dtd = b"<!ENTITY e 'works'>";
+        assert_eq!(
+            XML_Parse(child, dtd.as_ptr().cast(), dtd.len() as c_int, 1),
+            OK
+        );
+        XML_ParserFree(child);
+        assert_eq!(XML_Parse(parent, c"<r>&e;</r>".as_ptr(), 10, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(parent), 24);
         XML_ParserFree(parent);
     }
 }

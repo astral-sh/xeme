@@ -44,6 +44,11 @@ C memory-allocation contract and must not reenter parser APIs; entry points reje
 reentry before accessing a parser. Ordinary event callbacks remain reentrant for
 the documented operations above.
 
+Namespace separators must be ASCII bytes. The C constructors reject bytes
+`0x80` through `0xff`, which cannot be represented as a single UTF-8 byte by the
+Rust parser. ASCII separators retain their exact byte value; `\0` is supported
+without namespace triplets.
+
 The following Expat modes are explicitly unsupported:
 
 - Parameter entities inside declarations and conditional `INCLUDE`/`IGNORE`

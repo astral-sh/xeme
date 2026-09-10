@@ -118,3 +118,34 @@ fn incomplete_utf16_unit_and_surrogate_have_distinct_errors() {
         }
     }
 }
+
+#[test]
+fn an_unknown_declared_encoding_reports_its_value_location() {
+    for (input, line, column, byte) in [
+        (
+            &b"<?xml version='1.0' encoding='unknown'?><r/>"[..],
+            1,
+            30,
+            30,
+        ),
+        (
+            &b"<?xml version='1.0'\r\n encoding='unknown'?><r/>"[..],
+            2,
+            11,
+            32,
+        ),
+    ] {
+        let mut parser = Parser::new(Config::default());
+        parser.feed(input, true).unwrap();
+        let error = parser.next_event().unwrap_err();
+        assert_eq!(error.kind, ErrorKind::UnknownEncoding);
+        assert_eq!(
+            (
+                error.position.line,
+                error.position.column,
+                error.position.byte_index
+            ),
+            (line, column, byte)
+        );
+    }
+}

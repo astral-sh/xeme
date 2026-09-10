@@ -33,7 +33,7 @@ impl Parser {
             if !spaced {
                 return Err(self.err(ErrorKind::Syntax, "external identifier requires whitespace"));
             }
-            external_id(&mut cursor, false, self.allocator)?
+            external_id(&mut cursor, false, self.allocator, true)?
         } else {
             (None, None)
         };
@@ -183,6 +183,18 @@ impl Parser {
             return Err(self.err(ErrorKind::Syntax, "unexpected text in DTD"));
         };
         let limit = self.config.limits.max_token_bytes;
+        if mode == crate::ScanMode::Pi
+            && text[2..]
+                .chars()
+                .next()
+                .is_some_and(|character| !crate::names::is_name_start(character))
+        {
+            return Err(self.err_at(
+                ErrorKind::InvalidToken,
+                "invalid processing instruction target",
+                2,
+            ));
+        }
         let end = self
             .source_mut()
             .scan_token(mode, limit)
@@ -230,8 +242,8 @@ impl Parser {
             return Err(self.err(ErrorKind::InvalidToken, "invalid parameter entity name"));
         }
         let position = self.source().position(end + 1);
+        self.has_external_subset = true;
         if !self.parameter_entities_enabled() {
-            self.has_external_subset = true;
             self.declarations_skipped = !self.standalone;
             self.consume(end + 1);
             if !self.standalone {
@@ -311,16 +323,13 @@ impl Parser {
                 if value.contains("--") || value.ends_with('-') {
                     return Err(self.err(ErrorKind::InvalidToken, "double hyphen in DTD comment"));
                 }
-                self.emit(
-                    EventKind::Comment(normalize_newlines(value, self.allocator)?),
-                    position,
-                )?;
+                self.emit(EventKind::Comment(self.source_text(value)?), position)?;
                 self.event_raw(&text[..end + 7])?;
                 text = &rest[end + 3..];
                 continue;
             }
             if text.starts_with("<?") {
-                let end = text.find("?>").ok_or_else(|| {
+                let end = text[2..].find("?>").map(|index| index + 2).ok_or_else(|| {
                     self.err(
                         ErrorKind::UnclosedToken,
                         "unclosed DTD processing instruction",
@@ -387,8 +396,9 @@ impl Parser {
                     cursor
                         .require_space()
                         .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-                    let (system_id, public_id) = external_id(&mut cursor, true, self.allocator)
-                        .map_err(|error| self.err(error.kind, error.message))?;
+                    let (system_id, public_id) =
+                        external_id(&mut cursor, true, self.allocator, self.sources.len() == 1)
+                            .map_err(|error| self.err(error.kind, error.message))?;
                     self.emit(
                         EventKind::NotationDeclaration {
                             name,
@@ -447,7 +457,7 @@ impl Parser {
             let mut value = String::try_with_capacity_in(raw.len(), self.allocator)?;
             let mut rest = raw;
             while let Some(start) = rest.find('&') {
-                value.push_str(&normalize_newlines(&rest[..start], self.allocator)?)?;
+                value.push_str(&self.source_text(&rest[..start])?)?;
                 rest = &rest[start..];
                 let end = rest.find(';').ok_or_else(|| {
                     self.err(
@@ -475,11 +485,12 @@ impl Parser {
                 }
                 rest = &rest[end + 1..];
             }
-            value.push_str(&normalize_newlines(rest, self.allocator)?)?;
+            value.push_str(&self.source_text(rest)?)?;
             (Some(value), None, None, None)
         } else {
-            let (system_id, public_id) = external_id(cursor, false, self.allocator)
-                .map_err(|error| self.err(error.kind, error.message))?;
+            let (system_id, public_id) =
+                external_id(cursor, false, self.allocator, self.sources.len() == 1)
+                    .map_err(|error| self.err(error.kind, error.message))?;
             let spaced = cursor.space();
             let notation = if cursor.eat("NDATA") {
                 if parameter || !spaced {
@@ -523,6 +534,7 @@ impl Parser {
                     system_id: system_id.try_clone()?,
                     public_id: public_id.try_clone()?,
                     notation: notation.try_clone()?,
+                    declared_in_parameter_entity: self.external_subset || self.sources.len() > 1,
                 },
             )?;
             self.emit(
@@ -549,6 +561,7 @@ impl Parser {
             .name()
             .map_err(|message| self.err(ErrorKind::Syntax, message))?;
         let element = string(element, self.allocator)?;
+        let mut first_attribute = true;
         loop {
             let spaced = cursor.space();
             if cursor.rest().is_empty() {
@@ -652,6 +665,14 @@ impl Parser {
                     },
                 )?;
             }
+            if first_attribute {
+                first_attribute = false;
+            } else {
+                // Every later callback reuses the same input name. Charging before
+                // cloning prevents a long name and many tiny declarations from
+                // creating an unbounded queue of repeated callback payloads.
+                self.charge_expansion(element.len())?;
+            }
             self.emit(
                 EventKind::AttlistDeclaration {
                     element: element.try_clone()?,
@@ -724,12 +745,20 @@ fn external_id(
     cursor: &mut Cursor<'_>,
     public_only: bool,
     allocator: Allocator,
+    normalize: bool,
 ) -> Result<(Option<String>, Option<String>), Error> {
     let syntax = |message| Error::bare(ErrorKind::Syntax, message);
+    let system_literal = |value| {
+        if normalize {
+            normalize_newlines(value, allocator)
+        } else {
+            string(value, allocator)
+        }
+    };
     if cursor.eat("SYSTEM") {
         cursor.require_space().map_err(syntax)?;
         let value = cursor.quoted().map_err(syntax)?;
-        Ok((Some(normalize_newlines(value, allocator)?), None))
+        Ok((Some(system_literal(value)?), None))
     } else if cursor.eat("PUBLIC") {
         cursor.require_space().map_err(syntax)?;
         let public = cursor.quoted().map_err(syntax)?;
@@ -754,10 +783,7 @@ fn external_id(
             return Err(syntax("system identifier requires whitespace"));
         }
         let system = cursor.quoted().map_err(syntax)?;
-        Ok((
-            Some(normalize_newlines(system, allocator)?),
-            Some(normalized),
-        ))
+        Ok((Some(system_literal(system)?), Some(normalized)))
     } else {
         Err(syntax("external identifier requires SYSTEM or PUBLIC"))
     }

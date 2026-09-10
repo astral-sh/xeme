@@ -105,6 +105,21 @@ fn nested_entity_markup_is_balanced() {
 }
 
 #[test]
+fn character_reference_carriage_returns_survive_entity_replacement() {
+    let events = every_chunk(
+        "<!DOCTYPE r [<!ENTITY e 'a&#13;b<![CDATA[c&#13;d]]><!--e&#13;f--><?pi g&#13;h?>'><!ENTITY nl 'a\r\nb'>]><r>&e;&nl;</r>",
+    );
+    assert!(events.contains(&EventKind::Text(text("a\rb"))));
+    assert!(events.contains(&EventKind::Text(text("c\rd"))));
+    assert!(events.contains(&EventKind::Text(text("a\nb"))));
+    assert!(events.contains(&EventKind::Comment(text("e\rf"))));
+    assert!(events.contains(&EventKind::ProcessingInstruction {
+        target: text("pi"),
+        data: text("g\rh")
+    }));
+}
+
+#[test]
 fn encodings_and_split_surrogates() {
     let xml = "<?xml version='1.0' encoding='UTF-16'?><r>hé😀</r>";
     for little in [true, false] {
@@ -240,6 +255,31 @@ fn reused_default_attributes_consume_the_expansion_budget() {
         ..Config::default()
     };
     assert!(parse(b"<!DOCTYPE r [<!ATTLIST item a CDATA 'default'>]><r><item a='own'/><item a='own'/></r>", 1, config).is_ok());
+}
+
+#[test]
+fn reused_namespace_uris_and_declaration_names_consume_the_expansion_budget() {
+    for xml in [
+        "<r xmlns:p='0123456789'><p:a/><p:a/></r>",
+        "<r xmlns:p='0123456789'><a p:x='1' p:y='2'/></r>",
+        "<!DOCTYPE r [<!ATTLIST abcdefghij a CDATA #IMPLIED b CDATA #IMPLIED c CDATA #IMPLIED>]><r/>",
+    ] {
+        for chunk in [1, 7, xml.len()] {
+            let config = Config {
+                namespace_separator: Some('|'),
+                limits: Limits {
+                    max_entity_expansion_bytes: 16,
+                    ..Limits::default()
+                },
+                ..Config::default()
+            };
+            assert_eq!(
+                parse(xml.as_bytes(), chunk, config),
+                Err(ErrorKind::LimitExceeded),
+                "{xml}, chunk {chunk}"
+            );
+        }
+    }
 }
 
 #[test]
@@ -499,6 +539,62 @@ fn parameter_entities_expand_declarations_with_explicit_processing() {
 }
 
 #[test]
+fn standalone_documents_reject_entities_declared_in_parameter_entities() {
+    for external in [false, true] {
+        for standalone in [false, true] {
+            for attribute in [false, true] {
+                let mut parser = Parser::new(Config::default());
+                assert!(parser.set_param_entity_parsing(2));
+                let mut xml = if standalone {
+                    "<?xml version='1.0' standalone='yes'?>"
+                } else {
+                    ""
+                }
+                .to_owned();
+                xml.push_str(if external {
+                    "<!DOCTYPE r SYSTEM 'test.dtd'>"
+                } else {
+                    "<!DOCTYPE r [<!ENTITY % p \"<!ENTITY e 'value'>\">%p;]>"
+                });
+                xml.push_str(if attribute {
+                    "<r a='&e;'/>"
+                } else {
+                    "<r>&e;</r>"
+                });
+                parser.feed(xml.as_bytes(), true).unwrap();
+                let result = loop {
+                    match parser.next_event() {
+                        Ok(Some(event)) => {
+                            if matches!(
+                                event.kind,
+                                EventKind::ExternalEntityReference { context: None, .. }
+                            ) {
+                                let mut child =
+                                    parser.external_child_with_encoding(None, None).unwrap();
+                                child.feed(b"<!ENTITY e 'value'>", true).unwrap();
+                                while child.next_event().unwrap().is_some() {}
+                                parser.merge_external_subset(&child).unwrap();
+                            }
+                        }
+                        Ok(None) => break Ok(()),
+                        Err(error) => break Err(error.kind),
+                    }
+                };
+                assert_eq!(
+                    result,
+                    if standalone {
+                        Err(ErrorKind::EntityDeclaredInParameterEntity)
+                    } else {
+                        Ok(())
+                    },
+                    "external={external}, standalone={standalone}, attribute={attribute}"
+                );
+            }
+        }
+    }
+}
+
+#[test]
 fn foreign_dtd_requests_have_null_identifiers() {
     let mut parser = Parser::new(Config::default());
     assert!(parser.set_param_entity_parsing(2));
@@ -693,6 +789,23 @@ fn malformed_tokens_report_the_offending_byte() {
             (kind, byte),
             "{xml:?}"
         );
+    }
+}
+
+#[test]
+fn overlapping_processing_instruction_delimiters_never_panic() {
+    for xml in [
+        "<!DOCTYPE r[<?>?>",
+        "<!DOCTYPE r [<?>x<?>",
+        "<!DOCTYPE r [<?>LEM8888 (a,b*)>\n<!DOCTYPE r [<?>LEM8888 (a,b*)>",
+        "<?>x<?>",
+    ] {
+        for chunk in 1..=xml.len() {
+            assert!(
+                parse(xml.as_bytes(), chunk, Config::default()).is_err(),
+                "{xml}, chunk {chunk}"
+            );
+        }
     }
 }
 

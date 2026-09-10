@@ -262,6 +262,8 @@ XML_ParserCreate(const XML_Char *encoding);
    URI, the namespace separator character, and the local part of the
    name.  If the namespace separator is '\0' then the namespace URI
    and the local part will be concatenated without any separator.
+   Oriole requires an ASCII namespace separator: its C constructors return
+   NULL for separator bytes 0x80 through 0xff.
    It is a programming error to use the separator '\0' with namespace
    triplets (see XML_SetReturnNSTriplet).
    If a namespace separator is chosen that can be part of a URI or

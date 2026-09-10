@@ -3201,3 +3201,210 @@ fn resetting_after_a_missing_parameter_restores_declaration_processing() {
         XML_ParserFree(parser);
     }
 }
+
+#[test]
+fn doctype_closing_tokens_follow_each_handler_and_survive_mutation() {
+    unsafe extern "C" fn element_start(_: *mut c_void, _: *const c_char, _: *const *const c_char) {}
+    unsafe extern "C" fn element_end(_: *mut c_void, _: *const c_char) {}
+    struct ClosingState {
+        parser: XML_Parser,
+        events: Vec<String>,
+        action: u8,
+    }
+    unsafe extern "C" fn raw(data: *mut c_void, value: *const c_char, len: c_int) {
+        // SAFETY: Test-owned callback data and bytes stay live for the callback.
+        unsafe {
+            let state = &mut *data.cast::<ClosingState>();
+            let value = std::str::from_utf8(std::slice::from_raw_parts(value.cast(), len as usize))
+                .unwrap();
+            if let Some(previous) = state.events.last_mut().filter(|s| s.starts_with("raw:")) {
+                previous.push_str(value);
+            } else {
+                state.events.push(format!("raw:{value}"));
+            }
+            let parser = state.parser;
+            if state.action == 5 && value == "]" {
+                state.action = 0;
+                XML_SetStartDoctypeDeclHandler(parser, Some(start));
+                assert_eq!(XML_StopParser(parser, 1), OK);
+            }
+        }
+    }
+    unsafe extern "C" fn start(
+        data: *mut c_void,
+        _: *const c_char,
+        _: *const c_char,
+        _: *const c_char,
+        _: c_int,
+    ) {
+        // SAFETY: Copy callback controls before invoking the serialized C API.
+        unsafe {
+            let state = &mut *data.cast::<ClosingState>();
+            state.events.push("doctype".into());
+            let (parser, action) = (state.parser, state.action);
+            if action == 1 {
+                XML_SetStartDoctypeDeclHandler(parser, None);
+                assert_eq!(XML_StopParser(parser, 1), OK);
+            }
+        }
+    }
+    unsafe extern "C" fn end(data: *mut c_void) {
+        // SAFETY: The state is owned by this test and lives until parser free.
+        unsafe {
+            (*data.cast::<ClosingState>())
+                .events
+                .push("enddoctype".into())
+        };
+    }
+    unsafe extern "C" fn external(
+        parser: XML_Parser,
+        context: *const c_char,
+        _: *const c_char,
+        _: *const c_char,
+        _: *const c_char,
+    ) -> c_int {
+        // SAFETY: Related parser operations are serialized; child input finishes
+        // before freeing it. No borrowed state is accessed across parser calls.
+        unsafe {
+            let data = XML_GetUserData(parser).cast::<ClosingState>();
+            (*data).events.push("external".into());
+            let action = (*data).action;
+            match action {
+                2 => XML_SetStartDoctypeDeclHandler(parser, Some(start)),
+                3 => XML_SetStartDoctypeDeclHandler(parser, None),
+                4 => XML_SetEndDoctypeDeclHandler(parser, Some(end)),
+                _ => {}
+            }
+            let child = XML_ExternalEntityParserCreate(parser, context, ptr::null());
+            assert!(!child.is_null());
+            let status = XML_Parse(child, ptr::null(), 0, 1);
+            XML_ParserFree(child);
+            status
+        }
+    }
+    type ClosingCase<'a> = (&'a [u8], bool, bool, u8, &'a [&'a str]);
+    let cases: &[ClosingCase<'_>] = &[
+        (b"<!DOCTYPE r>", true, false, 0, &["doctype"]),
+        (b"<!DOCTYPE r>", true, false, 1, &["doctype"]),
+        (
+            b"<!DOCTYPE r>",
+            false,
+            true,
+            0,
+            &["raw:<!DOCTYPE r", "enddoctype"],
+        ),
+        (b"<!DOCTYPE r>", false, false, 0, &["raw:<!DOCTYPE r>"]),
+        (b"<!DOCTYPE r [] \t>", true, false, 0, &["doctype", "raw:>"]),
+        (
+            b"<!DOCTYPE r [] \t>",
+            true,
+            true,
+            0,
+            &["doctype", "enddoctype"],
+        ),
+        (
+            b"<!DOCTYPE r [] \t>",
+            false,
+            true,
+            0,
+            &["raw:<!DOCTYPE r [] \t", "enddoctype"],
+        ),
+        (
+            b"<!DOCTYPE r [] \t>",
+            false,
+            false,
+            5,
+            &["raw:<!DOCTYPE r []>"],
+        ),
+        (
+            b"<!DOCTYPE r SYSTEM 'dtd'>",
+            true,
+            false,
+            3,
+            &["doctype", "external"],
+        ),
+        (
+            b"<!DOCTYPE r SYSTEM 'dtd'>",
+            false,
+            false,
+            2,
+            &["raw:<!DOCTYPE r SYSTEM 'dtd'", "external", "raw:>"],
+        ),
+        (
+            b"<!DOCTYPE r SYSTEM 'dtd' [] \t>",
+            false,
+            false,
+            2,
+            &["raw:<!DOCTYPE r SYSTEM 'dtd' [] \t", "external", "raw:>"],
+        ),
+        (
+            b"<!DOCTYPE r SYSTEM 'dtd' [] \t>",
+            true,
+            false,
+            3,
+            &["doctype", "external", "raw:>"],
+        ),
+        (
+            b"<!DOCTYPE r SYSTEM 'dtd' [] \t>",
+            true,
+            false,
+            4,
+            &["doctype", "external", "enddoctype"],
+        ),
+    ];
+    for &(declaration, has_start, has_end, action, expected) in cases {
+        for width in 1..=declaration.len() + 4 {
+            // SAFETY: Every buffer, handle and callback context remains owned
+            // throughout parsing, any resume, reset and final cleanup.
+            unsafe {
+                let parser = XML_ParserCreate(ptr::null());
+                assert!(!parser.is_null());
+                let mut state = ClosingState {
+                    parser,
+                    events: Vec::new(),
+                    action,
+                };
+                XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                XML_SetDefaultHandlerExpand(parser, Some(raw));
+                XML_SetElementHandler(parser, Some(element_start), Some(element_end));
+                XML_SetStartDoctypeDeclHandler(parser, has_start.then_some(start));
+                XML_SetEndDoctypeDeclHandler(parser, has_end.then_some(end));
+                XML_SetExternalEntityRefHandler(parser, Some(external));
+                assert_eq!(XML_SetParamEntityParsing(parser, 2), 1);
+                // Element callbacks consume the root's raw markup so every
+                // default byte belongs to the declaration under review.
+                let mut input = declaration.to_vec();
+                input.extend_from_slice(b"<r/>");
+                for (index, part) in input.chunks(width).enumerate() {
+                    let mut status = XML_Parse(
+                        parser,
+                        part.as_ptr().cast(),
+                        part.len() as c_int,
+                        c_int::from((index + 1) * width >= input.len()),
+                    );
+                    while status == SUSPENDED {
+                        status = XML_ResumeParser(parser);
+                    }
+                    assert_eq!(status, OK);
+                }
+                assert_eq!(state.events, expected, "{declaration:?}, width {width}");
+                assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+                state.events.clear();
+                XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                XML_SetDefaultHandlerExpand(parser, Some(raw));
+                let reset_input = b"<!DOCTYPE r><r/>";
+                assert_eq!(
+                    XML_Parse(
+                        parser,
+                        reset_input.as_ptr().cast(),
+                        reset_input.len() as c_int,
+                        1
+                    ),
+                    OK
+                );
+                assert_eq!(state.events, ["raw:<!DOCTYPE r><r/>"]);
+                XML_ParserFree(parser);
+            }
+        }
+    }
+}

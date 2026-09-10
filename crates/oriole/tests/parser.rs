@@ -1066,9 +1066,12 @@ fn queued_dtd_events_have_individual_raw_tokens() {
     assert_eq!(raw[0].1, "<!DOCTYPE r [");
     assert_eq!(raw[1].1, "<!ENTITY e 'value'>");
     assert_eq!(raw[2].1, "<!ELEMENT r EMPTY>");
-    assert_eq!(raw[3].1, "]>");
-    assert_eq!(raw[4].1, "<r/>");
-    assert_eq!(raw[5].1, "");
+    assert!(matches!(raw[3].0, EventKind::DoctypeClosingPrefix));
+    assert_eq!(raw[3].1, "]");
+    assert!(matches!(raw[4].0, EventKind::EndDoctype));
+    assert_eq!(raw[4].1, ">");
+    assert_eq!(raw[5].1, "<r/>");
+    assert_eq!(raw[6].1, "");
 }
 
 #[test]

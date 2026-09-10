@@ -271,6 +271,10 @@ pub enum EventKind {
     },
     ExternalEntityReference(oriole_storage::Box<ExternalEntityReference>),
     StartDoctype(oriole_storage::Box<DoctypeDeclaration>),
+    /// Internal-subset closing bracket or whitespace before the final `>`.
+    /// A C adapter suppresses default delivery when its start-doctype handler
+    /// handles this grammar token.
+    DoctypeClosingPrefix,
     EndDoctype,
     NotStandalone,
     StartNamespace {

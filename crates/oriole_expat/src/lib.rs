@@ -165,6 +165,7 @@ pub struct XML_ParserStruct {
     unknown_encoding_arg: *mut c_void,
     default_dispatch: bool,
     default_pending: Queue<XmlString>,
+    doctype_close_handled: bool,
     family: Shared<FamilyBudget>,
     child_depth: usize,
     encoding_release: Option<unsafe extern "C" fn(*mut c_void)>,
@@ -324,6 +325,7 @@ unsafe fn create(
                     unknown_encoding_arg: ptr::null_mut(),
                     default_dispatch: false,
                     default_pending: Queue::new_in(allocator),
+                    doctype_close_handled: false,
                     family,
                     child_depth: 0,
                     encoding_release: None,
@@ -539,6 +541,7 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                 (*parser).error = 0;
                 (*parser).parse_error = 0;
                 (*parser).final_buffer = false;
+                (*parser).doctype_close_handled = false;
                 (*parser).specified_attributes = 0;
                 (*parser).base = None;
                 (*parser).buffer.clear();
@@ -596,6 +599,7 @@ unsafe fn dispatch(
     let optional_len = |value: &Option<XmlString>| value.as_ref().map_or(0, |value| value.len());
     let callback_bytes = match &kind {
         EventKind::Default
+        | EventKind::DoctypeClosingPrefix
         | EventKind::EntityDeclarationPrefix
         | EventKind::AttlistDeclarationPrefix
         | EventKind::ElementDeclarationPrefix
@@ -683,6 +687,7 @@ unsafe fn dispatch(
     let split_default = matches!(
         &kind,
         EventKind::StartDoctype(_)
+            | EventKind::DoctypeClosingPrefix
             | EventKind::EndDoctype
             | EventKind::EntityDeclaration(_)
             | EventKind::AttlistDeclaration(_)
@@ -706,6 +711,7 @@ unsafe fn dispatch(
     unsafe {
         match kind {
             EventKind::Default => handled = false,
+            EventKind::DoctypeClosingPrefix => handled = h.start_doctype.is_some(),
             EventKind::EntityDeclarationPrefix => handled = h.entity_decl.is_some(),
             EventKind::AttlistDeclarationPrefix => handled = h.attlist_decl.is_some(),
             EventKind::ElementDeclarationPrefix => handled = h.element_decl.is_some(),
@@ -860,6 +866,10 @@ unsafe fn dispatch(
                     public_id,
                     has_internal_subset,
                 } = XmlBox::into_inner(declaration);
+                // The start callback handles the closing token only when this
+                // declaration has no internal subset. Preserve that decision
+                // across handler changes and an intervening external callback.
+                (*parser).doctype_close_handled = !has_internal_subset && h.start_doctype.is_some();
                 if let Some(callback) = h.start_doctype {
                     callback(
                         arg,
@@ -876,8 +886,9 @@ unsafe fn dispatch(
                 if let Some(callback) = h.end_doctype {
                     callback(arg);
                 } else {
-                    handled = false;
+                    handled = (*parser).doctype_close_handled;
                 }
+                (*parser).doctype_close_handled = false;
             }
             EventKind::StartNamespace { prefix, uri } => {
                 if let Some(callback) = h.start_namespace {
@@ -2126,6 +2137,7 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                         unknown_encoding_arg: (*parser).unknown_encoding_arg,
                         default_dispatch: false,
                         default_pending: Queue::new_in(allocator),
+                        doctype_close_handled: false,
                         family: Shared::clone(&(*parser).family),
                         child_depth: (*parser).child_depth + 1,
                         encoding_release: None,

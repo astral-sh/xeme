@@ -487,7 +487,16 @@ impl Parser {
                 .for_slice(&text[..end])
                 .decode(self.allocator)?;
             self.account_source(end)?;
-            self.finish_doctype(position, &raw)?;
+            self.emit(EventKind::DoctypeClosingPrefix, self.source().position(1))?;
+            self.event_raw(&raw[..1])?;
+            if end > 2 {
+                self.emit(
+                    EventKind::DoctypeClosingPrefix,
+                    self.source().position_at(1, end - 2),
+                )?;
+                self.event_raw(&raw[1..raw.len() - 1])?;
+            }
+            self.finish_doctype(position, ">")?;
             self.consume(end)?;
             return Ok(true);
         }

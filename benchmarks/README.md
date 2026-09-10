@@ -1,6 +1,8 @@
 # Benchmarks
 
-See the [validated checkpoint](results/2026-09-10/checkpoint/),
+See the [combined runtime measurements](results/2026-09-10/combined-runtime/),
+[inline text experiment](results/2026-09-10/inline-text/),
+[earlier validated checkpoint](results/2026-09-10/checkpoint/),
 [explicit namespace measurements](results/2026-09-10/namespaces/),
 [callback allocation measurements](results/2026-09-10/callback-allocation/), and
 [initial optimization comparisons](results/2026-09-10/README.md) for results, source

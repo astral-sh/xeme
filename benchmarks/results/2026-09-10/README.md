@@ -1,0 +1,70 @@
+# Initial measurements — September 10, 2026
+
+These measurements establish a baseline before the DTD index and buffer reuse
+optimizations. Oriole is substantially slower than Expat on these generated
+workloads. They are not CPython application benchmarks.
+
+## C interface
+
+Median milliseconds for a complete parse, with 4 KiB input chunks:
+
+| Workload | Input bytes | Oriole | Expat 2.8.4 |
+| --- | ---: | ---: | ---: |
+| 10,000 empty elements with attributes | 310,013 | 23.06 | 3.53 |
+| Text with line breaks | 440,013 | 11.44 | 1.61 |
+| Predefined and numeric references | 340,013 | 31.50 | 2.15 |
+| Prefixed names, namespace processing disabled | 330,034 | 26.24 | 3.24 |
+
+Across the tested 64-byte, 4 KiB, and 1 MiB chunk sizes, Oriole took approximately
+6–17 times as long as Expat. The [complete native results](native-baseline.json.gz)
+retain every sample and all paired ratios, including the discarded warmups.
+
+## Safe Rust API and allocators
+
+Median milliseconds with the same 4 KiB chunks:
+
+| Workload | System | jemalloc | mimalloc |
+| --- | ---: | ---: | ---: |
+| Elements and attributes | 16.71 | 15.85 | 15.79 |
+| Text with line breaks | 9.84 | 9.65 | 9.98 |
+| References | 25.08 | 25.53 | 25.19 |
+| Prefixed names, namespace processing disabled | 19.06 | 18.05 | 18.44 |
+
+No allocator won on every workload. These small differences do not establish a
+universal preference. The CLI follows uv's platform allocator policy; library
+users choose their allocator. The safe API and C API include different ownership
+and accounting work, so their absolute timings are separate comparisons.
+
+Separate instrumented runs counted 140,021 allocation/reallocation requests for
+elements, 40,234 for text, 190,096 for references, and 150,047 for prefixed names.
+These counts motivated buffer and temporary-string work. Requested bytes are the
+sum of requests, including reallocations; they are not peak live memory. The
+[allocator results](allocators-baseline.json.gz) retain those observations
+separately from the uninstrumented timing samples.
+
+## Method and provenance
+
+Each comparison used seven randomized pairs of processes. Each process discarded
+one warmup and timed ten complete parses, including construction, callback/event
+processing, and destruction. Loading files and libraries, process startup, and
+JSON output were excluded. Results are medians of process medians. The runners
+check callback output before or during comparisons; native preflight compares
+complete normalized streams separately from its timed FNV digest.
+
+The host reported an AMD EPYC-Milan processor. Processes were pinned to one
+available logical CPU, but competing host activity, frequency, and memory
+bandwidth were uncontrolled. Filesystem caches were warm. Rust builds used Ohm
+1.98.1-dev (`f62703110`), thin LTO, and one codegen unit. The reference was Expat
+2.8.4, built in CMake Release mode, at
+`12cf0b1f25f026a022fe728ad8f7e3d017285b80`.
+
+The [source archive](baseline-source.tar.gz) preserves the exact baseline Rust
+sources and benchmark executable source. The [source manifest](baseline-source.json)
+and [build manifest](baseline-complete-build.json) identify source, compiler,
+commands, and executable hashes. The latter is a supplemental manifest assembled
+from the retained artifacts after the initial timing run. The original result
+files remain unchanged; newer runner versions also hash their Python helpers,
+copy build manifests, and isolate preflight in a process with a timeout.
+
+These are local development results. They do not establish performance on other
+architectures, production toolchains, real application corpora, or a PBS build.

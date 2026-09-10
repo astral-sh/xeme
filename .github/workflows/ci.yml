@@ -43,6 +43,11 @@ jobs:
           components: rustfmt, clippy
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - run: cargo fmt --manifest-path benchmarks/inprocess/Cargo.toml --check
+      - run: cargo clippy --manifest-path benchmarks/inprocess/Cargo.toml --all-targets --locked -- -D warnings
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+      - run: uvx --from ruff==0.16.6 ruff check tools benchmarks
+      - run: uvx --from ty==0.0.80 ty check --extra-search-path tools tools benchmarks
   native:
     name: C ABI and callback safety
     runs-on: ubuntu-24.04-arm

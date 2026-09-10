@@ -1,0 +1,22 @@
+[package]
+name = "oriole-inprocess-benchmark"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[features]
+default = []
+jemalloc = ["dep:tikv-jemallocator"]
+mimalloc = ["dep:mimalloc"]
+allocation-counts = []
+
+[dependencies]
+oriole = { path = "../../crates/oriole" }
+tikv-jemallocator = { version = "0.6.0", optional = true }
+mimalloc = { version = "0.1.50", features = ["v2"], optional = true }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

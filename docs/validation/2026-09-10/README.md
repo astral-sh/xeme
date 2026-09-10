@@ -2,37 +2,21 @@
 
 ## Current evidence
 
-The [combined evidence package](combined-evidence/) preserves full reports, input
-and source hashes, commands, skipped tests, and failures. Its main runtime is
-`b68bdca`; subsequent fixes have their own independent reviews and combined checks.
+The [final runtime package](final-runtime/) identifies parser revision `1262888` and fuzz harness `338dcd0`. It retains source and binary hashes, commands, raw observations, skipped tests, failures and independent reviews. Earlier checkpoints remain available with their own source identities.
 
 | Gate | Result | Evidence |
 | --- | --- | --- |
-| Full Expat public API matrix | 3,753 pass, 987 fail; 12 further improvements, zero regressions; no crashes/timeouts | [Latest matrix](external-grammar/), [earlier failure classification](combined-evidence/) |
-| CPython 3.12.13 | Six XML modules succeed in four shared/static, original/fixed configurations; 803 reported tests, 31 skips per run | [Latest consumer reports](../../../benchmarks/results/2026-09-10/dtd-checkpoint/) |
-| Native allocation and callback probes | Six shared/static runs pass, including 353 allocation-failure scenarios per linkage | [Latest native report](../../../benchmarks/results/2026-09-10/dtd-checkpoint/) |
-| Generated differential corpus | 12,318 semantic comparisons pass; six exact-fragment and 450 final-position differences remain | [Combined runtime replay](../../../benchmarks/results/2026-09-10/dtd-checkpoint/) |
-| Three ten-minute Rust ASan campaigns | 4,240,573 executions without findings, plus corpus and large-input replays | [Frozen source and corpora](combined-evidence/campaigns/final/) |
-| Full PBS distribution | Measured runtime passes archive validator, custom checks, installed XML suites, and CentOS 7/glibc 2.17 with 802 tests, 13 skips | [Successful build and runtime evidence](pbs-values/) |
-| W3C acceptance corpus | 5,916 required checks pass, six fail; 81 optional observations; no resolver errors | [Latest results](external-grammar/), [original catalog](w3c/) |
-| External DTD declaration grammar | Independent 8,254 encoded comparisons match; full 4,656-case matrix has no outcome or successful normalized-callback differences | [Implementation, review and combined checks](external-grammar/) |
-| Declared UTF-16 diagnostics | Incorrect-encoding errors retain their declaration value location; 60 focused upstream configurations pass | [Encoding review](encoding-mismatch/) |
-| External entity values and declaration callbacks | 18,468 positive observations match; malformed-input differences retained | [Implementation and review](external-values/) |
-| Foreign DTD policy | 4,632 outcomes and 480 nested observations match; 24 upstream configurations fixed | [Policy review](foreign-dtd-policy/) |
-| External content encoding | Five upstream tests fixed across all 12 configurations; context oracles add no differences | [Encoding review](content-encoding/) |
-| Namespace/version syntax | Empty namespace prefix and forward-compatible XML declarations corrected | [Namespaces](empty-namespace-prefix/), [versions](xml-versions/) |
+| Full Expat public API matrix | 3,753 pass, 987 fail; no signals/timeouts; 12 improvements over PR56, zero regressions | [Full matrix](external-grammar/), [allocation diagnosis](final-runtime/) |
+| CPython 3.12.13 | Six XML modules succeed in four shared/static, original/fixed configurations; 803 reported tests, 31 skips per run | [Final consumers](final-runtime/) |
+| Native callback and allocation probes | Six shared/static runs pass, including 353 allocation-failure scenarios per linkage | [Final native report](final-runtime/) |
+| Generated differential corpus | 12,318 semantic comparisons pass; six exact-fragment and 450 final-position differences remain | [Final generated corpus](final-runtime/) |
+| Three ten-minute Rust ASan campaigns | 3,912,477 executions without findings; 15,713 corpus input files and 84 stress replays | [Frozen source, corpora and audits](final-runtime/) |
+| W3C acceptance corpus | 5,916 required checks pass, six fail; 81 optional observations, no resolver errors | [Full results](external-grammar/) |
+| Final full PBS distribution | Build and installed-distribution gates in progress | [Dedicated build](https://github.com/astral-sh/oriole/actions/runs/34456274540) |
 
-The successful PBS archive matches all compiled Rust sources in the measured
-`b68bdca` runtime. A previous successful archive at `6a6a9ec` is retained separately.
-Local consumer passes are not substituted for installed-distribution validation.
+[Final benchmarks](../../../benchmarks/results/2026-09-10/final-runtime/) measure the same runtime through the C and safe Rust APIs, with namespace modes, alternate allocators and DTD scaling. Oriole remains about 5–11 times slower than Expat on the 4 KiB generated C workloads. Raw runs, semantic preflights, allocation counts and limitations are retained.
 
-[The DTD checkpoint](../../../benchmarks/results/2026-09-10/dtd-checkpoint/)
-measures the combined PR56 runtime with namespaces enabled and disabled, and adds
-DTD scaling measurements with one-byte feeds. The C interface remains about
-5–11 times slower than Expat on its 4 KiB generated workloads. The earlier
-[allocator comparison](../../../benchmarks/results/2026-09-10/combined-runtime/)
-still identifies its `b68bdca` source. Reports retain raw runs, semantic preflights,
-allocation counts, and regressions.
+The [previous successful PBS archive](pbs-values/) identifies the earlier `b68bdca` runtime. Its archive validator, installed XML suites and actual glibc 2.17 baseline all pass. It is not relabeled as a result for the final runtime. The [earlier combined evidence package](combined-evidence/) retains its complete source and campaign history.
 
 ## Earlier validation layers
 
@@ -43,7 +27,7 @@ one claim of Expat equivalence.
 | Layer | Result | Evidence |
 |---|---|---|
 | Conditional DTD and multibyte input | 3,455 upstream API configurations pass; 1,285 fail | [Complete API matrix](multibyte/) |
-| Actual consumers for that same runtime | Four CPython shared/static, original/fixed runs pass 803 tests with 31 skips each; six native C suites pass | [Consumer report](newfeatures-consumers/) |
+| Actual consumers for that same runtime | Four CPython shared/static, original/fixed runs succeed with 803 reported tests and 31 skips each; six native C suites pass | [Consumer report](newfeatures-consumers/) |
 | Malformed references, prolog, and deferral | 60,159 cases have no acceptance or normalized-callback differences; 39 error, three exact-fragment, and 2,307 position differences remain | [Expanded replay](prolog-deferral/) |
 | Independent stop/resume review | 80 prior differences fixed; two new malformed-input callback differences and 242 existing differences retained | [Suspension review](prolog-suspension/) |
 | Internal parameter entities in values | 256 status/error, 12 inheritance, and 23,328 encoding/chunk summaries match; focused upstream matrix gains 24 configurations | [Parameter-value report](parameter-values/) |
@@ -70,7 +54,7 @@ library/source hashes, failures, and logs; `index.json` records their file hashe
 |---|---|---|
 | Generated and named differential corpus | 6,159 semantic comparisons pass | Acceptance, error codes, and normalized callbacks; chunks 1, 7, and 4,096 |
 | Pinned libxml2 corpus and named cases | 807 comparisons pass | Acceptance/error/location only; callbacks disabled |
-| Actual CPython XML consumers | 803 tests pass, 31 skips | Each of shared and static unmodified consumers, CPython 3.12.13 |
+| Actual CPython XML consumers | 803 reported tests, 31 skips; suites succeed | Each of shared and static unmodified consumers, CPython 3.12.13 |
 | Native C ABI/lifecycle | Pass | C callbacks instrumented with ASan/UBSan |
 | Custom allocator failure sweep | 386 scenarios pass | Every successful custom allocation released |
 | C API sanitizer fuzzing | 5,422 replay and 591,789 campaign executions pass | Rust ASan, 121-second campaign; leak sanitizer disabled under ptrace |
@@ -96,7 +80,7 @@ The [explicit upstream backport and fault probes](../../../integration/python-bu
 show that both reference-linked and Oriole-linked original consumers crash when
 child creation returns NULL. Patched reference, shared-Oriole, and static-Oriole
 consumers raise `MemoryError` and preserve parent ownership. Patched shared/static
-consumers each pass the same 803 tests. The opt-in PBS bundle includes this fix.
+consumers each report the same 803 tests, including 31 skips, with successful suites. The opt-in PBS bundle includes this fix.
 
 The separate [external-family fuzz target](../../../fuzz/results/2026-09-10/ffi-family/)
 passed 16 initial-seed replays and 266,749 executions in 121 seconds, exercising
@@ -113,9 +97,10 @@ atomic lifetime tokens. Related parser operations still require serialization.
 
 The [PBS recipe](../../../integration/python-build-standalone/) has a real PIC
 archive, native static consumer checks, and complete-archive shared-link validation.
-A dedicated CI job has passed the complete Linux x86-64 distribution, its
+The [earlier `b68bdca` PBS job](pbs-values/) passed the complete Linux x86-64 distribution, its
 metadata/linkage validator, and the resulting interpreter's XML tests, including
-the actual glibc 2.17 baseline. Other distribution targets need separate validation.
+the actual glibc 2.17 baseline. The final-runtime build is tracked above. Other
+distribution targets need separate validation.
 
 Complete Expat compatibility, unsupported DTD/custom-encoding modes, strict callback
 and position equivalence, and broader target distribution validation remain open.

@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "scope": "Read-only package member/hash audit; no benchmark or test reruns.",
+  "archives": {
+    "source.tar.gz": {
+      "members_verified": 62,
+      "sha256": "f292f9500d508e780cccb0b46092a66772552342115cf3b3060b4c2fc737e935"
+    },
+    "consumer-and-native.tar.gz": {
+      "members_verified": 53,
+      "sha256": "c5f6eae686f31b0c5a65051f9c34293483313e35cea88d1f179fdd0c6991e3d6"
+    },
+    "generated.tar.gz": {
+      "members_verified": 7,
+      "sha256": "0a2e63dec7aa0a60919529c405359a7251e7eba5aac1e2c5639d31cce09f753c"
+    },
+    "allocation-diagnosis.tar.gz": {
+      "members_verified": 25,
+      "sha256": "1c70c255aeae4564efe4ee234aadac2e18380380839e84f25be88a1b106c0c05"
+    },
+    "campaigns.tar.gz": {
+      "members_verified": 55,
+      "sha256": "1293076cbb3a7999b75f211141aabe435e2ffb3e55978e38f20039591ce3315c"
+    }
+  }
+}

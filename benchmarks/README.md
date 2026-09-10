@@ -1,6 +1,7 @@
 # Benchmarks
 
-See the [DTD runtime checkpoint](results/2026-09-10/dtd-checkpoint/),
+See the [final runtime measurements](results/2026-09-10/final-runtime/),
+[DTD runtime checkpoint](results/2026-09-10/dtd-checkpoint/),
 [earlier combined runtime measurements](results/2026-09-10/combined-runtime/),
 [inline text experiment](results/2026-09-10/inline-text/),
 [earlier validated checkpoint](results/2026-09-10/checkpoint/),

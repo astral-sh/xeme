@@ -1889,7 +1889,12 @@ impl Parser {
                 )?;
                 return Ok(());
             }
-            if attrs.is_empty() || attrs[0].0 != "version" || !matches!(attrs[0].1, "1.0" | "1.1") {
+            if attrs.is_empty()
+                || attrs[0].0 != "version"
+                || !attrs[0].1.strip_prefix("1.").is_some_and(|minor| {
+                    !minor.is_empty() && minor.bytes().all(|byte| byte.is_ascii_digit())
+                })
+            {
                 return Err(self.err_at(
                     ErrorKind::XmlDeclaration,
                     "XML declaration must begin with a version",
@@ -1897,9 +1902,6 @@ impl Parser {
                 ));
             }
             let version = string(attrs[0].1, self.allocator)?;
-            if version != "1.0" {
-                return Err(self.err(ErrorKind::XmlDeclaration, "only XML 1.0 is supported"));
-            }
             let mut encoding = None;
             let mut standalone = None;
             for (name, value, _, _) in attrs.into_iter().skip(1) {

@@ -233,6 +233,30 @@ fn parse(
 }
 
 #[test]
+fn newer_versions_in_external_values_preserve_replacement_text() {
+    let dtd = b"<!ENTITY % p SYSTEM 'p'><!ENTITY e 'L%p;R'>";
+    for body in [
+        b"<?xml version='1.1' encoding='UTF-8'?>X".as_slice(),
+        b"<?xml version='1.7' encoding='UTF-8'?>X".as_slice(),
+    ] {
+        for chunk in 1..=body.len() {
+            assert_eq!(
+                parse(
+                    dtd,
+                    chunk,
+                    2,
+                    false,
+                    &[("p", Load::Parse(body))],
+                    Config::default()
+                )
+                .unwrap(),
+                [("e".into(), "LXR".into())]
+            );
+        }
+    }
+}
+
+#[test]
 fn external_value_bytes_remain_data_at_every_chunk_width() {
     let dtd = "<!ENTITY % p SYSTEM 'p'><!ENTITY e 'L%p;R'><!ENTITY after 'A'>";
     let mut encodings = vec![dtd.as_bytes().to_vec()];

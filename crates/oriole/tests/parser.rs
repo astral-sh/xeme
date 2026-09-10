@@ -768,6 +768,32 @@ fn namespace_constraints() {
 }
 
 #[test]
+fn newer_minor_versions_keep_xml_10_character_rules() {
+    for version in ["1.0", "1.1", "1.7", "1.01", "1.000"] {
+        let xml = format!("<?xml version='{version}'?><r/>");
+        for width in [1, 7, xml.len()] {
+            let events = parse(xml.as_bytes(), width, Config::default()).unwrap();
+            assert!(matches!(
+                &events[0],
+                EventKind::XmlDeclaration { version: actual, .. } if actual == version
+            ));
+        }
+        let invalid = format!("<?xml version='{version}'?><r>&#x1;</r>");
+        assert_eq!(
+            parse(invalid.as_bytes(), 1, Config::default()),
+            Err(ErrorKind::BadCharacterReference)
+        );
+    }
+    for version in ["", "1.", "1.x", "2.0", "01.0", "1.\u{0661}"] {
+        let xml = format!("<?xml version='{version}'?><r/>");
+        assert_eq!(
+            parse(xml.as_bytes(), 1, Config::default()),
+            Err(ErrorKind::XmlDeclaration)
+        );
+    }
+}
+
+#[test]
 fn byte_line_and_column_positions() {
     let mut parser = Parser::new(Config::default());
     parser.feed("<r>é\r\n<n/></r>".as_bytes(), true).unwrap();

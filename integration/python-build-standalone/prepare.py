@@ -110,6 +110,18 @@ def main() -> None:
     shutil.copyfile(
         target_dir / TARGET / "release/liboriole_expat.a", output / "libexpat.a"
     )
+    # Only an optional weak reference can safely select Rust's null-hook path.
+    symbols = subprocess.check_output(
+        ["nm", "--undefined-only", "--format=posix", str(output / "libexpat.a")],
+        text=True,
+    )
+    references = [
+        fields[1]
+        for line in symbols.splitlines()
+        if (fields := line.split()) and fields[0] == "__cxa_thread_atexit_impl"
+    ]
+    if not references or any(kind not in ("w", "v") for kind in references):
+        raise RuntimeError("Rust's optional TLS destructor hook requires review")
     shutil.copyfile(ROOT / "include/expat.h", output / "expat.h")
     consumer_fix = Path(__file__).resolve().parent / "consumer-fix"
     provenance = json.loads((consumer_fix / "provenance.json").read_text())

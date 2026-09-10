@@ -287,7 +287,8 @@ def main() -> None:
             )
             assert configured.splitlines() == [
                 f"-I{tools}/deps/include",
-                f"-L{tools}/deps/lib -lexpat -lgcc_s -lpthread -ldl -lm -lc",
+                f"-L{tools}/deps/lib -lexpat -lgcc_s -lpthread -ldl -lm -lc "
+                "-Wl,--wrap=__cxa_thread_atexit_impl",
             ]
             if cpython:
                 consumer = Path(temporary) / "consumer"

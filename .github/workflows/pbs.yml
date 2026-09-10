@@ -42,6 +42,7 @@ jobs:
       - name: Build the frozen Oriole bundle
         run: |
           rustup component add rust-docs
+          python3 integration/python-build-standalone/validate-tls.py --output "$RUNNER_TEMP/pbs-tls-probe"
           python3 integration/python-build-standalone/prepare.py --output "$RUNNER_TEMP/oriole-bundle"
           git -C .cache/pbs apply --check "$GITHUB_WORKSPACE/integration/python-build-standalone/pbs-a455388.patch"
           git -C .cache/pbs apply "$GITHUB_WORKSPACE/integration/python-build-standalone/pbs-a455388.patch"
@@ -80,6 +81,15 @@ jobs:
           subprocess.run([str(executable), '-I', '-c', "import pyexpat; print(pyexpat.EXPAT_VERSION); assert pyexpat.EXPAT_VERSION.startswith('oriole_')"], check=True)
           PY
           sha256sum dist/*.tar.zst > "$RUNNER_TEMP/pbs-archive-sha256.txt"
+      - name: Run the installed interpreter on glibc 2.17
+        run: |
+          set -o pipefail
+          docker run --rm --network=none \
+            -v "$RUNNER_TEMP/pbs-extracted/python:/python:ro" \
+            -v "$GITHUB_WORKSPACE/integration/python-build-standalone:/checks:ro" \
+            docker.io/library/centos@sha256:dead07b4d8ed7e29e98de0f4504d87e8880d4347859d839686a31da35a3b532f \
+            /python/install/bin/python3.12 -I /checks/test-old-glibc.py \
+            2>&1 | tee "$RUNNER_TEMP/pbs-glibc217-tests.log"
       - name: Retain build and validation evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -90,4 +100,6 @@ jobs:
             ${{ runner.temp }}/pbs-archive-sha256.txt
             ${{ runner.temp }}/oriole-bundle/manifest.json
             ${{ runner.temp }}/oriole-bundle/build.log
+            ${{ runner.temp }}/pbs-tls-probe/manifest.json
+            ${{ runner.temp }}/pbs-tls-probe/*-symbols.txt
           retention-days: 14

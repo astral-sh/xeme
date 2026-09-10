@@ -45,6 +45,15 @@ sysroot inside a newer container. A successful link on the development host does
 not establish that older glibc baseline. Run PBS's distribution validator and inspect
 its dynamic library and symbol-version results before treating the archive as portable.
 
+The overlay requires Rust's TLS destructor hook reference to remain weak, then
+uses the linker's `--wrap=__cxa_thread_atexit_impl` option without defining a
+wrapper. This selects Rust's existing pthread-key fallback instead of acquiring
+a glibc 2.18 version requirement from the Jessie sysroot. No glibc implementation
+is replaced. `validate-tls.py` checks real destructors on C-created threads and
+verifies the resulting ELF symbols. This workaround is scoped to the pinned
+CPython overlay; see the [full failure and correction report](../../docs/validation/2026-09-10/pbs-glibc/).
+
+
 ## Apply and run
 
 Create an isolated PBS checkout, then apply the small patch:

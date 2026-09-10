@@ -1,0 +1,7 @@
+{
+  "archive": "/tmp/oriole-final-encoding-checkpoint/liboriole_expat.a",
+  "sha256": "b6031442902ac0b0adf85f93deac5e46db8582899d6ac31a2bdc30fa0a593cbf",
+  "references": [
+    "__cxa_thread_atexit_impl w         "
+  ]
+}

@@ -1,0 +1,4 @@
+patching file Modules/pyexpat.c
+Pinned CPython source: {"license_file": "LICENSE.cpython.txt", "licenses": ["Python-2.0", "CNRI-Python"], "python_tag": "cp312", "sha256": "c08bc65a81971c1dd5783182826503369466c7e67374d1646519adf05207b684", "size": 20801708, "url": "https://www.python.org/ftp/python/3.12.13/Python-3.12.13.tar.xz", "version": "3.12.13"}
+Patch application, source pinning, generated Make target, Python compilation, shell syntax, default path, overlay staging, native linker flags, target guards, and checksum rejection passed.
+No Rust archive was built or linked by these fixture checks; no PBS distribution was built.

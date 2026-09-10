@@ -141,7 +141,7 @@
      $$(PYTHON_DEPENDS_$(1)) \
 --- a/cpython-unix/build-cpython.sh
 +++ b/cpython-unix/build-cpython.sh
-@@ -28,6 +28,14 @@
+@@ -28,6 +28,16 @@
          # https://github.com/python/cpython/issues/155813
          export ac_cv_lib_ffi_ffi_call=no
      fi
@@ -152,11 +152,13 @@
 +if [[ -f "${TOOLS_PATH}/deps/lib/oriole-native-static-libs.txt" ]]; then
 +    read -r oriole_native_libs < "${TOOLS_PATH}/deps/lib/oriole-native-static-libs.txt"
 +    export LIBEXPAT_CFLAGS="-I${TOOLS_PATH}/deps/include"
-+    export LIBEXPAT_LDFLAGS="-L${TOOLS_PATH}/deps/lib -lexpat ${oriole_native_libs}"
++    # The Jessie sysroot exports glibc 2.18's optional TLS destructor hook.
++    # Select Rust's existing pthread fallback to preserve the glibc 2.17 floor.
++    export LIBEXPAT_LDFLAGS="-L${TOOLS_PATH}/deps/lib -lexpat ${oriole_native_libs} -Wl,--wrap=__cxa_thread_atexit_impl"
  fi
  
  # configure somehow has problems locating llvm-profdata even though it is in
-@@ -72,6 +80,15 @@
+@@ -72,6 +82,15 @@
  cat Makefile.extra
  
  pushd "Python-${PYTHON_VERSION}"

@@ -1771,9 +1771,7 @@ impl Parser {
         // Encoding detection consumes a BOM without producing a text token.
         // Charge that prefix even for empty input or an incomplete next token.
         self.account_source(0)?;
-        if self.active_parameter_reference.is_some()
-            && let Some((_, position)) = self.active_parameter_reference.take()
-        {
+        if let Some((_, position)) = self.active_parameter_reference.take() {
             if self
                 .parameter_state
                 .get()
@@ -2057,9 +2055,7 @@ impl Parser {
             token.swap_decoded(&mut self.current_raw)?;
             parsed?;
             self.token_scratch = token;
-            // This complete token was accounted before semantic processing.
-            debug_assert_eq!(self.source().accounting_bytes(end), 0);
-            self.source_mut().consume(end);
+            self.consume(end)?;
         }
     }
 
@@ -3292,7 +3288,7 @@ impl Parser {
                 rest = parent;
                 continue;
             }
-            let end = memchr::memchr2(b'&', b'<', rest.as_bytes()).unwrap_or(rest.len());
+            let end = rest.find(['&', '<']).unwrap_or(rest.len());
             if !frames.is_empty() {
                 self.account_entity_bytes(end, true)?;
             }

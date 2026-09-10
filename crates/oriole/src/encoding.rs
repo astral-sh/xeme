@@ -46,7 +46,7 @@ pub(crate) struct Decoder {
     pending_cursor: usize,
     declaration_checked: usize,
     unknown_name: Option<String>,
-    unknown_position: Option<Position>,
+    encoding_error_position: Option<Position>,
     custom_map: Option<Box<[i32; 256]>>,
     conversion: Option<([u8; 4], u8)>,
 }
@@ -62,7 +62,7 @@ impl Decoder {
             pending_cursor: 0,
             declaration_checked: 0,
             unknown_name: None,
-            unknown_position: None,
+            encoding_error_position: None,
             custom_map: None,
             conversion: None,
         })
@@ -339,7 +339,10 @@ impl Decoder {
                         if !crate::valid_encoding_name(name) {
                             return Ok(Some((Encoding::Utf8, skip)));
                         }
-                        let Some(encoding) = Encoding::named(name) else {
+                        let encoding = Encoding::named(name);
+                        let mismatch = name.eq_ignore_ascii_case("UTF-16")
+                            || matches!(encoding, Some(Encoding::Utf16Le | Encoding::Utf16Be));
+                        if encoding.is_none() || mismatch {
                             let offset = declaration.len() - rest.len() + 1;
                             let mut position = Position {
                                 byte_index: skip + offset,
@@ -363,21 +366,21 @@ impl Decoder {
                                 }
                                 previous_cr = character == '\r';
                             }
-                            self.unknown_position = Some(position);
+                            self.encoding_error_position = Some(position);
+                            if mismatch {
+                                return Err(Error::bare(
+                                    ErrorKind::IncorrectEncoding,
+                                    "declared encoding conflicts with input bytes",
+                                ));
+                            }
                             self.unknown_name =
                                 Some(String::try_from_str_in(name, self.allocator)?);
                             return Err(Error::bare(
                                 ErrorKind::UnknownEncoding,
                                 "unsupported declared encoding",
                             ));
-                        };
-                        if matches!(encoding, Encoding::Utf16Le | Encoding::Utf16Be) {
-                            return Err(Error::bare(
-                                ErrorKind::IncorrectEncoding,
-                                "declared encoding conflicts with input bytes",
-                            ));
                         }
-                        return Ok(Some((encoding, skip)));
+                        return Ok(encoding.map(|encoding| (encoding, skip)));
                     }
                 }
             }
@@ -397,8 +400,8 @@ impl Decoder {
     pub(crate) fn unknown_encoding(&self) -> Option<&str> {
         self.unknown_name.as_deref()
     }
-    pub(crate) fn unknown_encoding_position(&self) -> Option<Position> {
-        self.unknown_position
+    pub(crate) fn encoding_error_position(&self) -> Option<Position> {
+        self.encoding_error_position
     }
     pub(crate) fn append_pending(&mut self, bytes: &[u8]) -> Result<(), Error> {
         try_extend_from_slice(&mut self.pending, bytes)?;

@@ -996,9 +996,12 @@ impl Parser {
             result = Err(Error {
                 kind,
                 message,
-                position: if kind == ErrorKind::UnknownEncoding {
+                position: if matches!(
+                    kind,
+                    ErrorKind::UnknownEncoding | ErrorKind::IncorrectEncoding
+                ) {
                     self.decoder
-                        .unknown_encoding_position()
+                        .encoding_error_position()
                         .unwrap_or_else(|| source.end_position())
                 } else {
                     source.end_position()
@@ -1233,8 +1236,10 @@ impl Parser {
                 }
                 if let Some((kind, message)) = self.decoding_error {
                     let mut error = self.err(kind, message);
-                    if kind == ErrorKind::UnknownEncoding
-                        && let Some(position) = self.decoder.unknown_encoding_position()
+                    if matches!(
+                        kind,
+                        ErrorKind::UnknownEncoding | ErrorKind::IncorrectEncoding
+                    ) && let Some(position) = self.decoder.encoding_error_position()
                     {
                         error.position = position;
                     }

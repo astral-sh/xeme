@@ -150,6 +150,33 @@ fn an_unknown_declared_encoding_reports_its_value_location() {
     }
 }
 
+#[test]
+fn ascii_declarations_of_utf16_report_an_encoding_mismatch() {
+    for name in ["UTF-16", "utf-16", "UtF-16", "UTF-16LE", "UTF-16BE"] {
+        for bom in ["", "\u{feff}"] {
+            let input = format!("{bom}<?xml version='1.0' encoding='{name}'?><r/>");
+            for width in [1, 2, 3, input.len()] {
+                for context in [None, Some(None), Some(Some(""))] {
+                    let mut parser = Parser::new(Config::default());
+                    if let Some(context) = context {
+                        parser = parser.external_child(context, None).unwrap();
+                    }
+                    assert_eq!(
+                        encoded_content(&mut parser, input.as_bytes(), width),
+                        Err(ErrorKind::IncorrectEncoding),
+                        "{name}/{bom:?}/{width}/{context:?}",
+                    );
+                    assert!(parser.unknown_encoding().is_none());
+                    assert_eq!(
+                        parser.next_event().unwrap_err().position.byte_index,
+                        input.find(name).unwrap(),
+                    );
+                }
+            }
+        }
+    }
+}
+
 fn encoded_content(parser: &mut Parser, input: &[u8], width: usize) -> Result<String, ErrorKind> {
     let mut text = String::new();
     for (index, piece) in input.chunks(width).enumerate() {

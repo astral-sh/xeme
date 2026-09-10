@@ -182,10 +182,11 @@ impl Parser {
                     self.conditional.header = Some(state);
                     return Ok(true);
                 }
-                if self
-                    .entity_chain
-                    .iter()
-                    .any(|entry| entry.strip_prefix('%') == Some(name))
+                if entity.is_some_and(Entity::is_value_open)
+                    || self
+                        .entity_chain
+                        .iter()
+                        .any(|entry| entry.strip_prefix('%') == Some(name))
                     || self.sources.iter().any(|source| {
                         source
                             .entity_name
@@ -517,10 +518,11 @@ impl Parser {
                         self.consume(end + 1)?;
                         continue;
                     }
-                    if self
-                        .entity_chain
-                        .iter()
-                        .any(|entry| entry.strip_prefix('%') == Some(name))
+                    if entity.is_some_and(Entity::is_value_open)
+                        || self
+                            .entity_chain
+                            .iter()
+                            .any(|entry| entry.strip_prefix('%') == Some(name))
                         || self.sources.iter().any(|source| {
                             source
                                 .entity_name

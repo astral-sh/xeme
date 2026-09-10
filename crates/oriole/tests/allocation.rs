@@ -369,6 +369,10 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
 
 #[test]
 fn every_allocation_can_fail_and_all_memory_uses_the_selected_suite() {
+    check_allocations(workload);
+}
+
+fn check_allocations(workload: fn(Allocator) -> Result<(), Error>) {
     // SAFETY: The callbacks use a complete libc-backed suite with failure injection;
     // every pointer remains valid until realloc succeeds or its matching free call.
     let allocator = unsafe {
@@ -591,4 +595,42 @@ fn foreign_recycling_token_rejects_storage_from_the_same_custom_suite() {
         "a foreign cache must not warm another parser"
     );
     assert_eq!(LIVE.get(), 0);
+}
+
+fn open_value_workload(allocator: Allocator) -> Result<(), Error> {
+    let root = Parser::try_new_in(Config::default(), allocator)?;
+    let mut dtd = root.external_child(None, None)?;
+    dtd.feed(
+        b"<!ENTITY % a SYSTEM 'a'><!ENTITY % b 'B'><!ENTITY n '%a;'>",
+        true,
+    )?;
+    while let Some(event) = next_event(&mut dtd)? {
+        if matches!(event.kind, EventKind::ExternalEntityReference(_)) {
+            break;
+        }
+    }
+    let mut first = dtd.external_child(None, None)?;
+    let mut sibling = dtd.external_child(None, None)?;
+    first.feed(b"%b;", true)?;
+    while next_event(&mut first)?.is_some() {}
+    let general = dtd.external_child(Some(""), None)?;
+    let mut copied_dtd = general.external_child(None, None)?;
+    drop(first);
+    drop(dtd);
+    drop(root);
+    drop(general);
+    sibling.feed(b"%b;", true)?;
+    match next_event(&mut sibling) {
+        Err(error) if error.kind == ErrorKind::RecursiveEntityReference => {}
+        Err(error) => return Err(error),
+        _ => panic!("a precreated sibling must retain the open entity state"),
+    }
+    copied_dtd.feed(b"<!ENTITY m '%b;'>", true)?;
+    while next_event(&mut copied_dtd)?.is_some() {}
+    Ok(())
+}
+
+#[test]
+fn shared_open_value_state_survives_every_allocation_failure_and_parent_drop() {
+    check_allocations(open_value_workload);
 }

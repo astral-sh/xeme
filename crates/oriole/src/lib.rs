@@ -303,6 +303,10 @@ struct Entity {
     public_id: Option<String>,
     notation: Option<String>,
     declared_in_parameter_entity: bool,
+    // External value parsers can leave an internal parameter entity open in
+    // Expat's shared DTD even after the child is freed. General entities do not
+    // need this state; ordinary active recursion uses the source/value stacks.
+    value_open: Option<Shared<AtomicBool>>,
 }
 
 #[derive(Debug)]
@@ -390,12 +394,19 @@ impl TryClone for DefaultAttributes {
 }
 
 impl Entity {
+    fn is_value_open(&self) -> bool {
+        self.value_open
+            .as_ref()
+            .is_some_and(|open| open.load(Ordering::Relaxed))
+    }
+
     /// General-content children copy Expat's DTD table. A reserved slot without
     /// a system ID becomes an empty internal value in that copy; parameter
     /// children retain the unfinished slot and its already parsed identifiers.
     fn clone_for_child(
         &self,
         parameter_context: bool,
+        parameter_entity: bool,
         allocator: Allocator,
     ) -> Result<Self, AllocError> {
         if !parameter_context && self.value.is_none() && self.system_id.is_none() {
@@ -405,9 +416,16 @@ impl Entity {
                 public_id: None,
                 notation: self.notation.try_clone()?,
                 declared_in_parameter_entity: self.declared_in_parameter_entity,
+                value_open: parameter_entity
+                    .then(|| Shared::try_new_in(AtomicBool::new(false), allocator))
+                    .transpose()?,
             })
         } else {
-            self.try_clone()
+            let mut entity = self.try_clone()?;
+            if !parameter_context && self.value_open.is_some() {
+                entity.value_open = Some(Shared::try_new_in(AtomicBool::new(false), allocator)?);
+            }
+            Ok(entity)
         }
     }
 }
@@ -420,6 +438,7 @@ impl TryClone for Entity {
             public_id: self.public_id.try_clone()?,
             notation: self.notation.try_clone()?,
             declared_in_parameter_entity: self.declared_in_parameter_entity,
+            value_open: self.value_open.clone(),
         })
     }
 }
@@ -708,7 +727,7 @@ impl Parser {
             try_insert(
                 &mut child.entities,
                 name.try_clone()?,
-                entity.clone_for_child(context.is_none(), self.allocator)?,
+                entity.clone_for_child(context.is_none(), false, self.allocator)?,
             )?;
         }
         for (name, attributes) in &self.defaults {
@@ -722,7 +741,7 @@ impl Parser {
             try_insert(
                 &mut child.parameter_entities,
                 name.try_clone()?,
-                entity.clone_for_child(context.is_none(), self.allocator)?,
+                entity.clone_for_child(context.is_none(), true, self.allocator)?,
             )?;
         }
         child.namespaces.clear();
@@ -778,6 +797,17 @@ impl Parser {
         Ok(child)
     }
 
+    fn new_parameter_value_open(&self, needed: bool) -> Result<Option<Shared<AtomicBool>>, Error> {
+        if !needed {
+            return Ok(None);
+        }
+        self.charge_expansion(size_of::<AtomicBool>())?;
+        Ok(Some(Shared::try_new_in(
+            AtomicBool::new(false),
+            self.allocator,
+        )?))
+    }
+
     /// Bound inherited copies before allocating a child, including work for empty
     /// declarations. Repeated empty external references must not repeatedly clone
     /// an otherwise unused large declaration environment for free.
@@ -786,8 +816,18 @@ impl Parser {
         context: Option<&str>,
         encoding: Option<&str>,
     ) -> Result<(), Error> {
+        if context.is_some() {
+            for entity in self.parameter_entities.values() {
+                if entity.value.is_none() && entity.system_id.is_none() {
+                    self.charge_expansion(size_of::<AtomicBool>())?;
+                }
+            }
+        }
         for (name, entity) in self.entities.iter().chain(&self.parameter_entities) {
             self.charge_expansion(size_of::<(String, Entity)>())?;
+            if context.is_some() && entity.value_open.is_some() {
+                self.charge_expansion(size_of::<AtomicBool>())?;
+            }
             self.charge_expansion(name.len())?;
             for value in [
                 &entity.value,

@@ -495,3 +495,93 @@ fn child_xml_declaration_changes_standalone_without_disabling_ancestor_mode() {
         ]
     );
 }
+
+#[test]
+fn external_value_internal_references_remain_open_in_the_shared_dtd() {
+    let failures: &[&[u8]] = &[
+        b"<!ENTITY % a SYSTEM 'a'><!ENTITY % b 'B'><!ENTITY n '%a;%a;'>",
+        b"<!ENTITY % a SYSTEM 'a'><!ENTITY % b 'B'><!ENTITY n '%a;%b;'>",
+        b"<!ENTITY % a SYSTEM 'a'><!ENTITY % b 'B'><!ENTITY n '%a;'><!ENTITY m '%b;'>",
+        b"<!ENTITY % a SYSTEM 'a'><!ENTITY % b 'B'><!ENTITY n '%a;'><!ENTITY m '%a;'>",
+        b"<!ENTITY % a SYSTEM 'a'><!ENTITY % b ''><!ENTITY n '%a;'>%b;",
+        b"<!ENTITY % a SYSTEM 'a'><!ENTITY % b 'EMPTY'><!ENTITY n '%a;'><!ELEMENT r %b;>",
+        b"<!ENTITY % a SYSTEM 'a'><!ENTITY % b 'INCLUDE'><!ENTITY n '%a;'><![%b;[<!ELEMENT r EMPTY>]]>",
+        b"<!ENTITY % a SYSTEM 'a'><!ENTITY % b 'B'><!ENTITY % c SYSTEM 'c'><!ENTITY n '%c;'><!ENTITY m '%b;'>",
+    ];
+    for bytes in failures {
+        for chunk in [1, 7, bytes.len()] {
+            assert_eq!(
+                parse(
+                    bytes,
+                    chunk,
+                    2,
+                    false,
+                    &[("a", Load::Parse(b"%b;")), ("c", Load::Parse(b"%a;"))],
+                    Config::default(),
+                ),
+                Err(ErrorKind::RecursiveEntityReference),
+                "{} / chunk {chunk}",
+                std::str::from_utf8(bytes).unwrap()
+            );
+        }
+    }
+    // Only the first internal reference is opened: the external value processor
+    // discards its tail. Missing parameters do not open later references either.
+    let bytes = b"<!ENTITY % a SYSTEM 'a'><!ENTITY % b 'B'><!ENTITY % c 'C'><!ENTITY n '%a;%c;'>";
+    for (value, expected) in [(b"L%b;%c;".as_slice(), "LC"), (b"%missing;%b;", "C")] {
+        let declarations = parse(
+            bytes,
+            1,
+            2,
+            false,
+            &[("a", Load::Parse(value))],
+            Config::default(),
+        )
+        .unwrap();
+        assert!(
+            declarations
+                .iter()
+                .any(|(name, value)| name == "n" && value == expected)
+        );
+    }
+}
+
+#[test]
+fn open_value_state_is_shared_by_siblings_but_not_general_entity_copies() {
+    let root = Parser::new(Config::default());
+    let mut dtd = root.external_child(None, None).unwrap();
+    dtd.feed(
+        b"<!ENTITY % a SYSTEM 'a'><!ENTITY % b 'B'><!ENTITY n '%a;'>",
+        true,
+    )
+    .unwrap();
+    while !matches!(
+        dtd.next_event().unwrap().unwrap().kind,
+        EventKind::ExternalEntityReference(_)
+    ) {}
+    let mut first = dtd.external_child(None, None).unwrap();
+    let mut sibling = dtd.external_child(None, None).unwrap();
+    first.feed(b"L%b;R", true).unwrap();
+    while first.next_event().unwrap().is_some() {}
+    // General-content parsers copy the DTD and clear the open state, including
+    // copies made after the original entity was left open.
+    let general = dtd.external_child(Some(""), None).unwrap();
+    let mut copied_dtd = general.external_child(None, None).unwrap();
+    drop(first);
+    drop(dtd);
+    drop(root);
+    drop(general);
+    sibling.feed(b"%b;", true).unwrap();
+    assert_eq!(
+        sibling.next_event().unwrap_err().kind,
+        ErrorKind::RecursiveEntityReference
+    );
+    copied_dtd.feed(b"<!ENTITY m '%b;'>", true).unwrap();
+    let declaration = copied_dtd.next_event().unwrap().unwrap();
+    assert!(matches!(
+        declaration.kind,
+        EventKind::EntityDeclaration(ref declaration)
+            if declaration.name == "m" && declaration.value.as_deref() == Some("B")
+    ));
+    assert!(copied_dtd.next_event().unwrap().is_none());
+}

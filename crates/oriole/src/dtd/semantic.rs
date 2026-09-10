@@ -347,6 +347,7 @@ impl Parser {
                 public_id: None,
                 notation: None,
                 declared_in_parameter_entity: self.external_subset || self.sources.len() > 1,
+                value_open: None,
             },
         )?;
         state.reserved = Some((name, parameter));

@@ -3033,3 +3033,68 @@ fn recycling_waits_for_callbacks_and_survives_suspend_resume_and_reset() {
         XML_ParserFree(parser);
     }
 }
+
+unsafe extern "C" fn open_value_external(
+    parser: XML_Parser,
+    context: *const c_char,
+    _: *const c_char,
+    system: *const c_char,
+    _: *const c_char,
+) -> c_int {
+    // SAFETY: Expat supplies callback-lived identifiers and a live parser. Each
+    // child is owned until its synchronous parse finishes and is then freed once.
+    unsafe {
+        let child = XML_ExternalEntityParserCreate(parser, context, ptr::null());
+        assert!(!child.is_null());
+        let bytes: &[u8] = if CStr::from_ptr(system).to_bytes() == b"d" {
+            b"<!ENTITY % a SYSTEM 'a'><!ENTITY % b 'B'><!ENTITY n '%a;'>"
+        } else {
+            b"%b;"
+        };
+        let status = XML_Parse(child, bytes.as_ptr().cast(), bytes.len() as c_int, 1);
+        XML_ParserFree(child);
+        status
+    }
+}
+
+#[test]
+fn reset_discards_internal_parameter_entities_left_open_by_value_children() {
+    // SAFETY: Input buffers remain live for each call, callbacks own their child
+    // handles, and the root is reset only after synchronous parsing has finished.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        assert!(!parser.is_null());
+        let bytes = b"<!DOCTYPE r SYSTEM 'd'><r>&n;</r>";
+        for width in [1, 7, bytes.len()] {
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            assert_eq!(XML_SetParamEntityParsing(parser, 2), 1);
+            XML_SetExternalEntityRefHandler(parser, Some(open_value_external));
+            for (index, part) in bytes.chunks(width).enumerate() {
+                assert_eq!(
+                    XML_Parse(
+                        parser,
+                        part.as_ptr().cast(),
+                        part.len() as c_int,
+                        c_int::from((index + 1) * width >= bytes.len()),
+                    ),
+                    OK
+                );
+            }
+            let child = XML_ExternalEntityParserCreate(parser, ptr::null(), ptr::null());
+            assert!(!child.is_null());
+            let declaration = b"<!ENTITY m '%b;'>";
+            assert_eq!(
+                XML_Parse(
+                    child,
+                    declaration.as_ptr().cast(),
+                    declaration.len() as c_int,
+                    1
+                ),
+                ERROR
+            );
+            assert_eq!(XML_GetErrorCode(child), 12);
+            XML_ParserFree(child);
+        }
+        XML_ParserFree(parser);
+    }
+}

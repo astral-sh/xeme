@@ -1,0 +1,13 @@
+# External entity-value lifecycle
+
+Expat's external value processor can leave an internal parameter entity open in its shared DTD. A later reference then fails as recursive, including through precreated siblings or after the first child is freed. The ordinary value processor closes its active entities; general-content DTD copies clear the open flags. The isolated handoff in the archive records the exact pinned Expat source locations.
+
+We now retain that state in an optional selected-allocator shared atomic flag for completed internal parameter declarations. All five reference readers check it. General-content copies get fresh false state, reset clears it, and parameter children/merges share it. Existing declaration, work, live-allocation and relative amplification bounds remain enforced; ordinary general entities do not allocate this new state.
+
+The integrated release library `d621da4c50621bb488d3022ff1b3348c07d8c8b1a80952f06a1b2bbc6897f29c` passes **253 core/C-interface Rust checks**, strict affected-package Clippy, a 1,518-case exact generated replay and six native C ASan/UBSan suites with 341 injected allocation failures per linkage. C callers are sanitizer-instrumented; Rust is not. LSan is disabled and selected-allocation live counts are checked separately. Integrating-agent review found no blocker in the author patch or its composition with owned boxed callbacks and recycling.
+
+All **60 lifecycle and 300 amplification configurations** now match Expat's status, nested error chain, text and child outcomes. The isolated baseline differed on 39 of the 60 lifecycle cases. Successful declarations match; 27 rejected cases still differ because Expat emits a partially built declaration before failure and Oriole omits it. This callback difference is retained explicitly. Probes use the pinned uv-managed Python with `-I -S` and reject a process with an already-loaded system Expat, avoiding symbol interposition.
+
+The unchanged 4,740-configuration upstream matrix remains **4,003 passes and 737 failures**, with no changed outcomes, verified library origin and no crashes or timeouts. This regression corpus closes a substantive acceptance gap beyond the existing upstream matrix; the pass count alone did not reveal it. No performance or new full-PBS claim is made for this layer.
+
+[evidence.tar.gz](evidence.tar.gz) retains source/build metadata, raw probes, matrix observations, logs, scope-limited reviews and the isolated handoff. ELF/static artifacts are excluded and identified by hash. [files.json](files.json) verifies every member and [summary.json](summary.json) gives compact counts. Archive SHA256: `b9a61f3b9da0c8c1f92dce7cbc345ba00526c0d1b773087cfc121d845fd666b2`.

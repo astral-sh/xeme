@@ -408,7 +408,9 @@ impl Parser {
                 continue;
             }
             self.charge_expansion(end + 1 + size_of::<Frame>())?;
-            if state.declaring.as_deref() == Some(name)
+            let entity = self.parameter_entities.get(name);
+            if entity.is_some_and(Entity::is_value_open)
+                || state.declaring.as_deref() == Some(name)
                 || state.parameters.iter().any(|parameter| parameter == name)
                 || state
                     .frames
@@ -431,7 +433,7 @@ impl Parser {
                     "recursive entity value",
                 ));
             }
-            let Some(entity) = self.parameter_entities.get(name) else {
+            let Some(entity) = entity else {
                 self.value_skip(state)?;
                 state.frames.last_mut().expect("value frame").offset += end + 1;
                 if state.child {
@@ -456,9 +458,15 @@ impl Parser {
                 ));
             }
             if let Some(value) = &entity.value {
-                // Expat's external value processor stops storing at an internal
-                // parameter reference; ordinary value frames still expand it.
+                // Expat's external value processor queues this internal entity
+                // without draining its value stack. The shared DTD keeps it open
+                // after this child finishes or is freed, so later reads recurse.
                 if state.child {
+                    entity
+                        .value_open
+                        .as_ref()
+                        .expect("internal parameter entity open state")
+                        .store(true, Ordering::Relaxed);
                     state.frames.clear();
                     continue;
                 }
@@ -501,9 +509,9 @@ impl Parser {
         let first_event = self.pending.len();
         let count = self.entities.len() + self.parameter_entities.len();
         let declarations = if declaration.parameter {
-            &mut self.parameter_entities
+            &self.parameter_entities
         } else {
-            &mut self.entities
+            &self.entities
         };
         if !declarations.contains_key(&declaration.name) {
             if count >= self.config.limits.max_entities {
@@ -512,6 +520,12 @@ impl Parser {
                     "entity declaration count limit exceeded",
                 ));
             }
+            let value_open = self.new_parameter_value_open(declaration.parameter)?;
+            let declarations = if declaration.parameter {
+                &mut self.parameter_entities
+            } else {
+                &mut self.entities
+            };
             oriole_storage::try_insert(
                 declarations,
                 declaration.name.try_clone()?,
@@ -521,6 +535,7 @@ impl Parser {
                     public_id: None,
                     notation: None,
                     declared_in_parameter_entity: declaration.origin,
+                    value_open,
                 },
             )?;
             self.emit(

@@ -618,10 +618,11 @@ impl Parser {
         let mut source_name = String::new_in(self.allocator);
         source_name.push('%')?;
         source_name.push_str(&name)?;
-        if self
-            .sources
-            .iter()
-            .any(|source| source.entity_name.as_ref() == Some(&source_name))
+        if entity.is_value_open()
+            || self
+                .sources
+                .iter()
+                .any(|source| source.entity_name.as_ref() == Some(&source_name))
             || self.entity_chain.iter().any(|name| name == &source_name)
         {
             return Err(self.err(
@@ -1293,9 +1294,9 @@ impl Parser {
         }
         let declaration_count = self.entities.len() + self.parameter_entities.len();
         let declarations = if parameter {
-            &mut self.parameter_entities
+            &self.parameter_entities
         } else {
-            &mut self.entities
+            &self.entities
         };
         if !declarations.contains_key(&name) {
             if declaration_count >= self.config.limits.max_entities {
@@ -1304,6 +1305,12 @@ impl Parser {
                     "entity declaration count limit exceeded",
                 ));
             }
+            let value_open = self.new_parameter_value_open(parameter && value.is_some())?;
+            let declarations = if parameter {
+                &mut self.parameter_entities
+            } else {
+                &mut self.entities
+            };
             try_insert(
                 declarations,
                 name.try_clone()?,
@@ -1313,6 +1320,7 @@ impl Parser {
                     public_id: public_id.try_clone()?,
                     notation: notation.try_clone()?,
                     declared_in_parameter_entity: self.external_subset || self.sources.len() > 1,
+                    value_open,
                 },
             )?;
             self.emit(
@@ -1410,7 +1418,9 @@ impl Parser {
             }
             // Charge reference work even for empty or missing replacements.
             self.charge_expansion(end + 1 + size_of::<EntityValueFrame<'_>>())?;
-            if declaring_parameter == Some(reference)
+            let entity = self.parameter_entities.get(reference);
+            if entity.is_some_and(Entity::is_value_open)
+                || declaring_parameter == Some(reference)
                 || declaration_parameters.iter().any(|name| name == reference)
                 || current.name == Some(reference)
                 || parents
@@ -1434,7 +1444,7 @@ impl Parser {
                 ));
             }
             current.rest = &current.rest[end + 1..];
-            let Some(entity) = self.parameter_entities.get(reference) else {
+            let Some(entity) = entity else {
                 skipped = true;
                 continue;
             };

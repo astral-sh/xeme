@@ -1,0 +1,597 @@
+{
+  "decision": "excluded after current-base attribution",
+  "accounting": {
+    "project_geomean_speedup": 1.0199201415103338,
+    "positive": 20,
+    "rows": [
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0030523349483564
+      },
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 0.9640730240876745
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0503403138251748
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0544304883673536
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9957781858005368
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0101234648247703
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0482380385784897
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.023627195094139
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0068456841383577
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0010429839017139
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0181551852806021
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9961680504611218
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9989691853681971
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0284103432674794
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0366825509479873
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0207361471551317
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0227141991524304
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0373560114517082
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9966488869890859
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0069687392670905
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0219052505910347
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0238253796737435
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.007767108958674
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0233256226592335
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0230520562381378
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.030428266475879
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0177082242313416
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0365739696601088
+      }
+    ]
+  },
+  "markers": {
+    "scope": "One-line attribute marker search screening; native callback hashes match; no normalized full-project preflight was run separately for this isolated candidate. Shared host; five randomized pairs of seven measured parses.",
+    "status": "passed",
+    "geomean": 1.0022267066499406,
+    "positive": 14,
+    "conditions": 24,
+    "rows": [
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0107852534887414,
+        "pairs": [
+          0.9695581618752476,
+          1.0107852534887414,
+          0.9978475534050429,
+          1.0519263683259328,
+          1.1188787939236773
+        ]
+      },
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.07970610259271,
+        "pairs": [
+          0.9903221398719356,
+          1.1608637477903332,
+          1.0372740369434796,
+          1.07970610259271,
+          1.1146338903245478
+        ]
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0481374759619815,
+        "pairs": [
+          1.0423278493172339,
+          1.0481374759619815,
+          1.4015053474630073,
+          1.8752416202735414,
+          1.0331535995336638
+        ]
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0957876795714634,
+        "pairs": [
+          1.0366590048167854,
+          1.1118848043723888,
+          1.0324326944830484,
+          1.1777534205155342,
+          1.0957876795714634
+        ]
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9650911418495677,
+        "pairs": [
+          0.9650911418495677,
+          0.9481872264002694,
+          0.9972981025496608,
+          0.9647819656245218,
+          1.0320195212548917
+        ]
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 0.9976314317340538,
+        "pairs": [
+          0.9905521115153909,
+          1.026537784993103,
+          0.9976314317340538,
+          1.0444628321034934,
+          0.959964501836423
+        ]
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0010370349324504,
+        "pairs": [
+          1.0010370349324504,
+          0.9312189696945624,
+          1.0270233936677247,
+          1.0515471639963871,
+          0.9548182620400547
+        ]
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.011934346873356,
+        "pairs": [
+          1.1514450357166486,
+          1.011934346873356,
+          0.9273653924417229,
+          1.0550371820748201,
+          0.9853723899207205
+        ]
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9840426239664228,
+        "pairs": [
+          0.9840426239664228,
+          1.0324195630963398,
+          0.9727822651880736,
+          1.018659898630968,
+          0.98154207434581
+        ]
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0310702844899466,
+        "pairs": [
+          1.019060717596177,
+          1.0341823741186045,
+          0.9972949368247119,
+          1.042494156302919,
+          1.0310702844899466
+        ]
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9729746981956727,
+        "pairs": [
+          0.9729746981956727,
+          0.9597345577830826,
+          0.9902435113475201,
+          0.9373211969050952,
+          1.0123441107682192
+        ]
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9858802519788782,
+        "pairs": [
+          0.9858802519788782,
+          0.945307119534456,
+          1.008286111544991,
+          0.9688928182106898,
+          1.0095965943078256
+        ]
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0159447140045679,
+        "pairs": [
+          1.0251912369741234,
+          0.9659622793123853,
+          1.0159447140045679,
+          1.0030395008701345,
+          1.0175852107314014
+        ]
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 0.9644841854319782,
+        "pairs": [
+          1.015554123829226,
+          0.9743579848398649,
+          0.9644841854319782,
+          0.8989067277375973,
+          0.914819543450249
+        ]
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0022478113968523,
+        "pairs": [
+          0.9535954521838809,
+          1.0022478113968523,
+          1.0151087860999168,
+          1.0027164501712906,
+          0.9772333277292858
+        ]
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.8856011517441055,
+        "pairs": [
+          0.882553251973001,
+          0.9769327184518483,
+          1.0608764569917934,
+          0.6697805717911572,
+          0.8856011517441055
+        ]
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0184555325266165,
+        "pairs": [
+          0.953707923238228,
+          0.9794147352126368,
+          1.0586561735286966,
+          1.0223161301383252,
+          1.0184555325266165
+        ]
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 0.9993905728668839,
+        "pairs": [
+          0.9510816370886457,
+          0.9993905728668839,
+          0.9817134179920664,
+          1.0051628800893317,
+          1.0367107819656514
+        ]
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9788946692653396,
+        "pairs": [
+          0.9779350131562643,
+          0.9788946692653396,
+          0.970745784089452,
+          1.0128108497111339,
+          1.0207191717713349
+        ]
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0210639741606276,
+        "pairs": [
+          1.012830654356236,
+          0.9852222991995834,
+          1.0210639741606276,
+          1.0286334878213654,
+          1.026502312080927
+        ]
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9780161782226051,
+        "pairs": [
+          1.0048476728443372,
+          0.9859261218078452,
+          0.9780161782226051,
+          0.9678070435052698,
+          0.9639700201969938
+        ]
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0085806316051626,
+        "pairs": [
+          1.0103458812346489,
+          1.0085806316051626,
+          0.9871757716992293,
+          0.9977730176374812,
+          1.0159929118644033
+        ]
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9859813200419636,
+        "pairs": [
+          0.9955677552846727,
+          0.9859813200419636,
+          0.9727377982724723,
+          0.9685858351563232,
+          1.0116419146768416
+        ]
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.9926015025441927,
+        "pairs": [
+          0.9926015025441927,
+          0.9954188175547464,
+          0.9789393141435646,
+          0.9904132719957643,
+          0.9940164517436276
+        ]
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.017764216696944,
+        "pairs": [
+          1.0266090614991352,
+          1.0061744049988774,
+          1.024249004878226,
+          0.9928915511449202,
+          1.017764216696944
+        ]
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 0.9854741704569063,
+        "pairs": [
+          1.0009633722496816,
+          0.9760947363200131,
+          0.9854741704569063,
+          1.0076644016912837,
+          0.9596976228106591
+        ]
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0053843373428621,
+        "pairs": [
+          1.0048514094762084,
+          1.0053843373428621,
+          0.9721784825315217,
+          1.0091632091927742,
+          1.0148993862854092
+        ]
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.001760105420856,
+        "pairs": [
+          1.0086113236758645,
+          1.0007004789674516,
+          1.001760105420856,
+          0.9996085808641577,
+          1.0569202230127102
+        ]
+      }
+    ]
+  },
+  "empty_parameter": {
+    "status": "source-validated candidate; runtime acceptance deferred to combined-base measurement",
+    "base_commit": "353dc3f19ebe6554b8c224a400c588bdf49e901a",
+    "base_library_sha256": "e6849aa2cc0d75c74b42370ecd568c6dd7581dfadbc892244176a6a03acf576d",
+    "candidate_library_sha256": "5eab71c7b3d0a5529d778946dd6b0a752065e60a1b4f002198de519860d433fb",
+    "source_manifest_sha256": "93b401ae8c8727fe768090535fd2489a3532141d54c2752bfea2afb34add24eb",
+    "patch_sha256": "fd757a4ee5aec17a95559b3c844ba3bc4c7f4c8fbad4b8037d5a0ed03f48c1c1",
+    "change": "Test whether active_parameter_reference is populated before taking the owned tuple. Some processing, work/positions, and drop scope are unchanged; None avoids the full record move.",
+    "assembly": {
+      "none_copy_bytes_avoided": 88,
+      "none_write_avoided": true,
+      "same_stack_frame_bytes": 1416,
+      "scope": "Exact x86_64 optimized library pair; no claimed stack-size reduction or result for other compiler/targets."
+    },
+    "checks": {
+      "fmt": true,
+      "strict_release_clippy_core_ffi_all_targets": true,
+      "release_core_ffi_tests": 323,
+      "test_summary_rows": 29,
+      "selected_allocator_failure_and_global_routing_sweeps": "Included in unmodified core allocation integration suite",
+      "publication_cases": 432,
+      "publication_changes": 0,
+      "publication_retained_reference_differences": 9,
+      "doctype_cases": 4104,
+      "doctype_differences": 0,
+      "custom_provenance_cases": 15288,
+      "custom_changes": 0,
+      "malformed_cases": 2392,
+      "streaming_cases": 32
+    },
+    "profile": {
+      "candidate_over_control_Ir": {
+        "wayland": 0.9980811171967444,
+        "maven": 0.9964287656581404
+      },
+      "scope": "Callgrind XML_Parse instructions including callbacks, with one warmup and one measured parse both collected. Constructor/free/IO/dlopen excluded by toggle; no wall-time throughput claim. Same root profiler command/configuration, CPU5.",
+      "processes": 4
+    },
+    "limits": [
+      "The initial240-second local compilation wrapper expired before tests ran; its incomplete log is retained. The unchanged command passed with a longer build deadline onCPU5. No test assertions or upstream retry ceilings changed.",
+      "No CPU0 timings or throughput claim for this isolated candidate.",
+      "No new upstream4740 replay or sanitizer campaign in this layer; full release core/FFI plus named targeted oracles are the reported checks.",
+      "Some paths gain a discriminant predicate and retain their existing copy; the measured instruction saving is small.",
+      "The nine existing reference differences in legal parameter-child publication are retained explicitly.",
+      "No root checkout edits; root owns independent review, composition and runtime acceptance."
+    ]
+  }
+}

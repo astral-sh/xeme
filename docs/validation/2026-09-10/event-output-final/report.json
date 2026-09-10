@@ -1,0 +1,930 @@
+{
+  "scope": "Owned event output only; three micro-optimizations excluded after attribution.",
+  "runtime_commit": "9074fbd9d0d53cc7694e97faa776bf0f15b40b57",
+  "library_sha256": {
+    "liboriole_expat.so": "fef31ffcaa4988ce470bf81fb86356ed3f25ec8278b9dff5a54e107e919c88c3",
+    "liboriole_expat.a": "53b27db2874a9e6cf30b4e4a01e2a585029718c134bda129cf2f8ecfd8104cb3"
+  },
+  "rust_checks": 326,
+  "reused_exact_binary_evidence": {
+    "reason": "The root rebuild produces byte-identical shared/static libraries and matches all final author source hashes. Reuse exact-binary API/native/differential/streaming evidence instead of repeating unchanged tests. Root independently ran all326 Rust checks, Clippy/fmt, publication/active controls and the isolated managed-Python custom-encoding corpus.",
+    "manifest_scope": "The root build lists63 compiler/header/C-test inputs. The author lists those same63 plus the unchanged adapter README; all64 author files match root. An initial dict-equality assertion rejected this extra documentation entry before evidence was copied.",
+    "author_final_source_sha256": "9566ffd23b9e1b839e80e2e43d0b8aa8e3c480a9a71196537da7bb05b0a356d5",
+    "source_files_matched": 64,
+    "library_sha256": {
+      "liboriole_expat.so": "fef31ffcaa4988ce470bf81fb86356ed3f25ec8278b9dff5a54e107e919c88c3",
+      "liboriole_expat.a": "53b27db2874a9e6cf30b4e4a01e2a585029718c134bda129cf2f8ecfd8104cb3"
+    },
+    "api_results_sha256": "8a31919328ca447bd793e47f6cc7e1f7788f7acec7d2f680374ecda04acb6bc9",
+    "native_report_sha256": "a903318b203dab1908d9ed1749ae03d4fa2805a147c848388f884687666e4677"
+  },
+  "api": {
+    "configurations": 4740,
+    "passed": 4113,
+    "failed": 627,
+    "changed_rows": 0
+  },
+  "native": {
+    "runs": 6,
+    "selected_allocation_scenarios_per_linkage": 336,
+    "scope": "C ASan/UBSan consumers, release Rust uninstrumented, LSan disabled"
+  },
+  "compatibility": {
+    "ordinary_exact": 1518,
+    "streaming": 64,
+    "independent_parser_invocations": 15030,
+    "independent_streaming_replays": 32,
+    "custom_encoding": 36456,
+    "active_membership": 4680,
+    "doctype": 4104,
+    "missing_parameter": 1944,
+    "child_controls": 6,
+    "shared_publication": 432,
+    "retained_shared_publication_differences": 9
+  },
+  "short_native_screen": {
+    "status": "passed",
+    "project_geomean_speedup": 1.037039623474648,
+    "project_geomean_oriole_over_expat": 2.4918961840879414,
+    "positive": 22,
+    "rows": [
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0301456818347643,
+        "oriole_over_expat": 1.1930359267686783,
+        "milliseconds": {
+          "control": 0.172261,
+          "candidate": 0.168385,
+          "expat": 0.140794
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 0.9854821203176646,
+        "oriole_over_expat": 1.3262216292020097,
+        "milliseconds": {
+          "control": 0.201437,
+          "candidate": 0.203611,
+          "expat": 0.146894
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9165083931514117,
+        "oriole_over_expat": 1.7606837606837604,
+        "milliseconds": {
+          "control": 0.19192800000000002,
+          "candidate": 0.215682,
+          "expat": 0.12249900000000001
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0525135169395774,
+        "oriole_over_expat": 1.449786142001711,
+        "milliseconds": {
+          "control": 0.197319,
+          "candidate": 0.184565,
+          "expat": 0.130333
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0639389208831285,
+        "oriole_over_expat": 2.2808940575691685,
+        "milliseconds": {
+          "control": 0.486618,
+          "candidate": 0.458997,
+          "expat": 0.207778
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0304727011368318,
+        "oriole_over_expat": 2.4894471668756974,
+        "milliseconds": {
+          "control": 0.593158,
+          "candidate": 0.570065,
+          "expat": 0.227516
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0578486498499833,
+        "oriole_over_expat": 2.596992982532847,
+        "milliseconds": {
+          "control": 0.49338099999999996,
+          "candidate": 0.475177,
+          "expat": 0.179775
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0358690905992738,
+        "oriole_over_expat": 2.681435529599922,
+        "milliseconds": {
+          "control": 0.58359,
+          "candidate": 0.553624,
+          "expat": 0.20788800000000002
+        }
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0214474850088957,
+        "oriole_over_expat": 7.000284231655778,
+        "milliseconds": {
+          "control": 15.546367,
+          "candidate": 15.143314,
+          "expat": 2.149655
+        }
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.005573930708675,
+        "oriole_over_expat": 7.19041250402836,
+        "milliseconds": {
+          "control": 15.393712,
+          "candidate": 15.172058,
+          "expat": 2.121633
+        }
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0451993968932025,
+        "oriole_over_expat": 4.8001127146106315,
+        "milliseconds": {
+          "control": 11.505209,
+          "candidate": 11.005025,
+          "expat": 2.2741279999999997
+        }
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0422141891192778,
+        "oriole_over_expat": 4.76578661429516,
+        "milliseconds": {
+          "control": 11.541116,
+          "candidate": 11.056472,
+          "expat": 2.318309
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0526637247424129,
+        "oriole_over_expat": 3.090611832276188,
+        "milliseconds": {
+          "control": 0.713864,
+          "candidate": 0.6799,
+          "expat": 0.221393
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.018889844282776,
+        "oriole_over_expat": 3.2800439782432838,
+        "milliseconds": {
+          "control": 0.756002,
+          "candidate": 0.741986,
+          "expat": 0.223747
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0816193987860794,
+        "oriole_over_expat": 3.430536874852408,
+        "milliseconds": {
+          "control": 0.7227899999999999,
+          "candidate": 0.668248,
+          "expat": 0.198531
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0704150783566286,
+        "oriole_over_expat": 3.583109946793388,
+        "milliseconds": {
+          "control": 0.748066,
+          "candidate": 0.705758,
+          "expat": 0.199262
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.1252043904363442,
+        "oriole_over_expat": 3.202566761354781,
+        "milliseconds": {
+          "control": 1.734129,
+          "candidate": 1.550817,
+          "expat": 0.481229
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0204777766954205,
+        "oriole_over_expat": 3.2450464915686275,
+        "milliseconds": {
+          "control": 1.875182,
+          "candidate": 1.83663,
+          "expat": 0.5671689999999999
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.05581084430654,
+        "oriole_over_expat": 3.5685794064904006,
+        "milliseconds": {
+          "control": 1.644191,
+          "candidate": 1.557359,
+          "expat": 0.44444100000000003
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.056934072157354,
+        "oriole_over_expat": 3.470320067464063,
+        "milliseconds": {
+          "control": 1.866005,
+          "candidate": 1.794211,
+          "expat": 0.523458
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0366348877699405,
+        "oriole_over_expat": 2.981003881186712,
+        "milliseconds": {
+          "control": 91.424137,
+          "candidate": 87.753552,
+          "expat": 29.161956999999997
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0324437803013702,
+        "oriole_over_expat": 3.290485375089614,
+        "milliseconds": {
+          "control": 98.19783,
+          "candidate": 95.115573,
+          "expat": 29.041814
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.022422358479128,
+        "oriole_over_expat": 3.054622496553467,
+        "milliseconds": {
+          "control": 91.278887,
+          "candidate": 88.91665499999999,
+          "expat": 28.875391999999998
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0134889003144454,
+        "oriole_over_expat": 3.3322158340709076,
+        "milliseconds": {
+          "control": 97.688448,
+          "candidate": 96.233441,
+          "expat": 28.890639999999998
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0422971122793974,
+        "oriole_over_expat": 1.803711610002235,
+        "milliseconds": {
+          "control": 2.077541,
+          "candidate": 1.993233,
+          "expat": 1.1065070000000001
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0360186570364087,
+        "oriole_over_expat": 1.9606569371844165,
+        "milliseconds": {
+          "control": 2.194338,
+          "candidate": 2.1383650000000003,
+          "expat": 1.0867
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0379960364693963,
+        "oriole_over_expat": 1.8372736121347832,
+        "milliseconds": {
+          "control": 2.043447,
+          "candidate": 1.9593089999999997,
+          "expat": 1.066422
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0286943374168052,
+        "oriole_over_expat": 1.9780237145227466,
+        "milliseconds": {
+          "control": 2.175132,
+          "candidate": 2.1034289999999998,
+          "expat": 1.0631460000000001
+        }
+      }
+    ]
+  },
+  "native_confirmation": {
+    "status": "passed",
+    "project_geomean_speedup": 1.0228927536073262,
+    "project_geomean_oriole_over_expat": 2.5418679916008893,
+    "positive": 22,
+    "rows": [
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.022779244198202,
+        "oriole_over_expat": 1.1390937198212296,
+        "milliseconds": {
+          "control": 0.1565425,
+          "candidate": 0.152896,
+          "expat": 0.13403550000000003
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0277754732472615,
+        "oriole_over_expat": 1.2579215306074993,
+        "milliseconds": {
+          "control": 0.1793,
+          "candidate": 0.1747965,
+          "expat": 0.13915
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0191488867427978,
+        "oriole_over_expat": 1.3037281654644999,
+        "milliseconds": {
+          "control": 0.1536615,
+          "candidate": 0.1506615,
+          "expat": 0.115571
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.045332233590135,
+        "oriole_over_expat": 1.4051663344461698,
+        "milliseconds": {
+          "control": 0.17869849999999998,
+          "candidate": 0.1722515,
+          "expat": 0.121778
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0290929679587215,
+        "oriole_over_expat": 2.5121452660572348,
+        "milliseconds": {
+          "control": 0.474907,
+          "candidate": 0.463325,
+          "expat": 0.1829665
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.042480640238201,
+        "oriole_over_expat": 2.535977730735874,
+        "milliseconds": {
+          "control": 0.5666734999999999,
+          "candidate": 0.5470175,
+          "expat": 0.21446600000000002
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0302590450736895,
+        "oriole_over_expat": 2.705201501907207,
+        "milliseconds": {
+          "control": 0.467558,
+          "candidate": 0.45391249999999994,
+          "expat": 0.1676535
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0343847425074812,
+        "oriole_over_expat": 2.8134849242475006,
+        "milliseconds": {
+          "control": 0.564524,
+          "candidate": 0.5457795,
+          "expat": 0.19552
+        }
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0200084563616507,
+        "oriole_over_expat": 6.8885972827647235,
+        "milliseconds": {
+          "control": 15.921873000000003,
+          "candidate": 15.428412,
+          "expat": 2.2443315000000004
+        }
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0210743074254793,
+        "oriole_over_expat": 6.999886314846838,
+        "milliseconds": {
+          "control": 15.721784,
+          "candidate": 15.191744,
+          "expat": 2.2271205000000003
+        }
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0026363257527213,
+        "oriole_over_expat": 5.038966860704753,
+        "milliseconds": {
+          "control": 11.476034499999999,
+          "candidate": 11.51096,
+          "expat": 2.2922015
+        }
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0053243675580317,
+        "oriole_over_expat": 5.055256399891677,
+        "milliseconds": {
+          "control": 11.310175,
+          "candidate": 11.34522,
+          "expat": 2.2492155
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.027339177881172,
+        "oriole_over_expat": 3.2036975714865368,
+        "milliseconds": {
+          "control": 0.7056875,
+          "candidate": 0.6858854999999999,
+          "expat": 0.2139795
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0226331214187463,
+        "oriole_over_expat": 3.4539753748289916,
+        "milliseconds": {
+          "control": 0.76278,
+          "candidate": 0.7460534999999999,
+          "expat": 0.216905
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0091688875233253,
+        "oriole_over_expat": 3.580277372224782,
+        "milliseconds": {
+          "control": 0.6914214999999999,
+          "candidate": 0.6878590000000001,
+          "expat": 0.191152
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.033815289369539,
+        "oriole_over_expat": 3.7281755071467733,
+        "milliseconds": {
+          "control": 0.7510125,
+          "candidate": 0.7196735000000001,
+          "expat": 0.19331600000000002
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9945041057002568,
+        "oriole_over_expat": 3.5252611644623375,
+        "milliseconds": {
+          "control": 1.6170955,
+          "candidate": 1.626032,
+          "expat": 0.4557765
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0326743866851729,
+        "oriole_over_expat": 3.375923601748885,
+        "milliseconds": {
+          "control": 1.8435730000000001,
+          "candidate": 1.794056,
+          "expat": 0.5309769999999999
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0021355399202707,
+        "oriole_over_expat": 3.861877363143186,
+        "milliseconds": {
+          "control": 1.5903,
+          "candidate": 1.5856964999999998,
+          "expat": 0.4103615
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.029459871982251,
+        "oriole_over_expat": 3.6061446492384484,
+        "milliseconds": {
+          "control": 1.8205604999999998,
+          "candidate": 1.7598615,
+          "expat": 0.48619799999999996
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0753420819498758,
+        "oriole_over_expat": 3.089544005354545,
+        "milliseconds": {
+          "control": 97.850942,
+          "candidate": 90.413991,
+          "expat": 29.136439
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 0.9872982069160409,
+        "oriole_over_expat": 3.457840318364142,
+        "milliseconds": {
+          "control": 100.61931200000001,
+          "candidate": 101.9138,
+          "expat": 30.427662
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.002584249948804,
+        "oriole_over_expat": 3.1346247875067363,
+        "milliseconds": {
+          "control": 90.81840700000001,
+          "candidate": 91.289957,
+          "expat": 29.017528000000002
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0197399518751802,
+        "oriole_over_expat": 3.4348939884004404,
+        "milliseconds": {
+          "control": 100.214445,
+          "candidate": 98.795175,
+          "expat": 28.766558
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0227685613762694,
+        "oriole_over_expat": 1.8687324727740857,
+        "milliseconds": {
+          "control": 2.0426804999999995,
+          "candidate": 1.9963285000000002,
+          "expat": 1.072844
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0121120040466072,
+        "oriole_over_expat": 2.019232521637575,
+        "milliseconds": {
+          "control": 2.186729,
+          "candidate": 2.1698125,
+          "expat": 1.075394
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0220980569435016,
+        "oriole_over_expat": 1.8919987301246277,
+        "milliseconds": {
+          "control": 2.0362035,
+          "candidate": 1.9833095,
+          "expat": 1.042622
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0082052904741974,
+        "oriole_over_expat": 2.068463210527347,
+        "milliseconds": {
+          "control": 2.2016925,
+          "candidate": 2.16846,
+          "expat": 1.0463794999999998
+        }
+      }
+    ],
+    "iterations": {
+      "vulkan": 7,
+      "wayland": 64,
+      "maven": 128,
+      "batik": 512,
+      "gtk": 256,
+      "docbook": 256,
+      "generated-rare-declarations": 32,
+      "generated-entities": 32
+    }
+  },
+  "actual_consumers": {
+    "python_geomean_oriole_over_expat": {
+      "elementtree": 1.7119589012335397,
+      "pyexpat-events": 1.4641326191476352
+    },
+    "python_rows": {
+      "maven/4096/pyexpat-events": {
+        "oriole_over_expat": 1.7406518698559774,
+        "milliseconds": {
+          "oriole": 3.027897,
+          "expat": 1.7395189999999998
+        }
+      },
+      "vulkan/4096/elementtree": {
+        "oriole_over_expat": 1.6998315629409415,
+        "milliseconds": {
+          "oriole": 145.097888,
+          "expat": 92.03434800000001
+        }
+      },
+      "gtk/4096/pyexpat-events": {
+        "oriole_over_expat": 1.679099226845811,
+        "milliseconds": {
+          "oriole": 1.2414189999999998,
+          "expat": 0.741896
+        }
+      },
+      "docbook/4096/elementtree": {
+        "oriole_over_expat": 1.7914831309271606,
+        "milliseconds": {
+          "oriole": 0.7433989999999999,
+          "expat": 0.41113700000000003
+        }
+      },
+      "vulkan/4096/pyexpat-events": {
+        "oriole_over_expat": 1.5953485077329652,
+        "milliseconds": {
+          "oriole": 259.28738400000003,
+          "expat": 173.72385300000002
+        }
+      },
+      "wayland/4096/pyexpat-events": {
+        "oriole_over_expat": 1.0607292511055455,
+        "milliseconds": {
+          "oriole": 3.404148,
+          "expat": 3.191411
+        }
+      },
+      "gtk/4096/elementtree": {
+        "oriole_over_expat": 1.9961098894291822,
+        "milliseconds": {
+          "oriole": 0.941629,
+          "expat": 0.479396
+        }
+      },
+      "maven/4096/elementtree": {
+        "oriole_over_expat": 2.3782606635819525,
+        "milliseconds": {
+          "oriole": 2.2723940000000002,
+          "expat": 0.96431
+        }
+      },
+      "batik/4096/pyexpat-events": {
+        "oriole_over_expat": 1.2879717197320228,
+        "milliseconds": {
+          "oriole": 0.323174,
+          "expat": 0.25129999999999997
+        }
+      },
+      "wayland/4096/elementtree": {
+        "oriole_over_expat": 1.525520448299408,
+        "milliseconds": {
+          "oriole": 2.759474,
+          "expat": 1.818678
+        }
+      },
+      "batik/4096/elementtree": {
+        "oriole_over_expat": 1.1415093207216507,
+        "milliseconds": {
+          "oriole": 0.287647,
+          "expat": 0.24992699999999998
+        }
+      },
+      "docbook/4096/pyexpat-events": {
+        "oriole_over_expat": 1.5464211196618256,
+        "milliseconds": {
+          "oriole": 0.924107,
+          "expat": 0.590464
+        }
+      }
+    },
+    "wayland": {
+      "client-header": {
+        "oriole_over_expat": 1.2394360913897655,
+        "milliseconds": {
+          "oriole": 8.1447665,
+          "expat": 6.5713485
+        }
+      },
+      "private-code": {
+        "oriole_over_expat": 1.3067492324051815,
+        "milliseconds": {
+          "oriole": 6.4614385,
+          "expat": 4.944666000000001
+        }
+      }
+    }
+  },
+  "cpython": {
+    "schema_version": 1,
+    "cpython_revision": "3bb231a6a5dc02b95658877318bf61501a7209e9",
+    "python": "3.12.13 (main, Aug  7 2026, 02:25:39) [Clang 22.1.3 ]",
+    "library_sha256": "fef31ffcaa4988ce470bf81fb86356ed3f25ec8278b9dff5a54e107e919c88c3",
+    "linkage": "shared",
+    "consumer_adaptation": null,
+    "consumer_fix": null,
+    "commands": [
+      [
+        "cc",
+        "-shared",
+        "-fPIC",
+        "-O2",
+        "-I/home/dev-user/code/oss/oriole/include",
+        "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12",
+        "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/internal",
+        "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/expat",
+        "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules",
+        "/tmp/oriole-event-slot-final/cpython-shared/pyexpat.c",
+        "/tmp/oriole-event-slot-final/cpython-shared/liboriole_expat.so",
+        "-Wl,-rpath,/tmp/oriole-event-slot-final/cpython-shared",
+        "-o",
+        "/tmp/oriole-event-slot-final/cpython-shared/pyexpat.cpython-312-x86_64-linux-gnu.so"
+      ],
+      [
+        "cc",
+        "-shared",
+        "-fPIC",
+        "-O2",
+        "-I/home/dev-user/code/oss/oriole/include",
+        "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12",
+        "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/internal",
+        "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/expat",
+        "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules",
+        "/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/_elementtree.c",
+        "/tmp/oriole-event-slot-final/cpython-shared/liboriole_expat.so",
+        "-Wl,-rpath,/tmp/oriole-event-slot-final/cpython-shared",
+        "-o",
+        "/tmp/oriole-event-slot-final/cpython-shared/_elementtree.cpython-312-x86_64-linux-gnu.so"
+      ]
+    ],
+    "test_command": [
+      "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3",
+      "-s",
+      "-m",
+      "test",
+      "-v",
+      "-j1",
+      "--timeout",
+      "120",
+      "test_pyexpat",
+      "test_xml_etree",
+      "test_xml_etree_c",
+      "test_minidom",
+      "test_sax",
+      "test_pulldom"
+    ],
+    "probe_exit_code": 0,
+    "tests_exit_code": 2,
+    "gate_exit_code": 0,
+    "text_fragmentation": {
+      "accepted_upstream_failures": true,
+      "allowed_assertions": [
+        "test1 (test.test_pyexpat.BufferTextTest.test1)",
+        "test_handlers (test.test_sax.CDATAHandlerTest.test_handlers)"
+      ],
+      "semantic_command": [
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3",
+        "-s",
+        "/home/dev-user/code/oss/oriole/tools/cpython/text_fragmentation.py",
+        "/tmp/oriole-event-slot-final/cpython-shared"
+      ],
+      "semantic_exit_code": 0,
+      "semantic_source_sha256": "97b76ae05228951f85fab5887ed9727cb2d218016cd049a898080d2e0d6fc4b4"
+    },
+    "source_sha256": "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0",
+    "compiled_source_sha256": "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0"
+  }
+}

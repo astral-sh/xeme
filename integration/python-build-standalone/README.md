@@ -97,6 +97,15 @@ license directory, and its extension metadata references Oriole's notices.
 
 ## Validation
 
+The combined runtime at [`b68bdca`](https://github.com/astral-sh/oriole/commit/b68bdca)
+includes the reviewed external-value continuations, declaration Default callbacks,
+allocation-free shared state, and inline character data. Its
+[frozen validation report](../../docs/validation/2026-09-10/external-values/)
+identifies the source and local release libraries. The PBS distribution gate
+rebuilds that source with its own pinned toolchain and records separate bundle and
+distribution hashes. Local library results do not substitute for that full build
+or its glibc 2.17 runtime check.
+
 Check the patch and staging logic against a clean pinned PBS source tree:
 
 ```sh

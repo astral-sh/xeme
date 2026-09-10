@@ -51,6 +51,47 @@ fn streaming_tokens_references_and_normalization() {
 }
 
 #[test]
+fn plain_attributes_and_short_references_keep_normalization_and_errors() {
+    let events = every_chunk(
+        "<!DOCTYPE r [<!ENTITY e 'entity'>]><r empty='' plain='hé😀' space=' x\t y\r\nz ' escaped='&lt;&amp;&#13;'>&lt;&gt;&amp;&apos;&quot;&#65;&#x1F600;&e;</r>",
+    );
+    let attributes = events
+        .iter()
+        .find_map(|event| {
+            if let EventKind::StartElement { attributes, .. } = event {
+                Some(attributes)
+            } else {
+                None
+            }
+        })
+        .unwrap();
+    assert_eq!(
+        attributes
+            .iter()
+            .map(|attribute| attribute.value.as_str())
+            .collect::<Vec<_>>(),
+        ["", "hé😀", " x  y z ", "<&\r"]
+    );
+    assert!(events.contains(&EventKind::Text(text("<>&'\"A😀entity"))));
+    for xml in ["<r>&#0;</r>", "<r>&#x110000;</r>", "<r>&#+1;</r>"] {
+        for chunk in 1..=xml.len() {
+            assert_eq!(
+                parse(xml.as_bytes(), chunk, Config::default()),
+                Err(ErrorKind::BadCharacterReference)
+            );
+        }
+    }
+    assert_eq!(
+        parse(
+            b"<!DOCTYPE r [<!ENTITY e '<'>]><r a='&e;'/>",
+            1,
+            Config::default()
+        ),
+        Err(ErrorKind::InvalidToken)
+    );
+}
+
+#[test]
 fn namespaces_and_triplets() {
     let xml = b"<r xmlns='urn:r' xmlns:a='urn:a' a:x='1' x='2'><a:c xmlns=''/></r>";
     let config = Config {

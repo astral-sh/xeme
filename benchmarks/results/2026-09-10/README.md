@@ -111,3 +111,38 @@ parses per process. The [build manifest](reuse-build.json) and
 from separate instrumented runs. The retained buffer keeps its largest capacity
 until reset or destruction; existing token/input and C-family allocation limits
 still apply. This is an allocation/time improvement with a retention tradeoff.
+
+## Avoiding temporary literal strings
+
+Plain attribute values now normalize directly into their result, and predefined
+or numeric references use the borrowed token before allocating a general-entity
+name. At 4 KiB chunks with the system allocator:
+
+| Workload | Reuse parent, ms | Literal paths, ms | Allocation requests before → after |
+| --- | ---: | ---: | ---: |
+| Elements and attributes | 15.69 | 15.15 | 130,021 → 110,021 |
+| Text with line breaks | 9.00 | 9.32 | 20,127 → 20,127 |
+| References | 22.22 | 21.71 | 110,057 → 80,057 |
+| Prefixed names, namespace processing disabled | 17.48 | 17.01 | 120,036 → 110,035 |
+
+The [paired comparison](bench-literal-common.json.gz) retains all samples. Text
+was about 3.5% slower in this run, despite unchanged allocation counts; this is
+not a universal timing improvement. We retain the change for its deterministic
+allocation reduction and simpler literal paths, without attributing the text
+regression to an unmeasured cause.
+
+The [repeated C comparison](bench-native-literal.json.gz) and
+[allocator comparison](bench-allocators-literal.json.gz) use this same candidate:
+
+| Workload | C Oriole, ms | C Expat, ms | Rust system, ms | Rust jemalloc, ms | Rust mimalloc, ms |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Elements and attributes | 22.15 | 3.74 | 15.16 | 14.67 | 14.82 |
+| Text with line breaks | 10.48 | 1.59 | 9.32 | 9.18 | 9.09 |
+| References | 25.18 | 2.15 | 21.62 | 21.71 | 21.12 |
+| Prefixed names, namespace processing disabled | 24.47 | 3.19 | 17.12 | 16.26 | 16.82 |
+
+These measurements precede the subsequent namespace and callback compatibility
+changes. The [build manifest](literal-build.json) and
+[source hashes](literal-source.json) identify the exact measured source. They
+show progress from the initial baseline, while the C interface still takes
+roughly 6–12 times as long as Expat at 4 KiB chunks.

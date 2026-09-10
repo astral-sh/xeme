@@ -1284,11 +1284,16 @@ impl Parser {
                 "entity reference byte limit exceeded",
             ));
         }
-        let name = string(&text[1..end], self.allocator)?;
+        let character = character_reference(&text[1..end]);
+        let name = if matches!(character, Ok(None)) {
+            Some(string(&text[1..end], self.allocator)?)
+        } else {
+            None
+        };
         let position = self.source().position(end + 1);
         self.save_current_raw(end + 1)?;
-        if let Some(character) = character_reference(&name)
-            .map_err(|kind| self.err(kind, "invalid character reference"))?
+        if let Some(character) =
+            character.map_err(|kind| self.err(kind, "invalid character reference"))?
         {
             self.consume(end + 1);
             self.emit(
@@ -1297,6 +1302,7 @@ impl Parser {
             )?;
             return Ok(true);
         }
+        let name = name.expect("general entity references have an owned name");
         if !is_name(&name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid entity name"));
         }
@@ -1919,6 +1925,9 @@ impl Parser {
     }
 
     fn expand_attribute(&mut self, value: &str, chain: &mut Vec<String>) -> Result<String, Error> {
+        if !value.bytes().any(|byte| matches!(byte, b'&' | b'<')) {
+            return normalize_attribute_whitespace(value, self.allocator);
+        }
         let mut output = String::try_with_capacity_in(value.len(), self.allocator)?;
         let mut rest = value;
         while !rest.is_empty() {

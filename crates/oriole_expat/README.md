@@ -62,6 +62,11 @@ Converted values must be non-ASCII XML characters in the Basic Multilingual Plan
 (`U+0080` through `U+FFFF`, excluding surrogates and invalid XML characters).
 ASCII characters use direct single-byte map entries.
 
+Name validation accepts a broader Unicode range than the pinned Expat 2.8.4
+reference, including CJK Extension A and supplementary name characters. Some
+well-formed names accepted by Oriole therefore fail in Expat. Compatibility
+reports retain these acceptance and diagnostic differences.
+
 The following Expat modes are explicitly unsupported:
 
 - Parameter entities inside declarations and external parameter references inside

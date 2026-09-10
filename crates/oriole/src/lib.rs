@@ -1502,18 +1502,10 @@ impl Parser {
 
     fn parse_reference(&mut self) -> Result<bool, Error> {
         let limit = self.config.limits.max_token_bytes;
-        let end = self.source_mut().scan_reference(limit).map_err(|kind| {
-            let offset = self
-                .source()
-                .remaining()
-                .char_indices()
-                .skip(1)
-                .find(|(_, character)| {
-                    whitespace(*character) || matches!(*character, '<' | '&' | '\'' | '"' | '\0')
-                })
-                .map_or(0, |(index, _)| index);
-            self.err_at(kind, "invalid entity reference", offset)
-        })?;
+        let end = self
+            .source_mut()
+            .scan_reference(limit)
+            .map_err(|(kind, offset)| self.err_at(kind, "invalid entity reference", offset))?;
         let text = self.source().remaining();
         let Some(end) = end else {
             if text.len() > self.config.limits.max_token_bytes {

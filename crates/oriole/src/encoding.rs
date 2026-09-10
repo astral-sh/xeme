@@ -732,28 +732,45 @@ impl Source {
     pub(crate) fn mark_deferred(&mut self) {
         self.deferred_size = self.remaining().len();
     }
-    pub(crate) fn scan_reference(&mut self, limit: usize) -> Result<Option<usize>, ErrorKind> {
-        let bytes = &self.text.as_bytes()[self.cursor..];
-        for (index, byte) in bytes
-            .iter()
-            .copied()
-            .enumerate()
-            .skip(self.scan.checked.max(1))
-        {
+    pub(crate) fn scan_reference(
+        &mut self,
+        limit: usize,
+    ) -> Result<Option<usize>, (ErrorKind, usize)> {
+        let text = &self.text[self.cursor..];
+        let numeric = text.starts_with("&#");
+        let hexadecimal = numeric && text.as_bytes().get(2) == Some(&b'x');
+        let digits_start = if hexadecimal { 3 } else { 2 };
+        let start = self.scan.checked.max(1);
+        for (relative, character) in text[start..].char_indices() {
+            let index = start + relative;
             if index >= limit {
-                return Err(ErrorKind::LimitExceeded);
+                return Err((ErrorKind::LimitExceeded, 0));
             }
-            match byte {
-                b';' => return Ok(Some(index)),
-                b'<' | b'&' | b'\'' | b'"' | b' ' | b'\t' | b'\r' | b'\n' | 0 => {
-                    return Err(ErrorKind::InvalidToken);
+            if character == ';' {
+                if index == 1 || (numeric && index == digits_start) {
+                    return Err((ErrorKind::InvalidToken, index));
                 }
-                _ => {}
+                return Ok(Some(index));
+            }
+            let valid = if index == 1 {
+                numeric || crate::names::is_name_start(character)
+            } else if numeric {
+                (index == 2 && character == 'x')
+                    || if hexadecimal {
+                        character.is_ascii_hexdigit()
+                    } else {
+                        character.is_ascii_digit()
+                    }
+            } else {
+                crate::names::is_name_char(character)
+            };
+            if !valid {
+                return Err((ErrorKind::InvalidToken, index));
             }
         }
-        self.scan.checked = bytes.len();
-        if bytes.len() > limit {
-            Err(ErrorKind::LimitExceeded)
+        self.scan.checked = text.len();
+        if text.len() > limit {
+            Err((ErrorKind::LimitExceeded, 0))
         } else {
             Ok(None)
         }
@@ -806,6 +823,28 @@ impl Source {
         }
         let scan = &mut self.scan;
         match mode {
+            ScanMode::Tag if bytes.starts_with(b"</") => {
+                // End tags contain only a name, optional XML whitespace, and '>'.
+                // Resume at a character boundary instead of rescanning long names.
+                let start = scan.checked.max(2);
+                let mut after_name =
+                    start > 2 && matches!(bytes[start - 1], b' ' | b'\t' | b'\r' | b'\n');
+                for (relative, character) in self.text[self.cursor + start..].char_indices() {
+                    let index = start + relative;
+                    if index + character.len_utf8() > limit {
+                        return Err((ErrorKind::LimitExceeded, index));
+                    }
+                    if character == '>' {
+                        return Ok(Some(index + 1));
+                    }
+                    if crate::names::whitespace(character) {
+                        after_name = true;
+                    } else if after_name || !crate::names::is_name_char(character) {
+                        return Err((ErrorKind::InvalidToken, index));
+                    }
+                }
+                scan.checked = bytes.len();
+            }
             ScanMode::Comment | ScanMode::Pi => {
                 let terminator: &[u8] = if mode == ScanMode::Comment {
                     b"-->"

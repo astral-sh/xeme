@@ -587,7 +587,9 @@ impl Parser {
         let end = self
             .source_mut()
             .scan_reference(limit)
-            .map_err(|kind| self.err(kind, "invalid parameter entity reference"))?;
+            .map_err(|(kind, offset)| {
+                self.err_at(kind, "invalid parameter entity reference", offset)
+            })?;
         let Some(end) = end else {
             if self.is_source_final() {
                 return Err(self.err(

@@ -5,7 +5,7 @@ well-formedness, callback compatibility, and safe resource use are separate gate
 A symbol existing or a document parsing successfully does not establish callback
 or CPython compatibility.
 
-The [current integration report](validation/2026-09-10/streaming-attlist-composed/)
+The [current integration report](validation/2026-09-10/buffer-reservations/)
 records the latest bounded validation results, including all remaining upstream
 failures. The [earlier full checkpoint](validation/2026-09-10/) retains its own
 runtime, fuzzing and distribution evidence.

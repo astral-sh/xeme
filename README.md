@@ -16,21 +16,21 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole | Expat | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 88.774 ms | 28.882 ms | 3.08× |
-| Wayland protocol | 2.017 ms | 1.072 ms | 1.92× |
-| Maven POM | 1.571 ms | 0.446 ms | 3.53× |
-| Batik SVG | 0.153 ms | 0.134 ms | 1.12× |
-| GTK UI | 0.680 ms | 0.213 ms | 3.19× |
-| DocBook XSL | 0.445 ms | 0.184 ms | 2.40× |
+| Vulkan registry | 89.987 ms | 29.108 ms | 3.09× |
+| Wayland protocol | 1.983 ms | 1.070 ms | 1.87× |
+| Maven POM | 1.585 ms | 0.454 ms | 3.45× |
+| Batik SVG | 0.154 ms | 0.133 ms | 1.15× |
+| GTK UI | 0.677 ms | 0.213 ms | 3.19× |
+| DocBook XSL | 0.453 ms | 0.186 ms | 2.38× |
 
-Oriole remains slower than Expat. These [native measurements](docs/validation/2026-09-10/streaming-attlist-composed/)
+Oriole remains slower than Expat. These [native measurements](docs/validation/2026-09-10/buffer-reservations/)
 use original XML from six pinned projects, Expat 2.8.4, 4 KiB chunks, and namespaces
 disabled on a shared Linux AMD EPYC-Milan host. Times are medians of process medians;
 ratios are medians of paired ratios. See the [benchmark guide](benchmarks/README.md)
 for methodology, complete results, and separately identified actual-consumer timings.
 
-The [current validation report](docs/validation/2026-09-10/streaming-attlist-composed/)
-records 365 workspace Rust checks and **4,115 passing / 625 failing upstream API
+The [current validation report](docs/validation/2026-09-10/buffer-reservations/)
+records 368 workspace Rust checks and **4,323 passing / 417 failing upstream API
 configurations**. Remaining allocation, resource, diagnostic, and callback differences
 are explicit in the [compatibility guide](docs/compatibility.md). Earlier fuzzing and
 PBS distribution reports identify their own tested revisions.

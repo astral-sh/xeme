@@ -1706,7 +1706,7 @@ impl Parser {
                         ));
                     }
                     self.declaration_allowed = false;
-                    self.emit(EventKind::Comment(self.source_text(text)?), position)?;
+                    self.emit(EventKind::Comment(self.markup_text(text)?), position)?;
                 }
                 ScanMode::Pi => self.parse_pi(&token, position)?,
                 ScanMode::Doctype => self.parse_doctype(&token, position)?,
@@ -2218,12 +2218,11 @@ impl Parser {
             }
             if attrs.is_empty()
                 || attrs[0].name(rest) != "version"
+                || attrs[0].value(rest).is_empty()
                 || !attrs[0]
                     .value(rest)
-                    .strip_prefix("1.")
-                    .is_some_and(|minor| {
-                        !minor.is_empty() && minor.bytes().all(|byte| byte.is_ascii_digit())
-                    })
+                    .bytes()
+                    .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_'))
             {
                 return Err(self.err_at(
                     ErrorKind::XmlDeclaration,
@@ -2293,7 +2292,7 @@ impl Parser {
             self.emit(
                 EventKind::ProcessingInstruction {
                     target: string(target, self.allocator)?,
-                    data: self.source_text(rest.trim_start_matches(whitespace))?,
+                    data: self.markup_text(rest.trim_start_matches(whitespace))?,
                 },
                 position,
             )?;
@@ -2715,6 +2714,12 @@ impl Parser {
                 )
             })?;
         Ok(())
+    }
+
+    /// Expat normalizes the callback string after comment and PI conversion,
+    /// including carriage returns introduced by entity character references.
+    fn markup_text(&self, text: &str) -> Result<String, Error> {
+        normalize_newlines(text, self.allocator)
     }
 
     fn character_data(&self, text: &str) -> Result<Text, Error> {

@@ -604,10 +604,10 @@ fn character_reference_carriage_returns_survive_entity_replacement() {
     assert!(events.contains(&EventKind::Text(text("a\rb"))));
     assert!(events.contains(&EventKind::Text(text("c\rd"))));
     assert!(events.contains(&EventKind::Text(text("a\nb"))));
-    assert!(events.contains(&EventKind::Comment(text("e\rf"))));
+    assert!(events.contains(&EventKind::Comment(text("e\nf"))));
     assert!(events.contains(&EventKind::ProcessingInstruction {
         target: text("pi"),
-        data: text("g\rh")
+        data: text("g\nh")
     }));
 }
 
@@ -879,7 +879,9 @@ fn unprefixed_attributes_can_match_serialized_namespace_names() {
 
 #[test]
 fn newer_minor_versions_keep_xml_10_character_rules() {
-    for version in ["1.0", "1.1", "1.7", "1.01", "1.000"] {
+    for version in [
+        "1.0", "1.1", "1.7", "1.01", "1.000", "1.", "1.x", "2.0", "01.0",
+    ] {
         let xml = format!("<?xml version='{version}'?><r/>");
         for width in [1, 7, xml.len()] {
             let events = parse(xml.as_bytes(), width, Config::default()).unwrap();
@@ -894,7 +896,7 @@ fn newer_minor_versions_keep_xml_10_character_rules() {
             Err(ErrorKind::BadCharacterReference)
         );
     }
-    for version in ["", "1.", "1.x", "2.0", "01.0", "1.\u{0661}"] {
+    for version in ["", "1.\u{0661}"] {
         let xml = format!("<?xml version='{version}'?><r/>");
         assert_eq!(
             parse(xml.as_bytes(), 1, Config::default()),

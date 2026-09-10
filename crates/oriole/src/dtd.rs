@@ -880,7 +880,7 @@ impl Parser {
                 if value.contains("--") || value.ends_with('-') {
                     return Err(self.err(ErrorKind::InvalidToken, "double hyphen in DTD comment"));
                 }
-                self.emit(EventKind::Comment(self.source_text(value)?), position)?;
+                self.emit(EventKind::Comment(self.markup_text(value)?), position)?;
                 self.event_raw(&text[..end + 7])?;
                 text = &rest[end + 3..];
                 continue;

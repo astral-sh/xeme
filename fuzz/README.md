@@ -12,10 +12,17 @@ reentry. It retains and frees content models and injects failure into a custom
 allocator, checking that every successful allocation is released. It does not
 pass invalid pointers or deliberately use already-freed handles.
 
+The `ffi_family` target creates bounded external-parser families with a custom
+allocator, then varies child input, allocation failures, buffer requests, parent
+reset, and parent/child destruction order. Surviving children parse after their
+parent is reset or freed, covering the lifetime token and external DTD merge.
+It uses eight handle slots and no callback recursion.
+
 ```console
 cargo fuzz run parse -- -max_len=65536 -max_total_time=300
 cargo fuzz run streaming -- -max_len=65536 -max_total_time=300
 cargo fuzz run ffi fuzz/seeds/ffi -- -max_len=65536 -max_total_time=300
+cargo fuzz run ffi_family fuzz/seeds/ffi_family -- -max_len=65536 -max_total_time=300
 ```
 
 Use an instrumented nightly toolchain with cargo-fuzz. Keep discovered inputs,

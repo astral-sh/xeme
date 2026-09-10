@@ -34,3 +34,10 @@ path = "fuzz_targets/ffi.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "ffi_family"
+path = "fuzz_targets/ffi_family.rs"
+test = false
+doc = false
+bench = false

@@ -17,5 +17,14 @@ integration_dir=$(cd "$(dirname "$0")" && pwd)
 git -C "$pbs_checkout" apply --reverse --check "$integration_dir/pbs-a455388.patch"
 test -f "$oriole_bundle/manifest.json"
 cd "$pbs_checkout"
-PYBUILD_ORIOLE_BUNDLE="$oriole_bundle" uv run --no-dev build.py \
+export PYBUILD_ORIOLE_BUNDLE="$oriole_bundle"
+uv run --no-dev python - <<'PY'
+from pythonbuild.downloads import DOWNLOADS
+
+source = DOWNLOADS["cpython-3.12"]
+assert source["version"] == "3.12.13", source
+assert source["sha256"] == "c08bc65a81971c1dd5783182826503369466c7e67374d1646519adf05207b684", source
+print(f"Oriole CPython source: {source['url']} (sha256={source['sha256']})")
+PY
+uv run --no-dev build.py \
     --target-triple x86_64-unknown-linux-gnu --python cpython-3.12 --options noopt

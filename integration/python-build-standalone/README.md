@@ -62,6 +62,12 @@ The wrapper verifies the PBS revision and applied patch, then sets
 the patch leaves the existing build path unchanged. The opt-in path rejects other
 targets, CPython versions, non-container builds, and fully static Python builds.
 
+PBS's pinned revision normally selects CPython 3.12.14. The overlay instead pins
+the [official 3.12.13 source archive](https://www.python.org/ftp/python/3.12.13/Python-3.12.13.tar.xz),
+including its size and SHA-256 (`c08bc65a81971c1dd5783182826503369466c7e67374d1646519adf05207b684`).
+The shared download metadata keeps the host Python, target Python, and generated
+Make targets on 3.12.13. The wrapper checks the selection before starting the build.
+
 At the pinned CPython version, PBS inherits `Modules/Setup.stdlib` flags from
 configure. CPython 3.12.13 reads `LIBEXPAT_CFLAGS` and `LIBEXPAT_LDFLAGS` directly;
 installing a pkg-config file alone would not add Rust's native dependencies. The
@@ -99,6 +105,8 @@ default path, native-linker propagation, target restrictions, and rejection of a
 mismatched header. Fixture checks do not compile a Python distribution.
 With `--cpython`, validation also runs the actual backport shell block against
 the pinned consumer source and verifies that reapplication is rejected.
+Alternatively, `--cpython-archive /absolute/Python-3.12.13.tar.xz` verifies the
+download's size and SHA-256 before exercising the backport on its `pyexpat.c`.
 
 Before deployment, run the actual resulting interpreter's XML test suites, confirm
 `pyexpat.EXPAT_VERSION` identifies Oriole, run PBS's distribution validator, and

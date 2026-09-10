@@ -17,7 +17,7 @@ concurrency:
 jobs:
   distribution:
     # This expensive integration gate has a dedicated review layer.
-    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'charlie/codex-oriole-pbs-distribution'
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'charlie/codex-oriole-pbs-distribution' || github.head_ref == 'charlie/codex-oriole-pbs-source-pin'
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:

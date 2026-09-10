@@ -1,3 +1,28 @@
+--- a/pythonbuild/downloads.py
++++ b/pythonbuild/downloads.py
+@@ -3,6 +3,7 @@
+ # file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ 
+ import json
++import os
+ from importlib.resources import files
+ 
+ # Several files in downloads.json are mirrored from their upstream sources due to
+@@ -17,3 +18,14 @@
+ 
+ with files("pythonbuild").joinpath("downloads.json").open("rb") as fh:
+     DOWNLOADS = json.load(fh)
++
++# Keep the optional overlay's host, target, and generated Make versions aligned
++# with the reviewed CPython consumer backport. The normal PBS source is unchanged.
++if os.environ.get("PYBUILD_ORIOLE_BUNDLE"):
++    DOWNLOADS["cpython-3.12"] = {
++        **DOWNLOADS["cpython-3.12"],
++        "url": "https://www.python.org/ftp/python/3.12.13/Python-3.12.13.tar.xz",
++        "size": 20801708,
++        "sha256": "c08bc65a81971c1dd5783182826503369466c7e67374d1646519adf05207b684",
++        "version": "3.12.13",
++    }
 --- a/cpython-unix/build.py
 +++ b/cpython-unix/build.py
 @@ -4,6 +4,7 @@

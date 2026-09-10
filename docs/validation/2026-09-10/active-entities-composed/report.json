@@ -1,0 +1,40 @@
+{
+  "runtime_commit_at_build": "15f25e354341f6f65d0625cbebab2defee3417d6",
+  "restacked_runtime_commit": "8adcba7c5e4b4507bad6dfa0ddf983c0cf56aeff",
+  "library_sha256": {
+    "liboriole_expat.so": "f8328c94dd07bfbd7db22c1a49c15cfcd508847a4051caf76b781cfae4f25474",
+    "liboriole_expat.a": "c4fe6962b2896968ad9777f8b53b5b26ca9212a452002f8826e74d07848ab5d0"
+  },
+  "rust_checks": 312,
+  "scope": "Core and C adapter package tests; standalone storage/CLI packages not counted.",
+  "upstream": {
+    "passed": 4077,
+    "failed": 663,
+    "changed_outcomes": 0,
+    "complete": true
+  },
+  "ordinary_exact": 1518,
+  "attribute_exact_to_baseline": 6468,
+  "attribute_reference_position_differences_retained": 2580,
+  "custom_attribute_exact": 372,
+  "malformed_attributes": 384,
+  "malformed_text": 2392,
+  "streaming": 32,
+  "custom_exact": 36456,
+  "active_membership": {
+    "cases": 4680,
+    "changed": 0,
+    "retained_depth_outcomes": 360
+  },
+  "doctype_exact": 4104,
+  "missing_parameter": {
+    "cases": 1944,
+    "changed_from_baseline": 0,
+    "retained_errors": 24,
+    "retained_events": 162
+  },
+  "child_probes": 6,
+  "native_suites": 6,
+  "allocation_scenarios_per_linkage": 333,
+  "limits_changed": false
+}

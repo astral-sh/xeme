@@ -77,8 +77,9 @@ A separate 512 MiB ceiling on live backing allocations remains active even when
 relative amplification checks are disabled.
 
 A parser family shares a 256 MiB raw-input budget and an 8 MiB entity-expansion
-budget. The C interface also caps aggregate event payloads at 64 MiB, child
-creation at 1,024 parsers, and external-child ancestry at 32 levels.
+budget. The C interface also caps aggregate event payloads at 64 MiB, including
+DTD identifiers, namespace metadata, and repeated base strings. It limits child
+creation to 1,024 parsers and external-child ancestry to 32 levels.
 
 These remaining boundaries prevent claiming complete Expat compatibility.
 Unmodified CPython can use its standard custom allocator suite; the actual consumer

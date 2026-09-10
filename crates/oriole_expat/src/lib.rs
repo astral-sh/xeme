@@ -556,7 +556,7 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
     );
     // SAFETY: Parser is pinned by the busy flag until the outer parse exits.
     // Copies and owned strings are the only values retained across callbacks.
-    let (h, arg, base) = unsafe {
+    let (h, arg, base_bytes) = unsafe {
         (
             (*parser).handlers,
             if (*parser).handler_arg_is_parser {
@@ -568,13 +568,13 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                 (*parser)
                     .base
                     .as_ref()
-                    .map(CString::try_clone)
-                    .transpose()?
+                    .map_or(0, |base| base.as_c_str().to_bytes().len())
             } else {
-                None
+                0
             },
         )
     };
+    let optional_len = |value: &Option<XmlString>| value.as_ref().map_or(0, |value| value.len());
     let callback_bytes = match &kind {
         EventKind::Default => {
             // SAFETY: Only the copied length survives this read, before any callback.
@@ -587,27 +587,83 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                     .map(|a| a.name.len() + a.value.len())
                     .sum::<usize>()
         }
-        EventKind::EndElement { name } => name.len(),
+        EventKind::EndElement { name } | EventKind::SkippedEntity { name, .. } => name.len(),
         EventKind::Text(value) | EventKind::Comment(value) => value.len(),
         EventKind::ProcessingInstruction { target, data } => target.len() + data.len(),
         EventKind::ElementDeclaration { name, model } => name.len() + model.len(),
-        EventKind::EntityDeclaration { name, value, .. } => {
-            name.len() + value.as_ref().map_or(0, |value| value.len())
+        EventKind::XmlDeclaration {
+            version, encoding, ..
+        } => version.len() + optional_len(encoding),
+        EventKind::TextDeclaration { version, encoding } => optional_len(version) + encoding.len(),
+        EventKind::ExternalEntityReference {
+            context,
+            system_id,
+            public_id,
+        } => optional_len(context) + optional_len(system_id) + optional_len(public_id),
+        EventKind::StartDoctype {
+            name,
+            system_id,
+            public_id,
+            ..
         }
-        _ => 0,
+        | EventKind::NotationDeclaration {
+            name,
+            system_id,
+            public_id,
+        } => name.len() + optional_len(system_id) + optional_len(public_id),
+        EventKind::StartNamespace { prefix, uri } => optional_len(prefix) + optional_len(uri),
+        EventKind::EndNamespace { prefix } => optional_len(prefix),
+        EventKind::EntityDeclaration {
+            name,
+            value,
+            system_id,
+            public_id,
+            notation,
+            ..
+        } => {
+            name.len()
+                + optional_len(value)
+                + optional_len(system_id)
+                + optional_len(public_id)
+                + optional_len(notation)
+        }
+        EventKind::AttlistDeclaration {
+            element,
+            name,
+            attribute_type,
+            default,
+            ..
+        } => element.len() + name.len() + attribute_type.len() + optional_len(default),
+        EventKind::StartCdata
+        | EventKind::EndCdata
+        | EventKind::EndDoctype
+        | EventKind::NotStandalone => 0,
     };
     // SAFETY: The shared budget contains atomic counters and never invokes user code.
     unsafe {
         let family = &(*parser).family;
         if !charge(
             &family.callback_bytes,
-            callback_bytes,
+            callback_bytes + base_bytes,
             MAX_FAMILY_CALLBACK_BYTES,
         ) {
             fail_parse(parser, 43);
             return Ok(());
         }
     }
+    // SAFETY: Charge repeated base metadata before cloning. The clone owns its
+    // bytes across callbacks, including callbacks that replace the parser base.
+    let base = unsafe {
+        if needs_base {
+            (*parser)
+                .base
+                .as_ref()
+                .map(CString::try_clone)
+                .transpose()?
+        } else {
+            None
+        }
+    };
     let split_default = matches!(
         &kind,
         EventKind::StartDoctype { .. }

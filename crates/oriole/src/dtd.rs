@@ -153,7 +153,9 @@ impl Parser {
             let end = self
                 .source_mut()
                 .scan_token(crate::ScanMode::Tag, limit)
-                .map_err(|kind| self.err(kind, "DTD token limit exceeded"))?;
+                .map_err(|(kind, offset)| {
+                    self.err_at(kind, "invalid or oversized DTD token", offset)
+                })?;
             let Some(end) = end else {
                 if self.is_source_final() {
                     return Err(self.err(
@@ -206,7 +208,9 @@ impl Parser {
         let end = self
             .source_mut()
             .scan_token(mode, limit)
-            .map_err(|kind| self.err(kind, "DTD token limit exceeded"))?;
+            .map_err(|(kind, offset)| {
+                self.err_at(kind, "invalid or oversized DTD token", offset)
+            })?;
         let Some(end) = end else {
             if self.is_source_final() {
                 return Err(self.err(ErrorKind::UnclosedToken, "unclosed DTD declaration"));
@@ -301,6 +305,7 @@ impl Parser {
                 crate::encoding::Source::entity(value, source_name, position, self.stack.len()),
             )?;
         } else {
+            self.charge_external_identifiers(entity)?;
             let system_id = entity.system_id.try_clone()?;
             let public_id = entity.public_id.try_clone()?;
             self.consume(end + 1);

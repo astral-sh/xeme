@@ -25,7 +25,8 @@ pub struct Limits {
     pub max_token_bytes: usize,
     pub max_total_bytes: usize,
     /// Total indirect bytes from entities, reused defaults, namespace URI expansion,
-    /// and repeated declaration callback names. Shared with external entity children.
+    /// repeated declaration callback names, and external reference identifiers and
+    /// namespace contexts. Shared with external entity children.
     pub max_entity_expansion_bytes: usize,
     pub max_entity_depth: usize,
     pub max_attributes: usize,
@@ -1087,7 +1088,9 @@ impl Parser {
             let end = self
                 .source_mut()
                 .scan_token(mode, max_token)
-                .map_err(|kind| self.err(kind, "XML token byte limit exceeded"))?;
+                .map_err(|(kind, offset)| {
+                    self.err_at(kind, "invalid or oversized XML token", offset)
+                })?;
             let Some(end) = end else {
                 if self.sources.len() == 1
                     && self.source().position(0).byte_index == self.feed_start_byte
@@ -1399,6 +1402,7 @@ impl Parser {
             return Err(self.err(ErrorKind::LimitExceeded, "entity nesting limit exceeded"));
         }
         if entity.value.is_none() {
+            self.charge_external_identifiers(entity)?;
             let system_id = entity
                 .system_id
                 .try_clone()?
@@ -1412,6 +1416,9 @@ impl Parser {
                 }
                 bindings.sort_unstable_by_key(|(prefix, _)| *prefix);
                 for (prefix, uri) in bindings {
+                    self.charge_expansion(prefix.len())?;
+                    self.charge_expansion(uri.len())?;
+                    self.charge_expansion(2)?;
                     context.try_push_str(prefix)?;
                     context.try_push('=')?;
                     context.try_push_str(uri)?;
@@ -1419,15 +1426,20 @@ impl Parser {
                 }
             }
             for name in &self.entity_chain {
+                self.charge_expansion(name.len())?;
+                self.charge_expansion(1)?;
                 context.try_push_str(name)?;
                 context.try_push('\u{c}')?;
             }
             for source in &self.sources {
                 if let Some(name) = &source.entity_name {
+                    self.charge_expansion(name.len())?;
+                    self.charge_expansion(1)?;
                     context.try_push_str(name)?;
                     context.try_push('\u{c}')?;
                 }
             }
+            self.charge_expansion(name.len())?;
             context.try_push_str(&name)?;
             self.consume(end + 1);
             self.emit(
@@ -1935,6 +1947,18 @@ impl Parser {
             result.try_push_str(prefix)?;
         }
         Ok(result)
+    }
+
+    fn charge_external_identifiers(&self, entity: &Entity) -> Result<(), Error> {
+        // A short reference can replay long declaration identifiers many times,
+        // even when the application declines to load the external entity.
+        if let Some(system_id) = &entity.system_id {
+            self.charge_expansion(system_id.len())?;
+        }
+        if let Some(public_id) = &entity.public_id {
+            self.charge_expansion(public_id.len())?;
+        }
+        Ok(())
     }
 
     fn charge_expansion(&self, size: usize) -> Result<(), Error> {

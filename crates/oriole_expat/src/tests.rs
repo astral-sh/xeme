@@ -1090,3 +1090,105 @@ fn default_whitespace_counts_toward_the_shared_event_budget() {
         }
     }
 }
+
+#[test]
+fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
+    fn word() -> XmlString {
+        XmlString::try_from_str_in("x", Allocator::System).unwrap()
+    }
+    fn event(case: usize) -> EventKind {
+        match case {
+            0 => EventKind::XmlDeclaration {
+                version: word(),
+                encoding: Some(word()),
+                standalone: None,
+            },
+            1 => EventKind::TextDeclaration {
+                version: Some(word()),
+                encoding: word(),
+            },
+            2 => EventKind::ExternalEntityReference {
+                context: Some(word()),
+                system_id: Some(word()),
+                public_id: Some(word()),
+            },
+            3 => EventKind::StartDoctype {
+                name: word(),
+                system_id: Some(word()),
+                public_id: Some(word()),
+                has_internal_subset: false,
+            },
+            4 => EventKind::StartNamespace {
+                prefix: Some(word()),
+                uri: Some(word()),
+            },
+            5 => EventKind::EndNamespace {
+                prefix: Some(word()),
+            },
+            6 => EventKind::EntityDeclaration {
+                name: word(),
+                value: Some(word()),
+                parameter: false,
+                system_id: Some(word()),
+                public_id: Some(word()),
+                notation: Some(word()),
+            },
+            7 => EventKind::AttlistDeclaration {
+                element: word(),
+                name: word(),
+                attribute_type: word(),
+                default: Some(word()),
+                required: false,
+            },
+            8 => EventKind::NotationDeclaration {
+                name: word(),
+                system_id: Some(word()),
+                public_id: Some(word()),
+            },
+            9 => EventKind::SkippedEntity {
+                name: word(),
+                parameter: false,
+            },
+            _ => unreachable!(),
+        }
+    }
+    // Each populated string carries one byte. Dispatch must account for every
+    // metadata field exactly once, independently of whether a handler is installed.
+    for (case, bytes) in [2, 2, 3, 3, 2, 1, 5, 4, 3, 1].into_iter().enumerate() {
+        for base in [false, true] {
+            let bytes = bytes + usize::from(base && matches!(case, 2 | 6 | 8));
+            for remaining in [bytes - 1, bytes] {
+                // SAFETY: The test owns a live handle and manually holds the dispatch
+                // guard; no callback is installed and the event owns all its strings.
+                unsafe {
+                    let parser = XML_ParserCreate(ptr::null());
+                    if base {
+                        assert_eq!(XML_SetBase(parser, c"x".as_ptr()), OK);
+                    }
+                    let family = &(*parser).family;
+                    family
+                        .callback_bytes
+                        .store(MAX_FAMILY_CALLBACK_BYTES - remaining, Ordering::Relaxed);
+                    (*parser).busy = true;
+                    dispatch(parser, event(case)).unwrap();
+                    (*parser).busy = false;
+                    assert_eq!(
+                        XML_GetErrorCode(parser),
+                        if remaining < bytes { 43 } else { 0 },
+                        "metadata case {case}"
+                    );
+                    let family = &(*parser).family;
+                    assert_eq!(
+                        family.callback_bytes.load(Ordering::Relaxed),
+                        if remaining < bytes {
+                            MAX_FAMILY_CALLBACK_BYTES - remaining
+                        } else {
+                            MAX_FAMILY_CALLBACK_BYTES
+                        }
+                    );
+                    XML_ParserFree(parser);
+                }
+            }
+        }
+    }
+}

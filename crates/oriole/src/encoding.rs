@@ -640,7 +640,7 @@ impl Source {
         &mut self,
         mode: ScanMode,
         limit: usize,
-    ) -> Result<Option<usize>, ErrorKind> {
+    ) -> Result<Option<usize>, (ErrorKind, usize)> {
         let bytes = &self.text.as_bytes()[self.cursor..];
         if self.scan.mode != Some(mode) {
             self.scan = Scan {
@@ -668,16 +668,24 @@ impl Source {
                     return if end <= limit {
                         Ok(Some(end))
                     } else {
-                        Err(ErrorKind::LimitExceeded)
+                        Err((ErrorKind::LimitExceeded, limit))
                     };
                 }
                 scan.checked = bytes.len().saturating_sub(terminator.len() - 1);
             }
             ScanMode::Tag | ScanMode::Doctype => {
+                let element_markup = mode == ScanMode::Tag
+                    && bytes.first() == Some(&b'<')
+                    && bytes.get(1) != Some(&b'!');
                 let mut index = scan.checked;
                 while index < bytes.len() {
+                    // An element tag cannot contain another literal '<', even
+                    // inside an attribute. DTD entity literals can contain it.
+                    if element_markup && index != 0 && bytes[index] == b'<' {
+                        return Err((ErrorKind::InvalidToken, index));
+                    }
                     if index >= limit {
-                        return Err(ErrorKind::LimitExceeded);
+                        return Err((ErrorKind::LimitExceeded, limit));
                     }
                     if scan.comment {
                         if bytes[index..].starts_with(b"-->") {
@@ -732,7 +740,7 @@ impl Source {
             }
         }
         if bytes.len() > limit {
-            Err(ErrorKind::LimitExceeded)
+            Err((ErrorKind::LimitExceeded, limit))
         } else {
             Ok(None)
         }

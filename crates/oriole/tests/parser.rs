@@ -209,6 +209,90 @@ fn external_fragments_emit_trailing_text_before_reporting_unbalanced_markup() {
 }
 
 #[test]
+fn repeated_external_entity_identifiers_consume_the_shared_expansion_budget() {
+    for (xml, parameter, limit) in [
+        (
+            "<!DOCTYPE r [<!ENTITY e PUBLIC 'public' 'system'>]><r>&e;&e;&e;</r>",
+            false,
+            26,
+        ),
+        (
+            "<!DOCTYPE r [<!ENTITY % e PUBLIC 'public' 'system'>%e;%e;%e;]><r/>",
+            true,
+            24,
+        ),
+    ] {
+        for chunk in 1..=xml.len() {
+            let mut parser = Parser::new(Config {
+                limits: Limits {
+                    max_entity_expansion_bytes: limit,
+                    ..Limits::default()
+                },
+                ..Config::default()
+            });
+            if parameter {
+                assert!(parser.set_param_entity_parsing(2));
+            }
+            let mut references = 0;
+            let mut failure = None;
+            'input: for bytes in xml.as_bytes().chunks(chunk) {
+                parser.feed(bytes, false).unwrap();
+                loop {
+                    match parser.next_event() {
+                        Ok(Some(event)) => {
+                            if matches!(event.kind, EventKind::ExternalEntityReference { .. }) {
+                                references += 1;
+                            }
+                        }
+                        Ok(None) => break,
+                        Err(error) => {
+                            failure = Some(error.kind);
+                            break 'input;
+                        }
+                    }
+                }
+            }
+            assert_eq!(
+                failure,
+                Some(ErrorKind::LimitExceeded),
+                "chunk {chunk}, {xml}"
+            );
+            assert_eq!(references, 2);
+        }
+    }
+}
+
+#[test]
+fn external_entity_namespace_context_is_charged_before_child_inheritance() {
+    let mut parser = Parser::new(Config {
+        namespace_separator: Some('|'),
+        limits: Limits {
+            max_entity_expansion_bytes: 180,
+            ..Limits::default()
+        },
+        ..Config::default()
+    });
+    let xml = format!(
+        "<!DOCTYPE r [<!ENTITY e SYSTEM 'sys'><!ENTITY other SYSTEM 'sys'>]><r xmlns:p='urn:{}'>&e;</r>",
+        "x".repeat(64)
+    );
+    parser.feed(xml.as_bytes(), true).unwrap();
+    let context = loop {
+        let event = parser.next_event().unwrap().unwrap();
+        if let EventKind::ExternalEntityReference { context, .. } = event.kind {
+            break context.unwrap();
+        }
+    };
+    assert!(context.contains("p=urn:"));
+    let mut child = parser.external_child(Some(&context), None).unwrap();
+    child.feed(b"&other;", true).unwrap();
+    assert_eq!(
+        child.next_event().unwrap_err().kind,
+        ErrorKind::LimitExceeded
+    );
+}
+
+#[test]
 fn attribute_declaration_types_omit_grammar_whitespace() {
     let events = every_chunk(
         "<!DOCTYPE r [<!ATTLIST r a ( one | two | three ) #REQUIRED b NOTATION \t( foo | bar ) #IMPLIED c NOTATION (foo) 'bar' d CDATA 'é'>]><r a='two'/>",
@@ -646,7 +730,9 @@ fn external_entity_children_inherit_namespaces_and_declarations() {
 fn external_entity_cycles_and_expansion_budgets_are_shared() {
     let mut parent = Parser::new(Config {
         limits: Limits {
-            max_entity_expansion_bytes: 16,
+            // Ten bytes describe the external reference; the remaining sixteen
+            // are shared by all externally supplied replacement text.
+            max_entity_expansion_bytes: 26,
             ..Limits::default()
         },
         ..Config::default()

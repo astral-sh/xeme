@@ -105,3 +105,18 @@ mode. Positions and Default callbacks remain separate compatibility checks.
 ## Real-project inputs and consumers
 
 The [pinned corpus](projects/README.md) contains original XML from Vulkan, Wayland, Maven, Batik, GTK and DocBook. The runners compare native callbacks, matched CPython consumers and complete Wayland code-generation commands, validating all outputs before reporting timings. See the [baseline results](results/2026-09-10/real-project-baseline/README.md) and [reproduction commands](projects/RERUN.md).
+
+## Profile-guided builds
+
+The optional [PGO workflow](../tools/pgo/) builds an instrumented library, trains on
+a fixed generated corpus, and rebuilds with a fresh profile. It preserves runtime
+configuration and keeps real project XML out of training. Every run records source,
+compiler, profile and library identities.
+
+The [initial paired study](results/2026-09-10/profile-guided-study/) improves Oriole
+by 22.2% geometrically on held-out native project workloads. Expat trained on the
+same generated corpus improves by 12.7%; the fair PGO comparison still takes 2.26×
+Expat's time overall. Those measurements identify an earlier source and do not
+certify newer builds. The [rejected optimization studies](results/2026-09-10/rejected-position-entity-studies/)
+retain unsuccessful position and entity candidates, including memory regressions
+fixed during review.

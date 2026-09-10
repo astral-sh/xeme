@@ -53,6 +53,7 @@ jobs:
       - run: uvx --from ruff==0.16.6 ruff check tools benchmarks integration
       - run: uvx --from ty==0.0.80 ty check --extra-search-path tools tools benchmarks integration
       - run: python3 -m unittest discover -s tools/cpython -p test_run.py
+      - run: python3 -m unittest discover -s tools/pgo -p test_build.py
   native:
     name: C ABI and callback safety
     runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-aarch64-4' || 'ubuntu-24.04-arm' }}
@@ -171,3 +172,61 @@ jobs:
           ref: 3bb231a6a5dc02b95658877318bf61501a7209e9
           path: .cache/cpython
       - run: python3 integration/python-build-standalone/validate.py --pbs .cache/pbs --cpython .cache/cpython
+
+  pgo:
+    name: Profile-guided library
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: stable
+          components: llvm-tools-preview
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+      - name: Build the normal and profile-guided libraries
+        run: |
+          host=$(rustc -vV | sed -n 's/^host: //p')
+          sysroot=$(rustc --print sysroot)
+          cargo build --release --locked --target "$host" -p oriole_expat
+          uv run --offline tools/pgo/build.py \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/oriole-pgo" \
+            --llvm-profdata "$sysroot/lib/rustlib/$host/bin/llvm-profdata"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'oriole-pgo'
+          latest = json.loads((root / 'latest.json').read_text())
+          manifest = pathlib.Path(latest['manifest'])
+          assert hashlib.sha256(manifest.read_bytes()).hexdigest() == latest['sha256']
+          data = json.loads(manifest.read_text())
+          assert data['status'] == 'passed'
+          library = manifest.parent / 'use/liboriole_expat.so'
+          assert hashlib.sha256(library.read_bytes()).hexdigest() == data['libraries_sha256']['use/liboriole_expat.so']
+          with open(os.environ['GITHUB_ENV'], 'a') as stream:
+              stream.write(f'ORIOLE_PGO_LIBRARY={library}\n')
+              stream.write(f'ORIOLE_NORMAL_LIBRARY={os.environ["GITHUB_WORKSPACE"]}/target/{data["host"]}/release/liboriole_expat.so\n')
+          PY
+      - name: Compare optimized callbacks with the normal build
+        run: >-
+          python3 tools/differential.py --library "$ORIOLE_PGO_LIBRARY"
+          --reference "$ORIOLE_NORMAL_LIBRARY" --strict
+          --output "$RUNNER_TEMP/oriole-pgo-differential" --generated 100
+      - name: Exercise optimized C callbacks and allocation failures
+        run: |
+          for source in integration adversarial allocations; do
+            cc -std=c11 -O2 -Wall -Wextra -Werror -I include \
+              "tests/c/$source.c" "$ORIOLE_PGO_LIBRARY" \
+              -Wl,-rpath,"$(dirname "$ORIOLE_PGO_LIBRARY")" -o "$RUNNER_TEMP/oriole-pgo-$source"
+            "$RUNNER_TEMP/oriole-pgo-$source"
+          done
+      - name: Retain profile build and comparison evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: oriole-pgo-validation
+          path: |
+            ${{ runner.temp }}/oriole-pgo/latest.json
+            ${{ runner.temp }}/oriole-pgo/runs/
+            ${{ runner.temp }}/oriole-pgo-differential/
+          retention-days: 14

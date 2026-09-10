@@ -1,0 +1,415 @@
+{
+  "decision": "excluded",
+  "handoff_verification": [
+    {
+      "study": "short-position",
+      "manifest_sha256": "07c17d5318c6064b4c9f7efbe003b9ac169990a01331129f947207d4bbd27c94",
+      "verified_files": 38
+    },
+    {
+      "study": "anchored-consume",
+      "manifest_sha256": "b62a45c8ef925b90b5951519aea14e02615c7aa605c779f54d294c81e883be0d",
+      "verified_files": 26
+    },
+    {
+      "study": "entity-summary",
+      "manifest_sha256": "d1ac95aa6cfda15a57ba90f12703f73ea79d7ffd5ac07c7e756c69f82e399981",
+      "verified_files": 658
+    }
+  ],
+  "studies": {
+    "short_position": {
+      "decision": "rejected",
+      "reason": "Exact position states match, but the required real-input instruction-count gate regresses on both selected workloads. No threshold tuning, wall-time timings or broader parser suites followed.",
+      "base_commit": "9074fbd9d0d53cc7694e97faa776bf0f15b40b57",
+      "base_library_sha256": "fef31ffcaa4988ce470bf81fb86356ed3f25ec8278b9dff5a54e107e919c88c3",
+      "candidate_library_sha256": "2aca0baea42a5432846c4aaab5cac765a5cfeddb113e571851ecc791e2bda238",
+      "patch_sha256": "17775bd88d891a8ce137d047c4e4f01767767cc00cc142393fb0db941c160cde",
+      "scope": "Replace only the <=128-byte advance_position character iterator with byte iteration, incrementing character columns only for non-continuation bytes. Long helper, threshold, text scanner, raw-width accounting, callbacks and limits remain unchanged.",
+      "prior_studies": {
+        "/tmp/oriole-position-short/position.patch": "2ee2d28803adab16747e662369141dd015fa57710fbaef6c04fa6dcc7432fd6d",
+        "/tmp/oriole-position-optimization/position.patch": "8479c4fdffa926b1fc15d135f8d46a0ca7ee1ca7e6b724f4157e43459724f402",
+        "/tmp/oriole-position-coalesced/position128.patch": "bc96853ead4f1a55d4105bed96b91a3c6056d46aea954373ec75f9a17f2c1791",
+        "/tmp/oriole-position-handoff/manifest.json": "3975849036feb9fc907a9aaade223bff69d010cdc3d2defdb684a873ba4398d8"
+      },
+      "prior_distinction": "Earlier studies use chars for short spans and memchr plus tail chars count for long spans; no non-continuation-byte counting candidate found.",
+      "validation": {
+        "standalone_oracle": {
+          "status": "passed",
+          "unicode_scalars": 1112064,
+          "scalar_and_exhaustive_checks": 6195056,
+          "total_state_comparisons": 7735056,
+          "random_cases": 9216,
+          "short_threshold": 128
+        },
+        "oracle_scope": "Extracted original/candidate helper text plus unchanged long-position helper. A simple exact byte-position search substitutes for memchr in this standalone harness; the short changed path uses no memchr. Compare independently to scalar character iteration, including every Unicode scalar, exhaustive six-character-alphabet strings through length 6, both prior-CR states, multiple initial positions, every valid character-boundary split and empty intervening call. No invalid UTF8 str is constructed.",
+        "native_profile_processes": 4,
+        "exact_metadata_checks": true,
+        "profile_scope": "Callgrind XML_Parse instructions including callbacks, with one warmup and one measured parse both collected. Constructor/free/IO/dlopen excluded by toggle; no wall-time throughput claim. Same root profiler command/configuration, CPU5.",
+        "instruction_comparisons": [
+          {
+            "workload": "wayland",
+            "namespaces": false,
+            "control_xml_parse_instructions": 30047890,
+            "candidate_xml_parse_instructions": 30096551,
+            "candidate_over_control": 1.001619448154263,
+            "relative_increase_percent": 0.161944815426307
+          },
+          {
+            "workload": "maven",
+            "namespaces": true,
+            "control_xml_parse_instructions": 26775760,
+            "candidate_xml_parse_instructions": 26850852,
+            "candidate_over_control": 1.0028044768850632,
+            "relative_increase_percent": 0.2804476885063245
+          }
+        ]
+      },
+      "not_run": [
+        "No throughput timing",
+        "No full core/FFI/upstream suites",
+        "No sanitizer campaign",
+        "No composed runtime integration"
+      ],
+      "limitations": [
+        "Instruction counts concern two pinned XML fixtures and this exact source/compiler configuration; they are not CPU cycles or application throughput.",
+        "Both small regressions fail the explicitly requested causal gate. Correctness equivalence alone does not justify adopting the patch.",
+        "The candidate was built only in isolated scratch and was not applied to the live repository. Initial snapshot-preparation metadata/directory handling mistakes are retained as preparation notes, not runtime failures."
+      ],
+      "binary_artifacts": {
+        "/tmp/oriole-position-bytes/evidence/control.so": "fef31ffcaa4988ce470bf81fb86356ed3f25ec8278b9dff5a54e107e919c88c3",
+        "/tmp/oriole-position-bytes/evidence/liboriole_expat.so": "2aca0baea42a5432846c4aaab5cac765a5cfeddb113e571851ecc791e2bda238",
+        "/tmp/oriole-position-bytes/evidence/oracle": "6f98b5ebd2574bef198b73dc4e4c208ebffe0928a081833c51d15ee7acbca81b"
+      }
+    },
+    "entity_summary": {
+      "decision": "rejected",
+      "reason": "Real-project paired geomean 0.998393\u00d7, only 10 of 24 conditions positive, no original API improvements; additional adapter flag/event state is unjustified. The generated declaration gain is real but too narrow.",
+      "control": {
+        "library": "/tmp/oriole-entity-payload-study/control.so",
+        "sha256": "9f0339982de57740402ba75a249c7359eae32f3e6d88aae421663aa860c9747d",
+        "source_archive": "/tmp/oriole-entity-payload-study/control-source.tar.gz",
+        "source_archive_sha256": "c759793b28c4d4921bbcf521f8bdeb98921cfc77ba11324c38175718cbd408de",
+        "scope": "Frozen combined lazy-buffer source atop output-slot/353dc3f; excludes newer root streaming ATTLIST layer."
+      },
+      "initial_candidate": {
+        "library": "/tmp/oriole-entity-payload-study/liboriole_expat.so",
+        "sha256": "85898dd2261362e8e9718be371fc1f143845ddc6fb5d56c7dc325069aa773504",
+        "runtime_patch_sha256": "05c65782d66ac66f6d31bb004ee7b7690774a8c2a7629d3618f1c1cf9c78cf12",
+        "disposition": "Rejected retained-memory regression before timing. Raw numeric spelling could inflate stored value capacity."
+      },
+      "repaired_candidate": {
+        "library": "/tmp/oriole-entity-payload-study/compact/liboriole_expat.so",
+        "sha256": "44f1d441b921a2283c6d6e61eed43ff6bcf1ef0694fa7d319f56f5608367c4de",
+        "source_archive_sha256": "eb4f87aba9e4c0567a68e25d9f29bea02bd628c2e136c004ada0cc2bfbdbbb36",
+        "source_map_sha256": "2d436daa290ac0e5122b1eec9e51b5f18a207cb7a78745afe3c6e1ac017079d4",
+        "patch_sha256": "44bd457d4a368c96c13c457e3dd10cf8c8ac6a3df995586198e68c2352cf5ac8",
+        "source_files": 65,
+        "workspace_matches_archive_map": true,
+        "disposition": "Rejected after full paired throughput screen; retained-capacity regression fixed via fallible compact-on-move."
+      },
+      "validation": {
+        "rust_tests": 331,
+        "strict_clippy": "passed",
+        "fmt": "passed",
+        "original_api": {
+          "pass": 4311,
+          "fail": 429,
+          "compared": 4740,
+          "changed_rows": 0,
+          "selection_complete": true,
+          "origin_verified": true
+        },
+        "exact_differential": 1518,
+        "custom_encoding_comparisons": 36456,
+        "handler_conditions_per_library": 240,
+        "handler_documents_per_library": 480,
+        "conversion_conditions_per_library": 24,
+        "parent_child_handler_combinations_per_library": 4,
+        "native_sanitizer_runs": 6,
+        "native_allocation_cutoffs_per_linkage": 324,
+        "numeric_allocation_cutoffs": [
+          {
+            "width": 1,
+            "variant": "control",
+            "compile_command": [
+              "cc",
+              "-std=c11",
+              "-O1",
+              "-g",
+              "-Wall",
+              "-Wextra",
+              "-Werror",
+              "-fsanitize=address,undefined",
+              "-fno-omit-frame-pointer",
+              "-I",
+              "/tmp/oriole-entity-payload-study/compact/native",
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/allocations-1.c",
+              "-L",
+              "/tmp/oriole-buffer-minimum/combined",
+              "-loriole_expat",
+              "-Wl,-rpath,/tmp/oriole-buffer-minimum/combined",
+              "-o",
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/control-1"
+            ],
+            "run_command": [
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/control-1"
+            ],
+            "library_sha256": "9f0339982de57740402ba75a249c7359eae32f3e6d88aae421663aa860c9747d",
+            "source_sha256": "9a7782b493d1627f0f0ec113ded9a65bb4b675afc166062fefb85fbf930ca68e",
+            "returncode": 0,
+            "stdout": "allocation failure sweep passed: 336 scenarios (oriole_0.0.1)\n",
+            "stderr": ""
+          },
+          {
+            "width": 1,
+            "variant": "candidate",
+            "compile_command": [
+              "cc",
+              "-std=c11",
+              "-O1",
+              "-g",
+              "-Wall",
+              "-Wextra",
+              "-Werror",
+              "-fsanitize=address,undefined",
+              "-fno-omit-frame-pointer",
+              "-I",
+              "/tmp/oriole-entity-payload-study/compact/native",
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/allocations-1.c",
+              "-L",
+              "/tmp/oriole-entity-payload-study/compact",
+              "-loriole_expat",
+              "-Wl,-rpath,/tmp/oriole-entity-payload-study/compact",
+              "-o",
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/candidate-1"
+            ],
+            "run_command": [
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/candidate-1"
+            ],
+            "library_sha256": "44f1d441b921a2283c6d6e61eed43ff6bcf1ef0694fa7d319f56f5608367c4de",
+            "source_sha256": "9a7782b493d1627f0f0ec113ded9a65bb4b675afc166062fefb85fbf930ca68e",
+            "returncode": 0,
+            "stdout": "allocation failure sweep passed: 327 scenarios (oriole_0.0.1)\n",
+            "stderr": ""
+          },
+          {
+            "width": 13,
+            "variant": "control",
+            "compile_command": [
+              "cc",
+              "-std=c11",
+              "-O1",
+              "-g",
+              "-Wall",
+              "-Wextra",
+              "-Werror",
+              "-fsanitize=address,undefined",
+              "-fno-omit-frame-pointer",
+              "-I",
+              "/tmp/oriole-entity-payload-study/compact/native",
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/allocations-13.c",
+              "-L",
+              "/tmp/oriole-buffer-minimum/combined",
+              "-loriole_expat",
+              "-Wl,-rpath,/tmp/oriole-buffer-minimum/combined",
+              "-o",
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/control-13"
+            ],
+            "run_command": [
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/control-13"
+            ],
+            "library_sha256": "9f0339982de57740402ba75a249c7359eae32f3e6d88aae421663aa860c9747d",
+            "source_sha256": "49e3ba1c99fa9f772f0f015da8a18400bceec442953fc0d7a25e238bb8e66860",
+            "returncode": 0,
+            "stdout": "allocation failure sweep passed: 336 scenarios (oriole_0.0.1)\n",
+            "stderr": ""
+          },
+          {
+            "width": 13,
+            "variant": "candidate",
+            "compile_command": [
+              "cc",
+              "-std=c11",
+              "-O1",
+              "-g",
+              "-Wall",
+              "-Wextra",
+              "-Werror",
+              "-fsanitize=address,undefined",
+              "-fno-omit-frame-pointer",
+              "-I",
+              "/tmp/oriole-entity-payload-study/compact/native",
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/allocations-13.c",
+              "-L",
+              "/tmp/oriole-entity-payload-study/compact",
+              "-loriole_expat",
+              "-Wl,-rpath,/tmp/oriole-entity-payload-study/compact",
+              "-o",
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/candidate-13"
+            ],
+            "run_command": [
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/candidate-13"
+            ],
+            "library_sha256": "44f1d441b921a2283c6d6e61eed43ff6bcf1ef0694fa7d319f56f5608367c4de",
+            "source_sha256": "49e3ba1c99fa9f772f0f015da8a18400bceec442953fc0d7a25e238bb8e66860",
+            "returncode": 0,
+            "stdout": "allocation failure sweep passed: 327 scenarios (oriole_0.0.1)\n",
+            "stderr": ""
+          },
+          {
+            "width": 1025,
+            "variant": "control",
+            "compile_command": [
+              "cc",
+              "-std=c11",
+              "-O1",
+              "-g",
+              "-Wall",
+              "-Wextra",
+              "-Werror",
+              "-fsanitize=address,undefined",
+              "-fno-omit-frame-pointer",
+              "-I",
+              "/tmp/oriole-entity-payload-study/compact/native",
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/allocations-1025.c",
+              "-L",
+              "/tmp/oriole-buffer-minimum/combined",
+              "-loriole_expat",
+              "-Wl,-rpath,/tmp/oriole-buffer-minimum/combined",
+              "-o",
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/control-1025"
+            ],
+            "run_command": [
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/control-1025"
+            ],
+            "library_sha256": "9f0339982de57740402ba75a249c7359eae32f3e6d88aae421663aa860c9747d",
+            "source_sha256": "6360b9f526ba45bbe44121deed449c51a8f6fc38ced93a15a1600f27d52c7d8a",
+            "returncode": 0,
+            "stdout": "allocation failure sweep passed: 342 scenarios (oriole_0.0.1)\n",
+            "stderr": ""
+          },
+          {
+            "width": 1025,
+            "variant": "candidate",
+            "compile_command": [
+              "cc",
+              "-std=c11",
+              "-O1",
+              "-g",
+              "-Wall",
+              "-Wextra",
+              "-Werror",
+              "-fsanitize=address,undefined",
+              "-fno-omit-frame-pointer",
+              "-I",
+              "/tmp/oriole-entity-payload-study/compact/native",
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/allocations-1025.c",
+              "-L",
+              "/tmp/oriole-entity-payload-study/compact",
+              "-loriole_expat",
+              "-Wl,-rpath,/tmp/oriole-entity-payload-study/compact",
+              "-o",
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/candidate-1025"
+            ],
+            "run_command": [
+              "/tmp/oriole-entity-payload-study/compact/numeric-allocation-sweep/candidate-1025"
+            ],
+            "library_sha256": "44f1d441b921a2283c6d6e61eed43ff6bcf1ef0694fa7d319f56f5608367c4de",
+            "source_sha256": "6360b9f526ba45bbe44121deed449c51a8f6fc38ced93a15a1600f27d52c7d8a",
+            "returncode": 0,
+            "stdout": "allocation failure sweep passed: 333 scenarios (oriole_0.0.1)\n",
+            "stderr": ""
+          }
+        ],
+        "layout": {
+          "EventKind": 120,
+          "Event": 152,
+          "OptionEvent": 152
+        },
+        "retained_capacity": "Exactly baseline in four synthetic numeric-reference cases; peak lower; all selected live allocations zero after free."
+      },
+      "timing": {
+        "real_project_geomean_speedup": 0.9983933885776117,
+        "positive_project_conditions": 10,
+        "total_project_conditions": 24,
+        "project_geomeans": {
+          "batik": 0.9930674976232616,
+          "docbook": 0.9909526016455372,
+          "gtk": 1.0069413451101599,
+          "maven": 1.013456864106513,
+          "vulkan": 0.9964195694005449,
+          "wayland": 0.9897530257591061
+        },
+        "generated_conditions": [
+          {
+            "workload": "generated-rare-declarations",
+            "chunk": 4096,
+            "median_speedup": 1.041925468193557,
+            "min_block_speedup": 1.0090747021969368,
+            "max_block_speedup": 1.0885328820119795,
+            "block_speedups": [
+              1.0090747021969368,
+              1.041925468193557,
+              1.0885328820119795,
+              1.0636467131249825,
+              1.0209262836727608
+            ]
+          },
+          {
+            "workload": "generated-entities",
+            "chunk": 4096,
+            "median_speedup": 0.9895194432165927,
+            "min_block_speedup": 0.9610239528801569,
+            "max_block_speedup": 1.014999606144529,
+            "block_speedups": [
+              0.9895194432165927,
+              1.014999606144529,
+              0.9610239528801569,
+              1.0023280152608112,
+              0.9614580916637518
+            ]
+          },
+          {
+            "workload": "generated-rare-declarations",
+            "chunk": 65536,
+            "median_speedup": 1.0160870408503206,
+            "min_block_speedup": 0.9988193988485711,
+            "max_block_speedup": 1.0779677645750088,
+            "block_speedups": [
+              0.9988193988485711,
+              1.0779677645750088,
+              1.0418276247898368,
+              1.015452846725104,
+              1.0160870408503206
+            ]
+          },
+          {
+            "workload": "generated-entities",
+            "chunk": 65536,
+            "median_speedup": 1.0031052247694554,
+            "min_block_speedup": 0.9572298947748323,
+            "max_block_speedup": 1.020810233552014,
+            "block_speedups": [
+              1.0031052247694554,
+              0.997011994193485,
+              1.0134491365967262,
+              0.9572298947748323,
+              1.020810233552014
+            ]
+          }
+        ]
+      },
+      "timing_processes": 280,
+      "semantic_preflight_processes": 56,
+      "timing_scope": "Native paired callback-driver, all six pinned projects \u00d7 two chunks \u00d7 two namespace modes, plus four generated conditions. CPU0 parent and children, five randomized engine blocks, fixed longer iterations, all raw samples kept, no outlier filtering. Neither Expat nor actual CPython in this causal cohort.",
+      "instruction_scope": "Callgrind XML_Parse warmup + measured parse; instructions, not cycles or timings. Constructor/free/loader excluded.",
+      "review_scope": "Root preliminary source review of original 05c65782 found accounting/base/ownership sound and requested added controls. Root agreed compact fix and rejection; no independent formal final-code review or independent execution claimed.",
+      "documentation_only_patch": {
+        "path": "/tmp/oriole-entity-payload-study/compact/documentation-only.patch",
+        "sha256": "99b56ddee6b1fb5ac2f6a3247347ca5dc536c94ad0c1823b44ed8c1a819fbf7e",
+        "scope": "Move misplaced pre-existing rustdoc above invalid_dtd_token. Not applied to immutable measured source."
+      }
+    }
+  }
+}

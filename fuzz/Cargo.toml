@@ -41,3 +41,10 @@ path = "fuzz_targets/ffi_family.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "multibyte"
+path = "fuzz_targets/multibyte.rs"
+test = false
+doc = false
+bench = false

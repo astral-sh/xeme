@@ -18,11 +18,19 @@ reset, and parent/child destruction order. Surviving children parse after their
 parent is reset or freed, covering the lifetime token and external DTD merge.
 It uses eight handle slots and no callback recursion.
 
+The `multibyte` target installs custom two-, three-, and four-byte encodings,
+then varies converter results, incomplete characters, chunking, buffer input,
+callback suspension and abort, and rejected reentry. It checks once-only encoding
+release and custom allocator balance, including children parsed after their
+parent is freed or reset. Named seeds cover valid non-ASCII conversions, invalid
+maps and scalars, ASCII conversion rejection, and allocation failures.
+
 ```console
 cargo fuzz run parse -- -max_len=65536 -max_total_time=300
 cargo fuzz run streaming -- -max_len=65536 -max_total_time=300
 cargo fuzz run ffi fuzz/seeds/ffi -- -max_len=65536 -max_total_time=300
 cargo fuzz run ffi_family fuzz/seeds/ffi_family -- -max_len=65536 -max_total_time=300
+cargo fuzz run multibyte fuzz/seeds/multibyte -- -max_len=65536 -max_total_time=300
 ```
 
 Use an instrumented nightly toolchain with cargo-fuzz. Keep discovered inputs,

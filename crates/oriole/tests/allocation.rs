@@ -207,6 +207,25 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
             values.merge_external_subset(&child)?;
         }
     }
+    for document in [b"<r/>".as_slice(), b"<!DOCTYPE r []><r/>"] {
+        let mut foreign = Parser::try_new_in(Config::default(), allocator)?;
+        assert!(foreign.set_use_foreign_dtd(true));
+        assert!(foreign.set_param_entity_parsing(2));
+        foreign.feed(document, true)?;
+        let mut notified = false;
+        while let Some(event) = next_event(&mut foreign)? {
+            match event.kind {
+                EventKind::ExternalEntityReference { .. } => {
+                    let mut child = foreign.external_child(None, None)?;
+                    child.feed(b"", true)?;
+                    while next_event(&mut child)?.is_some() {}
+                }
+                EventKind::NotStandalone => notified = true,
+                _ => {}
+            }
+        }
+        assert!(notified);
+    }
     let mut parser =
         Parser::try_new_with_encoding_in(Config::default(), Some("custom"), allocator)?;
     parser.feed(b"<r>\x80</r>", true)?;

@@ -379,6 +379,7 @@ pub struct Parser {
     parameter_entities: HashMap<String, Entity>,
     parameter_mode: u8,
     foreign_dtd: bool,
+    foreign_dtd_pending: Option<dtd::ForeignDtd>,
     in_doctype: bool,
     conditional: dtd::ConditionalState,
     value_state: Option<oriole_storage::Box<value::State>>,
@@ -455,6 +456,7 @@ impl Parser {
             parameter_entities: hash_map(allocator),
             parameter_mode: 0,
             foreign_dtd: false,
+            foreign_dtd_pending: None,
             in_doctype: false,
             conditional: dtd::ConditionalState::new(allocator),
             value_state: None,
@@ -949,6 +951,10 @@ impl Parser {
     /// or parsing is done. Inspect [`Self::encoding_conversion`] before feeding
     /// more input when using a multibyte custom map.
     pub fn next_event(&mut self) -> Result<Option<Event>, Error> {
+        if let Some(event) = self.finish_foreign_dtd() {
+            self.last_position = event.position;
+            return Ok(Some(event));
+        }
         if let Some(event) = self.pop_event() {
             self.last_position = event.position;
             return Ok(Some(event));
@@ -1104,6 +1110,21 @@ impl Parser {
     }
     fn pop_event(&mut self) -> Option<Event> {
         let pending = self.pending.pop_front()?;
+        if matches!(
+            &pending.event.kind,
+            EventKind::ExternalEntityReference {
+                context: None,
+                system_id: None,
+                ..
+            }
+        ) && let Some(foreign) = &mut self.foreign_dtd_pending
+        {
+            foreign.delivered = true;
+            self.parameter_read
+                .as_ref()
+                .expect("foreign DTD read marker")
+                .store(false, Ordering::Relaxed);
+        }
         if let Some(raw) = pending.raw {
             if raw.is_empty() {
                 self.current_raw.clear();
@@ -1348,16 +1369,8 @@ impl Parser {
             };
             if !self.seen_root && mode == ScanMode::Tag && self.foreign_dtd {
                 self.foreign_dtd = false;
-                self.has_external_subset = true;
+                self.start_foreign_dtd(self.here())?;
                 if self.parameter_entities_enabled() {
-                    self.emit(
-                        EventKind::ExternalEntityReference {
-                            context: None,
-                            system_id: None,
-                            public_id: None,
-                        },
-                        self.here(),
-                    )?;
                     continue;
                 }
             }

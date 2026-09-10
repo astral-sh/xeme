@@ -5,6 +5,14 @@ use crate::{
 use oriole_storage::{Allocator, Shared, String, TryClone, Vec, try_insert, try_push};
 use std::sync::atomic::{AtomicBool, Ordering};
 
+/// A foreign subset may be declined without making unknown entities skippable.
+#[derive(Debug)]
+pub(crate) struct ForeignDtd {
+    previous_subset: bool,
+    position: Position,
+    pub(crate) delivered: bool,
+}
+
 #[derive(Debug)]
 pub(crate) struct ConditionalState {
     included_sources: Vec<usize>,
@@ -618,22 +626,99 @@ impl Parser {
         self.parameter_mode != 0
     }
 
+    /// Schedule the implicit subset and retain the state to restore if a handler
+    /// declines to read it. Disabled processing still records a possible subset.
+    pub(crate) fn start_foreign_dtd(&mut self, position: Position) -> Result<(), Error> {
+        let previous_subset = self.has_external_subset;
+        self.has_external_subset = true;
+        if !self.parameter_entities_enabled() {
+            return Ok(());
+        }
+        if self.parameter_read.is_none() {
+            self.charge_expansion(size_of::<AtomicBool>())?;
+            self.parameter_read = Some(Shared::try_new_in(AtomicBool::new(false), self.allocator)?);
+        }
+        self.foreign_dtd_pending = Some(ForeignDtd {
+            previous_subset,
+            position,
+            delivered: false,
+        });
+        self.emit(
+            EventKind::ExternalEntityReference {
+                context: None,
+                system_id: None,
+                public_id: None,
+            },
+            position,
+        )?;
+        self.event_raw("")
+    }
+
+    /// Report that no external-entity handler was installed for the last event.
+    ///
+    /// An absent handler leaves a possible foreign subset unresolved. A handler
+    /// that runs but does not read a child instead confirms that no foreign DTD
+    /// exists. C adapters call this only for the absent-handler case.
+    pub fn external_entity_handler_absent(&mut self) {
+        if self
+            .foreign_dtd_pending
+            .as_ref()
+            .is_some_and(|foreign| foreign.delivered)
+        {
+            self.foreign_dtd_pending = None;
+        }
+    }
+
+    /// Complete a foreign callback before an already queued end-doctype event.
+    /// The read marker belongs to the parser family and is set by child input,
+    /// including a successful empty nonfinal feed, rather than child creation.
+    pub(crate) fn finish_foreign_dtd(&mut self) -> Option<crate::Event> {
+        if !self
+            .foreign_dtd_pending
+            .as_ref()
+            .is_some_and(|foreign| foreign.delivered)
+        {
+            return None;
+        }
+        let foreign = self
+            .foreign_dtd_pending
+            .take()
+            .expect("delivered foreign DTD");
+        if self
+            .parameter_read
+            .as_ref()
+            .is_some_and(|read| read.load(Ordering::Relaxed))
+        {
+            if !self.standalone {
+                self.current_raw.clear();
+                return Some(crate::Event {
+                    kind: EventKind::NotStandalone,
+                    position: foreign.position,
+                });
+            }
+        } else {
+            self.has_external_subset = foreign.previous_subset;
+        }
+        None
+    }
+
     fn finish_doctype(&mut self, position: Position, raw: &str) -> Result<(), Error> {
         self.in_doctype = false;
-        if let Some((system_id, public_id)) = self.doctype_external.take()
-            && self.parameter_entities_enabled()
-            && (system_id.is_some() || self.foreign_dtd)
-        {
-            self.has_external_subset = true;
-            self.emit(
-                EventKind::ExternalEntityReference {
-                    context: None,
-                    system_id,
-                    public_id,
-                },
-                position,
-            )?;
-            self.event_raw("")?;
+        if let Some((system_id, public_id)) = self.doctype_external.take() {
+            if system_id.is_none() && self.foreign_dtd {
+                self.start_foreign_dtd(position)?;
+            } else if system_id.is_some() && self.parameter_entities_enabled() {
+                self.has_external_subset = true;
+                self.emit(
+                    EventKind::ExternalEntityReference {
+                        context: None,
+                        system_id,
+                        public_id,
+                    },
+                    position,
+                )?;
+                self.event_raw("")?;
+            }
         }
         self.foreign_dtd = false;
         self.emit(EventKind::EndDoctype, position)?;

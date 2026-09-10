@@ -1998,3 +1998,109 @@ fn external_values_keep_callback_order_encoding_ownership_and_stop_semantics() {
         }
     }
 }
+
+#[derive(Default)]
+struct ForeignPolicy {
+    parser: XML_Parser,
+    events: Vec<&'static str>,
+    action: u8,
+}
+
+unsafe extern "C" fn foreign_policy_load(
+    parser: XML_Parser,
+    context: *const c_char,
+    _: *const c_char,
+    _: *const c_char,
+    _: *const c_char,
+) -> c_int {
+    // SAFETY: Only short state borrows occur before invoking a child parser.
+    unsafe {
+        (*XML_GetUserData(parser).cast::<ForeignPolicy>())
+            .events
+            .push("external");
+        let child = XML_ExternalEntityParserCreate(parser, context, ptr::null());
+        assert!(!child.is_null());
+        let result = XML_Parse(child, c"".as_ptr(), 0, 0);
+        XML_ParserFree(child);
+        result
+    }
+}
+
+unsafe extern "C" fn foreign_policy_notify(data: *mut c_void) -> c_int {
+    // SAFETY: The serialized callback owns access to this test state.
+    unsafe {
+        let state = &mut *data.cast::<ForeignPolicy>();
+        state.events.push("not-standalone");
+        if state.action == 2 {
+            assert_eq!(XML_StopParser(state.parser, 1), OK);
+        }
+        c_int::from(state.action != 1)
+    }
+}
+
+unsafe extern "C" fn foreign_policy_end(data: *mut c_void) {
+    // SAFETY: The test state outlives every callback.
+    unsafe { (*data.cast::<ForeignPolicy>()).events.push("end-doctype") }
+}
+
+unsafe extern "C" fn foreign_policy_start(
+    data: *mut c_void,
+    _: *const c_char,
+    _: *const *const c_char,
+) {
+    // SAFETY: The test state outlives every callback.
+    unsafe { (*data.cast::<ForeignPolicy>()).events.push("root") }
+}
+
+#[test]
+fn foreign_dtd_policy_rejection_and_suspension_precede_document_callbacks() {
+    // SAFETY: All handles, callback pointers, buffers, and state remain live and serialized.
+    unsafe {
+        for document in [b"<r/>".as_slice(), b"<!DOCTYPE r []><r/>"] {
+            for action in 0..3 {
+                for width in [1, document.len()] {
+                    let parser = XML_ParserCreate(ptr::null());
+                    let mut state = ForeignPolicy {
+                        parser,
+                        action,
+                        ..ForeignPolicy::default()
+                    };
+                    XML_SetUserData(parser, (&raw mut state).cast());
+                    XML_SetExternalEntityRefHandler(parser, Some(foreign_policy_load));
+                    XML_SetNotStandaloneHandler(parser, Some(foreign_policy_notify));
+                    XML_SetEndDoctypeDeclHandler(parser, Some(foreign_policy_end));
+                    XML_SetStartElementHandler(parser, Some(foreign_policy_start));
+                    assert_eq!(XML_UseForeignDTD(parser, 1), 0);
+                    assert_eq!(XML_SetParamEntityParsing(parser, 2), 1);
+                    for (index, chunk) in document.chunks(width).enumerate() {
+                        let status = XML_Parse(
+                            parser,
+                            chunk.as_ptr().cast(),
+                            chunk.len() as c_int,
+                            c_int::from((index + 1) * width >= document.len()),
+                        );
+                        if status == ERROR {
+                            assert_eq!(action, 1);
+                            assert_eq!(XML_GetErrorCode(parser), 22);
+                            break;
+                        }
+                        if status == SUSPENDED {
+                            assert_eq!(action, 2);
+                            assert_eq!(state.events, ["external", "not-standalone"]);
+                            assert_eq!(XML_ResumeParser(parser), OK);
+                        }
+                    }
+                    let mut expected = vec!["external", "not-standalone"];
+                    if action != 1 {
+                        if document.starts_with(b"<!DOCTYPE") {
+                            expected.push("end-doctype");
+                        }
+                        expected.push("root");
+                    }
+                    assert_eq!(state.events, expected);
+                    XML_ParserFree(parser);
+                }
+            }
+        }
+    }
+}

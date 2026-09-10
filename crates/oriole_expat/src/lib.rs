@@ -819,6 +819,7 @@ unsafe fn dispatch(parser: XML_Parser, kind: EventKind) -> Result<(), AllocError
                         fail_parse(parser, 21);
                     }
                 } else {
+                    (*parser).core.external_entity_handler_absent();
                     handled = false;
                 }
             }

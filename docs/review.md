@@ -18,6 +18,8 @@ The [current API failure census](validation/2026-09-11/api-failure-census/) clas
 
 The [selected-runtime validation refresh](validation/2026-09-11/reference-validation/) adds seven fresh 600-second ASan campaigns, 71,823 retained-corpus replays and 15 exact instrumented regressions on the reference-frame source. The independent audit verifies 9,939,415 campaign executions without findings. A separate stable PGO PBS build ships the verified profile-use archive and passes glibc 2.17 identity plus 1,024 threaded parses; both strict XML gates retain the same two callback assertions. Original failures, raw records, profiles and corpus ancestry remain available. These campaigns add no performance measurements.
 
+The [compact-coordinate experiment](validation/2026-09-11/compact-coordinates/) is rejected. Deferring native event positions increased real-project time by 3.3% normally and 7.8% with PGO; all 24 PGO conditions regressed. The retained evidence includes both complete benchmark campaigns, the reviewed source, 449 local tests and 18 focused callback tests under each Miri model. The selected runtime and its readiness limits are unchanged.
+
 ## Review order
 
 | Area | Layers | Main questions |

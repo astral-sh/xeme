@@ -1,0 +1,80 @@
+[
+  {
+    "path": "earlier-same-source/checks.json",
+    "origin": "/tmp/oriole-literal-attribute-check-study/checks.json",
+    "bytes": 1371,
+    "sha256": "8de45dd53812bf5597f8b5cfe8939715e960863b78f2a3da8dbbffc7811706ad"
+  },
+  {
+    "path": "earlier-same-source/fmt.log",
+    "origin": "/tmp/oriole-literal-attribute-check-study/fmt.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "raw/clippy.log",
+    "origin": "/tmp/oriole-literal-attribute-workspace-checks/clippy.log",
+    "bytes": 653,
+    "sha256": "81341bc7a3e08da2306cbd9f4edd7f31ec60e600d953df506b9762902bb51ea7"
+  },
+  {
+    "path": "raw/controller.py",
+    "origin": "/tmp/oriole-literal-attribute-workspace-checks/controller.py",
+    "bytes": 2867,
+    "sha256": "468cd00d0de49cc34f4cdb114ad071d5be202357002e2743d3716a3dd00a428a"
+  },
+  {
+    "path": "raw/doctests.log",
+    "origin": "/tmp/oriole-literal-attribute-workspace-checks/doctests.log",
+    "bytes": 585,
+    "sha256": "a2bdf9691ffdfac494a9955c8a46e0527928b330464ff23e5bfe3770453c333e"
+  },
+  {
+    "path": "raw/report.json",
+    "origin": "/tmp/oriole-literal-attribute-workspace-checks/report.json",
+    "bytes": 1502,
+    "sha256": "d513568cca19894a66c56c6d207c825214b5dd03f600c23f4e24326594f2a3cb"
+  },
+  {
+    "path": "raw/workspace-tests.log",
+    "origin": "/tmp/oriole-literal-attribute-workspace-checks/workspace-tests.log",
+    "bytes": 40345,
+    "sha256": "52b5e9e009204bc4b06192233d13284b5151a096f3e7c9340d0b689270228618"
+  },
+  {
+    "path": "review/attempt-01.log",
+    "origin": "/tmp/oriole-literal-attribute-workspace-independent-review/attempt-01.log",
+    "bytes": 1356,
+    "sha256": "4988667dfb632a8503c75b35b43152862bda63192c375cadf077a17b2dd697e9"
+  },
+  {
+    "path": "review/audit.py",
+    "origin": "/tmp/oriole-literal-attribute-workspace-independent-review/audit.py",
+    "bytes": 5002,
+    "sha256": "a95dc32226e2332b4187433d5c0af7aa160f4b1d8be2393c083c23e15e30b6a1"
+  },
+  {
+    "path": "review/details.json.gz",
+    "origin": "/tmp/oriole-literal-attribute-workspace-independent-review/details.json.gz",
+    "bytes": 13768,
+    "sha256": "99fb6190ccb5ede1d870cbf6f7ec195f030029e4c50e0a2ecafcd60d6de6b1d9"
+  },
+  {
+    "path": "review/files.json",
+    "origin": "/tmp/oriole-literal-attribute-workspace-independent-review/files.json",
+    "bytes": 628,
+    "sha256": "bb930edc1b62d1897753e17131241f4168233197a747b261e4909c66c5520a79"
+  },
+  {
+    "path": "review/receipt.json",
+    "origin": "/tmp/oriole-literal-attribute-workspace-independent-review/receipt.json",
+    "bytes": 333,
+    "sha256": "35d26dfdab4361f1bc7a35efd2e0d559781f1e7bd5d3bf609cfcf5cfcfaea79f"
+  },
+  {
+    "path": "review/review.json",
+    "origin": "/tmp/oriole-literal-attribute-workspace-independent-review/review.json",
+    "bytes": 1356,
+    "sha256": "4988667dfb632a8503c75b35b43152862bda63192c375cadf077a17b2dd697e9"
+  }
+]

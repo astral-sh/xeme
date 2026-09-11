@@ -14,24 +14,24 @@ A streaming XML parser and Expat C interface, written in Rust.
 - Embed the safe Rust parser or use the Expat-compatible C interface.
 - Try an opt-in python-build-standalone integration for CPython's XML consumers.
 
-| Project XML | Oriole | Expat | Oriole / Expat |
+| Project XML | Oriole (PGO) | Expat (PGO) | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 51.224 ms | 29.384 ms | 1.71× |
-| Wayland protocol | 1.205 ms | 1.077 ms | 1.12× |
-| Maven POM | 0.819 ms | 0.439 ms | 1.87× |
-| Batik SVG | 0.132 ms | 0.134 ms | 0.98× |
-| GTK UI | 0.359 ms | 0.213 ms | 1.69× |
-| DocBook XSL | 0.271 ms | 0.187 ms | 1.44× |
+| Vulkan registry | 36.723 ms | 24.545 ms | 1.50× |
+| Wayland protocol | 0.918 ms | 0.949 ms | 0.97× |
+| Maven POM | 0.600 ms | 0.370 ms | 1.63× |
+| Batik SVG | 0.105 ms | 0.125 ms | 0.84× |
+| GTK UI | 0.267 ms | 0.179 ms | 1.49× |
+| DocBook XSL | 0.191 ms | 0.165 ms | 1.15× |
 
-These [native measurements](benchmarks/results/2026-09-11/native-byte-count/) use original XML from six pinned projects, Expat 2.8.4, 4 KiB chunks, and namespaces disabled on a shared Linux AMD EPYC-Milan host. Times are medians of process medians; ratios are medians of paired ratios.
+These [native measurements](docs/validation/2026-09-11/literal-attribute-check/) use original XML from six pinned projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host. Both parsers use PGO trained on generated XML; these projects are held out of training. Times are medians of seven process medians; ratios are medians of paired ratios. Expat is version 2.8.4.
 
-Inlining native source byte counts reduces elapsed time by 3.1% across the 24 native project conditions and 1.5% through CPython. Both Oriole builds use verified ThinLTO without PGO or alternate allocators. Oriole still takes 1.59× Expat's time natively and 1.27× through CPython. Generated controls improve by 4.0%; one CPython condition regresses by 0.59%. The [full report](docs/validation/2026-09-11/native-byte-count/) retains all conditions and samples.
+Across all 24 real-project conditions, Oriole takes **1.38× Expat PGO's native time and 1.13× its CPython time**. The literal-attribute optimization reduces time by 2.1% and 1.2%, respectively, against the preceding parser. The normal build is flat overall, with a 2.1% regression on generated native controls. The [full report](docs/validation/2026-09-11/literal-attribute-check/) retains every condition, sample and adverse result.
 
-Optional [profile-guided builds](tools/pgo/) reduce current Oriole time by **24.8% natively and 15.5% through CPython**, improving every real-project condition. With both parsers trained, Oriole still takes **1.40× Expat's time natively and 1.15× through CPython**. Fat LTO alone adds little, and combining it with PGO regresses native time by 6.8%. The [current PGO/LTO study](benchmarks/results/2026-09-11/pgo-lto/) records matched builds, held-out project inputs and all adverse results.
+ThinLTO is the default, and [PGO is opt-in](tools/pgo/). The [PGO/LTO study](benchmarks/results/2026-09-11/pgo-lto/) on the preceding `be22a27` runtime measured PGO reductions of 24.8% natively and 15.5% through CPython. Fat LTO alone added little; combining it with PGO regressed native time by 6.8%.
 
 A separate [C allocator study](benchmarks/results/2026-09-11/c-allocators/) finds less than 0.2% aggregate real-project time change with jemalloc or mimalloc, alongside higher peak resident memory. The C allocator default remains unchanged.
 
-The [latest compatibility report](docs/validation/2026-09-11/native-byte-count/) records 407 workspace tests, one doc test, and **4,347 passing / 393 failing upstream API configurations**. Shared and static CPython each execute 802 tests with the same two text-grouping failures. Remaining allocation, resource, diagnostic, and callback differences are explicit in the [compatibility guide](docs/compatibility.md). Six [current ASan campaigns](docs/validation/2026-09-11/current-asan/) completed 10,496,706 executions on the accepted `be22a27` runtime without findings. The [current PBS distribution](docs/validation/2026-09-11/current-pbs/) loads both XML accelerators on glibc 2.17 and passes 1,024 threaded parses; its XML suite retains the same two grouping failures.
+The [latest compatibility report](docs/validation/2026-09-11/literal-attribute-check/) records 408 workspace tests, one doc test, and **4,347 passing / 393 failing upstream API configurations**. Shared and static CPython each execute 802 tests with the same two text-grouping failures. Remaining allocation, resource, diagnostic, and callback differences are explicit in the [compatibility guide](docs/compatibility.md). Six [sustained ASan campaigns](docs/validation/2026-09-11/current-asan/) completed 10,496,706 executions on the preceding `be22a27` runtime without findings. The [`be22a27` PBS distribution](docs/validation/2026-09-11/current-pbs/) loads both XML accelerators on glibc 2.17 and passes 1,024 threaded parses; its XML suite retains the same two grouping failures.
 
 The [Windows test portability supplement](docs/validation/2026-09-11/detached-end-windows-portability/) corrects an expected-value cast and verifies byte-identical C libraries.
 

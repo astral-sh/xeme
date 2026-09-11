@@ -1,0 +1,56 @@
+{
+  "archive_sha256": "ea88fe3aafe25a3c8269a7059dccc394274665989e4c4289f8808ab8eeaf0c93",
+  "assertions": 46028,
+  "audited_unchanged_inputs": 3742,
+  "compiled_exclusions": 18,
+  "coverage": {
+    "normal": {
+      "preflights": 72,
+      "raw_streams_and_specs": 1728,
+      "retained_regressions": 13,
+      "review_sha256": "49b60a8b17ef89d3c70943280f90335a72d8f9cb9327e699cd9b93469fc12e81",
+      "timed_workers": 504
+    },
+    "pgo": {
+      "preflights": 72,
+      "raw_streams_and_specs": 1728,
+      "retained_regressions": 2,
+      "review_sha256": "db6821c028996387979d120ef755e1d96efd95cbce4e949741d664c25a6fcfca",
+      "timed_workers": 504
+    }
+  },
+  "excluded_aliases": [
+    {
+      "link_text": "expat-control-liboriole_expat.so",
+      "origin": "/tmp/oriole-literal-attribute-normal-python-study/consumers/expat/libexpat.so.1",
+      "path": "normal/study/consumers/expat/libexpat.so.1",
+      "reason": "compiled library alias; target separately excluded",
+      "target": "/tmp/oriole-literal-attribute-normal-python-study/consumers/expat/expat-control-liboriole_expat.so",
+      "target_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+    },
+    {
+      "link_text": "expat-use-liboriole_expat.so",
+      "origin": "/tmp/oriole-literal-attribute-pgo-python-study/consumers/expat/libexpat.so.1",
+      "path": "pgo/study/consumers/expat/libexpat.so.1",
+      "reason": "compiled library alias; target separately excluded",
+      "target": "/tmp/oriole-literal-attribute-pgo-python-study/consumers/expat/expat-use-liboriole_expat.so",
+      "target_sha256": "12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0"
+    }
+  ],
+  "generator_sha256": "2b92f1bccc16e19c559edf3a843f68e6ff114f422c7b10ce40d865631c590e03",
+  "initial_packaging_failure": "All four original attempt files retained; libexpat.so.1 symlink guard rejected before archive creation. Final output uses a separate path and excludes relative same-directory aliases with target hashes.",
+  "limitations": [
+    "Compiled filtering is verified for every direct member and the three identified nested source/tool archives; arbitrary recursive compressed-data scanning is not claimed.",
+    "No interpretation of elapsed arithmetic, statistical significance, strict compatibility or current publication-copy links is added."
+  ],
+  "members": 3572,
+  "nested_source_files": 140,
+  "nested_tool_files": 6,
+  "numerical_review_reuse": "Normal49b60a8b and PGOdb6821c0 copied byte-exact; report groups, regressions and library pointers match. Numerical reconstruction not repeated; reviewer preparation authorship remains explicit.",
+  "package": "/tmp/oriole-literal-attribute-python-final-handoff",
+  "producer_input_hashes": 3595,
+  "report_sha256": "4f2bcba6b81589f5f308f2b44844eb3bf2152015716afcd53cc81cfced755739",
+  "scope": "CPU 6 independent saved-only package inventory/origin/hash/source-archive and exclusion review. No arithmetic reconstruction, target execution, or producer mutation.",
+  "source_provenance": "Both 70-file archived source maps match exact live worktrees. All six nested tool sources match the packaged map. All direct archive member origins and complete study trees match; raw data and all adversarial rows remain retained.",
+  "status": "passed"
+}

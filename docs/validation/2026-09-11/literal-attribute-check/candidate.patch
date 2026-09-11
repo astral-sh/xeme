@@ -1,0 +1,123 @@
+diff --git a/crates/oriole/src/tag.rs b/crates/oriole/src/tag.rs
+index e11eddd..9e19a8b 100644
+--- a/crates/oriole/src/tag.rs
++++ b/crates/oriole/src/tag.rs
+@@ -2,7 +2,8 @@
+ 
+ use oriole_storage::Vec;
+ 
+-use crate::{ErrorKind, NameRules, RawAttribute, invalid_xml_char};
++use crate::names::is_xml_char;
++use crate::{ErrorKind, NameRules, RawAttribute};
+ 
+ #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+ enum Phase {
+@@ -244,6 +245,31 @@ pub(crate) fn name_end(text: &str, offset: usize, rules: NameRules) -> usize {
+         .map_or(text.len(), |(index, _)| offset + index)
+ }
+ 
++/// Check literal attribute eligibility without separate normalization and XML scans.
++fn is_literal_value(text: &str) -> bool {
++    let mut rest = text;
++    while let Some(chunk) = rest.as_bytes().first_chunk::<8>() {
++        let word = u64::from_le_bytes(*chunk);
++        let high = 0x8080_8080_8080_8080;
++        let control = word.wrapping_sub(0x2020_2020_2020_2020) & !word & high;
++        let ampersand = word ^ 0x2626_2626_2626_2626;
++        let reference = ampersand.wrapping_sub(0x0101_0101_0101_0101) & !ampersand & high;
++        // Each nonzero mask implies an actual control byte or ampersand.
++        // Borrow propagation can mark later bytes, but cannot create a match.
++        if control | reference != 0 {
++            return false;
++        }
++        if word & high != 0 {
++            break;
++        }
++        rest = &rest[8..];
++    }
++    // Only ASCII words were skipped, so this remains a UTF-8 boundary.
++    // XML's allowed TAB/CR/LF still require attribute normalization.
++    rest.chars()
++        .all(|character| character >= ' ' && character != '&' && is_xml_char(character))
++}
++
+ /// Scalar progress plus offset records supplied by the parser's existing cache.
+ /// Failed or cold plans fall back once; they never allocate while input arrives.
+ #[derive(Debug, Default)]
+@@ -330,12 +356,7 @@ impl TagScanner {
+             match scanner.next(text, false, true, true, attribute_limit, rules) {
+                 Ok(Step::Attribute(mut attribute)) => {
+                     let value = attribute.value(text);
+-                    if records.len() == records.capacity()
+-                        || value
+-                            .bytes()
+-                            .any(|byte| matches!(byte, b'&' | b'\t' | b'\r' | b'\n'))
+-                        || invalid_xml_char(value).is_some()
+-                    {
++                    if records.len() == records.capacity() || !is_literal_value(value) {
+                         return Planned::Fallback;
+                     }
+                     attribute.name_start -= name_end;
+@@ -363,7 +384,9 @@ impl TagScanner {
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+-    use crate::{Error, Position, parse_raw_attributes, take_name, try_push, whitespace};
++    use crate::{
++        Error, Position, invalid_xml_char, parse_raw_attributes, take_name, try_push, whitespace,
++    };
+     use oriole_storage::Allocator;
+ 
+     type Outcome = (
+@@ -371,6 +394,51 @@ mod tests {
+         Option<(ErrorKind, &'static str, usize)>,
+     );
+ 
++    #[test]
++    fn literal_values_match_separate_checks_at_word_and_unicode_boundaries() {
++        fn check(text: &str) {
++            let expected = !text
++                .bytes()
++                .any(|byte| matches!(byte, b'&' | b'\t' | b'\r' | b'\n'))
++                && invalid_xml_char(text).is_none();
++            assert_eq!(is_literal_value(text), expected, "{text:?}");
++        }
++
++        check("");
++        // Adjacent ASCII pairs exercise both word masks and propagated borrows.
++        for offset in 0..8 {
++            for first in 0..128 {
++                for second in 0..128 {
++                    let mut bytes = [b'x'; 24];
++                    bytes[offset] = first;
++                    bytes[offset + 1] = second;
++                    check(std::str::from_utf8(&bytes).unwrap());
++                }
++            }
++        }
++        let mut text = std::string::String::new();
++        for scalar in 0..=0x10ffff {
++            if let Some(character) = char::from_u32(scalar) {
++                text.clear();
++                text.push_str("0123456");
++                text.push(character);
++                text.push_str("abcdefghi");
++                check(&text);
++            }
++        }
++        for offset in 0..16 {
++            for value in ["é&", "é\t", "é\r\n", "é\0", "é😀", "\u{fffe}", "\u{ffff}"] {
++                for tail in [0, 7, 8, 9, 128, 4096] {
++                    check(&format!(
++                        "{}{value}{}",
++                        "x".repeat(offset),
++                        "x".repeat(tail)
++                    ));
++                }
++            }
++        }
++    }
++
+     fn outcome(text: &str, refs: bool, limit: usize, legacy: bool) -> Outcome {
+         let mut attrs = Vec::new_in(Allocator::System);
+         let result = if legacy {

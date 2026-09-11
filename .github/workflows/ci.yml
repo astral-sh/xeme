@@ -186,7 +186,8 @@ jobs:
           cargo miri test --locked -p oriole --lib compact_coordinate_tests::
           cargo miri test --locked -p oriole --lib encoding::tests::deferred_discard_preserves_both_starts_until_the_host_selects_one -- --exact
       - name: Check callback coordinate publication
-        run: cargo miri test --locked -p oriole_expat --lib coordinate_tests::
+        run: |
+          cargo miri test --locked -p oriole_expat --lib coordinate_tests::
   native:
     name: C ABI and callback safety
     runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-aarch64-4' || 'ubuntu-24.04-arm' }}

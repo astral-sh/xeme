@@ -332,10 +332,34 @@ pub enum EventKind {
 
 #[derive(Debug)]
 struct Element {
-    raw_name: String,
+    name: ElementName,
     raw_encoding: Option<oriole_storage::Box<Vec<lexical::NameEncoding>>>,
-    expanded_name: Option<String>,
     bindings: Vec<(String, Option<String>)>,
+}
+
+/// Keep raw matching and a different expanded spelling in one stack owner.
+#[derive(Debug)]
+struct ElementName {
+    value: String,
+    expanded_start: Option<usize>,
+}
+
+impl ElementName {
+    /// Compare end tags against their decoded raw spelling, before expansion.
+    fn raw_name(&self) -> &str {
+        match self.expanded_start {
+            Some(end) => &self.value[..end],
+            None => &self.value,
+        }
+    }
+
+    /// Return an owned event name without allocating or retaining a raw prefix.
+    fn into_event_name(mut self) -> String {
+        if let Some(start) = self.expanded_start {
+            self.value.drain(..start);
+        }
+        self.value
+    }
 }
 
 #[derive(Debug)]
@@ -1918,7 +1942,7 @@ impl Parser {
         if element.raw_encoding.is_some() {
             return None;
         }
-        let end = element.raw_name.len().checked_add(3)?;
+        let end = element.name.raw_name().len().checked_add(3)?;
         let bytes = source.remaining().as_bytes();
         // Check the closing delimiter before comparing a potentially long name.
         // Otherwise, one-byte feeds without deferral could repeat a long prefix
@@ -1926,8 +1950,9 @@ impl Parser {
         if end > limit || bytes.get(end - 1) != Some(&b'>') {
             return None;
         }
-        (bytes.starts_with(b"</") && bytes.get(2..end - 1) == Some(element.raw_name.as_bytes()))
-            .then_some(end)
+        (bytes.starts_with(b"</")
+            && bytes.get(2..end - 1) == Some(element.name.raw_name().as_bytes()))
+        .then_some(end)
     }
 
     fn next_event_inner(&mut self, output: &mut EventOutput<'_>) -> Result<(), Error> {
@@ -3251,21 +3276,39 @@ impl Parser {
         };
         self.seen_root = true;
         self.declaration_allowed = false;
-        let stack_name = (expanded_name.as_str() != name)
-            .then(|| expanded_name.try_clone())
-            .transpose()?;
-        let raw_name = match name_value {
-            lexical::Decoded::Borrowed(name) => {
-                let reusable = self.event_recycling.take_name();
-                recycling::copy_name(name, reusable, self.allocator)?
+        let expanded_start = (expanded_name.as_str() != name).then_some(name.len());
+        let stack_name = if expanded_start.is_some() {
+            // Reserve the complete pair once, including the event terminator.
+            let capacity = name
+                .len()
+                .checked_add(expanded_name.len())
+                .and_then(|length| length.checked_add(1))
+                .ok_or(AllocError::CapacityOverflow)?;
+            let mut value = self
+                .event_recycling
+                .take_name()
+                .unwrap_or_else(|| String::new_in(self.allocator));
+            value.clear();
+            value.try_reserve(capacity)?;
+            value.try_push_str(name)?;
+            value.try_push_str(&expanded_name)?;
+            value
+        } else {
+            match name_value {
+                lexical::Decoded::Borrowed(name) => {
+                    let reusable = self.event_recycling.take_name();
+                    recycling::copy_name(name, reusable, self.allocator)?
+                }
+                lexical::Decoded::Owned(name) => name,
             }
-            lexical::Decoded::Owned(name) => name,
         };
         try_push(
             &mut self.stack,
             Element {
-                expanded_name: stack_name,
-                raw_name,
+                name: ElementName {
+                    value: stack_name,
+                    expanded_start,
+                },
                 raw_encoding,
                 bindings,
             },
@@ -3347,8 +3390,10 @@ impl Parser {
         try_push(
             &mut self.stack,
             Element {
-                expanded_name: None,
-                raw_name,
+                name: ElementName {
+                    value: raw_name,
+                    expanded_start: None,
+                },
                 raw_encoding: None,
                 bindings: Vec::new_in(self.allocator),
             },
@@ -3391,7 +3436,7 @@ impl Parser {
             ));
         }
         if self.stack.last().is_none_or(|element| {
-            element.raw_name != *decoded_name
+            element.name.raw_name() != &*decoded_name
                 || !token.for_slice(name).same_name_encoding(
                     element
                         .raw_encoding
@@ -3411,7 +3456,7 @@ impl Parser {
             .ok_or_else(|| self.err(ErrorKind::TagMismatch, "unexpected end tag"))?;
         self.emit(
             EventKind::EndElement {
-                name: element.expanded_name.unwrap_or(element.raw_name),
+                name: element.name.into_event_name(),
             },
             position,
         )?;
@@ -3446,7 +3491,7 @@ impl Parser {
             .pop()
             .expect("matched end has an opening element");
         debug_assert!(element.bindings.is_empty() && element.raw_encoding.is_none());
-        frame.prepare_end(element.expanded_name.unwrap_or(element.raw_name));
+        frame.prepare_end(element.name.into_event_name());
         if self.stack.is_empty() {
             self.closed_root = true;
         }

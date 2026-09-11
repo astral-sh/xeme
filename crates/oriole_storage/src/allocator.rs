@@ -504,6 +504,17 @@ mod tests {
     use super::*;
 
     #[test]
+    fn tracked_box_raw_roundtrip_retains_header() {
+        let allocator = Allocator::TrackedSystem;
+        let owner = allocator_api2::boxed::Box::try_new_in([7_u8; 32], allocator).unwrap();
+        let pointer = allocator_api2::boxed::Box::into_raw(owner);
+        // SAFETY: Reconstruct exactly the owner consumed by into_raw, using its allocator.
+        let owner = unsafe { allocator_api2::boxed::Box::from_raw_in(pointer, allocator) };
+        assert_eq!(*owner, [7_u8; 32]);
+        drop(owner);
+    }
+
+    #[test]
     fn huge_tracked_layouts_fail_without_panicking_or_allocating() {
         let allocator = Allocator::System.trackable();
         // These layouts fit isize::MAX as payloads, but their backing layouts do

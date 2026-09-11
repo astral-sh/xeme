@@ -16,6 +16,8 @@ The [ordinary markup classification experiment](validation/2026-09-11/markup-cla
 
 The [current API failure census](validation/2026-09-11/api-failure-census/) classifies all 393 nonpassing configurations by their reached assertions and bounds. A separate [current-source allocation diagnostic](validation/2026-09-11/allocation-semantic-coverage/) passes 72 configurations after raising retry and resource ceilings, reaching the original text and handler assertions in six tests. The original 4,740-result matrix remains unchanged.
 
+The [selected-runtime validation refresh](validation/2026-09-11/reference-validation/) adds seven fresh 600-second ASan campaigns, 71,823 retained-corpus replays and 15 exact instrumented regressions on the reference-frame source. The independent audit verifies 9,939,415 campaign executions without findings. A separate stable PGO PBS build ships the verified profile-use archive and passes glibc 2.17 identity plus 1,024 threaded parses; both strict XML gates retain the same two callback assertions. Original failures, raw records, profiles and corpus ancestry remain available. These campaigns add no performance measurements.
+
 ## Review order
 
 | Area | Layers | Main questions |

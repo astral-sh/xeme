@@ -1,0 +1,55 @@
+{
+  "status": "first root reader assertion failed",
+  "cause": "Reader required byte identity to every physical origin; inspecting explicitly transformed members before correction. All indexed archive hashes had matched up to this assertion.",
+  "failure_line": "assert b == Path(origin.path).read_bytes()",
+  "mismatches": [
+    {
+      "member": "distribution-members.json.gz",
+      "origin": {
+        "path": "/tmp/oriole-reference-frame-pbs-results/distribution-members.json",
+        "source_bytes": 931297,
+        "source_sha256": "1fa0ecec038f910a6d05dda1ec98709f72b4a118c47b56343a7628e0b9dd3f69",
+        "transformation": "gzip level 3, mtime 0"
+      },
+      "packaged_bytes": 71461,
+      "physical_bytes": 931297,
+      "physical_sha256": "1fa0ecec038f910a6d05dda1ec98709f72b4a118c47b56343a7628e0b9dd3f69"
+    },
+    {
+      "member": "libpython-dynsym.txt.gz",
+      "origin": {
+        "path": "/tmp/oriole-reference-frame-pbs-results/libpython-dynsym.txt",
+        "source_bytes": 195584,
+        "source_sha256": "398f0a5477496d07526bf859eaf44f2274b1920850bba717b1f9be5a2db15261",
+        "transformation": "gzip level 3, mtime 0"
+      },
+      "packaged_bytes": 41432,
+      "physical_bytes": 195584,
+      "physical_sha256": "398f0a5477496d07526bf859eaf44f2274b1920850bba717b1f9be5a2db15261"
+    },
+    {
+      "member": "python-dynsym.txt.gz",
+      "origin": {
+        "path": "/tmp/oriole-reference-frame-pbs-results/python-dynsym.txt",
+        "source_bytes": 196160,
+        "source_sha256": "788557d972135a80591c3d599428518f2614494099fb8e21b2c260adf54624c2",
+        "transformation": "gzip level 3, mtime 0"
+      },
+      "packaged_bytes": 41981,
+      "physical_bytes": 196160,
+      "physical_sha256": "788557d972135a80591c3d599428518f2614494099fb8e21b2c260adf54624c2"
+    },
+    {
+      "member": "workflow.log.gz",
+      "origin": {
+        "path": "/tmp/oriole-reference-frame-pbs-results/workflow.log",
+        "source_bytes": 16147223,
+        "source_sha256": "f744fe918b55eb7b29409bc0e01386b4e77a2883e5c5f3c7c3bde4d95cd08a6e",
+        "transformation": "gzip level 3, mtime 0"
+      },
+      "packaged_bytes": 1241687,
+      "physical_bytes": 16147223,
+      "physical_sha256": "f744fe918b55eb7b29409bc0e01386b4e77a2883e5c5f3c7c3bde4d95cd08a6e"
+    }
+  ]
+}

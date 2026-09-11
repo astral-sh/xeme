@@ -1,0 +1,14 @@
+{
+  "output": "/tmp/oriole-reference-frame-asan-publication",
+  "xz_archive": {
+    "name": "asan-evidence.tar.xz",
+    "bytes": 12797748,
+    "sha256": "73579260ee1df28286ea2561deb10a3cc0edfd17a34d02e16207b28c6c4d02b7"
+  },
+  "tar": {
+    "sha256": "da9f0f2528ccf5ba6282761240f3abccd661644dc0fc5e7695ca5bf18894ac18",
+    "bytes": 272291840,
+    "gzip_and_xz_identical": true
+  },
+  "receipt_sha256": "ce4e2f5bbc3bc22cce0ba3c8aadfd52340c6afe7d01c97ce1ea5136b6a73ae8a"
+}

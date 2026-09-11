@@ -1,0 +1,88 @@
+{
+  "member_index_rows_unchanged": 72087,
+  "original_files": {
+    "ASAN.md": {
+      "bytes": 4835,
+      "sha256": "859655d58fd159fe8c1ff6814308197e6b9b9b3d36a56b485564422e247eaa6e"
+    },
+    "asan-evidence-members.json.gz": {
+      "bytes": 3700088,
+      "sha256": "1e8550879ab0f0011b51b87f5ffa120f3a8c3286dd49700b7476d0fd4131644f"
+    },
+    "asan-evidence.tar.gz": {
+      "bytes": 54168255,
+      "sha256": "a9c5b323e1099b60dd47ba1837b719a3301e7269ae5e88913be45ca026d92efc"
+    },
+    "asan.json": {
+      "bytes": 6969,
+      "sha256": "07b16db2488ff461e277aee403ab01c692a7917ccec7aeab4521069014f42b3d"
+    },
+    "package.py": {
+      "bytes": 19016,
+      "sha256": "1cac9b3219d26740b987430f63fa739a482af148124fa1acfc4389af4e4bae8e"
+    }
+  },
+  "original_gzip_archive": {
+    "bytes": 54168255,
+    "name": "asan-evidence.tar.gz",
+    "sha256": "a9c5b323e1099b60dd47ba1837b719a3301e7269ae5e88913be45ca026d92efc"
+  },
+  "output_files": {
+    "ASAN.md": {
+      "bytes": 6133,
+      "sha256": "757e54d218e0e7332d1bd50f51d5922522d46f964ae6f84fba87342ff5e36742"
+    },
+    "asan-evidence-members.json.gz": {
+      "bytes": 3700085,
+      "sha256": "0538069ad10e07c3be9beb687ef4b098a4b31c66b464857f7ab99ccbe1705305"
+    },
+    "asan-evidence.tar.xz": {
+      "bytes": 12797748,
+      "sha256": "73579260ee1df28286ea2561deb10a3cc0edfd17a34d02e16207b28c6c4d02b7"
+    },
+    "asan.json": {
+      "bytes": 8076,
+      "sha256": "58503408785f21352be28b940e74db2884c48231fedd819ebfd80cf7a3f12c6a"
+    },
+    "package.py": {
+      "bytes": 19016,
+      "sha256": "1cac9b3219d26740b987430f63fa739a482af148124fa1acfc4389af4e4bae8e"
+    },
+    "recompress.py": {
+      "bytes": 7039,
+      "sha256": "48a2718997d2422f0286ca3e4e24f64a06fdd7371b2f7b80ef46473068980f6f"
+    }
+  },
+  "recipe": {
+    "check": "CRC64",
+    "converter": "recompress.py",
+    "converter_sha256": "48a2718997d2422f0286ca3e4e24f64a06fdd7371b2f7b80ef46473068980f6f",
+    "dictionary_bytes": 67108864,
+    "format": "XZ",
+    "original_gzip_archive": "asan-evidence.tar.gz",
+    "original_gzip_bytes": 54168255,
+    "original_gzip_sha256": "a9c5b323e1099b60dd47ba1837b719a3301e7269ae5e88913be45ca026d92efc",
+    "original_index_sha256": "1e8550879ab0f0011b51b87f5ffa120f3a8c3286dd49700b7476d0fd4131644f",
+    "original_packager_sha256": "1cac9b3219d26740b987430f63fa739a482af148124fa1acfc4389af4e4bae8e",
+    "preset": 9,
+    "receipt": "recompression.json",
+    "scope": "Only the outer compression and publication metadata changed. The original package.py produced the preserved gzip tar; recompress.py produced this XZ representation. All original tar headers, members, order and padding are identical.",
+    "threads": 1,
+    "uncompressed_tar_bytes": 272291840,
+    "uncompressed_tar_sha256": "da9f0f2528ccf5ba6282761240f3abccd661644dc0fc5e7695ca5bf18894ac18"
+  },
+  "reused_verified_trial": "/tmp/oriole-reference-frame-asan-compression-trial/asan-evidence-attempt01.tar.xz",
+  "scope": "Lossless saved-data recompression only; full archive-member/source/corpus readback is a separate receipt.",
+  "source_packet": "/tmp/oriole-reference-frame-asan-package",
+  "status": "passed exact uncompressed tar identity; original gzip packet unchanged",
+  "uncompressed_tar": {
+    "bytes": 272291840,
+    "gzip_and_xz_identical": true,
+    "sha256": "da9f0f2528ccf5ba6282761240f3abccd661644dc0fc5e7695ca5bf18894ac18"
+  },
+  "xz_archive": {
+    "bytes": 12797748,
+    "name": "asan-evidence.tar.xz",
+    "sha256": "73579260ee1df28286ea2561deb10a3cc0edfd17a34d02e16207b28c6c4d02b7"
+  }
+}

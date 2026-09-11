@@ -1,16 +1,16 @@
 # Reviewing Oriole
 
-The latest [element-name storage report](validation/2026-09-11/element-name-storage/) records the selected runtime, normal/PGO native and CPython benchmarks, allocation probes and unchanged upstream API outcomes. Its portable readers retain the rejected representation and every adverse condition. The roughly 1.10× Expat target remains unmet.
+The latest [character-reference frame report](validation/2026-09-11/reference-frames/) records the selected runtime, all 104 normal/PGO native and CPython conditions, unchanged allocation traces and complete upstream API outcomes. PGO native time improves by 2.0% and normal CPython time by 1.0%; ordinary native time regresses by 0.8%, while PGO CPython is effectively flat. The roughly 1.10× Expat target remains unmet.
 
 The implementation is published in native GitHub Stack 3, starting at [PR #1](https://github.com/astral-sh/oriole/pull/1), and continues in Stack 104 from [PR #102](https://github.com/astral-sh/oriole/pull/102). Each layer uses the preceding layer as its base, keeping implementation changes and their evidence reviewable together.
 
 The [retained C frame experiment](validation/2026-09-11/retained-c-frame/) remains rejected: native PGO is effectively flat, generated cases regress, and each parser handle grows by 256 bytes. Its source, allocation traces and completed compatibility results are retained alongside all benchmark conditions.
 
-The [serialized entity-accounting experiment](validation/2026-09-11/serialized-accounting/) also remains rejected. Three checked non-atomic counters improve PGO native time by 1.34% and CPython time by 1.10%, but normal native time regresses by 4.48% across all 24 real-project conditions. Normal CPython time regresses by 3.22%, with 23 of 24 conditions adverse; generated native controls regress in both builds. The report retains all normal/PGO native and CPython measurements, unchanged allocation traces and complete compatibility outcomes; the suffix-sharing runtime remains selected.
+The [serialized entity-accounting experiment](validation/2026-09-11/serialized-accounting/) also remains rejected. Three checked non-atomic counters improve PGO native time by 1.34% and CPython time by 1.10%, but normal native time regresses by 4.48% across all 24 real-project conditions. Normal CPython time regresses by 3.22%, with 23 of 24 conditions adverse; generated native controls regress in both builds. The report retains all normal/PGO native and CPython measurements, unchanged allocation traces and complete compatibility outcomes.
 
 The [long inherited default regression](validation/2026-09-11/long-inherited-default/) checks every byte of a 1,024-byte default attribute delivered by an external general-entity child. All 12 chunking/deferral combinations pass with exact callback and allocation assertions against Expat and both Oriole linkages. It closes a missing value assertion in the earlier allocation-success probe without changing the parser runtime or original upstream API results.
 
-The [private start-tag cache experiment](validation/2026-09-11/start-tag-cache/) remains rejected. Its ordinary release build regresses by 1.16% across real-project native conditions, with 17 of 24 conditions adverse, and adds 48 bytes to the parser and C handle plus a lazy heap cache. The report retains all 28 measured conditions and clearly marks the downstream PGO, compatibility and CPython campaigns as unexecuted; the suffix-sharing runtime remains selected.
+The [private start-tag cache experiment](validation/2026-09-11/start-tag-cache/) remains rejected. Its ordinary release build regresses by 1.16% across real-project native conditions, with 17 of 24 conditions adverse, and adds 48 bytes to the parser and C handle plus a lazy heap cache. The report retains all 28 measured conditions and clearly marks the downstream PGO, compatibility and CPython campaigns as unexecuted.
 
 ## Review order
 

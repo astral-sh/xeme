@@ -4,6 +4,8 @@ The latest [element-name storage report](validation/2026-09-11/element-name-stor
 
 The implementation is published in native GitHub Stack 3, starting at [PR #1](https://github.com/astral-sh/oriole/pull/1), and continues in Stack 104 from [PR #102](https://github.com/astral-sh/oriole/pull/102). Each layer uses the preceding layer as its base, keeping implementation changes and their evidence reviewable together.
 
+The [retained C frame experiment](validation/2026-09-11/retained-c-frame/) remains rejected: native PGO is effectively flat, generated cases regress, and each parser handle grows by 256 bytes. Its source, allocation traces and completed compatibility results are retained alongside all benchmark conditions.
+
 ## Review order
 
 | Area | Layers | Main questions |

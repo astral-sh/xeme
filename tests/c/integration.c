@@ -126,6 +126,71 @@ static void custom_memory(void) {
     XML_ParserFree(parser);
     assert(allocations > 0 && allocations == frees);
 }
+/* Successful namespace behavior from Expat's test_nsalloc_long_element.
+ * See UPSTREAM-NOTICES.txt for its license. Allocation-failure schedules remain
+ * covered by the separate upstream gate. */
+static const char namespace_long_element[] =
+    "http://example.org/ thisisalongenoughelementnametotriggerareallocation foo";
+static const char namespace_long_attribute[] = "http://example.org/ a bar";
+
+static void XMLCALL namespace_long_start(void *data, const char *name,
+                                        const char **attributes) {
+    int *calls = data;
+    assert(strcmp(name, namespace_long_element) == 0);
+    assert(attributes && attributes[0]);
+    assert(strcmp(attributes[0], namespace_long_attribute) == 0);
+    assert(attributes[1] && strcmp(attributes[1], "12") == 0 && !attributes[2]);
+    calls[0]++;
+}
+
+static void XMLCALL namespace_long_end(void *data, const char *name) {
+    int *calls = data;
+    assert(strcmp(name, namespace_long_element) == 0);
+    calls[1]++;
+}
+
+static void namespace_long_names(void) {
+    const char *input =
+        "<foo:thisisalongenoughelementnametotriggerareallocation\n"
+        " xmlns:foo='http://example.org/' bar:a='12'\n"
+        " xmlns:bar='http://example.org/'>"
+        "</foo:thisisalongenoughelementnametotriggerareallocation>";
+    const XML_Char separator[] = " ";
+    XML_Memory_Handling_Suite memory = {custom_malloc, custom_realloc, custom_free};
+#if XML_MAJOR_VERSION > 2 || (XML_MAJOR_VERSION == 2 && XML_MINOR_VERSION >= 6)
+    const int deferral_modes = 2;
+#else
+    const int deferral_modes = 1;
+#endif
+    for (int chunk = 0; chunk <= 5; chunk++) {
+        for (int deferral = 0; deferral < deferral_modes; deferral++) {
+            int calls[2] = {0, 0};
+            XML_Parser parser = XML_ParserCreate_MM(NULL, &memory, separator);
+            assert(parser);
+#if XML_MAJOR_VERSION > 2 || (XML_MAJOR_VERSION == 2 && XML_MINOR_VERSION >= 6)
+            assert(XML_SetReparseDeferralEnabled(parser, (XML_Bool)deferral));
+#endif
+            XML_SetReturnNSTriplet(parser, XML_TRUE);
+            XML_SetUserData(parser, calls);
+            XML_SetElementHandler(parser, namespace_long_start, namespace_long_end);
+            const char *next = input;
+            int remaining = (int)strlen(input);
+            if (chunk > 0) {
+                while (remaining > chunk) {
+                    assert(XML_Parse(parser, next, chunk, XML_FALSE) == XML_STATUS_OK);
+                    next += chunk;
+                    remaining -= chunk;
+                }
+            }
+            assert(XML_Parse(parser, next, remaining, XML_TRUE) == XML_STATUS_OK);
+            assert(XML_GetErrorCode(parser) == XML_ERROR_NONE);
+            assert(calls[0] == 1 && calls[1] == 1);
+            XML_ParserFree(parser);
+            assert(allocations == frees);
+        }
+    }
+}
+
 static void *fail_malloc(size_t size) { (void)size; return NULL; }
 static void *fail_realloc(void *pointer, size_t size) { (void)pointer; (void)size; return NULL; }
 static void fail_free(void *pointer) { assert(!pointer); }
@@ -265,6 +330,7 @@ int main(void) {
     suspend_resume();
     handler_argument();
     custom_memory();
+    namespace_long_names();
     failed_allocation();
     entity_amplification();
     custom_encoding_aliases();

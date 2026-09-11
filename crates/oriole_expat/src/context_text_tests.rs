@@ -29,6 +29,8 @@ fn request(resize: bool, size: usize) -> bool {
         unsafe {
             assert!(in_allocator_callback());
             assert_eq!(XML_GetCurrentByteIndex(parser), -1);
+            assert_eq!(XML_GetCurrentLineNumber(parser), 0);
+            assert_eq!(XML_GetCurrentColumnNumber(parser), 0);
             assert_eq!(XML_SetBase(parser, c"blocked".as_ptr()), ERROR);
             XML_SetCharacterDataHandler(parser, None);
             assert!(XML_GetBuffer(parser, 1).is_null());
@@ -366,7 +368,8 @@ fn context_text_frame_and_raw_oom_match_owned_mode() {
         let mut success_requests = None;
         for fail_at in 0..=3 {
             let mut outcomes = Vec::new();
-            for native in [false, true] {
+            for mode in 0..3 {
+                let native = mode != 0;
                 assert_eq!(LIVE.get(), 0);
                 clear_requests(0);
                 // SAFETY: The Rust-backed suite implements the documented contract.
@@ -382,15 +385,23 @@ fn context_text_frame_and_raw_oom_match_owned_mode() {
                 let value = "x".repeat(count);
                 core.feed(format!("<r>{value}</r>").as_bytes(), true)
                     .unwrap();
-                core.next_event().unwrap().unwrap();
-                let old_raw = core.current_raw().unwrap().to_owned();
                 let mut frame = core.adapter_frame();
                 let mut event = None;
+                // Every mode starts from the same unresolved native publication.
+                core.next_event_for_c_coordinates_into(&mut event, &mut frame)
+                    .unwrap()
+                    .unwrap();
+                let AdapterLocation::Native(old_native) = frame.location_for_c() else {
+                    panic!("root Start has native coordinates");
+                };
+                let old_position = core.position();
+                let old_raw = core.current_raw().unwrap().to_owned();
                 clear_requests(fail_at);
-                let result = if native {
-                    core.next_event_for_c_text_context_into(&mut event, &mut frame)
-                } else {
-                    core.next_event_for_adapter_into(&mut event, &mut frame)
+                let result = match mode {
+                    0 => core.next_event_for_adapter_into(&mut event, &mut frame),
+                    1 => core.next_event_for_c_text_context_into(&mut event, &mut frame),
+                    2 => core.next_event_for_c_coordinates_into(&mut event, &mut frame),
+                    _ => unreachable!(),
                 };
                 let requests = REQUESTS.with(|calls| calls.borrow().clone());
                 let error = result.err();
@@ -398,6 +409,11 @@ fn context_text_frame_and_raw_oom_match_owned_mode() {
                     assert_eq!(error.kind, ErrorKind::NoMemory);
                     assert!(!frame.is_active() && event.is_none());
                     assert_eq!(core.current_raw(), Some(old_raw.as_str()));
+                    assert_eq!(core.position(), old_position);
+                    assert_eq!(
+                        core.resolve_native_location_for_c(old_native),
+                        Some(old_position)
+                    );
                 } else {
                     assert!(frame.is_active() && event.is_none());
                     assert_eq!(core.current_raw(), Some(value.as_str()));
@@ -416,6 +432,7 @@ fn context_text_frame_and_raw_oom_match_owned_mode() {
                 assert_eq!(LIVE.get(), 0);
             }
             assert_eq!(outcomes[0], outcomes[1], "count={count}, failure={fail_at}");
+            assert_eq!(outcomes[0], outcomes[2], "count={count}, failure={fail_at}");
             if fail_at == 0 {
                 success_requests = Some(outcomes[0].0.len());
             }
@@ -470,7 +487,8 @@ fn context_text_invalid_host_range_fails_closed() {
 fn context_text_warmed_reservations_do_not_allocate() {
     for markup_between in [false, true] {
         let mut outcomes = Vec::new();
-        for native in [false, true] {
+        for mode in 0..3 {
+            let native = mode != 0;
             assert_eq!(LIVE.get(), 0);
             clear_requests(0);
             // SAFETY: Same Rust allocation suite as the failure-order test.
@@ -494,10 +512,11 @@ fn context_text_warmed_reservations_do_not_allocate() {
             let mut frame = core.adapter_frame();
             let mut event = None;
             for _ in 0..if markup_between { 3 } else { 1 } {
-                if native {
-                    core.next_event_for_c_text_context_into(&mut event, &mut frame)
-                } else {
-                    core.next_event_for_adapter_into(&mut event, &mut frame)
+                match mode {
+                    0 => core.next_event_for_adapter_into(&mut event, &mut frame),
+                    1 => core.next_event_for_c_text_context_into(&mut event, &mut frame),
+                    2 => core.next_event_for_c_coordinates_into(&mut event, &mut frame),
+                    _ => unreachable!(),
                 }
                 .unwrap()
                 .unwrap();
@@ -507,11 +526,14 @@ fn context_text_warmed_reservations_do_not_allocate() {
                 // With no intervening markup, both Text owners retain capacity.
                 core.feed(format!("{value}</r>").as_bytes(), true).unwrap();
             }
+            let old_location = frame.location_for_c();
+            let old_position = core.position();
             clear_requests(1);
-            let result = if native {
-                core.next_event_for_c_text_context_into(&mut event, &mut frame)
-            } else {
-                core.next_event_for_adapter_into(&mut event, &mut frame)
+            let result = match mode {
+                0 => core.next_event_for_adapter_into(&mut event, &mut frame),
+                1 => core.next_event_for_c_text_context_into(&mut event, &mut frame),
+                2 => core.next_event_for_c_coordinates_into(&mut event, &mut frame),
+                _ => unreachable!(),
             };
             let requests = REQUESTS.with(|calls| calls.borrow().clone());
             let error = if markup_between {
@@ -522,6 +544,13 @@ fn context_text_warmed_reservations_do_not_allocate() {
                 assert_eq!(requests.len(), 1);
                 assert!(!frame.is_active() && event.is_none());
                 assert_eq!(core.current_raw(), None);
+                assert_eq!(core.position(), old_position);
+                if let AdapterLocation::Native(native) = old_location {
+                    assert_eq!(
+                        core.resolve_native_location_for_c(native),
+                        Some(old_position)
+                    );
+                }
                 Some(error)
             } else {
                 result.unwrap().unwrap();
@@ -542,6 +571,7 @@ fn context_text_warmed_reservations_do_not_allocate() {
             assert_eq!(LIVE.get(), 0);
         }
         assert_eq!(outcomes[0], outcomes[1], "markup_between={markup_between}");
+        assert_eq!(outcomes[0], outcomes[2], "markup_between={markup_between}");
     }
 }
 

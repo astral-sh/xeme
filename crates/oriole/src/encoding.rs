@@ -1,4 +1,4 @@
-use crate::{Error, ErrorKind, Position, ScanMode};
+use crate::{Error, ErrorKind, NativeLocation, Position, ScanMode};
 use oriole_storage::{Allocator, Box, String, Vec, try_box, try_extend_from_slice};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -664,6 +664,7 @@ pub(crate) struct Source {
     line: usize,
     column: usize,
     previous_cr: bool,
+    coordinate_cursor: usize,
     anchor: Option<Position>,
     pub(crate) initial_depth: usize,
     pub(crate) entity_name: Option<String>,
@@ -698,6 +699,7 @@ impl Source {
             line: 1,
             column: 0,
             previous_cr: false,
+            coordinate_cursor: 0,
             anchor: None,
             initial_depth: 0,
             entity_name: None,
@@ -821,14 +823,85 @@ impl Source {
             self.remaining().floor_char_boundary(1024)
         }
     }
+
+    /// Original bytes stay eager while native C line and column work is deferred.
+    pub(crate) fn byte_index(&self) -> usize {
+        self.anchor
+            .map_or(self.raw_index, |anchor| anchor.byte_index)
+    }
+
+    fn coordinates_at(&self, offset: usize) -> (usize, usize, bool) {
+        assert!(offset >= self.coordinate_cursor && offset <= self.text.len());
+        let (mut line, mut column, mut previous_cr) = (self.line, self.column, self.previous_cr);
+        if offset == self.coordinate_cursor {
+            return (line, column, previous_cr);
+        }
+        advance_position(
+            &self.text[self.coordinate_cursor..offset],
+            &mut line,
+            &mut column,
+            &mut previous_cr,
+        );
+        (line, column, previous_cr)
+    }
+
+    /// The caller resolves its committed publication before advancing this checkpoint.
+    pub(crate) fn materialize_coordinates(&mut self) {
+        (self.line, self.column, self.previous_cr) = self.coordinates_at(self.cursor);
+        self.coordinate_cursor = self.cursor;
+    }
+
+    fn native_offset(&self, native: NativeLocation) -> usize {
+        assert!(self.native_utf8_byte_index().is_some() && !self.has_conversions());
+        let consumed = self
+            .raw_index
+            .checked_sub(native.byte_index)
+            .expect("retained native start");
+        let offset = self
+            .cursor
+            .checked_sub(consumed)
+            .expect("undiscarded native start");
+        let end = offset
+            .checked_add(native.byte_count)
+            .expect("native range bound");
+        assert!(self.text.get(offset..end).is_some());
+        offset
+    }
+
+    /// Project a native event while its consumed bytes remain in this buffer.
+    pub(crate) fn native_position(&self, native: NativeLocation) -> Position {
+        let offset = self.native_offset(native);
+        let (line, column, _) = self.coordinates_at(offset);
+        Position {
+            byte_index: native.byte_index,
+            byte_count: native.byte_count,
+            line,
+            column,
+        }
+    }
+
+    /// Save the committed start before progressing to the consumed checkpoint.
+    pub(crate) fn checkpoint_native(&mut self, native: NativeLocation) -> Position {
+        let offset = self.native_offset(native);
+        (self.line, self.column, self.previous_cr) = self.coordinates_at(offset);
+        self.coordinate_cursor = offset;
+        Position {
+            byte_index: native.byte_index,
+            byte_count: native.byte_count,
+            line: self.line,
+            column: self.column,
+        }
+    }
+
     pub(crate) fn position(&self, count: usize) -> Position {
         if let Some(anchor) = self.anchor {
             return anchor;
         }
+        let (line, column, _) = self.coordinates_at(self.cursor);
         Position {
             byte_index: self.raw_index,
-            line: self.line,
-            column: self.column,
+            line,
+            column,
             byte_count: self.raw_len(0, count),
         }
     }
@@ -842,25 +915,26 @@ impl Source {
         if let Some(anchor) = self.anchor {
             return anchor;
         }
-        let mut position = self.position(offset);
-        position.byte_index += position.byte_count;
-        position.byte_count = 0;
-        let mut previous_cr = self.previous_cr;
-        advance_position(
-            &self.remaining()[..offset],
-            &mut position.line,
-            &mut position.column,
-            &mut previous_cr,
-        );
-        position.byte_count = self.raw_len(offset, count);
-        position
+        let (line, column, _) = self.coordinates_at(self.cursor + offset);
+        Position {
+            byte_index: self.raw_index + self.raw_len(0, offset),
+            byte_count: self.raw_len(offset, count),
+            line,
+            column,
+        }
     }
 
     pub(crate) fn position_cursor(&self) -> PositionCursor {
+        let (line, column, previous_cr) = self.coordinates_at(self.cursor);
         PositionCursor {
             offset: 0,
-            position: self.position(0),
-            previous_cr: self.previous_cr,
+            position: self.anchor.unwrap_or(Position {
+                byte_index: self.raw_index,
+                byte_count: 0,
+                line,
+                column,
+            }),
+            previous_cr,
         }
     }
 
@@ -985,6 +1059,7 @@ impl Source {
     }
 
     pub(crate) fn consume(&mut self, count: usize) {
+        debug_assert_eq!(self.coordinate_cursor, self.cursor);
         self.raw_index += self.raw_len(0, count);
         let text = &self.text[self.cursor..self.cursor + count];
         advance_position(
@@ -994,14 +1069,38 @@ impl Source {
             &mut self.previous_cr,
         );
         self.cursor += count;
+        self.coordinate_cursor = self.cursor;
         self.scan = Scan::default();
         self.deferred_size = 0;
-        if self.cursor >= 64 * 1024 && self.cursor >= self.text.len() / 2 {
+        self.compact();
+    }
+
+    /// Consume one bounded native frame, retaining bytes until its delivery commits.
+    pub(crate) fn consume_deferred(&mut self, count: usize) {
+        assert!(self.native_utf8_byte_index().is_some() && !self.has_conversions());
+        assert!(count > 0 && count <= crate::arena::MAX_ARENA_BYTES);
+        assert!(!self.compaction_due());
+        assert!(self.remaining().get(..count).is_some());
+        self.raw_index += count;
+        self.cursor += count;
+        self.scan = Scan::default();
+        self.deferred_size = 0;
+    }
+
+    pub(crate) fn compaction_due(&self) -> bool {
+        self.cursor >= 64 * 1024 && self.cursor >= self.text.len() / 2
+    }
+
+    /// Discard only after the host has saved its committed location and checkpoint.
+    pub(crate) fn compact(&mut self) {
+        if self.compaction_due() {
+            assert_eq!(self.coordinate_cursor, self.cursor);
             self.text.discard_prefix(self.cursor);
             if self.encoding == Encoding::MultiByte {
                 self.raw_widths.drain(..self.cursor);
             }
             self.cursor = 0;
+            self.coordinate_cursor = 0;
         }
     }
     pub(crate) fn scan_token(
@@ -1300,6 +1399,64 @@ fn advance_long_position(text: &str, line: &mut usize, column: &mut usize, previ
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn deferred_discard_preserves_both_starts_until_the_host_selects_one() {
+        for commit_candidate in [false, true] {
+            let mut source = Source::new(Allocator::System, crate::NameRules::default());
+            source.text.try_push_str(&"x".repeat(65_530)).unwrap();
+            source.text.try_push_str("a\r\néz").unwrap();
+            source.consume(65_530);
+            let a = NativeLocation {
+                generation: 1,
+                byte_index: 65_530,
+                byte_count: 2,
+            };
+            let expected_a = source.position(2);
+            source.consume_deferred(2);
+            let b = NativeLocation {
+                generation: 1,
+                byte_index: 65_532,
+                byte_count: 4,
+            };
+            let expected_b = source.position(4);
+            source.consume_deferred(4);
+            assert!(source.compaction_due());
+            assert_eq!(source.cursor, 65_536);
+            assert_eq!(source.text.len(), 65_536);
+            assert_eq!(source.coordinate_cursor, 65_530);
+            assert_eq!(source.native_position(a), expected_a);
+            assert_eq!(source.native_position(b), expected_b);
+            let mut cursor = source.position_cursor();
+            assert_eq!(
+                source.position_from_cursor(&mut cursor, 0, 0),
+                source.position(0)
+            );
+
+            // At the next delivery boundary only the committed point survives.
+            // Choosing A also models recovery after an unpublished B unwinds.
+            let (current, expected) = if commit_candidate {
+                (b, expected_b)
+            } else {
+                (a, expected_a)
+            };
+            assert_eq!(source.checkpoint_native(current), expected);
+            source.materialize_coordinates();
+            source.compact();
+            assert_eq!(source.cursor, 0);
+            assert_eq!(source.coordinate_cursor, 0);
+            assert!(source.text.is_empty());
+            assert_eq!(
+                source.position(0),
+                Position {
+                    byte_index: 65_536,
+                    byte_count: 0,
+                    line: 2,
+                    column: 2,
+                }
+            );
+        }
+    }
 
     #[test]
     fn converted_positions_fit_at_the_source_bound() {

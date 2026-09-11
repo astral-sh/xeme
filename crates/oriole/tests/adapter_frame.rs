@@ -15,6 +15,15 @@ fn collect(
     config: Config,
     adapter: bool,
 ) -> (std::vec::Vec<std::string::String>, usize) {
+    collect_mode(input, chunk, config, u8::from(adapter))
+}
+
+fn collect_mode(
+    input: &[u8],
+    chunk: usize,
+    config: Config,
+    mode: u8,
+) -> (std::vec::Vec<std::string::String>, usize) {
     let mut parser = Parser::new(config);
     let mut frame = parser.adapter_frame();
     let mut records = std::vec::Vec::new();
@@ -26,10 +35,11 @@ fn collect(
         }
         loop {
             let mut event = None;
-            let result = if adapter {
-                parser.next_event_for_adapter_into(&mut event, &mut frame)
-            } else {
-                parser.next_event_for_recycling_into(&mut event)
+            let result = match mode {
+                0 => parser.next_event_for_recycling_into(&mut event),
+                1 => parser.next_event_for_adapter_into(&mut event, &mut frame),
+                2 => parser.next_event_for_c_coordinates_into(&mut event, &mut frame),
+                _ => unreachable!(),
             };
             let token = match result {
                 Ok(Some(token)) => token,
@@ -43,12 +53,33 @@ fn collect(
             };
             if frame.is_active() {
                 assert!(event.is_none());
+                let position = match frame.location_for_c() {
+                    oriole::AdapterLocation::Position(position) => {
+                        assert_eq!(frame.position(), position);
+                        position
+                    }
+                    oriole::AdapterLocation::Native(native) => {
+                        let position = parser.position(); // Pure ordinary API stays exact.
+                        assert_eq!(position.byte_index, native.byte_index());
+                        assert_eq!(position.byte_count, native.byte_count());
+                        if records.len() % 7 == 0 {
+                            assert_eq!(
+                                parser.resolve_native_location_for_c(native),
+                                Some(position)
+                            );
+                        }
+                        position
+                    }
+                };
                 if let Some(name) = frame.take_end_name() {
                     event = Some(Event {
                         kind: EventKind::EndElement { name },
-                        position: frame.position(),
+                        position,
                     });
-                } else if let Some(bytes) = frame.text_bytes() {
+                } else if let Some(bytes) = frame.native_text_range_for_c().map_or_else(
+                    || frame.text_bytes(),
+                    |(start, count)| Some(&input[start..start + count]),
+                ) {
                     assert_eq!(frame.callback_bytes(), bytes.len());
                     event = Some(Event {
                         kind: EventKind::Text(
@@ -58,7 +89,7 @@ fn collect(
                             )
                             .unwrap(),
                         ),
-                        position: frame.position(),
+                        position,
                     });
                 } else {
                     frames += 1;
@@ -85,7 +116,7 @@ fn collect(
                     );
                     event = Some(Event {
                         kind: EventKind::StartElement { name, attributes },
-                        position: frame.position(),
+                        position,
                     });
                 }
             }
@@ -547,4 +578,113 @@ fn ordinary_text_precedes_accounting_failure_but_cdata_does_not() {
         }
         parser.finish_adapter_frame(frame);
     }
+}
+
+#[test]
+fn lazy_coordinates_match_eager_events_through_fallbacks_and_compaction() {
+    let documents = [
+        "\u{feff}<r>é\r\n<n a='x'>α😀</n><e/>tail</r>".to_owned(),
+        "<r><n></n><bad a='x' a='y'></bad></r>".to_owned(),
+        "<r><n></n><n xmlns='u'><n/></n><n><![CDATA[x\r\ny]]>&amp;</n></r>".to_owned(),
+        "<!DOCTYPE r [<!ENTITY e 'body'>]><r><n>&e;</n></r>".to_owned(),
+        format!("<r>{}</r>", "<n>é\n</n>\n".repeat(7_000)),
+        "<r><n></n><bad a='incomplete".to_owned(),
+    ];
+    for xml in documents {
+        let utf16 = [0xfeff]
+            .into_iter()
+            .chain(xml.encode_utf16())
+            .flat_map(u16::to_le_bytes)
+            .collect::<std::vec::Vec<_>>();
+        for bytes in [xml.as_bytes(), utf16.as_slice()] {
+            for namespace_separator in [None, Some('|')] {
+                let chunks = if bytes.len() < 256 {
+                    (1..=bytes.len()).collect()
+                } else {
+                    vec![4_096, 65_536, bytes.len()]
+                };
+                for chunk in chunks {
+                    let config = Config {
+                        namespace_separator,
+                        ..Config::default()
+                    };
+                    assert_eq!(
+                        collect_mode(bytes, chunk, config.clone(), 2).0,
+                        collect_mode(bytes, chunk, config, 1).0,
+                        "chunk={chunk}, ns={namespace_separator:?}, bytes={}",
+                        bytes.len()
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn lazy_locations_reject_stale_and_foreign_descriptors_and_keep_eager_transitions() {
+    let mut config = Config::default();
+    config.limits.max_total_bytes = 20;
+    let mut parser = Parser::new(config);
+    parser.feed(b"<r><n></n><e/></r>", false).unwrap();
+    let mut old_frame = parser.adapter_frame();
+    let mut event = None;
+    parser
+        .next_event_for_c_coordinates_into(&mut event, &mut old_frame)
+        .unwrap()
+        .unwrap();
+    let oriole::AdapterLocation::Native(old) = old_frame.location_for_c() else {
+        panic!("native root")
+    };
+    let expected = parser.position();
+    assert!(
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| old_frame.position())).is_err()
+    );
+    // A rejected feed does not flush or replace the unresolved publication.
+    assert!(parser.feed(b"more bytes", false).is_err());
+    assert_eq!(parser.position(), expected);
+    assert_eq!(parser.resolve_native_location_for_c(old), Some(expected));
+    parser.finish_adapter_frame(old_frame);
+
+    let mut parser = Parser::new(Config::default());
+    parser.feed(b"<r><n></n><e/></r>", true).unwrap();
+    let mut first = parser.adapter_frame();
+    let mut second = parser.adapter_frame();
+    parser
+        .next_event_for_c_coordinates_into(&mut event, &mut first)
+        .unwrap()
+        .unwrap();
+    let oriole::AdapterLocation::Native(old) = first.location_for_c() else {
+        panic!("native root")
+    };
+    parser
+        .next_event_for_c_coordinates_into(&mut event, &mut second)
+        .unwrap()
+        .unwrap();
+    assert_eq!(parser.resolve_native_location_for_c(old), None);
+    assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| first.position())).is_err());
+    let oriole::AdapterLocation::Native(current) = second.location_for_c() else {
+        panic!("native child")
+    };
+    let mut foreign = Parser::new(Config::default());
+    foreign.feed(b"<r><n></n></r>", true).unwrap();
+    let mut foreign_frame = foreign.adapter_frame();
+    foreign
+        .next_event_for_c_coordinates_into(&mut event, &mut foreign_frame)
+        .unwrap()
+        .unwrap();
+    assert_eq!(foreign.resolve_native_location_for_c(current), None);
+    foreign
+        .next_event_for_c_coordinates_into(&mut event, &mut first)
+        .unwrap()
+        .unwrap();
+    assert!(!first.is_active() && event.is_some());
+    // Ordinary delivery after the explicit C seam owns an eager Position.
+    parser
+        .next_event_for_adapter_into(&mut event, &mut second)
+        .unwrap()
+        .unwrap();
+    assert_eq!(second.position(), parser.position());
+    parser.finish_adapter_frame(first);
+    parser.finish_adapter_frame(second);
+    foreign.finish_adapter_frame(foreign_frame);
 }

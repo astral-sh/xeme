@@ -4,7 +4,7 @@ use std::ops::Range;
 
 use oriole_storage::{AllocError, Allocator, String, Vec};
 
-use crate::{Position, RecyclingToken};
+use crate::{AdapterLocation, Position, RecyclingToken};
 
 pub(crate) const MAX_ARENA_BYTES: usize = 4 * 1024;
 pub(crate) const INLINE_TEXT_BYTES: usize = 23;
@@ -39,7 +39,7 @@ pub struct AdapterFrame {
     bytes: String,
     attributes: Vec<ArenaAttribute>,
     name: Range<usize>,
-    position: Position,
+    position: AdapterLocation,
     callback_bytes: usize,
     inline: [u8; INLINE_TEXT_BYTES],
     payload: Payload,
@@ -59,7 +59,7 @@ impl AdapterFrame {
             bytes: String::new_in(allocator),
             attributes: Vec::new_in(allocator),
             name: 0..0,
-            position: Position::default(),
+            position: AdapterLocation::Position(Position::default()),
             callback_bytes: 0,
             inline: [0; INLINE_TEXT_BYTES],
             payload: Payload::Start,
@@ -72,7 +72,7 @@ impl AdapterFrame {
         self.payload = Payload::Start;
         self.name = 0..0;
         self.callback_bytes = 0;
-        self.position = Position::default();
+        self.position = AdapterLocation::Position(Position::default());
         if self.bytes.capacity() > MAX_ARENA_BYTES {
             self.bytes = String::new_in(self.bytes.allocator());
         } else {
@@ -173,6 +173,10 @@ impl AdapterFrame {
     }
 
     pub(crate) fn publish(&mut self, position: Position) {
+        self.publish_location(AdapterLocation::Position(position));
+    }
+
+    pub(crate) fn publish_location(&mut self, position: AdapterLocation) {
         self.position = position;
         self.active = true;
     }
@@ -184,7 +188,21 @@ impl AdapterFrame {
 
     #[must_use]
     pub fn position(&self) -> Position {
+        match self.position {
+            AdapterLocation::Position(position) => position,
+            AdapterLocation::Native(_) => panic!("C native coordinates require the host resolver"),
+        }
+    }
+
+    /// Scalar coordinate descriptor for the explicit C host protocol.
+    #[doc(hidden)]
+    #[must_use]
+    pub fn location_for_c(&self) -> AdapterLocation {
         self.position
+    }
+
+    pub(crate) fn is_native_text(&self) -> bool {
+        matches!(self.payload, Payload::NativeText { .. })
     }
 
     /// Identify Text without requiring an owned-byte projection.

@@ -402,7 +402,7 @@ mod tests {
                 while parser.next_event().unwrap().is_some() {}
             }
             observations.push((
-                parser.last_position,
+                parser.position(),
                 parser.expanded.expanded.load(Ordering::Relaxed),
             ));
             let mut limits = parser.config.limits.clone();

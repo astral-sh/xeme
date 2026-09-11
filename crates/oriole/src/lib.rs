@@ -97,10 +97,78 @@ pub struct Position {
     pub byte_count: usize,
 }
 
+/// A checked native event identity for the explicit C coordinate protocol.
+/// Fields are private: a host may retain this scalar but cannot invent a location.
+#[doc(hidden)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct NativeLocation {
+    generation: u64,
+    byte_index: usize,
+    byte_count: usize,
+}
+
+impl NativeLocation {
+    #[must_use]
+    pub fn byte_index(self) -> usize {
+        self.byte_index
+    }
+    #[must_use]
+    pub fn byte_count(self) -> usize {
+        self.byte_count
+    }
+}
+
+/// Detached coordinates, either resolved or tied to one committed C delivery.
+#[doc(hidden)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum AdapterLocation {
+    Position(Position),
+    Native(NativeLocation),
+}
+
+impl AdapterLocation {
+    #[must_use]
+    pub fn byte_index(self) -> usize {
+        match self {
+            Self::Position(p) => p.byte_index,
+            Self::Native(p) => p.byte_index,
+        }
+    }
+    #[must_use]
+    pub fn byte_count(self) -> usize {
+        match self {
+            Self::Position(p) => p.byte_count,
+            Self::Native(p) => p.byte_count,
+        }
+    }
+}
+
+/// Keep a native publication's identity after its retained bytes are discarded.
+#[derive(Clone, Copy, Debug)]
+enum PublishedLocation {
+    Position(Position),
+    Native(NativeLocation),
+    ResolvedNative {
+        native: NativeLocation,
+        line: usize,
+        column: usize,
+    },
+}
+
+impl From<AdapterLocation> for PublishedLocation {
+    fn from(location: AdapterLocation) -> Self {
+        match location {
+            AdapterLocation::Position(position) => Self::Position(position),
+            AdapterLocation::Native(native) => Self::Native(native),
+        }
+    }
+}
+
 struct EventOutput<'a> {
     event: &'a mut Option<Event>,
     frame: Option<&'a mut AdapterFrame>,
     c_text_context: bool,
+    lazy_coordinates: bool,
 }
 
 impl EventOutput<'_> {
@@ -581,7 +649,7 @@ pub struct Parser {
     has_external_subset: bool,
     standalone: bool,
     reparse_deferral: bool,
-    last_position: Position,
+    last_position: PublishedLocation,
     current_raw: String,
     token_scratch: lexical::Buffer,
     raw_attributes: Vec<RawAttribute>,
@@ -668,10 +736,10 @@ impl Parser {
             has_external_subset: false,
             standalone: false,
             reparse_deferral: true,
-            last_position: Position {
+            last_position: PublishedLocation::Position(Position {
                 line: 1,
                 ..Position::default()
-            },
+            }),
             current_raw: String::new_in(allocator),
             token_scratch: lexical::Buffer::new_in(allocator),
             raw_attributes: Vec::new_in(allocator),
@@ -1208,7 +1276,8 @@ impl Parser {
         if bytes.len() > self.input_bytes_remaining() {
             return self.fail(ErrorKind::LimitExceeded, "input byte limit exceeded");
         }
-        self.feed_start_byte = self.sources[0].position(0).byte_index;
+        self.materialize_coordinates();
+        self.feed_start_byte = self.sources[0].byte_index();
         // The remaining-input check proves this addition and every original
         // source coordinate fit, before decoder or input state is changed.
         self.received += bytes.len();
@@ -1340,6 +1409,7 @@ impl Parser {
                 "no unresolved encoding is pending",
             ));
         }
+        self.materialize_coordinates();
         if let Err(error) = self
             .decoder
             .install_map(name, map, multibyte, &mut self.sources[0])
@@ -1388,6 +1458,7 @@ impl Parser {
         if let Some(error) = self.error {
             return Err(error);
         }
+        self.materialize_coordinates();
         if let Err(mut error) = self.decoder.resolve_conversion(value, &mut self.sources[0]) {
             error.position = self.sources[0].end_position();
             self.error = Some(error);
@@ -1481,6 +1552,7 @@ impl Parser {
             event: output,
             frame: None,
             c_text_context: false,
+            lazy_coordinates: false,
         })
     }
 
@@ -1519,6 +1591,28 @@ impl Parser {
         frame: &mut AdapterFrame,
         c_text_context: bool,
     ) -> Result<Option<RecyclingToken>, Error> {
+        self.next_event_for_adapter_modes_into(event, frame, c_text_context, false)
+    }
+
+    /// Fill C context frames with coordinates resolved only when the host asks.
+    /// Ordinary frame position projection rejects a native descriptor; use
+    /// `resolve_native_location_for_c` for the currently committed delivery.
+    #[doc(hidden)]
+    pub fn next_event_for_c_coordinates_into(
+        &mut self,
+        event: &mut Option<Event>,
+        frame: &mut AdapterFrame,
+    ) -> Result<Option<RecyclingToken>, Error> {
+        self.next_event_for_adapter_modes_into(event, frame, true, true)
+    }
+
+    fn next_event_for_adapter_modes_into(
+        &mut self,
+        event: &mut Option<Event>,
+        frame: &mut AdapterFrame,
+        c_text_context: bool,
+        lazy_coordinates: bool,
+    ) -> Result<Option<RecyclingToken>, Error> {
         *event = None;
         frame.clear();
         if !self.event_recycling.accepts(&frame.generation) {
@@ -1528,6 +1622,7 @@ impl Parser {
             event,
             frame: Some(frame),
             c_text_context,
+            lazy_coordinates,
         })?;
         Ok((event.is_some() || frame.active).then(|| self.event_recycling.token()))
     }
@@ -1540,6 +1635,16 @@ impl Parser {
     }
 
     fn next_delivery_into(&mut self, output: &mut EventOutput<'_>) -> Result<(), Error> {
+        // No new prospective frame exists yet. Retained bytes still describe
+        // the committed event, including after a caught panic before delivery.
+        output.lazy_coordinates = output.lazy_coordinates && self.can_defer_coordinates();
+        if !output.lazy_coordinates || self.sources[0].compaction_due() {
+            self.materialize_coordinates();
+        }
+        self.next_delivery_scoped(output)
+    }
+
+    fn next_delivery_scoped(&mut self, output: &mut EventOutput<'_>) -> Result<(), Error> {
         // Keep ordinary documents outside the owned-table publication frame.
         if self.shared_tables.get().is_none() && !self.in_doctype {
             return self.next_event_scoped(output);
@@ -1564,12 +1669,12 @@ impl Parser {
 
     fn next_event_scoped(&mut self, output: &mut EventOutput<'_>) -> Result<(), Error> {
         if let Some(event) = self.finish_foreign_dtd() {
-            self.last_position = event.position;
+            self.last_position = PublishedLocation::Position(event.position);
             *output.event = Some(event);
             return Ok(());
         }
         if let Some(event) = self.pop_event() {
-            self.last_position = event.position;
+            self.last_position = PublishedLocation::Position(event.position);
             *output.event = Some(event);
             return Ok(());
         }
@@ -1660,18 +1765,99 @@ impl Parser {
         if result.is_ok()
             && let Some(event) = output.event
         {
-            self.last_position = event.position;
+            self.last_position = PublishedLocation::Position(event.position);
         }
         if result.is_ok() && output.has_frame() {
-            self.last_position = output.frame.as_ref().unwrap().position();
+            self.last_position = output.frame.as_ref().unwrap().location_for_c().into();
         }
         result
     }
 
     #[must_use]
     pub fn position(&self) -> Position {
-        self.last_position
+        match self.last_position {
+            PublishedLocation::Position(position) => position,
+            PublishedLocation::Native(native) => self.sources[0].native_position(native),
+            PublishedLocation::ResolvedNative {
+                native,
+                line,
+                column,
+            } => Position {
+                byte_index: native.byte_index,
+                byte_count: native.byte_count,
+                line,
+                column,
+            },
+        }
     }
+
+    /// Resolve only the current publication from this exact parser generation.
+    /// No parser or source reference escapes the field-only C getter operation.
+    #[doc(hidden)]
+    pub fn resolve_native_location_for_c(&mut self, native: NativeLocation) -> Option<Position> {
+        if native.generation != self.event_recycling.generation() {
+            return None;
+        }
+        match self.last_position {
+            PublishedLocation::Native(current) if current == native => {
+                let position = self.sources[0].checkpoint_native(native);
+                self.last_position = PublishedLocation::ResolvedNative {
+                    native,
+                    line: position.line,
+                    column: position.column,
+                };
+                Some(position)
+            }
+            PublishedLocation::ResolvedNative {
+                native: current, ..
+            } if current == native => Some(self.position()),
+            _ => None,
+        }
+    }
+
+    /// Resolve the one committed start before source mutation or deferred discard.
+    fn materialize_coordinates(&mut self) {
+        if let PublishedLocation::Native(native) = self.last_position {
+            self.resolve_native_location_for_c(native)
+                .expect("current native publication");
+        }
+        self.sources[0].materialize_coordinates();
+        self.sources[0].compact();
+    }
+
+    fn can_defer_coordinates(&self) -> bool {
+        self.sources.len() == 1
+            && !self.fragment
+            && !self.external_subset
+            && !self.seen_doctype
+            && !self.foreign_dtd
+            && !self.in_doctype
+            && !self.in_cdata
+            && self.shared_tables.get().is_none()
+            && self.pending.is_empty()
+            && self.source().native_utf8_byte_index().is_some()
+            && !self.source().has_conversions()
+    }
+
+    /// Create a prospective location only for a selected bounded native frame.
+    fn frame_location(&mut self, count: usize, lazy: bool) -> AdapterLocation {
+        if lazy && self.can_defer_coordinates() && count > 0 && count <= arena::MAX_ARENA_BYTES {
+            let native = NativeLocation {
+                generation: self.event_recycling.generation(),
+                byte_index: self.source().byte_index(),
+                byte_count: count,
+            };
+            AdapterLocation::Native(native)
+        } else {
+            AdapterLocation::Position(self.eager_position(count))
+        }
+    }
+
+    fn eager_position(&mut self, count: usize) -> Position {
+        self.materialize_coordinates();
+        self.source().position(count)
+    }
+
     /// Earliest original input byte that a pending event can still reference.
     ///
     /// Adapters retaining a raw input window can discard bytes before this
@@ -1682,7 +1868,7 @@ impl Parser {
     pub fn input_context_byte_index(&self) -> usize {
         self.sources
             .iter()
-            .map(|source| source.position(0).byte_index)
+            .map(Source::byte_index)
             .chain(
                 self.pending
                     .iter()
@@ -1914,8 +2100,22 @@ impl Parser {
 
     fn consume(&mut self, count: usize) -> Result<(), Error> {
         self.account_source(count)?;
+        self.materialize_coordinates();
         self.source_mut().consume(count);
         Ok(())
+    }
+
+    /// Leave a native frame's bytes intact until the wrapper commits its delivery.
+    fn consume_frame(&mut self, count: usize, location: AdapterLocation) -> Result<(), Error> {
+        if let AdapterLocation::Native(native) = location {
+            assert_eq!(native.byte_index, self.source().byte_index());
+            assert_eq!(native.byte_count, count);
+            self.account_source(count)?;
+            self.sources[0].consume_deferred(count);
+            Ok(())
+        } else {
+            self.consume(count)
+        }
     }
     fn is_source_final(&self) -> bool {
         self.sources.len() > 1
@@ -2030,7 +2230,8 @@ impl Parser {
                     return Ok(());
                 }
                 self.finish_conditional_source()?;
-                self.last_position = self.here();
+                self.materialize_coordinates();
+                self.last_position = PublishedLocation::Position(self.here());
                 if self.in_doctype {
                     return Err(
                         self.err(ErrorKind::NoElements, "unclosed document type declaration")
@@ -2203,9 +2404,7 @@ impl Parser {
                 }
             };
             let Some(end) = end else {
-                if self.sources.len() == 1
-                    && self.source().position(0).byte_index == self.feed_start_byte
-                {
+                if self.sources.len() == 1 && self.source().byte_index() == self.feed_start_byte {
                     self.source_mut().mark_deferred();
                 }
                 if final_input {
@@ -2221,7 +2420,6 @@ impl Parser {
                 }
             }
             self.account_source(end)?;
-            let position = self.source().position(end);
             let mut token = std::mem::replace(
                 &mut self.token_scratch,
                 lexical::Buffer::new_in(self.allocator),
@@ -2232,7 +2430,7 @@ impl Parser {
                     .lexical_remaining()
                     .for_slice(&self.source().remaining()[..end]),
             )?;
-            let mut framed_end = false;
+            let mut framed_end = None;
             let parsed = (|| {
                 if matched_end.is_none()
                     && !matches!(planned, tag::Planned::Complete { .. })
@@ -2246,6 +2444,7 @@ impl Parser {
                 }
                 match mode {
                     ScanMode::Comment => {
+                        let position = self.eager_position(end);
                         let text = &token[4..token.len() - 3];
                         if let Some(offset) = text.find("--") {
                             return Err(self.err_at(
@@ -2267,8 +2466,14 @@ impl Parser {
                             position,
                         )?;
                     }
-                    ScanMode::Pi => self.parse_pi(token.view(), position)?,
-                    ScanMode::Doctype => self.parse_doctype(token.view(), position)?,
+                    ScanMode::Pi => {
+                        let position = self.eager_position(end);
+                        self.parse_pi(token.view(), position)?;
+                    }
+                    ScanMode::Doctype => {
+                        let position = self.eager_position(end);
+                        self.parse_doctype(token.view(), position)?;
+                    }
                     ScanMode::Tag if matched_end.is_some() => {
                         if !self.seen_doctype
                             && !self.foreign_dtd
@@ -2279,20 +2484,23 @@ impl Parser {
                                 .is_some_and(|element| element.bindings.is_empty())
                             && let Some(frame) = output.frame.as_deref_mut()
                         {
+                            let location = self.frame_location(end, output.lazy_coordinates);
                             self.prepare_end_frame(frame);
-                            framed_end = true;
+                            framed_end = Some(location);
                         } else {
+                            let position = self.eager_position(end);
                             self.end_element(position)?;
                         }
                     }
                     ScanMode::Tag if token.starts_with("</") => {
+                        let position = self.eager_position(end);
                         self.parse_end(token.view(), position)?
                     }
                     ScanMode::Tag => self.parse_start(
                         token.view(),
-                        position,
                         planned,
                         output.frame.as_deref_mut(),
+                        output.lazy_coordinates,
                     )?,
                     ScanMode::DtdDeclaration => {
                         unreachable!("DTD scanner only runs in DTD context")
@@ -2305,12 +2513,27 @@ impl Parser {
             token.swap_decoded(&mut self.current_raw)?;
             parsed?;
             self.token_scratch = token;
-            self.consume(end)?;
-            if framed_end {
+            let location = framed_end.or_else(|| {
+                output
+                    .frame
+                    .as_ref()
+                    .filter(|frame| frame.is_active())
+                    .map(|frame| frame.location_for_c())
+            });
+            if let Some(location) = location {
+                self.consume_frame(end, location)?;
+            } else {
+                self.consume(end)?;
+            }
+            if let Some(location) = framed_end {
                 // Native token publication only swaps owners. Consume sees the
                 // bytes already charged above, so neither can fail after the
                 // matched name is detached. Keep raw/position updates first.
-                output.frame.as_deref_mut().unwrap().publish(position);
+                output
+                    .frame
+                    .as_deref_mut()
+                    .unwrap()
+                    .publish_location(location);
             }
         }
     }
@@ -2525,24 +2748,42 @@ impl Parser {
                 "character data outside the document element",
             ));
         }
-        let position = self.source().position(end);
         let character_data = !self.stack.is_empty() || self.fragment;
         let value = if character_data {
             self.prepare_character_data(end, output.frame.as_deref_mut(), output.c_text_context)?
         } else {
             None
         };
+        let location = if character_data && value.is_none() {
+            let native_text = output
+                .frame
+                .as_ref()
+                .is_some_and(|frame| frame.is_native_text());
+            self.frame_location(end, output.lazy_coordinates && native_text)
+        } else {
+            AdapterLocation::Position(self.eager_position(end))
+        };
         self.save_current_raw(end)?;
         self.declaration_allowed = false;
         if let Some(value) = value {
+            let AdapterLocation::Position(position) = location else {
+                unreachable!()
+            };
             self.emit(EventKind::Text(value), position)?;
         } else if character_data {
             debug_assert!(self.pending.is_empty());
-            output.frame.as_deref_mut().unwrap().publish(position);
+            output
+                .frame
+                .as_deref_mut()
+                .unwrap()
+                .publish_location(location);
         } else if self.default_events {
+            let AdapterLocation::Position(position) = location else {
+                unreachable!()
+            };
             self.emit(EventKind::Default, position)?;
         }
-        self.consume(end)?;
+        self.consume_frame(end, location)?;
         Ok(true)
     }
 
@@ -2628,9 +2869,7 @@ impl Parser {
             if self.is_source_final() {
                 return Err(self.err(ErrorKind::UnclosedToken, "unclosed entity reference"));
             }
-            if self.sources.len() == 1
-                && self.source().position(0).byte_index == self.feed_start_byte
-            {
+            if self.sources.len() == 1 && self.source().byte_index() == self.feed_start_byte {
                 self.source_mut().mark_deferred();
             }
             return Ok(false);
@@ -2981,9 +3220,9 @@ impl Parser {
     fn parse_start(
         &mut self,
         token: lexical::Slice<'_>,
-        position: Position,
         planned: tag::Planned,
         frame: Option<&mut AdapterFrame>,
+        lazy_coordinates: bool,
     ) -> Result<(), Error> {
         if self.closed_root {
             return Err(self.err(
@@ -3016,8 +3255,10 @@ impl Parser {
                             name != "xmlns" && !name.contains(':')
                         })))
         }) {
-            return self.parse_start_frame(token, position, raw_name, rest, frame);
+            let location = self.frame_location(token.len(), lazy_coordinates && !empty);
+            return self.parse_start_frame(token, location, raw_name, rest, frame);
         }
+        let position = self.eager_position(token.len());
         if self.config.namespace_separator.is_some() && !self.config.name_rules.is_qname(raw_name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid qualified element name"));
         }
@@ -3356,7 +3597,7 @@ impl Parser {
     fn parse_start_frame(
         &mut self,
         token: lexical::Slice<'_>,
-        position: Position,
+        location: AdapterLocation,
         name: &str,
         rest: &str,
         frame: &mut AdapterFrame,
@@ -3422,7 +3663,7 @@ impl Parser {
             raw_attrs.clear();
             self.raw_attributes = raw_attrs;
         }
-        frame.publish(position);
+        frame.publish_location(location);
         Ok(())
     }
 
@@ -3857,6 +4098,8 @@ impl Parser {
     }
 }
 
+#[cfg(test)]
+mod compact_coordinate_tests;
 #[cfg(test)]
 mod context_text_tests;
 

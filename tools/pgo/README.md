@@ -4,6 +4,8 @@ Profile-guided optimization (PGO) lets the compiler use execution counts from a 
 
 This is an opt-in build workflow. It does not replace the default release or python-build-standalone build. Evaluate the resulting library with your application's tests and benchmarks before deployment; the generated replay is a build check, not a compatibility or security certification.
 
+For a PBS consumer, use the [optional PGO bundle command](../../integration/python-build-standalone/#optional-fresh-pgo-bundle). It runs this pipeline with the required PIC/unwind flags, verifies the effective ThinLTO configuration, and packages the exact optimized archive with its provenance and native linker dependencies. The `--native-static-libs` option is used by that Linux bridge to capture native dependencies from the same profile-use compilation; ordinary PGO invocations remain unchanged.
+
 ## Requirements
 
 - Linux or macOS, Python 3.11 or later, and an installed native Rust toolchain.

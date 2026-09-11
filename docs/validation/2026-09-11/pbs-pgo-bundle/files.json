@@ -1,0 +1,95 @@
+{
+  "scope": "Publication files, excluding this index itself. Historical local-ohm member and source inventories remain separately sealed.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 4572,
+      "sha256": "68bca3baeb26b43c3af1310c0415a17a71348398106dad5be5e3945ced3cacf9"
+    },
+    {
+      "path": "archive-root-review.json",
+      "bytes": 639,
+      "sha256": "81ef6683880ee98bc38879e6eab5c9bc46f56fc6f9348f0610b97c9efa737dea"
+    },
+    {
+      "path": "local-ohm/README.md",
+      "bytes": 1674,
+      "sha256": "52924c7eb90e70208337e5644bc6d8611c5a2904ca91f5c124a290035d49cb04"
+    },
+    {
+      "path": "local-ohm/evidence.tar.gz",
+      "bytes": 733050,
+      "sha256": "0907c94494c3607b61cfe79f1f7b314ab3023d6431593aa7d97cc9278ff7b189"
+    },
+    {
+      "path": "local-ohm/files.json",
+      "bytes": 434,
+      "sha256": "e42043e1ff9b1c16daf36ec37895cf388c7e6980149b43e189da527062328914"
+    },
+    {
+      "path": "local-ohm/members.json.gz",
+      "bytes": 10915,
+      "sha256": "de398601ad67d0111c09584d73f8ddd74a3b7f656a647c510c539177e2ccf93b"
+    },
+    {
+      "path": "local-ohm/package.py",
+      "bytes": 9298,
+      "sha256": "b48390508b89f9cb7bcbd28408925005d24eefd731f3d53b9e804f60c808386b"
+    },
+    {
+      "path": "local-ohm/summary.json",
+      "bytes": 5867,
+      "sha256": "5bd3554f42895050d028227caaec03373381a12b2d6ed9ad4dcfe8051a3ccb77"
+    },
+    {
+      "path": "report.json",
+      "bytes": 2618,
+      "sha256": "34b98dad5590a0983e6c3d361d78317febbf3a757c960e5a202ae434442b0656"
+    },
+    {
+      "path": "workflow-check-attempt01.py",
+      "bytes": 5041,
+      "sha256": "d5d1a3310c5691642b883a597c57527ec932c5919ef04c28b0a39acf952b818e"
+    },
+    {
+      "path": "workflow-check-attempt01.stderr",
+      "bytes": 798,
+      "sha256": "c9cae6d4086442aef6ee12272bfa6e7c63ba8676d35351c1b32a8c4bffe1323d"
+    },
+    {
+      "path": "workflow-check-attempt01.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "workflow-check.json",
+      "bytes": 3297,
+      "sha256": "05188ce55c7b7e74572449ee1efdc8aa3f873b2298383d1e0f0d166148cbed8e"
+    },
+    {
+      "path": "workflow-check.py",
+      "bytes": 5183,
+      "sha256": "e045e3cccb0fb2371db2a31ed2f90e839400928bf10fcae73fd39532f0437993"
+    },
+    {
+      "path": "workflow-check.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "workflow-check.stdout",
+      "bytes": 72,
+      "sha256": "3fb8071df0cc5b5708e5506ba2e836fba5c9f32022f24a088790fcc2ef759ad1"
+    },
+    {
+      "path": "workflow-independent-review.json",
+      "bytes": 3353,
+      "sha256": "eb967feb03a625a0444e68b8b553caccc9489298e642ce50ceb1ef1aedb00246"
+    },
+    {
+      "path": "workflow.patch",
+      "bytes": 3273,
+      "sha256": "54ad48401a895e8c73d57cad50e381148bd0a9cedbb617fcc9991826b8d2b4ef"
+    }
+  ]
+}

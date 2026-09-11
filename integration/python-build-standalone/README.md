@@ -44,6 +44,66 @@ The bundle contains:
   backported to 3.12.13 with recorded source and patch hashes.
 - `manifest.json`: source and file hashes, target, toolchain, and build command.
 
+### Optional fresh PGO bundle
+
+The command above uses the normal ThinLTO release build. To train and bundle a
+profile-guided build, provide an installed `llvm-profdata` matching the compiler's
+LLVM major, minor, and patch version:
+
+```sh
+python3 integration/python-build-standalone/prepare.py \
+  --output /absolute/oriole-pgo-bundle \
+  --pgo --llvm-profdata /absolute/matching/llvm-profdata
+```
+
+The output must be outside the source tree. Cargo dependencies must already be
+cached. Unset inherited `RUSTFLAGS`, `CARGO_ENCODED_RUSTFLAGS`, and `CARGO_PROFILE_*`
+overrides: this bundle verifies PIC, unwinding, ThinLTO, one codegen unit, and the
+GNU x86-64 target in the actual compiler commands. Use the normal production
+toolchain and matching Rust documentation. For local Ohm checks, add
+`--toolchain ohm --cargo-arg=-Zohm-defaults=no` and keep its experimental trust
+settings disabled.
+
+This delegates to the [existing generated-only PGO pipeline](../../tools/pgo/),
+then copies its exact optimized static archive into `libexpat.a`. It captures
+native linker libraries from that same profile-use compilation. The source,
+compiler, Cargo configuration, training inputs, profiles, library origins, and
+generated callback results must still match when packaging completes. No prior
+profile or separately rebuilt archive is accepted. The normal TLS, header,
+license, and CPython cleanup-backport checks also apply.
+
+`manifest.json` embeds the PGO manifest and its checksum. The `pgo/` subdirectory
+retains the complete build logs, generated training records, profiles, and
+instrumented and optimized libraries; retain it with the bundle when archiving
+evidence. PBS installs the same six payload files and retains the combined
+manifest in its license directory. Pass this bundle to `run.sh` exactly as below.
+
+Selecting PGO does not select PBS's CPython optimization variant, and local
+benchmark gains do not establish the installed distribution's performance.
+Repeat the full distribution, installed XML, glibc 2.17, threaded-TLS, and consumer
+benchmark gates for the resulting bundle. The ordinary CI distribution and
+default `prepare.py` invocation continue to use the normal release build.
+
+The manual **PBS distribution** workflow accepts a boolean `pgo` input, defaulting
+to `false`. Enabling it installs stable Rust's matching LLVM tools, fetches the
+locked dependencies before offline training, and passes the resulting PGO bundle
+through the same distribution gates. Its validation artifact retains the PGO
+logs, manifests, training inputs and records, and profiles. Cargo target trees and
+duplicate library binaries are excluded from that artifact. The bundle manifest
+retains the exact static archive hash; the produced PGO distribution still needs
+its packaged archive identity checked.
+
+Pull requests whose head branch starts with `charlie/codex-oriole-pbs-pgo-` also
+select the PGO path, allowing the unmerged integration stack to exercise it.
+Other PBS pull requests keep the normal build. Manual dispatch requires the
+workflow to be present on the repository's default branch.
+
+The [recorded local PGO bundle](../../docs/validation/2026-09-11/pbs-pgo-bundle/)
+passed its fresh Ohm build and both C consumers. The [normal stable PBS baseline](../../docs/validation/2026-09-11/pbs-independent-checks/)
+passed the archive validator and actual glibc 2.17 threaded parsing, while retaining
+the two known strict XML callback assertions. The new stable PGO distribution
+trial remains pending.
+
 The archive is built for the GNU target, but target compatibility remains a PBS
 validation gate. At the pinned revision, PBS links x86_64 against a Debian Jessie
 sysroot inside a newer container. A successful link on the development host does
@@ -123,6 +183,7 @@ or its glibc 2.17 runtime check.
 Check the patch and staging logic against a clean pinned PBS source tree:
 
 ```sh
+python3 -m unittest discover -s integration/python-build-standalone -p test_pgo_bundle.py
 python3 integration/python-build-standalone/validate.py --pbs /absolute/clean-pbs \
   --cpython /absolute/cpython-3.12.13
 ```

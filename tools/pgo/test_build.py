@@ -174,6 +174,22 @@ class PgoTests(unittest.TestCase):
             with self.assertRaises(build.BuildError):
                 build.check_profile_output(text)
 
+    def test_native_static_libraries_require_linux_linker_names(self):
+        self.assertEqual(
+            build.native_static_libraries(
+                "note: native-static-libs: -lgcc_s -lutil -lrt -lpthread -lm -ldl -lc\n"
+            ),
+            ["-lgcc_s", "-lutil", "-lrt", "-lpthread", "-lm", "-ldl", "-lc"],
+        )
+        for text in (
+            "no linker metadata",
+            "native-static-libs:\n",
+            "native-static-libs: -lc -Wl,custom",
+            "native-static-libs: /untracked/lib.a",
+        ):
+            with self.subTest(text=text), self.assertRaises(build.BuildError):
+                build.native_static_libraries(text)
+
     def test_output_lock_is_exclusive_and_preserves_existing_owner(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)

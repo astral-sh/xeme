@@ -282,6 +282,17 @@ def check_profile_output(text: str) -> None:
         )
 
 
+def native_static_libraries(text: str) -> list[str]:
+    """Read the exact use build's native dependencies for the Linux PBS bundle."""
+    matches = re.findall(r"native-static-libs:\s*([^\n]+)", text)
+    libraries = matches[-1].split() if matches else []
+    if not libraries or any(
+        re.fullmatch(r"-l[A-Za-z0-9_]+", library) is None for library in libraries
+    ):
+        raise BuildError("Missing or unsupported native-static-libs in the use build")
+    return libraries
+
+
 def require_unchanged(
     before: dict[str, str], after: dict[str, str], label: str
 ) -> None:
@@ -463,11 +474,18 @@ def execute(args: argparse.Namespace, run: Run) -> None:
                 "--crate-type",
                 "cdylib,staticlib",
                 "--verbose",
+                *(
+                    ["--", "--print=native-static-libs"]
+                    if phase == "use" and getattr(args, "native_static_libs", False)
+                    else []
+                ),
             ],
             phase_env,
         )
         if phase == "use":
             check_profile_output(log)
+            if getattr(args, "native_static_libs", False):
+                run.manifest["native_static_libraries"] = native_static_libraries(log)
         artifact_directory = run.directory / phase
         artifact_directory.mkdir()
         shared = (
@@ -586,6 +604,11 @@ def main() -> int:
         default=[],
         type=cargo_option,
         help="Repeatable global Cargo option, e.g. --cargo-arg=-Zohm-defaults=no",
+    )
+    parser.add_argument(
+        "--native-static-libs",
+        action="store_true",
+        help="Capture the use build's native linker libraries for a Linux PBS bundle",
     )
     parser.add_argument(
         "--command-timeout",

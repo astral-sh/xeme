@@ -1,0 +1,106 @@
+{
+  "status": "passed",
+  "scope": "YAML parse, unchanged runner and independent gates, bash -n for all run steps, false/true argument flow with inert command stubs; no Cargo/compiler/parser/container/workflow execution.",
+  "pyyaml": "6.0.1",
+  "head": "144e69e08c5462217d54791374e579e3ef390a87",
+  "workflow_sha256": "74d9c24b6a31a79d0e51a401f90f0ebc2829509c35739ce798977247e25e8b51",
+  "cases": [
+    {
+      "pgo": false,
+      "calls": [
+        [
+          "/tmp/oriole-workflow-kcsdqzis/bin/rustup",
+          "component",
+          "add",
+          "rust-docs"
+        ],
+        [
+          "/tmp/oriole-workflow-kcsdqzis/bin/python3",
+          "integration/python-build-standalone/validate-tls.py",
+          "--output",
+          "/tmp/oriole-workflow-kcsdqzis/pbs-tls-probe"
+        ],
+        [
+          "/tmp/oriole-workflow-kcsdqzis/bin/python3",
+          "integration/python-build-standalone/prepare.py",
+          "--output",
+          "/tmp/oriole-workflow-kcsdqzis/oriole-bundle"
+        ],
+        [
+          "/tmp/oriole-workflow-kcsdqzis/bin/git",
+          "-C",
+          ".cache/pbs",
+          "apply",
+          "--check",
+          "/tmp/oriole-workflow-kcsdqzis/workspace with spaces/integration/python-build-standalone/pbs-a455388.patch"
+        ],
+        [
+          "/tmp/oriole-workflow-kcsdqzis/bin/git",
+          "-C",
+          ".cache/pbs",
+          "apply",
+          "/tmp/oriole-workflow-kcsdqzis/workspace with spaces/integration/python-build-standalone/pbs-a455388.patch"
+        ]
+      ]
+    },
+    {
+      "pgo": true,
+      "calls": [
+        [
+          "/tmp/oriole-workflow-kcsdqzis/bin/rustup",
+          "component",
+          "add",
+          "llvm-tools-preview"
+        ],
+        [
+          "/tmp/oriole-workflow-kcsdqzis/bin/cargo",
+          "fetch",
+          "--locked",
+          "--target",
+          "x86_64-unknown-linux-gnu"
+        ],
+        [
+          "/tmp/oriole-workflow-kcsdqzis/bin/rustc",
+          "--print",
+          "sysroot"
+        ],
+        [
+          "/tmp/oriole-workflow-kcsdqzis/bin/rustup",
+          "component",
+          "add",
+          "rust-docs"
+        ],
+        [
+          "/tmp/oriole-workflow-kcsdqzis/bin/python3",
+          "integration/python-build-standalone/validate-tls.py",
+          "--output",
+          "/tmp/oriole-workflow-kcsdqzis/pbs-tls-probe"
+        ],
+        [
+          "/tmp/oriole-workflow-kcsdqzis/bin/python3",
+          "integration/python-build-standalone/prepare.py",
+          "--output",
+          "/tmp/oriole-workflow-kcsdqzis/oriole-bundle",
+          "--pgo",
+          "--llvm-profdata",
+          "/tmp/oriole-workflow-kcsdqzis/sysroot with spaces/lib/rustlib/x86_64-unknown-linux-gnu/bin/llvm-profdata"
+        ],
+        [
+          "/tmp/oriole-workflow-kcsdqzis/bin/git",
+          "-C",
+          ".cache/pbs",
+          "apply",
+          "--check",
+          "/tmp/oriole-workflow-kcsdqzis/workspace with spaces/integration/python-build-standalone/pbs-a455388.patch"
+        ],
+        [
+          "/tmp/oriole-workflow-kcsdqzis/bin/git",
+          "-C",
+          ".cache/pbs",
+          "apply",
+          "/tmp/oriole-workflow-kcsdqzis/workspace with spaces/integration/python-build-standalone/pbs-a455388.patch"
+        ]
+      ]
+    }
+  ]
+}

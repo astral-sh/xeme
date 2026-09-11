@@ -54,6 +54,7 @@ jobs:
       - run: uvx --from ty==0.0.80 ty check --extra-search-path tools tools benchmarks integration
       - run: python3 -m unittest discover -s tools/cpython -p test_run.py
       - run: python3 -m unittest discover -s tools/pgo -p test_build.py
+      - run: python3 -m unittest discover -s integration/python-build-standalone -p test_pgo_bundle.py
   native:
     name: C ABI and callback safety
     runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-aarch64-4' || 'ubuntu-24.04-arm' }}

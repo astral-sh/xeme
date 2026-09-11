@@ -12,6 +12,8 @@ The [long inherited default regression](validation/2026-09-11/long-inherited-def
 
 The [private start-tag cache experiment](validation/2026-09-11/start-tag-cache/) remains rejected. Its ordinary release build regresses by 1.16% across real-project native conditions, with 17 of 24 conditions adverse, and adds 48 bytes to the parser and C handle plus a lazy heap cache. The report retains all 28 measured conditions and clearly marks the downstream PGO, compatibility and CPython campaigns as unexecuted.
 
+The [ordinary markup classification experiment](validation/2026-09-11/markup-classification/) remains rejected. Normal native time improves by 0.51%, but PGO regresses by 0.38% across real-project conditions, and normal generated references regress by 3.31% in all 14 pairs. Its report retains both native campaigns and explicitly marks the downstream compatibility, CPython and allocation campaigns as unexecuted.
+
 ## Review order
 
 | Area | Layers | Main questions |

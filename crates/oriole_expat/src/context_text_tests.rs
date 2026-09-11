@@ -265,6 +265,8 @@ fn context_text_pointer_survives_reentry_suspend_and_abort() {
                         let raw_len = state.raw.len();
                         XML_DefaultCurrent(parser); // Outside a callback is a no-op.
                         assert_eq!(state.raw.len(), raw_len);
+                        // Direct state reads ended the previous mutable reborrow.
+                        XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
                         assert_eq!(XML_ResumeParser(parser), OK);
                     }
                     2 => {
@@ -563,6 +565,8 @@ fn context_text_late_handler_after_suspension_uses_eager_raw() {
         XML_SetDefaultHandlerExpand(parser, Some(default_text));
         XML_DefaultCurrent(parser);
         assert!(state.raw.is_empty());
+        // Refresh the callback borrow after inspecting state between parses.
+        XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
         assert_eq!(XML_ResumeParser(parser), OK);
         assert_eq!(parse(parser, b"", false, false), OK);
         assert_eq!(parse(parser, b"tail</r>", true, false), OK);

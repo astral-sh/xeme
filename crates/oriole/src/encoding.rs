@@ -850,6 +850,9 @@ impl Source {
     fn coordinates_at(&self, offset: usize) -> (usize, usize, bool) {
         assert!(offset >= self.coordinate_cursor && offset <= self.text.len());
         let (mut line, mut column, mut previous_cr) = (self.line, self.column, self.previous_cr);
+        if offset == self.coordinate_cursor {
+            return (line, column, previous_cr);
+        }
         advance_position(
             &self.text[self.coordinate_cursor..offset],
             &mut line,
@@ -860,6 +863,9 @@ impl Source {
     }
 
     fn advance_coordinates(&mut self, offset: usize) {
+        if offset == self.coordinate_cursor {
+            return;
+        }
         let (line, column, previous_cr) = self.coordinates_at(offset);
         self.line = line;
         self.column = column;
@@ -987,10 +993,18 @@ impl Source {
 
     /// Resolve starts in order before advancing the checkpoint or discarding text.
     pub(crate) fn materialize_coordinates(&mut self) {
-        if let Some(point) = self.committed {
+        // A retained point exactly at the checkpoint still needs its snapshot.
+        // Already resolved points need neither projection nor another writeback.
+        if let Some(point) = self.committed.as_ref()
+            && matches!(point.coordinates, NativeCoordinates::Retained(_))
+        {
+            let point = *point;
             self.committed = Some(self.resolve_point(point));
         }
-        if let Some(point) = self.prospective {
+        if let Some(point) = self.prospective.as_ref()
+            && matches!(point.coordinates, NativeCoordinates::Retained(_))
+        {
+            let point = *point;
             self.prospective = Some(self.resolve_point(point));
         }
         self.advance_coordinates(self.cursor);
@@ -1434,6 +1448,50 @@ fn advance_long_position(text: &str, line: &mut usize, column: &mut usize, previ
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn materialization_snapshots_publications_at_the_current_checkpoint() {
+        for committed in [false, true] {
+            let mut source = Source::new(Allocator::System, crate::NameRules::default());
+            source.text.try_push_str("a\r\nb").unwrap();
+            let identity = NativeLocation {
+                generation: 1,
+                byte_index: 0,
+                byte_count: 1,
+            };
+            let expected = source.position(1);
+            source.begin_prospective(identity);
+            if committed {
+                // A deliverable Text prefix can commit before failed accounting
+                // advances the source, leaving its start exactly at q == cursor.
+                source.commit_prospective(identity);
+            }
+            source.materialize_coordinates();
+            let point = if committed {
+                source.committed
+            } else {
+                source.prospective
+            }
+            .unwrap();
+            assert!(
+                matches!(point.coordinates, NativeCoordinates::Resolved(position) if position == expected)
+            );
+            if !committed {
+                source.commit_prospective(identity);
+            }
+            source.consume(4);
+            assert_eq!(source.published_position(identity), expected);
+            assert_eq!(
+                source.position(0),
+                Position {
+                    byte_index: 4,
+                    byte_count: 0,
+                    line: 2,
+                    column: 1
+                }
+            );
+        }
+    }
 
     #[test]
     fn lazy_compaction_resolves_both_starts_without_committing_the_candidate() {

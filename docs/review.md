@@ -1,5 +1,7 @@
 # Reviewing Oriole
 
+The latest [element-name storage report](validation/2026-09-11/element-name-storage/) records the selected runtime, normal/PGO native and CPython benchmarks, allocation probes and unchanged upstream API outcomes. Its portable readers retain the rejected representation and every adverse condition. The roughly 1.10× Expat target remains unmet.
+
 The implementation is published in native GitHub Stack 3, starting at [PR #1](https://github.com/astral-sh/oriole/pull/1), and continues in Stack 104 from [PR #102](https://github.com/astral-sh/oriole/pull/102). Each layer uses the preceding layer as its base, keeping implementation changes and their evidence reviewable together.
 
 ## Review order

@@ -16,16 +16,16 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole (PGO) | Expat (PGO) | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 36.429 ms | 23.639 ms | 1.55× |
-| Wayland protocol | 0.916 ms | 0.953 ms | 0.96× |
-| Maven POM | 0.602 ms | 0.365 ms | 1.66× |
-| Batik SVG | 0.107 ms | 0.124 ms | 0.86× |
-| GTK UI | 0.260 ms | 0.176 ms | 1.47× |
-| DocBook XSL | 0.191 ms | 0.165 ms | 1.15× |
+| Vulkan registry | 36.503 ms | 24.333 ms | 1.50× |
+| Wayland protocol | 0.899 ms | 0.949 ms | 0.95× |
+| Maven POM | 0.590 ms | 0.362 ms | 1.63× |
+| Batik SVG | 0.106 ms | 0.125 ms | 0.85× |
+| GTK UI | 0.258 ms | 0.176 ms | 1.47× |
+| DocBook XSL | 0.192 ms | 0.165 ms | 1.17× |
 
-These [native measurements](docs/validation/2026-09-11/context-text-frame/) use the earlier Context runtime, original XML from six pinned projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host. Both parsers use PGO trained on generated XML; these projects are held out of training. Times are medians of seven process medians; ratios are medians of paired ratios. Expat is version 2.8.4.
+These [native measurements](docs/validation/2026-09-11/element-name-storage/) use the selected element-name storage runtime and original XML from six pinned projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host. Both parsers use PGO trained on generated XML; these projects are held out of training. Times are medians of seven process medians; ratios are medians of paired ratios. Expat is version 2.8.4.
 
-The selected capacity-fixed runtime takes **1.37× Expat PGO's native time and 1.15× its CPython time** across the respective 24 real-project conditions. Both exceed our target of roughly 1.10×. The [fresh CPython report](docs/validation/2026-09-11/capacity-cpython/) measures 1.20× for ElementTree and 1.10× for pyexpat events, with only six of 24 individual PGO conditions within the target. The capacity fix is effectively flat against its parent. The [native capacity report](docs/validation/2026-09-11/arena-capacity-bound/) and [earlier Context study](docs/validation/2026-09-11/context-text-frame/) retain all conditions, samples and adverse results.
+The selected runtime takes **1.35× Expat PGO's native time and 1.13× its CPython time** across the respective 24 real-project conditions. Both exceed our target of roughly 1.10×. Sharing element-name storage reduces PGO native time by 1.6% and CPython time by 0.6% against the capacity-fixed parent. Normal native time is effectively flat (−0.2%), while normal CPython time decreases by 1.2%. Generated native controls regress by 0.5% normally and 0.3% with PGO. The [full report](docs/validation/2026-09-11/element-name-storage/) retains every condition and sample; only seven of 24 individual CPython PGO conditions fall within the target.
 
 ThinLTO is the default, and [PGO is opt-in](tools/pgo/). The [PGO/LTO study](benchmarks/results/2026-09-11/pgo-lto/) on the preceding `be22a27` runtime measured PGO reductions of 24.8% natively and 15.5% through CPython. Fat LTO alone added little; combining it with PGO regressed native time by 6.8%. A later [O2 experiment](docs/validation/2026-09-11/cdata-finder/rejected-o2/) regressed PGO time by 3.1%, so O3 remains selected. Further [training and Text-copy experiments](docs/validation/2026-09-11/unselected-pgo-text/) did not justify changing the selected runtime or recipe.
 
@@ -33,7 +33,7 @@ A later [CPU-targeting and BOLT study](docs/validation/2026-09-11/compiler-exper
 
 A separate [C allocator study](benchmarks/results/2026-09-11/c-allocators/) finds less than 0.2% aggregate real-project time change with jemalloc or mimalloc, alongside higher peak resident memory. The C allocator default remains unchanged.
 
-The [latest compatibility report](docs/validation/2026-09-11/context-text-frame/) preserves **4,347 passing / 391 failing / two timed-out upstream API configurations** and the same two text-grouping failures across 802 CPython method outcomes per linkage. All 11 focused context tests and 34 storage tests pass under both Miri aliasing models, following the [allocator ownership repair](docs/validation/2026-09-11/allocator-provenance/). The preceding [streaming-policy validation](docs/validation/2026-09-11/streaming-input-bounds/) matched Expat on incremental streams through 257 MiB and a separate 2,049 MiB text stream with constant tracked allocation peaks. Remaining allocation, resource, diagnostic, and callback differences are explicit in the [compatibility guide](docs/compatibility.md).
+The [latest compatibility report](docs/validation/2026-09-11/element-name-storage/) preserves **4,347 passing / 391 failing / two timed-out upstream API configurations** and the same two text-grouping failures across 802 CPython method outcomes per linkage. The earlier Context runtime passed all 11 focused context tests and 34 storage tests under both Miri aliasing models, following the [allocator ownership repair](docs/validation/2026-09-11/allocator-provenance/). The preceding [streaming-policy validation](docs/validation/2026-09-11/streaming-input-bounds/) matched Expat on incremental streams through 257 MiB and a separate 2,049 MiB text stream with constant tracked allocation peaks. Remaining allocation, resource, diagnostic, and callback differences are explicit in the [compatibility guide](docs/compatibility.md).
 
 Seven [streaming-runtime ASan campaigns](docs/validation/2026-09-11/streaming-input-bounds/ASAN.md) completed 2,170,731 executions and 68,897 retained-corpus replays without findings, alongside 13 focused policy regressions. These tested `708ca42`, before the CDATA search optimization, for 120 seconds each; the earlier [six 600-second campaigns](docs/validation/2026-09-11/current-asan/) remain scoped to `be22a27`. The [stable PGO PBS distribution](docs/validation/2026-09-11/pgo-trial-results/) uses that preceding streaming runtime, runs on glibc 2.17 and passes 1,024 threaded parses; its strict XML gates retain the same two callback assertions.
 

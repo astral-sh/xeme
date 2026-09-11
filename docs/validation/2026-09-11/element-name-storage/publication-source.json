@@ -1,0 +1,8 @@
+{
+  "old_head": "a0acaf1bf8c8ae3f55030332be794cb8b9b5bea9",
+  "new_head": "00f0338e8eff185f72ee7304a6c8f8f66860cd04",
+  "new_base": "6f50cd9d651ffc35d7672022b984bafc5e1c5d64",
+  "source_manifest_sha256": "cb7d4d2a2fb203beacc6e94db411f306c276b7607750a83ee3b17c1715c5e6b5",
+  "source_files_byte_exact": 72,
+  "scope": "Restack the two measured name-storage commits over documentation-only PR138; all runtime, test and build source bytes unchanged."
+}

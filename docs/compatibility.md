@@ -5,12 +5,7 @@ well-formedness, callback compatibility, and safe resource use are separate gate
 A symbol existing or a document parsing successfully does not establish callback
 or CPython compatibility.
 
-The selected runtime includes the [detached callback capacity repair](validation/2026-09-11/arena-capacity-bound/).
-Its [fresh CPython measurements](validation/2026-09-11/capacity-cpython/) are effectively
-flat against the Context parent: PGO takes 1.1465× Expat overall, with six of 24
-conditions within the roughly 1.10× target. Native PGO remains 1.3673× Expat.
-These performance runs do not extend the source-specific API, sanitizer or PBS
-evidence below.
+The selected runtime includes [shared element-name storage](validation/2026-09-11/element-name-storage/). Fresh PGO measurements take 1.3516× Expat natively and 1.1281× through CPython, improving 1.64% and 0.61% against the capacity-fixed parent. The original 4,740 API outcomes remain unchanged. Shared and static strict CPython runs retain 802 tests, two failures and 14 skip records with the explicit consumer cleanup backport; neither suite is green. Only seven of 24 individual CPython PGO conditions meet the roughly 1.10× target. These results do not extend the historical PBS or sustained sanitizer evidence below.
 
 The [current streaming report](validation/2026-09-11/streaming-input-bounds/)
 records the latest input/work-policy validation, including actual streams through

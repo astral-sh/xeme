@@ -439,6 +439,74 @@ fn text_frames_match_owned_projection_at_inline_heap_and_fallback_boundaries() {
 }
 
 #[test]
+fn reference_frames_preserve_boundaries_positions_and_error_prefixes() {
+    for xml in [
+        "<r>a&amp;&lt;&gt;&apos;&quot;&#13;&#10;&#xE9;&#x1F600;z</r>",
+        "<r>a&amp;bad]]></r>",
+        "<r>a&amp;&#0;</r>",
+        "<r>a&amp;&#x110000;</r>",
+        "<r>a&amp;&missing;</r>",
+        "<r>a&amp;&#x1F",
+        "<!DOCTYPE r [<!ENTITY e 'a&amp;&#x1F600;b'>]><r>&e;</r>",
+    ] {
+        let utf16 = [0xfeff]
+            .into_iter()
+            .chain(xml.encode_utf16())
+            .flat_map(u16::to_le_bytes)
+            .collect::<std::vec::Vec<_>>();
+        for input in [xml.as_bytes(), utf16.as_slice()] {
+            for chunk in 1..=input.len() {
+                for limit in [1, 4, 16, usize::MAX] {
+                    let mut config = Config::default();
+                    config.limits.max_token_bytes = limit;
+                    assert_eq!(
+                        collect(input, chunk, config.clone(), false).0,
+                        collect(input, chunk, config, true).0,
+                        "{xml:?} chunk={chunk} limit={limit}"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn decoded_reference_frame_owns_bytes_and_waits_for_accounting() {
+    let mut parser = Parser::new(Config::default());
+    parser.feed(b"<r>&#x1F600;</r>", true).unwrap();
+    parser.next_event().unwrap().unwrap();
+    let mut frame = parser.adapter_frame();
+    let mut event = None;
+    parser
+        .next_event_for_c_text_context_into(&mut event, &mut frame)
+        .unwrap()
+        .unwrap();
+    assert!(event.is_none());
+    assert_eq!(frame.text_bytes(), Some("😀".as_bytes()));
+    assert_eq!(frame.native_text_range_for_c(), None);
+    assert_eq!(frame.callback_bytes(), 4);
+    assert_eq!(parser.current_raw(), Some("&#x1F600;"));
+    assert_eq!(parser.position(), frame.position());
+    drop(parser);
+    assert_eq!(frame.text_bytes(), Some("😀".as_bytes()));
+
+    let parent = Parser::new(Config::default());
+    parent.set_entity_maximum_amplification(f32::INFINITY);
+    parent.set_entity_activation_threshold(0);
+    let mut child = parent.external_child_with_encoding(Some(""), None).unwrap();
+    child.feed(b"&amp;", true).unwrap();
+    parent.set_entity_maximum_amplification(1.0);
+    let mut frame = child.adapter_frame();
+    let error = child
+        .next_event_for_adapter_into(&mut event, &mut frame)
+        .unwrap_err();
+    assert_eq!(error.kind, oriole::ErrorKind::LimitExceeded);
+    assert!(!frame.is_active());
+    assert!(event.is_none());
+    child.finish_adapter_frame(frame);
+}
+
+#[test]
 fn ordinary_text_precedes_accounting_failure_but_cdata_does_not() {
     for cdata in [false, true] {
         let parent = Parser::new(Config::default());

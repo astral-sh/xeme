@@ -2075,7 +2075,7 @@ impl Parser {
                         "entity reference outside the document element",
                     ));
                 }
-                if !self.parse_reference()? {
+                if !self.parse_reference(output)? {
                     return Ok(());
                 }
                 continue;
@@ -2608,7 +2608,7 @@ impl Parser {
         Ok(true)
     }
 
-    fn parse_reference(&mut self) -> Result<bool, Error> {
+    fn parse_reference(&mut self, output: &mut EventOutput<'_>) -> Result<bool, Error> {
         let limit = self.config.limits.max_token_bytes;
         if self.reparse_deferral && !self.is_source_final() && self.source().should_defer(limit) {
             return Ok(false);
@@ -2662,13 +2662,19 @@ impl Parser {
                 self.account_entity_bytes(1, false)?;
             }
             self.consume(end + 1)?;
-            self.emit(
-                EventKind::Text(Text::try_from_str_in(
-                    character.encode_utf8(&mut [0; 4]),
-                    self.allocator,
-                )?),
-                position,
-            )?;
+            let mut bytes = [0; 4];
+            let text = character.encode_utf8(&mut bytes);
+            if let Some(frame) = output.frame.as_deref_mut() {
+                // A decoded scalar fits in detached inline storage. Publish
+                // only after the same source and entity accounting as owned Text.
+                frame.prepare_text(text)?;
+                frame.publish(position);
+            } else {
+                self.emit(
+                    EventKind::Text(Text::try_from_str_in(text, self.allocator)?),
+                    position,
+                )?;
+            }
             return Ok(true);
         }
         let name = name.expect("general entity references have an owned name");

@@ -1,0 +1,30 @@
+{
+  "status": "passed_complete_normal_workspace",
+  "source_manifest_sha256": "164201b810c2a121e20f50c4a890fa3e1a8fa48e69e40e44069fc42059d4dfc6",
+  "source_files": 70,
+  "source_unchanged": true,
+  "all_target_binaries": 33,
+  "all_target_tests_passed": 400,
+  "doc_tests_passed": 1,
+  "only_inventory_change": "FFI unit tests88\u219290; two Cell budget guard regressions. All other original32 binary counts unchanged.",
+  "workspace_clippy_strict": "passed",
+  "fmt_check": "passed",
+  "same_original_commands": true,
+  "same_original_normal_env_except_target": true,
+  "timeout_seconds_per_command": 900,
+  "cpu": 2,
+  "stable_target": "/home/dev-user/.cache/oriole/ffi-family-cell-target",
+  "frozen_normal_and_thinlto_artifacts_unchanged": true,
+  "frozen_libraries": {
+    "/tmp/oriole-ffi-family-cell-study/liboriole_expat.so": "99ec1371103191394785b807ef665091e593c2d1e8dd3807539c9de2d13f31a3",
+    "/tmp/oriole-ffi-family-cell-study/liboriole_expat.a": "57d573c9d53107c998723eb9dbab5083036e87c356c79d2e1367f62e1fbff5d8",
+    "/tmp/oriole-ffi-family-cell-thinlto-study/liboriole_expat.so": "0cfd610876f1bfd26a4d37a7f86adc9961896dfe24177c180ec7d15e0bae04e9",
+    "/tmp/oriole-ffi-family-cell-thinlto-study/liboriole_expat.a": "c86ad85e232afe4f7947053e522dbc8517cdca3694740994c3d1da64540f0610",
+    "/tmp/oriole-ffi-family-cell-workspace-gates/source.json": "164201b810c2a121e20f50c4a890fa3e1a8fa48e69e40e44069fc42059d4dfc6",
+    "/tmp/oriole-ffi-family-cell-workspace-gates/build.json": "3f8f665bded463cfe916d2144ee89bcb11078258fa35f35028e2e16710a9b291"
+  },
+  "report_sha256": "44dd30ab5847f87706840cfba0fb648e3b69eac99e007184cf261e2486baa69c",
+  "counts_sha256": "3e8c6c0c69aa59e5520b62717fff0974beee26c7811b6d26eed3fb8f494abaca",
+  "failed_or_discarded_runs": 0,
+  "scope": "Normal Cargo workspace only; C-only frozen-artifact gates owned separately. No source edit, B2 full gates, elapsed measurements, commit or push."
+}

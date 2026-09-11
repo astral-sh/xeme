@@ -1,0 +1,409 @@
+{
+  "runtime_commit": "1a4cae6669cd267fa51e0e104c3eac84edb3437d",
+  "source_assembly": {
+    "runtime_commit": "1a4cae6669cd267fa51e0e104c3eac84edb3437d",
+    "parent_commit": "89927e09a6a9f1576ee05e3cf757e2b4159d5d36",
+    "measured_source_sha256": "164201b810c2a121e20f50c4a890fa3e1a8fa48e69e40e44069fc42059d4dfc6",
+    "source_files": 70,
+    "documentation_only_delta": [
+      "crates/oriole_expat/README.md"
+    ],
+    "measured_patch_sha256": "583eb85f93fa83350f3d3674097232eed894ff19ef6908b1657419f469457a67",
+    "measured_patch_exact": true,
+    "assembled_source_sha256": {
+      "Cargo.lock": "f4ea894233794496a995af269c8e25e4a2f0883ecfdfd288e2dcea18bb4a7f2c",
+      "Cargo.toml": "bc83cd58b6b099db2c14e163f47bcaaffaafb4add9ce5cf0a6da97015667fbe9",
+      "crates/oriole/Cargo.toml": "7f5a8b09ce7936682ce60ca18c4c208b91cacf11a574094b61a669b8e264b9d5",
+      "crates/oriole/examples/frame_coverage.rs": "2c6aa30147b6f0bb49547e006c082f27f566c6418d4e78c98f338d0bb71d1078",
+      "crates/oriole/src/accounting.rs": "7169710f95e487d88a8a6fca9feab6bff4799973e73a784fa0923cf12030c441",
+      "crates/oriole/src/active.rs": "de402225be109e6385f0fd7f5159285029ac532fcb1bef5b5e16389bbbf528ca",
+      "crates/oriole/src/arena.rs": "a4b60d43a495010e492082969e5204909c8d91f1c9429f9164e42351b91e829a",
+      "crates/oriole/src/dtd.rs": "0cef3a535633110fa349bb4cd4d0f489c1053d7271f61d84833a7eff4f9154ac",
+      "crates/oriole/src/dtd/attlist.rs": "45b549e787548c4ba92936de73e251a7e265efeb118d974c330273007e28d18d",
+      "crates/oriole/src/dtd/composition.rs": "e83214c16960ba6813f878057d9fb42036f4de77da5a4552a933d4edae385557",
+      "crates/oriole/src/dtd/grammar.rs": "bb92d1b1227d347a68712d48af58634bb4535414b5ae0ecbdf58c960045590ad",
+      "crates/oriole/src/dtd/semantic.rs": "956867a7d3e3932284243f21221cd5df47e592236ec8af6e475e267f841f9381",
+      "crates/oriole/src/dtd_tables.rs": "3ae11444bcd5fee85d740f731e6c40a0982984f641fad767e08102d111b30ab3",
+      "crates/oriole/src/encoding.rs": "cc4f81f5b56846df35a856fa1a83f89ca14488ae065bc01cb6febb28c6311308",
+      "crates/oriole/src/lexical.rs": "397ced901b220557d0384c67f4acc9b61b1b6ae1bc0dda65db3720b709ce4ff0",
+      "crates/oriole/src/lib.rs": "eab22f5faaf0d889d1d23eea702f7dc4f5ae1a8a79f4412010981febbc081889",
+      "crates/oriole/src/names.rs": "4514e938d2556886d35599e62e3f5c1488e8adca2d705cd504692821eac506c6",
+      "crates/oriole/src/recycling.rs": "d1920a09e39d10bce9a843a08a8628e05aad75ecd0306fd9c6a7a15b590bf338",
+      "crates/oriole/src/tag.rs": "3006986fb4227d70b176659df9b8c48bd6f5a30fd9b4545ffd3b35d095e6db17",
+      "crates/oriole/src/value.rs": "10db353fe7a2d9d134692b0a4505c7cfda542cffc2fc34b3058a93fef0dd6a1f",
+      "crates/oriole/src/value_lexer.rs": "859c2d7d468aca9062dda8e0dac82c300bb4aadfadcea2e11fa5e2b3af4f5767",
+      "crates/oriole/tests/adapter_frame.rs": "72e1ca621d010a59af3d24724b81b168eae1921dff3ae87bf7785a8dd1b75cfa",
+      "crates/oriole/tests/allocation.rs": "0615443bc79da36c9d3e78069459f1c1d5dfb9d7a92160055842dfd58b1ee611",
+      "crates/oriole/tests/amplification.rs": "29075bd9ab5a2fcffd43a4f31ff0b512f434e05c907b9e5d1e5478c59f156ceb",
+      "crates/oriole/tests/attribute_entities.rs": "3c89f8b08f649e2a5b1ad46681efb4f321fe40094a513bdaeff1a74f4d17c6bb",
+      "crates/oriole/tests/conditional.rs": "ab51046976caa8eb315022b65198cbfd28c9cf220d983e177a13b5b4290eecbb",
+      "crates/oriole/tests/declaration_tokens.rs": "ba05dd5a4604ea4f776ad8e6b9c313c7336debc37e279c291283cd419b0137bd",
+      "crates/oriole/tests/diagnostics.rs": "6ea5df60e64fe16077c6e1a72a414d999f220e114617b36e5f171f1323a6f816",
+      "crates/oriole/tests/encodings.rs": "b452c223984f828c08469d67c3ffc60aa5c15631e3f221f87c8cb16b8cacd32b",
+      "crates/oriole/tests/entity_depth.rs": "724c330559ba3b73b629da8613cd188e023e2e94cf5603eb2faef70951fe24a9",
+      "crates/oriole/tests/event_output.rs": "05564387414f821ec4264f0f1b37351180b2b2c825e1fa4cd5dbbd0f459ac847",
+      "crates/oriole/tests/external_grammar.rs": "5304e0fa552b1d990a43aa426a4f7af65546605a1e959ede570154d3b9b1ec0c",
+      "crates/oriole/tests/external_headers.rs": "37fe9747abe3e3c871ceb7c4f298918f56e0ca2b61627a9204a6ec731acd086d",
+      "crates/oriole/tests/external_limits.rs": "77ae194e6094feb63209321bbdf1dc7b55d2b53bbb61a02be07ae0759a1a9ef5",
+      "crates/oriole/tests/external_values.rs": "3863f74f3cb93ac1c4fd88e5325428983cd89df813ab1bcb05e265d916ae6c37",
+      "crates/oriole/tests/foreign_dtd.rs": "e8308aa2dcb36bf97aec6329d8a837acfea57f63ccee77dc6efc184cb49a7e99",
+      "crates/oriole/tests/malformed_dtd.rs": "1786635f19d97bd128dba25efcf65403f6a7b3590678496a6edef8882999247a",
+      "crates/oriole/tests/missing_parameters.rs": "3038876c244d3959c67f9a76fdb57f616d197e895fd7500c6e15ff5fd9824096",
+      "crates/oriole/tests/multibyte.rs": "372208d18623871002ec7c59988eeb30000d382f2a98638e0bfd5c0a41c24152",
+      "crates/oriole/tests/name_rules.rs": "6c433434852a1e520f63e9484540797c47c7c57b93eab77aa3715a4532c9b018",
+      "crates/oriole/tests/parameter_values.rs": "d76f7e5b47b56fdede165a56f19f9f7a982bf75611f76ee74692bfd9cc9cb503",
+      "crates/oriole/tests/parser.rs": "52931b46bfa8fc327fb56b8df3ad7539c40525f52a4eb690b3497177ff767898",
+      "crates/oriole/tests/positions.rs": "451af1c98f7ddb86f1b7bd01f6fc91ece080c5c7bbe008e0d2942cc90e9e5dfd",
+      "crates/oriole/tests/prolog.rs": "bfd55c9767fabfbeaf26472c1514eed5f6cf9d9648082cf637e7cf2f833c2c63",
+      "crates/oriole/tests/raw_tokens.rs": "3675681faa7b5e5c8e80a4ebc82914ca57c72a819542dc5b81bbd3c0fac06b7e",
+      "crates/oriole/tests/recycling.rs": "12132edd1e33b8fb0568b234bbf7d48e5de38873cc27d331436a4ca6c2b5fb15",
+      "crates/oriole/tests/reparse_deferral.rs": "9f954325d028d1775fa47291af27eddec5913c76e2ec413e0c555eb549913709",
+      "crates/oriole/tests/text_coalescing.rs": "9f97951b91068584ff9a085355cbcedddb6876c3a0fd3433c9a1083cdb733ef9",
+      "crates/oriole_cli/Cargo.toml": "f51a77480b35fef0c59a7f3b06194d1692f3984d7d87468445974c6836804c5d",
+      "crates/oriole_cli/src/main.rs": "b1556990da5da6a3b91ed66e857e79d26ba4084f503be240649a10cea3ed6083",
+      "crates/oriole_expat/Cargo.toml": "8ec06203f4a6ec67f6eebac4ef6e1d34de34e933c8fc057f9e23d3df3f3bd215",
+      "crates/oriole_expat/README.md": "b2b9439d6455b0cb7f3a5c4f0659c69253c0800f0ee58f9da26e4e0fbd6c0474",
+      "crates/oriole_expat/src/content_model.rs": "0dd9baea94af469fc3e702b6504c5a976a256f2db38e96ee3eab8d2cd6f066f2",
+      "crates/oriole_expat/src/lib.rs": "2adfaa4495a5943ddac5f1016c476c83dc0dfb9bd02dd58f33f3a74af16a7998",
+      "crates/oriole_expat/src/tests.rs": "100ffa96b9360f920d49ed8d17dc47585258105df13742a9c358cfa11afe04dc",
+      "crates/oriole_expat/tests/memory.rs": "9cc50db9746bd5f8d975883a7e39653469fce08f7ca92b9f0b14f19a0c9366d6",
+      "crates/oriole_storage/Cargo.toml": "d009126c142efea7ad1b1017ff13c071330e885a43cc5e39b9f84a5168fd51d6",
+      "crates/oriole_storage/src/allocator.rs": "d57613751504f6881ba6118dc795e8b5b731d7fd244ac46ba319ce9205fcaf3b",
+      "crates/oriole_storage/src/hashing.rs": "f97040ee70e3a6147edf896778748aad7845c12f873b3b2688e2ad84989c4e80",
+      "crates/oriole_storage/src/lib.rs": "bef77200e81d340776f2e858cf679d01aa8986c27da208bc48a9afec3e069c2c",
+      "crates/oriole_storage/src/queue.rs": "944ae27c4cc1d453b77ce34c505b4b194ad37b42568d3fe24ebb0c5cece784a7",
+      "crates/oriole_storage/src/shared.rs": "52def3c62ee0563c71c051cfe4c759aaddc16b378f413969592af80cf2fdf13b",
+      "crates/oriole_storage/src/string.rs": "801cafba67a6c83bdd13b26a4087031adb360edcc81485540adaadea15a9fad5",
+      "crates/oriole_storage/src/tests.rs": "561ab8d0ece0e6d3f4b2e075798e0d6990a48b43b065ec3dd254473c99dd445f",
+      "crates/oriole_storage/src/tracking.rs": "c6f53efa24a5c31dad71d597c42612748c3209796507a2b2eafb7368a1b69cc6",
+      "crates/oriole_storage/src/try_lock.rs": "e08e75c6b2a1410d74d3fda3667e7f031dfade5eb26e0d5db5b98f6233ce6fde",
+      "include/expat.h": "c8c8fda28157a2550dd0b276a717df3414d2a91728e6d0f9d9e20ed143f8d42c",
+      "tests/c/adversarial.c": "abc52bb8d44d0bb5f9914e594b6ca2e0a7d8e6c5c9c293699a73e00dfa53793d",
+      "tests/c/allocations.c": "1ccf833e2d8d4ec75daf1524547dd7671592c7283e5a0d45b849cacbdb662f59",
+      "tests/c/integration.c": "13adde9211004fb21e67b786e1294da88f76b07a1deb77f9828f3c7a16ab39fb"
+    }
+  },
+  "libraries": {
+    "baseline": {
+      "liboriole_expat.so": "a55ca0f0fed68f8db0f2e8d3ea86c271c8491fe130b5074077aecace3ab4a4df",
+      "liboriole_expat.a": "3f4f51259327d2c736c5d93640e1b2dbb6de9e03ae0dc15fbc9f11df37c8aa60"
+    },
+    "candidate": {
+      "liboriole_expat.so": "0cfd610876f1bfd26a4d37a7f86adc9961896dfe24177c180ec7d15e0bae04e9",
+      "liboriole_expat.a": "c86ad85e232afe4f7947053e522dbc8517cdca3694740994c3d1da64540f0610"
+    }
+  },
+  "normal_build_libraries": {
+    "liboriole_expat.so": "99ec1371103191394785b807ef665091e593c2d1e8dd3807539c9de2d13f31a3",
+    "liboriole_expat.a": "57d573c9d53107c998723eb9dbab5083036e87c356c79d2e1367f62e1fbff5d8"
+  },
+  "workspace": {
+    "status": "passed_complete_normal_workspace",
+    "source_manifest_sha256": "164201b810c2a121e20f50c4a890fa3e1a8fa48e69e40e44069fc42059d4dfc6",
+    "source_files": 70,
+    "source_unchanged": true,
+    "all_target_binaries": 33,
+    "all_target_tests_passed": 400,
+    "doc_tests_passed": 1,
+    "only_inventory_change": "FFI unit tests88\u219290; two Cell budget guard regressions. All other original32 binary counts unchanged.",
+    "workspace_clippy_strict": "passed",
+    "fmt_check": "passed",
+    "same_original_commands": true,
+    "same_original_normal_env_except_target": true,
+    "timeout_seconds_per_command": 900,
+    "cpu": 2,
+    "stable_target": "/home/dev-user/.cache/oriole/ffi-family-cell-target",
+    "frozen_normal_and_thinlto_artifacts_unchanged": true,
+    "frozen_libraries": {
+      "/tmp/oriole-ffi-family-cell-study/liboriole_expat.so": "99ec1371103191394785b807ef665091e593c2d1e8dd3807539c9de2d13f31a3",
+      "/tmp/oriole-ffi-family-cell-study/liboriole_expat.a": "57d573c9d53107c998723eb9dbab5083036e87c356c79d2e1367f62e1fbff5d8",
+      "/tmp/oriole-ffi-family-cell-thinlto-study/liboriole_expat.so": "0cfd610876f1bfd26a4d37a7f86adc9961896dfe24177c180ec7d15e0bae04e9",
+      "/tmp/oriole-ffi-family-cell-thinlto-study/liboriole_expat.a": "c86ad85e232afe4f7947053e522dbc8517cdca3694740994c3d1da64540f0610",
+      "/tmp/oriole-ffi-family-cell-workspace-gates/source.json": "164201b810c2a121e20f50c4a890fa3e1a8fa48e69e40e44069fc42059d4dfc6",
+      "/tmp/oriole-ffi-family-cell-workspace-gates/build.json": "3f8f665bded463cfe916d2144ee89bcb11078258fa35f35028e2e16710a9b291"
+    },
+    "report_sha256": "44dd30ab5847f87706840cfba0fb648e3b69eac99e007184cf261e2486baa69c",
+    "counts_sha256": "3e8c6c0c69aa59e5520b62717fff0974beee26c7811b6d26eed3fb8f494abaca",
+    "failed_or_discarded_runs": 0,
+    "scope": "Normal Cargo workspace only; C-only frozen-artifact gates owned separately. No source edit, B2 full gates, elapsed measurements, commit or push."
+  },
+  "api": {
+    "raw_exit": 1,
+    "passed": 4347,
+    "failed": 393,
+    "all4740rows_exact": true,
+    "raw_results_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+    "baseline": "/tmp/oriole-thinlto-production-gates/api-native/upstream-api",
+    "baseline_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+    "bounds": {
+      "per_test_seconds": 3,
+      "per_test_address_space_bytes": 1073741824,
+      "per_test_rss_limit_bytes": 805306368,
+      "total_timeout_seconds": 240
+    }
+  },
+  "cpython_each_linkage": {
+    "tests": 802,
+    "failures": 2,
+    "reported_skips": 14,
+    "expected_failures": 3
+  },
+  "native": {
+    "scope": "All fixed conditions and samples; geometric means of per-condition paired median time ratios. Shared host.",
+    "groups": {
+      "real": {
+        "conditions": 24,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9910037981176822,
+            "below_one": 21
+          },
+          "candidate_over_expat": {
+            "geomean": 1.7137529392882824,
+            "below_one": 1
+          },
+          "published_over_expat": {
+            "geomean": 1.7272048430102127,
+            "below_one": 1
+          }
+        }
+      },
+      "generated": {
+        "conditions": 4,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9848254048209879,
+            "below_one": 3
+          },
+          "candidate_over_expat": {
+            "geomean": 5.073208753399178,
+            "below_one": 0
+          },
+          "published_over_expat": {
+            "geomean": 5.144589326307871,
+            "below_one": 0
+          }
+        }
+      }
+    },
+    "regressions": [
+      {
+        "condition": {
+          "name": "gtk",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+          "chunk": 4096,
+          "namespaces": true,
+          "iterations": 256
+        },
+        "ratio": 1.0007221292496733
+      },
+      {
+        "condition": {
+          "name": "generated-rare-declarations",
+          "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+          "chunk": 4096,
+          "namespaces": false,
+          "iterations": 32
+        },
+        "ratio": 1.0065890173770742
+      },
+      {
+        "condition": {
+          "name": "wayland",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+          "chunk": 65536,
+          "namespaces": true,
+          "iterations": 64
+        },
+        "ratio": 1.0028090651066248
+      },
+      {
+        "condition": {
+          "name": "gtk",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+          "chunk": 65536,
+          "namespaces": true,
+          "iterations": 256
+        },
+        "ratio": 1.0018621308777973
+      }
+    ]
+  },
+  "python": {
+    "scope": "All fixed conditions and samples; geometric means of per-condition paired median time ratios. Shared host.",
+    "groups": {
+      "all": {
+        "conditions": 24,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.999199356883713,
+            "below_one": 13
+          },
+          "candidate_over_expat": {
+            "geomean": 1.3070289905436836,
+            "below_one": 3
+          },
+          "published_over_expat": {
+            "geomean": 1.309406572117598,
+            "below_one": 3
+          }
+        }
+      },
+      "elementtree": {
+        "conditions": 12,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9981713872644055,
+            "below_one": 8
+          },
+          "candidate_over_expat": {
+            "geomean": 1.396887451835582,
+            "below_one": 1
+          },
+          "published_over_expat": {
+            "geomean": 1.403154677031098,
+            "below_one": 1
+          }
+        }
+      },
+      "pyexpat-events": {
+        "conditions": 12,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 1.0002283851604332,
+            "below_one": 5
+          },
+          "candidate_over_expat": {
+            "geomean": 1.222950911239709,
+            "below_one": 2
+          },
+          "published_over_expat": {
+            "geomean": 1.2219220013095957,
+            "below_one": 2
+          }
+        }
+      }
+    },
+    "regressions": [
+      {
+        "condition": {
+          "name": "vulkan",
+          "chunk": 4096,
+          "mode": "elementtree",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+          "iterations": 3
+        },
+        "ratio": 1.0073439118905916
+      },
+      {
+        "condition": {
+          "name": "vulkan",
+          "chunk": 65536,
+          "mode": "pyexpat-events",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+          "iterations": 3
+        },
+        "ratio": 1.0015657227220087
+      },
+      {
+        "condition": {
+          "name": "wayland",
+          "chunk": 65536,
+          "mode": "pyexpat-events",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+          "iterations": 16
+        },
+        "ratio": 1.003665593383919
+      },
+      {
+        "condition": {
+          "name": "maven",
+          "chunk": 4096,
+          "mode": "pyexpat-events",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+          "iterations": 32
+        },
+        "ratio": 1.015016793618425
+      },
+      {
+        "condition": {
+          "name": "maven",
+          "chunk": 65536,
+          "mode": "pyexpat-events",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+          "iterations": 32
+        },
+        "ratio": 1.0007081409832508
+      },
+      {
+        "condition": {
+          "name": "batik",
+          "chunk": 4096,
+          "mode": "pyexpat-events",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+          "iterations": 128
+        },
+        "ratio": 1.0075342598412858
+      },
+      {
+        "condition": {
+          "name": "batik",
+          "chunk": 65536,
+          "mode": "pyexpat-events",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+          "iterations": 128
+        },
+        "ratio": 1.0056581039000632
+      },
+      {
+        "condition": {
+          "name": "gtk",
+          "chunk": 4096,
+          "mode": "elementtree",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+          "iterations": 64
+        },
+        "ratio": 1.0011880454070345
+      },
+      {
+        "condition": {
+          "name": "docbook",
+          "chunk": 4096,
+          "mode": "elementtree",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+          "iterations": 64
+        },
+        "ratio": 1.0018090765503629
+      },
+      {
+        "condition": {
+          "name": "docbook",
+          "chunk": 4096,
+          "mode": "pyexpat-events",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+          "iterations": 64
+        },
+        "ratio": 1.0050509216855412
+      },
+      {
+        "condition": {
+          "name": "docbook",
+          "chunk": 65536,
+          "mode": "elementtree",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+          "iterations": 64
+        },
+        "ratio": 1.006173245707411
+      }
+    ]
+  },
+  "archive": {
+    "sha256": "5dae7cbfb08171d24ac002e425e7c225edfee401129f323396d9480c8731c7fa",
+    "members": 2801,
+    "direct_binary_exclusions": 19,
+    "bytes": 6509595,
+    "raw_bytes": 45750466,
+    "member_and_origin_readback": true
+  },
+  "scope": "Matched C-only ThinLTO a55 control and Cell 0cfd candidate, both without PGO. Normal99ec build has separate Rust gates and instruction profiles. New commit assembles the exact measured runtime/test patch above PR113 with only a C-interface README difference among the 70 measured files. CPython elapsed is effectively flat. No new full PBS distribution or sustained Rust sanitizer fuzz claim."
+}

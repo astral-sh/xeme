@@ -1,0 +1,24 @@
+{
+  "status": "source_review_no_blocker",
+  "scope": "Independent root source review only; no new compiler, parser or performance run.",
+  "base": "1cb326c6dcd3aaebf37e555826b515a0b53b6641",
+  "source_files": 70,
+  "changed_files": [
+    "crates/oriole_expat/src/lib.rs",
+    "crates/oriole_expat/src/tests.rs"
+  ],
+  "source_manifest_sha256": "164201b810c2a121e20f50c4a890fa3e1a8fa48e69e40e44069fc42059d4dfc6",
+  "patch_sha256": "583eb85f93fa83350f3d3674097232eed894ff19ef6908b1657419f469457a67",
+  "source_archive_and_live_files_exact": true,
+  "findings": [],
+  "reasoning": [
+    "Only the private FFI FamilyBudget counters change from AtomicUsize to Cell. The header and module already require serialization across a parser family. Core EntityBudget and allocation tracker atomics, Shared reference counts and lifetime tokens are unchanged.",
+    "The charge helper reads, checked-adds, applies the same inclusive limit, then writes only on success. It performs no allocation, callback, destructor or user conversion between the read and write. Zero above the limit still fails; overflow and rejected charges leave the counter unchanged.",
+    "All production charge callsites and their order are unchanged. A successful attempted charge remains consumed when later child construction, allocation or parsing fails. The one GetBuffer read changes only its access syntax.",
+    "Shared requires T: Send + Sync for its unsafe Send/Sync implementations; Cell removes those traits for this private family owner. No unsafe trait implementation or new safe concurrent API is added. Parser-facing C exports retain their unsafe serialized-handle contract.",
+    "Existing test fixtures preserve values, limits and observations while using get/set. New boundary cases check zero, exact limit, overflow and rejection stability. The lifecycle regression checks attempted-child charge retention after allocation failure, shared callback/input limits, fresh root reset and surviving old children retaining the old budget."
+  ],
+  "limitations": [
+    "Runtime behavior, allocator layout, full gates and performance remain separately measured; this source review does not establish a speedup."
+  ]
+}

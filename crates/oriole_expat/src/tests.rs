@@ -564,12 +564,9 @@ fn request_bound_and_public_positions_do_not_depend_on_lifetime_quota() {
             assert_eq!(family.input_bytes.get(), 0);
         }
         assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), OK);
-        (*parser).position = AdapterLocation::Position(Position {
-            byte_index: c_long::MAX as usize,
-            line: c_long::MAX as usize + 1,
-            column: c_long::MAX as usize,
-            byte_count: 0,
-        });
+        (*parser).position.byte_index = c_long::MAX as usize;
+        (*parser).position.line = c_long::MAX as usize + 1;
+        (*parser).position.column = c_long::MAX as usize;
         assert_eq!(XML_GetCurrentByteIndex(parser), c_long::MAX);
         assert_eq!(XML_GetCurrentLineNumber(parser), c_long::MAX as c_ulong + 1);
         assert_eq!(XML_GetCurrentColumnNumber(parser), c_long::MAX as c_ulong);

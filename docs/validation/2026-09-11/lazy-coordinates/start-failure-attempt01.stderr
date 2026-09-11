@@ -1,3 +1,0 @@
-   Compiling oriole v0.0.1 (/home/dev-user/code/oss/oriole-lazy-coordinates/crates/oriole)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.88s
-     Running tests/allocation.rs (/home/dev-user/.cache/ohm/verified-build/c3/411e57ca9177dc/debug/deps/allocation-e8f4c6432947fe95)

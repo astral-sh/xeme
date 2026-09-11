@@ -1,0 +1,230 @@
+{
+  "status": "assembled_rejected_experiment",
+  "decision": "Experimental V2 rejected under the predeclared PGO-first gate: all 28 native conditions are slower than capacity-fixed PGO. No normal native or CPython timing collected.",
+  "source_manifest_sha256": "d19f9d165325e4d12d78b6cca6994e16127320962c2cfcd371b9ed1edfc06cb9",
+  "source_files": 73,
+  "runtime_delta_vs_v1": [
+    "crates/oriole/src/encoding.rs"
+  ],
+  "guard_patch_sha256": "12102c9e7ea0e0328e10fa1e80e8ae0381b571bf2d366902e892c815729f2f6a",
+  "candidate_commit": "421bc188622498fcdda60ac2b2a1461ee72b9245",
+  "v1_parent_commit": "f766243bcc485ab305d339f5d37f095e0940eb49",
+  "selected_control_commit": "de859c89577b2982d59b6923d682032f6a7c7800",
+  "local_tests": 444,
+  "local_doctests": 1,
+  "focused_tests": 8,
+  "actual_compiler_vectors": 9,
+  "generated_training_records": 864,
+  "native": {
+    "pgo": {
+      "real": {
+        "conditions": 24,
+        "ratios": {
+          "candidate_over_control": 1.1097235748918874,
+          "candidate_over_expat": 1.5276222263798007,
+          "control_over_expat": 1.3733311835309516
+        },
+        "candidate_faster_than_control": 0,
+        "candidate_faster_than_expat": 3
+      },
+      "generated": {
+        "conditions": 4,
+        "ratios": {
+          "candidate_over_control": 1.057408824120776,
+          "candidate_over_expat": 5.247647153779695,
+          "control_over_expat": 4.975911167820342
+        },
+        "candidate_faster_than_control": 0,
+        "candidate_faster_than_expat": 0
+      },
+      "adverse_conditions": [
+        {
+          "name": "vulkan",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.1438450576686536
+        },
+        {
+          "name": "vulkan",
+          "chunk": 4096,
+          "namespaces": true,
+          "ratio": 1.1358293095211875
+        },
+        {
+          "name": "wayland",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.1341759182259947
+        },
+        {
+          "name": "wayland",
+          "chunk": 4096,
+          "namespaces": true,
+          "ratio": 1.130193238926557
+        },
+        {
+          "name": "maven",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.1343845566834239
+        },
+        {
+          "name": "maven",
+          "chunk": 4096,
+          "namespaces": true,
+          "ratio": 1.1169698806546533
+        },
+        {
+          "name": "batik",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.032579650565262
+        },
+        {
+          "name": "batik",
+          "chunk": 4096,
+          "namespaces": true,
+          "ratio": 1.0307081354223442
+        },
+        {
+          "name": "gtk",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.1197696810600037
+        },
+        {
+          "name": "gtk",
+          "chunk": 4096,
+          "namespaces": true,
+          "ratio": 1.1143092999301643
+        },
+        {
+          "name": "docbook",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.1873672939531523
+        },
+        {
+          "name": "docbook",
+          "chunk": 4096,
+          "namespaces": true,
+          "ratio": 1.1020286732514513
+        },
+        {
+          "name": "generated-rare-declarations",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.0317526686951521
+        },
+        {
+          "name": "generated-entities",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.0875399447218128
+        },
+        {
+          "name": "vulkan",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.1305660980972476
+        },
+        {
+          "name": "vulkan",
+          "chunk": 65536,
+          "namespaces": true,
+          "ratio": 1.125690971308239
+        },
+        {
+          "name": "wayland",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.1205344875758827
+        },
+        {
+          "name": "wayland",
+          "chunk": 65536,
+          "namespaces": true,
+          "ratio": 1.1143699662134359
+        },
+        {
+          "name": "maven",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.1275873189733763
+        },
+        {
+          "name": "maven",
+          "chunk": 65536,
+          "namespaces": true,
+          "ratio": 1.1150722945539386
+        },
+        {
+          "name": "batik",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.0266937786622827
+        },
+        {
+          "name": "batik",
+          "chunk": 65536,
+          "namespaces": true,
+          "ratio": 1.0335348639771187
+        },
+        {
+          "name": "gtk",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.1085575323784673
+        },
+        {
+          "name": "gtk",
+          "chunk": 65536,
+          "namespaces": true,
+          "ratio": 1.1089036788104647
+        },
+        {
+          "name": "docbook",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.1666299665035451
+        },
+        {
+          "name": "docbook",
+          "chunk": 65536,
+          "namespaces": true,
+          "ratio": 1.0911749810078502
+        },
+        {
+          "name": "generated-rare-declarations",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.02720469298559
+        },
+        {
+          "name": "generated-entities",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.0846607080571573
+        }
+      ]
+    }
+  },
+  "native_totals": {
+    "workers": 672,
+    "samples": 106176,
+    "measured_timed_samples": 105420,
+    "timed_warmups": 588,
+    "preflight_samples": 168
+  },
+  "correctness": {
+    "pgo_exact_differential_cases": 3318
+  },
+  "archive_sha256": "0e9bb6a3adacfa643bb46312f579443a0cf69ef01d38aa2844a61315ab2245fb",
+  "archive_index_sha256": "1a87e37d40993c721590e01943a336eddd701cf6b3b24b99aface38342b8e405",
+  "archive_bytes": 2902278,
+  "logical_files": 184,
+  "unique_files": 161,
+  "excluded_binaries_and_caches": 9,
+  "native_worker_aliases": 672,
+  "scope": "One fixed PGO native campaign, rejected before normal native or CPython timing. Local 444 tests, 1 doc test and 8 focused tests passed after the final source edit. PGO 3,318 exact differential rows match the capacity-fixed parent. No V2 CI/Miri, full upstream API/PBS/fuzz or strict CPython claim. Retained source/guard diff, matched normal+PGO build provenance, first outcomes and source/build/native reviews."
+}

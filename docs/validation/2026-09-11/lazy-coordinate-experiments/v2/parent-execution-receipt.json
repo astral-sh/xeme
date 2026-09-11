@@ -1,0 +1,81 @@
+{
+  "scope": "Parent-reported tool session completions; build/native child commands and waits are additionally retained by their controllers. Differential outer shell redirects stdout and stderr to the named log; each parser worker completion is retained in summary.json. No invented timestamps.",
+  "sessions": {
+    "commit": {
+      "id": 74339,
+      "exit": 0,
+      "reaped": true
+    },
+    "bind": {
+      "id": 69069,
+      "exit": 0,
+      "reaped": true
+    },
+    "build": {
+      "id": 20780,
+      "exit": 0,
+      "reaped": true
+    },
+    "proof": {
+      "id": 97730,
+      "exit": 0,
+      "reaped": true
+    },
+    "freeze": {
+      "id": 68540,
+      "exit": 0,
+      "reaped": true
+    },
+    "differential": {
+      "id": 91566,
+      "exit": 0,
+      "reaped": true
+    },
+    "native_prepare": {
+      "id": 91323,
+      "exit": 0,
+      "reaped": true
+    },
+    "native_pgo": {
+      "id": 91364,
+      "exit": 0,
+      "reaped": true
+    }
+  },
+  "differential": {
+    "argv": [
+      "env",
+      "-u",
+      "LD_PRELOAD",
+      "-u",
+      "LD_LIBRARY_PATH",
+      "-u",
+      "LLVM_PROFILE_FILE",
+      "-u",
+      "PYTHONPATH",
+      "-u",
+      "PYTHONHOME",
+      "taskset",
+      "-c",
+      "4",
+      "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+      "-I",
+      "-S",
+      "tools/differential.py",
+      "--library",
+      "/tmp/oriole-coordinate-checkpoint-guards-pgo-study/pgo/runs/run-0p9cbn_0/use/liboriole_expat.so",
+      "--reference",
+      "/tmp/oriole-arena-capacity-bound-pgo-study/pgo/runs/run-lm4ku8q_/use/liboriole_expat.so",
+      "--output",
+      "/tmp/oriole-coordinate-checkpoint-guards-differential",
+      "--generated",
+      "250",
+      "--strict"
+    ],
+    "cwd": "/home/dev-user/code/oss/oriole-coordinate-checkpoint-guards",
+    "combined_log": "/tmp/oriole-coordinate-checkpoint-guards-differential.log",
+    "log_sha256": "3173ad597900a92297783c84adcdb512e716e7f8699fc16b84cdfa75b56d8efb",
+    "summary_sha256": "dda567744c68a811f2256be7a50fd3777ac3cec18dd1139eafcac5dfca528b2c"
+  },
+  "decision": "PGO first was chosen before measurement. All28 PGO conditions regress versus capacity control. Reject without normal/CPython elapsed or fresh broad adoption gates."
+}

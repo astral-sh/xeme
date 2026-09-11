@@ -1,0 +1,41 @@
+--- V1-rejected/replay_native.py
++++ V2-rejected/replay_native.py
+@@ -1,4 +1,4 @@
+-"""Portable arithmetic/semantic replay of the six retained native JSON records.
++"""Portable arithmetic/semantic replay of the three retained PGO native JSON records.
+ 
+ Does not load a parser or require binaries, XML input bytes, original absolute
+ filesystem paths, or individual worker files. The original local audit separately
+@@ -16,7 +16,7 @@
+     raise RuntimeError('Do not disable validation with Python -O')
+ parser=argparse.ArgumentParser(description=__doc__)
+ parser.add_argument('--evidence-root',type=Path,required=True,
+-                    help='Directory containing normal/native-screen and pgo/native-screen')
++                    help='Directory containing pgo/native-screen')
+ parser.add_argument('--review',type=Path,default=Path(__file__).with_name('review.json'))
+ parser.add_argument('--output',type=Path,required=True)
+ args=parser.parse_args()
+@@ -24,12 +24,12 @@
+ sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+ review=read(args.review)
+ assert review['status']=='passed'
+-logical_root=Path('/tmp/oriole-lazy-coordinates-native-study')
++logical_root=Path('/tmp/oriole-coordinate-checkpoint-guards-native-study')
+ result={'status':'passed_records_only','modes':{},'input_sha256':{},
+         'scope':'Portable replay from hash-bound full JSON records only. No current compiler, library, XML, source or original worker-file bytes are verified in this mode; those checks belong to the original local audit.',
+         'review_sha256':sha(args.review),'replay_sha256':sha(Path(__file__))}
+ 
+-for mode in ('normal','pgo'):
++for mode in ('pgo',):
+     root=args.evidence_root/mode/'native-screen'
+     for name in ('protocol.json','preflight.json','results.json'):
+         digest=sha(root/name)
+@@ -118,7 +118,7 @@
+ 
+ result['totals']={'workers':sum(x['totals']['workers'] for x in result['modes'].values()),
+                   'samples':sum(x['totals']['samples'] for x in result['modes'].values())}
+-assert result['totals']=={'workers':1344,'samples':212352}
++assert result['totals']=={'workers':672,'samples':106176}
+ with args.output.open('x') as f:
+     json.dump(result,f,indent=2)
+     f.write('\n')

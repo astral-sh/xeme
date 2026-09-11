@@ -420,41 +420,20 @@ fn every_allocation_can_fail_and_all_memory_uses_the_selected_suite() {
 
 #[test]
 fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
-    thread_local! {
-        static FAILED_NATIVE_START: Cell<bool> = const { Cell::new(false) };
-    }
-    fn frames<const LAZY: bool>(allocator: Allocator) -> Result<(), Error> {
+    fn frames(allocator: Allocator) -> Result<(), Error> {
         let mut parser = Parser::try_new_in(Config::default(), allocator)?;
-        parser.feed(b"<r>inline\nabcdefghijklmnopqrstuvwxyz1234567890<n a='first' b='value'/><![CDATA[abcdefghijklmnopqrstuvwxyz1234567890]]><n a='second' b='new'/>fallback\r\n<n a='literal' b='other'/><n a='&amp;'/><n a='last'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/>lead<long_element_name_for_lazy a='framed'></long_element_name_for_lazy>abcdefghijklmnopqrstuvwxyz1234567890</r>", true)?;
+        parser.feed(b"<r>inline\nabcdefghijklmnopqrstuvwxyz1234567890<n a='first' b='value'/><![CDATA[abcdefghijklmnopqrstuvwxyz1234567890]]><n a='second' b='new'/>fallback\r\n<n a='literal' b='other'/><n a='&amp;'/><n a='last'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/>abcdefghijklmnopqrstuvwxyz1234567890</r>", true)?;
         let mut frame = parser.adapter_frame();
         let result = (|| {
             loop {
                 let mut event = None;
-                let old_position = parser.position();
-                let old_location = frame.location_for_c();
-                let target_start = LAZY && parser.current_raw() == Some("lead");
-                let result = if LAZY {
-                    parser.next_event_for_c_coordinates_into(&mut event, &mut frame)
-                } else {
-                    parser.next_event_for_adapter_into(&mut event, &mut frame)
-                };
+                let result = parser.next_event_for_adapter_into(&mut event, &mut frame);
                 let token = match result {
                     Ok(Some(token)) => token,
                     Ok(None) => break,
                     Err(error) => {
                         assert!(event.is_none());
                         assert!(!frame.is_active());
-                        assert_eq!(parser.position(), old_position);
-                        if target_start {
-                            let oriole::AdapterLocation::Native(native) = old_location else {
-                                panic!("target Start follows unresolved native Text");
-                            };
-                            assert_eq!(
-                                parser.resolve_native_location_for_c(native),
-                                Some(old_position)
-                            );
-                            FAILED_NATIVE_START.set(true);
-                        }
                         let calls = CALLS.get();
                         assert_eq!(
                             parser
@@ -471,9 +450,6 @@ fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
                     if let Some(name) = frame.take_end_name() {
                         assert_eq!(frame.callback_bytes(), name.len());
                         parser.recycle_end_element(token, name);
-                    } else if let Some((_, count)) = frame.native_text_range_for_c() {
-                        assert_eq!(frame.callback_bytes(), count);
-                        assert!(count > 0);
                     } else if let Some(bytes) = frame.text_bytes() {
                         assert_eq!(frame.callback_bytes(), bytes.len());
                         assert!(!bytes.is_empty());
@@ -499,12 +475,7 @@ fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
         parser.finish_adapter_frame(frame);
         result
     }
-    check_allocations(frames::<false>);
-    FAILED_NATIVE_START.set(false);
-    check_allocations(frames::<true>);
-    // Warm token/frame buffers cannot supply this longer element-name owner.
-    // Prove the sweep reached a failed prospective Start after native Text A.
-    assert!(FAILED_NATIVE_START.get());
+    check_allocations(frames);
 }
 
 #[test]

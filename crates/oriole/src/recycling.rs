@@ -51,10 +51,6 @@ impl EventRecycling {
         }
     }
 
-    pub(crate) fn generation(&self) -> u64 {
-        self.parser_id
-    }
-
     pub(crate) fn accepts(&self, token: &RecyclingToken) -> bool {
         token.parser_id == self.parser_id
     }

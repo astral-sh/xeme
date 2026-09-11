@@ -1,0 +1,227 @@
+--- PR134/verify.py
++++ V1-rejected/verify.py
+@@ -1,9 +1,12 @@
+-"""Verify a relocated CDATA-prefilter evidence package and replay saved native data.
++"""Verify a relocated rejected lazy-coordinate V1 evidence package and replay saved native data.
+ 
+ No compiler, library or parser is loaded. Only the trusted, hash-bound Python
+ records-only reader is executed; archive members are never blindly extracted.
+ """
+ import argparse
++import base64
++import csv
++import re
+ import hashlib
+ import io
+ import json
+@@ -21,6 +24,119 @@
+ def safe(name):
+     path = PurePosixPath(name)
+     assert not path.is_absolute() and '..' not in path.parts and str(path) == name
++
++
++def methods(data):
++    output={};pending=None;subtests=[]
++    def add(item,status):
++        name,identifier=item
++        if name=='setUpClass':return
++        assert name.startswith('test') and identifier not in output
++        output[identifier]=status
++    for line in data.decode().splitlines():
++        m=re.match(r'^(\w+) \((test\.[^)]+)\)(?: \.\.\. (.*))?$',line)
++        if m:
++            if pending is not None:
++                assert any(f'{pending[0]} ({pending[1]}) ' in t for t in subtests);add(pending,'subtest outcomes')
++            pending=(m[1],m[2]);status=m[3]
++            if status:add(pending,status);pending=None
++        elif pending is not None:
++            if re.match(r'^(ok|FAIL|ERROR|expected failure|skipped .+)$',line):add(pending,line);pending=None
++            elif line.startswith('  ') and ' ... ' in line:subtests.append(line)
++            elif ' ... ' in line and line.rsplit(' ... ',1)[1]:add(pending,line.rsplit(' ... ',1)[1]);pending=None
++    assert pending is None
++    return output
++
++
++def validation_records(get, identities):
++    """Recheck bounded saved correctness and CI records, without loading targets."""
++    load = lambda path: json.loads(get(path))
++    prefix = 'lazy-coordinates-correctness'
++    plan = load(prefix + '-plan.json')
++    execution = load(prefix + '/execution.json')
++    audit = load(prefix + '-review.json')
++    assert sha(get(prefix + '-review.json')) == '969ded35fe5d47116f9c03e52da746c70b028e60621ce963d6ea6efc1a00fa16'
++    assert execution['plan_sha256'] == sha(get(prefix + '-plan.json'))
++    assert execution['controller_sha256'] == sha(get(prefix + '-run.py'))
++    assert execution['pins_before'] == execution['pins_after'] and execution['pins_unchanged']
++    # Omitted binaries can be bound by identity; no claim to reload those bytes.
++    for path, digest in execution['pins_before'].items():
++        assert identities[path] == digest, path
++    expected_commands = []
++    for item in plan['commands']:
++        label = '-'.join(item[k] for k in ('mode', 'kind', 'linkage', 'fixture') if k in item)
++        if item['kind'] == 'unchanged-c-consumer':
++            expected_commands += [(label + '-build', item['build_argv'], item['build_timeout_seconds'], 0, {}),
++                (label, item['run_argv'], item['run_timeout_seconds'], 0, item['run_environment'])]
++        else:
++            expected_commands.append((label, item['argv'], item['timeout_seconds'], item.get('expected_exit', item.get('historical_raw_exit')), {}))
++    assert len(expected_commands) == len(execution['commands']) == 30
++    for row, expected in zip(execution['commands'], expected_commands, strict=True):
++        assert tuple(row[k] for k in ('label', 'argv', 'timeout', 'exit', 'environment_overrides')) == expected
++        assert row['reaped'] and 'exception' not in row and row['end'] >= row['start']
++        for stream in ['stdout', 'stderr']:
++            assert sha(get(prefix + '/' + row['label'] + '.' + stream)) == row[stream + '_sha256']
++    historical_maps = load('historical-strict/method-maps.json')
++    for mode in ['normal', 'pgo']:
++        folder = prefix + '/' + mode + '/differential/'
++        summary, corpus, reference, candidate = [load(folder + n + '.json') for n in ['summary', 'corpus', 'reference', 'oriole']]
++        assert summary['status'] == 'passed' and summary['exact_pass'] and summary['semantic_pass']
++        assert summary['cases'] == len(corpus) == len(candidate['results']) == 3318
++        assert reference == candidate and not summary['differences'] and not any(summary['difference_counts'].values())
++        for case, result in zip(corpus, candidate['results'], strict=True):
++            assert (case['name'], case['chunk_size']) == (result['name'], result['chunk_size'])
++            assert sha(base64.b64decode(case['base64'])) == case['sha256'] and not result['result']['callback_errors']
++        for engine, library in summary['libraries'].items():
++            assert library['returncode'] == 0
++            assert library['sha256_before'] == library['sha256_after'] == identities[library['path']]
++        for linkage in ['shared', 'static']:
++            folder = prefix + '/' + mode + '/cpython-' + linkage + '/'
++            summary = load(folder + 'summary.json')
++            assert summary['tests_exit_code'] == summary['gate_exit_code'] == 2
++            assert summary['probe_exit_code'] == summary['origin_exit_code'] == 0
++            assert summary['text_fragmentation'] is None and summary['consumer_fix'] == audit['consumer_fix']
++            assert sha(get(folder + 'pyexpat.c')) == summary['compiled_source_sha256'] == audit['consumer_fix']['patched_source_sha256']
++            origin = load(folder + 'origin.log')
++            assert origin['status'] == 'passed' and len(origin['origins']) == 4
++            for row in origin['origins'].values():
++                assert identities[row['path']] == row['sha256']
++            data = get(folder + 'tests.log')
++            rows = methods(data)
++            historical_data = get('historical-strict/' + linkage + '/tests.log')
++            assert len(rows) == 802 and rows == historical_maps[linkage] == methods(historical_data)
++            assert sha(json.dumps(rows, sort_keys=True).encode()) == plan['strict_expected']['method_map_sha256']
++            assert sorted(k for k, value in rows.items() if value in ['FAIL', 'ERROR']) == plan['strict_expected']['failures']
++            assert sum(value == 'expected failure' for value in rows.values()) == 3
++            assert sum(value.startswith('skipped') for value in rows.values()) == 5
++            skips = lambda data: [line for line in data.decode().splitlines() if ' ... skipped ' in line]
++            assert skips(data) == skips(historical_data) and len(skips(data)) == 14
++            assert sum(line.startswith('  ') for line in skips(data)) == 8
++            assert sum(line.startswith('setUpClass') for line in skips(data)) == 1
++    assert len(audit['c_consumers']) == 12
++    for key, row in audit['c_consumers'].items():
++        mode, linkage, fixture = key.split('/')
++        assert row['build_exit'] == row['run_exit'] == 0
++        assert identities['/tmp/oriole-lazy-coordinates-correctness/' + mode + '/c/' + fixture + '-' + linkage] == row['binary_sha256']
++    ci = load('lazy-coordinates-ci/readback.json')
++    run = load('lazy-coordinates-ci/run.json')
++    assert sha(get('lazy-coordinates-ci/readback.json')) == '116446678a086c63c8dd974d2ed102cc81bf1b6a2a2cfb2404331e764cb6d686'
++    assert ci['run_sha256'] == sha(get('lazy-coordinates-ci/run.json'))
++    assert ci['head'] == run['headSha'] == plan['candidate_commit'] == 'f766243bcc485ab305d339f5d37f095e0940eb49'
++    assert run['conclusion'] == 'success' and run['status'] == 'completed'
++    assert len(run['jobs']) == 16 and all(j['conclusion'] == 'success' for j in run['jobs'])
++    total = 0
++    for name, row in ci['logs'].items():
++        data = get('lazy-coordinates-ci/' + name)
++        assert (sha(data), len(data)) == (row['sha256'], row['bytes'])
++        counts = [list(map(int, match)) for match in re.findall(r'test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored;', data.decode())]
++        assert counts == row['counts'] and all(failed == ignored == 0 for passed, failed, ignored in counts)
++        assert {flag.strip() for flag in re.findall(r'MIRIFLAGS:([^\r\n]*)', data.decode())} == set(row['flags'])
++        total += sum(count[0] for count in counts)
++    assert total == ci['miri_tests_total'] == 96
++    return {'commands': 30, 'exact_differential_cases_per_mode': 3318, 'c_consumers': 12,
++            'strict_runs': 4, 'strict_methods_per_run': 802, 'known_strict_failures_per_run': 2,
++            'ci_checks': 16, 'miri_tests': 96,
++            'scope': 'Raw command streams, differential rows, strict method/skip maps, origins by retained identity, and CI summaries reconstructed. Compiled binaries were not loaded. Local source and compiler proofs remain retained original audit evidence.'}
+ 
+ 
+ def main():
+@@ -82,10 +198,10 @@
+             assert len(row['sha256']) == 64 and int(row['sha256'], 16) >= 0 and row['bytes'] >= 0
+     for name in ('notices/expat-2.8.4/COPYING', 'notices/expat-2.8.4/expat/COPYING',
+                  'notices/oriole/LICENSE-APACHE',
+-                 'notices/oriole/LICENSE-MIT', 'notices/oriole/tests/c/UPSTREAM-NOTICES.txt'):
++                 'notices/cpython-3.12.13/LICENSE', 'notices/oriole/LICENSE-MIT', 'notices/oriole/tests/c/UPSTREAM-NOTICES.txt'):
+         assert len(get(name)) > 0
+-    native = 'cdata-prefilter-native-study'
+-    audit = 'cdata-prefilter-independent-review/native'
++    native = 'lazy-coordinates-native-study'
++    audit = 'lazy-coordinates-native-review'
+     containers = {(mode, name): json.loads(get(f'{native}/{mode}/native-screen/{name}.json'))
+                   for mode in ('normal', 'pgo') for name in ('preflight', 'results')}
+     alias_list = []
+@@ -112,10 +228,10 @@
+     assert sorted(alias_list) == sorted(json.loads(get(audit + '/worker-aliases.json'))['aliases'])
+     assert len(alias_list) == 1344
+ 
+-    source = json.loads(get('cdata-prefilter-pgo-study/source.json'))['source_sha256']
+-    assert len(source) == 72
++    source = json.loads(get('lazy-coordinates-pgo-study/source.json'))['source_sha256']
++    assert len(source) == 73
+     source_seen = set()
+-    with tarfile.open(fileobj=io.BytesIO(get('cdata-prefilter-pgo-study/source.tar.gz')), mode='r:gz') as archive:
++    with tarfile.open(fileobj=io.BytesIO(get('lazy-coordinates-pgo-study/source.tar.gz')), mode='r:gz') as archive:
+         for member in archive:
+             assert member.isfile() and member.name in source and member.name not in source_seen
+             assert sha(archive.extractfile(member).read()) == source[member.name]
+@@ -123,6 +239,30 @@
+     assert source_seen == set(source)
+     assert (root / 'replay_native.py').read_bytes() == get(audit + '/replay.py')
+     assert (root / 'conditions.csv').read_bytes() == get(audit + '/conditions.csv')
++    replay_view = json.loads(get(audit + '/replay-review.json'))
++    combined = json.loads(get(audit + '/review.json'))
++    assert replay_view['combined_review_sha256'] == sha(get(audit + '/review.json'))
++    assert replay_view['input_sha256'] == combined['input_sha256']
++    expected_csv = [['phase', 'group', 'project', 'chunk', 'namespaces', 'iterations',
++                     'candidate_over_control', 'candidate_over_expat', 'control_over_expat']]
++    for mode in ['normal', 'pgo']:
++        data = get(audit + '/' + mode + '-review.json')
++        report = json.loads(data)
++        assert sha(data) == replay_view['phase_review_sha256'][mode] == combined['phases'][mode]['report_sha256']
++        assert replay_view['native'][mode] == report['native'][mode]
++        for row in report['native'][mode]['all_conditions']:
++            c = row['condition']
++            assert row['median_ratios']['candidate_over_control'] > 1
++            expected_csv.append([str(value) for value in [mode, 'generated' if c['name'].startswith('generated-') else 'real',
++                c['name'], c['chunk'], c['namespaces'], c['iterations'],
++                *[row['median_ratios'][k] for k in ['candidate_over_control', 'candidate_over_expat', 'control_over_expat']]]])
++    assert list(csv.reader(io.StringIO(get(audit + '/conditions.csv').decode()))) == expected_csv
++    assert len(expected_csv) == 57
++    identities = {}
++    for row in [*index['files'], *index['excluded_binaries_and_caches'], *index['native_worker_aliases']]:
++        assert row['origin'] not in identities or identities[row['origin']] == row['sha256']
++        identities[row['origin']] = row['sha256']
++    validation = validation_records(get, identities)
+     with tempfile.TemporaryDirectory(prefix='oriole-native-records-') as temporary:
+         temp = Path(temporary)
+         for mode in ('normal', 'pgo'):
+@@ -130,7 +270,7 @@
+             folder.mkdir(parents=True)
+             for name in ('protocol.json', 'preflight.json', 'results.json'):
+                 (folder / name).write_bytes(get(f'{native}/{mode}/native-screen/{name}'))
+-        (temp / 'review.json').write_bytes(get(audit + '/review.json'))
++        (temp / 'review.json').write_bytes(get(audit + '/replay-review.json'))
+         command = [sys.executable, '-I', '-S', str((root / 'replay_native.py').resolve()),
+                    '--evidence-root', str(temp), '--review', str(temp / 'review.json'),
+                    '--output', str(temp / 'replayed.json')]
+@@ -140,19 +280,19 @@
+     report = json.loads((root / 'report.json').read_bytes())
+     assert report['archive_sha256'] == manifest['files']['evidence.tar.gz']['sha256']
+     assert report['archive_index_sha256'] == sha(index_data)
+-    assert report['source_manifest_sha256'] == sha(get('cdata-prefilter-pgo-study/source.json'))
++    assert report['source_manifest_sha256'] == sha(get('lazy-coordinates-pgo-study/source.json'))
+     assert report['logical_files'] == len(records) and report['unique_files'] == len(objects)
+     assert report['excluded_binaries_and_caches'] == len(index['excluded_binaries_and_caches'])
+     assert report['native_worker_aliases'] == len(alias_list)
+     assert report['native_totals']['workers'] == replay['totals']['workers'] == 1344
+     assert report['native_totals']['samples'] == replay['totals']['samples'] == 212352
+     assert report['native'] == {mode: replay['modes'][mode]['groups'] for mode in ('normal', 'pgo')}
+-    receipt = {'status': 'passed', 'scope': 'Portable archive integrity, source snapshot, worker aliases and saved native arithmetic only; no targets or live dependencies checked.',
++    receipt = {'status': 'passed', 'scope': 'Portable archive integrity, source snapshot, worker aliases, all56 CSV/native arithmetic and bounded saved correctness/CI replay; no targets or live dependencies checked.',
+                'files_manifest_sha256': sha((root / 'files.json').read_bytes()),
+                'archive_sha256': report['archive_sha256'], 'logical_files': len(records),
+                'unique_objects': len(objects), 'excluded_identities': len(index['excluded_binaries_and_caches']),
+                'worker_aliases': len(alias_list), 'source_files': len(source),
+-               'native': replay, 'reader_stdout': outcome.stdout}
++               'native': replay, 'validation': validation, 'reader_stdout': outcome.stdout}
+     with args.output.open('x') as output:
+         json.dump(receipt, output, indent=2)
+         output.write('\n')

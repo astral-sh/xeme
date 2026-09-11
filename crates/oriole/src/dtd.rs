@@ -1826,7 +1826,7 @@ impl Parser {
         if silent {
             // The adapter omits this unused payload, but position getters still
             // observe the same completed attribute as an emitted declaration.
-            self.last_position = crate::AdapterLocation::Position(position);
+            self.last_position = position;
             return Ok(());
         }
         self.emit(

@@ -1,0 +1,237 @@
+{
+  "status": "passed",
+  "scope": "Portable archive integrity, source snapshot, worker aliases, all28 CSV/native arithmetic and saved PGO differential/local-check replay; no targets or live dependencies checked.",
+  "files_manifest_sha256": "0db960d90530b794c6ecaebac5aa750601e9656ddbb30355f00492b942a0cd83",
+  "archive_sha256": "0e9bb6a3adacfa643bb46312f579443a0cf69ef01d38aa2844a61315ab2245fb",
+  "logical_files": 184,
+  "unique_objects": 161,
+  "excluded_identities": 9,
+  "worker_aliases": 672,
+  "source_files": 73,
+  "native": {
+    "status": "passed_records_only",
+    "modes": {
+      "pgo": {
+        "totals": {
+          "workers": 672,
+          "samples": 106176
+        },
+        "groups": {
+          "real": {
+            "conditions": 24,
+            "ratios": {
+              "candidate_over_control": 1.1097235748918874,
+              "candidate_over_expat": 1.5276222263798007,
+              "control_over_expat": 1.3733311835309516
+            },
+            "candidate_faster_than_control": 0,
+            "candidate_faster_than_expat": 3
+          },
+          "generated": {
+            "conditions": 4,
+            "ratios": {
+              "candidate_over_control": 1.057408824120776,
+              "candidate_over_expat": 5.247647153779695,
+              "control_over_expat": 4.975911167820342
+            },
+            "candidate_faster_than_control": 0,
+            "candidate_faster_than_expat": 0
+          },
+          "adverse_conditions": [
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "namespaces": false,
+              "ratio": 1.1438450576686536
+            },
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "namespaces": true,
+              "ratio": 1.1358293095211875
+            },
+            {
+              "name": "wayland",
+              "chunk": 4096,
+              "namespaces": false,
+              "ratio": 1.1341759182259947
+            },
+            {
+              "name": "wayland",
+              "chunk": 4096,
+              "namespaces": true,
+              "ratio": 1.130193238926557
+            },
+            {
+              "name": "maven",
+              "chunk": 4096,
+              "namespaces": false,
+              "ratio": 1.1343845566834239
+            },
+            {
+              "name": "maven",
+              "chunk": 4096,
+              "namespaces": true,
+              "ratio": 1.1169698806546533
+            },
+            {
+              "name": "batik",
+              "chunk": 4096,
+              "namespaces": false,
+              "ratio": 1.032579650565262
+            },
+            {
+              "name": "batik",
+              "chunk": 4096,
+              "namespaces": true,
+              "ratio": 1.0307081354223442
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "namespaces": false,
+              "ratio": 1.1197696810600037
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "namespaces": true,
+              "ratio": 1.1143092999301643
+            },
+            {
+              "name": "docbook",
+              "chunk": 4096,
+              "namespaces": false,
+              "ratio": 1.1873672939531523
+            },
+            {
+              "name": "docbook",
+              "chunk": 4096,
+              "namespaces": true,
+              "ratio": 1.1020286732514513
+            },
+            {
+              "name": "generated-rare-declarations",
+              "chunk": 4096,
+              "namespaces": false,
+              "ratio": 1.0317526686951521
+            },
+            {
+              "name": "generated-entities",
+              "chunk": 4096,
+              "namespaces": false,
+              "ratio": 1.0875399447218128
+            },
+            {
+              "name": "vulkan",
+              "chunk": 65536,
+              "namespaces": false,
+              "ratio": 1.1305660980972476
+            },
+            {
+              "name": "vulkan",
+              "chunk": 65536,
+              "namespaces": true,
+              "ratio": 1.125690971308239
+            },
+            {
+              "name": "wayland",
+              "chunk": 65536,
+              "namespaces": false,
+              "ratio": 1.1205344875758827
+            },
+            {
+              "name": "wayland",
+              "chunk": 65536,
+              "namespaces": true,
+              "ratio": 1.1143699662134359
+            },
+            {
+              "name": "maven",
+              "chunk": 65536,
+              "namespaces": false,
+              "ratio": 1.1275873189733763
+            },
+            {
+              "name": "maven",
+              "chunk": 65536,
+              "namespaces": true,
+              "ratio": 1.1150722945539386
+            },
+            {
+              "name": "batik",
+              "chunk": 65536,
+              "namespaces": false,
+              "ratio": 1.0266937786622827
+            },
+            {
+              "name": "batik",
+              "chunk": 65536,
+              "namespaces": true,
+              "ratio": 1.0335348639771187
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "namespaces": false,
+              "ratio": 1.1085575323784673
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "namespaces": true,
+              "ratio": 1.1089036788104647
+            },
+            {
+              "name": "docbook",
+              "chunk": 65536,
+              "namespaces": false,
+              "ratio": 1.1666299665035451
+            },
+            {
+              "name": "docbook",
+              "chunk": 65536,
+              "namespaces": true,
+              "ratio": 1.0911749810078502
+            },
+            {
+              "name": "generated-rare-declarations",
+              "chunk": 65536,
+              "namespaces": false,
+              "ratio": 1.02720469298559
+            },
+            {
+              "name": "generated-entities",
+              "chunk": 65536,
+              "namespaces": false,
+              "ratio": 1.0846607080571573
+            }
+          ]
+        }
+      }
+    },
+    "input_sha256": {
+      "pgo/protocol.json": "8bf750946a9711305789edb89d9186cbc816b29d632987eba575ed55d5df2f79",
+      "pgo/preflight.json": "de205dc57de73f9934040011680c55d362a52214ee373756009c1100ed309560",
+      "pgo/results.json": "3ffd1ccd7158af301846686aa113ce1124eb5ada9f2fc190ba5087299e71832a"
+    },
+    "scope": "Portable replay from hash-bound full JSON records only. No current compiler, library, XML, source or original worker-file bytes are verified in this mode; those checks belong to the original local audit.",
+    "review_sha256": "472b2c33032adc6eede82e285d006a1c1cc292ae70b4a2b4625d49d9bca09635",
+    "replay_sha256": "595261b9ddbb7190c666389364af17e3c53bc80f2bbceedf66a9ecea94460d54",
+    "totals": {
+      "workers": 672,
+      "samples": 106176
+    }
+  },
+  "validation": {
+    "pgo_exact_differential_cases": 3318,
+    "local_tests": 444,
+    "local_doctests": 1,
+    "focused_tests": 8,
+    "source73_delta_vs_v1": [
+      "crates/oriole/src/encoding.rs"
+    ],
+    "scope": "Saved differential rows, final local command/stream outcomes and archived source snapshots checked. Parent session receipts remain explicitly parent-reported. No normal native, CPython timing or V2 CI/Miri validation claimed."
+  },
+  "reader_stdout": "{\"status\": \"passed_records_only\", \"output\": \"/tmp/oriole-native-records-cr5swrk0/replayed.json\", \"sha256\": \"f30d7a6ea319499bf62ab217844872456cf184ec0ae315714c88b4aed52954ad\", \"totals\": {\"workers\": 672, \"samples\": 106176}}\n"
+}

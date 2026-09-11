@@ -18,9 +18,7 @@ use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::ptr;
 use std::sync::atomic::{AtomicPtr, Ordering};
 
-use oriole::{
-    AdapterLocation, Config, ErrorKind, EventKind, NameRules, Parser, Position, RecyclingToken,
-};
+use oriole::{Config, ErrorKind, EventKind, NameRules, Parser, Position, RecyclingToken};
 use oriole_storage::{
     AllocError, AllocationTracker, Allocator, Box as XmlBox, CString, MemorySuite, Queue, Shared,
     String as XmlString, Vec as XmlVec, in_allocator_callback, with_tracking, without_tracking,
@@ -166,7 +164,7 @@ pub struct XML_ParserStruct {
     error: c_int,
     parse_error: c_int,
     final_buffer: bool,
-    position: AdapterLocation,
+    position: Position,
     specified_attributes: c_int,
     base: Option<CString>,
     buffer: XmlVec<u8>,
@@ -338,7 +336,7 @@ unsafe fn create(
                     error: 0,
                     parse_error: 0,
                     final_buffer: false,
-                    position: AdapterLocation::Position(position),
+                    position,
                     specified_attributes: 0,
                     base: None,
                     buffer: XmlVec::new_in(allocator),
@@ -555,7 +553,7 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                 core.set_notation_handler_enabled(false);
                 core.set_attlist_handler_enabled(false);
                 (*parser).core = core;
-                (*parser).position = AdapterLocation::Position((*parser).core.position());
+                (*parser).position = (*parser).core.position();
                 let unknown_encoding = (*parser).handlers.unknown_encoding;
                 (*parser).handlers = Handlers {
                     unknown_encoding,
@@ -1370,7 +1368,7 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterF
             }
             match (*parser)
                 .core
-                .next_event_for_c_coordinates_into(&mut event, frame)
+                .next_event_for_c_text_context_into(&mut event, frame)
             {
                 Ok(Some(recycling)) => recycling,
                 Ok(None) => {
@@ -1380,7 +1378,7 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterF
                     if (*parser).parse_error != 0 {
                         return ERROR;
                     }
-                    (*parser).position = AdapterLocation::Position((*parser).core.position());
+                    (*parser).position = (*parser).core.position();
                     if (*parser).core.is_finished() {
                         if !merge_external_subset(parser) {
                             return ERROR;
@@ -1402,16 +1400,15 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterF
                         return ERROR;
                     }
                     fail_parse(parser, error_code(&error.kind));
-                    (*parser).position = AdapterLocation::Position(error.position);
+                    (*parser).position = error.position;
                     return ERROR;
                 }
             }
         };
         if frame.is_active() {
-            // SAFETY: The frame carries an owned position or a checked scalar identity.
-            // No core or source borrow crosses callback dispatch.
+            // SAFETY: Both the frame and its position are owned outside CParser.
             unsafe {
-                (*parser).position = frame.location_for_c();
+                (*parser).position = frame.position();
                 let result = if let Some((start, count)) = frame.native_text_range_for_c() {
                     dispatch_context_text(parser, start, count)
                 } else if let Some(mut name) = frame.take_end_name() {
@@ -1465,7 +1462,7 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterF
         let event = event.expect("recycling token accompanies an owned event");
         // SAFETY: The event owns its data and the parser remains busy.
         unsafe {
-            (*parser).position = AdapterLocation::Position(event.position);
+            (*parser).position = event.position;
             if dispatch(parser, event.kind, recycling).is_err() {
                 fail_parse(parser, 1);
                 return ERROR;
@@ -1490,7 +1487,7 @@ unsafe fn merge_external_subset(parser: XML_Parser) -> bool {
                 && let Err(error) = (*parent).core.merge_external_subset(&(*parser).core)
             {
                 fail_parse(parser, error_code(&error.kind));
-                (*parser).position = AdapterLocation::Position(error.position);
+                (*parser).position = error.position;
                 return false;
             }
         }
@@ -1526,14 +1523,14 @@ unsafe fn resolve_pending_conversion(parser: XML_Parser) -> bool {
             return false;
         };
         let data = (*parser).encoding_data;
-        (*parser).position = AdapterLocation::Position(request.position);
+        (*parser).position = request.position;
         let value = convert(data, request.bytes.as_ptr().cast());
         if (*parser).parse_error != 0 || (*parser).destroying {
             return false;
         }
         if let Err(error) = (*parser).core.resolve_encoding_conversion(value) {
             fail_parse(parser, error_code(&error.kind));
-            (*parser).position = AdapterLocation::Position(error.position);
+            (*parser).position = error.position;
             return false;
         }
         true
@@ -1697,7 +1694,7 @@ pub unsafe extern "C" fn XML_Parse(
                         return ERROR;
                     }
                     fail_parse(parser, error_code(&error.kind));
-                    (*parser).position = AdapterLocation::Position(error.position);
+                    (*parser).position = error.position;
                     return ERROR;
                 }
                 run_events(parser)
@@ -2205,34 +2202,13 @@ pub unsafe extern "C" fn XML_GetIdAttributeIndex(parser: XML_Parser) -> c_int {
     }
 }
 
-/// Resolve only the separately borrowed core field; no borrow crosses a callback.
-unsafe fn resolve_current_position(parser: XML_Parser) -> Option<Position> {
-    // SAFETY: Getters reject null handles and allocator reentry before calling.
-    // The caller serializes handle access. No input-context reference is formed,
-    // so a live character-data callback pointer remains valid during resolution.
-    unsafe {
-        match (*parser).position {
-            AdapterLocation::Position(position) => Some(position),
-            AdapterLocation::Native(native) => {
-                let position = (*parser).core.resolve_native_location_for_c(native);
-                if let Some(position) = position {
-                    (*parser).position = AdapterLocation::Position(position);
-                } else {
-                    fail_parse(parser, UNEXPECTED_STATE);
-                }
-                position
-            }
-        }
-    }
-}
-
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn XML_GetCurrentLineNumber(parser: XML_Parser) -> c_ulong {
     if parser.is_null() || in_allocator_callback() {
         return 0;
     }
-    // SAFETY: The serialized live handle permits a short, field-only resolver borrow.
-    unsafe { resolve_current_position(parser).map_or(0, |position| position.line as c_ulong) }
+    // SAFETY: Scalar read from the caller's serialized live handle.
+    unsafe { (*parser).position.line as c_ulong }
 }
 
 #[unsafe(no_mangle)]
@@ -2240,8 +2216,8 @@ pub unsafe extern "C" fn XML_GetCurrentColumnNumber(parser: XML_Parser) -> c_ulo
     if parser.is_null() || in_allocator_callback() {
         return 0;
     }
-    // SAFETY: The serialized live handle permits a short, field-only resolver borrow.
-    unsafe { resolve_current_position(parser).map_or(0, |position| position.column as c_ulong) }
+    // SAFETY: Scalar read from the caller's serialized live handle.
+    unsafe { (*parser).position.column as c_ulong }
 }
 
 #[unsafe(no_mangle)]
@@ -2256,7 +2232,7 @@ pub unsafe extern "C" fn XML_GetCurrentByteIndex(parser: XML_Parser) -> c_long {
         }
         (*parser)
             .position
-            .byte_index()
+            .byte_index
             .try_into()
             .unwrap_or(c_long::MAX)
     }
@@ -2271,7 +2247,7 @@ pub unsafe extern "C" fn XML_GetCurrentByteCount(parser: XML_Parser) -> c_int {
     unsafe {
         (*parser)
             .position
-            .byte_count()
+            .byte_count
             .try_into()
             .unwrap_or(c_int::MAX)
     }
@@ -2340,13 +2316,13 @@ pub unsafe extern "C" fn XML_GetInputContext(
         }
         let Some(start) = (*parser)
             .position
-            .byte_index()
+            .byte_index
             .checked_sub((*parser).input_context_start)
         else {
             return ptr::null();
         };
         let context = &(*parser).input_context;
-        if start > context.len() || (*parser).position.byte_count() > context.len() - start {
+        if start > context.len() || (*parser).position.byte_count > context.len() - start {
             return ptr::null();
         }
         let (Ok(start), Ok(length)) = (c_int::try_from(start), c_int::try_from(context.len()))
@@ -2433,7 +2409,7 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                         error: 0,
                         parse_error: 0,
                         final_buffer: false,
-                        position: AdapterLocation::Position(position),
+                        position,
                         specified_attributes: 0,
                         base: (*parser)
                             .base
@@ -2836,5 +2812,3 @@ mod tests;
 
 #[cfg(test)]
 mod context_text_tests;
-#[cfg(test)]
-mod coordinate_tests;

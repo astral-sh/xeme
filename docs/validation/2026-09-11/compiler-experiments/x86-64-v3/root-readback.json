@@ -1,0 +1,146 @@
+{
+  "status": "passed_portable_bytes_build_records_and_original_native_replay",
+  "archive_sha256": "ed993fc983470d8d4f9cb2202b934f518767b6532d91b7819462af492f74d3fa",
+  "stored_members": 2254,
+  "origins": 2320,
+  "content_aliases": 66,
+  "omitted_payloads": 33,
+  "source_files": 70,
+  "pipeline_source_files": 67,
+  "pipeline_helpers": 6,
+  "expat_source_files": 167,
+  "actual_compiler_vectors_rederived": {
+    "rust": 9,
+    "expat": 24
+  },
+  "v3_generated_records_recompared": 1728,
+  "native_workers": 1792,
+  "native_samples": 283136,
+  "conditions": 56,
+  "original_normal_pgo_posthoc_audits_reconstructed_byte_equal": true,
+  "groups": {
+    "normal": {
+      "real": {
+        "conditions": 24,
+        "ratios": {
+          "oriole-v3_over_oriole-generic": 0.9774424939504056,
+          "expat-v3_over_expat-generic": 0.9980099613915715,
+          "oriole-generic_over_expat-generic": 1.5623912478998496,
+          "oriole-v3_over_expat-v3": 1.5300700783048042
+        },
+        "lower_counts": {
+          "oriole-v3_over_oriole-generic": 24,
+          "expat-v3_over_expat-generic": 17,
+          "oriole-generic_over_expat-generic": 1,
+          "oriole-v3_over_expat-v3": 1
+        }
+      },
+      "generated": {
+        "conditions": 4,
+        "ratios": {
+          "oriole-v3_over_oriole-generic": 0.9202103023521773,
+          "expat-v3_over_expat-generic": 0.9404101690966817,
+          "oriole-generic_over_expat-generic": 4.806952021499667,
+          "oriole-v3_over_expat-v3": 4.694378995445769
+        },
+        "lower_counts": {
+          "oriole-v3_over_oriole-generic": 4,
+          "expat-v3_over_expat-generic": 4,
+          "oriole-generic_over_expat-generic": 0,
+          "oriole-v3_over_expat-v3": 0
+        }
+      }
+    },
+    "pgo": {
+      "real": {
+        "conditions": 24,
+        "ratios": {
+          "oriole-v3_over_oriole-generic": 0.9584343333743235,
+          "expat-v3_over_expat-generic": 1.053566482829572,
+          "oriole-generic_over_expat-generic": 1.38203711446923,
+          "oriole-v3_over_expat-v3": 1.2598778712767051
+        },
+        "lower_counts": {
+          "oriole-v3_over_oriole-generic": 22,
+          "expat-v3_over_expat-generic": 1,
+          "oriole-generic_over_expat-generic": 7,
+          "oriole-v3_over_expat-v3": 8
+        }
+      },
+      "generated": {
+        "conditions": 4,
+        "ratios": {
+          "oriole-v3_over_oriole-generic": 0.9142853645106694,
+          "expat-v3_over_expat-generic": 0.9984024878815533,
+          "oriole-generic_over_expat-generic": 4.966205005325352,
+          "oriole-v3_over_expat-v3": 4.55140198237425
+        },
+        "lower_counts": {
+          "oriole-v3_over_oriole-generic": 4,
+          "expat-v3_over_expat-generic": 2,
+          "oriole-generic_over_expat-generic": 0,
+          "oriole-v3_over_expat-v3": 0
+        }
+      }
+    }
+  },
+  "posthoc": {
+    "normal": {
+      "real": {
+        "conditions": 24,
+        "geometric_mean_ratio": 1.5301865344950503,
+        "oriole_v3_lower": 1,
+        "oriole_v3_higher": 23
+      },
+      "generated": {
+        "conditions": 4,
+        "geometric_mean_ratio": 4.432778607262669,
+        "oriole_v3_lower": 0,
+        "oriole_v3_higher": 4
+      }
+    },
+    "pgo": {
+      "real": {
+        "conditions": 24,
+        "geometric_mean_ratio": 1.3262998955716945,
+        "oriole_v3_lower": 6,
+        "oriole_v3_higher": 18
+      },
+      "generated": {
+        "conditions": 4,
+        "geometric_mean_ratio": 4.547619256928026,
+        "oriole_v3_lower": 0,
+        "oriole_v3_higher": 4
+      }
+    }
+  },
+  "recorded_only_omitted_hashes_used": [
+    "/tmp/oriole-allocator-provenance-pgo-study/normal/liboriole_expat.a",
+    "/tmp/oriole-allocator-provenance-pgo-study/normal/liboriole_expat.so",
+    "/tmp/oriole-allocator-provenance-pgo-study/pgo/runs/run-j08t9z8v/generate/liboriole_expat.a",
+    "/tmp/oriole-allocator-provenance-pgo-study/pgo/runs/run-j08t9z8v/generate/liboriole_expat.so",
+    "/tmp/oriole-allocator-provenance-pgo-study/pgo/runs/run-j08t9z8v/use/liboriole_expat.a",
+    "/tmp/oriole-allocator-provenance-pgo-study/pgo/runs/run-j08t9z8v/use/liboriole_expat.so",
+    "/tmp/oriole-allocator-provenance-pgo-study/source.tar.gz",
+    "/tmp/oriole-grammar-bench-plain/native-driver",
+    "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+    "/tmp/oriole-pgo-study/expat-use-liboriole_expat.so",
+    "/tmp/oriole-x86-64-v3-pgo-study/expat/generate-libexpat.so",
+    "/tmp/oriole-x86-64-v3-pgo-study/expat/normal-libexpat.so",
+    "/tmp/oriole-x86-64-v3-pgo-study/expat/use-libexpat.so",
+    "/tmp/oriole-x86-64-v3-pgo-study/normal/liboriole_expat.a",
+    "/tmp/oriole-x86-64-v3-pgo-study/normal/liboriole_expat.so",
+    "/tmp/oriole-x86-64-v3-pgo-study/pgo/runs/run-h9ows5w9/generate/liboriole_expat.a",
+    "/tmp/oriole-x86-64-v3-pgo-study/pgo/runs/run-h9ows5w9/generate/liboriole_expat.so",
+    "/tmp/oriole-x86-64-v3-pgo-study/pgo/runs/run-h9ows5w9/use/liboriole_expat.a",
+    "/tmp/oriole-x86-64-v3-pgo-study/pgo/runs/run-h9ows5w9/use/liboriole_expat.so",
+    "/tmp/oriole-x86-64-v3-pgo-study/source.tar.gz"
+  ],
+  "limitations": [
+    "No original absolute filesystem reads occur during replay; absolute paths in reports are logical archive keys.",
+    "Excluded compiler/library/archive bytes are not verified by this portable replay. Their hashes are recorded identities, separate from included source/log/profile/sample byte verification.",
+    "Build replay rederives raw vectors and compares archived training/profile/source bindings; it does not rebuild binaries or validate newly executed compiler behavior.",
+    "Native replay preserves all original planned and post-hoc arithmetic. It adds no parser runs, observations, full compatibility, Python or PBS validation.",
+    "The ISA study remains experimental/unselected and uses allocator e1 without ContextText composition."
+  ]
+}

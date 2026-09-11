@@ -1,0 +1,10 @@
+--- archived-verify.py
++++ final-verify.py
+@@ -106,6 +106,7 @@
+ 
+     original = output_root + '/audit.py'
+     code = ArchivePath(original).read_text()
++    assert digest(code.encode()) == '9fe3094ca537574e682e04a03ac4e649101319572f5b370ffb2d2547fa8e288f'
+     edits = [
+         ('from pathlib import Path', 'Path = archive_path'),
+         ('assert os.sched_getaffinity(0)=={6}', '# Portable saved-data replay; no CPU affinity dependency.'),

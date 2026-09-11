@@ -1,0 +1,11 @@
+{
+  "status": "ready_for_saved_data_assembly",
+  "source_commit": "e1d263a711e862e4f0f0018b15de9ac83a87a342",
+  "source_manifest_sha256": "de22680210036caf36f4b8d4d8b5d914ff37522f94aa75ae96a60710581e4ea8",
+  "selection": "experimental_unselected",
+  "scope": "Fixed explicit x86-64-v3 compiler treatment for both engines, generated-only G288, normal and PGO native campaigns. No ContextText/BOLT/additive/bulk composition, default change, full compatibility, Python or PBS execution.",
+  "worker_payloads": "Retain all original workers, controller streams and result reports intact. Exact content duplicates share hash-addressed members; no JSON value compaction.",
+  "excluded": "Compiled libraries, tool binaries and reusable build trees. Frozen source capsules are expanded into included source bytes; capsule hashes remain recorded-only identities.",
+  "replay": "Verify included bytes, source/pipeline/training/profile bindings and raw compiler vector delta; replay unchanged original normal/PGO native and post-hoc auditors through archive-only I/O. No parser/compiler/profiler execution.",
+  "packaging_cpu": 7
+}

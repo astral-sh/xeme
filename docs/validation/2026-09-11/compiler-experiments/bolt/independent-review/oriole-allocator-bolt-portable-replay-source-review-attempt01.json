@@ -1,0 +1,10 @@
+{
+  "status": "failed_review_helper_only",
+  "command_scope": "Source-only AST comparison; no adapter/archive/target execution",
+  "failure": "AssertionError at helper line14: incorrectly assumed unchanged AST body length after replacing the CPU-affinity Assert with a comment. Original91 versus adapted90 nodes. No source defect established.",
+  "source_files": [
+    "/tmp/oriole-allocator-bolt-publication/verify.py",
+    "/tmp/oriole-allocator-bolt-native-independent-audit/audit.py"
+  ],
+  "correction": "Drop only original affinity Assert before comparing remaining AST nodes; classify Path import replacement and sha function replacement explicitly. Preserve all numerical nodes."
+}

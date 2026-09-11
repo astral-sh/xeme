@@ -47,6 +47,7 @@ jobs:
           git -C .cache/pbs apply --check "$GITHUB_WORKSPACE/integration/python-build-standalone/pbs-a455388.patch"
           git -C .cache/pbs apply "$GITHUB_WORKSPACE/integration/python-build-standalone/pbs-a455388.patch"
       - name: Build CPython 3.12.13 with Oriole
+        id: build_distribution
         run: |
           set -o pipefail
           bash integration/python-build-standalone/run.sh "$GITHUB_WORKSPACE/.cache/pbs" "$RUNNER_TEMP/oriole-bundle" 2>&1 | tee "$RUNNER_TEMP/pbs-build.log"
@@ -67,6 +68,8 @@ jobs:
             test_pyexpat test_xml_etree test_xml_etree_c test_minidom test_sax test_pulldom \
             2>&1 | tee "$RUNNER_TEMP/pbs-xml-tests.log"
       - name: Verify the installed parser identity
+        id: installed_identity
+        if: ${{ !cancelled() && steps.build_distribution.outcome == 'success' }}
         working-directory: .cache/pbs
         run: |
           uv run --no-dev python - <<'PY'
@@ -82,6 +85,7 @@ jobs:
           PY
           sha256sum dist/*.tar.zst > "$RUNNER_TEMP/pbs-archive-sha256.txt"
       - name: Run the installed interpreter on glibc 2.17
+        if: ${{ !cancelled() && steps.installed_identity.outcome == 'success' }}
         run: |
           set -o pipefail
           docker run --rm --network=none \

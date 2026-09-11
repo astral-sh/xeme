@@ -1,0 +1,71 @@
+{
+  "status": "local_portability_supplement_passed",
+  "scope": "Test-only Windows C-long cast correction. Preserved historical source/gates/measurements; platform execution belongs to PR115 CI. No local Windows execution or full Linux re-gate claimed.",
+  "base_commit": "ef1559e59fe837f36359aa85dd1dd2d03a77bd45",
+  "prior_source_manifest_sha256": "344730269a59a8402d3e18e5eed170982d2c44acfe6fc3d869f2acc166f149df",
+  "source_manifest_sha256": "eab8c0277ca2afeba5a664a10320296367fcdeab2ea7a283fa95cef23dc24714",
+  "selected_source_files": 70,
+  "other_selected_files_unchanged": 69,
+  "runtime_implementation_unchanged": true,
+  "changed_file": "crates/oriole_expat/src/tests.rs",
+  "change": "Expected XML_GetCurrentByteIndex byte offset casts to imported c_long instead of i64. Fixture, expected value, callback budget and all assertions preserved.",
+  "patch_sha256": "8f240abe4d160b205fa88c7994abcfbef76022e9b4f5fedce417571e653c86ed",
+  "original_windows_failure": {
+    "run": 34553541588,
+    "job": 103121238410,
+    "url": "https://github.com/astral-sh/oriole/actions/runs/34553541588/job/103121238410",
+    "error": "E0308: expected i32, found i64 in lib test compilation",
+    "raw_log_sha256": "e45238f7a006f451fac141b1622ab829368e5af35ee6e3f2710648c853817f3b"
+  },
+  "local_checks": {
+    "focused_tests": 1,
+    "focused_name": "tests::detached_end_charges_the_name_before_handlers_or_default_fallback",
+    "fmt": "passed",
+    "command_exits": [
+      0,
+      0
+    ],
+    "checks_sha256": "d2ef251a0ee7e16e70a76be5366a264f454ccacf8d7583d74f75143204d87721"
+  },
+  "fresh_c_only_build": {
+    "workspace_compiles": 3,
+    "compiler_vectors_identical": true,
+    "libraries_identical_to_measured": true,
+    "libraries": {
+      "liboriole_expat.so": "02fcab59f6e3818c128da6706d67987ae7450dd8b59e97cd28ce497a547f28f5",
+      "liboriole_expat.a": "69ebed414946cbaef1a940c052a636be277c809902943d676e824deab45d22d5"
+    },
+    "build_report_sha256": "d9848073c88d6e9d30a000fd14d70dd43f5697e58f712ce9c9f54c919b162d5b"
+  },
+  "archive": {
+    "sha256": "d8a44f83ef9c6fe8d41a429974cdc324dd1a4a17766f1c8602bda8519e44ac1c",
+    "members": 25,
+    "nested_sources": [
+      {
+        "member": "source/source.tar.gz",
+        "source_files": 70,
+        "map_exact": true
+      },
+      {
+        "member": "build/source.tar.gz",
+        "source_files": 70,
+        "map_exact": true
+      }
+    ],
+    "excluded_binaries": [
+      {
+        "member": "build/liboriole_expat.a",
+        "origin": "/tmp/oriole-pr115-windows-portability-build/liboriole_expat.a",
+        "bytes": 3645220,
+        "sha256": "69ebed414946cbaef1a940c052a636be277c809902943d676e824deab45d22d5"
+      },
+      {
+        "member": "build/liboriole_expat.so",
+        "origin": "/tmp/oriole-pr115-windows-portability-build/liboriole_expat.so",
+        "bytes": 1148744,
+        "sha256": "02fcab59f6e3818c128da6706d67987ae7450dd8b59e97cd28ce497a547f28f5"
+      }
+    ]
+  },
+  "author_role": "The patch author performed the local focused test, source-map/byte-identity checks and archive readback. Historical independent reviews remain separately preserved."
+}

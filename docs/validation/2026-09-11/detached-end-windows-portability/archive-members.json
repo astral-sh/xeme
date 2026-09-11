@@ -1,0 +1,127 @@
+{
+  "source/candidate.patch": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/candidate.patch",
+    "bytes": 750,
+    "sha256": "8f240abe4d160b205fa88c7994abcfbef76022e9b4f5fedce417571e653c86ed"
+  },
+  "source/checks-controller.log": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/checks-controller.log",
+    "bytes": 77,
+    "sha256": "b0567c813eadf1f9d746e5400fe430b5ca80ccc4276eda3c59431bfdb73c6937"
+  },
+  "source/checks.json": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/checks.json",
+    "bytes": 24284,
+    "sha256": "d2ef251a0ee7e16e70a76be5366a264f454ccacf8d7583d74f75143204d87721"
+  },
+  "source/checks.py": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/checks.py",
+    "bytes": 2506,
+    "sha256": "44e86a435ab8ace540c1acf122df1ab3c1a82bd335971564a5217d7bc2a82be1"
+  },
+  "source/fmt.log": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/fmt.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "source/focused.log": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/focused.log",
+    "bytes": 501,
+    "sha256": "e1e9e1f14f9334835b6a0b15dcf6ebaf160cf2540a3b603058837669ab178d77"
+  },
+  "source/initial-metadata-report.json": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/initial-metadata-report.json",
+    "bytes": 863,
+    "sha256": "e761f7591383219568487d75f726a18ac62561692c483ec31bffe7a086b22560"
+  },
+  "source/original-job.json": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/original-job.json",
+    "bytes": 2399,
+    "sha256": "28e2001751e0dbfc0e44e6ff8067c76bb1fbaf2e9446d722bfc2423016f8a06b"
+  },
+  "source/original-pr.json": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/original-pr.json",
+    "bytes": 4862,
+    "sha256": "55705d4389f5087cc5d432517d920249c12f595d3a9a3bdd33750f82d05c2653"
+  },
+  "source/prior-source.json": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/prior-source.json",
+    "bytes": 7814,
+    "sha256": "344730269a59a8402d3e18e5eed170982d2c44acfe6fc3d869f2acc166f149df"
+  },
+  "source/report.json": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/report.json",
+    "bytes": 1170,
+    "sha256": "c70e424b94cb0fded3f8a0fe661a7581663785185db1bf2170948e18f501cd30"
+  },
+  "source/source.json": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/source.json",
+    "bytes": 7882,
+    "sha256": "eab8c0277ca2afeba5a664a10320296367fcdeab2ea7a283fa95cef23dc24714"
+  },
+  "source/source.tar.gz": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/source.tar.gz",
+    "bytes": 270302,
+    "sha256": "6f58eb0cf65d7e2ae3837dd26ef61bda20c8724b11f955e7bc3f721409f08fc8"
+  },
+  "source/test-only.patch": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/test-only.patch",
+    "bytes": 750,
+    "sha256": "8f240abe4d160b205fa88c7994abcfbef76022e9b4f5fedce417571e653c86ed"
+  },
+  "source/windows-failure.log": {
+    "origin": "/tmp/oriole-pr115-windows-portability-study/windows-failure.log",
+    "bytes": 6862,
+    "sha256": "e45238f7a006f451fac141b1622ab829368e5af35ee6e3f2710648c853817f3b"
+  },
+  "build/build.py": {
+    "origin": "/tmp/oriole-pr115-windows-portability-build/build.py",
+    "bytes": 4954,
+    "sha256": "89979eeae292ba207f74460f983f59920549f612a779f57742fc28c9f8d76f9c"
+  },
+  "build/candidate.patch": {
+    "origin": "/tmp/oriole-pr115-windows-portability-build/candidate.patch",
+    "bytes": 750,
+    "sha256": "8f240abe4d160b205fa88c7994abcfbef76022e9b4f5fedce417571e653c86ed"
+  },
+  "build/compiler-invocations.json": {
+    "origin": "/tmp/oriole-pr115-windows-portability-build/compiler-invocations.json",
+    "bytes": 6551,
+    "sha256": "c47b4a1c3d73855eb37cf74a9e60d0701290a173220d31f84d01191f6558aa86"
+  },
+  "build/controller.log": {
+    "origin": "/tmp/oriole-pr115-windows-portability-build/controller.log",
+    "bytes": 241,
+    "sha256": "570cd5c217c8d30a52dda015f2ef1ad463e13de4398acb3207d9d102f1d04bda"
+  },
+  "build/controller.patch": {
+    "origin": "/tmp/oriole-pr115-windows-portability-build/controller.patch",
+    "bytes": 2073,
+    "sha256": "c6865ba54df989a6bd32a507ad07c009338fec0538fffef0010800224394adf9"
+  },
+  "build/release.log": {
+    "origin": "/tmp/oriole-pr115-windows-portability-build/release.log",
+    "bytes": 8165,
+    "sha256": "03c1bad4fd5fedd9bee22cd651506aac056bc8c2094b276c5e57413e6f631942"
+  },
+  "build/report.json": {
+    "origin": "/tmp/oriole-pr115-windows-portability-build/report.json",
+    "bytes": 13687,
+    "sha256": "d9848073c88d6e9d30a000fd14d70dd43f5697e58f712ce9c9f54c919b162d5b"
+  },
+  "build/rustc-version.log": {
+    "origin": "/tmp/oriole-pr115-windows-portability-build/rustc-version.log",
+    "bytes": 219,
+    "sha256": "7f8aefa1f89997f46b979665c40b511a92cdf04f6c8463fbec02d30743fb3d6f"
+  },
+  "build/source.json": {
+    "origin": "/tmp/oriole-pr115-windows-portability-build/source.json",
+    "bytes": 7882,
+    "sha256": "eab8c0277ca2afeba5a664a10320296367fcdeab2ea7a283fa95cef23dc24714"
+  },
+  "build/source.tar.gz": {
+    "origin": "/tmp/oriole-pr115-windows-portability-build/source.tar.gz",
+    "bytes": 270302,
+    "sha256": "6f58eb0cf65d7e2ae3837dd26ef61bda20c8724b11f955e7bc3f721409f08fc8"
+  }
+}

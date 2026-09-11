@@ -1,0 +1,42 @@
+{
+  "status": "passed",
+  "scope": "Saved evidence packaging/replay only, no target execution",
+  "steps": [
+    {
+      "name": "assemble",
+      "command": [
+        "taskset",
+        "-c",
+        "6",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "-S",
+        "/tmp/oriole-allocator-provenance-publication/package.py"
+      ],
+      "start": 1789135451.970439,
+      "script_sha256": "d805c147338976997dff60b6e9e753ce0bfb39bfd9aaf3644e37602df177243c",
+      "exit": 0,
+      "end": 1789135454.0927236
+    },
+    {
+      "name": "verify",
+      "command": [
+        "taskset",
+        "-c",
+        "6",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "-S",
+        "/tmp/oriole-allocator-provenance-publication/verify.py",
+        "--package",
+        "/tmp/oriole-allocator-provenance-publication",
+        "--output",
+        "/tmp/oriole-allocator-provenance-publication/verification-attempt01.json"
+      ],
+      "start": 1789135454.093268,
+      "script_sha256": "caed92a4dd6b2bfa82011ae8fce6322a79218a63ae47a64c9c2e8fbfee344680",
+      "exit": 0,
+      "end": 1789135455.2140527
+    }
+  ]
+}

@@ -4610,7 +4610,8 @@ fn arena_text_keeps_bytes_raw_context_and_handlers_live_through_suspension() {
     }
     unsafe extern "C" fn first(data: *mut c_void, bytes: *const c_char, len: c_int) {
         // SAFETY: Raw state access avoids a mutable reference across the nested
-        // DefaultCurrent callback. Detached payload bytes remain independently owned.
+        // DefaultCurrent callback. Eligible Text bytes stay in the C input context,
+        // which remains stable under the busy guard through callback return.
         unsafe {
             let state = data.cast::<TextState>();
             let parser = (*state).parser;

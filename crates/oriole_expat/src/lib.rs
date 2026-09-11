@@ -1266,9 +1266,74 @@ unsafe fn dispatch_text_frame(parser: XML_Parser, bytes: &[u8]) -> Result<(), Al
     }
 }
 
+/// Dispatch a validated native Text range without borrowing parser bytes across C.
+unsafe fn dispatch_context_text(
+    parser: XML_Parser,
+    start: usize,
+    count: usize,
+) -> Result<(), AllocError> {
+    // SAFETY: Called under the busy guard. Borrow only the accounting fields,
+    // then capture scalars exactly as for owned Text dispatch.
+    let (callback, arg) = unsafe {
+        let family = &(*parser).family;
+        if !charge(
+            &family.callback_bytes,
+            count,
+            (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
+        ) {
+            fail_parse(parser, 43);
+            return Ok(());
+        }
+        (
+            (*parser).handlers.text,
+            if (*parser).handler_arg_is_parser {
+                parser.cast()
+            } else {
+                (*parser).user_data
+            },
+        )
+    };
+    let Some(callback) = callback else {
+        // SAFETY: Eager raw storage and the default dispatch path are unchanged.
+        return unsafe { dispatch_unhandled(parser, false, None) };
+    };
+    // SAFETY: Field-only borrows end before the callback. Vec::as_ptr does not
+    // create a slice reference. Checked offsets preserve its allocation provenance.
+    let span = unsafe {
+        (|| {
+            if !(*parser).busy
+                || !(*parser).input_context_active
+                || (*parser).destroying
+                || count == 0
+                || count > 4096
+            {
+                return None;
+            }
+            let offset = start.checked_sub((*parser).input_context_start)?;
+            let context = &(*parser).input_context;
+            let remaining = context.len().checked_sub(offset)?;
+            if count > remaining {
+                return None;
+            }
+            let length = c_int::try_from(count).ok()?;
+            Some((context.as_ptr().add(offset).cast::<c_char>(), length))
+        })()
+    };
+    let Some((pointer, length)) = span else {
+        // SAFETY: An invalid host range is a protocol error, never an allocation error.
+        unsafe { fail_parse(parser, UNEXPECTED_STATE) };
+        return Ok(());
+    };
+    // SAFETY: No parser/context reference crosses this call. The busy guard
+    // prevents same-parser feed, reset or destruction even after StopParser;
+    // permitted setters borrow disjoint fields. The pointer is used only here.
+    unsafe { callback(arg, pointer, length) };
+    Ok(())
+}
+
 unsafe fn run_events(parser: XML_Parser) -> c_int {
-    // SAFETY: Called under the busy guard. The frame owns all storage outside
-    // CParser, so callback-time setters may access the core independently.
+    // SAFETY: Called under the busy guard. The detached frame carries owned
+    // storage or scalar ranges; no core borrow crosses callback-time setters.
     unsafe {
         if (*parser).destroying {
             return ERROR;
@@ -1303,7 +1368,7 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterF
             }
             match (*parser)
                 .core
-                .next_event_for_adapter_into(&mut event, frame)
+                .next_event_for_c_text_context_into(&mut event, frame)
             {
                 Ok(Some(recycling)) => recycling,
                 Ok(None) => {
@@ -1344,7 +1409,9 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterF
             // SAFETY: Both the frame and its position are owned outside CParser.
             unsafe {
                 (*parser).position = frame.position();
-                let result = if let Some(mut name) = frame.take_end_name() {
+                let result = if let Some((start, count)) = frame.native_text_range_for_c() {
+                    dispatch_context_text(parser, start, count)
+                } else if let Some(mut name) = frame.take_end_name() {
                     // The original name is local, independently of the reusable
                     // arena and parser. Match owned End dispatch: charge before
                     // its terminator, recycle after callbacks, then raw fallback.
@@ -2742,3 +2809,6 @@ pub extern "C" fn XML_ErrorString(code: c_int) -> *const c_char {
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod context_text_tests;

@@ -24,12 +24,14 @@ enum Payload {
     InlineText,
     HeapText,
     End(String),
+    NativeText { start: usize },
 }
 
-/// Owned callback storage for literal tags or plain character data.
+/// Detached callback storage for literal tags or plain character data.
 ///
 /// Start-tag slices include a trailing NUL; text is length-delimited. No
-/// parser borrow escapes. The original raw token remains owned by the parser.
+/// parser borrow escapes. The explicit C host may instead receive a scalar
+/// original-input Text range. The raw token remains owned by the parser.
 #[doc(hidden)]
 #[derive(Debug)]
 pub struct AdapterFrame {
@@ -106,6 +108,22 @@ impl AdapterFrame {
         Ok(())
     }
 
+    /// Retain the ordinary Text reservation but let the C host resolve the bytes.
+    pub(crate) fn prepare_native_text(
+        &mut self,
+        start: usize,
+        count: usize,
+    ) -> Result<(), AllocError> {
+        debug_assert!(!self.active && self.bytes.is_empty());
+        debug_assert!(count > 0 && count <= MAX_ARENA_BYTES);
+        if count > INLINE_TEXT_BYTES {
+            self.bytes.try_reserve_exact(count)?;
+        }
+        self.payload = Payload::NativeText { start };
+        self.callback_bytes = count;
+        Ok(())
+    }
+
     fn append(&mut self, text: &str) -> Result<Range<usize>, AllocError> {
         debug_assert!(!text.as_bytes().contains(&0));
         let required = text
@@ -160,6 +178,29 @@ impl AdapterFrame {
         self.position
     }
 
+    /// Identify Text without requiring an owned-byte projection.
+    pub(crate) fn is_text(&self) -> bool {
+        self.active
+            && matches!(
+                self.payload,
+                Payload::InlineText | Payload::HeapText | Payload::NativeText { .. }
+            )
+    }
+
+    /// Absolute original-input range for the explicit C-context host protocol.
+    /// The host must validate and resolve this range before each callback.
+    #[doc(hidden)]
+    #[must_use]
+    pub fn native_text_range_for_c(&self) -> Option<(usize, usize)> {
+        if self.active
+            && let Payload::NativeText { start } = self.payload
+        {
+            Some((start, self.callback_bytes))
+        } else {
+            None
+        }
+    }
+
     /// Character data bytes, valid through the callback and until frame reuse.
     #[must_use]
     pub fn text_bytes(&self) -> Option<&[u8]> {
@@ -170,6 +211,7 @@ impl AdapterFrame {
             Payload::Start | Payload::End(_) => None,
             Payload::InlineText => Some(&self.inline[..self.callback_bytes]),
             Payload::HeapText => Some(self.bytes.as_bytes()),
+            Payload::NativeText { .. } => panic!("C-context Text requires the host range resolver"),
         }
     }
 
@@ -190,11 +232,19 @@ impl AdapterFrame {
     /// Name bytes including the final NUL; valid until this owned frame is reused.
     #[must_use]
     pub fn name_bytes(&self) -> &[u8] {
+        assert!(
+            !matches!(self.payload, Payload::NativeText { .. }),
+            "C-context Text has no name bytes"
+        );
         &self.bytes.as_bytes()[self.name.clone()]
     }
 
     /// Attribute name/value bytes including each final NUL, in source order.
     pub fn attributes(&self) -> impl ExactSizeIterator<Item = (&[u8], &[u8])> {
+        assert!(
+            !matches!(self.payload, Payload::NativeText { .. }),
+            "C-context Text has no attributes"
+        );
         self.attributes.iter().map(|attribute| {
             (
                 &self.bytes.as_bytes()[attribute.name.clone()],

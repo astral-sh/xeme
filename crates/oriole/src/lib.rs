@@ -100,6 +100,7 @@ pub struct Position {
 struct EventOutput<'a> {
     event: &'a mut Option<Event>,
     frame: Option<&'a mut AdapterFrame>,
+    c_text_context: bool,
 }
 
 impl EventOutput<'_> {
@@ -1459,6 +1460,7 @@ impl Parser {
         self.next_delivery_into(&mut EventOutput {
             event: output,
             frame: None,
+            c_text_context: false,
         })
     }
 
@@ -1476,6 +1478,27 @@ impl Parser {
         event: &mut Option<Event>,
         frame: &mut AdapterFrame,
     ) -> Result<Option<RecyclingToken>, Error> {
+        self.next_event_for_adapter_mode_into(event, frame, false)
+    }
+
+    /// Fill detached slots for a C host retaining the original input context.
+    /// Native Text frames contain scalar ranges; the host must validate them
+    /// against its stable context and never call the ordinary byte projection.
+    #[doc(hidden)]
+    pub fn next_event_for_c_text_context_into(
+        &mut self,
+        event: &mut Option<Event>,
+        frame: &mut AdapterFrame,
+    ) -> Result<Option<RecyclingToken>, Error> {
+        self.next_event_for_adapter_mode_into(event, frame, true)
+    }
+
+    fn next_event_for_adapter_mode_into(
+        &mut self,
+        event: &mut Option<Event>,
+        frame: &mut AdapterFrame,
+        c_text_context: bool,
+    ) -> Result<Option<RecyclingToken>, Error> {
         *event = None;
         frame.clear();
         if !self.event_recycling.accepts(&frame.generation) {
@@ -1484,6 +1507,7 @@ impl Parser {
         self.next_delivery_into(&mut EventOutput {
             event,
             frame: Some(frame),
+            c_text_context,
         })?;
         Ok((event.is_some() || frame.active).then(|| self.event_recycling.token()))
     }
@@ -1568,10 +1592,7 @@ impl Parser {
             // prefix on a subsequent accounting error, as the pending queue did.
             // CDATA and start frames publish only after their fallible work.
             let text_prefix = error.kind != ErrorKind::NoMemory
-                && output
-                    .frame
-                    .as_ref()
-                    .is_some_and(|frame| frame.text_bytes().is_some());
+                && output.frame.as_ref().is_some_and(|frame| frame.is_text());
             if !text_prefix {
                 output.clear_frame();
             }
@@ -2486,7 +2507,7 @@ impl Parser {
         let position = self.source().position(end);
         let character_data = !self.stack.is_empty() || self.fragment;
         let value = if character_data {
-            self.prepare_character_data(end, output.frame.as_deref_mut())?
+            self.prepare_character_data(end, output.frame.as_deref_mut(), output.c_text_context)?
         } else {
             None
         };
@@ -2554,7 +2575,7 @@ impl Parser {
             end = invalid;
         }
         let position = self.source().position(end);
-        let value = self.prepare_character_data(end, output.frame.as_deref_mut())?;
+        let value = self.prepare_character_data(end, output.frame.as_deref_mut(), false)?;
         self.save_current_raw(end)?;
         self.consume(end)?;
         if let Some(value) = value {
@@ -3526,12 +3547,13 @@ impl Parser {
         normalize_newlines(&text.decoded(self.allocator)?, self.allocator)
     }
 
-    /// Copy a validated span into detached storage, or keep the owned projection.
+    /// Prepare detached Text or an explicit C-host range, or keep the owned projection.
     /// A prepared frame is not visible until the caller reaches its emit point.
     fn prepare_character_data(
         &mut self,
         count: usize,
         frame: Option<&mut AdapterFrame>,
+        c_text_context: bool,
     ) -> Result<Option<Text>, Error> {
         let text = &self.source().remaining()[..count];
         if let Some(frame) = frame
@@ -3543,7 +3565,17 @@ impl Parser {
                 self.event_recycling
                     .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
             }
-            frame.prepare_text(&self.source().remaining()[..count])?;
+            if c_text_context
+                && count > 0
+                && !self.fragment
+                && !self.external_subset
+                && self.sources.len() == 1
+                && let Some(start) = self.source().native_utf8_byte_index()
+            {
+                frame.prepare_native_text(start, count)?;
+            } else {
+                frame.prepare_text(&self.source().remaining()[..count])?;
+            }
             Ok(None)
         } else {
             self.character_data(text).map(Some)
@@ -3767,6 +3799,9 @@ impl Parser {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod context_text_tests;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum ScanMode {

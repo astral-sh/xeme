@@ -1,0 +1,39 @@
+{
+  "status": "passed_independent_readme_and_csv_reconstruction",
+  "scope": "From copied package and archived elapsed review JSON only; no original-study paths read.",
+  "table_lines": [
+    "| Normal | 1.000060 | 1.275813 | 14/24 | 4/24 |",
+    "| Generated-corpus PGO | 1.000163 | 1.146520 | 14/24 | 6/24 |",
+    "| ElementTree | 1.359323 | 1.197582 |",
+    "| pyexpat events | 1.197434 | 1.097634 |"
+  ],
+  "tables": {
+    "normal": {
+      "candidate_over_control": 1.0000598777156122,
+      "candidate_over_expat": 1.2758133686254862,
+      "adverse": 14,
+      "within_1_10": 4,
+      "elementtree": 1.3593230497295339,
+      "pyexpat-events": 1.1974340844785767
+    },
+    "pgo": {
+      "candidate_over_control": 1.0001632484165779,
+      "candidate_over_expat": 1.1465195124025775,
+      "adverse": 14,
+      "within_1_10": 6,
+      "elementtree": 1.1975819298276855,
+      "pyexpat-events": 1.0976342908822803
+    }
+  },
+  "csv_conditions": 48,
+  "copied_files": [
+    "README.md",
+    "conditions.csv",
+    "evidence.tar.gz",
+    "files.json",
+    "index.json",
+    "replay.py",
+    "report.json",
+    "verify.py"
+  ]
+}

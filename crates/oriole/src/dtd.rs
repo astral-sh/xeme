@@ -394,7 +394,10 @@ impl Parser {
         Ok(())
     }
 
-    pub(crate) fn parse_dtd_step(&mut self) -> Result<bool, Error> {
+    pub(crate) fn parse_dtd_step(
+        &mut self,
+        input_buffer: Option<&crate::InputBuffer>,
+    ) -> Result<bool, Error> {
         // An active ordinary declaration retains its complete, unconsumed
         // source token and DTD context until every callback has been drained.
         // Resume it before inspecting or consuming any bytes from that source.
@@ -546,7 +549,7 @@ impl Parser {
             ));
         }
         let final_input = self.is_source_final();
-        if self.reparse_deferral && !final_input && self.source().should_defer(limit) {
+        if self.reparse_deferral && !final_input && self.should_defer_input(limit, input_buffer) {
             return Ok(false);
         }
         let end = self

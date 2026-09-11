@@ -2933,6 +2933,84 @@ fn encoding_setter_observes_abort_and_suspension_inside_callbacks() {
 }
 
 #[test]
+fn reparse_pressure_retries_before_the_next_input_growth() {
+    // SAFETY: Inputs and callback state stay live through each serial parse.
+    unsafe {
+        for pregrow in [false, true] {
+            let mut state = State::default();
+            let parser = configured(&mut state);
+            if pregrow {
+                assert!(!XML_GetBuffer(parser, 65536).is_null());
+            }
+            let mut input = vec![b'x'; 32 * 131];
+            input[..3000].fill(b' ');
+            input[..2].copy_from_slice(b"<r");
+            input[2999] = b'>';
+            let expected_feed = if pregrow { 32 } else { 30 };
+            for (index, chunk) in input.chunks(131).enumerate() {
+                assert_eq!(XML_Parse(parser, chunk.as_ptr().cast(), 131, 0), OK);
+                let starts = state
+                    .events
+                    .iter()
+                    .filter(|event| *event == "start:r")
+                    .count();
+                assert_eq!(starts, usize::from(index + 1 >= expected_feed));
+            }
+            assert_eq!(XML_Parse(parser, c"</r>".as_ptr(), 4, 1), OK);
+            XML_ParserFree(parser);
+        }
+    }
+}
+
+#[test]
+fn parse_buffer_preserves_the_requested_fill_size() {
+    // SAFETY: The short submitted fill stays inside the successful reservation.
+    unsafe {
+        for requested in [100, 3000] {
+            let mut state = State::default();
+            let parser = configured(&mut state);
+            let mut input = [b' '; 1000];
+            input[..2].copy_from_slice(b"<r");
+            assert_eq!(XML_Parse(parser, input.as_ptr().cast(), 1000, 0), OK);
+            let buffer = XML_GetBuffer(parser, requested).cast::<u8>();
+            assert!(!buffer.is_null());
+            ptr::write_bytes(buffer, b' ', 100);
+            ptr::copy_nonoverlapping(b"/>".as_ptr(), buffer, 2);
+            assert_eq!(XML_ParseBuffer(parser, 100, 0), OK);
+            assert_eq!(state.events.is_empty(), requested == 100);
+            assert_eq!(XML_ParseBuffer(parser, 0, 1), OK);
+            assert_eq!(state.events, ["start:r", "end:r"]);
+            XML_ParserFree(parser);
+        }
+    }
+}
+
+#[test]
+fn reset_retains_the_reservation_for_zero_length_parse_buffer() {
+    // SAFETY: Zero-byte calls do not access staging bytes. All handles are owned.
+    unsafe {
+        for reservation in 0..4 {
+            let parser = XML_ParserCreate(ptr::null());
+            assert!(!parser.is_null());
+            match reservation {
+                0 => {}
+                1 => assert!(!XML_GetBuffer(parser, 1).is_null()),
+                2 => assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), OK),
+                3 => assert_eq!(XML_Parse(parser, ptr::null(), 0, 0), OK),
+                _ => unreachable!(),
+            }
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            assert_eq!(
+                XML_ParseBuffer(parser, 0, 0),
+                if reservation == 0 { ERROR } else { OK }
+            );
+            assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), OK);
+            XML_ParserFree(parser);
+        }
+    }
+}
+
+#[test]
 fn zero_length_parse_buffer_finishes_owned_input_without_a_reservation() {
     // SAFETY: Every input is readable for its explicit length; buffer writes stay
     // within a successful reservation, and each parser is freed exactly once.

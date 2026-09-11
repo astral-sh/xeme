@@ -101,6 +101,20 @@ struct EventOutput<'a> {
     event: &'a mut Option<Event>,
     frame: Option<&'a mut AdapterFrame>,
     c_text_context: bool,
+    input_buffer: Option<&'a InputBuffer>,
+}
+
+/// Original-byte reservation metadata supplied by the C adapter for one delivery.
+///
+/// This describes its reparse scheduling budget, not decoded buffer capacity.
+/// No input bytes or adapter references are retained after the delivery returns.
+#[doc(hidden)]
+pub struct InputBuffer {
+    pub start: usize,
+    pub length: usize,
+    pub capacity: usize,
+    pub request: usize,
+    pub context_bytes: usize,
 }
 
 impl EventOutput<'_> {
@@ -1461,6 +1475,7 @@ impl Parser {
             event: output,
             frame: None,
             c_text_context: false,
+            input_buffer: None,
         })
     }
 
@@ -1478,7 +1493,7 @@ impl Parser {
         event: &mut Option<Event>,
         frame: &mut AdapterFrame,
     ) -> Result<Option<RecyclingToken>, Error> {
-        self.next_event_for_adapter_mode_into(event, frame, false)
+        self.next_event_for_adapter_mode_into(event, frame, false, None)
     }
 
     /// Fill detached slots for a C host retaining the original input context.
@@ -1490,7 +1505,19 @@ impl Parser {
         event: &mut Option<Event>,
         frame: &mut AdapterFrame,
     ) -> Result<Option<RecyclingToken>, Error> {
-        self.next_event_for_adapter_mode_into(event, frame, true)
+        self.next_event_for_adapter_mode_into(event, frame, true, None)
+    }
+
+    /// Fill C context slots while honoring the host's original-byte reservation.
+    /// The reservation applies only to this delivery and the original source.
+    #[doc(hidden)]
+    pub fn next_event_for_c_input_into(
+        &mut self,
+        event: &mut Option<Event>,
+        frame: &mut AdapterFrame,
+        input_buffer: &InputBuffer,
+    ) -> Result<Option<RecyclingToken>, Error> {
+        self.next_event_for_adapter_mode_into(event, frame, true, Some(input_buffer))
     }
 
     fn next_event_for_adapter_mode_into(
@@ -1498,6 +1525,7 @@ impl Parser {
         event: &mut Option<Event>,
         frame: &mut AdapterFrame,
         c_text_context: bool,
+        input_buffer: Option<&InputBuffer>,
     ) -> Result<Option<RecyclingToken>, Error> {
         *event = None;
         frame.clear();
@@ -1508,6 +1536,7 @@ impl Parser {
             event,
             frame: Some(frame),
             c_text_context,
+            input_buffer,
         })?;
         Ok((event.is_some() || frame.active).then(|| self.event_recycling.token()))
     }
@@ -1677,6 +1706,23 @@ impl Parser {
             .chain(self.value_context_byte_index())
             .min()
             .expect("a parser always has its original input source")
+    }
+
+    /// Retry an incomplete original token before the next usual fill would
+    /// exceed the host's reservation. Query retained anchors only on deferral.
+    fn should_defer_input(&self, limit: usize, input_buffer: Option<&InputBuffer>) -> bool {
+        if !self.source().should_defer(limit) {
+            return false;
+        }
+        let Some(input) = input_buffer.filter(|_| self.sources.len() == 1) else {
+            return true;
+        };
+        let discard = self
+            .input_context_byte_index()
+            .saturating_sub(input.start)
+            .saturating_sub(input.context_bytes)
+            .min(input.length);
+        input.request <= input.capacity.saturating_sub(input.length - discard)
     }
 
     #[must_use]
@@ -2035,7 +2081,7 @@ impl Parser {
                 return Ok(());
             }
             if self.in_doctype || self.external_subset {
-                if !self.parse_dtd_step()? {
+                if !self.parse_dtd_step(output.input_buffer)? {
                     return Ok(());
                 }
                 continue;
@@ -2054,7 +2100,7 @@ impl Parser {
                         "entity reference outside the document element",
                     ));
                 }
-                if !self.parse_reference()? {
+                if !self.parse_reference(output.input_buffer)? {
                     return Ok(());
                 }
                 continue;
@@ -2139,7 +2185,7 @@ impl Parser {
             let final_input = self.is_source_final();
             let max_token = self.config.limits.max_token_bytes;
             let deferral = self.reparse_deferral && !final_input;
-            if deferral && self.source().should_defer(max_token) {
+            if deferral && self.should_defer_input(max_token, output.input_buffer) {
                 return Ok(());
             }
             let matched_end = if mode == ScanMode::Tag && remaining.starts_with("</") {
@@ -2335,9 +2381,7 @@ impl Parser {
         if !self.seen_root
             && !self.fragment
             && !self.is_source_final()
-            && self
-                .source()
-                .should_defer(self.config.limits.max_token_bytes)
+            && self.should_defer_input(self.config.limits.max_token_bytes, output.input_buffer)
         {
             return Ok(false);
         }
@@ -2587,9 +2631,12 @@ impl Parser {
         Ok(true)
     }
 
-    fn parse_reference(&mut self) -> Result<bool, Error> {
+    fn parse_reference(&mut self, input_buffer: Option<&InputBuffer>) -> Result<bool, Error> {
         let limit = self.config.limits.max_token_bytes;
-        if self.reparse_deferral && !self.is_source_final() && self.source().should_defer(limit) {
+        if self.reparse_deferral
+            && !self.is_source_final()
+            && self.should_defer_input(limit, input_buffer)
+        {
             return Ok(false);
         }
         let end = self

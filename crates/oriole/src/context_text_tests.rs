@@ -16,7 +16,7 @@ fn context_text_native_prefix_precedes_late_accounting_error() {
         let mut event = None;
         assert!(
             parser
-                .next_event_for_adapter_mode_into(&mut event, &mut frame, native)
+                .next_event_for_adapter_mode_into(&mut event, &mut frame, native, None)
                 .unwrap()
                 .is_some()
         );
@@ -30,7 +30,7 @@ fn context_text_native_prefix_precedes_late_accounting_error() {
         assert_eq!(frame.position(), parser.position());
         let position = frame.position();
         let error = parser
-            .next_event_for_adapter_mode_into(&mut event, &mut frame, native)
+            .next_event_for_adapter_mode_into(&mut event, &mut frame, native, None)
             .unwrap_err();
         assert_eq!(error.kind, ErrorKind::LimitExceeded);
         assert!(event.is_none() && !frame.is_active());

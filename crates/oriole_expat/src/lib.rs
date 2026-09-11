@@ -169,6 +169,10 @@ pub struct XML_ParserStruct {
     base: Option<CString>,
     buffer: XmlVec<u8>,
     buffer_available: bool,
+    // Logical original-byte reservation for reparse scheduling. Actual staging,
+    // retained context and decoded storage remain independently accounted.
+    reparse_capacity: usize,
+    last_buffer_request: usize,
     input_context: XmlVec<u8>,
     input_context_start: usize,
     input_context_active: bool,
@@ -341,6 +345,8 @@ unsafe fn create(
                     base: None,
                     buffer: XmlVec::new_in(allocator),
                     buffer_available: false,
+                    reparse_capacity: 0,
+                    last_buffer_request: 0,
                     input_context: XmlVec::new_in(allocator),
                     input_context_start: 0,
                     input_context_active: false,
@@ -571,6 +577,9 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                 (*parser).base = None;
                 (*parser).buffer.clear();
                 (*parser).buffer_available = false;
+                // Successful reset keeps the input reservation, but no pending
+                // token or producer request belongs to the new document.
+                (*parser).last_buffer_request = 0;
                 (*parser).input_context.clear();
                 (*parser).input_context_start = 0;
                 (*parser).external_arg = ptr::null_mut();
@@ -1346,6 +1355,17 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
 }
 
 unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterFrame) -> c_int {
+    // SAFETY: Busy excludes input/reservation changes for this whole operation.
+    // Only scalars are copied; no reference crosses an application callback.
+    let input_buffer = unsafe {
+        oriole::InputBuffer {
+            start: (*parser).input_context_start,
+            length: (*parser).input_context.len(),
+            capacity: (*parser).reparse_capacity,
+            request: (*parser).last_buffer_request,
+            context_bytes: INPUT_CONTEXT_BYTES,
+        }
+    };
     loop {
         // SAFETY: Pending lexical fragments belong to a previously suspended event.
         unsafe {
@@ -1368,7 +1388,7 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterF
             }
             match (*parser)
                 .core
-                .next_event_for_c_text_context_into(&mut event, frame)
+                .next_event_for_c_input_into(&mut event, frame, &input_buffer)
             {
                 Ok(Some(recycling)) => recycling,
                 Ok(None) => {
@@ -1624,6 +1644,18 @@ pub unsafe extern "C" fn XML_Parse(
     len: c_int,
     final_input: c_int,
 ) -> c_int {
+    // SAFETY: The shared entry validates the same caller-owned input and handle.
+    unsafe { parse_input(parser, input, len, final_input, false) }
+}
+
+/// Parse copied input without replacing a GetBuffer request for ParseBuffer.
+unsafe fn parse_input(
+    parser: XML_Parser,
+    input: *const c_char,
+    len: c_int,
+    final_input: c_int,
+    buffered: bool,
+) -> c_int {
     // SAFETY: The scope owns a tracker clone and rejects allocator-callback reentry
     // before reading parser state; all temporary allocations use the same family.
     let operation = || {
@@ -1650,6 +1682,9 @@ pub unsafe extern "C" fn XML_Parse(
             }
             if (*parser).parse_error != 0 {
                 return ERROR;
+            }
+            if !buffered {
+                (*parser).last_buffer_request = len as usize;
             }
             (*parser).error = 0;
             if len as usize > MAX_INPUT_BYTES
@@ -1681,6 +1716,11 @@ pub unsafe extern "C" fn XML_Parse(
                 if preserve_input_context(parser, input).is_err() {
                     fail_parse(parser, 1);
                     return ERROR;
+                }
+                if !buffered {
+                    // Context preservation has already reclaimed old bytes and
+                    // appended this call's input. Do not count the fill twice.
+                    reserve_reparse_buffer(parser, 0);
                 }
                 if let Err(error) = (*parser).core.feed(input, final_input != 0) {
                     if error.kind == ErrorKind::UnknownEncoding && resolve_unknown_encoding(parser)
@@ -1734,6 +1774,9 @@ pub unsafe extern "C" fn XML_GetBuffer(parser: XML_Parser, len: c_int) -> *mut c
                     return ptr::null_mut();
                 }
                 let len = len as usize;
+                // A valid request describes the producer's usual fill even if
+                // its allocation or independent resource limit check fails.
+                (*parser).last_buffer_request = len;
                 let remaining = (*parser).core.input_bytes_remaining().min(MAX_INPUT_BYTES);
                 if len > remaining {
                     (*parser).error = 43;
@@ -1746,6 +1789,7 @@ pub unsafe extern "C" fn XML_GetBuffer(parser: XML_Parser, len: c_int) -> *mut c
                 }
                 (*parser).buffer.resize(len.max(1), 0);
                 (*parser).buffer_available = true;
+                reserve_reparse_buffer(parser, len);
                 (*parser).buffer.as_mut_ptr().cast()
             }
         }))
@@ -1783,11 +1827,10 @@ pub unsafe extern "C" fn XML_ParseBuffer(
             (*parser).error = 36;
             return ERROR;
         }
-        // Once parsing has started, a zero-length call finishes already-owned
-        // input without requiring a caller-visible writable buffer reservation.
-        // Initialized parsers and all positive lengths retain that requirement.
-        if len == 0 && (*parser).state == 1 {
-            return XML_Parse(parser, ptr::null(), 0, final_input);
+        // Zero-length calls can finish owned input, including an empty buffer
+        // retained by Reset. They do not replace the last producer request.
+        if len == 0 && ((*parser).state == 1 || (*parser).reparse_capacity != 0) {
+            return parse_input(parser, ptr::null(), 0, final_input, true);
         }
         if !(*parser).buffer_available {
             (*parser).error = 42;
@@ -1798,7 +1841,7 @@ pub unsafe extern "C" fn XML_ParseBuffer(
             return ERROR;
         }
         let input = (*parser).buffer.as_ptr();
-        XML_Parse(parser, input.cast(), len, final_input)
+        parse_input(parser, input.cast(), len, final_input, true)
     }
 }
 
@@ -2295,6 +2338,35 @@ unsafe fn preserve_input_context(parser: XML_Parser, input: &[u8]) -> Result<(),
     Ok(())
 }
 
+/// Honor successful original-byte reservations without allocating hidden data.
+/// Expat starts at 2 KiB and doubles when the retained input plus the requested
+/// fill no longer fits. This budget controls timing, not physical memory limits.
+unsafe fn reserve_reparse_buffer(parser: XML_Parser, request: usize) {
+    // SAFETY: Called under exclusive entry, after a successful input reservation.
+    // No parser reference survives this scalar update or reaches a callback.
+    unsafe {
+        let length = (*parser).input_context.len();
+        let capacity = (*parser).reparse_capacity;
+        if capacity != 0 && length <= capacity && request <= capacity - length {
+            return;
+        }
+        let discard = (*parser)
+            .core
+            .input_context_byte_index()
+            .saturating_sub((*parser).input_context_start)
+            .saturating_sub(INPUT_CONTEXT_BYTES)
+            .min(length);
+        // Tracked context storage is bounded by the 512 MiB live-allocation
+        // limit, and a request by MAX_INPUT_BYTES (256 MiB). Their sum and its
+        // next power of two fit usize even on 32-bit targets. This allocates no
+        // storage and does not increase either of those resource limits.
+        let needed = (length - discard + request).max(2048);
+        if needed > capacity {
+            (*parser).reparse_capacity = needed.next_power_of_two();
+        }
+    }
+}
+
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn XML_GetInputContext(
     parser: XML_Parser,
@@ -2418,6 +2490,8 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                             .transpose()?,
                         buffer: XmlVec::new_in(allocator),
                         buffer_available: false,
+                        reparse_capacity: 0,
+                        last_buffer_request: 0,
                         input_context: XmlVec::new_in(allocator),
                         input_context_start: 0,
                         input_context_active: false,

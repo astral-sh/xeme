@@ -16,16 +16,16 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole | Expat | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 56.530 ms | 28.872 ms | 1.95× |
-| Wayland protocol | 1.259 ms | 1.075 ms | 1.17× |
-| Maven POM | 0.951 ms | 0.432 ms | 2.21× |
-| Batik SVG | 0.138 ms | 0.134 ms | 1.03× |
-| GTK UI | 0.417 ms | 0.214 ms | 1.95× |
-| DocBook XSL | 0.287 ms | 0.184 ms | 1.56× |
+| Vulkan registry | 56.367 ms | 29.392 ms | 1.91× |
+| Wayland protocol | 1.260 ms | 1.078 ms | 1.17× |
+| Maven POM | 0.955 ms | 0.450 ms | 2.12× |
+| Batik SVG | 0.134 ms | 0.135 ms | 0.99× |
+| GTK UI | 0.427 ms | 0.214 ms | 1.99× |
+| DocBook XSL | 0.291 ms | 0.185 ms | 1.57× |
 
-These [native measurements](benchmarks/results/2026-09-10/start-frame-integration/) use original XML from six pinned projects, Expat 2.8.4, 4 KiB chunks, and namespaces disabled on a shared Linux AMD EPYC-Milan host. Times are medians of process medians; ratios are medians of paired ratios.
+These [native measurements](benchmarks/results/2026-09-11/c-library-thinlto/) use original XML from six pinned projects, Expat 2.8.4, 4 KiB chunks, and namespaces disabled on a shared Linux AMD EPYC-Milan host. Times are medians of process medians; ratios are medians of paired ratios.
 
-The latest start-tag change reduces elapsed time by 9.3% across the 24 native project conditions and 4.4% across the 24 actual CPython conditions versus `503a559`. Oriole still takes 1.75× Expat's time natively and 1.32× through CPython. Three Wayland consumer conditions are faster than Expat in this measurement. The [full report](docs/validation/2026-09-10/start-frame-integration/) retains all conditions and samples, including the earlier isolated study's small regression.
+Building the C libraries with effective ThinLTO reduces elapsed time by 1.8% across the 24 native project conditions and 1.1% across the 24 actual CPython conditions versus the identical normal build. Oriole still takes 1.73× Expat's time natively and 1.31× through CPython. One Batik native condition and two Wayland pyexpat conditions are faster than Expat in this measurement; the Batik margin is only 0.65% on a shared host. The [full report](docs/validation/2026-09-11/c-library-thinlto/) retains all conditions, samples and regressions.
 
 Optional [profile-guided builds](tools/pgo/) are available. The [earlier PGO results](benchmarks/results/2026-09-10/version-consistent-pgo/) measure `4b11ace`; they do not measure these new parser changes.
 

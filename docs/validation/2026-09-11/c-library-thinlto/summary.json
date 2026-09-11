@@ -1,0 +1,246 @@
+{
+  "runtime_commit": "50c20c1e73eeaacabb9df90e413f502361fb45b3",
+  "source_files": 70,
+  "current_documentation_only_source_delta": [
+    "crates/oriole_expat/README.md"
+  ],
+  "libraries": {
+    "normal": {
+      "liboriole_expat.so": "9815cc852327d455c094b0fb72c1d33fb90a4571e67cf15965e96e2300376828",
+      "liboriole_expat.a": "92eafd42ffe68dc30db920ff5ff8d67357b2c6c4273f51b0e3e841b2bfb9ea69"
+    },
+    "thinlto": {
+      "liboriole_expat.so": "a55ca0f0fed68f8db0f2e8d3ea86c271c8491fe130b5074077aecace3ab4a4df",
+      "liboriole_expat.a": "3f4f51259327d2c736c5d93640e1b2dbb6de9e03ae0dc15fbc9f11df37c8aa60"
+    }
+  },
+  "api": {
+    "raw_exit": 1,
+    "passed": 4347,
+    "failed": 393,
+    "all4740rows_exact": true,
+    "raw_results_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+    "baseline": "/tmp/oriole-start-frame-integration-gates/api-native/upstream-api",
+    "baseline_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+    "bounds": {
+      "per_test_seconds": 3,
+      "per_test_address_space_bytes": 1073741824,
+      "per_test_rss_limit_bytes": 805306368,
+      "total_timeout_seconds": 240
+    }
+  },
+  "cpython_each_linkage": {
+    "tests": 802,
+    "failures": 2,
+    "reported_skips": 14,
+    "expected_failures": 3
+  },
+  "native": {
+    "scope": "All fixed conditions and samples; geometric means of per-condition paired median time ratios. Shared host.",
+    "groups": {
+      "real": {
+        "conditions": 24,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9818992565161654,
+            "below_one": 18
+          },
+          "candidate_over_expat": {
+            "geomean": 1.7261877660486005,
+            "below_one": 1
+          },
+          "published_over_expat": {
+            "geomean": 1.7599284518843947,
+            "below_one": 0
+          }
+        }
+      },
+      "generated": {
+        "conditions": 4,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9798834676288136,
+            "below_one": 3
+          },
+          "candidate_over_expat": {
+            "geomean": 5.1706994037476965,
+            "below_one": 0
+          },
+          "published_over_expat": {
+            "geomean": 5.272565382486424,
+            "below_one": 0
+          }
+        }
+      }
+    },
+    "regressions": [
+      {
+        "condition": {
+          "name": "vulkan",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+          "chunk": 4096,
+          "namespaces": true,
+          "iterations": 7
+        },
+        "ratio": 1.0001606713604378
+      },
+      {
+        "condition": {
+          "name": "wayland",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+          "chunk": 4096,
+          "namespaces": true,
+          "iterations": 64
+        },
+        "ratio": 1.0050671117501193
+      },
+      {
+        "condition": {
+          "name": "gtk",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+          "chunk": 4096,
+          "namespaces": false,
+          "iterations": 256
+        },
+        "ratio": 1.0032715057333597
+      },
+      {
+        "condition": {
+          "name": "gtk",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+          "chunk": 4096,
+          "namespaces": true,
+          "iterations": 256
+        },
+        "ratio": 1.0050554290467295
+      },
+      {
+        "condition": {
+          "name": "generated-entities",
+          "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+          "chunk": 4096,
+          "namespaces": false,
+          "iterations": 32
+        },
+        "ratio": 1.0083108521023347
+      },
+      {
+        "condition": {
+          "name": "wayland",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+          "chunk": 65536,
+          "namespaces": true,
+          "iterations": 64
+        },
+        "ratio": 1.0077926346091817
+      },
+      {
+        "condition": {
+          "name": "gtk",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+          "chunk": 65536,
+          "namespaces": true,
+          "iterations": 256
+        },
+        "ratio": 1.0072456546589676
+      }
+    ]
+  },
+  "python": {
+    "scope": "All fixed conditions and samples; geometric means of per-condition paired median time ratios. Shared host.",
+    "groups": {
+      "all": {
+        "conditions": 24,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9889550043182667,
+            "below_one": 21
+          },
+          "candidate_over_expat": {
+            "geomean": 1.3142053672535123,
+            "below_one": 2
+          },
+          "published_over_expat": {
+            "geomean": 1.3280882111918229,
+            "below_one": 2
+          }
+        }
+      },
+      "elementtree": {
+        "conditions": 12,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9887963669981488,
+            "below_one": 10
+          },
+          "candidate_over_expat": {
+            "geomean": 1.4125449466172548,
+            "below_one": 0
+          },
+          "published_over_expat": {
+            "geomean": 1.4254426060389147,
+            "below_one": 0
+          }
+        }
+      },
+      "pyexpat-events": {
+        "conditions": 12,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.989113667089327,
+            "below_one": 11
+          },
+          "candidate_over_expat": {
+            "geomean": 1.2227120641039158,
+            "below_one": 2
+          },
+          "published_over_expat": {
+            "geomean": 1.2373828937301623,
+            "below_one": 2
+          }
+        }
+      }
+    },
+    "regressions": [
+      {
+        "condition": {
+          "name": "wayland",
+          "chunk": 65536,
+          "mode": "elementtree",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+          "iterations": 16
+        },
+        "ratio": 1.0035198756829342
+      },
+      {
+        "condition": {
+          "name": "gtk",
+          "chunk": 65536,
+          "mode": "elementtree",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+          "iterations": 64
+        },
+        "ratio": 1.0010350679131292
+      },
+      {
+        "condition": {
+          "name": "gtk",
+          "chunk": 65536,
+          "mode": "pyexpat-events",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+          "iterations": 64
+        },
+        "ratio": 1.001280007222207
+      }
+    ]
+  },
+  "archive": {
+    "sha256": "6bc7406343e1fe9d2f66906bcb67fa81cc6d520f97867bfcf9675606fbeda0cf",
+    "members": 2474,
+    "direct_binary_exclusions": 15,
+    "bytes": 5090679,
+    "raw_bytes": 40973250,
+    "member_and_origin_readback": true
+  },
+  "scope": "Same-source normal9815 and C-only ThinLTOa55 libraries. Expat normal7a333. No PGO or runtime changes. No transfer of same-source Rust test results to the C-only artifact. Production command validation is separate from these frozen measurements."
+}

@@ -1,0 +1,430 @@
+{
+  "status": "independent_saved_native_audit_passed",
+  "scope": "Saved-data-only native timing source/hash/metadata/order/arithmetic audit. No parser, build, benchmark or timing executions. Completed correctness-gate handoff left unchanged.",
+  "audit_cpu": 6,
+  "interpreter": "/home/dev-user/.virtualenvs/openai/bin/python3",
+  "counts": {
+    "conditions": 28,
+    "real_conditions": 24,
+    "generated_conditions": 4,
+    "preflight_workers": 84,
+    "preflight_samples_with_warmups": 168,
+    "timed_workers": 588,
+    "timed_warmups": 588,
+    "timed_measured_samples": 105420,
+    "all_samples_with_preflights_and_warmups": 106176,
+    "seeded_cohorts": 196,
+    "immediate_worker_records": 672,
+    "paired_ratios": 588,
+    "per_condition_ratio_medians": 84
+  },
+  "identities": {
+    "libraries": {
+      "published": {
+        "path": "/tmp/oriole-thinlto-production-study/normal/liboriole_expat.so",
+        "sha256": "9815cc852327d455c094b0fb72c1d33fb90a4571e67cf15965e96e2300376828"
+      },
+      "candidate": {
+        "path": "/tmp/oriole-thinlto-production-study/thinlto/liboriole_expat.so",
+        "sha256": "a55ca0f0fed68f8db0f2e8d3ea86c271c8491fe130b5074077aecace3ab4a4df"
+      },
+      "expat": {
+        "path": "/home/dev-user/.cache/oriole/expat-build/libexpat.so.1.12.4",
+        "sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+      }
+    },
+    "candidate_source_manifest_sha256": "a22d98b7d406252d843373474701038b31a20c02034e60ebdcb954045860adef",
+    "candidate_source_files": 70,
+    "candidate_live_and_source_archives_verified": true,
+    "baseline_archived_source_files": 70,
+    "baseline_live_source_files_verified": 70,
+    "composition_review_sha256": "e9b3e851d3bce876591d5fdf2d932d3123a1aa1763e4115838e61c753d7efddd",
+    "comparison_baseline": "Same70 source, matched fresh normal9815 versus C-only effective ThinLTOa55c; pinned Expat retains normal compiler flags. The two Oriole builds differ in crate types and actual LTO codegen; no runtime source edits.",
+    "common_runtime_source_changes": [],
+    "changed_tests": [],
+    "driver": {
+      "source_sha256": "3ee1dd4de79d12f8fed9224d5b1e88a3724ba7c2582b1b959c56ea4c5b1a6ee1",
+      "binary_sha256": "e9478cd0f8572b08ab513377795a07754086a9cdf2c06748183db3c69d232e23",
+      "original_build_record_sha256": "cab72f04d5e08bea825145faa285e661ffa7edcd380510618543f8ad14b508d9",
+      "original_build_command": [
+        "cc",
+        "-std=c11",
+        "-O3",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "/home/dev-user/code/oss/oriole/benchmarks/native_driver.c",
+        "-ldl",
+        "-o",
+        "/tmp/oriole-grammar-bench-plain/native-driver"
+      ],
+      "binding": "Per-process absolute library path, dlopen(RTLD_LOCAL|RTLD_NOW), dlsym on that handle; version output checked. No per-worker dladdr receipt was emitted."
+    }
+  },
+  "groups": {
+    "real": {
+      "conditions": 24,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.9818992565161654,
+          "below_one": 18
+        },
+        "candidate_over_expat": {
+          "geomean": 1.7261877660486005,
+          "below_one": 1
+        },
+        "published_over_expat": {
+          "geomean": 1.7599284518843947,
+          "below_one": 0
+        }
+      }
+    },
+    "generated": {
+      "conditions": 4,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.9798834676288136,
+          "below_one": 3
+        },
+        "candidate_over_expat": {
+          "geomean": 5.1706994037476965,
+          "below_one": 0
+        },
+        "published_over_expat": {
+          "geomean": 5.272565382486424,
+          "below_one": 0
+        }
+      }
+    },
+    "real-namespaces-off": {
+      "conditions": 12,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.98443402095298,
+          "below_one": 11
+        },
+        "candidate_over_expat": {
+          "geomean": 1.6131023320128541,
+          "below_one": 1
+        },
+        "published_over_expat": {
+          "geomean": 1.6383644552602508,
+          "below_one": 0
+        }
+      }
+    },
+    "real-namespaces-on": {
+      "conditions": 12,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.979371018703394,
+          "below_one": 7
+        },
+        "candidate_over_expat": {
+          "geomean": 1.8472009769756588,
+          "below_one": 0
+        },
+        "published_over_expat": {
+          "geomean": 1.890512300732376,
+          "below_one": 0
+        }
+      }
+    }
+  },
+  "regressions": [
+    {
+      "condition": {
+        "name": "vulkan",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 7
+      },
+      "ratio": 1.0001606713604378
+    },
+    {
+      "condition": {
+        "name": "wayland",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 64
+      },
+      "ratio": 1.0050671117501193
+    },
+    {
+      "condition": {
+        "name": "gtk",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 256
+      },
+      "ratio": 1.0032715057333597
+    },
+    {
+      "condition": {
+        "name": "gtk",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "ratio": 1.0050554290467295
+    },
+    {
+      "condition": {
+        "name": "generated-entities",
+        "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "ratio": 1.0083108521023347
+    },
+    {
+      "condition": {
+        "name": "wayland",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 64
+      },
+      "ratio": 1.0077926346091817
+    },
+    {
+      "condition": {
+        "name": "gtk",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "ratio": 1.0072456546589676
+    }
+  ],
+  "generated_conditions": [
+    {
+      "condition": {
+        "name": "generated-rare-declarations",
+        "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "median_process_seconds": {
+        "published": 0.011378532,
+        "candidate": 0.010985363000000001,
+        "expat": 0.0022789615
+      },
+      "median_ratios": {
+        "candidate_over_published": 0.9729218145187797,
+        "candidate_over_expat": 4.857660824897656,
+        "published_over_expat": 5.055294400043545
+      },
+      "paired_ratios": {
+        "candidate_over_published": [
+          0.9837123393664868,
+          0.9918106183360125,
+          0.9729218145187797,
+          0.9322732454435725,
+          0.9885983182062195,
+          0.9695359112486942,
+          0.9382169694965025
+        ],
+        "candidate_over_expat": [
+          4.620449299173525,
+          5.103881651676843,
+          4.857660824897656,
+          4.783199854928626,
+          4.915124262097267,
+          4.9012894627766395,
+          4.745969091642081
+        ],
+        "published_over_expat": [
+          4.6969516537213565,
+          5.146024409619412,
+          4.992858369919808,
+          5.130684462206996,
+          4.97181127216118,
+          5.055294400043545,
+          5.058498456054384
+        ]
+      }
+    },
+    {
+      "condition": {
+        "name": "generated-entities",
+        "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "median_process_seconds": {
+        "published": 0.01177895,
+        "candidate": 0.0118031205,
+        "expat": 0.0021623435
+      },
+      "median_ratios": {
+        "candidate_over_published": 1.0083108521023347,
+        "candidate_over_expat": 5.446568173057507,
+        "published_over_expat": 5.4031831163457635
+      },
+      "paired_ratios": {
+        "candidate_over_published": [
+          0.9891707576575867,
+          1.0202231862116258,
+          1.0001347743219897,
+          1.010342070829811,
+          1.0137288723444535,
+          1.0083108521023347,
+          1.007883579235317
+        ],
+        "candidate_over_expat": [
+          5.427725058484001,
+          5.674457667305647,
+          5.403911326686855,
+          5.455937929627109,
+          5.2382002802187255,
+          5.446568173057507,
+          5.493225455671733
+        ],
+        "published_over_expat": [
+          5.487146699865216,
+          5.561976775274532,
+          5.4031831163457635,
+          5.400089818239535,
+          5.167259632355469,
+          5.401675645661631,
+          5.450257915541648
+        ]
+      }
+    },
+    {
+      "condition": {
+        "name": "generated-rare-declarations",
+        "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "median_process_seconds": {
+        "published": 0.011623465,
+        "candidate": 0.011002825,
+        "expat": 0.0022598055
+      },
+      "median_ratios": {
+        "candidate_over_published": 0.9457158973238944,
+        "candidate_over_expat": 4.900612063675542,
+        "published_over_expat": 5.151743879529452
+      },
+      "paired_ratios": {
+        "candidate_over_published": [
+          0.951253047176552,
+          0.9225576113425584,
+          1.00975730690321,
+          0.9720668659446734,
+          0.9457158973238944,
+          0.9310613934452759,
+          0.9291550851157905
+        ],
+        "candidate_over_expat": [
+          4.900612063675542,
+          4.735902873346703,
+          5.186435555138253,
+          5.058459898429312,
+          4.9044737009671175,
+          4.804156449539619,
+          4.708623407988567
+        ],
+        "published_over_expat": [
+          5.151743879529452,
+          5.1334494617140995,
+          5.136318915130562,
+          5.203818868482266,
+          5.185990544142672,
+          5.159870748976542,
+          5.067639927302107
+        ]
+      }
+    },
+    {
+      "condition": {
+        "name": "generated-entities",
+        "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "median_process_seconds": {
+        "published": 0.011885164,
+        "candidate": 0.011846731999999999,
+        "expat": 0.0021615719999999996
+      },
+      "median_ratios": {
+        "candidate_over_published": 0.9937214162673416,
+        "candidate_over_expat": 5.513110629091472,
+        "published_over_expat": 5.492088076609315
+      },
+      "paired_ratios": {
+        "candidate_over_published": [
+          1.023350925767876,
+          0.9749662772086115,
+          0.969989974824068,
+          1.0416481001019422,
+          1.043422709144511,
+          0.9784371797395336,
+          0.9937214162673416
+        ],
+        "candidate_over_expat": [
+          5.539008211236642,
+          5.244474124933291,
+          5.513110629091472,
+          5.746133013385812,
+          5.641162774129199,
+          5.437205508908269,
+          5.457605541753188
+        ],
+        "published_over_expat": [
+          5.412618557099974,
+          5.379133871120695,
+          5.683677947384368,
+          5.516386016374877,
+          5.40640214621581,
+          5.557030764464295,
+          5.492088076609315
+        ]
+      }
+    }
+  ],
+  "point_estimate": {
+    "real_candidate_control_ratio": 0.9818992565161654,
+    "real_elapsed_reduction_percent": 1.8100743483834614,
+    "real_candidate_expat_ratio": 1.7261877660486005
+  },
+  "method": [
+    "Every immediate worker record matched its copied phase record on every original field; all commands/CPUs/versions/status/stderr and106176 sample records checked.",
+    "Reconstructed conditions from pinned project manifest and retained generated inputs; fixed per-process iteration counts and exactly one excluded warmup retained.",
+    "Reproduced seed2026091003 cohort shuffle, engine order and all196 cohort labels. Recomputed process medians, all three families of paired ratios, all28 condition summaries and all published real/generated group aggregates.",
+    "Ratios are medians of seven within-cohort process-median ratios. Group results are geometric means of condition medians. Do not replace these with ratios of unpaired aggregate medians."
+  ],
+  "limits": [
+    "Native measured region includes parser construction, callback setup, XML_Parse calls/native callbacks and parser free. Input I/O, dlopen, process startup and full application work are outside the sample timer.",
+    "Selected callback FNV hashes and counts agree across engines; this does not prove exact callback fragmentation, position or API conformance.",
+    "One shared host, fixed seven cohorts, timing workers pinnedCPU0 and preflightCPU3. Pinning/shuffling does not eliminate contention or establish statistical significance.",
+    "Retained all 7 candidate/control regressions, all four generated conditions and all candidate/Expat ratios. Real improvements: 18/24; generated improvements: 3/4.",
+    "No PGO, parser reruns, sample filtering, removal or adoption decision in this audit. Batik external DTD is not loaded by this native driver.",
+    "Driver worker timeout90s; preflight outer timeout600s; timing outer timeout1200s. Timing wrapper handles timeout with process-group kill/wait; these scripts do not provide an explicit comprehensive SIGTERM forwarding guarantee.",
+    "Recorded source and runtime identities are rehashed now and during this audit; these checks cannot prove historical immutability outside recorded before/after evidence.",
+    "Python timings and strict CPython consumer checks are parent-owned and excluded. Same-source LTO builds only; no default adoption or equivalent compiler flags across Rust and C are claimed."
+  ],
+  "checked_file_count": 848,
+  "passed_checks": 6269,
+  "generator_sha256": "f28e738d0b83cb2190ae5ca8b0c3f5f961ec807637bddf7b72d3ab915591ccfa",
+  "artifact_sha256": {
+    "streams.json": "01aea391e981eba2ac690b298456622f053bf8ecd77067bf040b9652c647188f",
+    "conditions.json": "7c43cafe2b416e0ffd3766e86fa5e2bde6a948e8ff1eebdbacfb2211f386c897",
+    "groups.json": "dc6d9f9367fdf7d5f1b78dc4a18c1d885cf3564bbdd9b9ba7a0829505c85b2da",
+    "checked-files.json": "7a0074d72bc8af109a1cc8648d959cbdd52d209e259d59c27e6b936b4c38aa5b"
+  }
+}

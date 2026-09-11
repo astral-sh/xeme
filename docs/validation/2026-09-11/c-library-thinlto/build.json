@@ -1,0 +1,421 @@
+{
+  "status": "passed",
+  "scope": "Matched normal and C-only ThinLTO builds, exact70 frozen source bytes; no parser tests, execution, profiling or timing. Manifest crate types unchanged; all artifact inspection is static.",
+  "base": "503a55957f7cdebcc0b3fb3ada2751ffdb8cb9c9",
+  "copied_source_files": [
+    "crates/oriole/src/lib.rs",
+    "crates/oriole/tests/adapter_frame.rs",
+    "crates/oriole/tests/allocation.rs"
+  ],
+  "source_manifest_sha256": "a22d98b7d406252d843373474701038b31a20c02034e60ebdcb954045860adef",
+  "env_overrides": {
+    "CARGO_HOME": "/home/dev-user/.cache/toucan/cargo",
+    "CARGO_TARGET_DIR": "/home/dev-user/.cache/oriole/thinlto-production-target",
+    "CARGO_BUILD_BUILD_DIR": "/home/dev-user/.cache/ohm/verified-build/{workspace-path-hash}",
+    "CARGO_UNSTABLE_OHM_PROC_MACRO_TRUST": "all",
+    "CARGO_UNSTABLE_OHM_NATIVE_TOOL_TRUST": "all",
+    "CARGO_BUILD_JOBS": "1",
+    "CARGO_INCREMENTAL": "0",
+    "RUSTC_WRAPPER": "",
+    "RUSTC_WORKSPACE_WRAPPER": "",
+    "RUSTFLAGS": "",
+    "CARGO_ENCODED_RUSTFLAGS": ""
+  },
+  "original_before": {
+    "/tmp/oriole-start-frame-integration-study/source.json": "e9eaeb4c8ee18357adbe97c91870801b41fb4553dc7259eaecc2d1d98fc5c5e4",
+    "/tmp/oriole-start-frame-integration-study/source.tar.gz": "3363ee39a3f117d057e610fbb93227f79b9e3e7013e7a6ae4f6332cb10f0fb45",
+    "/tmp/oriole-start-frame-integration-study/build.json": "2dd21c36c9cad71bda1b00ddfbb2c88aeaf166e143f99ee9c5d0fdd1d0d0dd2d",
+    "/tmp/oriole-start-frame-integration-study/compiler-invocations.json": "f261b372ea4902f25a3677a596fda1f1548b866754397c17bc1500ecaba4dc83",
+    "/tmp/oriole-start-frame-integration-study/release.log": "fef334934ea6e3bcb6bf0038287f754e74d4288e55da31b0a2f26619269cfffd",
+    "/tmp/oriole-start-frame-integration-study/liboriole_expat.so": "9815cc852327d455c094b0fb72c1d33fb90a4571e67cf15965e96e2300376828",
+    "/tmp/oriole-start-frame-integration-study/liboriole_expat.a": "92eafd42ffe68dc30db920ff5ff8d67357b2c6c4273f51b0e3e841b2bfb9ea69"
+  },
+  "commands": [
+    {
+      "label": "rustc-version",
+      "command": [
+        "taskset",
+        "-c",
+        "1",
+        "rustc",
+        "+ohm",
+        "-vV"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole-thinlto-production",
+      "start": 1789084226.0371418,
+      "timeout": 30,
+      "exit": 0,
+      "end": 1789084226.1133702,
+      "stdout_sha256": "7f8aefa1f89997f46b979665c40b511a92cdf04f6c8463fbec02d30743fb3d6f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "cargo-version",
+      "command": [
+        "taskset",
+        "-c",
+        "1",
+        "cargo",
+        "+ohm",
+        "-Zohm-defaults=no",
+        "-Vv"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole-thinlto-production",
+      "start": 1789084226.1158092,
+      "timeout": 30,
+      "exit": 0,
+      "end": 1789084226.189194,
+      "stdout_sha256": "2795ea977f07d572b920d4397455af86e9cdd3cfe4001f6958ca8ab6dd09a2f9",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "cargo-rustc-help",
+      "command": [
+        "taskset",
+        "-c",
+        "1",
+        "cargo",
+        "+ohm",
+        "-Zohm-defaults=no",
+        "rustc",
+        "--help"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole-thinlto-production",
+      "start": 1789084226.1900086,
+      "timeout": 30,
+      "exit": 0,
+      "end": 1789084226.2109854,
+      "stdout_sha256": "6517ce9d5e1b83883074adc12bac6b2943e3eed251bad85b28bfb3a7a416c30f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "normal",
+      "command": [
+        "taskset",
+        "-c",
+        "1",
+        "cargo",
+        "+ohm",
+        "-Zohm-defaults=no",
+        "build",
+        "--release",
+        "--locked",
+        "-p",
+        "oriole_expat",
+        "-vv"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole-thinlto-production",
+      "start": 1789084226.2179828,
+      "timeout": 1200,
+      "exit": 0,
+      "end": 1789084238.9132602,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "32a01680f1fe582c8effa1576a9203119c086559f29aa604465c582f4546e5b1"
+    },
+    {
+      "label": "thinlto",
+      "command": [
+        "taskset",
+        "-c",
+        "1",
+        "cargo",
+        "+ohm",
+        "-Zohm-defaults=no",
+        "rustc",
+        "--release",
+        "--locked",
+        "-p",
+        "oriole_expat",
+        "--lib",
+        "--crate-type",
+        "cdylib,staticlib",
+        "-vv"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole-thinlto-production",
+      "start": 1789084238.9701035,
+      "timeout": 1200,
+      "exit": 0,
+      "end": 1789084255.7017617,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "258d7cca22d27bba78f1ffec63b44fa813eee66c33f13fe42a8914ee25ed3072"
+    },
+    {
+      "label": "manifest-metadata",
+      "command": [
+        "taskset",
+        "-c",
+        "1",
+        "cargo",
+        "+ohm",
+        "-Zohm-defaults=no",
+        "metadata",
+        "--no-deps",
+        "--format-version",
+        "1",
+        "--locked"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole-thinlto-production",
+      "start": 1789084255.7216256,
+      "timeout": 30,
+      "exit": 0,
+      "end": 1789084255.759175,
+      "stdout_sha256": "85a101e727b05868c316ca0133bea73b175fb435bb586c715958fd517b5da284",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "normal-dynamic-symbols",
+      "command": [
+        "taskset",
+        "-c",
+        "1",
+        "nm",
+        "-D",
+        "--defined-only",
+        "/tmp/oriole-thinlto-production-study/normal/liboriole_expat.so"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole-thinlto-production",
+      "start": 1789084255.7601044,
+      "timeout": 30,
+      "exit": 0,
+      "end": 1789084256.0430567,
+      "stdout_sha256": "855cf7bb64db39739cda32887579ab2280710ee4707b2567af3f717d8434f3f6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "normal-elf-headers",
+      "command": [
+        "taskset",
+        "-c",
+        "1",
+        "readelf",
+        "-h",
+        "-S",
+        "/tmp/oriole-thinlto-production-study/normal/liboriole_expat.so"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole-thinlto-production",
+      "start": 1789084256.0514996,
+      "timeout": 30,
+      "exit": 0,
+      "end": 1789084256.096964,
+      "stdout_sha256": "eeef46f280ad63a2c5a2216ad9e7d6e3ac4eb6825448415857623c06f64f38c2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "normal-static-members",
+      "command": [
+        "taskset",
+        "-c",
+        "1",
+        "ar",
+        "t",
+        "/tmp/oriole-thinlto-production-study/normal/liboriole_expat.a"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole-thinlto-production",
+      "start": 1789084256.0978212,
+      "timeout": 30,
+      "exit": 0,
+      "end": 1789084256.1210525,
+      "stdout_sha256": "489c7f6593ebb93707ef887ffb4f318f5a06166f17abfe2964b0d8d8d84a572e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "thinlto-dynamic-symbols",
+      "command": [
+        "taskset",
+        "-c",
+        "1",
+        "nm",
+        "-D",
+        "--defined-only",
+        "/tmp/oriole-thinlto-production-study/thinlto/liboriole_expat.so"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole-thinlto-production",
+      "start": 1789084256.1220195,
+      "timeout": 30,
+      "exit": 0,
+      "end": 1789084256.191321,
+      "stdout_sha256": "9874a2bede9b532ffe5c1b1649a64498fcf526af9ac9ad178a90e4d720910936",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "thinlto-elf-headers",
+      "command": [
+        "taskset",
+        "-c",
+        "1",
+        "readelf",
+        "-h",
+        "-S",
+        "/tmp/oriole-thinlto-production-study/thinlto/liboriole_expat.so"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole-thinlto-production",
+      "start": 1789084256.1923287,
+      "timeout": 30,
+      "exit": 0,
+      "end": 1789084256.2017293,
+      "stdout_sha256": "176262d45fd7d5bd1b469e3a46a067773f07d4ce4129d6d540fb8b7a12f15ec1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "thinlto-static-members",
+      "command": [
+        "taskset",
+        "-c",
+        "1",
+        "ar",
+        "t",
+        "/tmp/oriole-thinlto-production-study/thinlto/liboriole_expat.a"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole-thinlto-production",
+      "start": 1789084256.202558,
+      "timeout": 30,
+      "exit": 0,
+      "end": 1789084256.223948,
+      "stdout_sha256": "c6c97e26a87684814ad04ee478cc4d1b24d10d5f7f9ec0cc2bc0e094a95c43b1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "builds": {
+    "normal": {
+      "libraries": {
+        "liboriole_expat.so": {
+          "sha256": "9815cc852327d455c094b0fb72c1d33fb90a4571e67cf15965e96e2300376828",
+          "size": 1180536
+        },
+        "liboriole_expat.a": {
+          "sha256": "92eafd42ffe68dc30db920ff5ff8d67357b2c6c4273f51b0e3e841b2bfb9ea69",
+          "size": 11871272
+        }
+      },
+      "workspace_compiler_invocations": 3,
+      "final_codegen_options": [
+        "opt-level=3",
+        "codegen-units=1",
+        "metadata=f49fab9ca64bf7b4",
+        "strip=debuginfo"
+      ],
+      "final_crate_types": [
+        "cdylib",
+        "staticlib",
+        "rlib"
+      ]
+    },
+    "thinlto": {
+      "libraries": {
+        "liboriole_expat.so": {
+          "sha256": "a55ca0f0fed68f8db0f2e8d3ea86c271c8491fe130b5074077aecace3ab4a4df",
+          "size": 1144888
+        },
+        "liboriole_expat.a": {
+          "sha256": "3f4f51259327d2c736c5d93640e1b2dbb6de9e03ae0dc15fbc9f11df37c8aa60",
+          "size": 3637666
+        }
+      },
+      "workspace_compiler_invocations": 3,
+      "final_codegen_options": [
+        "opt-level=3",
+        "lto=thin",
+        "codegen-units=1",
+        "metadata=5627490fcd955071",
+        "strip=debuginfo"
+      ],
+      "final_crate_types": [
+        "cdylib",
+        "staticlib"
+      ]
+    }
+  },
+  "rustc_version": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+  "cargo_version": "cargo 1.98.1-dev (81d8c6d26 2026-09-08) (ohm-1.98.1-1)\nrelease: 1.98.1-dev\ncommit-hash: 81d8c6d261b3663c0b8d64fcd60eaaaeefa9b351\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nlibgit2: 1.9.4 (sys:0.21.0 vendored)\nlibcurl: 8.21.0-DEV (sys:0.4.90+curl-8.21.0 vendored ssl:OpenSSL/3.6.3)\nssl: OpenSSL 3.6.3 9 Jun 2026\nos: Ubuntu 24.4.0 (noble) [64-bit]\n",
+  "manifest_crate_types": [
+    "cdylib",
+    "staticlib",
+    "rlib"
+  ],
+  "dynamic_exports_unchanged": [
+    "XML_DefaultCurrent",
+    "XML_ErrorString",
+    "XML_ExpatVersion",
+    "XML_ExpatVersionInfo",
+    "XML_ExternalEntityParserCreate",
+    "XML_FreeContentModel",
+    "XML_GetBase",
+    "XML_GetBuffer",
+    "XML_GetCurrentByteCount",
+    "XML_GetCurrentByteIndex",
+    "XML_GetCurrentColumnNumber",
+    "XML_GetCurrentLineNumber",
+    "XML_GetErrorCode",
+    "XML_GetFeatureList",
+    "XML_GetIdAttributeIndex",
+    "XML_GetInputContext",
+    "XML_GetParsingStatus",
+    "XML_GetSpecifiedAttributeCount",
+    "XML_GetUserData",
+    "XML_MemFree",
+    "XML_MemMalloc",
+    "XML_MemRealloc",
+    "XML_Parse",
+    "XML_ParseBuffer",
+    "XML_ParserCreate",
+    "XML_ParserCreateNS",
+    "XML_ParserCreate_MM",
+    "XML_ParserFree",
+    "XML_ParserReset",
+    "XML_ResumeParser",
+    "XML_SetAllocTrackerActivationThreshold",
+    "XML_SetAllocTrackerMaximumAmplification",
+    "XML_SetAttlistDeclHandler",
+    "XML_SetBase",
+    "XML_SetBillionLaughsAttackProtectionActivationThreshold",
+    "XML_SetBillionLaughsAttackProtectionMaximumAmplification",
+    "XML_SetCdataSectionHandler",
+    "XML_SetCharacterDataHandler",
+    "XML_SetCommentHandler",
+    "XML_SetDefaultHandler",
+    "XML_SetDefaultHandlerExpand",
+    "XML_SetDoctypeDeclHandler",
+    "XML_SetElementDeclHandler",
+    "XML_SetElementHandler",
+    "XML_SetEncoding",
+    "XML_SetEndCdataSectionHandler",
+    "XML_SetEndDoctypeDeclHandler",
+    "XML_SetEndElementHandler",
+    "XML_SetEndNamespaceDeclHandler",
+    "XML_SetEntityDeclHandler",
+    "XML_SetExternalEntityRefHandler",
+    "XML_SetExternalEntityRefHandlerArg",
+    "XML_SetHashSalt",
+    "XML_SetHashSalt16Bytes",
+    "XML_SetNamespaceDeclHandler",
+    "XML_SetNotStandaloneHandler",
+    "XML_SetNotationDeclHandler",
+    "XML_SetParamEntityParsing",
+    "XML_SetProcessingInstructionHandler",
+    "XML_SetReparseDeferralEnabled",
+    "XML_SetReturnNSTriplet",
+    "XML_SetSkippedEntityHandler",
+    "XML_SetStartCdataSectionHandler",
+    "XML_SetStartDoctypeDeclHandler",
+    "XML_SetStartElementHandler",
+    "XML_SetStartNamespaceDeclHandler",
+    "XML_SetUnknownEncodingHandler",
+    "XML_SetUnparsedEntityDeclHandler",
+    "XML_SetUserData",
+    "XML_SetXmlDeclHandler",
+    "XML_StopParser",
+    "XML_UseForeignDTD",
+    "XML_UseParserAsHandlerArg"
+  ],
+  "source_unchanged": true,
+  "original_after": {
+    "/tmp/oriole-start-frame-integration-study/source.json": "e9eaeb4c8ee18357adbe97c91870801b41fb4553dc7259eaecc2d1d98fc5c5e4",
+    "/tmp/oriole-start-frame-integration-study/source.tar.gz": "3363ee39a3f117d057e610fbb93227f79b9e3e7013e7a6ae4f6332cb10f0fb45",
+    "/tmp/oriole-start-frame-integration-study/build.json": "2dd21c36c9cad71bda1b00ddfbb2c88aeaf166e143f99ee9c5d0fdd1d0d0dd2d",
+    "/tmp/oriole-start-frame-integration-study/compiler-invocations.json": "f261b372ea4902f25a3677a596fda1f1548b866754397c17bc1500ecaba4dc83",
+    "/tmp/oriole-start-frame-integration-study/release.log": "fef334934ea6e3bcb6bf0038287f754e74d4288e55da31b0a2f26619269cfffd",
+    "/tmp/oriole-start-frame-integration-study/liboriole_expat.so": "9815cc852327d455c094b0fb72c1d33fb90a4571e67cf15965e96e2300376828",
+    "/tmp/oriole-start-frame-integration-study/liboriole_expat.a": "92eafd42ffe68dc30db920ff5ff8d67357b2c6c4273f51b0e3e841b2bfb9ea69"
+  },
+  "original_unchanged": true
+}

@@ -1,0 +1,144 @@
+{
+  "files": {
+    "README.md": {
+      "bytes": 9400,
+      "sha256": "7dc216b8f33eaa46825575b19f3d0ccbe5f826f113df71335a98b45f50b10a49"
+    },
+    "archive-members.json": {
+      "bytes": 737776,
+      "sha256": "39cb155e594420601f32e4018c9a2aaff843741f24f08e620a6d37afd840b572"
+    },
+    "build-review.json": {
+      "bytes": 37555,
+      "sha256": "e9b3e851d3bce876591d5fdf2d932d3123a1aa1763e4115838e61c753d7efddd"
+    },
+    "build.json": {
+      "bytes": 14610,
+      "sha256": "ea5e8a55ce38fe21312f4f1d21f4f7c38d181617161bdae754852accb427209a"
+    },
+    "command-assembly.json": {
+      "bytes": 469,
+      "sha256": "0f3d73a05ba0da5d63750386334e1188e37467c7c3669a5e7aefd1b5b16aa9d9"
+    },
+    "command-validation.md": {
+      "bytes": 4946,
+      "sha256": "946bfda36864f60fb8e794da2646f85dd6a6d71c44ffcdedb38a1eafdac0f9e2"
+    },
+    "commands/HANDOFF.md": {
+      "bytes": 1537,
+      "sha256": "e89610a3915caa9d0e3f9b0fc68fd397f28b43a8bef532e37299065321fb16a8"
+    },
+    "commands/archive-members.json": {
+      "bytes": 28592,
+      "sha256": "72756d71d3df8f0b1a9bf0bc75c18282e285478bf1f62efac2d681aed0e01884"
+    },
+    "commands/artifact-manifest.json": {
+      "bytes": 1425,
+      "sha256": "37172361ec2be5411fec3a06fe62b11d975881195bda6663e8220662469ce200"
+    },
+    "commands/candidate.patch": {
+      "bytes": 19400,
+      "sha256": "d78782c80e54008b4312a0fec8b38742ab7350a888e9867a54271aafc64413ab"
+    },
+    "commands/evidence.tar.gz": {
+      "bytes": 1880397,
+      "sha256": "20d1ad701fbfec33c9cdba3c0a037eb7d73fb88526d52369520e00526da4afe6"
+    },
+    "commands/excluded-binaries.json": {
+      "bytes": 2997,
+      "sha256": "750db031f37562d13bcf274dac7bfabfcb876d4978db5791da356c33a3f96135"
+    },
+    "commands/nested-source-members.json": {
+      "bytes": 37275,
+      "sha256": "9b77c9b9d9931f6bb55bc855510fd82945790bcdc3f658f4cf0c4539d6591d94"
+    },
+    "commands/package.py": {
+      "bytes": 8754,
+      "sha256": "54de2e51e53207fb99e07d0213d766f55da3cde9802e77267aa62be22162baba"
+    },
+    "commands/phase3-delta.json": {
+      "bytes": 420,
+      "sha256": "1542e3b272cff15605c3181b0ad6071f00065150e7dbf94c4c6cb0fc04a9a581"
+    },
+    "commands/source.json": {
+      "bytes": 17003,
+      "sha256": "bc3d40467ba389139baed90deed02ee8ea03c2d6a63729ef4d2da99f18a47e04"
+    },
+    "commands/source.tar.gz": {
+      "bytes": 302682,
+      "sha256": "47648d0e3baedf16ab1bc89ca8938bab74cd40b3ae87bb26c2b36ee8287750f7"
+    },
+    "commands/summary.json": {
+      "bytes": 4467,
+      "sha256": "e5e0f30152caf466254a17626d3c0fae132d2cff2570f4eedd3f41c93579ec05"
+    },
+    "cpython-review.json": {
+      "bytes": 8470,
+      "sha256": "49fa4c3c887ca810f51ed0a6ee104975300b3eaef9a4e683260f3ef51a163d9d"
+    },
+    "evidence.tar.gz": {
+      "bytes": 5090679,
+      "sha256": "6bc7406343e1fe9d2f66906bcb67fa81cc6d520f97867bfcf9675606fbeda0cf"
+    },
+    "final-review-members.json": {
+      "bytes": 22761,
+      "sha256": "3ac5b4fc32a668ee4e11c31c6f88cf3dcdd43d2d8876fad9256bd8f6745f03ce"
+    },
+    "final-reviews.json": {
+      "bytes": 1423,
+      "sha256": "1378124e6902ef9a16e9d97019bd7863ac4b0a5340ab6f6dc8fc6a465d470b36"
+    },
+    "final-reviews.tar.gz": {
+      "bytes": 344534,
+      "sha256": "a1faf040771e185ee9c91a245cc7c9f6cf7f53b09111009e1999e1c831b040ca"
+    },
+    "gates.json": {
+      "bytes": 2966,
+      "sha256": "83adb1b90d0d7ffee9d8b114e8357c58f4aad8660e65b9ce77429b1afd586b37"
+    },
+    "native-review.json": {
+      "bytes": 14989,
+      "sha256": "150dfc09c8c1fbce30db5364d4659431ec929a3af1e323c6f0fff9a7cc177699"
+    },
+    "native-summary.json": {
+      "bytes": 2918,
+      "sha256": "816860d1ce28a3bf614398bf1c834bcc9c0346c0475c1e61ba2ef1fb0aaabb78"
+    },
+    "native-wins.json": {
+      "bytes": 261,
+      "sha256": "7f905753064d6fe4225af5c5f08ecb000fe05e7675043fce70276b2ff23bc83f"
+    },
+    "oriole-attach-c-library-command-validation.py": {
+      "bytes": 6293,
+      "sha256": "1958ca89fc6a09dbe74a657c60cd4b6f0b265132b7380d5a1c637edf4adbcfcd"
+    },
+    "oriole-finalize-c-library-thinlto.py": {
+      "bytes": 3404,
+      "sha256": "00012bb356084b079948b26c114d661b794bd5483af87429832f9cedbd4b4cbe"
+    },
+    "oriole-write-c-library-thinlto-docs.py": {
+      "bytes": 12067,
+      "sha256": "ef8fd4974835417bd641c82c2ce120a23f8f8b1c1ece374adcf1826fcdab2e20"
+    },
+    "python-review.json": {
+      "bytes": 8010,
+      "sha256": "ab405c08444a293805cd7317a2223cc1a28bb061d22b27d54c3bde8e5e7e44bf"
+    },
+    "python-summary.json": {
+      "bytes": 2260,
+      "sha256": "ee8ce94ee1dd56cb8dafd90c3f0fc91ada59dd8976bcd35b3df8d0240b6bde2f"
+    },
+    "source.json": {
+      "bytes": 7885,
+      "sha256": "a22d98b7d406252d843373474701038b31a20c02034e60ebdcb954045860adef"
+    },
+    "summary.json": {
+      "bytes": 7408,
+      "sha256": "2411b740e6afc5ca7730064e58a0d6cc02cd9ab777e818da160dad26ed4fca3d"
+    },
+    "table.md": {
+      "bytes": 284,
+      "sha256": "f7f60e5a3f6f6af3990c959c3f2f497668d84699b33e393e7a28facc5dc36129"
+    }
+  }
+}

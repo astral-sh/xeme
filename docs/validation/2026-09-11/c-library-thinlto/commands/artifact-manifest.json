@@ -1,0 +1,46 @@
+{
+  "HANDOFF.md": {
+    "sha256": "e89610a3915caa9d0e3f9b0fc68fd397f28b43a8bef532e37299065321fb16a8",
+    "bytes": 1537
+  },
+  "archive-members.json": {
+    "sha256": "72756d71d3df8f0b1a9bf0bc75c18282e285478bf1f62efac2d681aed0e01884",
+    "bytes": 28592
+  },
+  "candidate.patch": {
+    "sha256": "d78782c80e54008b4312a0fec8b38742ab7350a888e9867a54271aafc64413ab",
+    "bytes": 19400
+  },
+  "evidence.tar.gz": {
+    "sha256": "20d1ad701fbfec33c9cdba3c0a037eb7d73fb88526d52369520e00526da4afe6",
+    "bytes": 1880397
+  },
+  "excluded-binaries.json": {
+    "sha256": "750db031f37562d13bcf274dac7bfabfcb876d4978db5791da356c33a3f96135",
+    "bytes": 2997
+  },
+  "nested-source-members.json": {
+    "sha256": "9b77c9b9d9931f6bb55bc855510fd82945790bcdc3f658f4cf0c4539d6591d94",
+    "bytes": 37275
+  },
+  "package.py": {
+    "sha256": "54de2e51e53207fb99e07d0213d766f55da3cde9802e77267aa62be22162baba",
+    "bytes": 8754
+  },
+  "phase3-delta.json": {
+    "sha256": "1542e3b272cff15605c3181b0ad6071f00065150e7dbf94c4c6cb0fc04a9a581",
+    "bytes": 420
+  },
+  "source.json": {
+    "sha256": "bc3d40467ba389139baed90deed02ee8ea03c2d6a63729ef4d2da99f18a47e04",
+    "bytes": 17003
+  },
+  "source.tar.gz": {
+    "sha256": "47648d0e3baedf16ab1bc89ca8938bab74cd40b3ae87bb26c2b36ee8287750f7",
+    "bytes": 302682
+  },
+  "summary.json": {
+    "sha256": "e5e0f30152caf466254a17626d3c0fae132d2cff2570f4eedd3f41c93579ec05",
+    "bytes": 4467
+  }
+}

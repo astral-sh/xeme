@@ -257,7 +257,9 @@ mod tests {
             else {
                 break;
             };
-            if frame.is_active() {
+            if let Some(name) = frame.take_end_name() {
+                parser.recycle_end_element(token, name);
+            } else if frame.is_active() {
                 if frame.text_bytes().is_some() {
                     texts += 1;
                 } else {

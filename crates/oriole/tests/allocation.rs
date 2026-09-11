@@ -447,7 +447,10 @@ fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
                 };
                 if frame.is_active() {
                     assert!(event.is_none());
-                    if let Some(bytes) = frame.text_bytes() {
+                    if let Some(name) = frame.take_end_name() {
+                        assert_eq!(frame.callback_bytes(), name.len());
+                        parser.recycle_end_element(token, name);
+                    } else if let Some(bytes) = frame.text_bytes() {
                         assert_eq!(frame.callback_bytes(), bytes.len());
                         assert!(!bytes.is_empty());
                     } else {
@@ -473,6 +476,38 @@ fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
         result
     }
     check_allocations(frames);
+}
+
+#[test]
+fn detached_end_names_reuse_selected_storage_without_new_allocations() {
+    fn ends(allocator: Allocator) -> Result<(), Error> {
+        let mut parser = Parser::try_new_in(Config::default(), allocator)?;
+        parser.feed(b"<r><n a='v'></n><n a='v'></n></r>", true)?;
+        let mut frame = parser.adapter_frame();
+        let result = (|| {
+            let mut ends = 0;
+            loop {
+                let calls = CALLS.get();
+                let mut event = None;
+                let Some(token) = parser.next_event_for_adapter_into(&mut event, &mut frame)?
+                else {
+                    break;
+                };
+                if let Some(mut name) = frame.take_end_name() {
+                    assert!(event.is_none());
+                    name.try_push('\0')?;
+                    parser.recycle_end_element(token, name);
+                    assert_eq!(CALLS.get(), calls, "warmed native End must not allocate");
+                    ends += 1;
+                }
+            }
+            assert_eq!(ends, 3);
+            Ok(())
+        })();
+        parser.finish_adapter_frame(frame);
+        result
+    }
+    check_allocations(ends);
 }
 
 fn check_allocations(workload: fn(Allocator) -> Result<(), Error>) {

@@ -1336,7 +1336,43 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterF
             // SAFETY: Both the frame and its position are owned outside CParser.
             unsafe {
                 (*parser).position = frame.position();
-                let result = if let Some(bytes) = frame.text_bytes() {
+                let result = if let Some(mut name) = frame.take_end_name() {
+                    // The original name is local, independently of the reusable
+                    // arena and parser. Match owned End dispatch: charge before
+                    // its terminator, recycle after callbacks, then raw fallback.
+                    (|| -> Result<(), AllocError> {
+                        let callback = (*parser).handlers.end_element;
+                        let arg = if (*parser).handler_arg_is_parser {
+                            parser.cast()
+                        } else {
+                            (*parser).user_data
+                        };
+                        let charged = {
+                            let family = &(*parser).family;
+                            charge(
+                                &family.callback_bytes,
+                                name.len(),
+                                MAX_FAMILY_CALLBACK_BYTES,
+                            )
+                        };
+                        if !charged {
+                            fail_parse(parser, 43);
+                            return Ok(());
+                        }
+                        if let Some(callback) = callback {
+                            if name.as_bytes().contains(&0) {
+                                return Err(AllocError::InteriorNul);
+                            }
+                            name.try_push('\0')?;
+                            callback(arg, name.as_ptr().cast());
+                        }
+                        (*parser).core.recycle_end_element(recycling, name);
+                        if callback.is_none() {
+                            dispatch_unhandled(parser, false, None)?;
+                        }
+                        Ok(())
+                    })()
+                } else if let Some(bytes) = frame.text_bytes() {
                     dispatch_text_frame(parser, bytes)
                 } else {
                     dispatch_start_frame(parser, frame)

@@ -2155,6 +2155,7 @@ impl Parser {
                     .lexical_remaining()
                     .for_slice(&self.source().remaining()[..end]),
             )?;
+            let mut framed_end = false;
             let parsed = (|| {
                 if matched_end.is_none()
                     && !matches!(planned, tag::Planned::Complete { .. })
@@ -2191,7 +2192,22 @@ impl Parser {
                     }
                     ScanMode::Pi => self.parse_pi(token.view(), position)?,
                     ScanMode::Doctype => self.parse_doctype(token.view(), position)?,
-                    ScanMode::Tag if matched_end.is_some() => self.end_element(position)?,
+                    ScanMode::Tag if matched_end.is_some() => {
+                        if !self.seen_doctype
+                            && !self.foreign_dtd
+                            && self.shared_tables.get().is_none()
+                            && self
+                                .stack
+                                .last()
+                                .is_some_and(|element| element.bindings.is_empty())
+                            && let Some(frame) = output.frame.as_deref_mut()
+                        {
+                            self.prepare_end_frame(frame);
+                            framed_end = true;
+                        } else {
+                            self.end_element(position)?;
+                        }
+                    }
                     ScanMode::Tag if token.starts_with("</") => {
                         self.parse_end(token.view(), position)?
                     }
@@ -2213,6 +2229,12 @@ impl Parser {
             parsed?;
             self.token_scratch = token;
             self.consume(end)?;
+            if framed_end {
+                // Native token publication only swaps owners. Consume sees the
+                // bytes already charged above, so neither can fail after the
+                // matched name is detached. Keep raw/position updates first.
+                output.frame.as_deref_mut().unwrap().publish(position);
+            }
         }
     }
 
@@ -3353,6 +3375,21 @@ impl Parser {
             self.closed_root = true;
         }
         Ok(())
+    }
+
+    /// Move a matched native End name out without an Event or namespace undo.
+    fn prepare_end_frame(&mut self, frame: &mut AdapterFrame) {
+        debug_assert!(self.pending.is_empty() && !frame.is_active());
+        debug_assert!(!self.fragment && self.sources.len() == 1);
+        let element = self
+            .stack
+            .pop()
+            .expect("matched end has an opening element");
+        debug_assert!(element.bindings.is_empty() && element.raw_encoding.is_none());
+        frame.prepare_end(element.expanded_name.unwrap_or(element.raw_name));
+        if self.stack.is_empty() {
+            self.closed_root = true;
+        }
     }
 
     fn expand_name(

@@ -26,6 +26,10 @@ fn main() {
                 break;
             };
             events += 1;
+            if let Some(name) = frame.take_end_name() {
+                parser.recycle_end_element(token, name);
+                continue;
+            }
             if frame.text_bytes().is_some() {
                 continue;
             }

@@ -1486,6 +1486,130 @@ fn arena_start_enforces_exact_callback_budget_with_default_fallback() {
 }
 
 #[test]
+fn detached_end_charges_the_name_before_handlers_or_default_fallback() {
+    for end_handler in [false, true] {
+        for default_handler in [false, true] {
+            for remaining in [3, 4] {
+                // SAFETY: The test owns State and the parser through all callbacks.
+                unsafe {
+                    let mut state = State::default();
+                    let parser = configured(&mut state);
+                    let opening = c"<root><name a='v'>";
+                    assert_eq!(
+                        XML_Parse(
+                            parser,
+                            opening.as_ptr(),
+                            opening.to_bytes().len() as c_int,
+                            0
+                        ),
+                        OK
+                    );
+                    state.events.clear();
+                    XML_SetEndElementHandler(parser, end_handler.then_some(end));
+                    XML_SetDefaultHandler(parser, default_handler.then_some(text));
+                    {
+                        let family = &(*parser).family;
+                        family
+                            .callback_bytes
+                            .set(MAX_FAMILY_CALLBACK_BYTES - remaining);
+                    }
+                    let status = XML_Parse(parser, c"</name>".as_ptr(), 7, 0);
+                    let charged = {
+                        let family = &(*parser).family;
+                        family.callback_bytes.get()
+                    };
+                    if remaining == 3 {
+                        assert_eq!(status, ERROR);
+                        assert_eq!(XML_GetErrorCode(parser), 43);
+                        assert!(state.events.is_empty());
+                        assert_eq!(charged, MAX_FAMILY_CALLBACK_BYTES - 3);
+                    } else {
+                        assert_eq!(status, OK);
+                        assert_eq!(charged, MAX_FAMILY_CALLBACK_BYTES);
+                        let expected = if end_handler {
+                            vec!["end:name"]
+                        } else if default_handler {
+                            vec!["text:</name>"]
+                        } else {
+                            vec![]
+                        };
+                        assert_eq!(state.events, expected);
+                        assert_eq!(
+                            XML_GetCurrentByteIndex(parser),
+                            opening.to_bytes().len() as i64
+                        );
+                        assert_eq!(XML_GetCurrentByteCount(parser), 7);
+                        assert_eq!(XML_GetSpecifiedAttributeCount(parser), 2);
+                    }
+                    XML_ParserFree(parser);
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn detached_end_owner_survives_default_current_children_stop_and_reset_rejection() {
+    unsafe extern "C" fn held_end(data: *mut c_void, name: *const c_char) {
+        // SAFETY: Only scalar handles and independently owned name bytes cross
+        // nested callbacks; each State access ends before another C API call.
+        unsafe {
+            let parser = (*data.cast::<State>()).parser;
+            let before = CStr::from_ptr(name).to_bytes().to_vec();
+            (*data.cast::<State>())
+                .events
+                .push(format!("held:{}", std::str::from_utf8(&before).unwrap()));
+            XML_DefaultCurrent(parser);
+            XML_ParserFree(parser);
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
+            let child = XML_ExternalEntityParserCreate(parser, c"".as_ptr(), ptr::null());
+            assert!(!child.is_null());
+            XML_SetElementHandler(child, None, None);
+            XML_SetDefaultHandler(child, None);
+            assert_eq!(XML_Parse(child, c"<child/>".as_ptr(), 8, 1), OK);
+            XML_ParserFree(child);
+            XML_SetEndElementHandler(parser, Some(end));
+            assert_eq!(XML_StopParser(parser, 1), OK);
+            XML_DefaultCurrent(parser);
+            assert_eq!(CStr::from_ptr(name).to_bytes(), before);
+        }
+    }
+    for length in [1, 4097] {
+        // SAFETY: Input, State and both callback functions outlive synchronous use.
+        unsafe {
+            let name = "n".repeat(length);
+            let document = format!("<r><{name}></{name}><e/></r>");
+            let mut state = State::default();
+            let parser = configured(&mut state);
+            XML_SetEndElementHandler(parser, Some(held_end));
+            XML_SetDefaultHandler(parser, Some(text));
+            assert_eq!(
+                XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1),
+                SUSPENDED
+            );
+            assert!(state.events.ends_with(&[
+                format!("held:{name}"),
+                format!("text:</{name}>"),
+                format!("text:</{name}>")
+            ]));
+            assert_eq!(XML_ResumeParser(parser), OK);
+            assert!(
+                state
+                    .events
+                    .ends_with(&["start:e".into(), "end:e".into(), "end:r".into()])
+            );
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            state.events.clear();
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+            XML_SetElementHandler(parser, Some(start), Some(end));
+            assert_eq!(XML_Parse(parser, c"<new></new>".as_ptr(), 11, 1), OK);
+            assert_eq!(state.events, ["start:new", "end:new"]);
+            XML_ParserFree(parser);
+        }
+    }
+}
+
+#[test]
 fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
     fn word() -> XmlString {
         XmlString::try_from_str_in("x", Allocator::System).unwrap()

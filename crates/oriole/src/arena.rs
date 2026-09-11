@@ -23,9 +23,10 @@ enum Payload {
     Start,
     InlineText,
     HeapText,
+    End(String),
 }
 
-/// Owned callback storage for a literal start tag or plain character data.
+/// Owned callback storage for literal tags or plain character data.
 ///
 /// Start-tag slices include a trailing NUL; text is length-delimited. No
 /// parser borrow escapes. The original raw token remains owned by the parser.
@@ -137,6 +138,13 @@ impl AdapterFrame {
         Ok(())
     }
 
+    /// Detach the opening element's name without displacing the reusable arena.
+    pub(crate) fn prepare_end(&mut self, name: String) {
+        debug_assert!(!self.active && self.attributes.is_empty());
+        self.callback_bytes = name.len();
+        self.payload = Payload::End(name);
+    }
+
     pub(crate) fn publish(&mut self, position: Position) {
         self.position = position;
         self.active = true;
@@ -159,10 +167,24 @@ impl AdapterFrame {
             return None;
         }
         match self.payload {
-            Payload::Start => None,
+            Payload::Start | Payload::End(_) => None,
             Payload::InlineText => Some(&self.inline[..self.callback_bytes]),
             Payload::HeapText => Some(self.bytes.as_bytes()),
         }
+    }
+
+    /// Take the original end-name owner for dispatch and subsequent recycling.
+    /// No trailing NUL has been added. This consumes the active End delivery.
+    #[must_use]
+    pub fn take_end_name(&mut self) -> Option<String> {
+        if !self.active || !matches!(self.payload, Payload::End(_)) {
+            return None;
+        }
+        let Payload::End(name) = std::mem::replace(&mut self.payload, Payload::Start) else {
+            unreachable!("active End payload was checked above")
+        };
+        self.active = false;
+        Some(name)
     }
 
     /// Name bytes including the final NUL; valid until this owned frame is reused.
@@ -191,6 +213,64 @@ impl AdapterFrame {
 mod tests {
     use super::*;
     use crate::{Config, Parser};
+
+    #[test]
+    fn detached_end_keeps_the_warmed_start_arena_and_oversized_owner_separate() {
+        let mut parser = Parser::new(Config::default());
+        let mut frame = parser.adapter_frame();
+        parser
+            .feed(b"<r><n a='v'></n><n a='v'></n><n a='v'></n></r>", true)
+            .unwrap();
+        let mut event = None;
+        // The first attribute tag warms the lexical record capacity through
+        // the existing owned fallback. Compare two subsequent framed starts.
+        for _ in 0..4 {
+            parser
+                .next_event_for_adapter_into(&mut event, &mut frame)
+                .unwrap()
+                .unwrap();
+        }
+        assert!(frame.is_active() && event.is_none());
+        assert_eq!(frame.name_bytes(), b"n\0");
+        let pointer = frame.bytes.as_bytes().as_ptr();
+        let capacity = frame.bytes.capacity();
+        let attribute_capacity = frame.attributes.capacity();
+        let token = parser
+            .next_event_for_adapter_into(&mut event, &mut frame)
+            .unwrap()
+            .unwrap();
+        let name = frame.take_end_name().unwrap();
+        assert_eq!(name.as_str(), "n");
+        parser.recycle_end_element(token, name);
+        parser
+            .next_event_for_adapter_into(&mut event, &mut frame)
+            .unwrap()
+            .unwrap();
+        assert!(frame.is_active() && event.is_none());
+        assert_eq!(frame.name_bytes(), b"n\0");
+        assert_eq!(frame.bytes.as_bytes().as_ptr(), pointer);
+        assert_eq!(frame.bytes.capacity(), capacity);
+        assert_eq!(frame.attributes.capacity(), attribute_capacity);
+        parser.finish_adapter_frame(frame);
+
+        let name = "n".repeat(MAX_ARENA_BYTES + 1);
+        let mut parser = Parser::new(Config::default());
+        parser
+            .feed(format!("<{name}></{name}>").as_bytes(), true)
+            .unwrap();
+        parser.next_event().unwrap().unwrap();
+        let mut frame = parser.adapter_frame();
+        let token = parser
+            .next_event_for_adapter_into(&mut event, &mut frame)
+            .unwrap()
+            .unwrap();
+        assert_eq!(frame.bytes.capacity(), 0);
+        let owner = frame.take_end_name().unwrap();
+        assert_eq!(owner.as_str(), name);
+        parser.recycle_end_element(token, owner);
+        assert!(parser.event_recycling.take_name().is_none());
+        parser.finish_adapter_frame(frame);
+    }
 
     #[test]
     fn text_storage_drops_start_terminators_and_stays_within_the_byte_cap() {

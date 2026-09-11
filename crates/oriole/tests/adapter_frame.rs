@@ -43,7 +43,12 @@ fn collect(
             };
             if frame.is_active() {
                 assert!(event.is_none());
-                if let Some(bytes) = frame.text_bytes() {
+                if let Some(name) = frame.take_end_name() {
+                    event = Some(Event {
+                        kind: EventKind::EndElement { name },
+                        position: frame.position(),
+                    });
+                } else if let Some(bytes) = frame.text_bytes() {
                     assert_eq!(frame.callback_bytes(), bytes.len());
                     event = Some(Event {
                         kind: EventKind::Text(
@@ -292,6 +297,111 @@ fn foreign_and_reset_frames_cannot_be_filled_by_another_generation() {
         .unwrap();
     assert!(!frame.is_active());
     first.finish_adapter_frame(frame);
+}
+
+#[test]
+fn detached_end_frames_keep_native_and_namespace_undo_boundaries() {
+    for (xml, expected) in [
+        ("<r><n></n><e/></r>", vec!["n", "r"]),
+        ("<r><n></n ></r >", vec![]),
+        ("<r xmlns:p='u'><p:n></p:n></r>", vec!["u|n"]),
+        ("<r xmlns='u'><n></n></r>", vec!["u|n"]),
+        ("<!DOCTYPE r><r><n></n></r>", vec![]),
+    ] {
+        for utf16 in [false, true] {
+            let input = if utf16 {
+                [0xfeff]
+                    .into_iter()
+                    .chain(xml.encode_utf16())
+                    .flat_map(u16::to_le_bytes)
+                    .collect::<std::vec::Vec<_>>()
+            } else {
+                xml.as_bytes().to_vec()
+            };
+            for chunk in 1..=input.len() {
+                let mut parser = Parser::new(Config {
+                    namespace_separator: Some('|'),
+                    ..Config::default()
+                });
+                parser.set_reparse_deferral_enabled(false);
+                let mut frame = parser.adapter_frame();
+                let mut names = std::vec::Vec::new();
+                for (index, bytes) in input.chunks(chunk).enumerate() {
+                    parser
+                        .feed(bytes, (index + 1) * chunk >= input.len())
+                        .unwrap();
+                    loop {
+                        let mut event = None;
+                        let Some(token) = parser
+                            .next_event_for_adapter_into(&mut event, &mut frame)
+                            .unwrap()
+                        else {
+                            break;
+                        };
+                        if let Some(name) = frame.take_end_name() {
+                            assert!(event.is_none());
+                            assert_eq!(frame.callback_bytes(), name.len());
+                            assert!(parser.current_raw().unwrap().starts_with("</"));
+                            names.push(name.as_str().to_owned());
+                            parser.recycle_end_element(token, name);
+                        }
+                    }
+                }
+                assert!(parser.is_finished());
+                assert_eq!(names, if utf16 { vec![] } else { expected.clone() });
+                parser.finish_adapter_frame(frame);
+            }
+        }
+    }
+}
+
+#[test]
+fn detached_end_frames_recheck_child_publication_and_generation() {
+    let mut parser = Parser::new(Config::default());
+    let mut frame = parser.adapter_frame();
+    parser.feed(b"<r><n></n></r>", true).unwrap();
+    let mut event = None;
+    for _ in 0..2 {
+        parser
+            .next_event_for_adapter_into(&mut event, &mut frame)
+            .unwrap()
+            .unwrap();
+    }
+    let mut child = parser.external_child_with_encoding(None, None).unwrap();
+    child.feed(b"<!ATTLIST r a CDATA 'v'>", true).unwrap();
+    while child.next_event().unwrap().is_some() {}
+    parser
+        .next_event_for_adapter_into(&mut event, &mut frame)
+        .unwrap()
+        .unwrap();
+    assert!(!frame.is_active());
+    assert!(matches!(event.unwrap().kind, EventKind::EndElement { .. }));
+    parser.finish_adapter_frame(frame);
+
+    let mut first = Parser::new(Config::default());
+    let mut frame = first.adapter_frame();
+    first.feed(b"<old></old>", true).unwrap();
+    let mut event = None;
+    for _ in 0..2 {
+        first
+            .next_event_for_adapter_into(&mut event, &mut frame)
+            .unwrap()
+            .unwrap();
+    }
+    assert!(frame.is_active()); // Leave the original End owner in the old frame.
+    let mut replacement = Parser::new(Config::default());
+    replacement.feed(b"<new></new>", true).unwrap();
+    replacement.next_event().unwrap().unwrap();
+    replacement
+        .next_event_for_adapter_into(&mut event, &mut frame)
+        .unwrap()
+        .unwrap();
+    assert!(!frame.is_active());
+    let EventKind::EndElement { name } = event.unwrap().kind else {
+        panic!("owned fallback")
+    };
+    assert_eq!(name.as_str(), "new");
+    replacement.finish_adapter_frame(frame);
 }
 
 #[test]

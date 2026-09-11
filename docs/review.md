@@ -14,6 +14,8 @@ The [private start-tag cache experiment](validation/2026-09-11/start-tag-cache/)
 
 The [ordinary markup classification experiment](validation/2026-09-11/markup-classification/) remains rejected. Normal native time improves by 0.51%, but PGO regresses by 0.38% across real-project conditions, and normal generated references regress by 3.31% in all 14 pairs. Its report retains both native campaigns and explicitly marks the downstream compatibility, CPython and allocation campaigns as unexecuted.
 
+The [current API failure census](validation/2026-09-11/api-failure-census/) classifies all 393 nonpassing configurations by their reached assertions and bounds. A separate [current-source allocation diagnostic](validation/2026-09-11/allocation-semantic-coverage/) passes 72 configurations after raising retry and resource ceilings, reaching the original text and handler assertions in six tests. The original 4,740-result matrix remains unchanged.
+
 ## Review order
 
 | Area | Layers | Main questions |

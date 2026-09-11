@@ -1,0 +1,527 @@
+{
+  "status": "complete",
+  "scope": "Six separate raised-ceiling diagnostic tests, twelve contexts each; original matrix and all non-ceiling source bytes remain unchanged. Not a replacement API matrix, benchmark, or exhaustive OOM validation.",
+  "preparation_sha256": "49d610ab61359f7922e5cba456a828ce4fb9488c870b33659fec6eb6b525432f",
+  "controller_sha256": "c84e87f4a6016fc864fae49a528aae3309ad8280e6f16385c9f57f10e2965c7c",
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-gcc-13",
+        "-O1",
+        "-DXML_TESTING",
+        "-D_GNU_SOURCE",
+        "-I/tmp/oriole-reference-frame-semantic-diagnostic/adapted",
+        "-I/tmp/oriole-reference-frame-semantic-diagnostic/lib",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/acc_tests.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/alloc_tests.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/basic_tests.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/bridge.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/chardata.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/common.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/dummy.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/handlers.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/memcheck.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/minicheck.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/misc_tests.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/ns_tests.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/nsalloc_tests.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/runtests.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/adapted/structdata.c",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/liboriole_expat.so",
+        "-Wl,-rpath,/tmp/oriole-reference-frame-semantic-diagnostic",
+        "-lm",
+        "-ldl",
+        "-o",
+        "/tmp/oriole-reference-frame-semantic-diagnostic/run01/runtests"
+      ],
+      "cwd": "/tmp/oriole-reference-frame-semantic-diagnostic",
+      "timeout_seconds": 120,
+      "environment": {
+        "PATH": "/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/tmp",
+        "ORIOLE_CHUNK_MASK": "63",
+        "ORIOLE_DEFERRAL_MASK": "3",
+        "ORIOLE_TEST_TIMEOUT": "15",
+        "ORIOLE_MEMORY_MIB": "4096",
+        "ORIOLE_RSS_MIB": "3072",
+        "ORIOLE_SELECTED_TESTS": "test_alloc_public_entity_value,test_alloc_nested_groups,test_alloc_notation,test_alloc_public_notation,test_alloc_system_notation,test_alloc_dtd_default_handling"
+      },
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/tmp/oriole-reference-frame-semantic-diagnostic/run01/runtests",
+        "--verbose"
+      ],
+      "cwd": "/tmp/oriole-reference-frame-semantic-diagnostic",
+      "timeout_seconds": 300,
+      "environment": {
+        "PATH": "/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/tmp",
+        "ORIOLE_CHUNK_MASK": "63",
+        "ORIOLE_DEFERRAL_MASK": "3",
+        "ORIOLE_TEST_TIMEOUT": "15",
+        "ORIOLE_MEMORY_MIB": "4096",
+        "ORIOLE_RSS_MIB": "3072",
+        "ORIOLE_SELECTED_TESTS": "test_alloc_public_entity_value,test_alloc_nested_groups,test_alloc_notation,test_alloc_public_notation,test_alloc_system_notation,test_alloc_dtd_default_handling"
+      },
+      "exit_code": 0,
+      "log_sha256": "6408b82f2303a7163164e926596d126f4aa3b1947945acab9e78749d25e17093"
+    }
+  ],
+  "preflight_passed": true,
+  "compile_exit_code": 0,
+  "binary_sha256": "db53efcdf2bdfeedc13a3192d07273a3bbdabc86dcb4741a1b4a97b818d28e1a",
+  "run_exit_code": 0,
+  "selection_complete": true,
+  "library_origins": [
+    "/tmp/oriole-reference-frame-semantic-diagnostic/liboriole_expat.so"
+  ],
+  "library_origin_verified": true,
+  "outcomes": {
+    "pass": 72
+  },
+  "results": [
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    }
+  ],
+  "library_unchanged": true,
+  "original_tree_unchanged": true,
+  "all_diagnostic_contexts_passed": true,
+  "original_tree_unchanged_on_exit": true
+}

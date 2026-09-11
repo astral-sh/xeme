@@ -5,7 +5,7 @@ well-formedness, callback compatibility, and safe resource use are separate gate
 A symbol existing or a document parsing successfully does not establish callback
 or CPython compatibility.
 
-The selected runtime includes [shared element-name storage](validation/2026-09-11/element-name-storage/). Fresh PGO measurements take 1.3516× Expat natively and 1.1281× through CPython, improving 1.64% and 0.61% against the capacity-fixed parent. The original 4,740 API outcomes remain unchanged. Shared and static strict CPython runs retain 802 tests, two failures and 14 skip records with the explicit consumer cleanup backport; neither suite is green. Only seven of 24 individual CPython PGO conditions meet the roughly 1.10× target. These results do not extend the historical PBS or sustained sanitizer evidence below.
+The selected runtime includes [detached character-reference frames](validation/2026-09-11/reference-frames/). Fresh PGO measurements take 1.3261× Expat natively and 1.1179× through CPython across their respective 24 real-project conditions. Nine of 24 individual CPython PGO conditions meet the roughly 1.10× target; both aggregate results remain above it. Shared and static strict CPython runs retain 802 tests, two failures and 14 skip records with the explicit consumer cleanup backport. These results do not extend the historical PBS or sustained sanitizer evidence below.
 
 The [current streaming report](validation/2026-09-11/streaming-input-bounds/)
 records the latest input/work-policy validation, including actual streams through
@@ -14,19 +14,19 @@ records the latest input/work-policy validation, including actual streams throug
 [full checkpoint](validation/2026-09-10/) retain their own source-specific runtime,
 fuzzing and distribution evidence.
 
-The original API matrix currently passes 4,347 of 4,740 configurations: 391
-assertion failures and two timeouts remain. No passing configuration regressed.
-The two active upstream 2 GiB cases now reach the unchanged three-second timeout
-instead of the earlier input assertion; they are not counted as fixed. The
-[earlier failure classification](validation/2026-09-10/detached-frames/#compatibility-and-safety-checks)
-distinguishes allocation costs, assertions tied to Expat's allocation schedule,
-literal identity and resource-policy boundaries. Callback grouping and position
-differences remain separately visible. The current strict shared/static CPython
-runs retain the same two failures with an explicit consumer cleanup backport;
-the four completed performance campaigns retain all conditions and raw samples in
-the [current benchmark report](validation/2026-09-11/streaming-input-bounds/#benchmarks).
-The fixed PGO aggregate remains slower than Expat in both native C and actual
-CPython, so the speed objective remains unmet.
+The original API matrix passes 4,347 of 4,740 configurations: 391 assertion failures and two timeouts remain, spanning 38 test names. The [exact failure census](validation/2026-09-11/api-failure-census/) retains every result and reached source assertion:
+
+| Reached failure | Configurations |
+| --- | ---: |
+| Allocation retry ceilings or allocation schedules | 366 |
+| Literal Expat version identity | 12 |
+| Single-buffer resource policy | 12 |
+| Deferral allocation-growth assertion | 1 |
+| Three-second timeout on a 2 GiB case | 2 |
+
+These failures do not establish a new XML-content defect, but an early allocation assertion does not validate later semantic assertions that were never reached. A separate [current-source allocation diagnostic](validation/2026-09-11/allocation-semantic-coverage/) passes all 72 configurations of six tests after raising retry and resource limits. It reaches their original text and handler assertions without changing the original matrix or declaring those failures fixed. Callback presence checks do not establish exact argument values, ordering or positions.
+
+The [selected runtime's benchmark report](validation/2026-09-11/reference-frames/) retains all normal/PGO native and CPython conditions. Native and CPython PGO aggregates both exceed the roughly 1.10× Expat target. The two strict CPython text-grouping failures remain explicit; no passing original API configuration regressed.
 
 ## Differential testing
 

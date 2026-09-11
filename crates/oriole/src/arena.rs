@@ -134,7 +134,16 @@ impl AdapterFrame {
             .callback_bytes
             .checked_add(text.len())
             .ok_or(AllocError::CapacityOverflow)?;
-        self.bytes.try_reserve(required)?;
+        if required > self.bytes.capacity() - self.bytes.len()
+            && self.bytes.capacity() > MAX_ARENA_BYTES / 2
+        {
+            // Text can leave a non-power-of-two capacity. If doubling it would
+            // exceed the arena budget, reserve the full bound once instead.
+            self.bytes
+                .try_reserve_exact(MAX_ARENA_BYTES - self.bytes.len())?;
+        } else {
+            self.bytes.try_reserve(required)?;
+        }
         let start = self.bytes.len();
         self.bytes.try_push_str(text)?;
         self.bytes.try_push('\0')?;
@@ -352,5 +361,58 @@ mod tests {
             Some(b"abcdefghijklmnopqrstuvwxyz".as_slice())
         );
         assert!(frame.bytes.capacity() <= MAX_ARENA_BYTES);
+    }
+
+    #[test]
+    fn start_after_text_stays_within_the_reserved_frame_capacity() {
+        let warm_attributes = (0..MAX_ARENA_ATTRIBUTES)
+            .map(|index| format!(" a{index}=''"))
+            .collect::<std::string::String>();
+        let attributes = (0..MAX_ARENA_ATTRIBUTES)
+            .map(|index| format!(" a{index}='{}'", "v".repeat(22)))
+            .collect::<std::string::String>();
+        let tag = format!("<n{attributes}/>");
+        assert!(tag.len() <= MAX_ARENA_BYTES);
+        let text = "x".repeat(3000);
+        let xml = format!("<r><w{warm_attributes}/><w{warm_attributes}/>{text}{tag}</r>");
+        let mut parser = Parser::new(Config::default());
+        parser.feed(xml.as_bytes(), true).unwrap();
+        let mut frame = parser.adapter_frame();
+        let mut event = None;
+        // The first attribute tag warms lexical storage; the second warms the
+        // detached frame's full attribute capacity.
+        for _ in 0..4 {
+            parser
+                .next_event_for_adapter_into(&mut event, &mut frame)
+                .unwrap()
+                .unwrap();
+        }
+        assert!(frame.is_active() && event.is_none());
+        assert_eq!(frame.attributes.len(), MAX_ARENA_ATTRIBUTES);
+        assert_eq!(frame.attributes.capacity(), MAX_ARENA_ATTRIBUTES);
+        // Deliver the empty End, then Text with an exact 3000-byte reservation.
+        for _ in 0..2 {
+            parser
+                .next_event_for_adapter_into(&mut event, &mut frame)
+                .unwrap()
+                .unwrap();
+        }
+        assert_eq!(frame.text_bytes(), Some(text.as_bytes()));
+        assert_eq!(frame.bytes.capacity(), 3000);
+        parser
+            .next_event_for_adapter_into(&mut event, &mut frame)
+            .unwrap()
+            .unwrap();
+        assert!(frame.is_active() && event.is_none());
+        assert_eq!(frame.name_bytes(), b"n\0");
+        assert_eq!(frame.bytes.len(), 3476);
+        assert_eq!(frame.attributes.len(), MAX_ARENA_ATTRIBUTES);
+        let retained =
+            frame.bytes.capacity() + frame.attributes.capacity() * size_of::<ArenaAttribute>();
+        assert!(
+            retained <= RETAINED_ARENA_BYTES,
+            "active frame retains {retained} bytes against its {RETAINED_ARENA_BYTES}-byte reservation"
+        );
+        parser.finish_adapter_frame(frame);
     }
 }

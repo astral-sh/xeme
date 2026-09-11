@@ -1,0 +1,26 @@
+{
+  "README.md": {
+    "sha256": "261930f1a20fe13cdb4c56e63273011d387b459127dba6419d60ad648cbde429",
+    "size": 4898
+  },
+  "evidence-members.json": {
+    "sha256": "55849e6a00a585d4582dc6a445e06f777bb32f4671a1a2838a5181c6e318360e",
+    "size": 21292
+  },
+  "evidence.tar.gz": {
+    "sha256": "44a641c34055925b762c442ff4b8ddd43b8a00209e53f646a111640686f80dd1",
+    "size": 5944875
+  },
+  "excluded-distribution.json": {
+    "sha256": "26c5514787b8dbf64fca303c870268e5f37a9309dd1acd8c7117b5bd443f466e",
+    "size": 912
+  },
+  "files.json": {
+    "sha256": "8e01b1ffd547b1f887b21ccc21a9381a1ce36aa7c09c1dbb67155a8a0a3c4946",
+    "size": 654
+  },
+  "report.json": {
+    "sha256": "78196e28e8df72e8e4331092adec1edd73fb297288ed51a77dcab861aac26261",
+    "size": 10256
+  }
+}

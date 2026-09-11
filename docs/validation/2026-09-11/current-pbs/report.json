@@ -1,0 +1,242 @@
+{
+  "status": "followup_complete_workflow_and_xml_gates_remain_failed",
+  "workflow": {
+    "id": 34563056904,
+    "head_sha": "c1776c922b023a3558badfefa697cd11b0d37d8e",
+    "conclusion": "failure",
+    "failed_steps": [
+      "Validate the complete distribution"
+    ],
+    "skipped_steps": [
+      "Verify the installed parser identity",
+      "Run the installed interpreter on glibc 2.17",
+      "Post Run astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d"
+    ]
+  },
+  "ci_subchecks": {
+    "archive_validator": "passed",
+    "custom_invocations": 2,
+    "each_custom": {
+      "tests": 22,
+      "skips": 5,
+      "successes": 17
+    },
+    "xml_initial_executions": 802,
+    "xml_rerun_executions": 4,
+    "xml_total_executions": 806,
+    "xml_failure_occurrences": 4,
+    "xml_skips": 12,
+    "xml_unique_failure_methods": [
+      "test.test_pyexpat.BufferTextTest.test1",
+      "test.test_sax.CDATAHandlerTest.test_handlers"
+    ],
+    "rerun_methods": [
+      {
+        "id": "test.test_pyexpat.BufferTextTest.test1",
+        "status": "FAIL"
+      },
+      {
+        "id": "test.test_pyexpat.MalformedInputTest.test1",
+        "status": "ok"
+      },
+      {
+        "id": "test.test_sax.CDATAHandlerTest.test_handlers",
+        "status": "FAIL"
+      },
+      {
+        "id": "test.test_sax.LexicalHandlerTest.test_handlers",
+        "status": "ok"
+      }
+    ],
+    "observed_failure_kind": "ordinary character-data callback grouping assertions"
+  },
+  "source": {
+    "bundle_files_matching_git_and_live": 69,
+    "launch_files_matching_git_and_live": 97,
+    "snapshot_union_files": 101,
+    "source_manifest_sha256": "5fb3d534fd6dc914327364b7915983fcd0798a181ec8814c971b93a0b9222d7c",
+    "six_installed_xml_test_modules_match_cached_upstream": {
+      "test_pyexpat": "44129616745434f065948aa9cee6a9be4546aa7cea93b952259e140cbc3fe844",
+      "test_xml_etree": "2b5af95189ddba78b3d64f4529aa4393ba1a48a07b06dc9c0ea737ee105946eb",
+      "test_xml_etree_c": "6e77d3dc478c0357ef9910f3fea602e1b8ed48c7a0b74496801e98936dba7be5",
+      "test_minidom": "ce1abf7b06c4c98c535cea962908ddc4362ad2e626c23e9b726bffa5e60bf843",
+      "test_sax": "b061db0792bb838bf2568ff145b770db0b89cbf7bfa995664f4d392d5e41ec34",
+      "test_pulldom": "4c323df7e8eaf8e5f49f337bda9e23cb69a26e63eab8533a347a9cab2f1c2a1e"
+    },
+    "cached_upstream_reference": "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Lib/test"
+  },
+  "build": {
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8\n",
+    "command": [
+      "cargo",
+      "rustc",
+      "--locked",
+      "--release",
+      "--target",
+      "x86_64-unknown-linux-gnu",
+      "-p",
+      "oriole_expat",
+      "--lib",
+      "--crate-type",
+      "cdylib,staticlib",
+      "--verbose",
+      "--",
+      "--print=native-static-libs"
+    ],
+    "rustflags": "-C relocation-model=pic -C panic=unwind",
+    "actual_workspace_rustc_vectors": 3,
+    "c_only_thin_lto": true,
+    "pgo": false,
+    "native_static_libraries": "-lgcc_s -lutil -lrt -lpthread -lm -ldl -lc",
+    "native_hashes": {
+      "build/lib/libexpat.a": "3ad17c84e0e4019d0882b57c2f48584aecf58caaf9ebaf003d836d34923d2c30",
+      "build/Modules/pyexpat.o": "8c9d5740b0af63f8500627d85f4432f6dd7bf60e237f3afe7c88ca46b0cf7018",
+      "build/Modules/_elementtree.o": "7e0a1b7611e5a2dc20caae14a5aa71d8ec83e16d14ce86f3854f4aeac9337b65",
+      "install/bin/python3.12": "9d2509770458cd840bbff5a3947c9da1fe991322e76227dd4a63c206d2d75e05",
+      "install/lib/libpython3.12.so.1.0": "87097b2a190af58c3ba6c38c7a17ffb156aa012c47b6f7ecef159e9c08aa6ad0",
+      "install/lib/libpython3.12.so": "87097b2a190af58c3ba6c38c7a17ffb156aa012c47b6f7ecef159e9c08aa6ad0",
+      "install/lib/libpython3.12.a": "27f3418f2660de128f57723338040bcdc459329d5b354ef8ec314ab87094a472",
+      "install/include/python3.12/pyexpat.h": "91b3b4f199a074a44504bf914c96d5a1c525eeffd1726c218f38195979bf43fb"
+    },
+    "consumer_adaptation": {
+      "cpython_revision": "3bb231a6a5dc02b95658877318bf61501a7209e9",
+      "cpython_version": "3.12.13",
+      "upstream_issue": "https://github.com/python/cpython/issues/144984",
+      "upstream_pull_request": "https://github.com/python/cpython/pull/144992",
+      "upstream_commit": "e6b9a1406980fbb1d4032eca9cc0b4f8f252b716",
+      "source_sha256": "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0",
+      "patched_source_sha256": "1c3cf2ee6dfa568cf833742ad786880f4816042705689a116a4f308b7a9d95f2",
+      "patch_sha256": "10999b7171ce016e249c47c7f12d562f05a28aadf17791d61664090928f736a2",
+      "scope": "Backports only Modules/pyexpat.c from the upstream fix; no CPython tests or other files are changed."
+    }
+  },
+  "distribution": {
+    "status": "passed",
+    "archive": "/tmp/oriole-be22-pbs-followup/distribution/cpython-3.12.13-x86_64-unknown-linux-gnu-noopt-20260910T0100.tar.zst",
+    "bytes": 47936107,
+    "sha256": "d7033afb5a01b88737c2e57500269f0078d9237af01455506e5343f46cba539e",
+    "target_execution": false,
+    "command": [
+      "zstd",
+      "-dc",
+      "/tmp/oriole-be22-pbs-followup/distribution/cpython-3.12.13-x86_64-unknown-linux-gnu-noopt-20260910T0100.tar.zst"
+    ],
+    "decompression_exit": 0,
+    "tar_bytes": 357928960,
+    "tar_sha256": "261c62c1ced198e03898e8203c25e7b255a1cdb67666eee88a461a9980d5d293",
+    "members": 6546,
+    "all_regular_members_rehashed": true,
+    "extracted": "/tmp/oriole-be22-pbs-followup/extracted",
+    "extraction_filter": "tarfile data",
+    "operational_seconds": 5.8537257019779645
+  },
+  "elf_static_inspection": {
+    "maximum_glibc_version": "2.17",
+    "tls": [
+      "117: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __wrap___cxa_thread_atexit_impl"
+    ],
+    "module_initializers_present": true,
+    "runtime_loading_proven": false
+  },
+  "installed_identity": {
+    "python": "3.12.13 (main, Sep 11 2026, 04:55:26) [Clang 22.1.3 ]",
+    "executable": "/tmp/oriole-be22-pbs-followup/extracted/python/install/bin/python3.12",
+    "glibc": [
+      "glibc",
+      "2.39"
+    ],
+    "expat_version": "oriole_compat_2.8.4",
+    "version_info": [
+      2,
+      8,
+      4
+    ],
+    "pyexpat_origin": "built-in",
+    "elementtree_origin": "built-in",
+    "pyexpat_file": null,
+    "elementtree_file": null,
+    "python_library": "libpython3.12.so",
+    "modules": {
+      "test_pyexpat": "/tmp/oriole-be22-pbs-followup/extracted/python/install/lib/python3.12/test/test_pyexpat.py",
+      "test_xml_etree": "/tmp/oriole-be22-pbs-followup/extracted/python/install/lib/python3.12/test/test_xml_etree.py",
+      "test_xml_etree_c": "/tmp/oriole-be22-pbs-followup/extracted/python/install/lib/python3.12/test/test_xml_etree_c.py",
+      "test_minidom": "/tmp/oriole-be22-pbs-followup/extracted/python/install/lib/python3.12/test/test_minidom.py",
+      "test_sax": "/tmp/oriole-be22-pbs-followup/extracted/python/install/lib/python3.12/test/test_sax.py",
+      "test_pulldom": "/tmp/oriole-be22-pbs-followup/extracted/python/install/lib/python3.12/test/test_pulldom.py"
+    },
+    "module_sha256": {
+      "test_pyexpat": "44129616745434f065948aa9cee6a9be4546aa7cea93b952259e140cbc3fe844",
+      "test_xml_etree": "2b5af95189ddba78b3d64f4529aa4393ba1a48a07b06dc9c0ea737ee105946eb",
+      "test_xml_etree_c": "6e77d3dc478c0357ef9910f3fea602e1b8ed48c7a0b74496801e98936dba7be5",
+      "test_minidom": "ce1abf7b06c4c98c535cea962908ddc4362ad2e626c23e9b726bffa5e60bf843",
+      "test_sax": "b061db0792bb838bf2568ff145b770db0b89cbf7bfa995664f4d392d5e41ec34",
+      "test_pulldom": "4c323df7e8eaf8e5f49f337bda9e23cb69a26e63eab8533a347a9cab2f1c2a1e"
+    },
+    "collected_test_methods": 803,
+    "loader_errors": []
+  },
+  "fresh_accelerator": {
+    "python": "3.12.13 (main, Sep 11 2026, 04:55:26) [Clang 22.1.3 ]",
+    "expat": "oriole_compat_2.8.4",
+    "original_accelerator": "built-in",
+    "original_pyexpat": "built-in",
+    "fresh_accelerator": "built-in",
+    "cET_is_none": false,
+    "cET_alias_is_none": false
+  },
+  "local_diagnostics": {
+    "planned_commands_run_once": 5,
+    "exit_codes": [
+      0,
+      0,
+      1,
+      1,
+      1
+    ],
+    "host_and_glibc_verbose": {
+      "each_tests": 802,
+      "each_failures": 2,
+      "each_skipped_outcomes": 12,
+      "each_expected_failures": 3,
+      "each_exit_code": 1,
+      "all_802_method_outcomes_equal": true,
+      "all_fixture_and_subtest_outcomes_equal": true,
+      "failure_names": [
+        "test.test_pyexpat.BufferTextTest.test1",
+        "test.test_sax.CDATAHandlerTest.test_handlers"
+      ],
+      "method_skips": 3,
+      "skipped_subtests": 8,
+      "skipped_classes": 1
+    },
+    "original_glibc_script": {
+      "thread_subcheck": {
+        "glibc": [
+          "glibc",
+          "2.17"
+        ],
+        "expat": "oriole_compat_2.8.4",
+        "threaded_parses": 1024
+      },
+      "outer_exit_code": 1,
+      "xml_child_exit_code": 2,
+      "xml_tests": 802,
+      "xml_failures": 2,
+      "xml_skips": 13
+    },
+    "collection": {
+      "collected": 803,
+      "executed": 802,
+      "not_executed_due_to_class_skip": [
+        "test.test_xml_etree_c.NoAcceleratorTest.test_correct_import_pyET"
+      ]
+    },
+    "skip_count_explanation": "Original -m test uses default regrtest resources and skips the CPU-resource Minidom complexity test; direct unittest assumes resources enabled, and the saved host/container verbose logs show that method passed. CPython test/support/__init__.py lines 284-290 and test_minidom.py lines 180-181 define this distinction.",
+    "scope": "Local checks supplement skipped CI steps; workflow stays failed. Original glibc script and XML suites fail. Identity, fresh accelerator and 1024 threaded parses pass."
+  },
+  "retained_operational_failure": "Initial sandbox Docker socket permission denial before any container execution. Authorized resume executes only the two remaining planned diagnostics; no target rerun.",
+  "runtime_audit_sha256": "d94613a0b15322d819e0e5f8815117a6752c0ea1fdbb21754946191473efe70b",
+  "no_source_test_workflow_changes": true,
+  "no_binary_equivalence_to_local_ohm_or_pgo": true,
+  "cpu2_target_execution_complete": true
+}

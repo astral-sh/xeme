@@ -154,6 +154,22 @@ unsafe extern "C" fn text(data: *mut c_void, bytes: *const c_char, len: c_int) {
         let state = data.cast::<State>();
         let parser = (*state).parser;
         let original = std::slice::from_raw_parts(bytes.cast::<u8>(), len as usize).to_vec();
+        let expected = (*parser).core.position();
+        let descriptor = (*parser).position;
+        assert_eq!(
+            XML_GetCurrentByteIndex(parser),
+            expected.byte_index as c_long
+        );
+        assert_eq!(
+            XML_GetCurrentByteCount(parser),
+            expected.byte_count as c_int
+        );
+        assert_eq!((*parser).position, descriptor); // Byte getters do not resolve.
+        assert_eq!(XML_GetCurrentLineNumber(parser), expected.line as c_ulong);
+        assert_eq!(
+            XML_GetCurrentColumnNumber(parser),
+            expected.column as c_ulong
+        );
         (*state).calls += 1;
         (*state).text.extend_from_slice(&original);
         if (*state).expect_native {
@@ -205,6 +221,11 @@ unsafe extern "C" fn text(data: *mut c_void, bytes: *const c_char, len: c_int) {
             }
             _ => {}
         }
+        assert_eq!(XML_GetCurrentLineNumber(parser), expected.line as c_ulong);
+        assert_eq!(
+            XML_GetCurrentColumnNumber(parser),
+            expected.column as c_ulong
+        );
         // This read is the alias/lifetime assertion, after every nested operation.
         assert_eq!(
             std::slice::from_raw_parts(bytes.cast::<u8>(), len as usize),
@@ -366,7 +387,8 @@ fn context_text_frame_and_raw_oom_match_owned_mode() {
         let mut success_requests = None;
         for fail_at in 0..=3 {
             let mut outcomes = Vec::new();
-            for native in [false, true] {
+            for mode in 0..3 {
+                let native = mode != 0;
                 assert_eq!(LIVE.get(), 0);
                 clear_requests(0);
                 // SAFETY: The Rust-backed suite implements the documented contract.
@@ -387,7 +409,9 @@ fn context_text_frame_and_raw_oom_match_owned_mode() {
                 let mut frame = core.adapter_frame();
                 let mut event = None;
                 clear_requests(fail_at);
-                let result = if native {
+                let result = if mode == 2 {
+                    core.next_event_for_c_coordinates_into(&mut event, &mut frame)
+                } else if native {
                     core.next_event_for_c_text_context_into(&mut event, &mut frame)
                 } else {
                     core.next_event_for_adapter_into(&mut event, &mut frame)
@@ -416,6 +440,10 @@ fn context_text_frame_and_raw_oom_match_owned_mode() {
                 assert_eq!(LIVE.get(), 0);
             }
             assert_eq!(outcomes[0], outcomes[1], "count={count}, failure={fail_at}");
+            assert_eq!(
+                outcomes[0], outcomes[2],
+                "lazy count={count}, failure={fail_at}"
+            );
             if fail_at == 0 {
                 success_requests = Some(outcomes[0].0.len());
             }

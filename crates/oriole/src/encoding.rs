@@ -1,4 +1,4 @@
-use crate::{Error, ErrorKind, Position, ScanMode};
+use crate::{Error, ErrorKind, NativeLocation, Position, ScanMode};
 use oriole_storage::{Allocator, Box, String, Vec, try_box, try_extend_from_slice};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -664,6 +664,9 @@ pub(crate) struct Source {
     line: usize,
     column: usize,
     previous_cr: bool,
+    coordinate_cursor: usize,
+    committed: Option<NativePoint>,
+    prospective: Option<NativePoint>,
     anchor: Option<Position>,
     pub(crate) initial_depth: usize,
     pub(crate) entity_name: Option<String>,
@@ -671,6 +674,20 @@ pub(crate) struct Source {
     scan: Scan,
     deferred_size: usize,
     name_rules: crate::NameRules,
+}
+
+/// A native event start survives compaction either as a retained offset or an
+/// exact resolved position. Prospective points are never public before commit.
+#[derive(Clone, Copy, Debug)]
+struct NativePoint {
+    identity: NativeLocation,
+    coordinates: NativeCoordinates,
+}
+
+#[derive(Clone, Copy, Debug)]
+enum NativeCoordinates {
+    Retained(usize),
+    Resolved(Position),
 }
 
 /// Coordinates within one source whose consumed prefix remains unchanged.
@@ -698,6 +715,9 @@ impl Source {
             line: 1,
             column: 0,
             previous_cr: false,
+            coordinate_cursor: 0,
+            committed: None,
+            prospective: None,
             anchor: None,
             initial_depth: 0,
             entity_name: None,
@@ -821,14 +841,41 @@ impl Source {
             self.remaining().floor_char_boundary(1024)
         }
     }
+    /// Original bytes remain eager even when line and column are deferred.
+    pub(crate) fn byte_index(&self) -> usize {
+        self.anchor
+            .map_or(self.raw_index, |anchor| anchor.byte_index)
+    }
+
+    fn coordinates_at(&self, offset: usize) -> (usize, usize, bool) {
+        assert!(offset >= self.coordinate_cursor && offset <= self.text.len());
+        let (mut line, mut column, mut previous_cr) = (self.line, self.column, self.previous_cr);
+        advance_position(
+            &self.text[self.coordinate_cursor..offset],
+            &mut line,
+            &mut column,
+            &mut previous_cr,
+        );
+        (line, column, previous_cr)
+    }
+
+    fn advance_coordinates(&mut self, offset: usize) {
+        let (line, column, previous_cr) = self.coordinates_at(offset);
+        self.line = line;
+        self.column = column;
+        self.previous_cr = previous_cr;
+        self.coordinate_cursor = offset;
+    }
+
     pub(crate) fn position(&self, count: usize) -> Position {
         if let Some(anchor) = self.anchor {
             return anchor;
         }
+        let (line, column, _) = self.coordinates_at(self.cursor);
         Position {
             byte_index: self.raw_index,
-            line: self.line,
-            column: self.column,
+            line,
+            column,
             byte_count: self.raw_len(0, count),
         }
     }
@@ -842,26 +889,111 @@ impl Source {
         if let Some(anchor) = self.anchor {
             return anchor;
         }
-        let mut position = self.position(offset);
-        position.byte_index += position.byte_count;
-        position.byte_count = 0;
-        let mut previous_cr = self.previous_cr;
-        advance_position(
-            &self.remaining()[..offset],
-            &mut position.line,
-            &mut position.column,
-            &mut previous_cr,
-        );
-        position.byte_count = self.raw_len(offset, count);
-        position
+        let (line, column, _) = self.coordinates_at(self.cursor + offset);
+        Position {
+            byte_index: self.raw_index + self.raw_len(0, offset),
+            byte_count: self.raw_len(offset, count),
+            line,
+            column,
+        }
     }
 
     pub(crate) fn position_cursor(&self) -> PositionCursor {
+        let (line, column, previous_cr) = self.coordinates_at(self.cursor);
         PositionCursor {
             offset: 0,
-            position: self.position(0),
-            previous_cr: self.previous_cr,
+            position: self.anchor.unwrap_or(Position {
+                byte_index: self.raw_index,
+                byte_count: 0,
+                line,
+                column,
+            }),
+            previous_cr,
         }
+    }
+
+    pub(crate) fn begin_prospective(&mut self, identity: NativeLocation) {
+        assert!(self.prospective.is_none());
+        assert!(self.native_utf8_byte_index() == Some(identity.byte_index));
+        assert!(!self.has_conversions() && identity.byte_count > 0);
+        assert!(self.remaining().get(..identity.byte_count).is_some());
+        self.prospective = Some(NativePoint {
+            identity,
+            coordinates: NativeCoordinates::Retained(self.cursor),
+        });
+    }
+
+    pub(crate) fn commit_prospective(&mut self, identity: NativeLocation) {
+        let point = self
+            .prospective
+            .take()
+            .expect("native frame has a prospective start");
+        assert_eq!(point.identity, identity);
+        self.committed = Some(point);
+    }
+
+    pub(crate) fn discard_prospective(&mut self) {
+        self.prospective = None;
+    }
+
+    pub(crate) fn recover_prospective(&mut self) {
+        if self.prospective.is_some() {
+            self.materialize_coordinates();
+            self.discard_prospective();
+        }
+    }
+
+    fn point_position(&self, point: NativePoint) -> Position {
+        match point.coordinates {
+            NativeCoordinates::Resolved(position) => position,
+            NativeCoordinates::Retained(offset) => {
+                let (line, column, _) = self.coordinates_at(offset);
+                Position {
+                    byte_index: point.identity.byte_index,
+                    byte_count: point.identity.byte_count,
+                    line,
+                    column,
+                }
+            }
+        }
+    }
+
+    pub(crate) fn published_position(&self, identity: NativeLocation) -> Position {
+        let point = self.committed.expect("native publication is retained");
+        assert_eq!(point.identity, identity);
+        self.point_position(point)
+    }
+
+    fn resolve_point(&mut self, mut point: NativePoint) -> NativePoint {
+        if let NativeCoordinates::Retained(offset) = point.coordinates {
+            self.advance_coordinates(offset);
+            point.coordinates = NativeCoordinates::Resolved(Position {
+                byte_index: point.identity.byte_index,
+                byte_count: point.identity.byte_count,
+                line: self.line,
+                column: self.column,
+            });
+        }
+        point
+    }
+
+    pub(crate) fn resolve_published(&mut self, identity: NativeLocation) -> Position {
+        let point = self.committed.expect("native publication is retained");
+        assert_eq!(point.identity, identity);
+        let point = self.resolve_point(point);
+        self.committed = Some(point);
+        self.point_position(point)
+    }
+
+    /// Resolve starts in order before advancing the checkpoint or discarding text.
+    pub(crate) fn materialize_coordinates(&mut self) {
+        if let Some(point) = self.committed {
+            self.committed = Some(self.resolve_point(point));
+        }
+        if let Some(point) = self.prospective {
+            self.prospective = Some(self.resolve_point(point));
+        }
+        self.advance_coordinates(self.cursor);
     }
 
     /// Advance coordinates in an append-only source view. The caller must not
@@ -985,23 +1117,25 @@ impl Source {
     }
 
     pub(crate) fn consume(&mut self, count: usize) {
+        let deferred = self.prospective.is_some();
+        if !deferred {
+            self.materialize_coordinates();
+        }
         self.raw_index += self.raw_len(0, count);
-        let text = &self.text[self.cursor..self.cursor + count];
-        advance_position(
-            text,
-            &mut self.line,
-            &mut self.column,
-            &mut self.previous_cr,
-        );
         self.cursor += count;
+        if !deferred {
+            self.advance_coordinates(self.cursor);
+        }
         self.scan = Scan::default();
         self.deferred_size = 0;
         if self.cursor >= 64 * 1024 && self.cursor >= self.text.len() / 2 {
+            self.materialize_coordinates();
             self.text.discard_prefix(self.cursor);
             if self.encoding == Encoding::MultiByte {
                 self.raw_widths.drain(..self.cursor);
             }
             self.cursor = 0;
+            self.coordinate_cursor = 0;
         }
     }
     pub(crate) fn scan_token(
@@ -1300,6 +1434,72 @@ fn advance_long_position(text: &str, line: &mut usize, column: &mut usize, previ
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn lazy_compaction_resolves_both_starts_without_committing_the_candidate() {
+        for commit in [false, true] {
+            let mut source = Source::new(Allocator::System, crate::NameRules::default());
+            source.text.try_push_str(&"x".repeat(65_530)).unwrap();
+            source.text.try_push_str("a\r\néz").unwrap();
+            source.consume(65_530);
+            let a = NativeLocation {
+                generation: 1,
+                byte_index: 65_530,
+                byte_count: 2,
+            };
+            let expected_a = source.position(2);
+            source.begin_prospective(a);
+            source.consume(2);
+            source.commit_prospective(a);
+            assert_eq!(source.coordinate_cursor, 65_530);
+            assert_eq!(source.published_position(a), expected_a);
+            // The CR is still pending at the checkpoint. Both projection APIs
+            // must carry its state into the LF without counting a second line.
+            let mut cursor = source.position_cursor();
+            assert_eq!(
+                source.position_from_cursor(&mut cursor, 1, 2),
+                source.position_at(1, 2)
+            );
+            assert_eq!(cursor.position.line, 2);
+            let b = NativeLocation {
+                generation: 1,
+                byte_index: 65_532,
+                byte_count: 4,
+            };
+            let expected_b = source.position(4);
+            source.begin_prospective(b);
+            source.consume(4); // Existing 64 KiB compaction discards A and B bytes.
+            assert_eq!(source.cursor, 0);
+            assert_eq!(source.coordinate_cursor, 0);
+            assert!(source.text.is_empty());
+            assert_eq!(source.published_position(a), expected_a);
+            assert_eq!(
+                source.position(0),
+                Position {
+                    byte_index: 65_536,
+                    byte_count: 0,
+                    line: 2,
+                    column: 2,
+                }
+            );
+            if commit {
+                source.commit_prospective(b);
+                assert_eq!(source.resolve_published(b), expected_b);
+            } else {
+                // This is also entry recovery after a caught host panic. B was
+                // resolved before compaction but never became a public event.
+                source.recover_prospective();
+                assert!(source.prospective.is_none());
+                assert_eq!(source.resolve_published(a), expected_a);
+            }
+        }
+        eprintln!(
+            "lazy layouts Source={} Parser={} AdapterFrame={}",
+            size_of::<Source>(),
+            size_of::<crate::Parser>(),
+            size_of::<crate::AdapterFrame>()
+        );
+    }
 
     #[test]
     fn converted_positions_fit_at_the_source_bound() {

@@ -1,0 +1,39 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "4",
+    "cargo",
+    "+ohm",
+    "-Zohm-defaults=no",
+    "test",
+    "--offline",
+    "-p",
+    "oriole",
+    "--test",
+    "allocation",
+    "--jobs",
+    "1",
+    "detached_start_frames_use_the_selected_suite_and_clear_on_every_failure",
+    "--",
+    "--exact"
+  ],
+  "cwd": "/home/dev-user/code/oss/oriole-lazy-coordinates",
+  "env": {
+    "CARGO_HOME": "/home/dev-user/.cache/toucan/cargo",
+    "CARGO_TARGET_DIR": "/home/dev-user/.cache/oriole/targets/lazy-coordinates",
+    "CARGO_BUILD_BUILD_DIR": "/home/dev-user/.cache/ohm/verified-build/{workspace-path-hash}",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_BUILD_JOBS": "1"
+  },
+  "returncode": 0,
+  "seconds": 0.9683131109923124,
+  "stdout": {
+    "bytes": 196,
+    "sha256": "336037562ded06b7b972f5e7c9d70b7b5ff1f3299e1b06c2e8c33a323f22a269"
+  },
+  "stderr": {
+    "bytes": 297,
+    "sha256": "1d58f622e7f0e57abbdaa9e2a1f88debd4813a5c9615eef55b07ed6a4c9c3a3f"
+  }
+}

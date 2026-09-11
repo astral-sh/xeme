@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "reviewer": "/root/coordinate_review",
+  "reviewed_at_utc": "2026-09-11T16:16:29.456518+00:00",
+  "worktree": "/home/dev-user/code/oss/oriole-lazy-coordinates",
+  "base_commit": "de859c89577b2982d59b6923d682032f6a7c7800",
+  "verdict": "no_actionable_runtime_correctness_blocker_found",
+  "review_kind": "source_review_with_separate_test_authorship",
+  "independently_reviewed_runtime_files": [
+    "crates/oriole/src/arena.rs",
+    "crates/oriole/src/dtd.rs",
+    "crates/oriole/src/encoding.rs",
+    "crates/oriole/src/lib.rs",
+    "crates/oriole/src/recycling.rs",
+    "crates/oriole_expat/src/lib.rs"
+  ],
+  "reviewer_authored_test_files": [
+    "crates/oriole_expat/src/coordinate_tests.rs"
+  ],
+  "files": [
+    {
+      "path": "crates/oriole/src/arena.rs",
+      "bytes": 16051,
+      "sha256": "9b162fb48ca354b9cf0e2cf3bdd33fd8d535ccbb4eae7d1d2659dce31f77df6b",
+      "base_sha256": "732da2c1bac637f3d136b2644ff59ca094eef83c2437f98f2123662be5bfa7a1"
+    },
+    {
+      "path": "crates/oriole/src/dtd.rs",
+      "bytes": 83225,
+      "sha256": "9a201c348ce25b9f85455ca6585368fc5d0c9fde778d21f71ef4134cabf50d0d",
+      "base_sha256": "0cef3a535633110fa349bb4cd4d0f489c1053d7271f61d84833a7eff4f9154ac"
+    },
+    {
+      "path": "crates/oriole/src/encoding.rs",
+      "bytes": 68799,
+      "sha256": "3ad0b7da9477802c392651ab31a3624de3ace81f4a3cd4041af25cb5104eab2f",
+      "base_sha256": "a4d2f77d3fb36559fae901ff8de1ef231ccf83bee2cbc1396bc7587ae3aec298"
+    },
+    {
+      "path": "crates/oriole/src/lib.rs",
+      "bytes": 186637,
+      "sha256": "3a60ba73bfb7da8a380dfd3b0df185085463c90af5958d3d6eefa4966b0d2db6",
+      "base_sha256": "f677c9da7579513d40d6b5c319c0a1ea6f0e87c63cab77f293441138f1879426"
+    },
+    {
+      "path": "crates/oriole/src/recycling.rs",
+      "bytes": 19716,
+      "sha256": "89d18ae49a2e8e484c086fc5ebb85e54ed651c0fc0a35f435679db0f92e59ff7",
+      "base_sha256": "06307e76b6673f5f70d6ed38da999942dd4dc2bc12fbfa2e18c836e2a5adb0a8"
+    },
+    {
+      "path": "crates/oriole_expat/src/lib.rs",
+      "bytes": 107409,
+      "sha256": "e1bee83f8f705ccb72a2db1787f458a774a48413565c0509ccb642efe9253a18",
+      "base_sha256": "babe2d339e2119910797998f8d9819443b4b19bd7feb7951a574bfbfcf3184a7"
+    },
+    {
+      "path": "crates/oriole_expat/src/coordinate_tests.rs",
+      "bytes": 10137,
+      "sha256": "ea2188f5afc10297b397297fd81b0e087bbec7d7bbba3099176a0ba0bfaddeb2"
+    }
+  ],
+  "invariants_reviewed": [
+    "Only positive-count native unconverted UTF-8 root frames enter the new C coordinate seam; empty starts, pending sequences, DTD/shared state, children, CDATA and generic fallbacks keep eager publication paths.",
+    "NativeLocation has private fields and binds parser generation plus exact byte start/count. The current-publication resolver rejects stale and foreign descriptors. Ordinary AdapterFrame.position rejects unresolved descriptors in release builds.",
+    "Source keeps committed A separate from prospective B. The existing successful delivery decision commits B, including deliverable ordinary Text before a non-OOM accounting error. Early failures discard B and preserve A; entry recovery materializes and discards a leftover prospective point.",
+    "Before existing source compaction, materialization resolves A then B then the consumed cursor. Resolved old points survive buffer discard; coordinate cursor rebases with the consumed cursor. No extra source bytes or deferred compaction are introduced.",
+    "Ordinary Source and Parser position queries project exact line/column from the checkpoint. position_at and position_cursor carry the projected CR state, including split CRLF. Original byte accounting stays eager and the scalar input-context accessor preserves entity anchors.",
+    "Public feed materializes after rejection guards and before decoder mutation. Encoding-map and conversion operations materialize before mutation. Ordinary delivery and generic consume remain eager; errors retain real Position values.",
+    "The C dispatcher installs the event descriptor before callbacks. Coordinate getters borrow only the core field briefly, cache a resolved C Position, and retain allocator-reentry guards. Byte/index/context getters do not resolve. Existing detached Start/End owners and input-context Text pointers do not borrow the core across callbacks.",
+    "C construction, reset, owned events, EOF, decoding requests and error publication store explicit Positions. Encoding release during reset observes the old core and publication before replacement."
+  ],
+  "notes": [
+    "No actionable runtime correctness blocker found in this bounded source review; this is not a production-readiness or performance finding.",
+    "The reviewer authored the new coordinate_tests.rs only. Runtime source was authored by /root/lazy_coordinates. Review suggestions guided focused coverage; authored tests are not represented as an independent test-author review.",
+    "A new adapter test initially changed limits after feed; review caught the unsupported test setup and the implementer corrected it before first execution. No production change was required.",
+    "The reviewer ran no compiler, parser, test, profiler or benchmark target. Saved first focused C results were read and all three authored tests passed. Final source validation, Miri and performance acceptance belong to the implementation/root lanes.",
+    "This seal covers the six named runtime files (including their in-file unit tests) and the authored C coordinate test file only. Allocation-test strengthening, other tests, CI and publication metadata are outside this seal."
+  ],
+  "layout_readback": {
+    "path": "/tmp/oriole-lazy-coordinate-layout-readback.json",
+    "sha256": "9312d8c30e064e8afa5cf2733b42e8d077fb61f86b67e96fee471feb4c6b1282",
+    "deltas_bytes": {
+      "Source": 136,
+      "Parser": 8,
+      "AdapterFrame": 8,
+      "XML_ParserStruct": 16
+    }
+  },
+  "saved_focused_c_stdout": {
+    "path": "/tmp/oriole-lazy-coordinates-checks/focused-c-attempt01.stdout",
+    "sha256": "7825330ea66e7e631e65e53abb97a5415e3c074bc14b937e8ce089bf15149879",
+    "observed_result": "3 passed; 0 failed",
+    "scope": "Observed saved first focused run, not a certificate that its binary matches every byte in this later source seal."
+  },
+  "markdown": {
+    "path": "/tmp/oriole-lazy-coordinates-source-review.md",
+    "sha256": "8ee081e3833980dd91fa47a9b60b952d33974e1c3a41c552bf5dd1db7c9a17e1"
+  }
+}

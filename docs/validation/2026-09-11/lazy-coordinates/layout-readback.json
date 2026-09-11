@@ -1,0 +1,2410 @@
+{
+  "report": "/tmp/oriole-arena-capacity-bound-study/checks-attempt01/report.json",
+  "report_sha256": "3f721648c9e8902d788e848f430962ad74a453d8a821a535cc3bd5173aa0779e",
+  "verified_baseline_source_files": 72,
+  "baseline_test_log": {
+    "path": "/tmp/oriole-arena-capacity-bound-study/checks-attempt01/tests.log",
+    "sha256": "d15eb389d5b54d2dc44d02c0eaf48bf9541213bd4f86003b58bbd57c2e78dd7e"
+  },
+  "current_sizeof_logs": [
+    {
+      "path": "/tmp/oriole-lazy-coordinates-checks/focused-attempt01.stderr",
+      "sha256": "35a95e684e20b0c3b28859515ff213b6686a3126c08bb706b3b5eaed7cdca232",
+      "layout_line": "lazy layouts Source=520 Parser=2416 AdapterFrame=264"
+    },
+    {
+      "path": "/tmp/oriole-lazy-coordinates-checks/focused-c-attempt01.stderr",
+      "sha256": "20f35936347c8da0b15ddc25de430c22b7f1297186962f4c90532b77db81a651",
+      "layout_line": "coordinate layout: CParser=3176 Parser=2416 AdapterFrame=264 AdapterLocation=40"
+    }
+  ],
+  "sources": {
+    "Source": {
+      "path": "/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole/src/encoding.rs",
+      "sha256": "a4d2f77d3fb36559fae901ff8de1ef231ccf83bee2cbc1396bc7587ae3aec298"
+    },
+    "Parser": {
+      "path": "/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole/src/lib.rs",
+      "sha256": "f677c9da7579513d40d6b5c319c0a1ea6f0e87c63cab77f293441138f1879426"
+    },
+    "AdapterFrame": {
+      "path": "/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole/src/arena.rs",
+      "sha256": "732da2c1bac637f3d136b2644ff59ca094eef83c2437f98f2123662be5bfa7a1"
+    },
+    "XML_ParserStruct": {
+      "path": "/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole_expat/src/lib.rs",
+      "sha256": "babe2d339e2119910797998f8d9819443b4b19bd7feb7951a574bfbfcf3184a7"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "/home/dev-user/.cache/ohm/verified-build/3d/0d6cdab4346afb/debug/deps/oriole-3caaf1ad0de617aa",
+      "sha256": "b03820ea3acb75263107ce1ff88ed8afda98d7a696070092219e909f87dfdd6d",
+      "bytes": 10791720,
+      "argv": [
+        "readelf",
+        "--debug-dump=info",
+        "/home/dev-user/.cache/ohm/verified-build/3d/0d6cdab4346afb/debug/deps/oriole-3caaf1ad0de617aa"
+      ],
+      "types": [
+        {
+          "depth": 3,
+          "die_offset": "2f50",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.00",
+            "stmt_list": "0",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x134c0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "4d1b",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.00",
+            "stmt_list": "0",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x134c0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "623d",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.00",
+            "stmt_list": "0",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x134c0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "43e3a",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.01",
+            "stmt_list": "0x22e0c",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x1a3b0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "46700",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.01",
+            "stmt_list": "0x22e0c",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x1a3b0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "47836",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.01",
+            "stmt_list": "0x22e0c",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x1a3b0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "72718",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.02",
+            "stmt_list": "0x2c29a",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x1dc30"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "72b51",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.02",
+            "stmt_list": "0x2c29a",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x1dc30"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "98f27",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.03",
+            "stmt_list": "0x34b07",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x26640"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "9a5c4",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.03",
+            "stmt_list": "0x34b07",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x26640"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "9adc3",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.03",
+            "stmt_list": "0x34b07",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x26640"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "a3061",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.04",
+            "stmt_list": "0x3c5bf",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x2d870"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "a3585",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.04",
+            "stmt_list": "0x3c5bf",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x2d870"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "d500f",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.05",
+            "stmt_list": "0x45ec9",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x32110"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "d7554",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.05",
+            "stmt_list": "0x45ec9",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x32110"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "d82b0",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.05",
+            "stmt_list": "0x45ec9",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x32110"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "e87c7",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.06",
+            "stmt_list": "0x4e72e",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x35970"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "e9dd9",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.06",
+            "stmt_list": "0x4e72e",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x35970"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "e9ff0",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.06",
+            "stmt_list": "0x4e72e",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x35970"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "1123fb",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.07",
+            "stmt_list": "0x56e74",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x3de00"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "113e36",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.07",
+            "stmt_list": "0x56e74",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x3de00"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "11f4c0",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.08",
+            "stmt_list": "0x5f274",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x42880"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "1208aa",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.08",
+            "stmt_list": "0x5f274",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x42880"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "1276c7",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.08",
+            "stmt_list": "0x5f274",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x42880"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "13bda1",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.09",
+            "stmt_list": "0x67a75",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x45910"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "13c215",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.09",
+            "stmt_list": "0x67a75",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x45910"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "13c431",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.09",
+            "stmt_list": "0x67a75",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x45910"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "162065",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.10",
+            "stmt_list": "0x6f683",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x49ac0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "162c6c",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.10",
+            "stmt_list": "0x6f683",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x49ac0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "193442",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.12",
+            "stmt_list": "0x80ce7",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x52f70"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "1964b9",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.12",
+            "stmt_list": "0x80ce7",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x52f70"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "196bf7",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.12",
+            "stmt_list": "0x80ce7",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x52f70"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "1af295",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.13",
+            "stmt_list": "0x88859",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x55250"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "1af72a",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.13",
+            "stmt_list": "0x88859",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x55250"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "1b1be4",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.13",
+            "stmt_list": "0x88859",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x55250"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "1c6bc0",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.14",
+            "stmt_list": "0x90bc1",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x59fd0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "1c7385",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.14",
+            "stmt_list": "0x90bc1",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x59fd0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "1ee1d3",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.15",
+            "stmt_list": "0x986b8",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x5a790"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "1efa4f",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.15",
+            "stmt_list": "0x986b8",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x5a790"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "1f00ad",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.30b387fb8b0d2fc9-cgu.15",
+            "stmt_list": "0x986b8",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x5a790"
+          }
+        }
+      ],
+      "source_file_tables": [
+        {
+          "line_table_offset": 0,
+          "file_index": 1,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 142860,
+          "file_index": 25,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 142860,
+          "file_index": 48,
+          "relative_path": "crates/oriole/src/encoding.rs"
+        },
+        {
+          "line_table_offset": 180890,
+          "file_index": 10,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 215815,
+          "file_index": 10,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 247231,
+          "file_index": 18,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 286409,
+          "file_index": 33,
+          "relative_path": "crates/oriole/src/encoding.rs"
+        },
+        {
+          "line_table_offset": 286409,
+          "file_index": 45,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 321326,
+          "file_index": 14,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 355956,
+          "file_index": 6,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 389748,
+          "file_index": 9,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 389748,
+          "file_index": 26,
+          "relative_path": "crates/oriole/src/arena.rs"
+        },
+        {
+          "line_table_offset": 424565,
+          "file_index": 25,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 456323,
+          "file_index": 4,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 456323,
+          "file_index": 35,
+          "relative_path": "crates/oriole/src/arena.rs"
+        },
+        {
+          "line_table_offset": 489481,
+          "file_index": 7,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 527591,
+          "file_index": 14,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 559193,
+          "file_index": 5,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 592833,
+          "file_index": 16,
+          "relative_path": "crates/oriole/src/lib.rs"
+        }
+      ]
+    },
+    {
+      "path": "/home/dev-user/.cache/ohm/verified-build/3d/0d6cdab4346afb/debug/deps/oriole_expat-301c69f1ab512743",
+      "sha256": "c5a4def77630554c68f9ffa1b544c05e2d3c1212fa820cfab4126ede2465cda4",
+      "bytes": 12043032,
+      "argv": [
+        "readelf",
+        "--debug-dump=info",
+        "/home/dev-user/.cache/ohm/verified-build/3d/0d6cdab4346afb/debug/deps/oriole_expat-301c69f1ab512743"
+      ],
+      "types": [
+        {
+          "depth": 3,
+          "die_offset": "2a6",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.0",
+            "stmt_list": "0",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x82d0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "f98",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.0",
+            "stmt_list": "0",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x82d0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "1e9e",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.0",
+            "stmt_list": "0",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x82d0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "2316f",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "XML_ParserStruct",
+            "byte_size": "3160",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole_expat::XML_ParserStruct",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.0",
+            "stmt_list": "0",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x82d0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "26afb",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "XML_ParserStruct",
+            "byte_size": "3160",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole_expat::XML_ParserStruct",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.1",
+            "stmt_list": "0x10f80",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0xe760"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "33dcd",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.1",
+            "stmt_list": "0x10f80",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0xe760"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "34b8b",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.1",
+            "stmt_list": "0x10f80",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0xe760"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "35ab4",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.1",
+            "stmt_list": "0x10f80",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0xe760"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "45636",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.2",
+            "stmt_list": "0x1d7c2",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x113a0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "45a6f",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.2",
+            "stmt_list": "0x1d7c2",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x113a0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "47479",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.2",
+            "stmt_list": "0x1d7c2",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x113a0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "4acc0",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "XML_ParserStruct",
+            "byte_size": "3160",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole_expat::XML_ParserStruct",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.2",
+            "stmt_list": "0x1d7c2",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x113a0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "65e30",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.3",
+            "stmt_list": "0x24859",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x158a0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "66b6f",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.3",
+            "stmt_list": "0x24859",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x158a0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "699eb",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "XML_ParserStruct",
+            "byte_size": "3160",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole_expat::XML_ParserStruct",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.3",
+            "stmt_list": "0x24859",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x158a0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "80a3b",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.4",
+            "stmt_list": "0x29b35",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x189f0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "817f9",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.4",
+            "stmt_list": "0x29b35",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x189f0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "82762",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.4",
+            "stmt_list": "0x29b35",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x189f0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "83264",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "XML_ParserStruct",
+            "byte_size": "3160",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole_expat::XML_ParserStruct",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.4",
+            "stmt_list": "0x29b35",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x189f0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "a075e",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.5",
+            "stmt_list": "0x2ec74",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x1ce90"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "a1450",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.5",
+            "stmt_list": "0x2ec74",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x1ce90"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "a2353",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.5",
+            "stmt_list": "0x2ec74",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x1ce90"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "a2d87",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "XML_ParserStruct",
+            "byte_size": "3160",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole_expat::XML_ParserStruct",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.5",
+            "stmt_list": "0x2ec74",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x1ce90"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "b80b0",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.6",
+            "stmt_list": "0x33de7",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x1e430"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "b8e6e",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.6",
+            "stmt_list": "0x33de7",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x1e430"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "ba7c9",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "XML_ParserStruct",
+            "byte_size": "3160",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole_expat::XML_ParserStruct",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.6",
+            "stmt_list": "0x33de7",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x1e430"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "c8b0e",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.7",
+            "stmt_list": "0x37dc9",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x20aa0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "c9800",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.7",
+            "stmt_list": "0x37dc9",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x20aa0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "ccbb5",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "XML_ParserStruct",
+            "byte_size": "3160",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole_expat::XML_ParserStruct",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole_expat/src/lib.rs/@/oriole_expat.d473223bb3ddbec3-cgu.7",
+            "stmt_list": "0x37dc9",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x20aa0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "e05f3",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.00",
+            "stmt_list": "0x3e4ac",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x385e0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "e1b27",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.00",
+            "stmt_list": "0x3e4ac",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x385e0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "e4174",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.00",
+            "stmt_list": "0x3e4ac",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x385e0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "119e83",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.02",
+            "stmt_list": "0x5f995",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x3c8b0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "130514",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.03",
+            "stmt_list": "0x6634c",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x3d340"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "131971",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.03",
+            "stmt_list": "0x6634c",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x3d340"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "132d4e",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.03",
+            "stmt_list": "0x6634c",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x3d340"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "163b7d",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.04",
+            "stmt_list": "0x75144",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x45910"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "16476e",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.04",
+            "stmt_list": "0x75144",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x45910"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "17aae5",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.05",
+            "stmt_list": "0x7b423",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x4b440"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "17c5b3",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.05",
+            "stmt_list": "0x7b423",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x4b440"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "17c801",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.05",
+            "stmt_list": "0x7b423",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x4b440"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "182e3e",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.06",
+            "stmt_list": "0x8014f",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x4c3d0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "184103",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.06",
+            "stmt_list": "0x8014f",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x4c3d0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "1a7d43",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.07",
+            "stmt_list": "0x85fe2",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x50de0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "1aac8d",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.07",
+            "stmt_list": "0x85fe2",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x50de0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "1c0ecf",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.08",
+            "stmt_list": "0x8b965",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x566e0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "1cab0e",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.09",
+            "stmt_list": "0x91abb",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x59790"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "1cd08f",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.09",
+            "stmt_list": "0x91abb",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x59790"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "1e0ad1",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.10",
+            "stmt_list": "0x9752a",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x5d0c0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "1e27ea",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.10",
+            "stmt_list": "0x9752a",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x5d0c0"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "1f2a15",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.11",
+            "stmt_list": "0x9d2ec",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x5f860"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "1f46ed",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.11",
+            "stmt_list": "0x9d2ec",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x5f860"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "1f4b7b",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.11",
+            "stmt_list": "0x9d2ec",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x5f860"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "20bdb6",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.12",
+            "stmt_list": "0xa24a5",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x62780"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "20d8ac",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.12",
+            "stmt_list": "0xa24a5",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x62780"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "20e0db",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "AdapterFrame",
+            "byte_size": "256",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::arena::AdapterFrame",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.12",
+            "stmt_list": "0xa24a5",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x62780"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "2294c9",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.14",
+            "stmt_list": "0xabfba",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x66470"
+          }
+        },
+        {
+          "depth": 3,
+          "die_offset": "241382",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Source",
+            "byte_size": "384",
+            "accessibility": "2\t(protected)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::encoding::Source",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.15",
+            "stmt_list": "0xb12ad",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x676e0"
+          }
+        },
+        {
+          "depth": 2,
+          "die_offset": "242ffa",
+          "tag": "DW_TAG_structure_type",
+          "attributes": {
+            "name": "Parser",
+            "byte_size": "2408",
+            "accessibility": "1\t(public)",
+            "alignment": "8"
+          },
+          "qualified_name": "oriole::Parser",
+          "cu": {
+            "producer": "clang LLVM (rustc version 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1))",
+            "language": "28\t(Rust)",
+            "name": "crates/oriole/src/lib.rs/@/oriole.6ef15e1f4b7554bc-cgu.15",
+            "stmt_list": "0xb12ad",
+            "comp_dir": "/home/dev-user/code/oss/oriole-arena-capacity-bound",
+            "low_pc": "0",
+            "ranges": "0x676e0"
+          }
+        }
+      ],
+      "source_file_tables": [
+        {
+          "line_table_offset": 0,
+          "file_index": 10,
+          "relative_path": "crates/oriole_expat/src/lib.rs"
+        },
+        {
+          "line_table_offset": 0,
+          "file_index": 18,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 69504,
+          "file_index": 1,
+          "relative_path": "crates/oriole_expat/src/lib.rs"
+        },
+        {
+          "line_table_offset": 120770,
+          "file_index": 17,
+          "relative_path": "crates/oriole/src/arena.rs"
+        },
+        {
+          "line_table_offset": 120770,
+          "file_index": 20,
+          "relative_path": "crates/oriole_expat/src/lib.rs"
+        },
+        {
+          "line_table_offset": 149593,
+          "file_index": 22,
+          "relative_path": "crates/oriole_expat/src/lib.rs"
+        },
+        {
+          "line_table_offset": 149593,
+          "file_index": 35,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 170805,
+          "file_index": 43,
+          "relative_path": "crates/oriole_expat/src/lib.rs"
+        },
+        {
+          "line_table_offset": 191604,
+          "file_index": 51,
+          "relative_path": "crates/oriole_expat/src/lib.rs"
+        },
+        {
+          "line_table_offset": 212455,
+          "file_index": 25,
+          "relative_path": "crates/oriole_expat/src/lib.rs"
+        },
+        {
+          "line_table_offset": 228809,
+          "file_index": 5,
+          "relative_path": "crates/oriole_expat/src/lib.rs"
+        },
+        {
+          "line_table_offset": 244924,
+          "file_index": 7,
+          "relative_path": "crates/oriole_expat/src/lib.rs"
+        },
+        {
+          "line_table_offset": 255148,
+          "file_index": 1,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 418636,
+          "file_index": 5,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 444079,
+          "file_index": 6,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 479556,
+          "file_index": 17,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 504867,
+          "file_index": 9,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 524623,
+          "file_index": 13,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 548834,
+          "file_index": 26,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 571749,
+          "file_index": 3,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 596667,
+          "file_index": 5,
+          "relative_path": "crates/oriole/src/encoding.rs"
+        },
+        {
+          "line_table_offset": 596667,
+          "file_index": 17,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 619818,
+          "file_index": 11,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 643820,
+          "file_index": 10,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 643820,
+          "file_index": 11,
+          "relative_path": "crates/oriole/src/arena.rs"
+        },
+        {
+          "line_table_offset": 664741,
+          "file_index": 11,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 685589,
+          "file_index": 5,
+          "relative_path": "crates/oriole/src/lib.rs"
+        },
+        {
+          "line_table_offset": 704442,
+          "file_index": 10,
+          "relative_path": "crates/oriole/src/lib.rs"
+        }
+      ]
+    }
+  ],
+  "sizes": {
+    "Source": {
+      "baseline_bytes": 384,
+      "current_sizeof_bytes": 520,
+      "delta_bytes": 136,
+      "matching_dies": 37
+    },
+    "Parser": {
+      "baseline_bytes": 2408,
+      "current_sizeof_bytes": 2416,
+      "delta_bytes": 8,
+      "matching_dies": 33
+    },
+    "AdapterFrame": {
+      "baseline_bytes": 256,
+      "current_sizeof_bytes": 264,
+      "delta_bytes": 8,
+      "matching_dies": 21
+    },
+    "XML_ParserStruct": {
+      "baseline_bytes": 3160,
+      "current_sizeof_bytes": 3176,
+      "delta_bytes": 16,
+      "matching_dies": 8
+    }
+  },
+  "mapping_scope": "The Rust structure DIEs omit declaration-file attributes. Qualified namespace, compilation-unit crate path and comp_dir, source file tables, and the source-pinned test execution log identify this baseline. No source checksum is embedded in DWARF4."
+}

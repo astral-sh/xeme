@@ -1,0 +1,43 @@
+{
+  "command": [
+    "env",
+    "-u",
+    "RUSTFLAGS",
+    "-u",
+    "CARGO_ENCODED_RUSTFLAGS",
+    "-u",
+    "CARGO_UNSTABLE_OHM_PROC_MACRO_TRUST",
+    "-u",
+    "CARGO_UNSTABLE_OHM_NATIVE_TOOL_TRUST",
+    "CARGO_HOME=/home/dev-user/.cache/toucan/cargo",
+    "CARGO_TARGET_DIR=/home/dev-user/.cache/oriole/targets/lazy-coordinates",
+    "CARGO_BUILD_BUILD_DIR=/home/dev-user/.cache/ohm/verified-build/{workspace-path-hash}",
+    "CARGO_INCREMENTAL=0",
+    "taskset",
+    "-c",
+    "4",
+    "cargo",
+    "+ohm",
+    "-Zohm-defaults=no",
+    "check",
+    "--offline",
+    "-p",
+    "oriole",
+    "-p",
+    "oriole_expat",
+    "--all-targets",
+    "--jobs",
+    "1"
+  ],
+  "cwd": "/home/dev-user/code/oss/oriole-lazy-coordinates",
+  "returncode": 101,
+  "note": "Reconstructed from exact tool invocation; compiler missed remaining DTD enum assignment, no parser/test executed.",
+  "stdout": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "bytes": 961,
+    "sha256": "a35b0051869ec18c3bb3f1adc83d55302c5f2f9ee5889e85d07f95ba50929eff"
+  }
+}

@@ -3,7 +3,8 @@ use super::*;
 #[test]
 fn context_text_native_prefix_precedes_late_accounting_error() {
     let mut records = std::vec::Vec::new();
-    for native in [false, true] {
+    for mode in 0..3 {
+        let native = mode != 0;
         let mut parser = Parser::new(Config::default());
         parser.feed(b"<r>abc</r>", true).unwrap();
         parser.next_event().unwrap().unwrap();
@@ -16,7 +17,7 @@ fn context_text_native_prefix_precedes_late_accounting_error() {
         let mut event = None;
         assert!(
             parser
-                .next_event_for_adapter_mode_into(&mut event, &mut frame, native)
+                .next_event_for_adapter_modes_into(&mut event, &mut frame, native, mode == 2)
                 .unwrap()
                 .is_some()
         );
@@ -27,10 +28,16 @@ fn context_text_native_prefix_precedes_late_accounting_error() {
             assert_eq!(frame.text_bytes(), Some(b"abc".as_slice()));
         }
         assert_eq!(parser.current_raw(), Some("abc"));
-        assert_eq!(frame.position(), parser.position());
-        let position = frame.position();
+        let position = parser.position();
+        match frame.location_for_c() {
+            AdapterLocation::Position(owned) => assert_eq!(owned, position),
+            AdapterLocation::Native(location) => assert_eq!(
+                parser.resolve_native_location_for_c(location),
+                Some(position)
+            ),
+        }
         let error = parser
-            .next_event_for_adapter_mode_into(&mut event, &mut frame, native)
+            .next_event_for_adapter_modes_into(&mut event, &mut frame, native, mode == 2)
             .unwrap_err();
         assert_eq!(error.kind, ErrorKind::LimitExceeded);
         assert!(event.is_none() && !frame.is_active());
@@ -38,6 +45,7 @@ fn context_text_native_prefix_precedes_late_accounting_error() {
         parser.finish_adapter_frame(frame);
     }
     assert_eq!(records[0], records[1]);
+    assert_eq!(records[0], records[2]);
 }
 
 #[test]

@@ -1,0 +1,8 @@
+
+running 3 tests
+test coordinate_tests::native_coordinate_getters_preserve_bytes_and_resolve_exact_positions ... ok
+test coordinate_tests::stale_same_generation_c_coordinates_fail_closed ... ok
+test coordinate_tests::suspended_coordinates_survive_rejected_reset_and_encoding_release ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 103 filtered out; finished in 0.00s
+

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/oriole-cdata-finder-perf-package-review.py", line 59, in <module>
+    for name in required: assert name in dest,name
+                                 ^^^^^^^^^^^^
+AssertionError: source/candidate/tests/c/UPSTREAM-NOTICES

@@ -1,0 +1,10 @@
+{
+  "aliases": 1036,
+  "archive_sha256": "c1d57a40b866fc4f19293dcfeb821aa1dc8c536ccac3def82b714f615979ddb7",
+  "first_attempt": true,
+  "reaped": true,
+  "scope": "Every stored payload and alias verified using only package-local files. No original producer path, target execution or numerical rerun required.",
+  "session": 72341,
+  "status": "passed",
+  "stored_members": 4388
+}

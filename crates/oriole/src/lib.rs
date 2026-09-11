@@ -2401,7 +2401,11 @@ impl Parser {
             return Ok(false);
         }
         let invalid = invalid_xml_char(&text[..end]);
-        let forbidden = memchr::memmem::find(&text.as_bytes()[..end], b"]]>");
+        // Borrow the fixed needle once; each search keeps its own local state.
+        static CDATA_END: OnceLock<memchr::memmem::Finder<'static>> = OnceLock::new();
+        let forbidden = CDATA_END
+            .get_or_init(|| memchr::memmem::Finder::new(b"]]>"))
+            .find(&text.as_bytes()[..end]);
         if let Some(forbidden) =
             forbidden.filter(|forbidden| invalid.is_none_or(|invalid| invalid > *forbidden))
         {

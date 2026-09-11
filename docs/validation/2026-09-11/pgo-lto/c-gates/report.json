@@ -1,0 +1,117 @@
+{
+  "status": "correctness_parity_gates_passed",
+  "role": "Study author and packager; independent C-gate audit is supplied separately.",
+  "summary": {
+    "status": "correctness_parity_gates_passed",
+    "source": {
+      "files": 70,
+      "manifest_sha256": "d1e021143e45331358ea63dcb20663e80d808fc7cee87510dc59e076b803451f",
+      "live_unchanged": true,
+      "changed_files_from_control": [],
+      "git_commit": "be22a27"
+    },
+    "libraries": {
+      "baseline": {
+        "liboriole_expat.so": "ccfb22956a11c1b241ec755f46245c61f088187ef93143b77a7afec748983821",
+        "liboriole_expat.a": "f58d5bc6ed28077933fcbcb84ad876cc7208e0102c9008347223da91a328b03c"
+      },
+      "candidate": {
+        "liboriole_expat.so": "4f1518fc819bf4e8c92da914adea92acf2492cbf681de6324eeece8360186c02",
+        "liboriole_expat.a": "8b6ca03e6fd4be81aba81cccf10b4aa2d67e16586010477cba1e8f23a4dec97d"
+      }
+    },
+    "workspace": "No fresh normal-workspace test claim for this PGO artifact; measured C-only optimized libraries are exercised by these C gates.",
+    "api": {
+      "raw_exit": 1,
+      "passed": 4347,
+      "failed": 393,
+      "all4740rows_exact": true,
+      "raw_results_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+      "baseline": "/tmp/oriole-native-byte-count-gates/api-native/upstream-api",
+      "baseline_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+      "bounds": {
+        "per_test_seconds": 3,
+        "per_test_address_space_bytes": 1073741824,
+        "per_test_rss_limit_bytes": 805306368,
+        "total_timeout_seconds": 240
+      }
+    },
+    "native": {
+      "consumers": 6,
+      "allocation_scenarios_per_linkage": 327,
+      "scope": "C ASan/UBSan only; Rust ThinLTO PGO-use release is not sanitizer-instrumented; leak checking disabled; dynamic and static linkage both exercised."
+    },
+    "strict_baseline_traces": 3318,
+    "custom_alias_baseline_comparisons": 36456,
+    "malformed_baseline_comparisons": 2392,
+    "publication": {
+      "logical_cases": 1304,
+      "parser_executions": 3912,
+      "exact_baseline": true,
+      "same_process_origin_checks": 9,
+      "retained_reference_position_events": {
+        "default": 10416,
+        "external": 864
+      }
+    },
+    "end_lifecycle": {
+      "logical_cases": 38,
+      "parser_executions": 114,
+      "candidate_vs_baseline_different_cases": 0,
+      "expat_vs_baseline_different_cases": 38,
+      "invariant_failures": {
+        "baseline": [],
+        "candidate": [],
+        "expat": []
+      }
+    },
+    "end_oom": {
+      "row_counts": [
+        37,
+        37
+      ],
+      "scenarios": {
+        "baseline": {
+          "complete": true,
+          "scenarios": 6
+        },
+        "candidate": {
+          "complete": true,
+          "scenarios": 6
+        }
+      },
+      "failed_indices": 4,
+      "success_controls": 2,
+      "observations_exact": true
+    },
+    "rehash_recorded_subprocess_streams": 40,
+    "limitations": [
+      "No timing or speed claim.",
+      "Successful custom alias raw pairs are not archived by the unchanged helper; scripts, counts, commands, hashes and difference summaries are retained.",
+      "End SOURCE_REVIEW.md describes historical fixture provenance, not current detached End eligibility or a fresh source audit.",
+      "End6 namespace-restoration fixtures retain their original scope; they do not establish coverage of every detached End fast path.",
+      "Original393 upstream failures and reference callback-position differences remain.",
+      "CPython gates are owned by root, outside this artifact.",
+      "Normal workspace checks are separately owned and are not claimed by this C-only gate receipt."
+    ],
+    "prior_harness_corrections": "Corrected End-final CPU1 guards and existing saved-observation classifier used from first launch; historical failures remain only in prior immutable PR116 evidence."
+  },
+  "summary_sha256": "c71e4f8ddad65ff4999bc6072c1208b65914c1f927237e12788a45ed9adf26a1",
+  "freeze_sha256": "213ca9c1e8e57351b4fca7131ab9bd76843379bec00aade9f6d364e203171501",
+  "shared_host": "CPU1 gates overlapped root allocator timing on CPU0 and strict CPython on CPU4.",
+  "archive": {
+    "file": "evidence.tar.gz",
+    "sha256": "a67f40ec001486921627ae7142ba342448990d72509ccf9c62a6e8bd4af85168",
+    "bytes": 1602319,
+    "members": 233
+  },
+  "readback_sha256": "010e6f2793a7a91d2ba6822ef864ca874da54e8e6a45c7d9865d87e2b268f856",
+  "detailed_manifest_member": "packaging/manifest.json",
+  "detailed_manifest_sha256": "6e6ea32e9092dc8d55c3fa60005b3b253b57ac6b91fa487de95db56ede12536f",
+  "excluded_binary_count": 10,
+  "first_handoff": {
+    "path": "/tmp/oriole-current-pgo-native-handoff",
+    "archive_sha256": "d2a6b5926d33c3037f84087fb0a611202c0e6a186d572d875d0021c3a71c3872",
+    "scope": "Complete fresh normal/PGO ThinLTO and fat-LTO build/source/profile/training bytes, historical Expat reuse, and initial five-engine native campaign."
+  }
+}

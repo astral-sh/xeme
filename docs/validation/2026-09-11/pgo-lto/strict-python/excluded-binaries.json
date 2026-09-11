@@ -1,0 +1,38 @@
+[
+  {
+    "path": "current/shared/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-current-thin-pgo-cpython-gates/shared/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "size": 106128,
+    "sha256": "5e7c41d7865ea387b8f5887af14467a16ca557d669dd910516026139a98cf26b"
+  },
+  {
+    "path": "current/shared/liboriole_expat.so",
+    "origin": "/tmp/oriole-current-thin-pgo-cpython-gates/shared/liboriole_expat.so",
+    "size": 1279992,
+    "sha256": "4f1518fc819bf4e8c92da914adea92acf2492cbf681de6324eeece8360186c02"
+  },
+  {
+    "path": "current/shared/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-current-thin-pgo-cpython-gates/shared/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "size": 93016,
+    "sha256": "2b6ce56d8048ea853d61559fc8cc8042fe0afb1c2ffd94596e473ad920667f7d"
+  },
+  {
+    "path": "current/static/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-current-thin-pgo-cpython-gates/static/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "size": 106128,
+    "sha256": "c2a7029c9039a28a8390c0224d7f55d8b91d979c7cba3f8c6a1c0ada95f04ea8"
+  },
+  {
+    "path": "current/static/liboriole_expat.a",
+    "origin": "/tmp/oriole-current-thin-pgo-cpython-gates/static/liboriole_expat.a",
+    "size": 3778068,
+    "sha256": "8b6ca03e6fd4be81aba81cccf10b4aa2d67e16586010477cba1e8f23a4dec97d"
+  },
+  {
+    "path": "current/static/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-current-thin-pgo-cpython-gates/static/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "size": 1411760,
+    "sha256": "2dfc1181c50c0962ad07424c48fbe25a18e551706c3203a3b7183092505b6af1"
+  }
+]

@@ -1,7 +1,7 @@
 # Benchmarks
 
 See the [current native and consumer measurements](results/2026-09-11/native-byte-count/),
-[earlier matched PGO measurements](results/2026-09-10/version-consistent-pgo/),
+[current PGO/LTO measurements](results/2026-09-11/pgo-lto/),
 [earlier full runtime measurements](results/2026-09-10/final-runtime/),
 [DTD runtime checkpoint](results/2026-09-10/dtd-checkpoint/),
 [earlier combined runtime measurements](results/2026-09-10/combined-runtime/),
@@ -115,7 +115,9 @@ a fixed generated corpus, and rebuilds with a fresh profile. It preserves runtim
 configuration and keeps real project XML out of training. Every run records source,
 compiler, profile and library identities.
 
-The [current matched-build study](results/2026-09-10/version-consistent-pgo/) measures
+The [current PGO/LTO study](results/2026-09-11/pgo-lto/) measures runtime `be22a27` with effective C-only ThinLTO and freshly generated profiles. PGO reduces native time by 24.8% and CPython consumer time by 15.5%; Oriole still takes 1.40× and 1.15× Expat's time with both parsers trained. Fat LTO without PGO helps little, while fat LTO with a fresh PGO profile regresses native time by 6.8% relative to ThinLTO PGO. All 24 project conditions per consumer campaign and the separate generated controls remain included.
+
+The [earlier matched-build study](results/2026-09-10/version-consistent-pgo/) measures
 runtime `4b11ace` through native callbacks, unchanged CPython consumers and the
 Wayland scanner. PGO reduces Oriole's native time by 22.7% and Expat's by 13.4%;
 with both trained, Oriole takes 2.23× Expat's time overall. The corresponding

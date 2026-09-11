@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "archive": {
+    "path": "/tmp/oriole-current-pgo-native-handoff/evidence.tar.gz",
+    "sha256": "d2a6b5926d33c3037f84087fb0a611202c0e6a186d572d875d0021c3a71c3872",
+    "bytes": 4807257,
+    "members": 1525
+  },
+  "manifest_sha256": "62494a295f8fff616d7f09508006e1d32373fdcfab8253397c0c1e2973f73cc0",
+  "report_sha256": "f54a1d1f57d58db75cc26bcbf21317e8b0eed93db661eca7bb7aa64f20384b1e",
+  "readback_sha256": "ff7cfd3eea5251ddfc600225a3b52d69df7fda0516e5a4cfb3c5745657638f93",
+  "nested_source_members": 76,
+  "excluded_binary_paths": 15,
+  "runtime_source_files": 70,
+  "pgo_tool_files": 6,
+  "scope": "Fresh be22 ThinLTO/PGO and fatLTO/PGO build matrix, initial five-engine native timing and verified historical Expat PGO reuse. No fat-PGO timing/full-gate claim.",
+  "publication": "Keep this compact index and readable README/summary in Git; archive detailed manifests, compiler vectors, raw profiles/rows and full audit reports. Fat-PGO independent review is separate if received after this seal."
+}

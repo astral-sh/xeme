@@ -40,6 +40,12 @@ Directory-changing options are rejected. Configuration overrides must use inline
 Build logging uses one `--verbose`, retaining compiler commands and Cargo's normal
 dependency lint policy. The profile-warning rejection remains enabled.
 
+## Measured configuration
+
+Keep the release profile's ThinLTO and one codegen unit when evaluating PGO. In the [current Linux study](../../benchmarks/results/2026-09-11/pgo-lto/), a fresh profile reduced native parsing time by 24.8% and CPython consumer time by 15.5% on held-out project XML. Fat LTO without PGO helped less; combining fat LTO with its own fresh profile increased native time by 6.8% and CPython consumer time by 2.6% relative to ThinLTO PGO. These results support ThinLTO for these inputs and compiler.
+
+The study's Oriole builds used local Ohm with experimental defaults disabled, an explicit host target, and verified final `cdylib,staticlib` compiler invocations. Deployment builds should use the project's normal toolchain and fresh profiles, then repeat application tests and benchmarks. Changing LTO settings also requires retraining; a ThinLTO profile is not the fat-LTO control.
+
 ## Outputs and provenance
 
 Every invocation creates a new `runs/run-*` directory with an empty raw-profile directory. The stable `targets/generate` and `targets/use` directories reuse ordinary Cargo build dependencies, while each run's unique profile paths force fresh instrumented and optimized compilation. Profiles are never reused across source or compiler changes.

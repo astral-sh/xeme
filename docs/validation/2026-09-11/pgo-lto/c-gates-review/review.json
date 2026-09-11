@@ -1,0 +1,110 @@
+{
+  "status": "passed",
+  "scope": "Independent saved Thin-PGO C-gate source/controller/raw-result audit; no parser, compiler, build, profiler, timing or target execution.",
+  "audit_cpu": 4,
+  "source_manifest_sha256": "d1e021143e45331358ea63dcb20663e80d808fc7cee87510dc59e076b803451f",
+  "libraries": {
+    "baseline": {
+      "liboriole_expat.so": "ccfb22956a11c1b241ec755f46245c61f088187ef93143b77a7afec748983821",
+      "liboriole_expat.a": "f58d5bc6ed28077933fcbcb84ad876cc7208e0102c9008347223da91a328b03c"
+    },
+    "candidate": {
+      "liboriole_expat.so": "4f1518fc819bf4e8c92da914adea92acf2492cbf681de6324eeece8360186c02",
+      "liboriole_expat.a": "8b6ca03e6fd4be81aba81cccf10b4aa2d67e16586010477cba1e8f23a4dec97d"
+    }
+  },
+  "reused_reviews": {
+    "/tmp/oriole-native-byte-count-gates-independent-review/review.json": "7d88712eb34eec26f9612bffe611aabdb5079ae5e5e269db5e5ada2e1145f619",
+    "/tmp/oriole-native-byte-count-pgo-build-independent-review/review.json": "cec78c70730e111f139a6fab70089e1629ffe3336843106585a35922a525bbc9",
+    "/tmp/oriole-native-byte-count-pgo-training-independent-review/review.json": "9e7a8451c1429ea888904ae16ba6c120e0a86ec4e4695a72bfe7dce5ff9e0934"
+  },
+  "source": "All70 source files equal archived/live be22 and the PR116 source map. PGO-use4f15/8b6 measured artifacts are exercised against implicit-target PR116ccfb/f58 behavior baseline; no gate certification is transferred to explicit-target normal0c8c.",
+  "controller": "13 original controllers preserve exactly seven identity substitutions; only run_lane selects the existing classifier after malformed and removes historical failed End launches. Corrected CPU1 final End helpers run once. All three lanes completed with zero outer exits and unchanged82-input maps. Historical failed phases remain solely in prior evidence.",
+  "api": {
+    "rows": 4740,
+    "pass": 4347,
+    "fail": 393,
+    "exit": 1,
+    "raw_rows_and_baseline_exact": true,
+    "public_tests": 395,
+    "configurations_each": 12,
+    "bounds": {
+      "per_test_seconds": 3,
+      "per_test_address_space_bytes": 1073741824,
+      "per_test_rss_limit_bytes": 805306368,
+      "total_timeout_seconds": 240
+    }
+  },
+  "native": {
+    "consumers": 6,
+    "allocation_scenarios_per_linkage": 327,
+    "all_C_builds_and_runs_exit0": true,
+    "C_ASan_UBSan_only": true,
+    "Rust_PGO_release_uninstrumented": true,
+    "leak_detection_disabled": true
+  },
+  "strict": {
+    "full_paired_traces": 3318,
+    "all_fields_exact": true
+  },
+  "aliases": {
+    "comparisons": 36456,
+    "groups": [
+      {
+        "name": "full-events",
+        "cases": 28812,
+        "raw_successful_pairs_retained": false
+      },
+      {
+        "name": "external-semantic-compare",
+        "cases": 7644,
+        "raw_successful_pairs_retained": false
+      }
+    ],
+    "proof": "Original controller/template/loop counts, script/library/report hashes, successful commands and empty difference summaries. Successful raw pairs are not retained and cannot be reread."
+  },
+  "malformed": {
+    "paired_rows": 2392,
+    "all_fields_exact": true,
+    "all_input_hash_encoding_chunk_keys_reconstructed": true
+  },
+  "publication": {
+    "cases": 1304,
+    "parser_executions": 3912,
+    "baseline_all_fields_exact": true,
+    "same_process_origin_records": 9,
+    "reference_outcome_payload_order_final_position_exact": true,
+    "retained_reference_position_events": {
+      "default": 10416,
+      "external": 864
+    }
+  },
+  "end": {
+    "cases": 38,
+    "parser_executions": 114,
+    "all_case_fields_match_PR116_baseline": true,
+    "same_process_symbol_origins_per_engine": 21,
+    "retained_reference_different_cases": 38,
+    "retained_reference_in_handler_different_cases": 14,
+    "OOM_scenarios_per_engine": 6,
+    "OOM_rows_per_engine": 37,
+    "OOM_failed_indices": 4,
+    "OOM_success_controls": 2,
+    "OOM_bytes_exact_current_and_PR116": true,
+    "OOM_retry33_retained": true
+  },
+  "limits": [
+    "The original393 canonical API failures and exit1 remain; this is exact baseline parity, not a fully green upstream suite.",
+    "Successful custom-alias raw pairs are absent from the original helper; source/count/hash/difference-summary evidence is explicitly narrower.",
+    "Only C consumers are sanitizer-instrumented; Rust optimized release libraries are not. Leak checks are disabled.",
+    "End SOURCE_REVIEW.md is historical fixture provenance. The original End6 namespace-restoration fixtures do not establish every detached-End fast path.",
+    "Reference callback-position and End differences remain; no blanket Expat equivalence claim.",
+    "Recorded origins attest the specified symbols/processes. No comprehensive all-symbol or sanitizer-attribution guarantee.",
+    "Strict CPython802, normal workspace checks, full Python performance and elapsed studies are separately audited; none is transferred here.",
+    "Saved hashes establish identity/stability of current records, not independent observation of historical scheduling or immutability before their original receipt."
+  ],
+  "passed_checks": 15835,
+  "checked_files": 352,
+  "all_inspected_bytes_unchanged": true,
+  "generator_sha256": "c8e517f11b32bb35a475d0aa1f938abb1539f13f5bb210c8c5b1dbd9c01ca66b"
+}

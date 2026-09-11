@@ -98,18 +98,14 @@ fn custom_names_match_original_byte_sequences() {
     }
     for name in [b"\x80\0".as_slice(), b"\x81\0\0", b"\x84", b"\xe9"] {
         for end in [b"\x80\0".as_slice(), b"\x81\0\0", b"\x84", b"\xe9"] {
-            for namespace_separator in [None, Some('|')] {
-                let mut document = if namespace_separator.is_some() {
-                    b"<p:".to_vec()
-                } else {
-                    b"<".to_vec()
-                };
+            for (namespace_separator, start, middle) in [
+                (None, b"<".as_slice(), b"></".as_slice()),
+                (Some('|'), b"<p:", b" xmlns:p='urn'></p:"),
+                (Some('|'), b"<", b" xmlns='urn'></"),
+            ] {
+                let mut document = start.to_vec();
                 document.extend_from_slice(name);
-                document.extend_from_slice(if namespace_separator.is_some() {
-                    b" xmlns:p='urn'></p:".as_slice()
-                } else {
-                    b"></"
-                });
+                document.extend_from_slice(middle);
                 document.extend_from_slice(end);
                 document.push(b'>');
                 for width in [1, document.len()] {

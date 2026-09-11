@@ -341,23 +341,19 @@ struct Element {
 #[derive(Debug)]
 struct ElementName {
     value: String,
-    expanded_start: Option<usize>,
+    raw_start: usize,
+    expanded_end: usize,
 }
 
 impl ElementName {
     /// Compare end tags against their decoded raw spelling, before expansion.
     fn raw_name(&self) -> &str {
-        match self.expanded_start {
-            Some(end) => &self.value[..end],
-            None => &self.value,
-        }
+        &self.value[self.raw_start..]
     }
 
-    /// Return an owned event name without allocating or retaining a raw prefix.
+    /// Return an owned event name without allocating or moving its bytes.
     fn into_event_name(mut self) -> String {
-        if let Some(start) = self.expanded_start {
-            self.value.drain(..start);
-        }
+        self.value.truncate(self.expanded_end);
         self.value
     }
 }
@@ -3276,12 +3272,14 @@ impl Parser {
         };
         self.seen_root = true;
         self.declaration_allowed = false;
-        let expanded_start = (expanded_name.as_str() != name).then_some(name.len());
-        let stack_name = if expanded_start.is_some() {
-            // Reserve the complete pair once, including the event terminator.
-            let capacity = name
-                .len()
-                .checked_add(expanded_name.len())
+        let expanded_end = expanded_name.len();
+        let (stack_name, raw_start) = if expanded_name.as_str() != name {
+            // A raw name often already occupies the expanded spelling's suffix.
+            // Otherwise append it after the event name, which can be truncated
+            // without moving bytes when the end event takes ownership.
+            let shared_suffix = expanded_name.ends_with(name);
+            let capacity = expanded_end
+                .checked_add(if shared_suffix { 0 } else { name.len() })
                 .and_then(|length| length.checked_add(1))
                 .ok_or(AllocError::CapacityOverflow)?;
             let mut value = self
@@ -3290,24 +3288,31 @@ impl Parser {
                 .unwrap_or_else(|| String::new_in(self.allocator));
             value.clear();
             value.try_reserve(capacity)?;
-            value.try_push_str(name)?;
             value.try_push_str(&expanded_name)?;
-            value
+            let raw_start = if shared_suffix {
+                expanded_end - name.len()
+            } else {
+                value.try_push_str(name)?;
+                expanded_end
+            };
+            (value, raw_start)
         } else {
-            match name_value {
+            let value = match name_value {
                 lexical::Decoded::Borrowed(name) => {
                     let reusable = self.event_recycling.take_name();
                     recycling::copy_name(name, reusable, self.allocator)?
                 }
                 lexical::Decoded::Owned(name) => name,
-            }
+            };
+            (value, 0)
         };
         try_push(
             &mut self.stack,
             Element {
                 name: ElementName {
                     value: stack_name,
-                    expanded_start,
+                    raw_start,
+                    expanded_end,
                 },
                 raw_encoding,
                 bindings,
@@ -3391,8 +3396,9 @@ impl Parser {
             &mut self.stack,
             Element {
                 name: ElementName {
+                    raw_start: 0,
+                    expanded_end: raw_name.len(),
                     value: raw_name,
-                    expanded_start: None,
                 },
                 raw_encoding: None,
                 bindings: Vec::new_in(self.allocator),

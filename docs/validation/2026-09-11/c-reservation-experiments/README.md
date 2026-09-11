@@ -1,6 +1,6 @@
 # C input-reservation experiments
 
-All three candidates remain outside the selected runtime. Their PGO builds took more time across the real-project suite. The selected runtime remains `de859c89577b2982d59b6923d682032f6a7c7800`; our target remains roughly 1.10× Expat time.
+All three candidates were left unselected. Their PGO builds took more time across the real-project suite. The control runtime is `de859c89577b2982d59b6923d682032f6a7c7800`; our target remains roughly 1.10× Expat time.
 
 | Candidate | Build | Real XML / selected | Generated / selected | Real XML / Expat | Adverse real conditions |
 | --- | --- | ---: | ---: | ---: | ---: |
@@ -21,7 +21,7 @@ The second candidate moves the retained-input calculation into a cold helper. Em
 
 The third candidate restores the selected token and event paths and checks reservation pressure at decoder boundaries, including successful custom-encoding callbacks. Its additional regression covers pressure following custom-encoding conversion. Passing functional checks does not establish a speed advantage.
 
-The first candidate remains a draft in [PR #138](https://github.com/astral-sh/oriole/pull/138). The two refinements were rejected without CPython timing; their prepared consumer scripts were not executed. No candidate is presented as meeting the production or performance goals.
+[PR #138](https://github.com/astral-sh/oriole/pull/138) retains these experiments as documentation only. Its runtime and test sources match the selected `de859c8` control; the rejected implementations remain in the archived source snapshots and patches. The two refinements were rejected without CPython timing; their prepared consumer scripts were not executed. No candidate is presented as meeting the production or performance goals.
 
 ## Measurement
 

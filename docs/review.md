@@ -20,6 +20,8 @@ The [selected-runtime validation refresh](validation/2026-09-11/reference-valida
 
 The [compact-coordinate experiment](validation/2026-09-11/compact-coordinates/) is rejected. Deferring native event positions increased real-project time by 3.3% normally and 7.8% with PGO; all 24 PGO conditions regressed. The retained evidence includes both complete benchmark campaigns, the reviewed source, 449 local tests and 18 focused callback tests under each Miri model. The selected runtime and its readiness limits are unchanged.
 
+The [buffer-state diagnostic](validation/2026-09-11/buffer-state/) reaches the unchanged continuation of an upstream test blocked by an allocation-schedule assertion. All 12 configurations pass at the original resource limits. Its accompanying audit accounts for all 34 nonpassing allocation-test names and distinguishes blocked assertions from existing permanent coverage and additional possible output checks. The selected runtime and original API matrix are unchanged.
+
 ## Review order
 
 | Area | Layers | Main questions |

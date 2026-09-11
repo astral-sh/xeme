@@ -26,6 +26,8 @@ The original API matrix passes 4,347 of 4,740 configurations: 391 assertion fail
 
 These failures do not establish a new XML-content defect, but an early allocation assertion does not validate later semantic assertions that were never reached. A separate [current-source allocation diagnostic](validation/2026-09-11/allocation-semantic-coverage/) passes all 72 configurations of six tests after raising retry and resource limits. It reaches their original text and handler assertions without changing the original matrix or declaring those failures fixed. Callback presence checks do not establish exact argument values, ordering or positions.
 
+A further [buffer-state diagnostic and assertion audit](validation/2026-09-11/buffer-state/) accounts for all 34 nonpassing allocation-test names. The six earlier cases exhaust their post-loop text and handler-flag assertions. A separate copy of `test_nsalloc_parse_buffer` records its successful empty call, then passes all original suspension, callback-clearing, resume and finished-state assertions in 12 configurations at the original limits. Neither diagnostic replaces the original allocation-schedule failures or proves exhaustive allocation-failure coverage.
+
 The [selected runtime's benchmark report](validation/2026-09-11/reference-frames/) retains all normal/PGO native and CPython conditions. Native and CPython PGO aggregates both exceed the roughly 1.10× Expat target. The two strict CPython text-grouping failures remain explicit; no passing original API configuration regressed.
 
 ## Differential testing

@@ -609,5 +609,6 @@
     "archive_sha256": "6d7e97a84845cbd2bc15df1a95ee6d861ba63db9d17a5dfc08ed449d869c0df5",
     "archive_members": 1014
   },
-  "scope": "Documentation-only rejected experiment. The Expat-only census is a lexical opportunity model, not candidate hit-rate, memory or speed measurement. No runtime adoption or compatibility improvement is claimed."
+  "scope": "Documentation-only rejected experiment. The Expat-only census is a lexical opportunity model, not candidate hit-rate, memory or speed measurement. No runtime adoption or compatibility improvement is claimed.",
+  "original_audit_prose_note": "The archived native auditor and its original review retain descriptive text about the prior serialized-accounting experiment, nominal core types, nine runtime files and unchanged C fixtures. That text is stale: the executable source checks bind this cache candidate to five changed files in the 72-file set and four in the 69-file pipeline set, including inherited integration coverage only in the former. Original receipts are preserved; the source bindings, worker arithmetic and this report state the current scope."
 }

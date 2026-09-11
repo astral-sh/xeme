@@ -1,0 +1,117 @@
+{
+  "rows": [
+    "| Vulkan registry | 51.224 ms | 29.384 ms | 1.71\u00d7 |",
+    "| Wayland protocol | 1.205 ms | 1.077 ms | 1.12\u00d7 |",
+    "| Maven POM | 0.819 ms | 0.439 ms | 1.87\u00d7 |",
+    "| Batik SVG | 0.132 ms | 0.134 ms | 0.98\u00d7 |",
+    "| GTK UI | 0.359 ms | 0.213 ms | 1.69\u00d7 |",
+    "| DocBook XSL | 0.271 ms | 0.187 ms | 1.44\u00d7 |"
+  ],
+  "native_groups": {
+    "real": {
+      "conditions": 24,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.96933037093228,
+          "below_one": 24
+        },
+        "candidate_over_expat": {
+          "geomean": 1.5909445066417878,
+          "below_one": 1
+        },
+        "published_over_expat": {
+          "geomean": 1.638711790998736,
+          "below_one": 1
+        }
+      }
+    },
+    "generated": {
+      "conditions": 4,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.9598935385673529,
+          "below_one": 4
+        },
+        "candidate_over_expat": {
+          "geomean": 4.993939589810212,
+          "below_one": 0
+        },
+        "published_over_expat": {
+          "geomean": 5.167031471647095,
+          "below_one": 0
+        }
+      }
+    }
+  },
+  "python_groups": {
+    "scope": "All fixed conditions and samples; geometric means of per-condition paired median time ratios. Shared host.",
+    "groups": {
+      "all": {
+        "conditions": 24,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.984646618568893,
+            "below_one": 23
+          },
+          "candidate_over_expat": {
+            "geomean": 1.2687409258478857,
+            "below_one": 3
+          },
+          "published_over_expat": {
+            "geomean": 1.2865474302233701,
+            "below_one": 3
+          }
+        }
+      },
+      "elementtree": {
+        "conditions": 12,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9794459862427116,
+            "below_one": 12
+          },
+          "candidate_over_expat": {
+            "geomean": 1.3438212692833154,
+            "below_one": 1
+          },
+          "published_over_expat": {
+            "geomean": 1.3676588866707489,
+            "below_one": 1
+          }
+        }
+      },
+      "pyexpat-events": {
+        "conditions": 12,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9898748650534579,
+            "below_one": 11
+          },
+          "candidate_over_expat": {
+            "geomean": 1.1978553798153786,
+            "below_one": 2
+          },
+          "published_over_expat": {
+            "geomean": 1.21024643377529,
+            "below_one": 2
+          }
+        }
+      }
+    },
+    "regressions": [
+      {
+        "condition": {
+          "name": "docbook",
+          "chunk": 65536,
+          "mode": "pyexpat-events",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+          "iterations": 64
+        },
+        "ratio": 1.0058919985205277
+      }
+    ]
+  },
+  "native_measured": 105420,
+  "native_warmups": 588,
+  "python_measured": 25788
+}

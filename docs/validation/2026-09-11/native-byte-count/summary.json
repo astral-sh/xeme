@@ -1,0 +1,165 @@
+{
+  "runtime_commit": "be22a271f8a5c004d13e515cd4024a68afe57887",
+  "parent_commit": "079fb66dc159cdc0e1c3ad16397f149751783014",
+  "source_manifest_sha256": "735afb9491158c3a34fd376109edc2312727382b5fa61e5e8b084796d7294f1d",
+  "committed_patch_sha256": "faf56975ae27c070276be8bcc65d6f6178a78f6dcba360902769ec7e26128b68",
+  "source_files": 70,
+  "libraries": {
+    "liboriole_expat.so": "ccfb22956a11c1b241ec755f46245c61f088187ef93143b77a7afec748983821",
+    "liboriole_expat.a": "f58d5bc6ed28077933fcbcb84ad876cc7208e0102c9008347223da91a328b03c"
+  },
+  "workspace": {
+    "status": "author_saved_workspace_review_passed",
+    "source_manifest_sha256": "735afb9491158c3a34fd376109edc2312727382b5fa61e5e8b084796d7294f1d",
+    "source_files": 70,
+    "all_target_tests": 407,
+    "target_inventory_rows": 33,
+    "doc_tests": 1,
+    "new_or_removed_tests": 0,
+    "four_commands_exit0": true,
+    "timeout_seconds_per_command": 900,
+    "raw_report_sha256": "33ccd63b3e41f18a1afe2fece297e4d3ac9a106d7997c74da010c33238105d68",
+    "actual_counts_sha256": "1cd64a8681b8875c4737e2579d5faa85347973a2267d0f12fa86b6b363b5234e",
+    "scope": "Source/gate author rehashed saved Cargo logs, exact per-target test names versus prior407 baseline, all70 archive/live bytes and frozen C-only library hashes. No fresh parser reruns by this saved review; independent source/compiler review remains separate. Normal Rust workspace test binaries are distinct from the frozen C-only production artifacts.",
+    "frozen_libraries": {
+      "/tmp/oriole-native-byte-count-thinlto-study/liboriole_expat.so": "ccfb22956a11c1b241ec755f46245c61f088187ef93143b77a7afec748983821",
+      "/tmp/oriole-native-byte-count-thinlto-study/liboriole_expat.a": "f58d5bc6ed28077933fcbcb84ad876cc7208e0102c9008347223da91a328b03c",
+      "/tmp/oriole-native-byte-count-workspace-gates/source.json": "735afb9491158c3a34fd376109edc2312727382b5fa61e5e8b084796d7294f1d",
+      "/tmp/oriole-native-byte-count-workspace-gates/build.json": "c7abfbc1ff2e5be3ba8610329c5db262ec86985758cb9e19cdc2b11dc7410f65"
+    },
+    "original_failed_gates": "No failures in this workspace attempt. C End CPU guard and postprocessing-only attempts are preserved in separate C-gate evidence."
+  },
+  "api": {
+    "raw_exit": 1,
+    "passed": 4347,
+    "failed": 393,
+    "all4740rows_exact": true,
+    "raw_results_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+    "baseline": "/tmp/oriole-end-frame-cells-thinlto-gates/api-native/upstream-api",
+    "baseline_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+    "bounds": {
+      "per_test_seconds": 3,
+      "per_test_address_space_bytes": 1073741824,
+      "per_test_rss_limit_bytes": 805306368,
+      "total_timeout_seconds": 240
+    }
+  },
+  "cpython_each_linkage": {
+    "methods": 802,
+    "failures": 2,
+    "reported_skips": 14,
+    "expected_failures": 3
+  },
+  "native": {
+    "real": {
+      "conditions": 24,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.96933037093228,
+          "below_one": 24
+        },
+        "candidate_over_expat": {
+          "geomean": 1.5909445066417878,
+          "below_one": 1
+        },
+        "published_over_expat": {
+          "geomean": 1.638711790998736,
+          "below_one": 1
+        }
+      }
+    },
+    "generated": {
+      "conditions": 4,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.9598935385673529,
+          "below_one": 4
+        },
+        "candidate_over_expat": {
+          "geomean": 4.993939589810212,
+          "below_one": 0
+        },
+        "published_over_expat": {
+          "geomean": 5.167031471647095,
+          "below_one": 0
+        }
+      }
+    }
+  },
+  "python": {
+    "scope": "All fixed conditions and samples; geometric means of per-condition paired median time ratios. Shared host.",
+    "groups": {
+      "all": {
+        "conditions": 24,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.984646618568893,
+            "below_one": 23
+          },
+          "candidate_over_expat": {
+            "geomean": 1.2687409258478857,
+            "below_one": 3
+          },
+          "published_over_expat": {
+            "geomean": 1.2865474302233701,
+            "below_one": 3
+          }
+        }
+      },
+      "elementtree": {
+        "conditions": 12,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9794459862427116,
+            "below_one": 12
+          },
+          "candidate_over_expat": {
+            "geomean": 1.3438212692833154,
+            "below_one": 1
+          },
+          "published_over_expat": {
+            "geomean": 1.3676588866707489,
+            "below_one": 1
+          }
+        }
+      },
+      "pyexpat-events": {
+        "conditions": 12,
+        "ratios": {
+          "candidate_over_published": {
+            "geomean": 0.9898748650534579,
+            "below_one": 11
+          },
+          "candidate_over_expat": {
+            "geomean": 1.1978553798153786,
+            "below_one": 2
+          },
+          "published_over_expat": {
+            "geomean": 1.21024643377529,
+            "below_one": 2
+          }
+        }
+      }
+    },
+    "regressions": [
+      {
+        "condition": {
+          "name": "docbook",
+          "chunk": 65536,
+          "mode": "pyexpat-events",
+          "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+          "iterations": 64
+        },
+        "ratio": 1.0058919985205277
+      }
+    ]
+  },
+  "archive": {
+    "sha256": "bc63cf87e4733c2b05e7391e0ef782747a6ba0ea1046efae92843a53485b6dd0",
+    "bytes": 13178538,
+    "members": 1863,
+    "binary_exclusions": 17,
+    "all_direct_members_and_origins_read_back": true
+  },
+  "scope": "Native byte-count extraction atop PR115. Measured prototype and integrated release libraries are byte-identical; integration inherits only the parent Windows test cast. Current normal C-only ThinLTO measurements, without PGO or alternate allocator. Strict CPython retains two failures; no new sustained Rust sanitizer campaign or full PBS distribution build."
+}

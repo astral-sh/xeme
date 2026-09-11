@@ -1,0 +1,5 @@
+We inline the native UTF-8/ASCII source byte-count check and move converted-encoding counting into a private helper. The original calculations, range assertion, accounting and position publication stay unchanged; the current compiler can now remove the out-of-line call from native source consumption and lookup.
+
+Across all fixed project conditions, the change reduces elapsed time by 3.1% natively and 1.5% through CPython against PR #115. Generated controls improve by 4.0%; DocBook pyexpat at 64 KiB regresses by 0.59%. We still take 1.59× Expat's native time and 1.27× its CPython time. Both Oriole builds use verified C-only ThinLTO without PGO or allocator substitution.
+
+We retain all conditions and raw samples, independent source/build and measurement reviews, 407 passing Rust tests plus one doc test, the unchanged 4,347/393 upstream API matrix, C callback and allocator checks, and both strict 802-test CPython runs with their existing two failures. Fresh integrated shared/static libraries are byte-identical to the measured prototype. The README keeps its structure, warning and license section and links to the complete evidence report.

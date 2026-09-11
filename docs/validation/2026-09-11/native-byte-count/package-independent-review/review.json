@@ -1,0 +1,71 @@
+{
+  "status": "independent_native_byte_count_package_and_workspace_audit_passed",
+  "blocking_findings": [],
+  "scope": "Saved archive/member/origin/copy/source/workspace audit; no target, compiler, packager, parser or timing execution. Human prose and later final outer index are separate.",
+  "runtime_commit": "be22a271f8a5c004d13e515cd4024a68afe57887",
+  "parent_commit": "079fb66dc159cdc0e1c3ad16397f149751783014",
+  "main_archive": {
+    "sha256": "bc63cf87e4733c2b05e7391e0ef782747a6ba0ea1046efae92843a53485b6dd0",
+    "bytes": 13178538,
+    "members": 1863,
+    "binary_exclusions": 17,
+    "all_direct_members_and_origins_read_back": true
+  },
+  "main_complete_selection": true,
+  "main_origins_including_exclusions": 1880,
+  "nested_handoffs": [
+    {
+      "prefix": "prototype-native",
+      "members": 1038,
+      "exclusions": 8,
+      "nested_archives": 4,
+      "nested_source_members": 280,
+      "all_member_origin_bytes_exact": true,
+      "full_source_selection_checked": true
+    },
+    {
+      "prefix": "gates",
+      "members": 332,
+      "exclusions": 12,
+      "nested_archives": 5,
+      "nested_source_members": 350,
+      "all_member_origin_bytes_exact": true,
+      "full_source_selection_checked": true
+    }
+  ],
+  "recursive_tar_inventory": {
+    "archives": 15,
+    "member_instances": 4073,
+    "max_depth": 2,
+    "ELF_or_ar_members": [],
+    "scope": "Every .tar.gz/.tgz/.tar.xz/.tar reached by suffix was read, all member bytes hashed. Magic checks apply to those member bytes; no claim about other opaque formats or fresh semantic review of every nested study."
+  },
+  "committed_live_and_archived_source_inputs": 70,
+  "top_original_copies": 9,
+  "workspace": {
+    "all_target_tests": 407,
+    "target_rows": 33,
+    "doc_tests": 1,
+    "all_named_results_reconstructed": true,
+    "same_baseline_target_test_names": true,
+    "four_commands_exit0": true,
+    "normal_workspace_distinct_from_C_only_libraries": true
+  },
+  "outer_snapshot": {
+    "file_count": 15,
+    "files_json_present": false,
+    "scope": "Point-in-time file hashes only; later review sidecars and final outer index require a separate readback."
+  },
+  "preserved_failures": "All selected package origins and nested records retain initial source-verifier, CPU4 preparation/End guard, summary postprocessing and Python directory-collision evidence. Original API393 and strict CPython2 failures remain in their separately reviewed records.",
+  "limits": [
+    "Direct archive excludes17 binary files; nested handoffs separately record8 and12 exclusions. Recursive tar magic inventory is explicit rather than an assumed blanket binary exclusion.",
+    "No new semantic review of nested CPython, instruction or Python timing results; separately sealed review artifacts and original hashes remain.",
+    "Workspace407/33/+1 reconstructed from saved raw logs and unchanged baseline inventory. No test or compiler run by this reviewer.",
+    "Outer final files index and subsequent attachments are intentionally not certified by this snapshot."
+  ],
+  "checked_files": 3299,
+  "origin_rows": 3270,
+  "passed_checks": 20995,
+  "all_inspected_files_unchanged": true,
+  "generator_sha256": "afd8111b6ef2fb3d967613f2688dbc2e524a8d99aadee73644b1082b62ef3004"
+}

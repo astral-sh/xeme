@@ -1,0 +1,236 @@
+--- /tmp/oriole-end-cell-gates-independent-review/audit.py
++++ generator.py
+@@ -12,20 +12,16 @@
+ import re
+ import tarfile
+ 
+-R = Path('/tmp/oriole-end-frame-cells-thinlto-gates')
++R = Path('/tmp/oriole-native-byte-count-gates')
+ O = Path(__file__).resolve().parent
+-W = Path('/home/dev-user/code/oss/oriole-end-frame-cells')
+-L = Path('/tmp/oriole-end-frame-cells-thinlto-study')
+-B = Path('/tmp/oriole-ffi-family-cell-thinlto-study')
+-assert sorted(os.sched_getaffinity(0)) == [6]
++W = Path('/home/dev-user/code/oss/oriole-native-byte-count')
++L = Path('/tmp/oriole-native-byte-count-thinlto-study')
++B = Path('/tmp/oriole-end-frame-cells-thinlto-study')
++assert sorted(os.sched_getaffinity(0)) == [4]
+ tracked = {}
+ checks = []
+ def read(path):
+     p = Path(path)
+-    # Source paths in historical before/after maps deliberately resolve to the
+-    # independently hashed frozen e7eb archive. Live test-only overlay is separate.
+-    if p.is_relative_to(W) and (O/'frozen-source'/p.relative_to(W)).is_file():
+-        p = O/'frozen-source'/p.relative_to(W)
+     data = p.read_bytes()
+     value = hashlib.sha256(data).hexdigest()
+     assert tracked.setdefault(str(p), value) == value, str(p)
+@@ -42,7 +38,7 @@
+     return all(h(path) == value for path, value in mapping.items())
+ def unchanged(report, before='before', after='after'):
+     return report[before] == report[after] and hashes(report[before])
+-def commands(report, root, allow_api=False, cpu=4):
++def commands(report, root, allow_api=False, cpu=1):
+     for command in report['commands']:
+         ck('command CPU ' + command['label'], command['command'][:3] == ['taskset','-c',str(cpu)])
+         ck('command exit ' + command['label'], command['exit'] == (1 if allow_api and command['label'] == 'api' else 0))
+@@ -50,56 +46,68 @@
+         for stream in ['stdout','stderr']:
+             ck('command stream hash ' + command['label'] + stream, h(root / (command['label'] + '.' + stream)) == command[stream + '_sha256'])
+ 
+-
+-S=L
+-source=j(R/'source.json');preparation=j(R/'preparation.json');build=j(R/'build.json')
+-ck('pinned frozen EndCell source70',len(source['source_sha256'])==70 and h(R/'source.json')==h(S/'source.json')==build['source_manifest_sha256']=='e7eb4e525a8ae2e06889888aa4c855bc41ad830d08fd716296a1ccd0d4b9154f')
+-normal_source=j(B/'source.json')
+-changed=sorted(n for n,v in source['source_sha256'].items() if normal_source['source_sha256'][n]!=v)
+-summary_source=j(R/'summary.json')['source']
+-ck('exact End changes plus README from Cell control',len(changed)==10 and changed==summary_source['changed_files_from_control'] and set(source['source_sha256'])==set(normal_source['source_sha256']))
+-ck('all70 frozen source hashes',all(h(W/name)==value for name,value in source['source_sha256'].items()))
++S=L;prior_root=Path('/tmp/oriole-end-frame-cells-thinlto-gates');initial_root=Path('/tmp/oriole-native-byte-count-gates-initial-cpu4')
++source=j(R/'source.json');preparation=j(R/'preparation.json');initial_preparation=j(initial_root/'preparation.json');build=j(R/'build.json');summary=j(R/'summary.json')
++source_review_path=Path('/tmp/oriole-native-byte-count-source-build-independent-review/review.json')
++ck('source build review pinned',h(source_review_path)=='f1f801a46736344b8fae130ed3ca815c9d71c542c0dda15b098cd5e784c0d886')
++ck('source70 identity',len(source['source_sha256'])==70 and h(R/'source.json')==h(S/'source.json')==build['source_manifest_sha256']=='735afb9491158c3a34fd376109edc2312727382b5fa61e5e8b084796d7294f1d')
++normal_source=j(B/'source.json');changed=sorted(n for n,v in source['source_sha256'].items() if normal_source['source_sha256'][n]!=v)
++ck('summary source delta exact',changed==summary['source']['changed_files_from_control']==['crates/oriole/src/encoding.rs','crates/oriole_expat/src/tests.rs'])
++ck('all70 live source bytes',all(h(W/n)==v for n,v in source['source_sha256'].items()))
+ for p in [R/'source.tar.gz',S/'source.tar.gz']:
+-    with tarfile.open(fileobj=io.BytesIO(read(p)),mode='r:gz') as archive:
+-        members=archive.getmembers()
+-        ck('source archive70 exact '+str(p),len(members)==len({m.name for m in members})==70 and all(m.isfile() for m in members) and {m.name:hashlib.sha256(archive.extractfile(m).read()).hexdigest() for m in members}==source['source_sha256'])
+-expected_libraries={'liboriole_expat.so':'02fcab59f6e3818c128da6706d67987ae7450dd8b59e97cd28ce497a547f28f5','liboriole_expat.a':'69ebed414946cbaef1a940c052a636be277c809902943d676e824deab45d22d5'}
+-normal_libraries={'liboriole_expat.so':'0cfd610876f1bfd26a4d37a7f86adc9961896dfe24177c180ec7d15e0bae04e9','liboriole_expat.a':'c86ad85e232afe4f7947053e522dbc8517cdca3694740994c3d1da64540f0610'}
+-ck('build report completed source unchanged',build['status']=='passed' and build['source_unchanged'] and build['original_unchanged'] and h(R/'build.json')==h(S/'build.json'))
+-for label,root,expected in [('control',B,normal_libraries),('candidate',L,expected_libraries)]:
+-    ck('pinned artifacts '+label,all(h(root/name)==value for name,value in expected.items()))
+-ck('preparation recorded frozen identities unchanged',hashes(preparation['before']))
+-prior_root=Path('/tmp/oriole-ffi-family-cell-thinlto-gates');deltas=j(R/'controller-deltas.json')
+-ck('twelve retained controllers',len(preparation['controllers'])==12 and set(preparation['controllers'])==set(deltas))
+-repls=[(str(B),str(S)),('/tmp/oriole-thinlto-production-study/thinlto',str(B)),('/home/dev-user/code/oss/oriole-ffi-family-cell',str(W)),(str(prior_root),str(R)),(normal_libraries['liboriole_expat.so'],expected_libraries['liboriole_expat.so']),('a55ca0f0fed68f8db0f2e8d3ea86c271c8491fe130b5074077aecace3ab4a4df',normal_libraries['liboriole_expat.so']),('/tmp/oriole-thinlto-production-gates/api-native/upstream-api',str(prior_root/'api-native/upstream-api'))]
++ with tarfile.open(fileobj=io.BytesIO(read(p)),mode='r:gz') as a:
++  ms=a.getmembers();ck('source archive70 '+str(p),len(ms)==len({m.name for m in ms})==70 and all(m.isfile() for m in ms) and {m.name:hashlib.sha256(a.extractfile(m).read()).hexdigest() for m in ms}==source['source_sha256'])
++expected_libraries={'liboriole_expat.so':'ccfb22956a11c1b241ec755f46245c61f088187ef93143b77a7afec748983821','liboriole_expat.a':'f58d5bc6ed28077933fcbcb84ad876cc7208e0102c9008347223da91a328b03c'}
++normal_libraries={'liboriole_expat.so':'02fcab59f6e3818c128da6706d67987ae7450dd8b59e97cd28ce497a547f28f5','liboriole_expat.a':'69ebed414946cbaef1a940c052a636be277c809902943d676e824deab45d22d5'}
++ck('build alias exact',read(R/'build.json')==read(S/'report.json') and build['status']=='passed' and build['source_unchanged'] and build['libraries']==expected_libraries)
++for root,libmap in [(S,expected_libraries),(B,normal_libraries)]:ck('library identities '+str(root),all(h(root/n)==v for n,v in libmap.items()))
++ck('all81 prepared inputs unchanged',len(preparation['before'])==81 and hashes(preparation['before']))
++ck('initial preparation receipt',h(initial_root/'preparation.json')==preparation['initial_cpu4_preparation']['sha256']=='e292da0ce5fce28123c94f79ea79efb139d82540b7a25b1a532ac22230f4b72e' and initial_preparation['status']=='prepared_not_executed')
++repls=[(str(prior_root),str(R)),(str(B),str(S)),('/tmp/oriole-ffi-family-cell-thinlto-study',str(B)),('/tmp/oriole-ffi-family-cell-thinlto-gates/api-native/upstream-api',str(prior_root/'api-native/upstream-api')),('/home/dev-user/code/oss/oriole-end-frame-cells',str(W)),(normal_libraries['liboriole_expat.so'],expected_libraries['liboriole_expat.so']),('0cfd610876f1bfd26a4d37a7f86adc9961896dfe24177c180ec7d15e0bae04e9',normal_libraries['liboriole_expat.so'])]
++ck('seven original substitutions declared',preparation['replacements']==[list(x) for x in repls]==initial_preparation['replacements'])
+ def adapt(value):
+-    for i,(a,b) in enumerate(repls):value=value.replace(a,'__END_CELL_REPLACE_'+str(i)+'__')
+-    for i,(a,b) in enumerate(repls):value=value.replace('__END_CELL_REPLACE_'+str(i)+'__',b)
+-    return value
++ for i,(a,b) in enumerate(repls):value=value.replace(a,'__NATIVE_COUNT_'+str(i)+'__')
++ for i,(a,b) in enumerate(repls):value=value.replace('__NATIVE_COUNT_'+str(i)+'__',b)
++ return value
++def cpu1(value):
++ return value.replace('CPU4','CPU1').replace("'4'","'1'").replace("'api':4,'other':4","'api':1,'other':1").replace('=={4}','=={1}').replace('owned by structural agent','owned by the byte-count source author')
++deltas=j(R/'controller-deltas.json')
++ck('13 original controllers and retained deltas',len(preparation['controllers'])==13 and set(preparation['controllers'])==set(deltas) and read(R/'controller-deltas.json')==read(initial_root/'controller-deltas.json'))
+ for name,value in preparation['controllers'].items():
+-    original_path=prior_root/name;original=read(original_path).decode()
+-    ck('prepared and prior controller hashes',h(R/name)==value and h(original_path)==preparation['prior_controllers'][str(original_path)])
+-    adapted=adapt(original)
+-    if name=='api_native.py':
+-        adapted=adapted.replace('all children on CPU1.','all children on CPU4.').replace("['taskset','-c','1',*args]","['taskset','-c','4',*args]")
+-    if name=='run_lane.py':adapted=adapted.replace("cpu={'api':1,'other':4}","cpu={'api':4,'other':4}")
+-    ck('only declared paths hashes and affinity '+name,adapted==read(R/name).decode())
+-    ck('exact retained controller diff '+name,deltas[name]==''.join(difflib.unified_diff(original.splitlines(True),adapted.splitlines(True),fromfile=str(original_path),tofile=str(R/name))))
+-for name in ['probe.c','original-allocations.c','expat.h']:ck('End OOM assertions byte exact '+name,read(R/'end-oom-final'/name)==read(prior_root/'end-oom-final'/name))
+-for lane,cpu,names in [('api',4,['api_native.py']),('other',4,['other_controls.py','run_publication.py','run_malformed.py','end-lifecycle/controller.py','end-oom-final/run.py'])]:
+-    report=j(R/(lane+'-controller.json'))
+-    ck('lane completed and identities '+lane,report['status']=='completed_zero_exits' and report['unchanged'] and report['before']==report['after']==preparation['before'] and not report['hash_errors'] and [r['script'] for r in report['jobs']]==names)
+-    for row in report['jobs']:
+-        ck('lane bounded command '+row['script'],row['exit']==0 and row['timeout']==660 and 'exception' not in row and row['command'][:3]==['taskset','-c',str(cpu)] and h(R/row['script'])==row['sha256'])
+-        for stream in ['stdout','stderr']:ck('lane stream '+row['script']+stream,h(R/(row['script'].replace('/','-')+'.'+stream))==row[stream+'_sha256'])
+-        ck('lane no stderr diagnostics',read(R/(row['script'].replace('/','-')+'.stderr'))==b'')
+-ck('malformed worker unchanged except paths',adapt(read(prior_root/'malformed/malformed_probe.py').decode())==read(R/'malformed/malformed_probe.py').decode())
+-read(R/'prepare.py');read(R/'run_lane.py')
+-
++ original_path=prior_root/name;original=read(original_path).decode();initial=read(initial_root/name).decode();current=read(R/name).decode()
++ ck('prior/current/initial controller pins '+name,h(original_path)==preparation['prior_controllers'][str(original_path)] and h(initial_root/name)==initial_preparation['controllers'][name] and h(R/name)==value)
++ ck('initial exact seven substitutions '+name,adapt(original)==initial)
++ ck('initial exact retained delta '+name,deltas[name]==''.join(difflib.unified_diff(original.splitlines(True),initial.splitlines(True),fromfile=str(original_path),tofile=str(R/name))))
++ ck('current only CPU/prose substitutions '+name,cpu1(initial)==current)
++ck('initial combined patch retained',read(R/'initial-controller.patch')==read(initial_root/'controller.patch')==''.join(deltas.values()).encode())
++ck('CPU lane patch pin',h(R/'cpu-lane.patch')==preparation['cpu_lane_patch_sha256'])
++for name in ['probe.c','original-allocations.c','expat.h']:ck('End OOM original assertions '+name,read(R/'end-oom-final'/name)==read(prior_root/'end-oom-final'/name))
++for lane,status,names,codes in [('api','completed_zero_exits',['api_native.py'],[0]),('other','failed',['other_controls.py','run_publication.py','run_malformed.py','end-lifecycle/controller.py'],[0,0,0,1]),('end','completed_zero_exits',['end-lifecycle-final/controller.py','end-oom-final/run.py'],[0,0])]:
++ report=j(R/(lane+'-controller.json'))
++ ck('lane identity/status '+lane,report['status']==status and report['unchanged'] and report['before']==report['after']==preparation['before'] and not report['hash_errors'] and [r['script'] for r in report['jobs']]==names and [r['exit'] for r in report['jobs']]==codes and report['cpu']==1)
++ for row in report['jobs']:
++  ck('lane command bound '+row['script'],row['timeout']==660 and 'exception' not in row and row['command']==['taskset','-c','1','/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12','-I','-S',str(R/row['script'])] and h(R/row['script'])==row['sha256'] and 0<row['end']-row['start']<660)
++  for stream in ['stdout','stderr']:ck('lane stream '+row['script']+stream,h(R/(row['script'].replace('/','-')+'.'+stream))==row[stream+'_sha256'])
++  ck('lane child stderr empty '+row['script'],read(R/(row['script'].replace('/','-')+'.stderr'))==b'')
++failed=j(R/'end-lifecycle/controller.json');fix=j(R/'end-affinity-fix.json')
++ck('initial End guard failed before any parser runs',failed['status']=='failed' and failed['runs']==fix['initial_runs']==[] and 'assert sorted(os.sched_getaffinity(0)) == [4]' in failed['error'] and h(R/'end-lifecycle/controller.json')==fix['initial_controller_sha256'])
++fixdiff=''
++for name in ['controller.py','oracle.py']:
++ old=read(R/'end-lifecycle'/name).decode();new=read(R/'end-lifecycle-final'/name).decode()
++ expected=old.replace("'cpu': 4","'cpu': 1").replace('== [4]','== [1]')
++ ck('End final only CPU guard/metadata '+name,expected==new)
++ fixdiff+=''.join(difflib.unified_diff(old.splitlines(True),new.splitlines(True),fromfile='initial/'+name,tofile='final/'+name))
++ck('End final correction patch exact',fixdiff==read(R/'end-affinity-fix.patch').decode() and h(R/'end-affinity-fix.patch')==fix['patch_sha256']=='da24ac6eb69eacdaf58fbd0395059ca355513a74ac27b82262608a25f14ef899')
++ck('End SOURCE_REVIEW unchanged',read(R/'end-lifecycle-final/SOURCE_REVIEW.md')==read(R/'end-lifecycle/SOURCE_REVIEW.md'))
++lane_code=read(R/'run_lane.py').decode();remaining=read(R/'run_remaining.py').decode()
++expected_remaining=lane_code.replace("cpu={'api':1,'other':1}","cpu={'end':1}").replace("names={'api':['api_native.py'],'other':['other_controls.py','run_publication.py','run_malformed.py','end-lifecycle/controller.py','end-oom-final/run.py']}[lane]","names={'end':['end-lifecycle-final/controller.py','end-oom-final/run.py']}[lane]")
++ck('remaining controller only changed job selection',expected_remaining==remaining)
++ck('malformed worker exact inherited preparation',adapt(read(prior_root/'malformed/malformed_probe.py').decode())==read(R/'malformed/malformed_probe.py').decode())
++for p in [R/'prepare.py',R/'remaining-controller.patch',R/'controller.patch',R/'summary-adaptation.patch']:h(p)
+ A=R/'api-native'; U=A/'upstream-api'
+ api_report=j(A/'report.json'); comparison=j(A/'api-comparison.json')
+ ck('API/native saved report passed and references unchanged',api_report['status']=='passed' and api_report['unchanged'] and unchanged(api_report))
+-commands(api_report,A,allow_api=True,cpu=4)
++commands(api_report,A,allow_api=True,cpu=1)
+ ck('API and six build/run pairs count',len(api_report['commands'])==13)
+ manifest=j(U/'manifest.json'); results=j(U/'results.json'); baseline=Path(comparison['baseline'])
+ base_manifest=j(baseline/'manifest.json'); base_results=j(baseline/'results.json')
+@@ -214,22 +222,66 @@
+ origins=pr['origins_before_parses']
+ ck('publication9 recorded same-process origin checks',len(origins)==3 and all({row['symbol'] for row in rows}=={'XML_Parse','XML_ParserCreate','XML_ExternalEntityParserCreate'} and all(Path(row['path']).resolve()==Path(path).resolve() and h(row['path'])==row['sha256']==pr['hashes_before'][path] for row in rows) for path,rows in origins.items()))
+ 
+-ck('saved files unchanged across audit',all(hashlib.sha256(Path(path).read_bytes()).hexdigest()==expected for path,expected in tracked.items()))
+-report={
+-    'status':'independent_original_saved_gates_audit_passed',
+-    'scope':'Saved-data-only audit of original API/native C/strict/custom alias/malformed/publication gates. No builds, parser calls, or timing reruns. End lifecycle/OOM and archive readback are separate supplements. No ThinLTO workspace test run is claimed; End changes plus C README differ from the Cell control; original frozen source audited and later test-only supplement is separate.',
+-    'cpu':6,
+-    'source':{'entries':70,'recorded_and_frozen_archive_all_match':True,'manifest_sha256':h(R/'source.json'),'changed_files':changed,'direct_control_source_entries':70,'additional_manifest_entries':[],'direct_control_shared_sha256':h(B/'liboriole_expat.so')},
+-    'libraries':expected_libraries,
+-    'api':{'rows':4740,'passed':4347,'failed':393,'suite_exit':1,'raw_rows_reconstructed_from_log':True,'all_rows_exact_against_baseline':True,'bounds':bounds,'adapted_sources':34,'upstream_include_sources':38,'public_tests':395,'configurations_per_test':12,'excluded_private_tests':12},
+-    'native':{'consumers':native,'allocation_scenarios_each_linkage':327,'scope':'C ASan/UBSan only; Rust release libraries uninstrumented, leak detection disabled. Six builds and six runs exited0.'},
+-    'strict':{'comparisons':3318,'all_saved_full_traces_exact':True},
+-    'aliases':{'comparisons':36456,'groups':aliases,'verified':'Controller/template/loop arithmetic, expected library hashes, command exits, script and summary hashes, compressed summary readback and retained empty difference lists. Full successful paired alias observations are not present; no independent reconstruction claim for those pairs.'},
+-    'malformed':{'comparisons':2392,'all_full_observation_fields_exact':True,'all_original_input_sha256_encoding_chunk_keys_reconstructed':True,'summary_rows_reconstructed':True},
+-    'publication':{'cases':1304,'library_parses':3912,'all_baseline_observation_fields_exact':True,'recorded_same_process_symbol_origins':9,'reference_outcome_and_callback_payload_order_and_final_position_equal':True,'retained_reference_position_event_differences':dict(positions)},
+-    'limits':['Parity with baseline does not make the original API suite green:393 failures and exit1 remain.','Custom alias gates retain only difference summaries for successful comparisons; independently re-reading raw successful pair outputs is impossible from these artifacts.','Recorded origin evidence is scoped to the checked symbols; no new all-symbol origin or sanitizer-attribution claim.','Outer controllers use per-command timeouts and process-group cleanup on caught exceptions; ordinary SIGTERM forwarding is not explicit in these inherited original controllers. All audited commands completed.','No workspace test result transfer to this C-only artifact is claimed. Throughput and CPython/PBS are outside this gate audit. Source/compiler safety and provenance reviews remain separate.','Hashes verified against existing recorded references and again during this audit do not establish historical immutability before the first read.'],
+-    'passed_checks':len(checks),'inspected_file_count':len(tracked),'audit_generator_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+-}
+-(O/'checked-files.json').write_text(json.dumps(tracked,indent=2,sort_keys=True)+'\n')
+-(O/'review.json').write_text(json.dumps(report,indent=2)+'\n')
+-print(json.dumps({'status':report['status'],'checks':len(checks),'files':len(tracked),'review_sha256':hashlib.sha256((O/'review.json').read_bytes()).hexdigest()},indent=2))
++
++OLD=prior_root
++gate={'source':{'direct_control_shared_sha256':normal_libraries['liboriole_expat.so']},'libraries':expected_libraries}
++LC=R/'end-lifecycle-final';OM=R/'end-oom-final';control=j(LC/'controller.json')
++engines={name:j(LC/(name+'.json')) for name in ['baseline','candidate','expat']}
++expected={'baseline':gate['source']['direct_control_shared_sha256'],'candidate':gate['libraries']['liboriole_expat.so'],'expat':'7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478'}
++ck('38 lifecycle logical cases and114 parsers',control['status']=='passed' and control['logical_cases']==38 and control['parser_executions']==114 and control['outer_timeout_seconds_per_engine']==90)
++for name,data in engines.items():
++    ck('lifecycle runtime '+name,data['status']=='passed' and data['affinity']==[1] and len(data['cases'])==38 and data['library_unchanged'] and data['expected_sha256']==data['before_sha256']==data['after_sha256']==expected[name]==h(data['library']))
++    ck('lifecycle21 same process bindings '+name,len(data['dladdr'])==21 and all(Path(v['path']).resolve()==Path(data['library']).resolve() and v['sha256']==expected[name]==h(v['path']) for v in data['dladdr'].values()))
++    ck('all lifecycle case fields equal historical '+name,data['cases']==j(OLD/'end-lifecycle'/(name+'.json'))['cases'])
++    ck('lifecycle case IDs unique '+name,len({c['id'] for c in data['cases']})==38)
++    for case in data['cases']:
++        ck('lifecycle successful invariants and cleanup',case['freed'] and case['retained_callback_count_through_free']==7 and not case['callback_errors'] and not case.get('harness_error') and not case.get('invariant_error') and all(case['invariants'].values()))
++        ck('lifecycle exact input bytes',hashlib.sha256(bytes.fromhex(case['input_hex'])).hexdigest()==case['input_sha256'])
++    row=next(r for r in control['runs'] if r['engine']==name)
++    ck('lifecycle worker success',row['status']=='passed' and row['exit_code']==0 and row['command'][:3]==['taskset','-c','1'] and h(LC/(name+'.json'))==control['result_sha256'][name])
++    for stream in ['stdout','stderr']:ck('lifecycle worker output',h(LC/(name+'.'+stream))==row[stream+'_sha256'])
++    ck('38 immediate case receipts',[json.loads(line)['case'] for line in read(LC/(name+'.stdout')).splitlines()]==[case['id'] for case in data['cases']] and read(LC/(name+'.stderr'))==b'')
++ck('lifecycle full candidate control equality',engines['candidate']['cases']==engines['baseline']['cases'])
++comparison=j(LC/'comparison.json');oldcomparison=j(OLD/'end-lifecycle/comparison.json')
++ck('exact retained full reference differences',comparison==oldcomparison and comparison['candidate_vs_baseline']==[] and len(comparison['expat_vs_baseline'])==38 and sum(any(not d['path'].startswith('/final/') for d in row['differences']) for row in comparison['expat_vs_baseline'])==14)
++for name,field in [('oracle.py','oracle_sha256'),('controller.py','controller_sha256'),('SOURCE_REVIEW.md','source_review_sha256'),('comparison.json','comparison_sha256')]:ck('lifecycle source and comparison hash',h(LC/name)==control[field])
++oom=j(OM/'report.json')
++ck('OOM recorded success',oom['status']=='passed' and oom['unchanged'] and not oom['hash_errors'] and oom['before']==oom['after'] and len(oom['commands'])==4)
++for p,value in oom['before'].items():ck('OOM before after identity',h(p)==value)
++for row in oom['commands']:
++    ck('OOM command bounds success',row['exit']==0 and row['timeout']==120 and row['command'][:3]==['taskset','-c','1'])
++    for stream in ['stdout','stderr']:ck('OOM output hash',h(OM/(row['label']+'.'+stream))==row[stream+'_sha256'])
++    if row['label'].endswith('-build'):ck('C-only sanitizer flags',all(x in row['command'] for x in ['-fsanitize=address,undefined','-fno-omit-frame-pointer','-Werror']) and read(OM/(row['label']+'.stderr'))==b'')
++    else:ck('OOM binary and narrow XML_Parse origin',h(OM/row['label'])==oom['binaries'][row['label']] and read(OM/(row['label']+'.stderr')).decode()=='XML_Parse origin: '+engines[row['label']]['library']+'\n')
++raw=read(OM/'baseline.stdout')
++ck('OOM current control candidate historical bytes exact',raw==read(OM/'candidate.stdout')==read(OLD/'end-oom-final/baseline.stdout'))
++rows=[json.loads(line) for line in raw.splitlines()];summaries=[row for row in rows if row.get('summary')];retries=[]
++ck('exact six OOM scenarios',len(rows)==37 and rows[-1]=={'complete':True,'scenarios':6} and [(r['scenario'],r['mode'],r['fail_index']) for r in summaries]==[(0,0,0),(1,0,1),(2,0,2),(3,1,0),(4,1,1),(5,1,2)])
++for row in summaries:
++    events=[r for r in rows if r.get('scenario')==row['scenario'] and 'event' in r];retry=[r for r in rows if r.get('scenario')==row['scenario'] and 'retry_error' in r]
++    ck('OOM zero live and expected prefix allocations',row['live']==0 and row['calls_before']==33)
++    if row['failed']:
++        ck('OOM failed slot and stable retries',row['status']==0 and row['error']==1 and len(retry)==2 and retry[0]==retry[1] and retry[0]['retry_calls']==row['calls_before']+row['end_calls'] and retry[0]['retry_events']==len(events));retries.extend(retry)
++    else:ck('OOM successful end namespace restoration',not retry and row['status']==1 and row['error']==0 and row['end_calls']==row['end_count']==2 and row['resumes']==row['mode'] and sum(e['event']=='namespace-end' for e in events)==2)
++ck('exact measured retry33 retained',[(r['scenario'],r['retry_error']) for r in retries]==[(1,1),(1,1),(2,1),(2,1),(4,33),(4,33),(5,1),(5,1)])
++ck('summary lifecycle raw completion',summary['end_lifecycle']=={k:control[k] for k in ['logical_cases','parser_executions','candidate_vs_baseline_different_cases','expat_vs_baseline_different_cases','invariant_failures']})
++ck('summary OOM raw completion',summary['end_oom']=={k:oom[k] for k in ['row_counts','scenarios','failed_indices','success_controls','observations_exact']})
++
++initial_summary=j(R/'summary-initial-attempt/receipt.json');initial_code=read(R/'summary-initial-attempt/summarize-final.py');initial_log=read(R/'summary-initial-attempt/log').decode()
++ck('initial missing classifier failure retained',initial_summary['status']=='failed_postprocessing_only' and initial_summary['parser_or_compiler_reruns']==0 and 'FileNotFoundError' in initial_log and 'malformed/readback.json' in initial_log)
++ck('final summarizer unchanged after classifier generation',initial_code==read(R/'summarize-final.py'))
++classification=j(R/'publication-probe/reference-classification.json');malformed_readback=j(R/'malformed/readback.json')
++ck('saved malformed readback independently reproduced',malformed_readback=={'status':'passed','paired_rows':2392,'all_observation_fields_exact':True,'sha256':h(R/'malformed/observations.jsonl.gz')})
++ck('publication saved classification independently reproduced',classification['cases']==1304 and classification['baseline_candidate_exact'] and classification['reference_outcome_differences']==classification['reference_callback_payload_order_differences']==classification['reference_final_position_differences']==0 and classification['retained_reference_position_events']==dict(positions) and classification['observations_sha256']==h(R/'publication-probe/observations.json.gz'))
++ck('author summary source/library identities',summary['status']=='correctness_parity_gates_passed' and summary['source']['files']==70 and summary['source']['manifest_sha256']==h(R/'source.json') and summary['source']['git_commit']=='be22a27' and summary['libraries']=={'baseline':normal_libraries,'candidate':expected_libraries})
++ck('author API/native summary',summary['api']['raw_exit']==1 and summary['api']['passed']==4347 and summary['api']['failed']==393 and summary['api']['all4740rows_exact'] and summary['api']['bounds']==bounds and summary['api']['raw_results_sha256']==summary['api']['baseline_sha256']==h(U/'results.json') and summary['native']['consumers']==6 and summary['native']['allocation_scenarios_per_linkage']==327)
++ck('author paired scope summary',summary['strict_baseline_traces']==3318 and summary['custom_alias_baseline_comparisons']==36456 and summary['malformed_baseline_comparisons']==2392 and summary['publication']=={'logical_cases':1304,'parser_executions':3912,'exact_baseline':True,'same_process_origin_checks':9,'retained_reference_position_events':dict(positions)} and summary['rehash_recorded_subprocess_streams']==40)
++ck('author retained failure summary',summary['retained_harness_failure']['initial_other_controller_sha256']==h(R/'other-controller.json') and summary['retained_harness_failure']['initial_end_controller_sha256']==h(R/'end-lifecycle/controller.json') and summary['retained_harness_failure']['initial_end_parser_executions']==0 and summary['retained_harness_failure']['patch_sha256']==h(R/'end-affinity-fix.patch'))
++ck('no workspace results transferred','outside this C-gate artifact' in summary['workspace'] and not (R/'workspace-checks').exists())
++audit_prep=j(O/'audit-preparation.json');ck('audit generator lineage',audit_prep['generator_sha256']==h(Path(__file__)) and audit_prep['prior_core_sha256']==h(audit_prep['prior_core']) and audit_prep['prior_end_supplement_sha256']==h(audit_prep['prior_end_supplement']))
++for name in ['prepare-audit.py','audit-setup.py','audit-tail.py','adaptation.patch']:h(O/name)
++for name in ['classify_observations.py','summary-controller.log','summary-controller-final.log','api-outer.log','other-outer.log','end-outer.log']:h(R/name)
++ck('all inspected bytes unchanged at end',all(hashlib.sha256(Path(p).read_bytes()).hexdigest()==v for p,v in tracked.items()))
++for name,value in [('checked-files.json',tracked),('checks.json',checks),('native-consumers.json',native),('api-outcomes.json',dict(api_counts))]: (O/name).write_text(json.dumps(value,indent=2,sort_keys=True)+'\n')
++report={'status':'independent_native_byte_count_saved_C_gates_audit_passed','blocking_findings':[],'scope':'Saved source/hash/controller/raw-result reconstruction only. No target, parser, build, compiler or timing execution. Workspace and CPython gates are separate.','audit_cpu':4,'source_manifest_sha256':h(R/'source.json'),'source_build_review':{'path':str(source_review_path),'sha256':h(source_review_path)},'libraries':summary['libraries'],'api':{'rows':4740,'pass':4347,'fail':393,'exit':1,'all_rows_from_raw_log_exact':True,'all_rows_byte_equal_to_baseline':True,'selected_public_tests':395,'configurations_each':12,'bounds':bounds},'native':{'consumers':6,'allocation_scenarios_each_linkage':327,'all_C_builds_and_runs_exit0':True,'C_ASan_UBSan_only':True},'strict':{'full_paired_traces':3318,'all_fields_exact':True},'aliases':{'comparisons':36456,'groups':aliases,'verification':'Exact inherited source substitutions, fixture-loop counts, pinned libraries, command exits, script/report hashes, compressed readback and empty difference lists. Successful raw pairs are not retained and cannot be independently reread.'},'malformed':{'paired_rows':2392,'all_observations_exact':True,'all_input_hash_encoding_chunk_keys_reconstructed':True},'publication':{'cases':1304,'parser_executions':3912,'all_baseline_fields_exact':True,'same_process_origins':9,'reference_non_event_and_payload_order_exact':True,'retained_reference_callback_position_events':dict(positions)},'end':{'logical_cases':38,'parser_executions':114,'full_cases_equal_baseline_and_historical':True,'same_process_symbol_origins_each_engine':21,'retained_reference_different_cases':38,'retained_reference_in_handler_different_cases':14,'OOM_scenarios_each_engine':6,'OOM_rows_each_engine':37,'OOM_failed_indices_each_engine':4,'OOM_success_controls_each_engine':2,'OOM_raw_bytes_match_baseline_and_historical':True,'OOM_retry33_preserved':True},'retained_failures':{'initial_CPU4_preparation_separate':True,'other_lane_exit_pattern':[0,0,0,1],'initial_End_guard_parser_runs':0,'only_remaining_End38_and_End6_completed_after_CPU_guard_fix':True,'initial_missing_classifier_summary_failure_retained':True,'classifier_then_identical_final_summary':True},'limits':['Original393 canonical API failures and exit1 remain; this is parity with baseline.','Successful custom-alias raw pair records are absent in inherited tools. Source/count/hash/difference-summary audit is the available evidence.','C ASan/UBSan only; Rust release libraries are uninstrumented and leak checking is disabled. Origin records cover the recorded symbols and processes.','End SOURCE_REVIEW.md is historical fixture provenance. End6 namespace restoration does not establish every detached-End fast-path case.','Initial preparation contains CPU4 scripts; the CPU1 controller delta is separate. Initial End guard failed before any parser child, then only remaining End38/End6 ran; original successful probes remain.','Separate source735afb/commitbe22 integration yields the measured ccfb/f58 libraries. Historical sources retain their original identities.','No workspace, CPython, elapsed timing, adoption or blanket compatibility claim. Hash readback establishes stability during this audit, not historical immutability before the first receipt.'],'passed_checks':len(checks),'checked_file_count':len(tracked),'all_inspected_files_unchanged':True,'generator_sha256':h(Path(__file__))}
++(O/'review.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps({'status':report['status'],'review_sha256':hashlib.sha256((O/'review.json').read_bytes()).hexdigest(),'checks':len(checks),'files':len(tracked)},indent=2))

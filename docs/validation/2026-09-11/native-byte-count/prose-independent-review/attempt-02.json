@@ -1,0 +1,13 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "4",
+    "python3",
+    "/tmp/oriole-native-byte-count-human-independent-review/audit.py"
+  ],
+  "exit": 0,
+  "start": 1789095923.1306813,
+  "end": 1789095924.7437277,
+  "generator_sha256": "95330d4fbe4a27a63fd4e0a3f8d74f75df8babe1fee23f16a0ca81ad028edafa"
+}

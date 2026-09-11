@@ -1,0 +1,15 @@
+{
+  "started_utc": "2026-09-11T03:02:25Z",
+  "command": [
+    "taskset",
+    "-c",
+    "4",
+    "python3",
+    "/tmp/oriole-native-byte-count-package-independent-review/generator.py"
+  ],
+  "scope": "Saved package/workspace audit only; no target execution.",
+  "exit": 0,
+  "generator_sha256": "afd8111b6ef2fb3d967613f2688dbc2e524a8d99aadee73644b1082b62ef3004",
+  "stdout_sha256": "55a0b04bb1255e6a4ecf90455f0f55d6664e6873dc4507f6be2838b795af4776",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

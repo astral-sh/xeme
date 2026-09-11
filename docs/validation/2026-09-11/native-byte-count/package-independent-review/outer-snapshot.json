@@ -1,0 +1,77 @@
+[
+  {
+    "path": "README.md",
+    "bytes": 11304,
+    "sha256": "1adf9d4c1295856283dfa77351243dc23b2c299eb42969b084fb18b5eeaf61a3"
+  },
+  {
+    "path": "archive-members.json",
+    "bytes": 589014,
+    "sha256": "7c219b123d674df9d7ef5b7854aa3036817c954421565c33efd4fa5eee1ed2a1"
+  },
+  {
+    "path": "build.json",
+    "bytes": 13506,
+    "sha256": "c7abfbc1ff2e5be3ba8610329c5db262ec86985758cb9e19cdc2b11dc7410f65"
+  },
+  {
+    "path": "cpython-root-review.json",
+    "bytes": 8696,
+    "sha256": "3fed974b9ad5a4169203716be8310fda9d204acfddeb004cad30b55c7995320c"
+  },
+  {
+    "path": "evidence.tar.gz",
+    "bytes": 13178538,
+    "sha256": "bc63cf87e4733c2b05e7391e0ef782747a6ba0ea1046efae92843a53485b6dd0"
+  },
+  {
+    "path": "gates.json",
+    "bytes": 4145,
+    "sha256": "af4e2535a4e9f370cf05f0fa467ab40191767e2452763c5b32601f07c22645d9"
+  },
+  {
+    "path": "native-summary.json",
+    "bytes": 37165,
+    "sha256": "8823c0f54f31258d619ffaa17813e48941ef84cc509b4450c7f7d60743eb5c35"
+  },
+  {
+    "path": "oriole-write-native-byte-count-docs.py",
+    "bytes": 14423,
+    "sha256": "e5cd36d62e4d7cbd599c4c7e98eb3b3d45685c105846b04cd51c24ab5912eb12"
+  },
+  {
+    "path": "python-review.json",
+    "bytes": 12502,
+    "sha256": "c3686759a9b9e1ea0d5c0d545c1f0af3978e92e029593f679e29e9c63748ff0e"
+  },
+  {
+    "path": "python-summary.json",
+    "bytes": 1687,
+    "sha256": "99e04947a625d7b512b33f3e006aac8a01a48b2e12f4b0c3de76ad92323ee4fa"
+  },
+  {
+    "path": "source-build-review.json",
+    "bytes": 3914,
+    "sha256": "f1f801a46736344b8fae130ed3ca815c9d71c542c0dda15b098cd5e784c0d886"
+  },
+  {
+    "path": "source.json",
+    "bytes": 7940,
+    "sha256": "735afb9491158c3a34fd376109edc2312727382b5fa61e5e8b084796d7294f1d"
+  },
+  {
+    "path": "summary.json",
+    "bytes": 6182,
+    "sha256": "0df5f9339c0711be7621a7cc6b6bea2194024d9f0c3d829e33add0948bd18fbe"
+  },
+  {
+    "path": "table.md",
+    "bytes": 284,
+    "sha256": "d09628d600baa0d0368ca306ea2bedf08ff6d3c0890522119b0bb97c5b3c6344"
+  },
+  {
+    "path": "workspace.json",
+    "bytes": 1626,
+    "sha256": "a5446fbb78a87d0f6f62440d7df5557be2d86d6853179b9509ef083c12ef289a"
+  }
+]

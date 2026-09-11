@@ -1,0 +1,105 @@
+{
+  "status": "correctness_parity_gates_passed",
+  "source": {
+    "files": 70,
+    "manifest_sha256": "735afb9491158c3a34fd376109edc2312727382b5fa61e5e8b084796d7294f1d",
+    "live_unchanged": true,
+    "changed_files_from_control": [
+      "crates/oriole/src/encoding.rs",
+      "crates/oriole_expat/src/tests.rs"
+    ],
+    "git_commit": "be22a27"
+  },
+  "libraries": {
+    "baseline": {
+      "liboriole_expat.so": "02fcab59f6e3818c128da6706d67987ae7450dd8b59e97cd28ce497a547f28f5",
+      "liboriole_expat.a": "69ebed414946cbaef1a940c052a636be277c809902943d676e824deab45d22d5"
+    },
+    "candidate": {
+      "liboriole_expat.so": "ccfb22956a11c1b241ec755f46245c61f088187ef93143b77a7afec748983821",
+      "liboriole_expat.a": "f58d5bc6ed28077933fcbcb84ad876cc7208e0102c9008347223da91a328b03c"
+    }
+  },
+  "workspace": "Separate normal-workspace checks are owned by the byte-count source author, outside this C-gate artifact. No transfer of those tests to C-only artifact is claimed.",
+  "api": {
+    "raw_exit": 1,
+    "passed": 4347,
+    "failed": 393,
+    "all4740rows_exact": true,
+    "raw_results_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+    "baseline": "/tmp/oriole-end-frame-cells-thinlto-gates/api-native/upstream-api",
+    "baseline_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+    "bounds": {
+      "per_test_seconds": 3,
+      "per_test_address_space_bytes": 1073741824,
+      "per_test_rss_limit_bytes": 805306368,
+      "total_timeout_seconds": 240
+    }
+  },
+  "native": {
+    "consumers": 6,
+    "allocation_scenarios_per_linkage": 327,
+    "scope": "C ASan/UBSan only; Rust ThinLTO release is uninstrumented; leak checking disabled; dynamic and static linkage both exercised."
+  },
+  "strict_baseline_traces": 3318,
+  "custom_alias_baseline_comparisons": 36456,
+  "malformed_baseline_comparisons": 2392,
+  "publication": {
+    "logical_cases": 1304,
+    "parser_executions": 3912,
+    "exact_baseline": true,
+    "same_process_origin_checks": 9,
+    "retained_reference_position_events": {
+      "default": 10416,
+      "external": 864
+    }
+  },
+  "end_lifecycle": {
+    "logical_cases": 38,
+    "parser_executions": 114,
+    "candidate_vs_baseline_different_cases": 0,
+    "expat_vs_baseline_different_cases": 38,
+    "invariant_failures": {
+      "baseline": [],
+      "candidate": [],
+      "expat": []
+    }
+  },
+  "end_oom": {
+    "row_counts": [
+      37,
+      37
+    ],
+    "scenarios": {
+      "baseline": {
+        "complete": true,
+        "scenarios": 6
+      },
+      "candidate": {
+        "complete": true,
+        "scenarios": 6
+      }
+    },
+    "failed_indices": 4,
+    "success_controls": 2,
+    "observations_exact": true
+  },
+  "rehash_recorded_subprocess_streams": 40,
+  "limitations": [
+    "No timing or speed claim.",
+    "Successful custom alias raw pairs are not archived by the unchanged helper; scripts, counts, commands, hashes and difference summaries are retained.",
+    "End SOURCE_REVIEW.md describes historical fixture provenance, not current detached End eligibility or a fresh source audit.",
+    "End6 namespace-restoration fixtures retain their original scope; they do not establish coverage of every detached End fast path.",
+    "Original393 upstream failures and reference callback-position differences remain.",
+    "CPython gates are owned by root, outside this artifact.",
+    "Normal workspace checks are separately owned and are not claimed by this C-only gate receipt."
+  ],
+  "retained_harness_failure": {
+    "initial_other_controller_sha256": "5d1e80011db1262318fee4609bc090ca9c6f67e6bb51ca7fcb1029ae264ddeb8",
+    "initial_end_controller_sha256": "b935464457d4788d4ae9bd82d365637665845a36782be414248f54f8d316ac4e",
+    "phase": "CPU affinity assertion before any End parser run",
+    "initial_end_parser_executions": 0,
+    "correction": "Controller/oracle sorted-list CPU guard and report metadata4->1 only, final End38 run in separate directory; successful other probes not rerun. End6 ran once afterward.",
+    "patch_sha256": "da24ac6eb69eacdaf58fbd0395059ca355513a74ac27b82262608a25f14ef899"
+  }
+}

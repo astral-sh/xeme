@@ -1,0 +1,10 @@
+{
+  "status": "sealed_native_byte_count_saved_C_gate_review",
+  "review_sha256": "7d88712eb34eec26f9612bffe611aabdb5079ae5e5e269db5e5ada2e1145f619",
+  "generator_sha256": "6e442d96ddb35c01c74488a37521efe4703e60ca63a0d45fc18f960eaf2b1c39",
+  "all375_inspected_files_unchanged": true,
+  "audit_attempts": 1,
+  "first_attempt_exit": 0,
+  "target_executions": 0,
+  "scope": "Saved raw C-gate/API/trace/publication/malformed/End evidence and inherited-controller/source hashes. Original393 API failures, reference differences, missing alias raw pairs and initial harness/postprocessing failures retained."
+}

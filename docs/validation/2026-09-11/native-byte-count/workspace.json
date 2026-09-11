@@ -1,0 +1,21 @@
+{
+  "status": "author_saved_workspace_review_passed",
+  "source_manifest_sha256": "735afb9491158c3a34fd376109edc2312727382b5fa61e5e8b084796d7294f1d",
+  "source_files": 70,
+  "all_target_tests": 407,
+  "target_inventory_rows": 33,
+  "doc_tests": 1,
+  "new_or_removed_tests": 0,
+  "four_commands_exit0": true,
+  "timeout_seconds_per_command": 900,
+  "raw_report_sha256": "33ccd63b3e41f18a1afe2fece297e4d3ac9a106d7997c74da010c33238105d68",
+  "actual_counts_sha256": "1cd64a8681b8875c4737e2579d5faa85347973a2267d0f12fa86b6b363b5234e",
+  "scope": "Source/gate author rehashed saved Cargo logs, exact per-target test names versus prior407 baseline, all70 archive/live bytes and frozen C-only library hashes. No fresh parser reruns by this saved review; independent source/compiler review remains separate. Normal Rust workspace test binaries are distinct from the frozen C-only production artifacts.",
+  "frozen_libraries": {
+    "/tmp/oriole-native-byte-count-thinlto-study/liboriole_expat.so": "ccfb22956a11c1b241ec755f46245c61f088187ef93143b77a7afec748983821",
+    "/tmp/oriole-native-byte-count-thinlto-study/liboriole_expat.a": "f58d5bc6ed28077933fcbcb84ad876cc7208e0102c9008347223da91a328b03c",
+    "/tmp/oriole-native-byte-count-workspace-gates/source.json": "735afb9491158c3a34fd376109edc2312727382b5fa61e5e8b084796d7294f1d",
+    "/tmp/oriole-native-byte-count-workspace-gates/build.json": "c7abfbc1ff2e5be3ba8610329c5db262ec86985758cb9e19cdc2b11dc7410f65"
+  },
+  "original_failed_gates": "No failures in this workspace attempt. C End CPU guard and postprocessing-only attempts are preserved in separate C-gate evidence."
+}

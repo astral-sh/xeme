@@ -1,0 +1,11 @@
+{
+  "status": "sealed_native_byte_count_package_workspace_review",
+  "review_sha256": "8cabf7ec6dd062f01e69fb2b2a26d255eaa94e6a21d096e45eb247add224b0f0",
+  "generator_sha256": "afd8111b6ef2fb3d967613f2688dbc2e524a8d99aadee73644b1082b62ef3004",
+  "all3299_inspected_files_unchanged": true,
+  "audit_attempts": 1,
+  "first_attempt_exit": 0,
+  "target_executions": 0,
+  "final_outer_index_certified": false,
+  "scope": "Main and nested tar members/origins/exclusions/manifests/source/workspace raw counts. Later outer attachments and files.json require a separate readback."
+}

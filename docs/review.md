@@ -6,6 +6,8 @@ The implementation is published in native GitHub Stack 3, starting at [PR #1](ht
 
 The [retained C frame experiment](validation/2026-09-11/retained-c-frame/) remains rejected: native PGO is effectively flat, generated cases regress, and each parser handle grows by 256 bytes. Its source, allocation traces and completed compatibility results are retained alongside all benchmark conditions.
 
+The [serialized entity-accounting experiment](validation/2026-09-11/serialized-accounting/) also remains rejected. Three checked non-atomic counters improve PGO native time by 1.34% and CPython time by 1.10%, but normal native time regresses by 4.48% across all 24 real-project conditions. Normal CPython time regresses by 3.22%, with 23 of 24 conditions adverse; generated native controls regress in both builds. The report retains all normal/PGO native and CPython measurements, unchanged allocation traces and complete compatibility outcomes; the suffix-sharing runtime remains selected.
+
 ## Review order
 
 | Area | Layers | Main questions |

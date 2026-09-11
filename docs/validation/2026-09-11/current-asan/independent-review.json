@@ -1,0 +1,124 @@
+{
+  "status": "passed",
+  "role": "Independent saved-data reviewer; no producer code or target executions.",
+  "cpu": 6,
+  "checks": 676701,
+  "unchanged_input_files": 57597,
+  "readiness_reused": {
+    "path": "/tmp/oriole-be22-asan-readiness-independent-review/review.json",
+    "sha256": "26762b63b360a02a262f67cc868d862ce95889898fcdd2fbd9647ad6854c0f5b",
+    "previous_inputs_rehashed": 43396
+  },
+  "source": {
+    "commit": "c1776c922b023a3558badfefa697cd11b0d37d8e",
+    "source_files": 357,
+    "runtime_files": 70,
+    "source_manifest_sha256": "6a55c820e837c309797ab9bb419e364ceb76c68f45cc1c797c5c67c2b1d2b92e"
+  },
+  "results": [
+    {
+      "target": "parse",
+      "initial_files": 4316,
+      "replay_exec": 4316,
+      "campaign_exec": 4090775,
+      "final_disk_files": 4479,
+      "duration_seconds": 601.3118861520197,
+      "status": "passed"
+    },
+    {
+      "target": "multibyte",
+      "initial_files": 11282,
+      "replay_exec": 11282,
+      "campaign_exec": 1137365,
+      "final_disk_files": 1531,
+      "duration_seconds": 601.3985806090059,
+      "status": "passed"
+    },
+    {
+      "target": "streaming",
+      "initial_files": 9000,
+      "replay_exec": 9001,
+      "campaign_exec": 1890912,
+      "final_disk_files": 2781,
+      "duration_seconds": 601.3428364749998,
+      "status": "passed"
+    },
+    {
+      "target": "value_family",
+      "initial_files": 3686,
+      "replay_exec": 3687,
+      "campaign_exec": 673319,
+      "final_disk_files": 769,
+      "duration_seconds": 601.3215062340023,
+      "status": "passed"
+    },
+    {
+      "target": "ffi",
+      "initial_files": 5144,
+      "replay_exec": 5145,
+      "campaign_exec": 2222031,
+      "final_disk_files": 3539,
+      "duration_seconds": 601.3860726149869,
+      "status": "passed"
+    },
+    {
+      "target": "ffi_family",
+      "initial_files": 9533,
+      "replay_exec": 9533,
+      "campaign_exec": 482304,
+      "final_disk_files": 1058,
+      "duration_seconds": 601.7100263859611,
+      "status": "passed"
+    }
+  ],
+  "totals": {
+    "initial_files": 42961,
+    "empty_files": 3,
+    "replay_exec": 42964,
+    "campaign_exec": 10496706,
+    "final_disk_files": 14157,
+    "replay_processes": 6,
+    "campaign_processes": 6,
+    "all_processes_exit_zero": true,
+    "artifacts": 0,
+    "harness_timeouts": 0,
+    "reruns": 0,
+    "campaign_duration_min_seconds": 601.3118861520197,
+    "campaign_duration_max_seconds": 601.7100263859611
+  },
+  "package": {
+    "report_sha256": "8f2ffd730bfcebfeed4ee1d880adc3bd1917e273628e0a6723b2b55b36521099",
+    "files_sha256": "1e48c5c976b20ae19eb3b7771f3e4a6439e6974c97a53dcd4eeca5e6fdbe4f3b",
+    "archives": {
+      "evidence": {
+        "sha256": "5f97e88e85c31f032e4bb13ab4611e946f4aea11f8fe7f20dc23b814d573d26e",
+        "members": 90
+      },
+      "final_corpus": {
+        "sha256": "9bfc81a10a2dd06d569aeda1f19f22b3c154d3f08e09c7f3fd1441fefa658820",
+        "members": 14157
+      },
+      "readiness_review": {
+        "sha256": "a9a69535c7809523a7b0559f9298eff8ad91640d969930784c213db14328818a",
+        "members": 6
+      }
+    },
+    "nested_source_files": 357,
+    "nested_original_corpus_members": {
+      "initial-retained-corpus.tar.gz": 26689,
+      "final-retained-corpus.tar.gz": 16272
+    },
+    "preparation_members": 19,
+    "excluded_compiled_binaries": 6,
+    "omitted_bytecode_files": 0
+  },
+  "findings": [],
+  "limitations": [
+    "Saved evidence confirms the 12 recorded original launches; successful runs do not exercise timeout or signal cleanup paths.",
+    "Executions include initialization and repeated inputs; final disk files are an evolved corpus, not a unique-input or coverage proof.",
+    "ASan external Clang runtime, leak detection disabled. No LSan/UBSan, entire std/libc instrumentation, performance, exhaustive-safety, literal-attribute prototype, or PBS result claim.",
+    "Preparation/build/input readiness and its three preserved preparation failures are reused by exact review hash, with all prior inputs rehashed. No preparation failure is a campaign rerun."
+  ],
+  "generator_sha256": "9478f0f8712786eabeff6f1f973b907b21e96182ce0c2bf5ff524850daf6e676",
+  "compressed_details_sha256": "6b40e3c380273bbea9386d84593c406cdd62ca2781a00d70a4c23409a38929ff"
+}

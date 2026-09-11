@@ -1,0 +1,70 @@
+{
+  "README.md": {
+    "sha256": "326522e3331dfcae2c243fb9932f0acf063189648045f88e17bf04e717e23d1c",
+    "size": 5113
+  },
+  "archive-members.json": {
+    "sha256": "0d4ac7d555fba46c4b76a59638a3262e5be487c0b08286a230c07260644f9ddd",
+    "size": 6489
+  },
+  "assemble-draft.py": {
+    "sha256": "c91361d4fdb188bc085a29aaa0466ca90a749f09d8f6f7d1c7879c6a174e5c0a",
+    "size": 6436
+  },
+  "draft-prose-review.tar.gz": {
+    "sha256": "a2341001d80bf74a2491c78c6843c9c467b8c95c22eb4657ce9a72cfbc43f2de",
+    "size": 15186
+  },
+  "draft-structure-review.tar.gz": {
+    "sha256": "dd04057927e178f30a3a227b1e1582aa14f7cd7cb87317212df212904bc18f5a",
+    "size": 9292
+  },
+  "independent-review.json": {
+    "sha256": "2c8ee226e4aa494c25a751ed9e184de281600eed8bc3d506601bd4fb5e3e7899",
+    "size": 4259
+  },
+  "independent-review.tar.gz": {
+    "sha256": "1fb0f7b094408e53d8e121d3638673f5a2f0169be8e3971a55962239bbd75b36",
+    "size": 3674404
+  },
+  "index-publication.py": {
+    "sha256": "5bfcdb63d8b19926de133d6a0509478bfb617594f086ee0e65f57804cc687636",
+    "size": 760
+  },
+  "package-publication.py": {
+    "sha256": "8f17a7d8a92dae6b3d2aca1213907792e2092a4b68868fcf7356df8dd9498f37",
+    "size": 4910
+  },
+  "packaging-correction.json": {
+    "sha256": "b973a62f62a1e3d7e673b99813a3dbfd51760616c08250ff4423357ce42e61af",
+    "size": 627
+  },
+  "packaging-correction.py": {
+    "sha256": "2953e3d64c69a8e2d7a14b09147fd42f5129780af53836134cc50f3651dad991",
+    "size": 2767
+  },
+  "producer-handoff.tar.gz": {
+    "sha256": "8566b9d0666f40cacd177b2e366f51ffaae2136c099606f6f54d000a1463f57a",
+    "size": 15157855
+  },
+  "publication-review-details.tar.gz": {
+    "sha256": "3fb70af9733a69240a69db6b3bb2ad9593f6b5c31fb5852f70d93f2531bbfd12",
+    "size": 18748
+  },
+  "publication-review-receipt.json": {
+    "sha256": "88839640c4877b434f7d2f3250f020e1a2983731bdca8a3e2261518c19af71dd",
+    "size": 775
+  },
+  "publication-review.json": {
+    "sha256": "5962c3dcc35693be5b4e74a6803d9775b71ea9bd45b57fbe6deaeb9c3a37df33",
+    "size": 2711
+  },
+  "readiness-review.json": {
+    "sha256": "26762b63b360a02a262f67cc868d862ce95889898fcdd2fbd9647ad6854c0f5b",
+    "size": 3048
+  },
+  "report.json": {
+    "sha256": "8f2ffd730bfcebfeed4ee1d880adc3bd1917e273628e0a6723b2b55b36521099",
+    "size": 7353
+  }
+}

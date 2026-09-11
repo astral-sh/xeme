@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "initial_attempt": "Cross-filesystem shutil.move copied all 12 sealed files, then could not remove the read-only source directory. Four archives and three report copies had already completed.",
+  "correction": "Verified all four archives and both complete uncompressed copies against their immutable sources. A same-filesystem rename also required write permission on the copied directory. Made that generated directory writable, renamed it, and completed the document update. Original immutable handoff permissions and bytes remain unchanged.",
+  "sources_changed": false,
+  "targets_rerun": false
+}

@@ -1,0 +1,10 @@
+{
+  "audit-real-corpus.py": {
+    "source": "/tmp/oriole-real-pgo-corpus-independent-audit.py",
+    "sha256": "412133ae9a30e8df8a67726b6860bdfc0e6ef651ee94e39f2fde403fd3f026a6"
+  },
+  "audit-text-build.py": {
+    "source": "/tmp/oriole-deferred-c-text-raw-build-independent-audit.py",
+    "sha256": "552f18a306a9493ae52bb3b1037b97d6b1eac654ca0d4a11b7c89e0bbb9df12c"
+  }
+}

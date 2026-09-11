@@ -44,13 +44,19 @@ pub struct Limits {
     pub max_depth: usize,
     pub max_token_bytes: usize,
     pub max_total_bytes: usize,
-    /// Total indirect bytes from entities, reused defaults, namespace URI expansion,
+    /// Allowance for indirect bytes from entities, reused defaults, namespace URI expansion,
     /// repeated declaration callback names, skipped conditional-reference callback
     /// storage, and external reference identifiers and namespace contexts. Child construction also charges inherited declaration,
     /// namespace, encoding, and context storage, including per-entry structural
     /// work. Parameter children share definitions without copying them. Shared
-    /// with external entity children.
+    /// with external entity children. This is an absolute limit when
+    /// `max_work_amplification` is `None`; otherwise the limit is the greater of
+    /// this allowance and that factor times consumed original root-input bytes.
     pub max_entity_expansion_bytes: usize,
+    /// Optional input-relative allowance for cumulative indirect and adapter work.
+    /// `None` preserves absolute work limits. Children share consumed root credit;
+    /// buffered but unconsumed bytes and external input do not increase it.
+    pub max_work_amplification: Option<usize>,
     pub max_entity_depth: usize,
     pub max_attributes: usize,
     pub max_entities: usize,
@@ -63,6 +69,7 @@ impl Default for Limits {
             max_token_bytes: 16 * 1024 * 1024,
             max_total_bytes: 256 * 1024 * 1024,
             max_entity_expansion_bytes: 8 * 1024 * 1024,
+            max_work_amplification: None,
             max_entity_depth: 32,
             max_attributes: 10_000,
             max_entities: 10_000,
@@ -1143,6 +1150,32 @@ impl Parser {
         Ok(())
     }
 
+    /// Bytes that can still be supplied to this parser's original input source.
+    ///
+    /// The representable source bound leaves room for one-based line numbers,
+    /// even when an explicit input limit is larger than a signed pointer offset.
+    /// External children have their own source offsets and input allowance.
+    #[doc(hidden)]
+    #[must_use]
+    pub fn input_bytes_remaining(&self) -> usize {
+        self.config
+            .limits
+            .max_total_bytes
+            .min(isize::MAX as usize)
+            .saturating_sub(self.received)
+    }
+
+    /// Cumulative work allowance based on consumed original root-input bytes.
+    ///
+    /// Adapters use this policy for their own work counters. The threshold may
+    /// saturate, but callers must still reject overflow of the charged counter.
+    #[doc(hidden)]
+    #[must_use]
+    pub fn work_bytes_limit(&self, initial: usize) -> usize {
+        self.expanded
+            .work_limit(initial, self.config.limits.max_work_amplification)
+    }
+
     /// Append input without calling user code. Drain events before feeding more data.
     pub fn feed(&mut self, bytes: &[u8], is_final: bool) -> Result<(), Error> {
         if let Some(error) = &self.error {
@@ -1151,11 +1184,13 @@ impl Parser {
         if self.final_input {
             return self.fail(ErrorKind::Finished, "input has already been finalized");
         }
+        if bytes.len() > self.input_bytes_remaining() {
+            return self.fail(ErrorKind::LimitExceeded, "input byte limit exceeded");
+        }
         self.feed_start_byte = self.sources[0].position(0).byte_index;
-        self.received = match self.received.checked_add(bytes.len()) {
-            Some(size) if size <= self.config.limits.max_total_bytes => size,
-            _ => return self.fail(ErrorKind::LimitExceeded, "input byte limit exceeded"),
-        };
+        // The remaining-input check proves this addition and every original
+        // source coordinate fit, before decoder or input state is changed.
+        self.received += bytes.len();
         if self.fragment
             && let Err(error) = self.charge_expansion(bytes.len())
         {
@@ -1634,7 +1669,7 @@ impl Parser {
     }
 
     /// Set the combined direct/indirect byte threshold for relative amplification.
-    /// Absolute input, expansion-work and nesting limits remain independent.
+    /// Input, expansion-work and nesting policies remain independent.
     pub fn set_entity_activation_threshold(&self, bytes: u64) -> bool {
         if self.fragment {
             return false;
@@ -3465,12 +3500,13 @@ impl Parser {
     }
 
     fn charge_expansion(&self, size: usize) -> Result<(), Error> {
+        let limit = self.work_bytes_limit(self.config.limits.max_entity_expansion_bytes);
         self.expanded
             .expanded
             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
                 expanded
                     .checked_add(size)
-                    .filter(|expanded| *expanded <= self.config.limits.max_entity_expansion_bytes)
+                    .filter(|expanded| *expanded <= limit)
             })
             .map_err(|_| {
                 self.err(
@@ -3932,6 +3968,171 @@ fn character_reference(name: &str) -> Result<Option<char>, (ErrorKind, usize)> {
             Ok(Some(value))
         }
         _ => Ok(None),
+    }
+}
+
+#[cfg(test)]
+mod input_bound_tests {
+    use super::*;
+
+    #[test]
+    fn source_limit_rejection_preserves_input_state() {
+        for limit in [0, 7, Limits::default().max_total_bytes, usize::MAX] {
+            let mut config = Config::default();
+            config.limits.max_total_bytes = limit;
+            let mut parser = Parser::new(config);
+            let bound = limit.min(isize::MAX as usize);
+            // Seed cumulative history without allocating the preceding bytes.
+            parser.received = bound.saturating_sub(1);
+            if bound != 0 {
+                assert_eq!(parser.input_bytes_remaining(), 1);
+                parser.feed(b" ", false).unwrap();
+            }
+            assert_eq!(parser.received, bound);
+            assert_eq!(parser.input_bytes_remaining(), 0);
+            parser.feed_start_byte = 17;
+            let before = format!("{:?}{:?}", parser.sources, parser.decoder);
+            let error = parser.feed(b"x", true).unwrap_err();
+            assert_eq!(error.kind, ErrorKind::LimitExceeded);
+            assert_eq!(parser.received, bound);
+            assert_eq!(parser.feed_start_byte, 17);
+            assert!(!parser.final_input);
+            assert_eq!(format!("{:?}{:?}", parser.sources, parser.decoder), before);
+        }
+        let mut config = Config::default();
+        config.limits.max_total_bytes = 0;
+        let mut parser = Parser::new(config);
+        parser.feed(b"", true).unwrap();
+        assert_eq!(parser.received, 0);
+        assert!(parser.final_input);
+    }
+
+    #[test]
+    fn external_input_allowance_belongs_to_each_source() {
+        let mut config = Config::default();
+        config.limits.max_total_bytes = 7;
+        let mut parent = Parser::new(config);
+        parent.feed(b"<r>", false).unwrap();
+        while parent.next_event().unwrap().is_some() {}
+        for context in [None, Some("")] {
+            let mut child = parent.external_child(context, None).unwrap();
+            assert_eq!(child.input_bytes_remaining(), 7);
+            let text = if context.is_some() { b"<c/>" } else { b"    " };
+            child.feed(text, true).unwrap();
+            while child.next_event().unwrap().is_some() {}
+            assert_eq!(child.input_bytes_remaining(), 3);
+            assert_eq!(parent.input_bytes_remaining(), 4);
+        }
+        parent.feed(b"</r>", true).unwrap();
+        while parent.next_event().unwrap().is_some() {}
+        assert_eq!(parent.input_bytes_remaining(), 0);
+        assert_eq!(parent.sources[0].position(0).byte_index, 7);
+        assert!(parent.is_finished());
+    }
+}
+
+#[cfg(test)]
+mod streaming_work_tests {
+    use super::*;
+
+    fn drain(parser: &mut Parser) -> Result<(), Error> {
+        while parser.next_event()?.is_some() {}
+        Ok(())
+    }
+
+    #[test]
+    fn linear_namespace_and_default_work_can_outlive_the_initial_allowance() {
+        let documents = [
+            format!("<r xmlns:p='urn:test'>{}</r>", "<p:e/>".repeat(100)),
+            format!(
+                "<!DOCTYPE r [<!ATTLIST e a CDATA 'value'>]><r>{}</r>",
+                "<e/>".repeat(100)
+            ),
+        ];
+        for document in documents {
+            for factor in [None, Some(100)] {
+                let mut config = Config {
+                    namespace_separator: Some(' '),
+                    ..Config::default()
+                };
+                config.limits.max_entity_expansion_bytes = 64;
+                config.limits.max_work_amplification = factor;
+                let mut parser = Parser::new(config);
+                parser.feed(document.as_bytes(), true).unwrap();
+                let result = drain(&mut parser);
+                if factor.is_some() {
+                    result.unwrap();
+                    assert!(parser.is_finished());
+                    assert!(parser.expanded.expanded.load(Ordering::Relaxed) > 64);
+                } else {
+                    assert_eq!(result.unwrap_err().kind, ErrorKind::LimitExceeded);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn large_reused_names_and_defaults_still_exhaust_relative_work() {
+        let value = "x".repeat(2048);
+        let documents = [
+            format!("<r xmlns:p='{value}'>{}</r>", "<p:e/>".repeat(300)),
+            format!(
+                "<!DOCTYPE r [<!ATTLIST e a CDATA '{value}'>]><r>{}</r>",
+                "<e/>".repeat(300)
+            ),
+        ];
+        for document in documents {
+            // If merely feeding bytes earned work credit, this suffix would
+            // finance all of the earlier expansion before it was consumed.
+            let input = format!("{document}{}", " ".repeat(64 * 1024));
+            for chunk_size in [input.len(), 37] {
+                let mut config = Config {
+                    namespace_separator: Some(' '),
+                    ..Config::default()
+                };
+                config.limits.max_entity_expansion_bytes = 64;
+                config.limits.max_work_amplification = Some(100);
+                let mut parser = Parser::new(config);
+                assert!(parser.set_entity_maximum_amplification(f32::INFINITY));
+                assert!(parser.set_entity_activation_threshold(u64::MAX));
+                let result = input
+                    .as_bytes()
+                    .chunks(chunk_size)
+                    .enumerate()
+                    .try_for_each(|(index, chunk)| {
+                        let final_chunk = (index + 1) * chunk_size >= input.len();
+                        parser.feed(chunk, final_chunk)?;
+                        drain(&mut parser)
+                    });
+                let error = result.unwrap_err();
+                assert_eq!(error.kind, ErrorKind::LimitExceeded);
+                assert!(error.position.byte_index < document.len());
+                assert!(parser.expanded.expanded.load(Ordering::Relaxed) > 64);
+                assert!(parser.work_bytes_limit(0) <= 100 * document.len());
+                if chunk_size == input.len() {
+                    assert_eq!(parser.received, input.len());
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn saturated_work_threshold_still_rejects_counter_overflow() {
+        let mut config = Config::default();
+        config.limits.max_work_amplification = Some(100);
+        let parser = Parser::new(config);
+        assert!(parser.expanded.account(usize::MAX, false, false));
+        assert_eq!(parser.work_bytes_limit(0), usize::MAX);
+        parser
+            .expanded
+            .expanded
+            .store(usize::MAX, Ordering::Relaxed);
+        parser.charge_expansion(0).unwrap();
+        assert_eq!(
+            parser.charge_expansion(1).unwrap_err().kind,
+            ErrorKind::LimitExceeded
+        );
+        assert_eq!(parser.expanded.expanded.load(Ordering::Relaxed), usize::MAX);
     }
 }
 

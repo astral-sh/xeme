@@ -647,6 +647,10 @@ struct Scan {
     pi: bool,
 }
 
+/// Original-input coordinates are bounded by `Parser::input_bytes_remaining`.
+/// Internal entities own a finite UTF-8 buffer and return the referring source's
+/// anchor without adding replacement offsets. Compaction changes buffer offsets,
+/// never the cumulative original-byte index or one-based line number.
 #[derive(Debug)]
 pub(crate) struct Source {
     pub(crate) text: crate::lexical::Buffer,
@@ -1296,6 +1300,91 @@ fn advance_long_position(text: &str, line: &mut usize, column: &mut usize, previ
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn converted_positions_fit_at_the_source_bound() {
+        let bound = isize::MAX as usize;
+        let text = "é\r\n雪";
+        for (encoding, widths) in [
+            (Encoding::Utf8, [2_u8, 1, 1, 3]),
+            (Encoding::Utf16Le, [2, 2, 2, 2]),
+            (Encoding::Utf16Be, [2, 2, 2, 2]),
+            (Encoding::SingleByte, [1, 1, 1, 1]),
+            (Encoding::MultiByte, [3, 1, 1, 4]),
+        ] {
+            let raw_bytes = widths
+                .iter()
+                .map(|width| usize::from(*width))
+                .sum::<usize>();
+            let mut source = Source::new(Allocator::System, crate::NameRules::default());
+            source.encoding = encoding;
+            source.raw_index = bound - raw_bytes;
+            source.accounted_raw = source.raw_index;
+            source.line = source.raw_index + 1;
+            source.decoded_end = source.position(0);
+            if encoding == Encoding::MultiByte {
+                for (character, width) in text.chars().zip(widths) {
+                    source.push_custom(character, width, None).unwrap();
+                }
+            } else {
+                source.text.try_push_str(text).unwrap();
+            }
+            let mut cursor = source.position_cursor();
+            let mut raw_offset = bound - raw_bytes;
+            for ((offset, character), width) in text.char_indices().zip(widths) {
+                let position =
+                    source.position_from_cursor(&mut cursor, offset, character.len_utf8());
+                assert_eq!(position, source.position_at(offset, character.len_utf8()));
+                assert_eq!(position.byte_index, raw_offset);
+                assert_eq!(position.byte_count, usize::from(width));
+                raw_offset += usize::from(width);
+            }
+            let end = source.position_from_cursor(&mut cursor, text.len(), 0);
+            assert_eq!(end.byte_index, bound);
+            assert_eq!(end.line, bound - raw_bytes + 2);
+            assert_eq!(end.column, 1);
+            if encoding == Encoding::MultiByte {
+                assert_eq!(source.decoded_end, end);
+            }
+            assert_eq!(source.accounting_bytes(text.len()), raw_bytes);
+            source.mark_accounted(raw_bytes);
+            assert_eq!(source.accounted_raw, bound);
+            source.consume(text.len());
+            assert_eq!(source.position(0), end);
+        }
+    }
+
+    #[test]
+    fn compaction_and_entity_anchors_keep_bounded_coordinates() {
+        let bound = isize::MAX as usize;
+        let mut source = Source::new(Allocator::System, crate::NameRules::default());
+        source.text.try_push_str(&"\n".repeat(65_537)).unwrap();
+        source.raw_index = bound - source.text.len();
+        source.accounted_raw = source.raw_index;
+        source.line = source.raw_index + 1;
+        source.consume(65_536);
+        assert_eq!(source.cursor, 0);
+        assert_eq!(source.text.as_str(), "\n");
+        assert_eq!(source.raw_index, bound - 1);
+        source.consume(1);
+        assert_eq!(source.raw_index, bound);
+        assert_eq!(source.line, bound + 1);
+
+        let anchor = source.position(0);
+        let mut entity = Source::entity(
+            String::try_from_str_in("é\nx", Allocator::System).unwrap(),
+            String::try_from_str_in("e", Allocator::System).unwrap(),
+            anchor,
+            0,
+            crate::NameRules::default(),
+        );
+        let mut cursor = entity.position_cursor();
+        assert_eq!(entity.position_at(2, 1), anchor);
+        assert_eq!(entity.position_from_cursor(&mut cursor, 4, 0), anchor);
+        entity.consume(4);
+        assert_eq!(entity.raw_index, 4);
+        assert_eq!(entity.position(0), anchor);
+    }
 
     #[test]
     fn short_position_words_match_scalar_characters_and_cr_state() {

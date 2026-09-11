@@ -1,0 +1,92 @@
+{
+  "status": "passed",
+  "role": "Independent saved-data ASan follow-up audit by next_hotspot; no target execution or collector script reuse.",
+  "source_manifest_sha256": "e52c4fa16e71a7dcd76864b29509b157a42b6fbe4531f87b68f98395418d5fc3",
+  "collector_summary_sha256": "5faee1d338e2dfe9bd7f25ae2b3132821d974f1c79b0fda3042ebbb6db47a82f",
+  "package_files": {
+    "ASAN.md": {
+      "sha256": "7524d7e2eae9be36ef1e3712cb6e35e6dfa5ff7dff113152c2dcb2c855fe477c",
+      "bytes": 4248
+    },
+    "asan.json": {
+      "sha256": "f11a5156736f4d985d32764aa146afcf9ca67db20ed66e849eec0c3db34c3fc2",
+      "bytes": 6544
+    },
+    "asan-evidence.tar.gz": {
+      "sha256": "3bf0bbb5d9baf7f6cb7f7c60d959edb1bf47fe82862fae18ffce1ea9acc1dfca",
+      "bytes": 24905903
+    },
+    "asan-evidence-members.json.gz": {
+      "sha256": "d118ae0e44f84d6c217be562d20178acec3d8aa0dfe4a3194dee19b7cbdeb9f0",
+      "bytes": 3089814
+    },
+    "package-streaming-policy-asan.py": {
+      "sha256": "c5dddcf4ac8e8e66329c0261de37ab85fbc30d3cb2f15d7122e246f8c2ad6091",
+      "bytes": 14515
+    }
+  },
+  "verified": {
+    "canonical_source_files": 70,
+    "workspace_asan_vectors": 3,
+    "fuzz_target_asan_vectors": 7,
+    "exact_policy_tests_passed": 13,
+    "replay_and_campaign_commands": 14,
+    "raw_log_totals": {
+      "targets": 7,
+      "initial_seed_files_per_target_sum": 68893,
+      "replay_executions": 68897,
+      "campaign_executed_units": 2170731,
+      "final_disk_corpus_files_per_target_sum": 2931,
+      "failure_artifacts": 0
+    },
+    "archive_members": 60226,
+    "unique_corpus_blobs": 60015,
+    "reconstructable_corpus_placements": 128942
+  },
+  "scope_and_caption_review": "Public ASAN.md accurately says 7 targets, 13 selected tests and 120 seconds each; retains per-target counting, historical seed-only reuse, disabled leak detection and collector ownership. Inherited raw six-target caption is preserved and explicitly explained.",
+  "publication_finding": "No blocking mismatch found in this ASan follow-up or its five-file package. Scope is the current e52c streaming policy only.",
+  "limitations": [
+    "Current source is streaming-policy e52c, not the direct-writer prototype.",
+    "Seven 120-second follow-up campaigns do not transfer historical six-by-600-second outcomes; historical bytes and provenance are seeds only.",
+    "Seed and corpus counts are per-target sums; streaming_work deliberately reuses streaming seeds. Executed-unit stats include campaign initialization and mutation, separate from replay.",
+    "ASAN_OPTIONS disables leak detection. No LSan, UBSan, whole std/libc instrumentation, PGO, performance or exhaustive-safety claim.",
+    "Raw instrumentation scope sentence says six fuzz targets; actual raw vectors, seven binary hashes, symbol readbacks and this receipt establish seven. Raw caption is preserved.",
+    "Saved process records and controllers show first attempts and cleanup; no new parser target was executed by this audit.",
+    "Preparation-only names were corrected before execution; original preparation correction is retained. Packaging audit is separate."
+  ],
+  "evidence": {
+    "audit_raw.py": "2bd560c515035e90f404a44ffd742c1528701720fdcbbc8eefcba3e21b181ebb",
+    "audit_package.py": "3c140ca0bf0c08118818bfd0047e4fc7a32b02f060b71b4302b833b964fe5a76",
+    "raw-audit.json": "a85ec7b77304da7f000d3a3bb546841cc7d7014e9310f8999fa87fb543cd5ec5",
+    "package-audit.json": "d8f24ca3ac8a98dd23063f8c4570a0749bc07db667cce3ff1757ca25b8359b4d",
+    "raw-attempt01.stdout": "6a41de748fd552b48fa4f8a86f2f999b7be46c018d0784c87250a97d09955de1",
+    "raw-attempt01.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "package-attempt01.stdout": "26c8b991049377a4fe989143b71e963ed24b240fa7ad6d7ad78621ba569f9c14",
+    "package-attempt01.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "attempts": [
+    {
+      "stage": "raw audit",
+      "command": [
+        "taskset",
+        "-c",
+        "6",
+        "python",
+        "/tmp/oriole-streaming-policy-asan-independent-audit/audit_raw.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "stage": "package audit",
+      "command": [
+        "taskset",
+        "-c",
+        "6",
+        "python",
+        "/tmp/oriole-streaming-policy-asan-independent-audit/audit_package.py"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "all_audit_processes_completed_and_reaped": true
+}

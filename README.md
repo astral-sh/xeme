@@ -16,22 +16,24 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole (PGO) | Expat (PGO) | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 36.723 ms | 24.545 ms | 1.50× |
-| Wayland protocol | 0.918 ms | 0.949 ms | 0.97× |
-| Maven POM | 0.600 ms | 0.370 ms | 1.63× |
-| Batik SVG | 0.105 ms | 0.125 ms | 0.84× |
-| GTK UI | 0.267 ms | 0.179 ms | 1.49× |
-| DocBook XSL | 0.191 ms | 0.165 ms | 1.15× |
+| Vulkan registry | 36.646 ms | 24.445 ms | 1.50× |
+| Wayland protocol | 0.926 ms | 0.945 ms | 0.97× |
+| Maven POM | 0.598 ms | 0.362 ms | 1.66× |
+| Batik SVG | 0.106 ms | 0.125 ms | 0.85× |
+| GTK UI | 0.266 ms | 0.176 ms | 1.52× |
+| DocBook XSL | 0.189 ms | 0.166 ms | 1.15× |
 
-These [native measurements](docs/validation/2026-09-11/literal-attribute-check/) use original XML from six pinned projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host. Both parsers use PGO trained on generated XML; these projects are held out of training. Times are medians of seven process medians; ratios are medians of paired ratios. Expat is version 2.8.4.
+These [native measurements](docs/validation/2026-09-11/streaming-input-bounds/) use original XML from six pinned projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host. Both parsers use PGO trained on generated XML; these projects are held out of training. Times are medians of seven process medians; ratios are medians of paired ratios. Expat is version 2.8.4.
 
-Across all 24 real-project conditions, Oriole takes **1.38× Expat PGO's native time and 1.13× its CPython time**. The literal-attribute optimization reduces time by 2.1% and 1.2%, respectively, against the preceding parser. The normal build is flat overall, with a 2.1% regression on generated native controls. The [full report](docs/validation/2026-09-11/literal-attribute-check/) retains every condition, sample and adverse result.
+Across all 24 real-project conditions, Oriole takes **1.38× Expat PGO's native time and 1.14× its CPython time**. The new streaming policy is effectively flat against the preceding parser: PGO native and CPython time each decrease by 0.3%. Normal native time decreases by 1.4%, while normal CPython time is flat. Generated native controls regress by 1.2% normally and 0.6% with PGO. The [full report](docs/validation/2026-09-11/streaming-input-bounds/) retains every condition, sample and adverse result.
 
 ThinLTO is the default, and [PGO is opt-in](tools/pgo/). The [PGO/LTO study](benchmarks/results/2026-09-11/pgo-lto/) on the preceding `be22a27` runtime measured PGO reductions of 24.8% natively and 15.5% through CPython. Fat LTO alone added little; combining it with PGO regressed native time by 6.8%.
 
 A separate [C allocator study](benchmarks/results/2026-09-11/c-allocators/) finds less than 0.2% aggregate real-project time change with jemalloc or mimalloc, alongside higher peak resident memory. The C allocator default remains unchanged.
 
-The [latest compatibility report](docs/validation/2026-09-11/literal-attribute-check/) records 408 workspace tests, one doc test, and **4,347 passing / 393 failing upstream API configurations**. Shared and static CPython each execute 802 tests with the same two text-grouping failures. Remaining allocation, resource, diagnostic, and callback differences are explicit in the [compatibility guide](docs/compatibility.md). Six [sustained ASan campaigns](docs/validation/2026-09-11/current-asan/) completed 10,496,706 executions on the preceding `be22a27` runtime without findings. The [`be22a27` PBS distribution](docs/validation/2026-09-11/current-pbs/) loads both XML accelerators on glibc 2.17 and passes 1,024 threaded parses; its XML suite retains the same two grouping failures.
+The [latest compatibility report](docs/validation/2026-09-11/streaming-input-bounds/) records 420 workspace tests, one doc test, and **4,347 passing / 391 failing / two timed-out upstream API configurations**. Shared and static CPython each retain the same two text-grouping failures across 802 method outcomes. Actual incremental streams through 257 MiB and a separate 2,049 MiB text stream match Expat's checked output and positions with constant tracked allocation peaks. Remaining allocation, resource, diagnostic, and callback differences are explicit in the [compatibility guide](docs/compatibility.md).
+
+Seven [current-source ASan campaigns](docs/validation/2026-09-11/streaming-input-bounds/ASAN.md) completed 2,170,731 executions and 68,897 retained-corpus replays without findings, alongside 13 focused policy regressions. Each campaign ran for 120 seconds; the earlier [six 600-second campaigns](docs/validation/2026-09-11/current-asan/) remain scoped to `be22a27`. The [`be22a27` PBS distribution](docs/validation/2026-09-11/current-pbs/) loads both XML accelerators on glibc 2.17 and passes 1,024 threaded parses; its XML suite retains the same two grouping failures.
 
 The [Windows test portability supplement](docs/validation/2026-09-11/detached-end-windows-portability/) corrects an expected-value cast and verifies byte-identical C libraries.
 

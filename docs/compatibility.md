@@ -5,17 +5,26 @@ well-formedness, callback compatibility, and safe resource use are separate gate
 A symbol existing or a document parsing successfully does not establish callback
 or CPython compatibility.
 
-The [current integration report](validation/2026-09-10/start-frame-integration/)
-records the latest bounded validation results, including all remaining upstream
-failures. The [earlier full checkpoint](validation/2026-09-10/) retains its own
-runtime, fuzzing and distribution evidence.
+The [current streaming report](validation/2026-09-11/streaming-input-bounds/)
+records the latest input/work-policy validation, including actual streams through
+257 MiB and a separate 2,049 MiB text stream. The
+[earlier integration report](validation/2026-09-10/start-frame-integration/) and
+[full checkpoint](validation/2026-09-10/) retain their own source-specific runtime,
+fuzzing and distribution evidence.
 
-The original API matrix currently passes 4,347 of 4,740 configurations, with 393
-failures. Its [failure classification](validation/2026-09-10/detached-frames/#compatibility-and-safety-checks)
+The original API matrix currently passes 4,347 of 4,740 configurations: 391
+assertion failures and two timeouts remain. No passing configuration regressed.
+The two active upstream 2 GiB cases now reach the unchanged three-second timeout
+instead of the earlier input assertion; they are not counted as fixed. The
+[earlier failure classification](validation/2026-09-10/detached-frames/#compatibility-and-safety-checks)
 distinguishes allocation costs, assertions tied to Expat's allocation schedule,
 literal identity and resource-policy boundaries. Callback grouping and position
-differences remain separately visible in the consumer and differential reports.
-No original failing assertion is counted as a pass.
+differences remain separately visible. The current strict shared/static CPython
+runs retain the same two failures with an explicit consumer cleanup backport;
+the four completed performance campaigns retain all conditions and raw samples in
+the [current benchmark report](validation/2026-09-11/streaming-input-bounds/#benchmarks).
+The fixed PGO aggregate remains slower than Expat in both native C and actual
+CPython, so the speed objective remains unmet.
 
 ## Differential testing
 
@@ -60,6 +69,31 @@ Name validation uses the selected edition in element and attribute names, DTD
 grammar, entity references, incremental scanners, and external children.
 Custom-encoding PUBLIC identifiers classify the original bytes with that same
 edition before reporting decoded callback text.
+
+## Streaming resource limits
+
+The C interface accepts at most 256 MiB in one input call or buffer request. Each
+original source, including an external child's source, can accept cumulative input
+up to `min(c_long::MAX, isize::MAX)` so byte positions and one-based line counts
+remain representable. The former 256 MiB lifetime C input ceiling no longer
+rejects longer ordinary incremental streams.
+
+Cumulative indirect work is bounded by `max(8 MiB, 100 × consumed root bytes)`;
+cumulative event payload is bounded by `max(64 MiB, 100 × consumed root bytes)`.
+Only consumed original root input supplies credit. Buffered suffixes, external
+input and reset documents cannot subsidize work in the earlier document. Children
+retained across a root reset keep the original budget. Checked counters reject
+overflow even when the relative threshold saturates.
+
+The 512 MiB live/reserved family-allocation ceiling and existing allocation and
+entity amplification checks remain independent. Token, attribute, depth, entity,
+cycle, external-depth and child-construction limits still apply. Expat-compatible
+amplification setters do not disable the fixed C work policy or live ceiling.
+The Rust interface keeps its default 256 MiB cumulative input and absolute 8 MiB
+work limits; `Limits.max_work_amplification` defaults to `None` and explicitly
+opts into relative work when set. See the
+[policy and arithmetic audit](validation/2026-09-11/streaming-input-bounds/POLICY.md)
+for accounting and source-position invariants.
 
 ## Native consumer tests
 
@@ -119,6 +153,16 @@ requires more than `XML_Parse`:
 | External entities | Child parser construction, callback return values, context, and parent lifetime |
 | Introspection | Error constants/strings, positions, version structure, feature list |
 | Integration | The `pyexpat` C capsule used by `_elementtree`, including identical callbacks and allocator ownership |
+
+The [current streaming consumer result](validation/2026-09-11/streaming-input-bounds/#cpython-consumer-checks)
+uses an allocation-failure cleanup backport in `Modules/pyexpat.c`, with unchanged
+upstream tests. Shared and static linkage each preserve all 802 method outcomes
+from the earlier unmodified-consumer control: the same two failures, three
+expected failures and 14 reported skip records. Those skips comprise five methods,
+eight subtests and one class setup. Both suites exit 2; they are not green suites.
+Four initial/fresh `pyexpat` and `_elementtree` origin records are checked per
+linkage. The report keeps the new patched consumer distinct from the earlier
+unmodified consumer and does not claim a full distribution build.
 
 The [upstream pyexpat tests](https://github.com/python/cpython/blob/v3.12.13/Lib/test/test_pyexpat.py)
 are one gate. ElementTree, SAX, minidom, and pulldom exercise separate consumers and

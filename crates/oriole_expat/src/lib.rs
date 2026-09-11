@@ -31,13 +31,17 @@ const ERROR: c_int = 0;
 const SUSPENDED: c_int = 2;
 const INVALID_ARGUMENT: c_int = 41;
 const UNEXPECTED_STATE: c_int = 23;
-const MAX_FAMILY_CALLBACK_BYTES: usize = 64 * 1024 * 1024;
+const INITIAL_CALLBACK_BYTES: usize = 64 * 1024 * 1024;
 const MAX_FAMILY_CHILDREN: usize = 1024;
 const MAX_EXTERNAL_DEPTH: usize = 32;
 const INPUT_CONTEXT_BYTES: usize = 1024;
+// Keep individual input requests bounded independently of document length.
+const MAX_INPUT_BYTES: usize = 256 * 1024 * 1024;
 
 #[derive(Default)]
 struct FamilyBudget {
+    // Checked cumulative statistic only; sibling input grants no source room or
+    // work credit. The core owns each source's length and consumed-root budget.
     input_bytes: Cell<usize>,
     callback_bytes: Cell<usize>,
     children: Cell<usize>,
@@ -298,8 +302,12 @@ unsafe fn create(
                 namespace_separator: separator,
                 name_rules: NameRules::FourthEdition,
                 // Iterative expansion supports Expat's deep-entity workloads.
-                // Shared byte, live-allocation and external-child caps still apply.
+                // Shared work, live-allocation and external-child bounds still apply.
                 limits: oriole::Limits {
+                    // The core also clamps source offsets to isize::MAX. Keep
+                    // individual requests and retained allocations independent.
+                    max_total_bytes: c_long::MAX as usize,
+                    max_work_amplification: Some(100),
                     max_entities: 100_000,
                     max_entity_depth: 100_000,
                     ..oriole::Limits::default()
@@ -682,7 +690,7 @@ unsafe fn dispatch(
         if !charge(
             &family.callback_bytes,
             callback_bytes + base_bytes,
-            MAX_FAMILY_CALLBACK_BYTES,
+            (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
         ) {
             fail_parse(parser, 43);
             return Ok(());
@@ -1181,7 +1189,7 @@ unsafe fn dispatch_start_frame(
         if !charge(
             &family.callback_bytes,
             frame.callback_bytes(),
-            MAX_FAMILY_CALLBACK_BYTES,
+            (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
         ) {
             fail_parse(parser, 43);
             return Ok(());
@@ -1234,7 +1242,7 @@ unsafe fn dispatch_text_frame(parser: XML_Parser, bytes: &[u8]) -> Result<(), Al
         if !charge(
             &family.callback_bytes,
             bytes.len(),
-            MAX_FAMILY_CALLBACK_BYTES,
+            (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
         ) {
             fail_parse(parser, 43);
             return Ok(());
@@ -1352,7 +1360,7 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterF
                             charge(
                                 &family.callback_bytes,
                                 name.len(),
-                                MAX_FAMILY_CALLBACK_BYTES,
+                                (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
                             )
                         };
                         if !charged {
@@ -1577,12 +1585,14 @@ pub unsafe extern "C" fn XML_Parse(
                 return ERROR;
             }
             (*parser).error = 0;
+            if len as usize > MAX_INPUT_BYTES
+                || len as usize > (*parser).core.input_bytes_remaining()
+            {
+                fail_parse(parser, 43);
+                return ERROR;
+            }
             let family = &(*parser).family;
-            if !charge(
-                &family.input_bytes,
-                len as usize,
-                (*parser).config.limits.max_total_bytes,
-            ) {
+            if !charge(&family.input_bytes, len as usize, usize::MAX) {
                 fail_parse(parser, 43);
                 return ERROR;
             }
@@ -1657,12 +1667,7 @@ pub unsafe extern "C" fn XML_GetBuffer(parser: XML_Parser, len: c_int) -> *mut c
                     return ptr::null_mut();
                 }
                 let len = len as usize;
-                let family = &(*parser).family;
-                let remaining = (*parser)
-                    .config
-                    .limits
-                    .max_total_bytes
-                    .saturating_sub(family.input_bytes.get());
+                let remaining = (*parser).core.input_bytes_remaining().min(MAX_INPUT_BYTES);
                 if len > remaining {
                     (*parser).error = 43;
                     return ptr::null_mut();

@@ -1,0 +1,69 @@
+{
+  "status": "passed",
+  "review_sha256": "6053e2f643552e1387c95f9da1dbfec7c312dab64809b683794cb5513ec10598",
+  "packages": {
+    "default-namespace-guard": {
+      "status": "passed",
+      "manifest_sha256": "7f020c48d005383e26ba5fea9ed66bab788d1b4d22c2759f95b83c2c3c0f0d96",
+      "archive_sha256": "f6523df9525a61b5fb1e156cc2e2c3c687d4929245fb8ab44e13fa3e23154f9b",
+      "readme_sha256": "1dba9bfb50a66d914107f39b3018cdf93af93f0e0192e5746c793829568f6057",
+      "relocated_receipt_sha256": "fef0f1b334debafaa2d7559a563111b4cb24a74daf350d12a7aad0bbbb6435b4",
+      "process": {
+        "returncode": 0,
+        "reaped": true,
+        "stdout_sha256": "542b217681b4ef039f0f41458ff2d2efd7a862068bde69108db9c29782da3d4f",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "logical_files_origin_exact": 188,
+      "unique_objects": 164,
+      "source_files": 72,
+      "exact_changed_files": [
+        "crates/oriole/src/lib.rs",
+        "crates/oriole/tests/adapter_frame.rs"
+      ],
+      "allocator_e1_unchanged": true,
+      "tests": 438,
+      "csv_rows": 56,
+      "csv_lf_only_and_all_ratios_exact": true,
+      "project_fixtures": 6,
+      "project_licenses_notices": 9,
+      "oriole_expat_notices": 5,
+      "worker_aliases": 1344,
+      "replayed_totals": {
+        "workers": 1344,
+        "samples": 212352
+      }
+    },
+    "cdata-prefilter": {
+      "status": "passed",
+      "manifest_sha256": "a902c4dca74608eca5731f1ff864d9ff069dc7804e55429eb26b5d351a7e9dfe",
+      "archive_sha256": "42ac6622d7fa1099e740e302ad62798f9735a92277d1626d0a0207608a431cf8",
+      "readme_sha256": "f84c21556db120d04904d5cff27b2014789011108251c6bfae044915b85d7b85",
+      "relocated_receipt_sha256": "7d5c9ee2cd202527db2ab9754e9ffdbd6bbaebd7a244ad12474d494d7a4093da",
+      "process": {
+        "returncode": 0,
+        "reaped": true,
+        "stdout_sha256": "fad65ce1d751062a991eafcc99c5f2234e3875c7edc31a3eb000f7988f8f54d3",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "logical_files_origin_exact": 184,
+      "unique_objects": 165,
+      "source_files": 72,
+      "exact_changed_files": [
+        "crates/oriole/src/lib.rs"
+      ],
+      "allocator_e1_unchanged": true,
+      "tests": 439,
+      "csv_rows": 56,
+      "csv_lf_only_and_all_ratios_exact": true,
+      "project_fixtures": 6,
+      "project_licenses_notices": 9,
+      "oriole_expat_notices": 5,
+      "worker_aliases": 1344,
+      "replayed_totals": {
+        "workers": 1344,
+        "samples": 212352
+      }
+    }
+  }
+}

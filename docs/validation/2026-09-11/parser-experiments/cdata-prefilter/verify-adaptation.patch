@@ -1,0 +1,41 @@
+--- /tmp/oriole-default-namespace-guard-publication/verify.py
++++ /tmp/oriole-cdata-prefilter-publication/verify.py
+@@ -1,4 +1,4 @@
+-"""Verify a relocated namespace-guard evidence package and replay saved native data.
++"""Verify a relocated CDATA-prefilter evidence package and replay saved native data.
+ 
+ No compiler, library or parser is loaded. Only the trusted, hash-bound Python
+ records-only reader is executed; archive members are never blindly extracted.
+@@ -84,8 +84,8 @@
+                  'notices/oriole/LICENSE-APACHE',
+                  'notices/oriole/LICENSE-MIT', 'notices/oriole/tests/c/UPSTREAM-NOTICES.txt'):
+         assert len(get(name)) > 0
+-    native = 'default-namespace-guard-native-study'
+-    audit = 'default-namespace-guard-independent-review/native'
++    native = 'cdata-prefilter-native-study'
++    audit = 'cdata-prefilter-independent-review/native'
+     containers = {(mode, name): json.loads(get(f'{native}/{mode}/native-screen/{name}.json'))
+                   for mode in ('normal', 'pgo') for name in ('preflight', 'results')}
+     alias_list = []
+@@ -112,10 +112,10 @@
+     assert sorted(alias_list) == sorted(json.loads(get(audit + '/worker-aliases.json'))['aliases'])
+     assert len(alias_list) == 1344
+ 
+-    source = json.loads(get('default-namespace-guard-pgo-study/source.json'))['source_sha256']
++    source = json.loads(get('cdata-prefilter-pgo-study/source.json'))['source_sha256']
+     assert len(source) == 72
+     source_seen = set()
+-    with tarfile.open(fileobj=io.BytesIO(get('default-namespace-guard-pgo-study/source.tar.gz')), mode='r:gz') as archive:
++    with tarfile.open(fileobj=io.BytesIO(get('cdata-prefilter-pgo-study/source.tar.gz')), mode='r:gz') as archive:
+         for member in archive:
+             assert member.isfile() and member.name in source and member.name not in source_seen
+             assert sha(archive.extractfile(member).read()) == source[member.name]
+@@ -140,7 +140,7 @@
+     report = json.loads((root / 'report.json').read_bytes())
+     assert report['archive_sha256'] == manifest['files']['evidence.tar.gz']['sha256']
+     assert report['archive_index_sha256'] == sha(index_data)
+-    assert report['source_manifest_sha256'] == sha(get('default-namespace-guard-pgo-study/source.json'))
++    assert report['source_manifest_sha256'] == sha(get('cdata-prefilter-pgo-study/source.json'))
+     assert report['logical_files'] == len(records) and report['unique_files'] == len(objects)
+     assert report['excluded_binaries_and_caches'] == len(index['excluded_binaries_and_caches'])
+     assert report['native_worker_aliases'] == len(alias_list)

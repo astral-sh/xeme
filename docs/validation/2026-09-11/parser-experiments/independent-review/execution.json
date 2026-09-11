@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "attempt": 1,
+  "cpu": 6,
+  "exec_session": 46588,
+  "exit_code": 0,
+  "reaped": true,
+  "review_sha256": "6053e2f643552e1387c95f9da1dbfec7c312dab64809b683794cb5513ec10598",
+  "reader_sha256": "ec7415d65130385ed3fe99a7822623a9204318e9bd43fc1278acf732e7fa4f39",
+  "stdout_sha256": "16c4adacd30aff1f3d4c9b70b5dd883ca8794b0421af9374b70f7fc2d90ee635",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "targets_executed": false,
+  "package_builder_executed": false,
+  "relocated_verifiers": [
+    "default-namespace-guard",
+    "cdata-prefilter"
+  ],
+  "scope": "Both verified under isolated pinned Python from fresh copied manifests/packages; exact stored-script reads plus independently checked source deltas, origins, CSV and full corpus notice identities. Namespace package/reader authorship is disclosed."
+}

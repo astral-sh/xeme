@@ -1,5 +1,6 @@
-The namespace_long_names fixture in integration.c is derived from
-Expat 2.8.4 tests/nsalloc_tests.c, test_nsalloc_long_element.
+The namespace_long_names and external_entity_long_default fixtures in
+integration.c are derived from Expat 2.8.4 tests/nsalloc_tests.c,
+test_nsalloc_long_element and test_nsalloc_long_default_in_ext, respectively.
 Upstream commit: 12cf0b1f25f026a022fe728ad8f7e3d017285b80
 
 nsalloc_tests.c

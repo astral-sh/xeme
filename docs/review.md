@@ -8,6 +8,8 @@ The [retained C frame experiment](validation/2026-09-11/retained-c-frame/) remai
 
 The [serialized entity-accounting experiment](validation/2026-09-11/serialized-accounting/) also remains rejected. Three checked non-atomic counters improve PGO native time by 1.34% and CPython time by 1.10%, but normal native time regresses by 4.48% across all 24 real-project conditions. Normal CPython time regresses by 3.22%, with 23 of 24 conditions adverse; generated native controls regress in both builds. The report retains all normal/PGO native and CPython measurements, unchanged allocation traces and complete compatibility outcomes; the suffix-sharing runtime remains selected.
 
+The [long inherited default regression](validation/2026-09-11/long-inherited-default/) checks every byte of a 1,024-byte default attribute delivered by an external general-entity child. All 12 chunking/deferral combinations pass with exact callback and allocation assertions against Expat and both Oriole linkages. It closes a missing value assertion in the earlier allocation-success probe without changing the parser runtime or original upstream API results.
+
 ## Review order
 
 | Area | Layers | Main questions |

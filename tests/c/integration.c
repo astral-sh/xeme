@@ -223,7 +223,7 @@ struct NestedEntities {
     int chunk, declarations, starts, ends, external_calls, created, completed, freed;
 };
 
-static void nested_entities_feed(XML_Parser parser, const char *text, int chunk) {
+static void parse_in_chunks(XML_Parser parser, const char *text, int chunk) {
     int remaining = (int)strlen(text);
     if (chunk > 0) {
         while (remaining > chunk) {
@@ -278,7 +278,7 @@ static int XMLCALL nested_entities_external(XML_Parser parent,
     assert(state->child);
     state->created++;
     /* The child inherits the parent's handlers, user data and deferral mode. */
-    nested_entities_feed(state->child, nested_entities_dtd, state->chunk);
+    parse_in_chunks(state->child, nested_entities_dtd, state->chunk);
     assert(state->declarations == 3);
     assert(XML_GetCurrentByteIndex(state->child) == (XML_Index)(sizeof(nested_entities_dtd) - 1));
     assert(XML_GetCurrentLineNumber(state->child) == 3);
@@ -312,13 +312,142 @@ static void nested_entities(void) {
             XML_SetExternalEntityRefHandler(state.root, nested_entities_external);
             XML_SetEntityDeclHandler(state.root, nested_entities_declaration);
             XML_SetElementHandler(state.root, nested_entities_start, nested_entities_end);
-            nested_entities_feed(state.root, nested_entities_root, chunk);
+            parse_in_chunks(state.root, nested_entities_root, chunk);
             assert(state.declarations == 3 && state.starts == 1 && state.ends == 1);
             assert(state.external_calls == 1 && state.created == 1);
             assert(state.completed == 1 && state.freed == 1 && !state.child);
             assert(XML_GetCurrentByteIndex(state.root) == (XML_Index)(sizeof(nested_entities_root) - 1));
             assert(XML_GetCurrentLineNumber(state.root) == 2);
             assert(XML_GetCurrentColumnNumber(state.root) == 7);
+            XML_ParserFree(state.root);
+            assert(allocations > allocations_before && allocations == frees);
+        }
+    }
+}
+
+/* Exact XML from Expat's test_nsalloc_long_default_in_ext; see
+ * UPSTREAM-NOTICES.txt. Check the inherited default's delivered value separately
+ * from the upstream test's allocation retry ceiling. */
+static const char long_default_root[]
+      = "<!DOCTYPE doc [\n"
+        "  <!ATTLIST e a1 CDATA '"
+        /* 64 characters per line */
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        "'>\n"
+        "  <!ENTITY x SYSTEM 'foo'>\n"
+        "]>\n"
+        "<doc>&x;</doc>";
+
+struct LongDefault {
+    XML_Parser root, child;
+    int chunk, root_starts, root_ends, child_starts, child_ends;
+    int external_calls, created, completed, freed;
+};
+
+static void XMLCALL long_default_start(void *data, const XML_Char *name,
+                                      const XML_Char **attributes) {
+    struct LongDefault *state = data;
+    assert(name && attributes);
+    if (state->child) {
+        assert(state->root_starts == 1 && state->root_ends == 0);
+        assert(state->created == 1 && state->completed == 0 && state->freed == 0);
+        assert(state->child_starts == 0 && state->child_ends == 0);
+        assert(strcmp(name, "e") == 0);
+        assert(attributes[0] && strcmp(attributes[0], "a1") == 0);
+        assert(attributes[1] && !attributes[2]);
+        assert(strlen(attributes[1]) == 1024);
+        /* Independent oracle: 64 repetitions of A through P, with no truncation. */
+        for (int i = 0; i < 1024; i++) assert(attributes[1][i] == 'A' + i % 16);
+        assert(XML_GetSpecifiedAttributeCount(state->child) == 0);
+        state->child_starts++;
+    } else {
+        assert(strcmp(name, "doc") == 0 && !attributes[0]);
+        assert(state->root_starts == 0 && state->root_ends == 0);
+        assert(state->external_calls == 0);
+        state->root_starts++;
+    }
+}
+
+static void XMLCALL long_default_end(void *data, const XML_Char *name) {
+    struct LongDefault *state = data;
+    assert(name);
+    if (state->child) {
+        assert(strcmp(name, "e") == 0);
+        assert(state->child_starts == 1 && state->child_ends == 0);
+        state->child_ends++;
+    } else {
+        assert(strcmp(name, "doc") == 0);
+        assert(state->root_starts == 1 && state->root_ends == 0);
+        assert(state->completed == 1 && state->freed == 1);
+        state->root_ends++;
+    }
+}
+
+static int XMLCALL long_default_external(XML_Parser parent,
+        const XML_Char *context, const XML_Char *base, const XML_Char *system,
+        const XML_Char *public_id) {
+    struct LongDefault *state = XML_GetUserData(parent);
+    assert(parent == state->root && !state->child && state->external_calls == 0);
+    assert(state->root_starts == 1 && state->root_ends == 0);
+    assert(context && !base && !public_id);
+    assert(system && strcmp(system, "foo") == 0);
+    state->external_calls++;
+    state->child = XML_ExternalEntityParserCreate(parent, context, NULL);
+    assert(state->child && XML_GetUserData(state->child) == state);
+    state->created++;
+    /* Keep inherited handlers, namespace mode, defaults and deferral settings. */
+    parse_in_chunks(state->child, "<e/>", state->chunk);
+    assert(state->child_starts == 1 && state->child_ends == 1);
+    state->completed++;
+    XML_ParserFree(state->child);
+    state->child = NULL;
+    state->freed++;
+    return XML_STATUS_OK;
+}
+
+static void external_entity_long_default(void) {
+    const XML_Char separator[] = " ";
+    XML_Memory_Handling_Suite memory = {custom_malloc, custom_realloc, custom_free};
+#if XML_MAJOR_VERSION > 2 || (XML_MAJOR_VERSION == 2 && XML_MINOR_VERSION >= 6)
+    const int deferral_modes = 2;
+#else
+    const int deferral_modes = 1;
+#endif
+    for (int chunk = 0; chunk <= 5; chunk++) {
+        for (int deferral = 0; deferral < deferral_modes; deferral++) {
+            struct LongDefault state = {0};
+            size_t allocations_before = allocations;
+            assert(allocations == frees);
+            state.chunk = chunk;
+            state.root = XML_ParserCreate_MM(NULL, &memory, separator);
+            assert(state.root);
+            XML_SetUserData(state.root, &state);
+            assert(XML_SetParamEntityParsing(state.root, XML_PARAM_ENTITY_PARSING_ALWAYS));
+#if XML_MAJOR_VERSION > 2 || (XML_MAJOR_VERSION == 2 && XML_MINOR_VERSION >= 6)
+            assert(XML_SetReparseDeferralEnabled(state.root, (XML_Bool)deferral));
+#endif
+            XML_SetElementHandler(state.root, long_default_start, long_default_end);
+            XML_SetExternalEntityRefHandler(state.root, long_default_external);
+            parse_in_chunks(state.root, long_default_root, chunk);
+            assert(state.root_starts == 1 && state.root_ends == 1);
+            assert(state.child_starts == 1 && state.child_ends == 1);
+            assert(state.external_calls == 1 && state.created == 1);
+            assert(state.completed == 1 && state.freed == 1 && !state.child);
             XML_ParserFree(state.root);
             assert(allocations > allocations_before && allocations == frees);
         }
@@ -549,6 +678,7 @@ int main(void) {
     handler_argument();
     custom_memory();
     namespace_long_names();
+    external_entity_long_default();
     nested_entities();
     nested_entities_phase_oom();
     failed_allocation();

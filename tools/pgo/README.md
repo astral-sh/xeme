@@ -22,6 +22,24 @@ uv run --offline tools/pgo/build.py \
 
 For an already installed alternate toolchain, add `--toolchain stable` or, for local development, `--toolchain ohm`. Production builds should use the project's normal toolchain. The script explicitly builds for that compiler's host target and rejects nonempty compiler-wrapper environment settings. It also explicitly disables wrappers supplied through Cargo configuration, so the recorded compiler is invoked directly. Existing Rust flags are retained using Cargo's encoded flag format, including arguments containing spaces; inherited PGO flags are rejected. Each command has a 30-minute timeout, configurable with `--command-timeout`.
 
+Both phases select `--lib --crate-type cdylib,staticlib` through Cargo's `rustc`
+command. This enables the release profile's ThinLTO step for the C artifacts while
+keeping `rlib` available in the manifest for Rust tests and consumers. Verbose build
+logs retain the actual compiler commands. A matching normal C build uses:
+
+```sh
+cargo rustc --release --locked --target YOUR_HOST_TARGET -p oriole_expat --lib --crate-type cdylib,staticlib
+```
+
+Global Cargo options can be repeated with `--cargo-arg=OPTION`, attaching any option
+value in the same argument. For local Ohm validation with its experimental defaults
+disabled, use `--toolchain ohm --cargo-arg=-Zohm-defaults=no`. These options are
+recorded and passed before Cargo's operation, separately from Rust compiler flags.
+Directory-changing options are rejected. Configuration overrides must use inline
+`--config=KEY=VALUE` syntax; additional configuration files are not accepted.
+Build logging uses one `--verbose`, retaining compiler commands and Cargo's normal
+dependency lint policy. The profile-warning rejection remains enabled.
+
 ## Outputs and provenance
 
 Every invocation creates a new `runs/run-*` directory with an empty raw-profile directory. The stable `targets/generate` and `targets/use` directories reuse ordinary Cargo build dependencies, while each run's unique profile paths force fresh instrumented and optimized compilation. Profiles are never reused across source or compiler changes.

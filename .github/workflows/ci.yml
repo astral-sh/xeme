@@ -64,7 +64,7 @@ jobs:
         with:
           toolchain: stable
       - run: sudo apt-get update && sudo apt-get install -y libexpat1-dev pkg-config
-      - run: cargo build --release --locked -p oriole_expat
+      - run: cargo rustc --release --locked -p oriole_expat --lib --crate-type cdylib,staticlib
       - name: Reference C consumer
         run: |
           cc -std=c11 -O2 -Wall -Wextra -Werror tests/c/integration.c $(pkg-config --cflags --libs expat) -o /tmp/reference-c
@@ -114,7 +114,7 @@ jobs:
           toolchain: stable
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
       - run: uv python install 3.12.13
-      - run: cargo build --release --locked -p oriole_expat
+      - run: cargo rustc --release --locked -p oriole_expat --lib --crate-type cdylib,staticlib
       - name: Run actual shared-library consumers
         if: matrix.linkage == 'shared'
         run: >-
@@ -172,6 +172,12 @@ jobs:
           ref: 3bb231a6a5dc02b95658877318bf61501a7209e9
           path: .cache/cpython
       - run: python3 integration/python-build-standalone/validate.py --pbs .cache/pbs --cpython .cache/cpython
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: stable
+          components: rust-docs
+      - name: Build the PBS static library bundle
+        run: python3 integration/python-build-standalone/prepare.py --output "$RUNNER_TEMP/oriole-pbs-bundle"
 
   pgo:
     name: Profile-guided library
@@ -188,7 +194,7 @@ jobs:
         run: |
           host=$(rustc -vV | sed -n 's/^host: //p')
           sysroot=$(rustc --print sysroot)
-          cargo build --release --locked --target "$host" -p oriole_expat
+          cargo rustc --release --locked --target "$host" -p oriole_expat --lib --crate-type cdylib,staticlib
           uv run --offline tools/pgo/build.py \
             --source "$GITHUB_WORKSPACE" \
             --output "$RUNNER_TEMP/oriole-pgo" \

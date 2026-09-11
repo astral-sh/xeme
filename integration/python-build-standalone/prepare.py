@@ -62,6 +62,8 @@ def main() -> None:
     cargo = ["cargo", *([f"+{args.toolchain}"] if args.toolchain else [])]
     rustc = ["rustc", *([f"+{args.toolchain}"] if args.toolchain else [])]
     env = dict(os.environ)
+    # Even an empty encoded value would override the required RUSTFLAGS below.
+    env.pop("CARGO_ENCODED_RUSTFLAGS", None)
     # CI may force ANSI colors; native-static-libs is machine-read below.
     env["CARGO_TERM_COLOR"] = "never"
     target_dir = Path(env.get("CARGO_TARGET_DIR", ROOT / "target" / "pbs")).resolve()
@@ -78,6 +80,10 @@ def main() -> None:
         TARGET,
         "-p",
         "oriole_expat",
+        "--lib",
+        "--crate-type",
+        "cdylib,staticlib",
+        "--verbose",
         "--",
         "--print=native-static-libs",
     ]

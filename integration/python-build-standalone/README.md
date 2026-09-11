@@ -27,6 +27,11 @@ use a new output directory when retrying.
 
 The script builds with position-independent code and unwinding enabled, captures
 `rustc --print=native-static-libs`, and rejects source changes during compilation.
+It uses Cargo's `rustc --lib --crate-type cdylib,staticlib` target override so the
+release profile's ThinLTO setting applies to the C artifacts. The manifest retains
+`rlib` for Rust tests; verbose build logs record the compiler's effective options.
+The recipe CI job also builds this bundle with stable Rust and its documentation
+component, exercising native-library extraction and the weak TLS-hook check.
 The bundle contains:
 
 - `libexpat.a`: Oriole's Rust static archive under the dependency's expected name.
@@ -127,7 +132,8 @@ native C integration and adversarial tests linked statically, and a shared-libra
 link of the complete archive. Commands and source hashes are retained in the
 bundle manifest. These checks passed on the development host.
 
-This checks clean patch application, Python compilation, shell syntax, the unchanged
+This checks the C-only archive command, clean patch application, Python compilation,
+shell syntax, the unchanged
 default path, native-linker propagation, target restrictions, and rejection of a
 mismatched header. Fixture checks do not compile a Python distribution.
 With `--cpython`, validation also runs the actual backport shell block against

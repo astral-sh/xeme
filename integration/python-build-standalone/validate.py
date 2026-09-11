@@ -22,6 +22,42 @@ DIRECTORY = Path(__file__).resolve().parent
 REVISION = "a4553880293fe9d1bb62747d34ab0e5121d3554f"
 
 
+def validate_archive_recipe() -> None:
+    """Check the production command without compiling or linking an archive."""
+    tree = ast.parse((DIRECTORY / "prepare.py").read_text())
+    command = next(
+        node.value
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "command"
+            for target in node.targets
+        )
+    )
+    for cargo in (["cargo"], ["cargo", "+ohm"]):
+        # Evaluate only the reviewed recipe's command-list expression.
+        arguments = eval(
+            compile(ast.Expression(command), "archive-command", "eval"),
+            {"cargo": cargo, "TARGET": "x86_64-unknown-linux-gnu"},
+        )
+        assert arguments[: len(cargo) + 1] == [*cargo, "rustc"]
+        separator = arguments.index("--")
+        cargo_arguments = arguments[:separator]
+        assert "--lib" in cargo_arguments
+        assert cargo_arguments[cargo_arguments.index("--crate-type") + 1] == (
+            "cdylib,staticlib"
+        )
+        assert "--locked" in cargo_arguments and "--release" in cargo_arguments
+        assert cargo_arguments[cargo_arguments.index("--target") + 1] == (
+            "x86_64-unknown-linux-gnu"
+        )
+        assert cargo_arguments[cargo_arguments.index("-p") + 1] == "oriole_expat"
+        assert arguments[separator + 1 :] == ["--print=native-static-libs"]
+    print(
+        "Archive recipe: C-only Cargo targets, release/locked host, native link flags."
+    )
+
+
 def validate_source_selection(checkout: Path, pbs: Path) -> dict:
     """Check the real download module and Make version generator in both modes."""
     original = json.loads((pbs / "pythonbuild/downloads.json").read_text())
@@ -125,6 +161,7 @@ def main() -> None:
         help="Verify the pinned download and apply the backport to its pyexpat source",
     )
     args = parser.parse_args()
+    validate_archive_recipe()
     with tempfile.TemporaryDirectory(prefix="oriole-pbs-validation-") as temporary:
         checkout = Path(temporary) / "pbs"
         checkout.mkdir()

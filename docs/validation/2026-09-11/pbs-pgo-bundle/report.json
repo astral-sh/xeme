@@ -14,7 +14,6 @@
     "sha256": "347b38d2378a7923ffdb0cbabdd14db5cf5a1b472c3f4ca7d717a6ba46b632e0"
   },
   "pending": [
-    "Stable-toolchain PGO PBS build and installed distribution/strict XML/identity/glibc validation",
     "Installed consumer performance for this produced PGO distribution"
   ],
   "pgo_static_archive_sha256": "2d1d5a592ec2debeadef526a45dc95d1adcc3e2b67c0e4b7ddad1c6878ede6e8",
@@ -27,7 +26,14 @@
   },
   "runtime_change": false,
   "runtime_scope": "Selected streaming Rust runtime unchanged; PR125 adds a C integration fixture and notice/docs after the local build.",
-  "status": "bridge and local validation passed; stable PGO PBS distribution pending",
+  "stable_pgo_distribution": {
+    "head": "c61b63476ce83b69814fd704b6c6710811e52a9c",
+    "path": "docs/validation/2026-09-11/pgo-trial-results/report.json",
+    "result": "Build/validator/installed identity/1024 threaded glibc 2.17 parses passed; workflow remains failed on the same two strict XML assertions as the normal baseline.",
+    "run": "https://github.com/astral-sh/oriole/actions/runs/34586223169",
+    "sha256": "d084a9e4f7da27444931adb47c4c98d2c427048e6689731b8cccc6defa600425"
+  },
+  "status": "Bridge, local validation and stable PGO distribution build passed; both strict XML gates retain the same two assertions.",
   "workflow": {
     "path": ".github/workflows/pbs.yml",
     "sha256": "74d9c24b6a31a79d0e51a401f90f0ebc2829509c35739ce798977247e25e8b51"

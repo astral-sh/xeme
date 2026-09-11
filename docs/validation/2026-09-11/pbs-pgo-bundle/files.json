@@ -3,8 +3,8 @@
   "files": [
     {
       "path": "README.md",
-      "bytes": 4572,
-      "sha256": "68bca3baeb26b43c3af1310c0415a17a71348398106dad5be5e3945ced3cacf9"
+      "bytes": 5078,
+      "sha256": "a469191801a0c33e47ce8ccc6ef6e24c57c4e6adbfba3c868bec1c4ecf47e28a"
     },
     {
       "path": "archive-root-review.json",
@@ -43,8 +43,8 @@
     },
     {
       "path": "report.json",
-      "bytes": 2618,
-      "sha256": "34b98dad5590a0983e6c3d361d78317febbf3a757c960e5a202ae434442b0656"
+      "bytes": 3063,
+      "sha256": "b6b527959998ca94399fa7a3b03301476e3b30c72b63550f36bc4f13b2261d6e"
     },
     {
       "path": "workflow-check-attempt01.py",

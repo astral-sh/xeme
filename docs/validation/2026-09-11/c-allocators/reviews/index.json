@@ -1,0 +1,10 @@
+{
+  "archive_sha256": "80046fc7764277274a53176a6c7050bec95bea646023b5f02adefcd458aca3e3",
+  "members": 23,
+  "full_member_readback": true,
+  "reviews": {
+    "source": "0028d3e8da086ba756da6c8314fcbf1b5961ef9459e7e661231dddeaffcdb34c",
+    "results": "a8be32770ca80ba832a24689f2513ac25af41c8c6cefe6b2351c9c554784fb94",
+    "package": "7b623f904020e5c7b524825407ae44ff8dfca26e5ab2b0886be101aa9783205b"
+  }
+}

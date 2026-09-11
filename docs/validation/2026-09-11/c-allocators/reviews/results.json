@@ -1,0 +1,384 @@
+{
+  "status": "independent_saved_allocator_results_passed",
+  "scope": "Complete saved native preflight/time and separate VmHWM raw records, commands, hashes, RNG schedules, sample medians, paired ratios/differences and aggregates. No producer import, parser/compiler/profiler/timing execution.",
+  "counts": {
+    "preflight_warmups": 224,
+    "preflight_parses": 224,
+    "preflight_workers": 224,
+    "elapsed_warmups": 1568,
+    "elapsed_parses": 281120,
+    "elapsed_workers": 1568,
+    "rss_warmups": 672,
+    "rss_parses": 120480,
+    "rss_workers": 672
+  },
+  "raw_files": 7392,
+  "elapsed_cohorts": 196,
+  "rss_cohorts": 84,
+  "elapsed_paired_ratios": 3136,
+  "rss_paired_ratios_and_differences": 1344,
+  "per_phase_condition_ratio_medians": 448,
+  "results": {
+    "elapsed": {
+      "real": {
+        "oriole_libc_over_oriole_ordinary": {
+          "geomean": 1.0026692683711873,
+          "lower_conditions": 6,
+          "higher_conditions": 18
+        },
+        "oriole_jemalloc_over_oriole_ordinary": {
+          "geomean": 0.9987486050568511,
+          "lower_conditions": 13,
+          "higher_conditions": 11
+        },
+        "oriole_mimalloc_over_oriole_ordinary": {
+          "geomean": 0.9997827670990737,
+          "lower_conditions": 17,
+          "higher_conditions": 7
+        },
+        "oriole_jemalloc_over_oriole_libc": {
+          "geomean": 0.9963471885374549,
+          "lower_conditions": 16,
+          "higher_conditions": 8
+        },
+        "oriole_mimalloc_over_oriole_libc": {
+          "geomean": 0.99870806742828,
+          "lower_conditions": 17,
+          "higher_conditions": 7
+        },
+        "oriole_mimalloc_over_oriole_jemalloc": {
+          "geomean": 1.002694531278799,
+          "lower_conditions": 15,
+          "higher_conditions": 9
+        },
+        "expat_libc_over_expat_ordinary": {
+          "geomean": 1.0026848681502867,
+          "lower_conditions": 7,
+          "higher_conditions": 17
+        },
+        "expat_jemalloc_over_expat_ordinary": {
+          "geomean": 0.9846150827333509,
+          "lower_conditions": 18,
+          "higher_conditions": 6
+        },
+        "expat_mimalloc_over_expat_ordinary": {
+          "geomean": 0.985885804707476,
+          "lower_conditions": 17,
+          "higher_conditions": 7
+        },
+        "expat_jemalloc_over_expat_libc": {
+          "geomean": 0.9822862938278701,
+          "lower_conditions": 19,
+          "higher_conditions": 5
+        },
+        "expat_mimalloc_over_expat_libc": {
+          "geomean": 0.9833786184268812,
+          "lower_conditions": 20,
+          "higher_conditions": 4
+        },
+        "expat_mimalloc_over_expat_jemalloc": {
+          "geomean": 1.0007861729097114,
+          "lower_conditions": 11,
+          "higher_conditions": 13
+        },
+        "oriole_ordinary_over_expat_ordinary": {
+          "geomean": 1.4285612622890105,
+          "lower_conditions": 3,
+          "higher_conditions": 21
+        },
+        "oriole_libc_over_expat_libc": {
+          "geomean": 1.4315772264772784,
+          "lower_conditions": 3,
+          "higher_conditions": 21
+        },
+        "oriole_jemalloc_over_expat_jemalloc": {
+          "geomean": 1.4461362180732704,
+          "lower_conditions": 3,
+          "higher_conditions": 21
+        },
+        "oriole_mimalloc_over_expat_mimalloc": {
+          "geomean": 1.4499221760020933,
+          "lower_conditions": 3,
+          "higher_conditions": 21
+        }
+      },
+      "generated": {
+        "oriole_libc_over_oriole_ordinary": {
+          "geomean": 1.0015369852368565,
+          "lower_conditions": 3,
+          "higher_conditions": 1
+        },
+        "oriole_jemalloc_over_oriole_ordinary": {
+          "geomean": 0.8851487597329366,
+          "lower_conditions": 4,
+          "higher_conditions": 0
+        },
+        "oriole_mimalloc_over_oriole_ordinary": {
+          "geomean": 0.8771549653257718,
+          "lower_conditions": 3,
+          "higher_conditions": 1
+        },
+        "oriole_jemalloc_over_oriole_libc": {
+          "geomean": 0.8934821798528634,
+          "lower_conditions": 2,
+          "higher_conditions": 2
+        },
+        "oriole_mimalloc_over_oriole_libc": {
+          "geomean": 0.8822180563904488,
+          "lower_conditions": 2,
+          "higher_conditions": 2
+        },
+        "oriole_mimalloc_over_oriole_jemalloc": {
+          "geomean": 0.9840549730957479,
+          "lower_conditions": 3,
+          "higher_conditions": 1
+        },
+        "expat_libc_over_expat_ordinary": {
+          "geomean": 0.9947779063381629,
+          "lower_conditions": 3,
+          "higher_conditions": 1
+        },
+        "expat_jemalloc_over_expat_ordinary": {
+          "geomean": 0.9709763956638898,
+          "lower_conditions": 4,
+          "higher_conditions": 0
+        },
+        "expat_mimalloc_over_expat_ordinary": {
+          "geomean": 0.9515368912252244,
+          "lower_conditions": 4,
+          "higher_conditions": 0
+        },
+        "expat_jemalloc_over_expat_libc": {
+          "geomean": 0.9727258040533413,
+          "lower_conditions": 3,
+          "higher_conditions": 1
+        },
+        "expat_mimalloc_over_expat_libc": {
+          "geomean": 0.954009774253017,
+          "lower_conditions": 3,
+          "higher_conditions": 1
+        },
+        "expat_mimalloc_over_expat_jemalloc": {
+          "geomean": 0.9791095627037695,
+          "lower_conditions": 4,
+          "higher_conditions": 0
+        },
+        "oriole_ordinary_over_expat_ordinary": {
+          "geomean": 5.075722425847275,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "oriole_libc_over_expat_libc": {
+          "geomean": 5.126787006032155,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "oriole_jemalloc_over_expat_jemalloc": {
+          "geomean": 4.65919997976859,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "oriole_mimalloc_over_expat_mimalloc": {
+          "geomean": 4.691064428826745,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        }
+      }
+    },
+    "rss": {
+      "real": {
+        "oriole_libc_over_oriole_ordinary": {
+          "geomean": 1.0010044841088266,
+          "lower_conditions": 7,
+          "higher_conditions": 10
+        },
+        "oriole_jemalloc_over_oriole_ordinary": {
+          "geomean": 1.030059672722582,
+          "lower_conditions": 0,
+          "higher_conditions": 24
+        },
+        "oriole_mimalloc_over_oriole_ordinary": {
+          "geomean": 1.733960082536654,
+          "lower_conditions": 0,
+          "higher_conditions": 24
+        },
+        "oriole_jemalloc_over_oriole_libc": {
+          "geomean": 1.028861749112469,
+          "lower_conditions": 2,
+          "higher_conditions": 21
+        },
+        "oriole_mimalloc_over_oriole_libc": {
+          "geomean": 1.7313386699874718,
+          "lower_conditions": 0,
+          "higher_conditions": 24
+        },
+        "oriole_mimalloc_over_oriole_jemalloc": {
+          "geomean": 1.6804999267894756,
+          "lower_conditions": 0,
+          "higher_conditions": 24
+        },
+        "expat_libc_over_expat_ordinary": {
+          "geomean": 1.0014488107668857,
+          "lower_conditions": 8,
+          "higher_conditions": 13
+        },
+        "expat_jemalloc_over_expat_ordinary": {
+          "geomean": 1.0124831221521735,
+          "lower_conditions": 4,
+          "higher_conditions": 20
+        },
+        "expat_mimalloc_over_expat_ordinary": {
+          "geomean": 1.6295643523015102,
+          "lower_conditions": 0,
+          "higher_conditions": 24
+        },
+        "expat_jemalloc_over_expat_libc": {
+          "geomean": 1.009409847174111,
+          "lower_conditions": 8,
+          "higher_conditions": 16
+        },
+        "expat_mimalloc_over_expat_libc": {
+          "geomean": 1.6253669744525545,
+          "lower_conditions": 0,
+          "higher_conditions": 24
+        },
+        "expat_mimalloc_over_expat_jemalloc": {
+          "geomean": 1.6105797327704419,
+          "lower_conditions": 0,
+          "higher_conditions": 24
+        },
+        "oriole_ordinary_over_expat_ordinary": {
+          "geomean": 1.2621436855686639,
+          "lower_conditions": 0,
+          "higher_conditions": 24
+        },
+        "oriole_libc_over_expat_libc": {
+          "geomean": 1.2580738646987624,
+          "lower_conditions": 0,
+          "higher_conditions": 24
+        },
+        "oriole_jemalloc_over_expat_jemalloc": {
+          "geomean": 1.2851982264112516,
+          "lower_conditions": 0,
+          "higher_conditions": 24
+        },
+        "oriole_mimalloc_over_expat_mimalloc": {
+          "geomean": 1.3419727668130015,
+          "lower_conditions": 0,
+          "higher_conditions": 24
+        }
+      },
+      "generated": {
+        "oriole_libc_over_oriole_ordinary": {
+          "geomean": 0.9930285612717646,
+          "lower_conditions": 3,
+          "higher_conditions": 0
+        },
+        "oriole_jemalloc_over_oriole_ordinary": {
+          "geomean": 1.1583210761297353,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "oriole_mimalloc_over_oriole_ordinary": {
+          "geomean": 1.7171441359472348,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "oriole_jemalloc_over_oriole_libc": {
+          "geomean": 1.1693737304347334,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "oriole_mimalloc_over_oriole_libc": {
+          "geomean": 1.7241640477678737,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "oriole_mimalloc_over_oriole_jemalloc": {
+          "geomean": 1.478421822534616,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "expat_libc_over_expat_ordinary": {
+          "geomean": 0.992136983183812,
+          "lower_conditions": 2,
+          "higher_conditions": 1
+        },
+        "expat_jemalloc_over_expat_ordinary": {
+          "geomean": 1.0547592177376832,
+          "lower_conditions": 1,
+          "higher_conditions": 3
+        },
+        "expat_mimalloc_over_expat_ordinary": {
+          "geomean": 2.0380908566011957,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "expat_jemalloc_over_expat_libc": {
+          "geomean": 1.0634896889806031,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "expat_mimalloc_over_expat_libc": {
+          "geomean": 2.056914175148881,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "expat_mimalloc_over_expat_jemalloc": {
+          "geomean": 1.9312600898678935,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "oriole_ordinary_over_expat_ordinary": {
+          "geomean": 1.5499996987738693,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "oriole_libc_over_expat_libc": {
+          "geomean": 1.5435234244734601,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "oriole_jemalloc_over_expat_jemalloc": {
+          "geomean": 1.694499468954856,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        },
+        "oriole_mimalloc_over_expat_mimalloc": {
+          "geomean": 1.2997979310473617,
+          "lower_conditions": 0,
+          "higher_conditions": 4
+        }
+      }
+    }
+  },
+  "nonempty_stderr_workers": {
+    "preflight": 0,
+    "elapsed": 0,
+    "rss": 0
+  },
+  "libraries": {
+    "oriole": {
+      "path": "/tmp/oriole-native-byte-count-pgo-study/pgo/runs/run-7_l2jvbd/use/liboriole_expat.so",
+      "sha256": "4f1518fc819bf4e8c92da914adea92acf2492cbf681de6324eeece8360186c02"
+    },
+    "expat": {
+      "path": "/tmp/oriole-pgo-study/expat-use-liboriole_expat.so",
+      "sha256": "12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0"
+    }
+  },
+  "elapsed_sha256": "d13210ad5df8ca6490e8db3c72ec4765bde9aa9586f5526e8d69d646b49ca3b1",
+  "rss_sha256": "1b00d51db62722db2d714cbdd4119fc0eb74e5428cf92d4fd3ac82887e23341c",
+  "producer_summary_sha256": "07abfa12aa5b663de0c3ddb5cde7a3ae5c42781ca2e57be234c69d1087ffac6c",
+  "limitations": [
+    "Native callback workloads only; no actual CPython allocator performance claim.",
+    "RSS is per-process absolute VmHWM after parse/free workload, including both static provider constructors, process/input/output/parser/measurement memory. Ratios of condition medians are not a group peak or isolated allocator resident bytes.",
+    "RSS seconds are retained and checked as raw samples but never enter elapsed aggregates. Elapsed has one discarded warmup; RSS runs the same warmup and original iteration workload.",
+    "Provider binding and ownership proof are separately reviewed; eight proof processes are not per-worker dladdr origin attestations.",
+    "Shared host and cross-CPU activity remain uncontrolled; near-one real Oriole elapsed ratios do not establish a useful gain or statistical significance.",
+    "Only named loader/provider environment controls are stripped; the full inherited environment is not recorded. Successful jobs do not independently exercise every process-cleanup branch."
+  ],
+  "checked_files": 7454,
+  "all_inspected_bytes_unchanged": true,
+  "blockers": []
+}

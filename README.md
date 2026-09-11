@@ -29,6 +29,8 @@ Inlining native source byte counts reduces elapsed time by 3.1% across the 24 na
 
 Optional [profile-guided builds](tools/pgo/) reduce current Oriole time by **24.8% natively and 15.5% through CPython**, improving every real-project condition. With both parsers trained, Oriole still takes **1.40× Expat's time natively and 1.15× through CPython**. Fat LTO alone adds little, and combining it with PGO regresses native time by 6.8%. The [current PGO/LTO study](benchmarks/results/2026-09-11/pgo-lto/) records matched builds, held-out project inputs and all adverse results.
 
+A separate [C allocator study](benchmarks/results/2026-09-11/c-allocators/) finds less than 0.2% aggregate real-project time change with jemalloc or mimalloc, alongside higher peak resident memory. The C allocator default remains unchanged.
+
 The [latest compatibility report](docs/validation/2026-09-11/native-byte-count/) records 407 workspace tests, one doc test, and **4,347 passing / 393 failing upstream API configurations**. Shared and static CPython each execute 802 tests with the same two text-grouping failures. Remaining allocation, resource, diagnostic, and callback differences are explicit in the [compatibility guide](docs/compatibility.md). Six [sustained ASan campaigns](docs/validation/2026-09-10/detached-frames-fuzz/) completed 14.62 million executions on `5bc806e` without findings; these precede the latest parser changes. The [PBS distribution report](docs/validation/2026-09-10/version-consistent-pbs/) applies to the earlier `4b11ace` runtime.
 
 The [Windows test portability supplement](docs/validation/2026-09-11/detached-end-windows-portability/) corrects an expected-value cast and verifies byte-identical C libraries.

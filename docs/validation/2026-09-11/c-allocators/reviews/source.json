@@ -1,0 +1,131 @@
+{
+  "status": "passed_with_provenance_limitations",
+  "scope": "Independent saved driver/provider API contract, source/build/failure lineage and proof-process audit. No parser/compiler/profiler/test/timing runs. Elapsed/RSS arithmetic belongs to the separate parent review.",
+  "audit_cpu": 4,
+  "findings": [],
+  "driver": {
+    "source_sha256": "729dc1a297776fcceb7439b3a416f8d0105d1a4c78560f1c4d8fb86b3a9d0583",
+    "binary_sha256": "982e7450aa5102e01d9ec3faa54615e2c9a76abdcbd9c540c7d5da2679076758",
+    "original_source_sha256": "3ee1dd4de79d12f8fed9224d5b1e88a3724ba7c2582b1b959c56ea4c5b1a6ee1",
+    "callback_and_timer_bytes_exact_except_constructor": true,
+    "static_suite_lifetime": true,
+    "process_interposition_absent_from_saved_symbols": true,
+    "dynamic_provider_functions": [
+      "mi_free",
+      "mi_malloc",
+      "mi_realloc",
+      "oriole_je_free",
+      "oriole_je_malloc",
+      "oriole_je_realloc"
+    ]
+  },
+  "providers": {
+    "jemalloc": {
+      "archive": "/tmp/oriole-explicit-mm-provider-proof/libjemalloc.a",
+      "sha256": "03102704b9d2bfbb1f81111293d7c5df4095ae9ec1f6c37ae08e9d4797500dbd",
+      "bytes": 42338956,
+      "required_symbols": [
+        "oriole_je_malloc",
+        "oriole_je_realloc",
+        "oriole_je_free",
+        "oriole_je_mallctl"
+      ],
+      "unprefixed_allocator_definitions": []
+    },
+    "mimalloc": {
+      "archive": "/tmp/oriole-explicit-mm-provider-proof/libmimalloc.a",
+      "sha256": "bcfb02ff1f059f9f31e3096ad8d32dcc2b8fdd32c4934a6a56b4affb47609721",
+      "bytes": 333334,
+      "required_symbols": [
+        "mi_malloc",
+        "mi_realloc",
+        "mi_free",
+        "mi_version"
+      ],
+      "unprefixed_allocator_definitions": []
+    }
+  },
+  "source_files": {
+    "oriole": 70,
+    "jemalloc": 467,
+    "mimalloc": 63
+  },
+  "provider_actual_compile_vectors": {
+    "jemalloc": 186,
+    "distinct_jemalloc_sources": 62,
+    "mimalloc": 1
+  },
+  "current_PGO_libraries": {
+    "oriole": {
+      "path": "/tmp/oriole-native-byte-count-pgo-study/pgo/runs/run-7_l2jvbd/use/liboriole_expat.so",
+      "sha256": "4f1518fc819bf4e8c92da914adea92acf2492cbf681de6324eeece8360186c02"
+    },
+    "expat": {
+      "path": "/tmp/oriole-pgo-study/expat-use-liboriole_expat.so",
+      "sha256": "12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0"
+    }
+  },
+  "PGO_replay": {
+    "phase": "/tmp/oriole-pgo-allocator-native-study/proof-replay",
+    "report_sha256": "d4cdcef85e9c0eed2216e900b41c48b3f723b45aef27b0fdea4a761e3102552e",
+    "processes": 8,
+    "trace_observations": 16,
+    "injections": 108,
+    "origin_rows": 88,
+    "load_assertions": 144,
+    "driver_sha256": "9cfa73b5652d1c706a50c384b0c5d11063737d1de662cf33268913357ec749a5"
+  },
+  "historical_proof_phases": [
+    {
+      "phase": "/tmp/oriole-explicit-mm-provider-proof/proof-attempt-02",
+      "report_sha256": "a8a49f7c32b358ba795a8ca1e7a623a31b2134e45a611e9a05d2e58480051552",
+      "processes": 8,
+      "trace_observations": 16,
+      "injections": 108,
+      "origin_rows": 88,
+      "load_assertions": 144,
+      "driver_sha256": "e6251bf3129d391962355f4df9af7835517094203f4515d7b2b4de0a72611f7e"
+    },
+    {
+      "phase": "/tmp/oriole-explicit-mm-provider-proof/proof-final",
+      "report_sha256": "b68cd4e8a89da3953962a1ed86c9c957e20024647d46b1a54259202448d3d176",
+      "processes": 8,
+      "trace_observations": 16,
+      "injections": 108,
+      "origin_rows": 88,
+      "load_assertions": 144,
+      "driver_sha256": "9cfa73b5652d1c706a50c384b0c5d11063737d1de662cf33268913357ec749a5"
+    }
+  ],
+  "contract": "Fixed per-process provider and static suites outlive all parser callbacks. Stack user-data remains live through synchronous parse/free. Nonzero realloc failure preserves old ownership. Content models are freed with live parser after reset; both child types are destroyed before parent. Direct growth/SIZE_MAX-failure/free(NULL) semantics and selected failure indices are recorded.",
+  "preserved_attempts": [
+    "Unexecuted parent-before-child draft; corrected before proof compile.",
+    "Initial jemalloc source execute-bit removal, configure diagnostics and failed build.",
+    "Mimalloc missing CMake helpers; unchanged vendored static.c recipe used afterward.",
+    "Strict-C write-result diagnostic failure before any proof processes.",
+    "Successful broader-export intermediate proof; final exact six-function exports.",
+    "Native driver comment correction with byte-identical binary.",
+    "Ambiguous Cargo.toml suffix source verifier failure before preflight; exact-member correction."
+  ],
+  "limitations": [
+    "The saved /etc/malloc.conf absence receipt does not attest the prefixed /etc/oriole_je_malloc.conf path actually read by this jemalloc build. Both are absent at review time only. Recorded selected options and stripped configuration environment are retained; complete historical default configuration is not established.",
+    "Zero-size allocation/reallocation behavior is outside this proof. The ledger rejects non-injected realloc size zero; it does not establish general zero-size equivalence.",
+    "Allocation failure injection covers one successful small fixture and its 20 Oriole / 16 Expat operation indices per explicit mode; it is not exhaustive parser OOM coverage.",
+    "Final zero ledger counts describe tracked explicit-suite blocks, not every process allocation. Ordinary mode bypasses the suite ledger.",
+    "18 entrypoint assertions per proof process are executed source checks with an aggregate count, while 11 origin rows per process are retained individually. These attest the instrumented proof executable, not separate timing-worker dladdr records.",
+    "Proof RSS is excluded from workload RSS. Both providers have startup constructors in the common native executable.",
+    "Native driver inherits the original Linux narrow-character ABI and callback/timer body; this audit establishes no cross-platform or concurrent proof-ledger guarantee.",
+    "Package origin/hash audit is separately sealed and hash-linked; historical build outputs are verified from saved commands/logs and current hashes, without reproducing the build."
+  ],
+  "reused_reviews": {
+    "/tmp/oriole-native-byte-count-pgo-build-independent-review/review.json": "cec78c70730e111f139a6fab70089e1629ffe3336843106585a35922a525bbc9",
+    "/tmp/oriole-current-pgo-expat-reuse-independent-review/review.json": "9a53fcddfa80a039da800284a3ebdbe7d83316fe83768ed1f4d7e4770b53b2d9",
+    "/tmp/oriole-pgo-allocator-package-independent-review/review.json": "7b623f904020e5c7b524825407ae44ff8dfca26e5ab2b0886be101aa9783205b"
+  },
+  "separate_package_archive_sha256": "0428afb9b64b99c077b84387e84232caf0f0c4af6bfafbb1accad3eff162278e",
+  "passed_checks": 6904,
+  "checked_files": 1352,
+  "all_inspected_bytes_unchanged": true,
+  "generator_sha256": "8679bf553cf1a199de4e756ed48803d0257d8cf00446f876e507c910defd500b",
+  "details_sha256": "55354012698df2a06e202fef162a20ec31ac746ec1c0c251d897cd3f9aac0b00"
+}

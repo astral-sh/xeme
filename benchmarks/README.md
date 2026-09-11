@@ -2,6 +2,7 @@
 
 See the [current native and consumer measurements](results/2026-09-11/native-byte-count/),
 [current PGO/LTO measurements](results/2026-09-11/pgo-lto/),
+[explicit C allocator measurements](results/2026-09-11/c-allocators/),
 [earlier full runtime measurements](results/2026-09-10/final-runtime/),
 [DTD runtime checkpoint](results/2026-09-10/dtd-checkpoint/),
 [earlier combined runtime measurements](results/2026-09-10/combined-runtime/),

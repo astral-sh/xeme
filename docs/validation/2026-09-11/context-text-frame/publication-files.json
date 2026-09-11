@@ -1,0 +1,121 @@
+{
+  "scope": "Final top-level files including source preparation and first assembly/readback receipts; excludes itself. files.json remains the portable verifier input manifest.",
+  "files": {
+    "PLAN.json": {
+      "sha256": "daa9abce10fb3c26323ba67bbe96fe5a12d5449e49d93f8d3b9c6c67f00714cf",
+      "bytes": 4840
+    },
+    "README-main-before.md": {
+      "sha256": "a6479c4bb36d007975ac5eb697b115cdf743c76f2c56220b6c4547868caa94e4",
+      "bytes": 6058
+    },
+    "README.draft.md": {
+      "sha256": "ad7dc26ea347105bfc01ebf03d64e6c370d6316d67dafd080ebb937b81a0ab9c",
+      "bytes": 2498
+    },
+    "README.md": {
+      "sha256": "7787648cace8992dbd6f326cc3d79731655be261ed59950fde1e81432f1a6c31",
+      "bytes": 8445
+    },
+    "allocator-reference-package.py": {
+      "sha256": "d805c147338976997dff60b6e9e753ce0bfb39bfd9aaf3644e37602df177243c",
+      "bytes": 9144
+    },
+    "allocator-reference-verify.py": {
+      "sha256": "caed92a4dd6b2bfa82011ae8fce6322a79218a63ae47a64c9c2e8fbfee344680",
+      "bytes": 8610
+    },
+    "archive-index.json": {
+      "sha256": "f07a5b5b9135d4481771a31242d0678c2eb4b841b67ab95997f22b308713ae0b",
+      "bytes": 2245025
+    },
+    "assemble-attempt01.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "assemble-attempt01.stdout": {
+      "sha256": "94bc3bfa520a3d0e0ba38c64f9fdd4646adab2fd306234478fbb4e9af85af9c0",
+      "bytes": 275
+    },
+    "conditions.csv": {
+      "sha256": "58b1edb66d28d5a1b12d2a2ac5a9c4db048c1fa6386587b6c4859c2ce6fdea2c",
+      "bytes": 5195
+    },
+    "evidence.tar.gz": {
+      "sha256": "7097c085fd7badfbcf10d6ba242197741067391160063c257039b50b5e83db1a",
+      "bytes": 8603412
+    },
+    "files.json": {
+      "sha256": "d056e3f93060bbfd1993176f29df1faa1b706d3d65481e7d8d26c33c97a85ae4",
+      "bytes": 1564
+    },
+    "native-readme-table.json": {
+      "sha256": "bf983c3c608266ac784c75117caafb3b6d573e2bd5a976e316689626e1ec0e48",
+      "bytes": 23084
+    },
+    "native-readme-table.md": {
+      "sha256": "ec259961e1028f66f67d5f16b3b5f0d20a0b34593ff7d90da3d47cad43eb96bb",
+      "bytes": 375
+    },
+    "package.py": {
+      "sha256": "3218d592de750e3a69d163578053c8a41abefc5b6b63de186adcf9ebdda01bf7",
+      "bytes": 11281
+    },
+    "package.py.adaptation.patch": {
+      "sha256": "60bdc5057bd617813e75c7e3c03bd47fcad9cbd17268b3a45449a4d3dd0b2a80",
+      "bytes": 13242
+    },
+    "packaging-attempt01.json": {
+      "sha256": "78277fe2574c657aa3f3fa35f30144e3df643f979d31d2531cd14ebfd0af372b",
+      "bytes": 1265
+    },
+    "preassembly-final.json": {
+      "sha256": "45993fb7d6a2257ad9b81aa988cbb2c09d3098b3a3b1e449698dfd686b40186f",
+      "bytes": 1404
+    },
+    "preparation-files.json": {
+      "sha256": "5a7000bcf9dff0943ad426f6cca0df1137249fcb4cdcfc384ab3fe68415d7724",
+      "bytes": 744
+    },
+    "prepare-final.py": {
+      "sha256": "df3c364b3157b4a87c7b53b283dc81e7fc934891142604c044823f3752fe5898",
+      "bytes": 11437
+    },
+    "recompute-native-readme.py": {
+      "sha256": "2404eec450e1bc3117845cbbce6a61df4ddf9b81d3626e3fe598b0b7f0850014",
+      "bytes": 3513
+    },
+    "replay_native.py": {
+      "sha256": "9c7c64326aa9e27243a8f29e10951a9a6ed0be2be7f6fbf61aa2daccc4882c92",
+      "bytes": 7062
+    },
+    "replay_python.py": {
+      "sha256": "889c52e0ff0387fc1977a75cfe3040022f6003c5fdf98eb132e4f89d8dbae1c8",
+      "bytes": 10342
+    },
+    "report.json": {
+      "sha256": "1f76b979be3f5ce91b587f5cb79a03bc24bcf4a7a0f73a93dbeee58fcf00b7f1",
+      "bytes": 25734
+    },
+    "verification-attempt01.json": {
+      "sha256": "7c7c8b87940a02051ee6f2a606256529535b34203e3b45be0d1445cc47888771",
+      "bytes": 25700
+    },
+    "verify-attempt01.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "verify-attempt01.stdout": {
+      "sha256": "9957b03d3597ca5874a668e86143ea64f0582c7577627d940c65c26be999f796",
+      "bytes": 279
+    },
+    "verify.py": {
+      "sha256": "357138b200ddf0ae8ebc0ff12d9b435b776a94ea02cc2b1b0174810a7cc420e8",
+      "bytes": 10902
+    },
+    "verify.py.adaptation.patch": {
+      "sha256": "32bea2078eb6cc5b3d99ff933feb4de47b2cfde8b814eed4d9b4cd02e1fb1c98",
+      "bytes": 6475
+    }
+  }
+}

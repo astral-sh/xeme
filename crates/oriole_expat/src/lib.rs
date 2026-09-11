@@ -12,10 +12,11 @@
 #![allow(non_snake_case, non_camel_case_types)]
 #![allow(clippy::missing_safety_doc)] // The common C ABI contract is documented above.
 
+use std::cell::Cell;
 use std::ffi::{CStr, c_char, c_int, c_long, c_ulong, c_void};
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::ptr;
-use std::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicPtr, Ordering};
 
 use oriole::{Config, ErrorKind, EventKind, NameRules, Parser, Position, RecyclingToken};
 use oriole_storage::{
@@ -37,17 +38,23 @@ const INPUT_CONTEXT_BYTES: usize = 1024;
 
 #[derive(Default)]
 struct FamilyBudget {
-    input_bytes: AtomicUsize,
-    callback_bytes: AtomicUsize,
-    children: AtomicUsize,
+    input_bytes: Cell<usize>,
+    callback_bytes: Cell<usize>,
+    children: Cell<usize>,
 }
 
-fn charge(counter: &AtomicUsize, amount: usize, limit: usize) -> bool {
-    counter
-        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
-            current.checked_add(amount).filter(|&next| next <= limit)
-        })
-        .is_ok()
+fn charge(counter: &Cell<usize>, amount: usize, limit: usize) -> bool {
+    // The C contract serializes the entire parser family. No callback or
+    // allocation can run between this counter read and its successful update.
+    let Some(next) = counter
+        .get()
+        .checked_add(amount)
+        .filter(|&next| next <= limit)
+    else {
+        return false;
+    };
+    counter.set(next);
+    true
 }
 
 pub type XML_Parser = *mut XML_ParserStruct;
@@ -669,7 +676,7 @@ unsafe fn dispatch(
         | EventKind::EndDoctype
         | EventKind::NotStandalone => 0,
     };
-    // SAFETY: The shared budget contains atomic counters and never invokes user code.
+    // SAFETY: Family access is serialized; charging never invokes user code.
     unsafe {
         let family = &(*parser).family;
         if !charge(
@@ -1619,7 +1626,7 @@ pub unsafe extern "C" fn XML_GetBuffer(parser: XML_Parser, len: c_int) -> *mut c
                     .config
                     .limits
                     .max_total_bytes
-                    .saturating_sub(family.input_bytes.load(Ordering::Relaxed));
+                    .saturating_sub(family.input_bytes.get());
                 if len > remaining {
                     (*parser).error = 43;
                     return ptr::null_mut();

@@ -714,6 +714,122 @@ fn external_dtd_construction_and_parsing_do_not_taint_parent() {
 }
 
 #[test]
+fn family_charge_preserves_zero_overflow_and_limit_boundaries() {
+    for (initial, amount, limit, success, final_value) in [
+        (0, 0, 0, true, 0),
+        (4, 0, 5, true, 4),
+        (5, 0, 5, true, 5),
+        (6, 0, 5, false, 6),
+        (4, 1, 5, true, 5),
+        (5, 1, 5, false, 5),
+        (usize::MAX, 0, usize::MAX, true, usize::MAX),
+        (usize::MAX, 1, usize::MAX, false, usize::MAX),
+        (usize::MAX - 1, 2, usize::MAX, false, usize::MAX - 1),
+    ] {
+        let counter = Cell::new(initial);
+        assert_eq!(
+            charge(&counter, amount, limit),
+            success,
+            "initial={initial}, amount={amount}, limit={limit}"
+        );
+        assert_eq!(counter.get(), final_value);
+    }
+}
+
+#[test]
+fn family_budgets_survive_child_failure_and_root_reset() {
+    // SAFETY: All handles and callback state stay live until cleanup. Counter
+    // changes happen between API calls, without borrowing a parser in a callback.
+    unsafe {
+        let counters = |parser: XML_Parser| {
+            let family = &(*parser).family;
+            (
+                family.input_bytes.get(),
+                family.callback_bytes.get(),
+                family.children.get(),
+            )
+        };
+        let mut state = State::default();
+        let parent = configured(&mut state);
+        let child = XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null());
+        let old_child = XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null());
+        assert!(!child.is_null());
+        assert!(!old_child.is_null());
+
+        // A valid child attempt consumes its slot even when allocation fails.
+        {
+            let family = &(*parent).family;
+            family.children.set(MAX_FAMILY_CHILDREN - 1);
+        }
+        let (live_bytes, direct_bytes) = {
+            let tracker = &(*parent).tracker;
+            (tracker.live_bytes(), tracker.direct_bytes())
+        };
+        assert!(live_bytes > 0);
+        assert_eq!(direct_bytes, 0);
+        assert_eq!(XML_SetAllocTrackerMaximumAmplification(parent, 1.0), 1);
+        assert_eq!(XML_SetAllocTrackerActivationThreshold(parent, 0), 1);
+        assert!(XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null()).is_null());
+        assert_eq!(counters(parent).2, MAX_FAMILY_CHILDREN);
+        {
+            let tracker = &(*parent).tracker;
+            assert_eq!(tracker.live_bytes(), live_bytes);
+        }
+        assert_eq!(
+            XML_SetAllocTrackerMaximumAmplification(
+                parent,
+                oriole_storage::MAXIMUM_AMPLIFICATION_DEFAULT
+            ),
+            1
+        );
+        assert_eq!(
+            XML_SetAllocTrackerActivationThreshold(
+                parent,
+                oriole_storage::ACTIVATION_THRESHOLD_DEFAULT
+            ),
+            1
+        );
+        assert!(XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null()).is_null());
+        assert_eq!(XML_GetErrorCode(parent), 43);
+        assert_eq!(counters(parent).2, MAX_FAMILY_CHILDREN);
+
+        {
+            let family = &(*parent).family;
+            family.callback_bytes.set(MAX_FAMILY_CALLBACK_BYTES - 2);
+        }
+        assert_eq!(XML_Parse(child, c"a".as_ptr(), 1, 1), OK);
+        assert_eq!(XML_Parse(parent, c"<r/>".as_ptr(), 4, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(parent), 43);
+        assert_eq!(state.events, ["text:a", "start:r"]);
+        for parser in [parent, child, old_child] {
+            assert_eq!(
+                counters(parser),
+                (5, MAX_FAMILY_CALLBACK_BYTES, MAX_FAMILY_CHILDREN)
+            );
+        }
+
+        assert_eq!(XML_ParserReset(parent, ptr::null()), 1);
+        assert_eq!(counters(parent), (0, 0, 0));
+        assert_eq!(XML_Parse(old_child, c"b".as_ptr(), 1, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(old_child), 43);
+        assert_eq!(
+            counters(old_child),
+            (6, MAX_FAMILY_CALLBACK_BYTES, MAX_FAMILY_CHILDREN)
+        );
+        assert_eq!(state.events, ["text:a", "start:r"]);
+
+        XML_SetUserData(parent, ptr::from_mut(&mut state).cast());
+        XML_SetElementHandler(parent, Some(start), Some(end));
+        assert_eq!(XML_Parse(parent, c"<r/>".as_ptr(), 4, 1), OK);
+        assert_eq!(counters(parent), (4, 2, 0));
+        assert_eq!(state.events, ["text:a", "start:r", "start:r", "end:r"]);
+        XML_ParserFree(old_child);
+        XML_ParserFree(child);
+        XML_ParserFree(parent);
+    }
+}
+
+#[test]
 fn external_children_share_input_and_construction_budgets() {
     // SAFETY: Limits are lowered directly in this internal test to avoid large allocations.
     unsafe {
@@ -727,9 +843,7 @@ fn external_children_share_input_and_construction_budgets() {
         XML_ParserFree(child);
         assert_eq!(XML_ParserReset(parent, ptr::null()), 1);
         let family = &(*parent).family;
-        family
-            .children
-            .store(MAX_FAMILY_CHILDREN, Ordering::Relaxed);
+        family.children.set(MAX_FAMILY_CHILDREN);
         assert!(XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null()).is_null());
         assert_eq!(XML_GetErrorCode(parent), 43);
         XML_ParserFree(parent);
@@ -1300,7 +1414,7 @@ fn default_whitespace_counts_toward_the_shared_event_budget() {
             let family = &(*parser).family;
             family
                 .callback_bytes
-                .store(MAX_FAMILY_CALLBACK_BYTES - remaining, Ordering::Relaxed);
+                .set(MAX_FAMILY_CALLBACK_BYTES - remaining);
             let status = XML_Parse(parser, c"  ".as_ptr(), 2, 0);
             if remaining == 1 {
                 assert_eq!(status, ERROR);
@@ -1346,7 +1460,7 @@ fn arena_start_enforces_exact_callback_budget_with_default_fallback() {
                 let family = &(*parser).family;
                 family
                     .callback_bytes
-                    .store(MAX_FAMILY_CALLBACK_BYTES - remaining, Ordering::Relaxed);
+                    .set(MAX_FAMILY_CALLBACK_BYTES - remaining);
                 (*parser).busy = true;
                 dispatch_start_frame(parser, &frame).unwrap();
                 (*parser).busy = false;
@@ -1354,10 +1468,7 @@ fn arena_start_enforces_exact_callback_budget_with_default_fallback() {
                 if remaining == 2 {
                     assert_eq!(XML_GetErrorCode(parser), 43);
                     assert!(state.events.is_empty());
-                    assert_eq!(
-                        family.callback_bytes.load(Ordering::Relaxed),
-                        MAX_FAMILY_CALLBACK_BYTES - 2
-                    );
+                    assert_eq!(family.callback_bytes.get(), MAX_FAMILY_CALLBACK_BYTES - 2);
                 } else {
                     assert_eq!(XML_GetErrorCode(parser), 0);
                     if start_handler {
@@ -1365,10 +1476,7 @@ fn arena_start_enforces_exact_callback_budget_with_default_fallback() {
                     } else {
                         assert_eq!(state.events, ["text:<n a='v'>"]);
                     }
-                    assert_eq!(
-                        family.callback_bytes.load(Ordering::Relaxed),
-                        MAX_FAMILY_CALLBACK_BYTES
-                    );
+                    assert_eq!(family.callback_bytes.get(), MAX_FAMILY_CALLBACK_BYTES);
                 }
                 (*parser).core.finish_adapter_frame(frame);
                 XML_ParserFree(parser);
@@ -1484,7 +1592,7 @@ fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
                     let family = &(*parser).family;
                     family
                         .callback_bytes
-                        .store(MAX_FAMILY_CALLBACK_BYTES - remaining, Ordering::Relaxed);
+                        .set(MAX_FAMILY_CALLBACK_BYTES - remaining);
                     (*parser).core.feed(b"<r/>", true).unwrap();
                     let (_, recycling) =
                         (*parser).core.next_event_for_recycling().unwrap().unwrap();
@@ -1498,7 +1606,7 @@ fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
                     );
                     let family = &(*parser).family;
                     assert_eq!(
-                        family.callback_bytes.load(Ordering::Relaxed),
+                        family.callback_bytes.get(),
                         if remaining < bytes {
                             MAX_FAMILY_CALLBACK_BYTES - remaining
                         } else {
@@ -3987,7 +4095,7 @@ fn unused_ordinary_attlist_payloads_do_not_consume_adapter_event_bytes() {
                 OK
             );
             let family = &(*parser).family;
-            totals[index] = family.callback_bytes.load(Ordering::Relaxed);
+            totals[index] = family.callback_bytes.get();
             XML_ParserFree(parser);
         }
         assert_eq!(totals[1] - totals[0], 2 * (1 + 1 + 5 + 1));
@@ -3999,7 +4107,7 @@ fn unused_ordinary_attlist_payloads_do_not_consume_adapter_event_bytes() {
             let family = &(*parser).family;
             family
                 .callback_bytes
-                .store(MAX_FAMILY_CALLBACK_BYTES - remaining, Ordering::Relaxed);
+                .set(MAX_FAMILY_CALLBACK_BYTES - remaining);
             let status = XML_Parse(parser, xml.as_ptr().cast(), xml.len() as c_int, 1);
             assert_eq!(status, if remaining == totals[0] { OK } else { ERROR });
             assert_eq!(XML_GetErrorCode(parser), if status == OK { 0 } else { 43 });
@@ -4157,7 +4265,7 @@ fn arena_text_enforces_exact_callback_budget_with_default_fallback() {
                     let family = &(*parser).family;
                     family
                         .callback_bytes
-                        .store(MAX_FAMILY_CALLBACK_BYTES - remaining, Ordering::Relaxed);
+                        .set(MAX_FAMILY_CALLBACK_BYTES - remaining);
                     (*parser).busy = true;
                     dispatch_text_frame(parser, frame.text_bytes().unwrap()).unwrap();
                     (*parser).busy = false;

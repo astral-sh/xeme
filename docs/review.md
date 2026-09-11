@@ -10,6 +10,8 @@ The [serialized entity-accounting experiment](validation/2026-09-11/serialized-a
 
 The [long inherited default regression](validation/2026-09-11/long-inherited-default/) checks every byte of a 1,024-byte default attribute delivered by an external general-entity child. All 12 chunking/deferral combinations pass with exact callback and allocation assertions against Expat and both Oriole linkages. It closes a missing value assertion in the earlier allocation-success probe without changing the parser runtime or original upstream API results.
 
+The [private start-tag cache experiment](validation/2026-09-11/start-tag-cache/) remains rejected. Its ordinary release build regresses by 1.16% across real-project native conditions, with 17 of 24 conditions adverse, and adds 48 bytes to the parser and C handle plus a lazy heap cache. The report retains all 28 measured conditions and clearly marks the downstream PGO, compatibility and CPython campaigns as unexecuted; the suffix-sharing runtime remains selected.
+
 ## Review order
 
 | Area | Layers | Main questions |

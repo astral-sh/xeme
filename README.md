@@ -16,20 +16,20 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole | Expat | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 55.779 ms | 28.985 ms | 1.93× |
-| Wayland protocol | 1.259 ms | 1.074 ms | 1.17× |
-| Maven POM | 0.944 ms | 0.448 ms | 2.13× |
-| Batik SVG | 0.133 ms | 0.134 ms | 0.99× |
-| GTK UI | 0.412 ms | 0.213 ms | 1.93× |
-| DocBook XSL | 0.282 ms | 0.187 ms | 1.53× |
+| Vulkan registry | 52.248 ms | 29.862 ms | 1.74× |
+| Wayland protocol | 1.233 ms | 1.078 ms | 1.15× |
+| Maven POM | 0.850 ms | 0.443 ms | 1.91× |
+| Batik SVG | 0.134 ms | 0.134 ms | 1.00× |
+| GTK UI | 0.387 ms | 0.213 ms | 1.83× |
+| DocBook XSL | 0.274 ms | 0.185 ms | 1.47× |
 
-These [native measurements](benchmarks/results/2026-09-11/family-budget-cells/) use original XML from six pinned projects, Expat 2.8.4, 4 KiB chunks, and namespaces disabled on a shared Linux AMD EPYC-Milan host. Times are medians of process medians; ratios are medians of paired ratios.
+These [native measurements](benchmarks/results/2026-09-11/detached-end-frames/) use original XML from six pinned projects, Expat 2.8.4, 4 KiB chunks, and namespaces disabled on a shared Linux AMD EPYC-Milan host. Times are medians of process medians; ratios are medians of paired ratios.
 
-Using cells for the C interface's serialized family counters reduces elapsed time by 0.9% across the 24 native project conditions; actual CPython time is effectively unchanged. Both Oriole builds use effective ThinLTO. Oriole still takes 1.71× Expat's time natively and 1.31× through CPython. One Batik native condition and three Wayland CPython conditions are faster than Expat in this measurement; the native Batik and Wayland ElementTree margins are only 1.36% and 0.91% on a shared host. The [full report](docs/validation/2026-09-11/family-budget-cells/) retains all conditions, samples and regressions.
+Detaching matched closing-tag names into callback frames reduces elapsed time by 4.0% across the 24 native project conditions and 2.1% through CPython. Both Oriole builds use effective ThinLTO. Oriole still takes 1.64× Expat's time natively and 1.29× through CPython; three Wayland CPython conditions are faster than Expat in this measurement. Generated controls regress by 2.5% overall, with entity input regressing by 3.3–6.2%. The [full report](docs/validation/2026-09-11/detached-end-frames/) retains all conditions, samples and regressions.
 
 Optional [profile-guided builds](tools/pgo/) are available. The [earlier PGO results](benchmarks/results/2026-09-10/version-consistent-pgo/) measure `4b11ace`; they do not measure these new parser changes.
 
-The [latest compatibility report](docs/validation/2026-09-11/family-budget-cells/) records 400 workspace tests, one doc test, and **4,347 passing / 393 failing upstream API configurations**. Shared and static CPython each execute 802 tests with the same two text-grouping failures. Remaining allocation, resource, diagnostic, and callback differences are explicit in the [compatibility guide](docs/compatibility.md). Six [sustained ASan campaigns](docs/validation/2026-09-10/detached-frames-fuzz/) completed 14.62 million executions on `5bc806e` without findings; these precede the latest parser changes. The [PBS distribution report](docs/validation/2026-09-10/version-consistent-pbs/) applies to the earlier `4b11ace` runtime.
+The [latest compatibility report](docs/validation/2026-09-11/detached-end-frames/) records 407 workspace tests, one doc test, and **4,347 passing / 393 failing upstream API configurations**. Shared and static CPython each execute 802 tests with the same two text-grouping failures. Remaining allocation, resource, diagnostic, and callback differences are explicit in the [compatibility guide](docs/compatibility.md). Six [sustained ASan campaigns](docs/validation/2026-09-10/detached-frames-fuzz/) completed 14.62 million executions on `5bc806e` without findings; these precede the latest parser changes. The [PBS distribution report](docs/validation/2026-09-10/version-consistent-pbs/) applies to the earlier `4b11ace` runtime.
 
 ## Installation
 

@@ -1,0 +1,137 @@
+{
+  "status": "workspace_checks_passed",
+  "scope": "Author-executed normal release-profile workspace gates and saved-data self-check. End implementation/test author performed this inventory audit; independent source/build and C-gate reviews remain separate. No transfer of normal test binaries to C-only ThinLTO artifacts is claimed.",
+  "source_manifest_sha256": "344730269a59a8402d3e18e5eed170982d2c44acfe6fc3d869f2acc166f149df",
+  "source_files": 70,
+  "source_unchanged": true,
+  "frozen_C_only_libraries_unchanged": true,
+  "frozen_libraries": {
+    "liboriole_expat.so": "02fcab59f6e3818c128da6706d67987ae7450dd8b59e97cd28ce497a547f28f5",
+    "liboriole_expat.a": "69ebed414946cbaef1a940c052a636be277c809902943d676e824deab45d22d5"
+  },
+  "profile": "release --workspace --all-targets --no-fail-fast; separate release --workspace --doc; strict release workspace Clippy and formatting",
+  "affinity": [
+    6
+  ],
+  "timeout_seconds_each": 900,
+  "commands": [
+    {
+      "label": "tests",
+      "exit": 0,
+      "elapsed_seconds": 423.3116376399994,
+      "log_sha256": "12515000b9954ba047a0fc7381cb1f317e3599bc58d8d03649b97d61164577c8"
+    },
+    {
+      "label": "doc-tests",
+      "exit": 0,
+      "elapsed_seconds": 1.001326084136963,
+      "log_sha256": "962de7b74e98ee2f426a4c061ce3fc32da5c6b14061fdf25395339075aacc14a"
+    },
+    {
+      "label": "clippy",
+      "exit": 0,
+      "elapsed_seconds": 7.669536352157593,
+      "log_sha256": "ab7cf64ce5d8fda3d96edd56a9326fb8d9738fa7f8214e042ba75bb40f84293e"
+    },
+    {
+      "label": "fmt",
+      "exit": 0,
+      "elapsed_seconds": 0.5221142768859863,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "all_target_passed": 407,
+  "all_target_inventory_rows": 33,
+  "doc_passed": 1,
+  "baseline_passed": 400,
+  "exact_new_test_count": 7,
+  "changed_target_inventories": [
+    {
+      "target": [
+        "oriole",
+        "unittests src/lib.rs"
+      ],
+      "before": 56,
+      "after": 57,
+      "added": [
+        "arena::tests::detached_end_keeps_the_warmed_start_arena_and_oversized_owner_separate"
+      ]
+    },
+    {
+      "target": [
+        "adapter_frame",
+        "tests/adapter_frame.rs"
+      ],
+      "before": 8,
+      "after": 10,
+      "added": [
+        "detached_end_frames_keep_native_and_namespace_undo_boundaries",
+        "detached_end_frames_recheck_child_publication_and_generation"
+      ]
+    },
+    {
+      "target": [
+        "allocation",
+        "tests/allocation.rs"
+      ],
+      "before": 9,
+      "after": 10,
+      "added": [
+        "detached_end_names_reuse_selected_storage_without_new_allocations"
+      ]
+    },
+    {
+      "target": [
+        "oriole_expat",
+        "unittests src/lib.rs"
+      ],
+      "before": 90,
+      "after": 92,
+      "added": [
+        "tests::detached_end_charges_the_name_before_handlers_or_default_fallback",
+        "tests::detached_end_owner_survives_default_current_children_stop_and_reset_rejection"
+      ]
+    },
+    {
+      "target": [
+        "memory",
+        "tests/memory.rs"
+      ],
+      "before": 2,
+      "after": 3,
+      "added": [
+        "detached_end_uses_the_selected_owner_and_default_failure_stays_terminal"
+      ]
+    }
+  ],
+  "no_baseline_test_removals": true,
+  "initial_attempt": {
+    "path": "/tmp/oriole-end-frame-cells-workspace-gates",
+    "report_sha256": "9e03fb668002e839f190240aae743245db90fee15196efd42ddadfc6df9c9471",
+    "all_target_tests_executed": 0,
+    "failure": "Two E0599 test-only uses of atomic store/load after Cell composition; tests/Clippy compilation failed. Initial doc1/fmt passed.",
+    "exits": [
+      101,
+      0,
+      101,
+      0
+    ]
+  },
+  "test_only_fix": {
+    "source_before_sha256": "e7eb4e525a8ae2e06889888aa4c855bc41ad830d08fd716296a1ccd0d4b9154f",
+    "source_after_sha256": "344730269a59a8402d3e18e5eed170982d2c44acfe6fc3d869f2acc166f149df",
+    "patch_sha256": "1008764ceb0c8eb5c77aab076d80d47fb1278f086471a938aac2dc9a46062ba7",
+    "scope": "Exactly .store(value,Relaxed)\u2192.set(value), .load(Relaxed)\u2192.get(); assertions/fixtures and other69files unchanged."
+  },
+  "root_C_only_rebuild": {
+    "report_sha256": "e02c14c57c413e0e6431eb371ac87109d5f0460ed615ddb65461e39ececb7c55",
+    "three_fresh_workspace_compiles": 3,
+    "same_bytes_as_measured": true
+  },
+  "report_sha256": "1566ae8b681300da8b87206da3e5a7dd1467b8f8ec4d2519c568c4f2716efc46",
+  "counts_sha256": "5fb2728fb0d0bd81ccab161e1c5f38e94a61e33d881d04a7701f1ea0fae117c0",
+  "controller_session": 72655,
+  "controller_exit": 0,
+  "count_session": 83168,
+  "count_exit": 0
+}

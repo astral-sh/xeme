@@ -1,0 +1,36 @@
+{
+  "status": "source_review_no_blocker",
+  "scope": "Independent root source/ownership/phase review; no new compiler, parser or timing execution.",
+  "base": "89927e09a6a9f1576ee05e3cf757e2b4159d5d36",
+  "source_files": 70,
+  "changed_files": [
+    "crates/oriole/examples/frame_coverage.rs",
+    "crates/oriole/src/arena.rs",
+    "crates/oriole/src/lib.rs",
+    "crates/oriole/src/recycling.rs",
+    "crates/oriole/tests/adapter_frame.rs",
+    "crates/oriole/tests/allocation.rs",
+    "crates/oriole_expat/src/lib.rs",
+    "crates/oriole_expat/src/tests.rs",
+    "crates/oriole_expat/tests/memory.rs"
+  ],
+  "source_manifest_sha256": "f261b87e333f393135162fcd584c4ae6dd955895ea8cac2ff1efe4b945010a63",
+  "patch_sha256": "fdab377f5efc0f814cf1479c36e7934ec1b8315af2136943737e941c92727d57",
+  "all_live_archive_and_git_delta_exact": true,
+  "findings": [],
+  "reasoning": [
+    "The existing matching_root_end_tag proof requires one native UTF-8 root source without conversion/fragment/raw-encoding metadata, an already validated opening name, an immediate matching closing delimiter, and the existing token bound. New guards additionally exclude seen DOCTYPE, foreign DTD, shared tables and any namespace bindings to restore. Empty tags remain in start parsing and queue their End events.",
+    "Only an accepted caller frame reaches this path. Pending events are drained before parsing and an active frame returns immediately. Popping the matched Element transfers expanded_name.unwrap_or(raw_name), preserving eager unused raw-owner destruction, and updates closed_root at the same phase. It does not clone, expand a name, change URI work, or restore namespaces.",
+    "The End owner is a separate Payload variant; it never replaces the retained Start/Text byte arena. clear drops an unconsumed owner, finish drops remaining fields before releasing the generation token, and take_end_name consumes the active delivery while retaining position/callback metadata. Oversized active names retain the existing recycling caps.",
+    "Account-source, position and token-copy work precede detachment. Raw-token publication and source consumption precede End frame publication. Under the narrow native proof, raw publication only swaps owners and the second accounting call charges zero, leaving no new fallible work after staging the End owner. This proof does not apply to converted or namespace-undo paths, which remain queued.",
+    "FFI dispatch takes the String into a local owner, snapshots the End callback and argument, and ends its family borrow before charging failure handling or callbacks. It charges the original name length even without a handler, checks/extends the C terminator only for an installed handler, invokes the callback, recycles, then performs no-handler raw Default fallback. Budget/NUL/allocation errors drop the local owner. No core or frame slice borrow crosses the callback.",
+    "The change adds no runtime unsafe block or unsafe trait implementation. Parser busy/lifetime protection, callback error handling, stop/resume and generation checks are unchanged. The public owned Event path uses the existing queue.",
+    "Test adapters/examples now distinguish End before Text/Start. New checks cover every input chunk on UTF-8/UTF-16 and namespace-undo boundaries, DTD publication/generation fallback, two proven warmed Start arenas, long names, selected-allocation failure sweeps and no-per-End-allocation, exact callback budget limits, no-handler/default handling, nested DefaultCurrent/child/handler mutation/stop and rejected reset/free, and terminal raw-default allocation failure."
+  ],
+  "limitations": [
+    "This source review does not establish elapsed performance or full compatibility. AdapterFrame grows 208 to 256 bytes; fixed controls must measure the additional 48-byte frame cost.",
+    "Removing a real PendingEvent allocation may change OOM indices. Exact allocation-index identity is not asserted and no fake allocation is introduced.",
+    "The old six End OOM fixtures are namespace-restoration fallbacks. The new selected tests cover eligible delivery; full End lifecycle, strict traces, custom encodings and upstream gates remain separate subsequent work.",
+    "Prototype remains based on89927/a55; it is not composed with the selected Cell runtime."
+  ]
+}

@@ -2436,6 +2436,16 @@ impl Parser {
             && self.source().native_utf8_byte_index().is_some())
         .then(|| text::TextPlan::scan(text))
         .flatten();
+        let text_plan = if !coalesce {
+            (!self.fragment
+                && !internal
+                && !self.source().has_conversions()
+                && self.source().native_utf8_byte_index().is_some())
+            .then(|| text::TextPlan::scan_outer_whitespace(text))
+            .flatten()
+        } else {
+            text_plan
+        };
         let fast_end = text_plan
             .map(|plan| plan.end)
             .or_else(|| coalesce.then(|| coalesced_text_end(text)).flatten());
@@ -2544,7 +2554,11 @@ impl Parser {
             end = stop;
         }
         let text = &text[..end];
-        if self.stack.is_empty() && !self.fragment && !text.chars().all(whitespace) {
+        if self.stack.is_empty()
+            && !self.fragment
+            && text_plan.is_none()
+            && !text.chars().all(whitespace)
+        {
             if !self.seen_root
                 && self.config.name_rules.is_name(text)
                 && end == self.source().remaining().len()

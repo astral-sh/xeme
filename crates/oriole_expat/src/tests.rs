@@ -1496,6 +1496,150 @@ fn default_handler_receives_outside_root_whitespace_without_character_data() {
             );
             assert!(state.events.is_empty());
             XML_ParserFree(parser);
+
+            for length in [15, 16, 17, 65_537] {
+                for split_crlf in [false, true] {
+                    let mut state = State::default();
+                    let parser = configured(&mut state);
+                    if expand {
+                        XML_SetDefaultHandlerExpand(parser, Some(text));
+                    } else {
+                        XML_SetDefaultHandler(parser, Some(text));
+                    }
+                    assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 0), OK);
+                    state.events.clear();
+                    let prefix: String = " \t".chars().cycle().take(length).collect();
+                    let input = format!("{prefix}{}", if split_crlf { "\r" } else { "\r\n\t" });
+                    assert_eq!(
+                        XML_Parse(
+                            parser,
+                            input.as_ptr().cast(),
+                            input.len() as c_int,
+                            i32::from(!split_crlf)
+                        ),
+                        OK
+                    );
+                    if split_crlf {
+                        assert_eq!(state.events, [format!("text:{prefix}")]);
+                        assert_eq!(XML_Parse(parser, c"\n\t".as_ptr(), 2, 1), OK);
+                    }
+                    assert_eq!(
+                        state.events,
+                        [
+                            format!("text:{prefix}"),
+                            "text:\r\n".to_string(),
+                            "text:\t".to_string()
+                        ]
+                    );
+                    XML_ParserFree(parser);
+                }
+            }
+
+            // A valid whitespace prefix is not always a separate token before
+            // an error. Whole-feed uncertain suffixes must keep that distinction.
+            for (suffix, code, emits_prefix, emits_newline) in [
+                ("x", 9, false, false),
+                ("é", 9, false, false),
+                ("]]>", 9, false, false),
+                ("\u{1}", 4, true, false),
+                ("&missing;", 4, true, false),
+                ("<extra/>", 9, true, false),
+                ("\r\nx", 9, true, true),
+            ] {
+                for split in [false, true] {
+                    let mut state = State::default();
+                    let parser = configured(&mut state);
+                    if expand {
+                        XML_SetDefaultHandlerExpand(parser, Some(text));
+                    } else {
+                        XML_SetDefaultHandler(parser, Some(text));
+                    }
+                    assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 0), OK);
+                    state.events.clear();
+                    let prefix = " ".repeat(17);
+                    let input = if split {
+                        prefix.clone()
+                    } else {
+                        format!("{prefix}{suffix}")
+                    };
+                    let mut status = XML_Parse(
+                        parser,
+                        input.as_ptr().cast(),
+                        input.len() as c_int,
+                        i32::from(!split),
+                    );
+                    if split {
+                        assert_eq!(status, OK);
+                        status =
+                            XML_Parse(parser, suffix.as_ptr().cast(), suffix.len() as c_int, 1);
+                    }
+                    assert_eq!(status, ERROR, "{suffix:?}, split {split}");
+                    assert_eq!(XML_GetErrorCode(parser), code);
+                    let mut expected = Vec::new();
+                    let mut offset = 4;
+                    if split || emits_prefix {
+                        expected.push(format!("text:{prefix}"));
+                        offset += prefix.len();
+                    }
+                    if emits_newline {
+                        expected.push("text:\r\n".to_string());
+                        offset += 2;
+                    }
+                    assert_eq!(state.events, expected, "{suffix:?}, split {split}");
+                    assert_eq!(XML_GetCurrentByteIndex(parser), offset as c_long);
+                    assert_eq!(
+                        XML_GetCurrentLineNumber(parser),
+                        if emits_newline { 2 } else { 1 }
+                    );
+                    assert_eq!(
+                        XML_GetCurrentColumnNumber(parser),
+                        if emits_newline { 0 } else { offset as c_ulong }
+                    );
+                    XML_ParserFree(parser);
+                }
+            }
+
+            // The earlier prolog-quote limit still publishes whitespace before
+            // diagnosing a quoted token, including across vector-sized feeds.
+            let prefix = " ".repeat(17);
+            let input = format!("{prefix}\"x\"y");
+            for width in [1, 15, 16, 17, input.len()] {
+                let mut state = State::default();
+                let parser = configured(&mut state);
+                assert_eq!(XML_SetReparseDeferralEnabled(parser, 0), 1);
+                if expand {
+                    XML_SetDefaultHandlerExpand(parser, Some(text));
+                } else {
+                    XML_SetDefaultHandler(parser, Some(text));
+                }
+                let mut status = OK;
+                for (index, chunk) in input.as_bytes().chunks(width).enumerate() {
+                    status = XML_Parse(
+                        parser,
+                        chunk.as_ptr().cast(),
+                        chunk.len() as c_int,
+                        i32::from((index + 1) * width >= input.len()),
+                    );
+                    if status == ERROR {
+                        break;
+                    }
+                }
+                assert_eq!(status, ERROR);
+                assert_eq!(XML_GetErrorCode(parser), 4);
+                assert_eq!(
+                    XML_GetCurrentByteIndex(parser),
+                    (prefix.len() + 3) as c_long
+                );
+                assert_eq!(
+                    state
+                        .events
+                        .iter()
+                        .map(|event| event.strip_prefix("text:").unwrap())
+                        .collect::<String>(),
+                    prefix
+                );
+                XML_ParserFree(parser);
+            }
         }
     }
 }

@@ -1536,6 +1536,45 @@ mod tests {
                 }
             }
         }
+
+        // Outer plans keep long noncoalesced lines intact and preserve an
+        // incoming CR, following LF, and the ordinary compaction boundary.
+        for length in [1, 15, 16, 17, 65_535, 65_536, 65_537] {
+            let whitespace: std::string::String = " \t".chars().cycle().take(length).collect();
+            let text = format!("{whitespace}\n<tail>");
+            for previous_cr in [false, true] {
+                let make_source = || {
+                    let mut source = Source::new(Allocator::System, crate::NameRules::default());
+                    source.text.try_push_str(&text).unwrap();
+                    source.line = 7;
+                    source.column = 11;
+                    source.previous_cr = previous_cr;
+                    source.scan.mode = Some(ScanMode::Tag);
+                    source.deferred_size = 12;
+                    source
+                };
+                let mut original = make_source();
+                let mut planned = make_source();
+                let plan = crate::text::TextPlan::scan_outer_whitespace(&text).unwrap();
+                assert_eq!(plan.end, length);
+                original.consume(length);
+                planned.consume_text(plan);
+                assert_eq!(planned.position(0), original.position(0));
+                assert_eq!(planned.previous_cr, original.previous_cr);
+                assert_eq!(planned.remaining(), original.remaining());
+                assert_eq!(planned.cursor, original.cursor);
+                assert!(planned.scan.mode.is_none());
+                assert_eq!(planned.deferred_size, 0);
+                assert_eq!((planned.line, planned.column), (7, 11 + length));
+                original.consume(1);
+                planned.consume(1);
+                assert_eq!(planned.position(0), original.position(0));
+                assert_eq!(
+                    (planned.line, planned.column, planned.previous_cr),
+                    (8, 0, false)
+                );
+            }
+        }
     }
 
     #[test]

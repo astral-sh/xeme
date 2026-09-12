@@ -1,4 +1,4 @@
-//! A transient proof for ordinary native ASCII character data.
+//! Transient proofs for native ASCII character data and outer whitespace.
 
 use wide::{i8x16, u8x16};
 
@@ -100,6 +100,40 @@ impl TextPlan {
             newlines,
             trailing_columns: end - last_line_end,
             leading_lf: bytes.first() == Some(&b'\n'),
+        })
+    }
+
+    /// Prove one noncoalesced space/TAB token without crossing its first boundary.
+    /// Uncertain bytes abandon the whole proof so error and callback order stay intact.
+    pub(crate) fn scan_outer_whitespace(text: &str) -> Option<Self> {
+        let bytes = text.as_bytes();
+        let mut end = 0;
+        while let Some(chunk) = bytes[end..].first_chunk::<16>() {
+            let lanes = u8x16::new(*chunk).cast_signed();
+            let whitespace =
+                lanes.simd_eq(i8x16::splat(b' ' as i8)) | lanes.simd_eq(i8x16::splat(b'\t' as i8));
+            let stops = (!whitespace).to_bitmask();
+            if stops != 0 {
+                end += stops.trailing_zeros() as usize;
+                break;
+            }
+            end += 16;
+        }
+        while matches!(bytes.get(end), Some(b' ' | b'\t')) {
+            end += 1;
+        }
+        if end == 0
+            || bytes
+                .get(end)
+                .is_some_and(|byte| !matches!(byte, b'<' | b'&' | b'\r' | b'\n'))
+        {
+            return None;
+        }
+        Some(Self {
+            end,
+            newlines: 0,
+            trailing_columns: end,
+            leading_lf: false,
         })
     }
 
@@ -292,6 +326,33 @@ mod tests {
                     (expected_line, column, false)
                 );
             }
+        }
+    }
+
+    #[test]
+    fn outer_whitespace_preserves_first_boundaries_and_uncertain_suffixes() {
+        for character in (0..=0x7f).map(char::from).chain(['é', '\u{85}', '雪']) {
+            for offset in 0..33 {
+                let prefix: String = " \t".chars().cycle().take(offset).collect();
+                let text = format!("{prefix}{character} \t              <\r\n]\u{1}é");
+                let expected = match character {
+                    ' ' | '\t' => Some(offset + 17),
+                    '<' | '&' | '\r' | '\n' if offset > 0 => Some(offset),
+                    _ => None,
+                };
+                assert_eq!(
+                    TextPlan::scan_outer_whitespace(&text).map(|plan| plan.end),
+                    expected,
+                    "{character:?} at {offset}"
+                );
+            }
+        }
+        for length in [0, 1, 15, 16, 17, 31, 32, 33, 65_535, 65_536, 65_537] {
+            let text: String = " \t".chars().cycle().take(length).collect();
+            assert_eq!(
+                TextPlan::scan_outer_whitespace(&text).map(|plan| plan.end),
+                (length > 0).then_some(length)
+            );
         }
     }
 

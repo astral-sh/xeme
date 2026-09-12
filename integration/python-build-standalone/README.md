@@ -138,10 +138,10 @@ duplicate library binaries are excluded from that artifact. The bundle manifest
 retains the exact static archive hash; the produced PGO distribution still needs
 its packaged archive identity checked.
 
-Pull requests whose head branch starts with `charlie/codex-oriole-pbs-pgo-` also
-select the PGO path, allowing the unmerged integration stack to exercise it.
-Other PBS pull requests keep the normal build. Manual dispatch requires the
-workflow to be present on the repository's default branch.
+PBS pull requests use the normal build, including branches whose names contain
+`pbs-pgo-`. The current workflow enables PGO only through its manual `pgo` input.
+Manual dispatch requires the workflow to be present on the repository's default
+branch.
 
 The [recorded local PGO bundle](../../docs/validation/2026-09-11/pbs-pgo-bundle/)
 passed its fresh Ohm build and both C consumers. The [normal stable PBS baseline](../../docs/validation/2026-09-11/pbs-independent-checks/)
@@ -207,6 +207,31 @@ PBS retains the combined notices and build manifest in the distribution's existi
 license directory, and its extension metadata references Oriole's notices.
 
 ## Validation
+
+### Current normal generic validation
+
+To validate a newly selected runtime, open a dedicated integration pull request
+from its published commit. The [PBS distribution workflow](../../.github/workflows/pbs.yml)
+runs for changes to this integration directory or that workflow when the head
+branch starts with `charlie/codex-oriole-pbs-`, for example
+`charlie/codex-oriole-pbs-current-normal`.
+
+This PR route selects `x86_64-unknown-linux-gnu` and `pgo=false`; it adds no CPU
+requirement. Oriole uses its normal release build with ThinLTO and one codegen
+unit. PBS's CPython build variant remains `noopt`. Keep these experimental
+archives outside the release artifact pool.
+
+Retain the checked-out commit, actual compiler vectors, bundle manifest, archive
+hash and installed provenance. Check that provenance records the generic target,
+`target_cpu: null` and `pgo: false`, and that the installed static archive matches
+the bundle. Record the archive validator, custom checks, installed XML suites,
+parser identity, and glibc 2.17 threaded-parser results, including any failures.
+
+Report these installed-distribution outcomes separately from the local CPython
+module benchmarks and strict extension tests: they use separately built artifacts.
+A new runtime needs a fresh distribution run; the historical results below do not
+establish its installed behavior. Installed-interpreter performance requires its
+own measurements beyond this workflow's compatibility checks.
 
 The runtime at [`1262888`](https://github.com/astral-sh/oriole/commit/1262888)
 includes external DTD declaration grammar, internal declaration composition,

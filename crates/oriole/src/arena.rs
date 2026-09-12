@@ -526,6 +526,57 @@ mod tests {
     }
 
     #[test]
+    fn direct_start_keeps_the_warmed_text_arena_owner() {
+        let mut parser = Parser::new(Config::default());
+        parser.enable_input_context();
+        parser.feed(b"<r><w a='v' b='v'/>", false).unwrap();
+        while parser.next_event().unwrap().is_some() {}
+        let text = "x".repeat(3000);
+        parser.feed(text.as_bytes(), false).unwrap();
+        let mut frame = parser.adapter_frame();
+        let mut event = None;
+        parser
+            .next_event_for_c_text_context_into(&mut event, &mut frame)
+            .unwrap()
+            .unwrap();
+        assert!(frame.native_text_range_for_c().is_some());
+        let owner = frame.bytes.as_ptr();
+        let capacity = frame.bytes.capacity();
+        assert_eq!(capacity, 3000);
+        let tag = "<n a='value' b='more'>";
+        parser.feed(tag.as_bytes(), false).unwrap();
+        parser
+            .next_event_for_c_text_context_into(&mut event, &mut frame)
+            .unwrap()
+            .unwrap();
+        assert!(event.is_none() && frame.is_active());
+        assert!(parser.native_raw.is_some());
+        assert_eq!(parser.current_raw(), Some(tag));
+        assert_eq!(frame.bytes.as_ptr(), owner);
+        assert_eq!(frame.bytes.capacity(), capacity);
+        assert_eq!(frame.name_bytes(), b"n\0");
+        assert_eq!(
+            frame.attributes().collect::<std::vec::Vec<_>>(),
+            [
+                (b"a\0".as_slice(), b"value\0".as_slice()),
+                (b"b\0".as_slice(), b"more\0".as_slice()),
+            ]
+        );
+        let retained =
+            frame.bytes.capacity() + frame.attributes.capacity() * size_of::<ArenaAttribute>();
+        assert!(retained <= RETAINED_ARENA_BYTES);
+        parser.feed(text.as_bytes(), false).unwrap();
+        parser
+            .next_event_for_c_text_context_into(&mut event, &mut frame)
+            .unwrap()
+            .unwrap();
+        assert!(frame.native_text_range_for_c().is_some());
+        assert_eq!(frame.bytes.as_ptr(), owner);
+        assert_eq!(frame.bytes.capacity(), capacity);
+        parser.finish_adapter_frame(frame);
+    }
+
+    #[test]
     fn start_after_text_stays_within_the_reserved_frame_capacity() {
         let warm_attributes = (0..MAX_ARENA_ATTRIBUTES)
             .map(|index| format!(" a{index}=''"))

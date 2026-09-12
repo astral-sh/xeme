@@ -15,7 +15,20 @@ fn collect(
     config: Config,
     adapter: bool,
 ) -> (std::vec::Vec<std::string::String>, usize) {
+    collect_mode(input, chunk, config, adapter, false)
+}
+
+fn collect_mode(
+    input: &[u8],
+    chunk: usize,
+    config: Config,
+    adapter: bool,
+    c_context: bool,
+) -> (std::vec::Vec<std::string::String>, usize) {
     let mut parser = Parser::new(config);
+    if c_context {
+        parser.enable_input_context();
+    }
     let mut frame = parser.adapter_frame();
     let mut records = std::vec::Vec::new();
     let mut frames = 0;
@@ -26,7 +39,9 @@ fn collect(
         }
         loop {
             let mut event = None;
-            let result = if adapter {
+            let result = if c_context {
+                parser.next_event_for_c_text_context_into(&mut event, &mut frame)
+            } else if adapter {
                 parser.next_event_for_adapter_into(&mut event, &mut frame)
             } else {
                 parser.next_event_for_recycling_into(&mut event)
@@ -46,6 +61,20 @@ fn collect(
                 if let Some(name) = frame.take_end_name() {
                     event = Some(Event {
                         kind: EventKind::EndElement { name },
+                        position: frame.position(),
+                    });
+                } else if let Some((start, count)) = frame.native_text_range_for_c() {
+                    let (context, base) = parser.input_context();
+                    let bytes = &context[start - base..start - base + count];
+                    assert_eq!(frame.callback_bytes(), bytes.len());
+                    event = Some(Event {
+                        kind: EventKind::Text(
+                            Text::try_from_str_in(
+                                std::str::from_utf8(bytes).unwrap(),
+                                Allocator::System,
+                            )
+                            .unwrap(),
+                        ),
                         position: frame.position(),
                     });
                 } else if let Some(bytes) = frame.text_bytes() {
@@ -117,6 +146,10 @@ fn owned_frames_preserve_events_positions_raw_and_error_order_at_every_chunk_siz
         "<r><n a='first'/><n a='v' b='later'\0/></r>",
         "<r><n a='first'/><n a='incomplete",
         "<r><n a='first'/><n a='v'bad='x'/></r>",
+        "<r><n a='first'/><élément\r\n a='α😀'>text</élément></r>",
+        "<r><n a='first'/><n a='v' a='duplicate'></n></r>",
+        "<r xmlns='urn'><n a='first'/><n a='v'>text</n></r>",
+        "<r><w a='0' b='1' c='2' d='3' e='4' f='5' g='6' h='7' i='8'/><n a='0' b='1' c='2' d='3' e='4' f='5' g='6' h='7' a='duplicate'></n></r>",
         "<!DOCTYPE r [<!ATTLIST n a CDATA 'default'>]><r><n/><n b='v'/></r>",
     ];
     for input in inputs {
@@ -127,7 +160,9 @@ fn owned_frames_preserve_events_positions_raw_and_error_order_at_every_chunk_siz
                     ..Config::default()
                 };
                 let owned = collect(input.as_bytes(), chunk, config.clone(), false);
-                let adapter = collect(input.as_bytes(), chunk, config, true);
+                let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
+                let c_context = collect_mode(input.as_bytes(), chunk, config, true, true);
+                assert_eq!(c_context.0, owned.0, "C context {input:?} chunk={chunk}");
                 assert_eq!(
                     adapter.0, owned.0,
                     "{input:?} chunk={chunk} namespaces={namespace_separator:?}"
@@ -155,7 +190,7 @@ fn literal_frames_keep_duplicate_checks_and_selected_name_rules() {
             ("n\u{200c}", false),
         ] {
             let input = format!(
-                "<r><warm{attributes}/><{name}{attributes}{}/></r>",
+                "<r><warm{attributes}/><{name}{attributes}{}/><{name}{attributes}></{name}></r>",
                 if duplicate { " a0='duplicate'" } else { "" }
             );
             for name_rules in [
@@ -170,7 +205,9 @@ fn literal_frames_keep_duplicate_checks_and_selected_name_rules() {
                             ..Config::default()
                         };
                         let owned = collect(input.as_bytes(), chunk, config.clone(), false);
-                        let adapter = collect(input.as_bytes(), chunk, config, true);
+                        let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
+                        let c_context = collect_mode(input.as_bytes(), chunk, config, true, true);
+                        assert_eq!(c_context.0, owned.0, "C context {input:?} {chunk}");
                         assert_eq!(
                             adapter.0, owned.0,
                             "{input:?} {name_rules:?} {namespace_separator:?} {chunk}"

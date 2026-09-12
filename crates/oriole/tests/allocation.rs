@@ -954,6 +954,57 @@ fn warmed_utf8_source_growth_preserves_selected_allocator_failures() {
 }
 
 #[test]
+fn direct_start_lowering_preserves_raw_and_every_selected_allocation_failure() {
+    fn workload(allocator: Allocator) -> Result<(), Error> {
+        let mut parser = Parser::try_new_in(Config::default(), allocator)?;
+        parser.enable_input_context();
+        // Warm only lexical records. The direct Start must still perform cold
+        // frame, duplicate-table and stack-name allocations in the chosen suite.
+        parser.feed(
+            b"<r><w a='0' b='1' c='2' d='3' e='4' f='5' g='6' h='7' i='8'/>",
+            false,
+        )?;
+        while next_event(&mut parser)?.is_some() {}
+        let tag = "<longer a='zero' b='one' c='two' d='three' e='four' f='five' g='six' h='seven' i='eight'>";
+        parser.feed(tag.as_bytes(), false)?;
+        let mut frame = parser.adapter_frame();
+        let result = (|| -> Result<(), Error> {
+            let mut event = None;
+            match parser.next_event_for_c_text_context_into(&mut event, &mut frame) {
+                Ok(Some(_)) => {
+                    assert!(event.is_none() && frame.is_active());
+                    assert_eq!(frame.name_bytes(), b"longer\0");
+                    assert_eq!(frame.attributes().count(), 9);
+                    assert_eq!(parser.current_raw(), Some(tag));
+                }
+                Ok(None) => panic!("complete Start must be delivered"),
+                Err(error) => {
+                    assert_eq!(error.kind, ErrorKind::NoMemory);
+                    assert!(event.is_none() && !frame.is_active());
+                    assert_eq!(parser.current_raw(), Some(tag));
+                    let calls = CALLS.get();
+                    assert_eq!(
+                        parser
+                            .next_event_for_c_text_context_into(&mut event, &mut frame)
+                            .unwrap_err(),
+                        error
+                    );
+                    assert_eq!(parser.feed(b"ignored", true).unwrap_err(), error);
+                    assert_eq!(CALLS.get(), calls);
+                    return Err(error);
+                }
+            }
+            parser.feed(b"</longer></r>", true)?;
+            while next_event(&mut parser)?.is_some() {}
+            Ok(())
+        })();
+        parser.finish_adapter_frame(frame);
+        result
+    }
+    check_allocations(workload);
+}
+
+#[test]
 fn native_raw_context_views_survive_every_feed_allocation_failure() {
     fn workload(allocator: Allocator) -> Result<(), Error> {
         // The first suffix forces native growth; the second forces Separate.

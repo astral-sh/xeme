@@ -611,6 +611,96 @@ pub struct Parser {
     id_attribute_index: Option<usize>,
 }
 
+/// Borrow only the fields changed by a nonempty identity Start.
+/// Source stays in the parser, and every borrow ends before event delivery.
+struct IdentityStartState<'a> {
+    source: &'a Source,
+    allocator: Allocator,
+    limits: &'a Limits,
+    namespaces: &'a HashMap<String, String>,
+    raw_attributes: &'a mut Vec<RawAttribute>,
+    event_recycling: &'a mut EventRecycling,
+    stack: &'a mut Vec<Element>,
+    id_attribute_index: &'a mut Option<usize>,
+    seen_root: &'a mut bool,
+    declaration_allowed: &'a mut bool,
+}
+
+impl IdentityStartState<'_> {
+    /// Keep the selected copy/error order for both borrowed and copied tokens.
+    fn lower(
+        self,
+        name: &str,
+        rest: &str,
+        position: Position,
+        frame: &mut AdapterFrame,
+    ) -> Result<(), Error> {
+        let mut raw_attrs = std::mem::replace(self.raw_attributes, Vec::new_in(self.allocator));
+        if raw_attrs.len() > self.limits.max_attributes {
+            return Err(Error {
+                kind: ErrorKind::LimitExceeded,
+                message: "attribute count limit exceeded",
+                position: self.source.position(0),
+            });
+        }
+        self.event_recycling
+            .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
+        frame.prepare(raw_attrs.len())?;
+        let literal_span = !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);
+        let mut names = (raw_attrs.len() > 8)
+            .then(|| HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator));
+        for (index, attribute) in raw_attrs.iter().enumerate() {
+            let (attr_name, value, attribute_offset, _) = attribute.parts(rest);
+            let duplicate = if let Some(names) = &mut names {
+                !try_set_insert(names, attr_name)?
+            } else {
+                raw_attrs[..index]
+                    .iter()
+                    .any(|attribute| attribute.name(rest) == attr_name)
+            };
+            if duplicate {
+                return Err(Error {
+                    kind: ErrorKind::DuplicateAttribute,
+                    message: "duplicate attribute",
+                    position: self
+                        .source
+                        .position_at(1 + name.len() + attribute_offset, 0),
+                });
+            }
+            if !literal_span {
+                frame.push_attribute(attr_name, value)?;
+            }
+        }
+        if literal_span {
+            frame.push_literal_attributes(rest, &raw_attrs)?;
+        }
+        *self.id_attribute_index = None;
+        frame.set_name(name)?;
+        *self.seen_root = true;
+        *self.declaration_allowed = false;
+        let reusable = self.event_recycling.take_name();
+        let value = recycling::copy_name(name, reusable, self.allocator)?;
+        try_push(
+            self.stack,
+            Element {
+                name: ElementName {
+                    raw_start: 0,
+                    expanded_end: value.len(),
+                    value,
+                },
+                raw_encoding: None,
+                namespace_scope: None,
+            },
+        )?;
+        if raw_attrs.capacity() <= 128 {
+            raw_attrs.clear();
+            *self.raw_attributes = raw_attrs;
+        }
+        frame.publish(position);
+        Ok(())
+    }
+}
+
 impl Parser {
     #[must_use]
     pub fn new(config: Config) -> Self {
@@ -2383,90 +2473,126 @@ impl Parser {
                 frame.publish(position);
                 continue;
             }
-            let mut token = std::mem::replace(
-                &mut self.token_scratch,
-                lexical::Buffer::new_in(self.allocator),
-            );
-            token.clear();
-            token.append(
-                self.source()
-                    .lexical_remaining()
-                    .for_slice(&self.source().remaining()[..end]),
-            )?;
+            let direct_start_name = if let tag::Planned::Complete { name_end, .. } = planned
+                && output.c_text_context
+                && self.input_context.is_some()
+                && !self.closed_root
+                && self.stack.len() < self.config.limits.max_depth
+                && end <= arena::MAX_ARENA_BYTES
+                && self.raw_attributes.len() <= arena::MAX_ARENA_ATTRIBUTES
+            {
+                let token = &self.source().remaining()[..end];
+                (!token.ends_with("/>")
+                    && self.identity_frame_names(&token[1..name_end], &token[name_end..end - 1]))
+                .then_some(name_end)
+            } else {
+                None
+            };
             let mut framed_end = false;
-            let parsed = (|| {
-                if matched_end.is_none()
-                    && !matches!(planned, tag::Planned::Complete { .. })
-                    && let Some(offset) = invalid_xml_char(&token)
-                {
-                    return Err(self.err_at(
-                        ErrorKind::InvalidToken,
-                        "invalid XML character",
-                        offset,
-                    ));
-                }
-                match mode {
-                    ScanMode::Comment => {
-                        let text = &token[4..token.len() - 3];
-                        if let Some(offset) = text.find("--") {
-                            return Err(self.err_at(
-                                ErrorKind::InvalidToken,
-                                "double hyphen in comment",
-                                4 + offset + 2,
-                            ));
+            if let Some(name_end) = direct_start_name
+                && let Some(frame) = output.frame.as_deref_mut()
+            {
+                let state = self.identity_start_state();
+                let source = state.source;
+                let token = &source.remaining()[..end];
+                let parsed = state.lower(
+                    &token[1..name_end],
+                    &token[name_end..end - 1],
+                    position,
+                    frame,
+                );
+                // Lowering has released every source/field borrow. Publish the
+                // complete token before either its frame or terminal error.
+                self.native_raw = Some(NativeRawRange {
+                    start: position.byte_index,
+                    count: NonZeroUsize::new(end).expect("nonempty planned Start"),
+                });
+                parsed?;
+            } else {
+                let mut token = std::mem::replace(
+                    &mut self.token_scratch,
+                    lexical::Buffer::new_in(self.allocator),
+                );
+                token.clear();
+                token.append(
+                    self.source()
+                        .lexical_remaining()
+                        .for_slice(&self.source().remaining()[..end]),
+                )?;
+                let parsed = (|| {
+                    if matched_end.is_none()
+                        && !matches!(planned, tag::Planned::Complete { .. })
+                        && let Some(offset) = invalid_xml_char(&token)
+                    {
+                        return Err(self.err_at(
+                            ErrorKind::InvalidToken,
+                            "invalid XML character",
+                            offset,
+                        ));
+                    }
+                    match mode {
+                        ScanMode::Comment => {
+                            let text = &token[4..token.len() - 3];
+                            if let Some(offset) = text.find("--") {
+                                return Err(self.err_at(
+                                    ErrorKind::InvalidToken,
+                                    "double hyphen in comment",
+                                    4 + offset + 2,
+                                ));
+                            }
+                            if text.ends_with('-') {
+                                return Err(self.err_at(
+                                    ErrorKind::InvalidToken,
+                                    "double hyphen in comment",
+                                    5 + text.len(),
+                                ));
+                            }
+                            self.declaration_allowed = false;
+                            self.emit(
+                                EventKind::Comment(self.markup_text(token.view().for_slice(text))?),
+                                position,
+                            )?;
                         }
-                        if text.ends_with('-') {
-                            return Err(self.err_at(
-                                ErrorKind::InvalidToken,
-                                "double hyphen in comment",
-                                5 + text.len(),
-                            ));
+                        ScanMode::Pi => self.parse_pi(token.view(), position)?,
+                        ScanMode::Doctype => self.parse_doctype(token.view(), position)?,
+                        ScanMode::Tag if matched_end.is_some() => {
+                            if !self.seen_doctype
+                                && !self.foreign_dtd
+                                && self.shared_tables.get().is_none()
+                                && self
+                                    .stack
+                                    .last()
+                                    .is_some_and(|element| element.namespace_scope.is_none())
+                                && let Some(frame) = output.frame.as_deref_mut()
+                            {
+                                self.prepare_end_frame(frame);
+                                framed_end = true;
+                            } else {
+                                self.end_element(position)?;
+                            }
                         }
-                        self.declaration_allowed = false;
-                        self.emit(
-                            EventKind::Comment(self.markup_text(token.view().for_slice(text))?),
+                        ScanMode::Tag if token.starts_with("</") => {
+                            self.parse_end(token.view(), position)?
+                        }
+                        ScanMode::Tag => self.parse_start(
+                            token.view(),
                             position,
-                        )?;
-                    }
-                    ScanMode::Pi => self.parse_pi(token.view(), position)?,
-                    ScanMode::Doctype => self.parse_doctype(token.view(), position)?,
-                    ScanMode::Tag if matched_end.is_some() => {
-                        if !self.seen_doctype
-                            && !self.foreign_dtd
-                            && self.shared_tables.get().is_none()
-                            && self
-                                .stack
-                                .last()
-                                .is_some_and(|element| element.namespace_scope.is_none())
-                            && let Some(frame) = output.frame.as_deref_mut()
-                        {
-                            self.prepare_end_frame(frame);
-                            framed_end = true;
-                        } else {
-                            self.end_element(position)?;
+                            planned,
+                            output.frame.as_deref_mut(),
+                        )?,
+                        ScanMode::DtdDeclaration => {
+                            unreachable!("DTD scanner only runs in DTD context")
                         }
                     }
-                    ScanMode::Tag if token.starts_with("</") => {
-                        self.parse_end(token.view(), position)?
-                    }
-                    ScanMode::Tag => self.parse_start(
-                        token.view(),
-                        position,
-                        planned,
-                        output.frame.as_deref_mut(),
-                    )?,
-                    ScanMode::DtdDeclaration => {
-                        unreachable!("DTD scanner only runs in DTD context")
-                    }
-                }
-                Ok(())
-            })();
-            // Parsing only writes queued raw overrides. Publish the owned token
-            // before returning either its events or its terminal error.
-            token.swap_decoded(&mut self.current_raw)?;
-            self.native_raw = None;
-            parsed?;
-            self.token_scratch = token;
+                    Ok(())
+                })();
+                // Parsing only writes queued raw overrides. Publish the owned token
+                // before returning either its events or its terminal error.
+                token.swap_decoded(&mut self.current_raw)?;
+                self.native_raw = None;
+                parsed?;
+                self.token_scratch = token;
+            }
             if matches!(
                 planned,
                 tag::Planned::Complete {
@@ -3237,13 +3363,7 @@ impl Parser {
                 && self.raw_attributes.len() <= arena::MAX_ARENA_ATTRIBUTES
                 // A frame contains final callback spellings. Namespace-aware
                 // tags can share this storage only when expansion is identity.
-                && (self.config.namespace_separator.is_none()
-                    || (!raw_name.contains(':')
-                        && !self.namespaces.contains_key("")
-                        && self.raw_attributes.iter().all(|attribute| {
-                            let name = attribute.name(rest);
-                            name != "xmlns" && !name.contains(':')
-                        })))
+                && self.identity_frame_names(raw_name, rest)
         }) {
             return self.parse_start_frame::<false>(token, position, raw_name, rest, frame);
         }
@@ -3602,6 +3722,38 @@ impl Parser {
         Ok(())
     }
 
+    /// Apply the same namespace identity test before either token representation.
+    fn identity_frame_names(&self, name: &str, rest: &str) -> bool {
+        self.config.namespace_separator.is_none()
+            || (!name.contains(':')
+                && !self.namespaces.contains_key("")
+                && self.raw_attributes.iter().all(|attribute| {
+                    let name = attribute.name(rest);
+                    name != "xmlns" && !name.contains(':')
+                }))
+    }
+
+    /// Split mutation fields from the live root source without moving its owner.
+    fn identity_start_state(&mut self) -> IdentityStartState<'_> {
+        debug_assert!(self.tables.defaults.is_empty());
+        debug_assert!(!self.fragment && self.sources.len() == 1);
+        IdentityStartState {
+            source: self
+                .sources
+                .last()
+                .expect("document source is always present"),
+            allocator: self.allocator,
+            limits: &self.config.limits,
+            namespaces: &self.namespaces,
+            raw_attributes: &mut self.raw_attributes,
+            event_recycling: &mut self.event_recycling,
+            stack: &mut self.stack,
+            id_attribute_index: &mut self.id_attribute_index,
+            seen_root: &mut self.seen_root,
+            declaration_allowed: &mut self.declaration_allowed,
+        }
+    }
+
     /// Check storage eligibility without charging URI work or changing error order.
     fn expanded_name_fits_frame(&self, name: &str, token_bytes: usize) -> bool {
         let Some(separator) = self.config.namespace_separator else {
@@ -3644,6 +3796,11 @@ impl Parser {
         debug_assert!(self.tables.defaults.is_empty());
         debug_assert!(!self.source().has_conversions());
         debug_assert!(!self.fragment && self.sources.len() == 1);
+        if !EXPAND_ELEMENT && !token.ends_with("/>") {
+            return self
+                .identity_start_state()
+                .lower(name, rest, position, frame);
+        }
         let mut raw_attrs =
             std::mem::replace(&mut self.raw_attributes, Vec::new_in(self.allocator));
         if raw_attrs.len() > self.config.limits.max_attributes {
@@ -5154,6 +5311,160 @@ mod native_raw_context_tests {
             .unwrap();
         assert!(parser.native_raw.is_some());
         (parser, frame)
+    }
+
+    #[test]
+    fn direct_start_raw_views_keep_copied_fallbacks_and_owner_handoffs() {
+        for (prefix, tag, namespace, enabled, c_mode, foreign, direct) in [
+            ("<r><w a='v'/>", "<n a='x'>", false, true, true, false, true),
+            ("<r><w a='v'/>", "<n a='x'>", true, true, true, false, true),
+            (
+                "<r xmlns='urn'><w a='v'/>",
+                "<n a='x'>",
+                true,
+                true,
+                true,
+                false,
+                false,
+            ),
+            (
+                "<r><w a='v'/>",
+                "<n a='x'/>",
+                false,
+                true,
+                true,
+                false,
+                false,
+            ),
+            (
+                "<r><w a='v'/>",
+                "<n a='&amp;'>",
+                false,
+                true,
+                true,
+                false,
+                false,
+            ),
+            (
+                "<r><w a='v'/>",
+                "<n a='x'>",
+                false,
+                false,
+                true,
+                false,
+                false,
+            ),
+            (
+                "<r><w a='v'/>",
+                "<n a='x'>",
+                false,
+                true,
+                false,
+                false,
+                false,
+            ),
+            ("<r><w a='v'/>", "<n a='x'>", false, true, true, true, false),
+        ] {
+            let mut parser = Parser::new(Config {
+                namespace_separator: namespace.then_some('|'),
+                ..Config::default()
+            });
+            if enabled {
+                parser.enable_input_context();
+            }
+            parser.feed(prefix.as_bytes(), false).unwrap();
+            while parser.next_event().unwrap().is_some() {}
+            parser.feed(tag.as_bytes(), false).unwrap();
+            let old_raw = parser.current_raw.as_str().to_owned();
+            let raw_pointer = parser.current_raw.as_ptr();
+            let raw_capacity = parser.current_raw.capacity();
+            let scratch = parser.token_scratch.as_bytes().as_ptr();
+            let scratch_len = parser.token_scratch.len();
+            let mut other = Parser::new(Config::default());
+            let mut frame = if foreign {
+                other.adapter_frame()
+            } else {
+                parser.adapter_frame()
+            };
+            let mut event = None;
+            if c_mode {
+                parser.next_event_for_c_text_context_into(&mut event, &mut frame)
+            } else {
+                parser.next_event_for_adapter_into(&mut event, &mut frame)
+            }
+            .unwrap()
+            .unwrap();
+            assert_eq!(parser.current_raw(), Some(tag));
+            assert_eq!(parser.native_raw.is_some(), direct);
+            if direct {
+                assert_eq!(parser.current_raw.as_str(), old_raw);
+                assert_eq!(parser.current_raw.as_ptr(), raw_pointer);
+                assert_eq!(parser.current_raw.capacity(), raw_capacity);
+                assert_eq!(parser.token_scratch.as_bytes().as_ptr(), scratch);
+                assert_eq!(parser.token_scratch.len(), scratch_len);
+                assert_eq!(frame.name_bytes(), b"n\0");
+                assert_eq!(
+                    frame.attributes().collect::<std::vec::Vec<_>>(),
+                    [(b"a\0".as_slice(), b"x\0".as_slice())]
+                );
+                let raw = parser.native_raw.unwrap();
+                let (context, start) = parser.input_context();
+                assert_eq!(
+                    parser.current_raw().unwrap().as_ptr(),
+                    context[raw.start - start..].as_ptr()
+                );
+                parser.feed(b"</n></r>", true).unwrap();
+                assert_eq!(parser.current_raw(), Some(tag));
+                while parser.next_event().unwrap().is_some() {
+                    assert!(parser.native_raw.is_none());
+                }
+            }
+            if foreign {
+                other.finish_adapter_frame(frame);
+            } else {
+                parser.finish_adapter_frame(frame);
+            }
+        }
+        for bytes in [arena::MAX_ARENA_BYTES, arena::MAX_ARENA_BYTES + 1] {
+            let tag = format!("<n{}>", " ".repeat(bytes - 3));
+            let mut parser = Parser::new(Config::default());
+            parser.enable_input_context();
+            parser.feed(tag.as_bytes(), false).unwrap();
+            let mut frame = parser.adapter_frame();
+            let mut event = None;
+            parser
+                .next_event_for_c_text_context_into(&mut event, &mut frame)
+                .unwrap()
+                .unwrap();
+            assert_eq!(parser.native_raw.is_some(), bytes <= arena::MAX_ARENA_BYTES);
+            assert_eq!(parser.current_raw(), Some(tag.as_str()));
+            parser.finish_adapter_frame(frame);
+        }
+        for count in [arena::MAX_ARENA_ATTRIBUTES, arena::MAX_ARENA_ATTRIBUTES + 1] {
+            let attributes = (0..count)
+                .map(|i| format!(" a{i}='v'"))
+                .collect::<std::string::String>();
+            let mut parser = Parser::new(Config::default());
+            parser.enable_input_context();
+            parser
+                .feed(format!("<r><w{attributes}/>").as_bytes(), false)
+                .unwrap();
+            while parser.next_event().unwrap().is_some() {}
+            let tag = format!("<n{attributes}>");
+            parser.feed(tag.as_bytes(), false).unwrap();
+            let mut frame = parser.adapter_frame();
+            let mut event = None;
+            parser
+                .next_event_for_c_text_context_into(&mut event, &mut frame)
+                .unwrap()
+                .unwrap();
+            assert_eq!(
+                parser.native_raw.is_some(),
+                count <= arena::MAX_ARENA_ATTRIBUTES
+            );
+            assert_eq!(parser.current_raw(), Some(tag.as_str()));
+            parser.finish_adapter_frame(frame);
+        }
     }
 
     #[test]

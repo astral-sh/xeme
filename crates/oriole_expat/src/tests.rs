@@ -3778,18 +3778,34 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
     }
     // SAFETY: Each parser and state stays live through its callbacks and resumes.
     unsafe {
-        for (input, namespace, name, expected_ends) in [
+        for (input, namespace, name, expected_ends, second_raw) in [
             (
                 b"<r><n a='first'/><n a='second' b='more'/></r>".as_slice(),
                 false,
                 b"n".as_slice(),
                 ["n", "r"],
+                "<n a='second' b='more'/>",
+            ),
+            (
+                b"<r><n a='first'/><n a='second' b='more'></n></r>".as_slice(),
+                false,
+                b"n".as_slice(),
+                ["n", "r"],
+                "<n a='second' b='more'>",
+            ),
+            (
+                b"<r><n a='first'/><n a='second' b='more'></n></r>".as_slice(),
+                true,
+                b"n".as_slice(),
+                ["n", "r"],
+                "<n a='second' b='more'>",
             ),
             (
                 b"<r xmlns='urn'><n a='first'/><n a='second' b='more'/></r>".as_slice(),
                 true,
                 b"urn|n".as_slice(),
                 ["urn|n", "urn|r"],
+                "<n a='second' b='more'/>",
             ),
         ] {
             for width in [1, 7, input.len()] {
@@ -3814,10 +3830,7 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
                         c_int::from((index + 1) * width >= input.len()),
                     );
                     if status == SUSPENDED {
-                        assert_eq!(
-                            (*parser).core.current_raw(),
-                            Some("<n a='second' b='more'/>")
-                        );
+                        assert_eq!((*parser).core.current_raw(), Some(second_raw));
                         assert_eq!(
                             XML_GetCurrentByteIndex(parser) as usize,
                             input
@@ -3840,10 +3853,7 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
                         .iter()
                         .filter(|value| !value.is_empty())
                         .collect::<Vec<_>>(),
-                    [
-                        &"<n a='first'/>".to_owned(),
-                        &"<n a='second' b='more'/>".to_owned()
-                    ]
+                    [&"<n a='first'/>".to_owned(), &second_raw.to_owned()]
                 );
                 assert_eq!(state.ends, expected_ends);
                 XML_ParserFree(parser);

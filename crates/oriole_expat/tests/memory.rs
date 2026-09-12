@@ -52,7 +52,9 @@ fn detached_end_uses_the_selected_owner_and_default_failure_stays_terminal() {
             CALLBACK_PARSER.set(parser);
             XML_UseParserAsHandlerArg(parser);
             XML_SetStartElementHandler(parser, Some(suspend_inner));
-            let input = c"<r><n a='v'></n></r>";
+            // Warm the element/name path before the resumed End/default check.
+            // Composed matched Ends borrow raw context and need no token-owner warmup.
+            let input = c"<r><w></w><n a='v'></n></r>";
             assert_eq!(
                 XML_Parse(parser, input.as_ptr(), input.to_bytes().len() as i32, 1),
                 2

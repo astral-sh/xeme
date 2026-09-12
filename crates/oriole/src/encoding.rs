@@ -1320,7 +1320,10 @@ mod tests {
             "".to_string(),
             "\n".to_string(),
             "\nabc\t\n\nend\u{7f}".to_string(),
+            "\nxxxxxx\nxxxxxxxx<tail>\n\n".to_string(),
+            "xxxxxxx\nxxxxxxx\n\nxxxxxx\nxxxxxxxx<tail>".to_string(),
             format!("a\n{}<tail>", "x".repeat(65_534)),
+            format!("{}<tail>", "\nxxxxxx\nxxxxxxxx".repeat(4096)),
         ] {
             for previous_cr in [false, true] {
                 let make_source = || {
@@ -1347,8 +1350,12 @@ mod tests {
                 if plan.end == 65_536 {
                     assert_eq!(planned.cursor, 0);
                     assert_eq!(planned.remaining(), "<tail>");
-                    assert_eq!(planned.line, 8);
-                    assert_eq!(planned.column, 65_534);
+                    let expected = if text.starts_with("a\n") {
+                        (8, 65_534)
+                    } else {
+                        (8199 - usize::from(previous_cr), 8)
+                    };
+                    assert_eq!((planned.line, planned.column), expected);
                 }
             }
         }

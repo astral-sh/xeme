@@ -239,6 +239,10 @@ fn native_text_plan_matches_ascii_fallback_events_and_errors() {
     }
     for data in [
         "alpha\tbeta\n\ngamma\u{7f}&amp;tail",
+        "\nxxxxx\n<child/>\nxxxxxx\nxxxxxxxx&amp;\tend",
+        "xxxxxxx\nxxxxxxx\n<child/>\nxxxxxx\nxxxxxxxx&amp;\n\nend",
+        "\nxxxxxx\nxxxxxxxx\u{1}<child/>",
+        "\nxxxxxx\nxxxxxxxx<child/>\n\nbad]]>",
         "a\r\nb\rc\nd",
         "good\nbad]]>",
         "good\nbad\u{1}]]>",

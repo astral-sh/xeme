@@ -1,0 +1,118 @@
+{
+  "status": "saved_supplemental_results_verified",
+  "existing_test_script": "/home/dev-user/code/oss/oriole-reference-frame/tools/cpython/text_fragmentation.py",
+  "existing_test_script_sha256": "97b76ae05228951f85fab5887ed9727cb2d218016cd049a898080d2e0d6fc4b4",
+  "installed_distribution": {
+    "origin": {
+      "executable": "/tmp/oriole-pbs-v3-workflow-results/runtime/python/install/bin/python3.12",
+      "expat_version": "oriole_compat_2.8.4",
+      "module_file": null,
+      "spec_origin": "built-in",
+      "loader": "type",
+      "module_directory": null,
+      "existing_semantic_guard_compatible": false
+    },
+    "semantic_result": {
+      "executable": "/tmp/oriole-pbs-v3-workflow-results/runtime/python/install/bin/python3.12",
+      "origin": "built-in",
+      "expat_version": "oriole_compat_2.8.4",
+      "semantic_script": "/home/dev-user/code/oss/oriole-reference-frame/tools/cpython/text_fragmentation.py"
+    },
+    "tests": 2,
+    "failures": 0,
+    "skipped": 0,
+    "interpreter_sha256": "b71071a78ef3f98479eed2ee0b8c3f2ea806ec97beefb2a5692a75055f09e2c6",
+    "libpython_sha256": "80cd61c37549a0b1e5ca4dada9f011cea0a341c756952d0a89cb757620b5f6cb",
+    "commands": [
+      {
+        "label": "origin",
+        "argv": [
+          "env",
+          "-u",
+          "LD_PRELOAD",
+          "-u",
+          "LD_LIBRARY_PATH",
+          "-u",
+          "PYTHONPATH",
+          "-u",
+          "PYTHONHOME",
+          "-u",
+          "ASAN_OPTIONS",
+          "-u",
+          "UBSAN_OPTIONS",
+          "-u",
+          "LLVM_PROFILE_FILE",
+          "timeout",
+          "--signal=TERM",
+          "--kill-after=5s",
+          "120s",
+          "taskset",
+          "-c",
+          "3",
+          "/tmp/oriole-pbs-v3-workflow-results/runtime/python/install/bin/python3.12",
+          "-I",
+          "/tmp/oriole-pbs-v3-workflow-review-prep/origin_probe.py"
+        ],
+        "root_tool_session": 63453,
+        "exit": 0,
+        "reaped": true,
+        "execution_record_source": "Root supervising-agent report of completed/reaped session; stdout/stderr and input hashes independently read here.",
+        "wrapper_sha256": "acdcc4e47297b1f1d4f67a2922729f3ddee9cc40a2bff4b0dca1165ef04a09c1",
+        "stdout_sha256": "c6791b02d50512fd557a57bfaa0b01d0c8c1deb69f97d39996fc3210a2615e03",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "semantics",
+        "argv": [
+          "env",
+          "-u",
+          "LD_PRELOAD",
+          "-u",
+          "LD_LIBRARY_PATH",
+          "-u",
+          "PYTHONPATH",
+          "-u",
+          "PYTHONHOME",
+          "-u",
+          "ASAN_OPTIONS",
+          "-u",
+          "UBSAN_OPTIONS",
+          "-u",
+          "LLVM_PROFILE_FILE",
+          "timeout",
+          "--signal=TERM",
+          "--kill-after=5s",
+          "120s",
+          "taskset",
+          "-c",
+          "3",
+          "/tmp/oriole-pbs-v3-workflow-results/runtime/python/install/bin/python3.12",
+          "-I",
+          "/tmp/oriole-pbs-v3-workflow-review-prep/installed_semantics.py"
+        ],
+        "root_tool_session": 13307,
+        "exit": 0,
+        "reaped": true,
+        "execution_record_source": "Root supervising-agent report of completed/reaped session; stdout/stderr and input hashes independently read here.",
+        "wrapper_sha256": "91c4ff597dc12c57798b51e3679e04689019e81969d8134adbac18ae239fbbdd",
+        "stdout_sha256": "2df94ff39cfaa44cc46a24d11c7fbebcb877aace62b1c8dc84365ef6e2a910e4",
+        "stderr_sha256": "2cb135c81a4bd062b86d566761a4e9b8328de40b6a339fdd79924d22b45a19d7"
+      }
+    ],
+    "guard_adaptation": "The existing script __main__ guard requires pyexpat.__file__, which the actual built-in module lacks. Root wrapper verifies the exact interpreter/script hashes and real built-in origin/version, then loads the unchanged test class and runs both methods. No fake path or changed semantic assertion.",
+    "local_execution_scope": "Host execution only; the workflow supplies the separate glibc 2.17 probe and strict-suite results."
+  },
+  "separate_host_modules": {
+    "tests": 4,
+    "failures": 0,
+    "modes": [
+      "shared",
+      "static"
+    ],
+    "source_results_sha256": "b958cb9c09e268610ac7764b68f3074955e0e6a7481ee0f6e0cc7dbcedc055f1",
+    "source_held_commands_sha256": "8674febdbfbe72f8a96e73f7044573ce0e861b843b7cb9e69b626e10bb91672b",
+    "input_pins_verified": 23,
+    "scope": "Previously built local v3 PGO CPython extensions with explicit cleanup backport; these are separate from the shipped PBS interpreter."
+  },
+  "strict_results": "Original host802 initial/2 failures (806 aggregate/4 with retries), glibc802/2 and local shared/static802/2 remain unchanged. Supplemental acceptance combines only adjacent text while preserving all characters, buffering controls and element/CDATA boundaries."
+}

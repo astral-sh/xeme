@@ -29,6 +29,8 @@ The selected runtime takes **1.33× Expat PGO's native time and 1.12× its CPyth
 
 An opt-in [x86-64-v3 PGO build](docs/validation/2026-09-11/reference-v3/) takes **1.094× generic Expat's CPython time** overall: 1.128× for ElementTree and 1.062× for pyexpat. Eleven of 24 conditions fall within 1.10×; native time remains 1.30× Expat. These host-module measurements do not establish installed distribution performance. The generic build remains the default.
 
+The [packaged v3 PGO trial](docs/validation/2026-09-12/v3-distribution/) verifies the shipped parser and passes 1,024 threaded parses on glibc 2.17. The distribution preserves text, callback-controlled buffering and CDATA order in supplemental checks; its strict upstream suites retain two callback-grouping failures. Installed distribution performance remains unmeasured.
+
 ThinLTO is the default, and [PGO is opt-in](tools/pgo/). The [C allocator study](benchmarks/results/2026-09-11/c-allocators/) finds less than 0.2% aggregate time change with jemalloc or mimalloc and higher peak resident memory, so the C allocator default remains unchanged.
 
 Compatibility testing records **4,347 passing / 391 failing / two timed-out upstream API configurations**, plus two text-grouping failures across 802 CPython method outcomes per linkage. The [compatibility guide](docs/compatibility.md) explains the remaining allocation, resource, diagnostic and callback differences. The [review guide](docs/review.md) links the adversarial tests, sanitizer campaigns, distribution trials and optimization studies.

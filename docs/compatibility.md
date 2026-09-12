@@ -32,6 +32,8 @@ The [selected runtime's benchmark report](validation/2026-09-11/reference-frames
 
 The optional [x86-64-v3 build](validation/2026-09-11/reference-v3/) preserves the same original API and strict CPython outcomes. Its PGO host-module benchmark averages 1.0943× generic Expat through CPython, including 1.1278× for ElementTree; native time remains 1.3011×. This CPU-specific result does not replace the generic measurements or establish installed distribution performance.
 
+The [stable v3 PGO distribution trial](validation/2026-09-12/v3-distribution/) verifies the installed target, manifest and exact optimized static archive. The glibc 2.17 identity and 1,024-threaded-parse probe pass. Its XML suite still reports 802 tests and two callback-grouping failures; host retries produce 806 executions and four failure records for those same two methods. Supplemental checks pass in the actual installed interpreter and the separately built shared/static consumers, preserving every text character, callback-controlled buffering and element/CDATA ordering. These results support accepting the documented text fragmentation difference; they do not change the original strict outcomes or establish installed performance.
+
 ## Differential testing
 
 ```console

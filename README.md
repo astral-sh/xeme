@@ -16,16 +16,16 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole (normal) | Expat (normal) | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 50.623 ms | 29.073 ms | 1.751× |
-| Wayland protocol | 1.177 ms | 1.066 ms | 1.104× |
-| Maven POM | 0.847 ms | 0.444 ms | 1.914× |
-| Batik SVG | 0.134 ms | 0.134 ms | 0.997× |
-| GTK UI | 0.360 ms | 0.213 ms | 1.686× |
-| DocBook XSL | 0.272 ms | 0.185 ms | 1.463× |
+| Vulkan registry | 49.282 ms | 28.701 ms | 1.707× |
+| Wayland protocol | 1.131 ms | 1.059 ms | 1.068× |
+| Maven POM | 0.843 ms | 0.436 ms | 1.916× |
+| Batik SVG | 0.132 ms | 0.134 ms | 0.983× |
+| GTK UI | 0.350 ms | 0.213 ms | 1.646× |
+| DocBook XSL | 0.263 ms | 0.187 ms | 1.395× |
 
-These [native measurements](docs/validation/2026-09-12/expanded-start/) use the expanded namespace Start runtime and original XML from six pinned projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host. Both parsers use normal release builds: Oriole uses O3 and ThinLTO with Ohm rustc 1.98.1-dev; Expat 2.8.4 uses GCC 13.3 O3 without LTO. Times are medians of seven process medians; ratios are medians of paired ratios.
+These [native measurements](docs/validation/2026-09-12/fused-attribute-normal/) use the fused attribute scanner and original XML from six pinned projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host. Both parsers use normal release builds: Oriole uses O3 and ThinLTO with Ohm rustc 1.98.1-dev; Expat 2.8.4 uses GCC 13.3 O3 without LTO. Times are medians of seven process medians; ratios are medians of paired ratios.
 
-Across their respective 24 real-project conditions, the candidate takes **1.54× Expat's native time and 1.24× its CPython time**, improvements of 3.40% and 2.58% against the previous selected runtime. Both remain above our target of roughly 1.10×; four of 24 individual CPython conditions fall within it. The [full report](docs/validation/2026-09-12/expanded-start/) retains every condition and regression.
+Across their respective 24 real-project conditions, the candidate takes **1.51× Expat's native time and 1.22× its CPython time**, improvements of 1.91% and 1.44% against the previous selected runtime. Both remain above our target of roughly 1.10×; four of 24 individual CPython conditions fall within it. The [full report](docs/validation/2026-09-12/fused-attribute-normal/) retains every condition and regression.
 
 ThinLTO is the default. The earlier [C allocator study](benchmarks/results/2026-09-11/c-allocators/) found less than 0.2% aggregate time change with jemalloc or mimalloc and higher peak resident memory, so the C allocator default remains unchanged.
 

@@ -1,0 +1,3 @@
+consumer,project,chunk_bytes,namespace_or_mode,candidate_over_control,candidate_over_expat,control_over_expat,adverse
+native,maven,4096,false,1.0040920710092598,1.9162069602894056,1.9235660892257072,True
+python,batik,4096,elementtree,1.0137334756764593,1.2327659422617137,1.2163701572934893,True

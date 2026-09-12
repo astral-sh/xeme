@@ -247,12 +247,17 @@ fn namespace_plans_preserve_errors_and_owned_expansions() {
 
 #[test]
 fn expanded_element_frames_preserve_packed_names_and_literal_attributes() {
-    for input in [
-        "<r xmlns='urn:m'><n a='α😀'><n b='v'/></n></r>",
-        "<p:r xmlns:p='urn:π'><p:é a='v'><p:é/></p:é></p:r>",
+    for (input, expected_frames) in [
+        ("<r xmlns='urn:m'><n a='α😀'><n b='v'/></n></r>", 2),
+        ("<p:r xmlns:p='urn:π'><p:é a='v'><p:é/></p:é></p:r>", 2),
         // NUL and colon separators can make expanded and raw spellings equal.
-        "<r xmlns:p='p:'><p:n a='v'><p:n/></p:n></r>",
-        "<r xmlns:p='p'><p:n a='v'><p:n/></p:n></r>",
+        ("<r xmlns:p='p:'><p:n a='v'><p:n/></p:n></r>", 2),
+        ("<r xmlns:p='p'><p:n a='v'><p:n/></p:n></r>", 2),
+        // Live packed names exhaust both cached owners before a longer name.
+        (
+            "<r xmlns:p='urn:example'><p:node><p:node><p:node><p:élong a='v'/></p:node></p:node></p:node><p:node/></r>",
+            5,
+        ),
     ] {
         for separator in ['|', '\0', ':', 'λ'] {
             for triplets in [false, true] {
@@ -273,7 +278,10 @@ fn expanded_element_frames_preserve_packed_names_and_literal_attributes() {
                             adapter.0, owned.0,
                             "{input:?} {separator:?} {triplets} {chunk}"
                         );
-                        assert_eq!(adapter.1, 2, "{input:?} {separator:?} {triplets} {chunk}");
+                        assert_eq!(
+                            adapter.1, expected_frames,
+                            "{input:?} {separator:?} {triplets} {chunk}"
+                        );
                     }
                 }
             }

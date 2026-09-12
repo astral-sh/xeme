@@ -3450,11 +3450,24 @@ impl Parser {
             let expanded_end = value.len();
             let shared_suffix = value.ends_with(name);
             let additional = if shared_suffix { 0 } else { name.len() };
-            value.try_reserve(
-                additional
-                    .checked_add(1)
-                    .ok_or(AllocError::CapacityOverflow)?,
-            )?;
+            let capacity = expanded_end
+                .checked_add(additional)
+                .and_then(|length| length.checked_add(1))
+                .ok_or(AllocError::CapacityOverflow)?;
+            if value.capacity() < capacity {
+                // Keep the expansion scratch reusable when a nested name needs
+                // a larger packed owner. Suffixes with spare capacity still move.
+                let mut packed = self
+                    .event_recycling
+                    .take_name()
+                    .unwrap_or_else(|| String::new_in(self.allocator));
+                packed.clear();
+                packed.try_reserve(capacity)?;
+                packed.try_push_str(&value)?;
+                self.event_recycling
+                    .recycle_end(self.event_recycling.token(), value);
+                value = packed;
+            }
             let raw_start = if shared_suffix {
                 expanded_end - name.len()
             } else {

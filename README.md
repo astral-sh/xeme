@@ -16,16 +16,16 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole (normal) | Expat (normal) | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 44.647 ms | 29.000 ms | 1.549× |
-| Wayland protocol | 1.010 ms | 1.071 ms | 0.943× |
-| Maven POM | 0.763 ms | 0.442 ms | 1.726× |
-| Batik SVG | 0.130 ms | 0.133 ms | 0.976× |
-| GTK UI | 0.305 ms | 0.215 ms | 1.416× |
-| DocBook XSL | 0.253 ms | 0.186 ms | 1.363× |
+| Vulkan registry | 43.747 ms | 29.110 ms | 1.507× |
+| Wayland protocol | 0.995 ms | 1.072 ms | 0.928× |
+| Maven POM | 0.737 ms | 0.436 ms | 1.699× |
+| Batik SVG | 0.130 ms | 0.134 ms | 0.973× |
+| GTK UI | 0.300 ms | 0.214 ms | 1.404× |
+| DocBook XSL | 0.250 ms | 0.188 ms | 1.309× |
 
-These [native measurements](docs/validation/2026-09-12/attribute-lane-masks/) use the selected quoted-attribute SIMD classifier with the LF Text scanner on original XML from six pinned projects, 4 KiB chunks and namespaces disabled. They come from a monitored confirmation window on a shared Linux AMD EPYC-Milan host, with elapsed work pinned to CPU0; affinity does not establish isolation. Oriole uses normal O3/ThinLTO and one codegen unit with Ohm rustc 1.98.1-dev; Expat 2.8.4 uses GCC 13.3 O3 without LTO. Times are medians of seven process medians; ratios are medians of paired ratios.
+These [native measurements](docs/validation/2026-09-12/eager-bare-tag-positions/) use the selected eager-position shortcut for bare ASCII opening tags, with the preceding attribute and Text scanners, on original XML from six pinned projects, 4 KiB chunks and namespaces disabled. They come from a monitored confirmation window on a shared Linux AMD EPYC-Milan host, with elapsed work pinned to CPU0; affinity does not establish isolation. Oriole uses normal O3/ThinLTO and one codegen unit with Ohm rustc 1.98.1-dev; Expat 2.8.4 uses GCC 13.3 O3 without LTO. Times are medians of seven process medians; ratios are medians of paired ratios.
 
-Across their respective 24 real-project conditions, confirmation takes **1.39× Expat's native time and 1.15× its CPython time**, observed reductions of 2.39% and 1.60% against the preceding LF runtime. Both aggregates remain above the roughly 1.10× target; five of 24 CPython conditions meet it. Native improves in 21 conditions and CPython in 20. Generated time increases 3.08%, including entity regressions of 7.37% and 10.04%; the [full report](docs/validation/2026-09-12/attribute-lane-masks/) retains every regression, separate initial measurements and the rejected compact-owner experiment. Both attribute epochs show modest aggregate gains on real-project inputs; this is not a statistical-significance claim.
+Across their respective 24 real-project conditions, confirmation takes **1.36× Expat's native time and 1.15× its CPython time**, observed reductions of 2.10% and 0.40% against the preceding attribute runtime. Both aggregates remain above the roughly 1.10× target; five of 24 CPython conditions meet it. The pyexpat aggregate is 1.0998× Expat and ElementTree is 1.2045×. Native improves in 23 conditions and CPython in 16. Generated time decreases 3.98%, while the two rare-declaration cases regress 2.38% and 1.20%; Batik's 4 KiB/namespaces-off native case regresses 0.23%. The [full report](docs/validation/2026-09-12/eager-bare-tag-positions/) retains all eight Python confirmation regressions and all 20 adverse rows across separate initial and confirmation runs. The small Python gains are observations, not a statistical-significance claim; the performance and production-readiness goals remain open.
 
 ThinLTO is the default. The earlier [C allocator study](benchmarks/results/2026-09-11/c-allocators/) found less than 0.2% aggregate time change with jemalloc or mimalloc and higher peak resident memory, so the C allocator default remains unchanged.
 

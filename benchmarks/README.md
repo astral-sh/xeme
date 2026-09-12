@@ -1,12 +1,14 @@
 # Benchmarks
 
+The [eager bare-tag position study](../docs/validation/2026-09-12/eager-bare-tag-positions/) records selected `19251bc0` against the preceding attribute runtime. Confirmation observes 2.10% less real-project native time and 0.40% less CPython time, remaining 1.3581× and 1.1510× Expat. Native improves in 23/24 real conditions and CPython in 16/24; five Python conditions meet the roughly 1.10× goal. The [project table](../README.md) uses confirmation 4 KiB/namespaces-off measurements only: medians of seven process medians, with ratios computed separately as medians of paired ratios.
+
+The generated aggregate decreases 3.98%, while both rare-declaration cases regress 2.38% and 1.20%; Batik's 4 KiB/namespaces-off native case regresses 0.23%, and all eight Python confirmation regressions remain. The initial epoch separately observes 2.24% less native and 0.50% less CPython time. All four epochs retain 104 conditions, 20 adverse rows, 2,496 workers and 265,080 samples; no observations or medians are pooled. Before/during host observations and CPU0 affinity do not establish isolation or statistical significance. The local-proof follow-up is unbuilt and supplies no measurements.
+
 The [quoted-attribute lane-mask study](../docs/validation/2026-09-12/attribute-lane-masks/)
-records selected `91038723` and the separately rejected compact-owner experiment.
+records preceding `91038723` and the separately rejected compact-owner experiment.
 Confirmation observes 2.39% less native real-input time and 1.60% less CPython time
 against LF, remaining 1.3886× and 1.1535× Expat. Five of 24 Python conditions meet
-the roughly 1.10× goal. The [project table](../README.md) uses only confirmation
-4 KiB/namespaces-off measurements: medians of seven process medians, with ratios
-computed separately as medians of paired ratios. All three native real-input,
+the roughly 1.10× goal. Its source-specific project table remains in the attribute report. All three native real-input,
 two generated and four Python confirmation regressions remain; generated time
 increases 3.08%, including entity cases of 7.37% and 10.04%. The separate initial
 epoch and rejected compact owner remain in the report. All five campaigns retain

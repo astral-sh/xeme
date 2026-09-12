@@ -993,6 +993,19 @@ impl Source {
             &mut self.column,
             &mut self.previous_cr,
         );
+        self.finish_consume(count);
+    }
+
+    /// Commit native text whose scanner already computed the eager position delta.
+    pub(crate) fn consume_text(&mut self, plan: crate::text::TextPlan) {
+        debug_assert!(self.native_utf8_byte_index().is_some() && !self.has_conversions());
+        self.raw_index += self.raw_len(0, plan.end);
+        plan.advance_position(&mut self.line, &mut self.column, &mut self.previous_cr);
+        self.finish_consume(plan.end);
+    }
+
+    /// Retire consumed input and scanning state after coordinates are committed.
+    fn finish_consume(&mut self, count: usize) {
         self.cursor += count;
         self.scan = Scan::default();
         self.deferred_size = 0;
@@ -1300,6 +1313,46 @@ fn advance_long_position(text: &str, line: &mut usize, column: &mut usize, previ
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn planned_text_matches_eager_consumption_and_compaction() {
+        for text in [
+            "".to_string(),
+            "\n".to_string(),
+            "\nabc\t\n\nend\u{7f}".to_string(),
+            format!("a\n{}<tail>", "x".repeat(65_534)),
+        ] {
+            for previous_cr in [false, true] {
+                let make_source = || {
+                    let mut source = Source::new(Allocator::System, crate::NameRules::default());
+                    source.text.try_push_str(&text).unwrap();
+                    source.line = 7;
+                    source.column = 11;
+                    source.previous_cr = previous_cr;
+                    source.scan.mode = Some(ScanMode::Tag);
+                    source.deferred_size = 12;
+                    source
+                };
+                let mut original = make_source();
+                let mut planned = make_source();
+                let plan = crate::text::TextPlan::scan(&text).unwrap();
+                original.consume(plan.end);
+                planned.consume_text(plan);
+                assert_eq!(planned.position(0), original.position(0));
+                assert_eq!(planned.previous_cr, original.previous_cr);
+                assert_eq!(planned.remaining(), original.remaining());
+                assert_eq!(planned.cursor, original.cursor);
+                assert!(planned.scan.mode.is_none());
+                assert_eq!(planned.deferred_size, 0);
+                if plan.end == 65_536 {
+                    assert_eq!(planned.cursor, 0);
+                    assert_eq!(planned.remaining(), "<tail>");
+                    assert_eq!(planned.line, 8);
+                    assert_eq!(planned.column, 65_534);
+                }
+            }
+        }
+    }
 
     #[test]
     fn converted_positions_fit_at_the_source_bound() {

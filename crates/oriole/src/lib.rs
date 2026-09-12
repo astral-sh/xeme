@@ -14,6 +14,7 @@ mod lexical;
 mod names;
 mod recycling;
 mod tag;
+mod text;
 mod value;
 mod value_lexer;
 
@@ -2386,7 +2387,16 @@ impl Parser {
         let text = &self.source().remaining()[..limit];
         let final_text = self.is_source_final() && limit == self.source().remaining().len();
         let coalesce = !self.stack.is_empty() || self.fragment;
-        let fast_end = coalesce.then(|| coalesced_text_end(text)).flatten();
+        let text_plan = (coalesce
+            && !self.fragment
+            && !internal
+            && !self.source().has_conversions()
+            && self.source().native_utf8_byte_index().is_some())
+        .then(|| text::TextPlan::scan(text))
+        .flatten();
+        let fast_end = text_plan
+            .map(|plan| plan.end)
+            .or_else(|| coalesce.then(|| coalesced_text_end(text)).flatten());
         let mut end = fast_end.unwrap_or_else(|| {
             let mut boundary = 0;
             text.bytes()
@@ -2442,12 +2452,17 @@ impl Parser {
         if end == 0 {
             return Ok(false);
         }
-        let invalid = invalid_xml_char(&text[..end]);
-        // Borrow the fixed needle once; each search keeps its own local state.
-        static CDATA_END: OnceLock<memchr::memmem::Finder<'static>> = OnceLock::new();
-        let forbidden = CDATA_END
-            .get_or_init(|| memchr::memmem::Finder::new(b"]]>"))
-            .find(&text.as_bytes()[..end]);
+        let (invalid, forbidden) = if text_plan.is_some() {
+            (None, None)
+        } else {
+            let invalid = invalid_xml_char(&text[..end]);
+            // Borrow the fixed needle once; each search keeps its own local state.
+            static CDATA_END: OnceLock<memchr::memmem::Finder<'static>> = OnceLock::new();
+            let forbidden = CDATA_END
+                .get_or_init(|| memchr::memmem::Finder::new(b"]]>"))
+                .find(&text.as_bytes()[..end]);
+            (invalid, forbidden)
+        };
         if let Some(forbidden) =
             forbidden.filter(|forbidden| invalid.is_none_or(|invalid| invalid > *forbidden))
         {
@@ -2528,7 +2543,12 @@ impl Parser {
         let position = self.source().position(end);
         let character_data = !self.stack.is_empty() || self.fragment;
         let value = if character_data {
-            self.prepare_character_data(end, output.frame.as_deref_mut(), output.c_text_context)?
+            self.prepare_character_data(
+                end,
+                output.frame.as_deref_mut(),
+                output.c_text_context,
+                text_plan.is_some(),
+            )?
         } else {
             None
         };
@@ -2542,7 +2562,13 @@ impl Parser {
         } else if self.default_events {
             self.emit(EventKind::Default, position)?;
         }
-        self.consume(end)?;
+        if let Some(plan) = text_plan {
+            debug_assert_eq!(end, plan.end);
+            self.account_source(end)?;
+            self.source_mut().consume_text(plan);
+        } else {
+            self.consume(end)?;
+        }
         Ok(true)
     }
 
@@ -2596,7 +2622,7 @@ impl Parser {
             end = invalid;
         }
         let position = self.source().position(end);
-        let value = self.prepare_character_data(end, output.frame.as_deref_mut(), false)?;
+        let value = self.prepare_character_data(end, output.frame.as_deref_mut(), false, false)?;
         self.save_current_raw(end)?;
         self.consume(end)?;
         if let Some(value) = value {
@@ -3697,12 +3723,13 @@ impl Parser {
         count: usize,
         frame: Option<&mut AdapterFrame>,
         c_text_context: bool,
+        no_carriage_returns: bool,
     ) -> Result<Option<Text>, Error> {
         let text = &self.source().remaining()[..count];
         if let Some(frame) = frame
             && count <= arena::MAX_ARENA_BYTES
             && !self.source().has_conversions()
-            && (self.sources.len() > 1 || !text.contains('\r'))
+            && (no_carriage_returns || self.sources.len() > 1 || !text.contains('\r'))
         {
             if count > arena::INLINE_TEXT_BYTES {
                 self.event_recycling
@@ -3720,6 +3747,10 @@ impl Parser {
                 frame.prepare_text(&self.source().remaining()[..count])?;
             }
             Ok(None)
+        } else if no_carriage_returns {
+            Text::try_from_str_in(text, self.allocator)
+                .map(Some)
+                .map_err(Into::into)
         } else {
             self.character_data(text).map(Some)
         }

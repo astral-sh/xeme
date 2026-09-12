@@ -169,8 +169,6 @@ pub struct XML_ParserStruct {
     base: Option<CString>,
     buffer: XmlVec<u8>,
     buffer_available: bool,
-    input_context: XmlVec<u8>,
-    input_context_start: usize,
     input_context_active: bool,
     external_arg: *mut c_void,
     unknown_encoding_arg: *mut c_void,
@@ -316,6 +314,7 @@ unsafe fn create(
             };
             let mut core = Parser::try_new_with_encoding_in(config.clone(), encoding, allocator)
                 .map_err(|_| AllocError::OutOfMemory)?;
+            core.enable_input_context();
             core.set_notation_handler_enabled(false);
             core.set_attlist_handler_enabled(false);
             let position = core.position();
@@ -341,8 +340,6 @@ unsafe fn create(
                     base: None,
                     buffer: XmlVec::new_in(allocator),
                     buffer_available: false,
-                    input_context: XmlVec::new_in(allocator),
-                    input_context_start: 0,
                     input_context_active: false,
                     external_arg: ptr::null_mut(),
                     unknown_encoding_arg: ptr::null_mut(),
@@ -535,6 +532,7 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                     allocator,
                 )
                 .map_err(|_| AllocError::OutOfMemory)?;
+                core.enable_input_context();
                 core.set_hash_salt((*parser).core.hash_salt())
                     .map_err(|_| AllocError::OutOfMemory)?;
                 let family = Shared::try_new_in(FamilyBudget::default(), allocator)?;
@@ -571,8 +569,6 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                 (*parser).base = None;
                 (*parser).buffer.clear();
                 (*parser).buffer_available = false;
-                (*parser).input_context.clear();
-                (*parser).input_context_start = 0;
                 (*parser).external_arg = ptr::null_mut();
                 while (*parser).default_pending.pop_front().is_some() {}
                 (*parser).family = family;
@@ -1297,8 +1293,8 @@ unsafe fn dispatch_context_text(
         // SAFETY: Eager raw storage and the default dispatch path are unchanged.
         return unsafe { dispatch_unhandled(parser, false, None) };
     };
-    // SAFETY: Field-only borrows end before the callback. Vec::as_ptr does not
-    // create a slice reference. Checked offsets preserve its allocation provenance.
+    // SAFETY: The core's immutable context borrow ends before the callback.
+    // Checked offsets preserve the stable input allocation's provenance.
     let span = unsafe {
         (|| {
             if !(*parser).busy
@@ -1309,8 +1305,8 @@ unsafe fn dispatch_context_text(
             {
                 return None;
             }
-            let offset = start.checked_sub((*parser).input_context_start)?;
-            let context = &(*parser).input_context;
+            let (context, context_start) = (*parser).core.input_context();
+            let offset = start.checked_sub(context_start)?;
             let remaining = context.len().checked_sub(offset)?;
             if count > remaining {
                 return None;
@@ -1680,11 +1676,18 @@ pub unsafe extern "C" fn XML_Parse(
                 } else {
                     std::slice::from_raw_parts(input.cast::<u8>(), len as usize)
                 };
-                if preserve_input_context(parser, input).is_err() {
-                    fail_parse(parser, 1);
-                    return ERROR;
-                }
-                if let Err(error) = (*parser).core.feed(input, final_input != 0) {
+                let fed = match (*parser).core.feed_with_input_context(
+                    input,
+                    final_input != 0,
+                    INPUT_CONTEXT_BYTES,
+                ) {
+                    Ok(result) => result,
+                    Err(_) => {
+                        fail_parse(parser, 1);
+                        return ERROR;
+                    }
+                };
+                if let Err(error) = fed {
                     if error.kind == ErrorKind::UnknownEncoding && resolve_unknown_encoding(parser)
                     {
                         return run_events(parser);
@@ -2272,31 +2275,6 @@ pub unsafe extern "C" fn XML_GetParsingStatus(parser: XML_Parser, status: *mut X
     }
 }
 
-/// Retain original bytes around pending events, including split tokens and
-/// suspended input. The decoder may normalize or convert its own input, so its
-/// UTF-8 source buffer cannot implement the C API's raw-input contract.
-unsafe fn preserve_input_context(parser: XML_Parser, input: &[u8]) -> Result<(), AllocError> {
-    // SAFETY: The outer parse operation owns the busy guard. No context borrow
-    // crosses a callback, and this storage is distinct from XML_GetBuffer's data.
-    unsafe {
-        let context = &mut (*parser).input_context;
-        let discard = (*parser)
-            .core
-            .input_context_byte_index()
-            .saturating_sub((*parser).input_context_start)
-            .saturating_sub(INPUT_CONTEXT_BYTES)
-            .min(context.len());
-        context.drain(..discard);
-        (*parser).input_context_start += discard;
-        if !input.is_empty() && context.capacity() == 0 {
-            let minimum = INPUT_CONTEXT_BYTES.min((*parser).config.limits.max_total_bytes);
-            context.try_reserve(input.len().max(minimum))?;
-        }
-        oriole_storage::try_extend_from_slice(context, input)?;
-    }
-    Ok(())
-}
-
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn XML_GetInputContext(
     parser: XML_Parser,
@@ -2310,20 +2288,16 @@ pub unsafe extern "C" fn XML_GetInputContext(
     // Active parsing owns the input storage; recursive parse/reset/free cannot
     // invalidate it before the requesting callback returns.
     unsafe {
-        if !(*parser).input_context_active
-            || (*parser).destroying
-            || (*parser).input_context.is_empty()
-        {
+        if !(*parser).input_context_active || (*parser).destroying {
             return ptr::null();
         }
-        let Some(start) = (*parser)
-            .position
-            .byte_index
-            .checked_sub((*parser).input_context_start)
-        else {
+        let (context, context_start) = (*parser).core.input_context();
+        if context.is_empty() {
+            return ptr::null();
+        }
+        let Some(start) = (*parser).position.byte_index.checked_sub(context_start) else {
             return ptr::null();
         };
-        let context = &(*parser).input_context;
         if start > context.len() || (*parser).position.byte_count > context.len() - start {
             return ptr::null();
         }
@@ -2389,10 +2363,11 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                 }
                 let context = input_string(context)?;
                 let encoding = input_string(encoding)?;
-                let core = (*parser)
+                let mut core = (*parser)
                     .core
                     .external_child_with_encoding(context, encoding)
                     .map_err(|_| AllocError::OutOfMemory)?;
+                core.enable_input_context();
                 let position = core.position();
                 let allocator = (*parser).allocator;
                 let lifetime = Shared::try_new_in(AtomicPtr::new(ptr::null_mut()), allocator)?;
@@ -2420,8 +2395,6 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                             .transpose()?,
                         buffer: XmlVec::new_in(allocator),
                         buffer_available: false,
-                        input_context: XmlVec::new_in(allocator),
-                        input_context_start: 0,
                         input_context_active: false,
                         external_arg: (*parser).external_arg,
                         unknown_encoding_arg: (*parser).unknown_encoding_arg,

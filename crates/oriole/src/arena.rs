@@ -31,7 +31,7 @@ enum Payload {
 ///
 /// Start-tag slices include a trailing NUL; text is length-delimited. No
 /// parser borrow escapes. The explicit C host may instead receive a scalar
-/// original-input Text range. The raw token remains owned by the parser.
+/// original-input Text range. The parser retains the corresponding raw token.
 #[doc(hidden)]
 #[derive(Debug)]
 pub struct AdapterFrame {
@@ -239,9 +239,16 @@ impl AdapterFrame {
     #[doc(hidden)]
     #[must_use]
     pub fn native_text_range_for_c(&self) -> Option<(usize, usize)> {
-        if self.active
-            && let Payload::NativeText { start } = self.payload
-        {
+        if self.active {
+            self.prepared_native_text_range()
+        } else {
+            None
+        }
+    }
+
+    /// Copy the prepared native range for raw publication before frame publication.
+    pub(crate) fn prepared_native_text_range(&self) -> Option<(usize, usize)> {
+        if let Payload::NativeText { start } = self.payload {
             Some((start, self.callback_bytes))
         } else {
             None

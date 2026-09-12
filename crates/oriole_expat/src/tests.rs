@@ -521,8 +521,8 @@ fn source_bound_preflight_preserves_family_and_input_storage() {
                 let family = &(*parser).family;
                 family.input_bytes.get()
             };
-            let context = (*parser).input_context.clone();
-            let context_start = (*parser).input_context_start;
+            let context = (*parser).core.input_context().0.to_vec();
+            let context_start = (*parser).core.input_context().1;
             let buffer_capacity = (*parser).buffer.capacity();
             assert_eq!((*parser).core.input_bytes_remaining(), 0);
             assert!(XML_GetBuffer(parser, 1).is_null());
@@ -534,8 +534,8 @@ fn source_bound_preflight_preserves_family_and_input_storage() {
                 let family = &(*parser).family;
                 assert_eq!(family.input_bytes.get(), input);
             }
-            assert_eq!((*parser).input_context, context);
-            assert_eq!((*parser).input_context_start, context_start);
+            assert_eq!((*parser).core.input_context().0, context);
+            assert_eq!((*parser).core.input_context().1, context_start);
             assert_eq!((*parser).buffer.capacity(), buffer_capacity);
             assert!(!(*parser).final_buffer);
             XML_ParserFree(parser);
@@ -658,7 +658,7 @@ fn family_input_statistic_cannot_overflow_or_grant_work_credit() {
         }
         assert_eq!((*parser).tracker.direct_bytes(), 0);
         assert_eq!((*parser).core.work_bytes_limit(0), 0);
-        assert!((*parser).input_context.is_empty());
+        assert!((*parser).core.input_context().0.is_empty());
         XML_ParserFree(parser);
     }
 }
@@ -3479,7 +3479,8 @@ fn input_context_discards_consumed_eventless_whitespace() {
                     OK
                 );
                 assert!(
-                    (*parser).input_context.len() <= INPUT_CONTEXT_BYTES + whitespace.len() + 16
+                    (*parser).core.input_context().0.len()
+                        <= INPUT_CONTEXT_BYTES + whitespace.len() + 16
                 );
             }
             let suffix = if dtd {

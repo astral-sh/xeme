@@ -356,6 +356,7 @@ impl Parser {
         {
             if !self.standalone {
                 self.current_raw.clear();
+                self.native_raw = None;
                 return Some(crate::Event {
                     kind: EventKind::NotStandalone,
                     position: foreign.position,

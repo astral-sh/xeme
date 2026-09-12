@@ -178,6 +178,7 @@ impl Parser {
         self.current_raw
             .try_reserve(raw.len().saturating_sub(self.current_raw.len()))?;
         self.current_raw.clear();
+        self.native_raw = None;
         self.current_raw.try_push_str(&raw)?;
         self.emit(
             if unconditional {
@@ -554,5 +555,36 @@ mod tests {
         }
         assert!(appended && parser.is_finished());
         assert_eq!(names, ["a", "b"]);
+    }
+}
+
+#[cfg(test)]
+mod native_raw_tests {
+    use super::*;
+
+    #[test]
+    fn attlist_fragment_replaces_a_retained_context_raw_view() {
+        let input = b"<!DOCTYPE r [<!ATTLIST r a CDATA 'x'>]><r/>";
+        let mut parser = Parser::new(crate::Config::default());
+        parser.enable_input_context();
+        parser.set_default_events(true);
+        parser.feed(input, true).unwrap();
+        while parser.conditional.attlist.is_none() {
+            parser.next_event().unwrap().unwrap();
+        }
+        let mut state = parser.conditional.attlist.take().unwrap();
+        let end = state.token.len();
+        let expected = state.token[state.fragment_start..end].to_owned();
+        // Exercise the writer contract with an earlier retained root range.
+        parser.native_raw = Some(crate::NativeRawRange {
+            start: 0,
+            count: std::num::NonZeroUsize::new(3).unwrap(),
+        });
+        assert_eq!(parser.current_raw(), Some("<!D"));
+        parser.attlist_raw(&mut state, end, false).unwrap();
+        assert!(parser.native_raw.is_none());
+        assert_eq!(parser.current_raw(), Some(expected.as_str()));
+        parser.pop_event().unwrap();
+        assert_eq!(parser.current_raw(), Some(expected.as_str()));
     }
 }

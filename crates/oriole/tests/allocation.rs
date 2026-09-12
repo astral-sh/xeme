@@ -952,3 +952,69 @@ fn warmed_utf8_source_growth_preserves_selected_allocator_failures() {
     }
     check_allocations(workload);
 }
+
+#[test]
+fn native_raw_context_views_survive_every_feed_allocation_failure() {
+    fn workload(allocator: Allocator) -> Result<(), Error> {
+        // The first suffix forces native growth; the second forces Separate.
+        let large = [b'x'; 65_536];
+        for suffix in [large.as_slice(), b"\xff"] {
+            let mut parser = Parser::try_new_in(Config::default(), allocator)?;
+            parser.enable_input_context();
+            parser.feed(b"<r>twelve-bytes", false)?;
+            assert!(next_event(&mut parser)?.is_some());
+            let mut frame = parser.adapter_frame();
+            let result = (|| -> Result<(), Error> {
+                let mut event = None;
+                let before = CALLS.get();
+                assert!(
+                    parser
+                        .next_event_for_c_text_context_into(&mut event, &mut frame)?
+                        .is_some()
+                );
+                assert_eq!(frame.native_text_range_for_c(), Some((3, 12)));
+                assert_eq!(parser.current_raw(), Some("twelve-bytes"));
+                assert_eq!(
+                    CALLS.get(),
+                    before,
+                    "short native Text needs no raw allocation"
+                );
+                let (context, start) = parser.input_context();
+                assert_eq!(
+                    parser.current_raw().unwrap().as_ptr(),
+                    context[3 - start..].as_ptr()
+                );
+                let fed = parser.feed(suffix, false);
+                assert_eq!(parser.current_raw(), Some("twelve-bytes"));
+                if let Err(error) = fed {
+                    assert_eq!(error.kind, ErrorKind::NoMemory);
+                    let calls = CALLS.get();
+                    assert_eq!(parser.next_event().unwrap_err(), error);
+                    assert_eq!(parser.feed(b"ignored", true).unwrap_err(), error);
+                    assert_eq!(CALLS.get(), calls);
+                    return Err(error);
+                }
+                // Decoder allocation errors are delivered by next_event even
+                // when feed succeeds. Drain before accepting this workload.
+                let invalid = loop {
+                    match next_event(&mut parser) {
+                        Ok(Some(_)) => {}
+                        Ok(None) => break false,
+                        Err(error)
+                            if suffix == b"\xff" && error.kind == ErrorKind::InvalidToken =>
+                        {
+                            break true;
+                        }
+                        Err(error) => return Err(error),
+                    }
+                };
+                assert_eq!(invalid, suffix == b"\xff");
+                Ok(())
+            })();
+            parser.finish_adapter_frame(frame);
+            result?;
+        }
+        Ok(())
+    }
+    check_allocations(workload);
+}

@@ -617,6 +617,48 @@ fn check_allocations(workload: fn(Allocator) -> Result<(), Error>) {
 }
 
 #[test]
+fn malformed_declarations_preserve_every_selected_allocation_failure() {
+    fn declarations(allocator: Allocator) -> Result<(), Error> {
+        for native in [false, true] {
+            for context in [None, Some(Some("")), Some(None)] {
+                for input in [
+                    b"<?xml version='1.0' encoding 'UTF-8'?>".as_slice(),
+                    b"<?xml version='1.0' encoding='UTF-8' extra='x'?>",
+                    b"<?xml encoding='UTF8' version='1.0'?>",
+                    b"<?xml version='1.0' encoding='UTF8' extra='x'?>",
+                ] {
+                    let parent = Parser::try_new_in(Config::default(), allocator)?;
+                    let mut parser = match context {
+                        None => Parser::try_new_in(Config::default(), allocator)?,
+                        Some(context) => parent.external_child(context, None)?,
+                    };
+                    if native {
+                        parser.enable_input_context();
+                    }
+                    parser.feed(input, true)?;
+                    let error = next_event(&mut parser).unwrap_err();
+                    if error.kind == ErrorKind::NoMemory {
+                        return Err(error);
+                    }
+                    assert_eq!(
+                        error.kind,
+                        if context.is_none() {
+                            ErrorKind::XmlDeclaration
+                        } else {
+                            ErrorKind::TextDeclaration
+                        },
+                    );
+                    assert_eq!(parser.next_event().unwrap_err(), error);
+                    assert_eq!(parser.feed(&[], true).unwrap_err(), error);
+                }
+            }
+        }
+        Ok(())
+    }
+    check_allocations(declarations);
+}
+
+#[test]
 fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
     // SAFETY: The complete libc-backed suite retains ownership on failure and
     // frees each successful allocation through the same callbacks.

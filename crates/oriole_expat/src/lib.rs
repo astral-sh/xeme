@@ -244,6 +244,7 @@ fn error_code(kind: &ErrorKind) -> c_int {
         ErrorKind::ExternalEntityInAttribute => 16,
         ErrorKind::MisplacedXmlDeclaration => 17,
         ErrorKind::XmlDeclaration => 30,
+        ErrorKind::TextDeclaration => 31,
         ErrorKind::PublicId => 32,
         ErrorKind::UndeclaringPrefix => 28,
         ErrorKind::UnknownEncoding => 18,

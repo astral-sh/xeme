@@ -1,4 +1,4 @@
-use crate::{Error, ErrorKind, Position, ScanMode};
+use crate::{DeclarationContext, Error, ErrorKind, Position, ScanMode};
 use oriole_storage::{Allocator, Box, String, Vec, try_box, try_extend_from_slice};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -53,6 +53,7 @@ impl Detection {
         final_input: bool,
         max_token: usize,
         external_content: bool,
+        declaration_context: DeclarationContext,
     ) -> Result<Option<(Encoding, usize)>, Error> {
         // An explicitly labelled external text entity can begin with ordinary
         // Latin-1 bytes that happen to spell a Unicode byte-order mark.
@@ -161,6 +162,23 @@ impl Detection {
                         let encoding = Encoding::named(name);
                         let mismatch = name.eq_ignore_ascii_case("UTF-16")
                             || matches!(encoding, Some(Encoding::Utf16Le | Encoding::Utf16Be));
+                        if encoding.is_none()
+                            && !mismatch
+                            && declaration.len() + 2 <= max_token
+                            && declaration
+                                .bytes()
+                                .all(|byte| required_ascii(i32::from(byte)))
+                            && crate::malformed_ascii_declaration(
+                                &declaration[5..],
+                                declaration_context,
+                            )
+                        {
+                            // These bytes are invariant under every custom map.
+                            // Let ordinary token parsing publish the grammar error before any
+                            // unknown-encoding callback; never decode a valid
+                            // unknown encoding by assuming UTF-8.
+                            return Ok(Some((Encoding::Utf8, skip)));
+                        }
                         if encoding.is_none() || mismatch {
                             let offset = declaration.len() - rest.len() + 1;
                             let mut position = Position {
@@ -279,6 +297,7 @@ impl Decoder {
         source: &mut Source,
         max_token: usize,
         external_content: bool,
+        declaration_context: DeclarationContext,
     ) -> Result<(), Error> {
         if self.encoding == Some(Encoding::Utf8)
             && self.conversion.is_none()
@@ -311,6 +330,7 @@ impl Decoder {
                 final_input,
                 max_token,
                 external_content,
+                declaration_context,
             )?
             else {
                 return Ok(());
@@ -808,6 +828,7 @@ impl InputContext {
         final_input: bool,
         max_token: usize,
         external_content: bool,
+        declaration_context: DeclarationContext,
     ) -> Result<(), Error> {
         debug_assert!(self.native);
         if decoder.encoding == Some(Encoding::Utf8) {
@@ -820,6 +841,7 @@ impl InputContext {
             final_input,
             max_token,
             external_content,
+            declaration_context,
         );
         match detected {
             Ok(None) => Ok(()),
@@ -843,7 +865,14 @@ impl InputContext {
                 source.raw_index = skip;
                 source.column = usize::from(skip != 0);
                 decoder.pending.drain(..skip);
-                decoder.feed(&[], final_input, source, max_token, external_content)
+                decoder.feed(
+                    &[],
+                    final_input,
+                    source,
+                    max_token,
+                    external_content,
+                    declaration_context,
+                )
             }
         }
     }
@@ -1580,9 +1609,22 @@ mod tests {
                     for (part, final_input) in [(&bytes[..split], false), (&bytes[split..], true)] {
                         // A nonempty pending buffer selects the unchanged path.
                         buffered.append_pending(part).unwrap();
-                        let expected =
-                            buffered.feed(&[], final_input, &mut buffered_source, 64, false);
-                        let actual = direct.feed(part, final_input, &mut direct_source, 64, false);
+                        let expected = buffered.feed(
+                            &[],
+                            final_input,
+                            &mut buffered_source,
+                            64,
+                            false,
+                            DeclarationContext::Document,
+                        );
+                        let actual = direct.feed(
+                            part,
+                            final_input,
+                            &mut direct_source,
+                            64,
+                            false,
+                            DeclarationContext::Document,
+                        );
                         assert_eq!(actual, expected, "{bytes:?}, split {split}, warm {warm}");
                         assert_eq!(direct.pending, buffered.pending);
                         assert_eq!(direct.pending_cursor, buffered.pending_cursor);
@@ -1623,7 +1665,14 @@ mod tests {
                 // block or growth. Restoring pending must not request one.
                 tracker.set_activation_threshold(0);
                 let error = decoder
-                    .feed(&bytes, true, &mut source, 1024, false)
+                    .feed(
+                        &bytes,
+                        true,
+                        &mut source,
+                        1024,
+                        false,
+                        DeclarationContext::Document,
+                    )
                     .unwrap_err();
                 assert_eq!(error, Error::bare(ErrorKind::NoMemory, "out of memory"));
                 assert_eq!(decoder.pending.as_slice(), bytes.as_slice());
@@ -1635,7 +1684,16 @@ mod tests {
                 assert_eq!(tracker.live_bytes(), live);
                 tracker.set_activation_threshold(u64::MAX);
                 // The retained bytes are available to the ordinary decoder path.
-                decoder.feed(&[], true, &mut source, 1024, false).unwrap();
+                decoder
+                    .feed(
+                        &[],
+                        true,
+                        &mut source,
+                        1024,
+                        false,
+                        DeclarationContext::Document,
+                    )
+                    .unwrap();
                 assert!(decoder.pending.is_empty());
                 assert_eq!(source.text.len(), prefix.len() + bytes.len());
                 assert_eq!(

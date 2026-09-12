@@ -168,6 +168,8 @@ pub enum ErrorKind {
     ReservedNamespaceUri,
     LimitExceeded,
     Finished,
+    /// Malformed declaration at the start of an external text entity.
+    TextDeclaration,
 }
 
 impl fmt::Display for Error {
@@ -1403,6 +1405,14 @@ impl Parser {
             .map_or((&[], 0), |context| context.view(&self.sources[0]))
     }
 
+    fn declaration_context(&self) -> DeclarationContext {
+        if self.fragment && !self.is_external_value() {
+            DeclarationContext::Text
+        } else {
+            DeclarationContext::Document
+        }
+    }
+
     fn feed_inner(&mut self, bytes: &[u8], is_final: bool, native: bool) -> Result<(), Error> {
         if let Some(error) = &self.error {
             return Err(*error);
@@ -1432,6 +1442,7 @@ impl Parser {
             }
             return Ok(());
         }
+        let declaration_context = self.declaration_context();
         let decoded = if native {
             self.input_context
                 .as_mut()
@@ -1442,6 +1453,7 @@ impl Parser {
                     is_final,
                     self.config.limits.max_token_bytes,
                     self.fragment && !self.external_subset,
+                    declaration_context,
                 )
         } else {
             self.decoder.feed(
@@ -1450,6 +1462,7 @@ impl Parser {
                 &mut self.sources[0],
                 self.config.limits.max_token_bytes,
                 self.fragment && !self.external_subset,
+                declaration_context,
             )
         };
         if let Err(error) = decoded {
@@ -1578,12 +1591,14 @@ impl Parser {
         self.mark_parameter_read();
         self.error = None;
         self.decoding_error = None;
+        let declaration_context = self.declaration_context();
         if let Err(error) = self.decoder.feed(
             &[],
             self.final_input,
             &mut self.sources[0],
             self.config.limits.max_token_bytes,
             self.fragment && !self.external_subset,
+            declaration_context,
         ) {
             self.decoding_error = Some((error.kind, error.message));
         }
@@ -1619,12 +1634,14 @@ impl Parser {
             self.error = Some(error);
             return Err(error);
         }
+        let declaration_context = self.declaration_context();
         if let Err(error) = self.decoder.feed(
             &[],
             self.final_input,
             &mut self.sources[0],
             self.config.limits.max_token_bytes,
             self.fragment && !self.external_subset,
+            declaration_context,
         ) {
             self.decoding_error = Some((error.kind, error.message));
         }
@@ -3217,12 +3234,20 @@ impl Parser {
             ));
         }
         if target.eq_ignore_ascii_case("xml") {
-            if target != "xml" || !self.declaration_allowed || self.sources.len() > 1 {
+            if target != "xml" {
+                return Err(self.err(
+                    ErrorKind::InvalidToken,
+                    "reserved processing instruction target",
+                ));
+            }
+            if !self.declaration_allowed || self.sources.len() > 1 {
                 return Err(self.err(
                     ErrorKind::MisplacedXmlDeclaration,
                     "XML declaration is not at the beginning",
                 ));
             }
+            let context = self.declaration_context();
+            let declaration_error = context.error_kind();
             let mut attrs = Vec::new_in(self.allocator);
             parse_raw_attributes(rest, false, &mut attrs, 3, self.config.name_rules).map_err(
                 |error| {
@@ -3230,112 +3255,57 @@ impl Parser {
                         if error.kind == ErrorKind::NoMemory {
                             ErrorKind::NoMemory
                         } else {
-                            ErrorKind::XmlDeclaration
+                            declaration_error
                         },
                         error.message,
                         2 + target.len() + error.position.byte_index,
                     )
                 },
             )?;
-            if self.fragment && !self.is_external_value() {
-                let mut attrs = attrs.into_iter().map(|attribute| attribute.parts(rest));
-                let first = attrs
-                    .next()
-                    .ok_or_else(|| self.err(ErrorKind::XmlDeclaration, "empty text declaration"))?;
-                let (version, encoding_attr) = if first.0 == "version" {
-                    (
-                        Some(token.for_slice(first.1).decode(self.allocator)?),
-                        attrs.next(),
-                    )
-                } else {
-                    (None, Some(first))
-                };
-                let (name, encoding, _, _) = encoding_attr.ok_or_else(|| {
-                    self.err(
-                        ErrorKind::XmlDeclaration,
-                        "text declaration requires an encoding",
-                    )
-                })?;
-                let encoding = token.for_slice(encoding).decoded(self.allocator)?;
-                if name != "encoding" || !valid_encoding_name(&encoding) || attrs.next().is_some() {
-                    return Err(self.err(ErrorKind::XmlDeclaration, "invalid text declaration"));
-                }
+            let allocator = self.allocator;
+            let Declaration {
+                version,
+                encoding,
+                standalone,
+            } = declaration_fields(rest, &attrs, context, |value| {
+                token.for_slice(value).decoded(allocator)
+            })
+            .map_err(|failure| match failure {
+                DeclarationFailure::Allocation(error) => Error::from(error),
+                DeclarationFailure::Syntax {
+                    message,
+                    offset: Some(offset),
+                } => self.err_at(declaration_error, message, 2 + target.len() + offset),
+                DeclarationFailure::Syntax {
+                    message,
+                    offset: None,
+                } => self.err(declaration_error, message),
+            })?;
+            let version = version
+                .map(|version| version.into_owned(allocator))
+                .transpose()?;
+            // Grammar is complete before an encoding error can invoke an adapter callback.
+            if let Some(encoding) = &encoding {
                 self.decoder
-                    .check_declaration(&encoding)
+                    .check_declaration(encoding)
                     .map_err(|error| self.err(error.kind, error.message))?;
+            }
+            if context == DeclarationContext::Text {
                 self.declaration_allowed = false;
                 self.emit(
                     EventKind::TextDeclaration {
                         version,
-                        encoding: string(&encoding, self.allocator)?,
+                        encoding: string(&encoding.expect("validated text encoding"), allocator)?,
                     },
                     position,
                 )?;
                 return Ok(());
             }
-            let version = attrs
-                .first()
-                .map(|attribute| {
-                    token
-                        .for_slice(attribute.value(rest))
-                        .decoded(self.allocator)
-                })
+            let version = version.expect("validated document version");
+            let encoding = encoding
+                .map(|encoding| encoding.into_owned(allocator))
                 .transpose()?;
-            if attrs.is_empty()
-                || attrs[0].name(rest) != "version"
-                || !version.as_ref().is_some_and(|version| {
-                    !version.is_empty()
-                        && version.bytes().all(|byte| {
-                            byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_')
-                        })
-                })
-            {
-                return Err(self.err_at(
-                    ErrorKind::XmlDeclaration,
-                    "XML declaration must begin with a version",
-                    2 + target.len() + attrs.first().map_or(0, |attribute| attribute.name_start),
-                ));
-            }
-            let version = version
-                .expect("validated declaration version")
-                .into_owned(self.allocator)?;
-            let mut encoding = None;
-            let mut standalone = None;
-            for attribute in attrs.into_iter().skip(1) {
-                let (name, value, _, _) = attribute.parts(rest);
-                match name {
-                    "encoding" if encoding.is_none() && standalone.is_none() => {
-                        let value = token.for_slice(value).decoded(self.allocator)?;
-                        if !valid_encoding_name(&value) {
-                            return Err(
-                                self.err(ErrorKind::XmlDeclaration, "invalid encoding name")
-                            );
-                        }
-                        self.decoder
-                            .check_declaration(&value)
-                            .map_err(|error| self.err(error.kind, error.message))?;
-                        encoding = Some(value.into_owned(self.allocator)?);
-                    }
-                    "standalone" if standalone.is_none() => {
-                        standalone = Some(match value {
-                            "yes" => true,
-                            "no" => false,
-                            _ => {
-                                return Err(self.err(
-                                    ErrorKind::XmlDeclaration,
-                                    "invalid standalone declaration",
-                                ));
-                            }
-                        });
-                    }
-                    _ => {
-                        return Err(self.err(
-                            ErrorKind::XmlDeclaration,
-                            "invalid XML declaration attribute",
-                        ));
-                    }
-                }
-            }
+            drop(attrs);
             self.standalone =
                 standalone == Some(true) || (self.is_external_value() && self.standalone);
             if standalone == Some(true) && self.parameter_mode == 1 {
@@ -4456,6 +4426,156 @@ impl RawAttribute {
             self.name_start,
             self.value_start,
         )
+    }
+}
+
+/// Declaration grammar is independent of the encoding-detection BOM policy.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum DeclarationContext {
+    Document,
+    Text,
+}
+
+impl DeclarationContext {
+    fn error_kind(self) -> ErrorKind {
+        match self {
+            Self::Document => ErrorKind::XmlDeclaration,
+            Self::Text => ErrorKind::TextDeclaration,
+        }
+    }
+}
+
+struct Declaration<'a> {
+    version: Option<lexical::Decoded<'a>>,
+    encoding: Option<lexical::Decoded<'a>>,
+    standalone: Option<bool>,
+}
+
+enum DeclarationFailure {
+    Syntax {
+        message: &'static str,
+        offset: Option<usize>,
+    },
+    Allocation(AllocError),
+}
+
+/// Validate complete fields before checking their declared encoding. The caller
+/// supplies lexical decoding; bootstrap ASCII values use borrowed slices only.
+fn declaration_fields<'a>(
+    rest: &'a str,
+    attrs: &[RawAttribute],
+    context: DeclarationContext,
+    mut decode: impl FnMut(&'a str) -> Result<lexical::Decoded<'a>, AllocError>,
+) -> Result<Declaration<'a>, DeclarationFailure> {
+    let syntax = |message| DeclarationFailure::Syntax {
+        message,
+        offset: None,
+    };
+    let mut decode = |value: &'a str| decode(value).map_err(DeclarationFailure::Allocation);
+    if context == DeclarationContext::Text {
+        let mut attrs = attrs.iter().map(|attribute| attribute.parts(rest));
+        let first = attrs
+            .next()
+            .ok_or_else(|| syntax("empty text declaration"))?;
+        let (version, encoding_attr) = if first.0 == "version" {
+            (Some(decode(first.1)?), attrs.next())
+        } else {
+            (None, Some(first))
+        };
+        let (name, encoding, _, _) =
+            encoding_attr.ok_or_else(|| syntax("text declaration requires an encoding"))?;
+        let encoding = decode(encoding)?;
+        if name != "encoding" || !valid_encoding_name(&encoding) || attrs.next().is_some() {
+            return Err(syntax("invalid text declaration"));
+        }
+        return Ok(Declaration {
+            version,
+            encoding: Some(encoding),
+            standalone: None,
+        });
+    }
+    let version = attrs
+        .first()
+        .map(|attribute| decode(attribute.value(rest)))
+        .transpose()?;
+    if attrs.is_empty()
+        || attrs[0].name(rest) != "version"
+        || !version.as_ref().is_some_and(|version| {
+            !version.is_empty()
+                && version
+                    .bytes()
+                    .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_'))
+        })
+    {
+        return Err(DeclarationFailure::Syntax {
+            message: "XML declaration must begin with a version",
+            offset: Some(attrs.first().map_or(0, |attribute| attribute.name_start)),
+        });
+    }
+    let mut encoding = None;
+    let mut standalone = None;
+    for attribute in attrs.iter().skip(1) {
+        let (name, value, _, _) = attribute.parts(rest);
+        match name {
+            "encoding" if encoding.is_none() && standalone.is_none() => {
+                let value = decode(value)?;
+                if !valid_encoding_name(&value) {
+                    return Err(syntax("invalid encoding name"));
+                }
+                encoding = Some(value);
+            }
+            "standalone" if standalone.is_none() => {
+                standalone = Some(match value {
+                    "yes" => true,
+                    "no" => false,
+                    _ => return Err(syntax("invalid standalone declaration")),
+                });
+            }
+            _ => return Err(syntax("invalid XML declaration attribute")),
+        }
+    }
+    Ok(Declaration {
+        version,
+        encoding,
+        standalone,
+    })
+}
+
+/// Prove malformed syntax only in a complete bounded ASCII bootstrap declaration.
+/// Ordinary parsing still reports the error after token limits, raw publication
+/// and source accounting. This helper creates no owned values or parser state.
+fn malformed_ascii_declaration(rest: &str, context: DeclarationContext) -> bool {
+    debug_assert!(rest.is_ascii());
+    if invalid_xml_char(rest).is_some() {
+        return true;
+    }
+    let empty = RawAttribute {
+        name_start: 0,
+        name_end: 0,
+        value_start: 0,
+        value_end: 0,
+    };
+    let mut attrs = [empty; 3];
+    let mut count = 0;
+    let mut scanner = tag::AttributeScanner::new(0);
+    loop {
+        // Fourth/Fifth edition name rules agree for this proven ASCII input.
+        match scanner.next(rest, true, false, false, 3, NameRules::default()) {
+            Ok(tag::Step::Attribute(attribute)) => {
+                attrs[count] = attribute;
+                count += 1;
+            }
+            Ok(tag::Step::End) => {
+                return declaration_fields(rest, &attrs[..count], context, |value| {
+                    Ok(lexical::Decoded::Borrowed(value))
+                })
+                .is_err();
+            }
+            Err(_) => return true,
+            Ok(tag::Step::Incomplete | tag::Step::TagEnd { .. }) => {
+                unreachable!("complete attribute view excludes a tag delimiter")
+            }
+        }
     }
 }
 

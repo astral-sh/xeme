@@ -821,6 +821,414 @@ unsafe extern "C" fn external_entity(
 }
 
 #[test]
+fn external_declaration_errors_keep_their_codes_in_each_child_context() {
+    struct DeclarationCase {
+        input: &'static [u8],
+        width: usize,
+        expected: c_int,
+        parameter: bool,
+        calls: usize,
+    }
+    unsafe extern "C" fn external(
+        parent: XML_Parser,
+        context: *const c_char,
+        _: *const c_char,
+        _: *const c_char,
+        _: *const c_char,
+    ) -> c_int {
+        // SAFETY: State and input are test-owned, and the child is freed before
+        // returning to its parent. No borrowed state is held across parser calls.
+        unsafe {
+            let state = XML_GetUserData(parent).cast::<DeclarationCase>();
+            let (input, width, expected, parameter) = (
+                (*state).input,
+                (*state).width,
+                (*state).expected,
+                (*state).parameter,
+            );
+            assert_eq!(context.is_null(), parameter);
+            let child = XML_ExternalEntityParserCreate(parent, context, ptr::null());
+            assert!(!child.is_null());
+            let mut status = OK;
+            for (index, bytes) in input.chunks(width).enumerate() {
+                status = XML_Parse(
+                    child,
+                    bytes.as_ptr().cast(),
+                    bytes.len() as c_int,
+                    c_int::from((index + 1) * width >= input.len()),
+                );
+                if status == ERROR {
+                    break;
+                }
+            }
+            assert_eq!(status, ERROR);
+            assert_eq!(XML_GetErrorCode(child), expected);
+            let position = (
+                XML_GetCurrentByteIndex(child),
+                XML_GetCurrentLineNumber(child),
+                XML_GetCurrentColumnNumber(child),
+            );
+            assert_eq!(XML_Parse(child, c"".as_ptr(), 0, 1), ERROR);
+            assert_eq!(XML_GetErrorCode(child), expected);
+            assert_eq!(
+                (
+                    XML_GetCurrentByteIndex(child),
+                    XML_GetCurrentLineNumber(child),
+                    XML_GetCurrentColumnNumber(child)
+                ),
+                position
+            );
+            XML_ParserFree(child);
+            (*state).calls += 1;
+            ERROR
+        }
+    }
+    let documents = [
+        (
+            b"<!DOCTYPE r [<!ENTITY e SYSTEM 'e'>]><r>&e;</r>".as_slice(),
+            false,
+        ),
+        (b"<!DOCTYPE r SYSTEM 'e'><r/>", true),
+        (b"<!DOCTYPE r [<!ENTITY % e SYSTEM 'e'>%e;]><r/>", true),
+    ];
+    for (input, expected) in [
+        (b"<?xml version='1.0'?>".as_slice(), 31),
+        (
+            b"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>",
+            31,
+        ),
+        (b"<?xml version='1.0' encoding 'UTF-8'?>", 31),
+        (b"<?XML encoding='UTF8'?>", 4),
+        (b"<?xml encoding='UTF8' version='1.0'?>", 31),
+        (b"<?xml version='1.0' encoding='UTF8' extra='x'?>", 31),
+        (b"<?xml version='1.0' encoding='UTF8'?>", 18),
+    ] {
+        for (document, parameter) in documents {
+            for width in [1, 7, input.len()] {
+                let mut state = DeclarationCase {
+                    input,
+                    width,
+                    expected,
+                    parameter,
+                    calls: 0,
+                };
+                // SAFETY: Callback state stays live through all parent/child calls.
+                unsafe {
+                    let parent = XML_ParserCreate(ptr::null());
+                    assert!(!parent.is_null());
+                    XML_SetUserData(parent, ptr::from_mut(&mut state).cast());
+                    XML_SetExternalEntityRefHandler(parent, Some(external));
+                    assert_eq!(XML_SetParamEntityParsing(parent, 2), 1);
+                    assert_eq!(
+                        XML_Parse(parent, document.as_ptr().cast(), document.len() as c_int, 1),
+                        ERROR
+                    );
+                    assert_eq!(XML_GetErrorCode(parent), 21);
+                    XML_ParserFree(parent);
+                }
+                assert_eq!(state.calls, 1);
+            }
+        }
+    }
+}
+
+#[test]
+fn unknown_encoding_callbacks_follow_complete_declaration_grammar() {
+    #[derive(Default)]
+    struct EncodingState {
+        requested: Vec<String>,
+        accept: bool,
+        releases: usize,
+        remapping: u8,
+        conversions: usize,
+    }
+    unsafe extern "C" fn release(data: *mut c_void) {
+        // SAFETY: Test state outlives every parser using this encoding instance.
+        unsafe {
+            (*data.cast::<EncodingState>()).releases += 1;
+        }
+    }
+    unsafe extern "C" fn convert(data: *mut c_void, bytes: *const c_char) -> c_int {
+        // SAFETY: The registered map requests exactly two bytes; the state lives
+        // until the parser releases the encoding instance.
+        unsafe {
+            assert_eq!(std::slice::from_raw_parts(bytes.cast::<u8>(), 2), b"@$");
+            (*data.cast::<EncodingState>()).conversions += 1;
+        }
+        i32::from(b'1')
+    }
+    unsafe extern "C" fn unknown(
+        data: *mut c_void,
+        name: *const c_char,
+        info: *mut XML_Encoding,
+    ) -> c_int {
+        // SAFETY: The name and writable record belong to this callback; state
+        // remains live until the parser and any child have both been destroyed.
+        unsafe {
+            let state = data.cast::<EncodingState>();
+            (*state)
+                .requested
+                .push(CStr::from_ptr(name).to_str().unwrap().to_owned());
+            if !(*state).accept {
+                return ERROR;
+            }
+            (*info).map = std::array::from_fn(|index| index as i32);
+            match (*state).remapping {
+                1 => (*info).map[1] = 0x100,
+                2 => {
+                    (*info).map[usize::from(b'@')] = -2;
+                    (*info).convert = Some(convert);
+                }
+                _ => {}
+            }
+            (*info).data = data;
+            (*info).release = Some(release);
+            OK
+        }
+    }
+    // Unrequested ASCII, explicit UTF-8, explicit custom, sniffed UTF-16,
+    // and ASCII bytes with a mismatching UTF-16 declaration.
+    for mode in 0..5 {
+        // Context: root, directly created general child, parameter/subset child.
+        for context in 0..3 {
+            for case in 0..4 {
+                let encoding = if mode >= 3 { "UTF-16" } else { "UTF8" };
+                let header = match case {
+                    0 => format!("<?xml encoding='{encoding}' version='1.0'?>"),
+                    1 => format!("<?xml version='1.0' encoding='{encoding}' extra='x'?>"),
+                    2 => format!("<?xml version='1.0' encoding='{encoding}'?>"),
+                    _ => format!("<?XML encoding='{encoding}'?>"),
+                };
+                let document = if context == 2 {
+                    header.clone()
+                } else {
+                    format!("{header}<r/>")
+                };
+                for bom in [false, true] {
+                    // Explicit custom encodings reject a BOM before grammar;
+                    // UTF-16 uses its own BOM in its single iteration.
+                    if bom && mode != 0 {
+                        continue;
+                    }
+                    let bytes = if mode == 3 {
+                        [
+                            b"\xff\xfe".as_slice(),
+                            &document
+                                .encode_utf16()
+                                .flat_map(u16::to_le_bytes)
+                                .collect::<Vec<_>>(),
+                        ]
+                        .concat()
+                    } else if bom {
+                        [b"\xef\xbb\xbf".as_slice(), document.as_bytes()].concat()
+                    } else {
+                        document.as_bytes().to_vec()
+                    };
+                    for accept in [false, true] {
+                        let calls = usize::from(mode == 2 || (mode == 0 && case == 2));
+                        let grammar_error = if context == 0 { 30 } else { 31 };
+                        let expected = if mode == 4 && case != 3 {
+                            19
+                        } else if calls != 0 && !accept {
+                            18
+                        } else if case == 3 {
+                            4
+                        } else if case < 2 {
+                            grammar_error
+                        } else {
+                            0
+                        };
+                        let mut first_position = None;
+                        for split in 0..=bytes.len() {
+                            let mut state = EncodingState {
+                                accept,
+                                ..EncodingState::default()
+                            };
+                            // SAFETY: All handles, input spans and callback state
+                            // are test-owned. No state borrow crosses a parser call.
+                            unsafe {
+                                let requested = match mode {
+                                    1 => c"UTF-8".as_ptr(),
+                                    2 => c"custom".as_ptr(),
+                                    _ => ptr::null(),
+                                };
+                                let parent = XML_ParserCreate(if context == 0 {
+                                    requested
+                                } else {
+                                    ptr::null()
+                                });
+                                assert!(!parent.is_null());
+                                let parser = if context == 0 {
+                                    parent
+                                } else {
+                                    XML_ExternalEntityParserCreate(
+                                        parent,
+                                        if context == 1 {
+                                            c"".as_ptr()
+                                        } else {
+                                            ptr::null()
+                                        },
+                                        requested,
+                                    )
+                                };
+                                assert!(!parser.is_null());
+                                XML_SetUnknownEncodingHandler(
+                                    parser,
+                                    Some(unknown),
+                                    ptr::from_mut(&mut state).cast(),
+                                );
+                                let mut status = OK;
+                                for (part, final_input) in
+                                    [(&bytes[..split], 0), (&bytes[split..], 1)]
+                                {
+                                    status = XML_Parse(
+                                        parser,
+                                        part.as_ptr().cast(),
+                                        part.len() as c_int,
+                                        final_input,
+                                    );
+                                    if status == ERROR {
+                                        break;
+                                    }
+                                }
+                                assert_eq!(
+                                    status,
+                                    if expected == 0 { OK } else { ERROR },
+                                    "mode={mode}, context={context}, case={case}, split={split}, accept={accept}"
+                                );
+                                assert_eq!(XML_GetErrorCode(parser), expected);
+                                if expected != 0 {
+                                    let position = (
+                                        XML_GetCurrentByteIndex(parser),
+                                        XML_GetCurrentLineNumber(parser),
+                                        XML_GetCurrentColumnNumber(parser),
+                                    );
+                                    assert_eq!(*first_position.get_or_insert(position), position);
+                                }
+                                if mode == 0 && case < 2 && context != 2 {
+                                    assert_eq!((*parser).core.current_raw(), Some(header.as_str()));
+                                }
+                                if context != 0 {
+                                    XML_ParserFree(parser);
+                                }
+                                XML_ParserFree(parent);
+                            }
+                            assert_eq!(state.requested.len(), calls);
+                            if calls != 0 {
+                                assert_eq!(
+                                    state.requested,
+                                    [if mode == 2 { "custom" } else { "UTF8" }]
+                                );
+                            }
+                            assert_eq!(state.releases, usize::from(calls != 0 && accept));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ASCII bytes outside required markup may decode differently. Preserve the
+    // existing custom-map path before deciding grammar, including a multibyte
+    // sequence whose decoded document version is valid. TextDecl versions keep
+    // their existing permissive grammar.
+    for remapping in 1..=2 {
+        let version = if remapping == 1 { "\u{1}" } else { "@$" };
+        for context in 0..3 {
+            for explicit in [false, true] {
+                for malformed_tail in [false, true] {
+                    let tail = if malformed_tail { " extra='x'" } else { "" };
+                    let header = format!("<?xml version='{version}' encoding='X-CUSTOM'{tail}?>");
+                    let document = if context == 2 {
+                        header
+                    } else {
+                        format!("{header}<r/>")
+                    };
+                    let bytes = document.as_bytes();
+                    for accept in [false, true] {
+                        let expected = if !accept {
+                            18
+                        } else if malformed_tail || (remapping == 1 && context == 0) {
+                            if context == 0 { 30 } else { 31 }
+                        } else {
+                            0
+                        };
+                        for split in 0..=bytes.len() {
+                            let mut state = EncodingState {
+                                accept,
+                                remapping,
+                                ..EncodingState::default()
+                            };
+                            // SAFETY: Handles and callback state remain live across
+                            // both feeds; state is read only after freeing all handles.
+                            unsafe {
+                                let requested = if explicit {
+                                    c"X-CUSTOM".as_ptr()
+                                } else {
+                                    ptr::null()
+                                };
+                                let parent = XML_ParserCreate(if context == 0 {
+                                    requested
+                                } else {
+                                    ptr::null()
+                                });
+                                assert!(!parent.is_null());
+                                let parser = if context == 0 {
+                                    parent
+                                } else {
+                                    XML_ExternalEntityParserCreate(
+                                        parent,
+                                        if context == 1 {
+                                            c"".as_ptr()
+                                        } else {
+                                            ptr::null()
+                                        },
+                                        requested,
+                                    )
+                                };
+                                assert!(!parser.is_null());
+                                XML_SetUnknownEncodingHandler(
+                                    parser,
+                                    Some(unknown),
+                                    ptr::from_mut(&mut state).cast(),
+                                );
+                                let mut status = OK;
+                                for (part, final_input) in
+                                    [(&bytes[..split], 0), (&bytes[split..], 1)]
+                                {
+                                    status = XML_Parse(
+                                        parser,
+                                        part.as_ptr().cast(),
+                                        part.len() as c_int,
+                                        final_input,
+                                    );
+                                    if status == ERROR {
+                                        break;
+                                    }
+                                }
+                                assert_eq!(
+                                    status,
+                                    if expected == 0 { OK } else { ERROR },
+                                    "remapping={remapping}, context={context}, explicit={explicit}, malformed_tail={malformed_tail}, accept={accept}, split={split}"
+                                );
+                                assert_eq!(XML_GetErrorCode(parser), expected);
+                                if context != 0 {
+                                    XML_ParserFree(parser);
+                                }
+                                XML_ParserFree(parent);
+                            }
+                            assert_eq!(state.requested, ["X-CUSTOM"]);
+                            assert_eq!(state.releases, usize::from(accept));
+                            assert_eq!(state.conversions, usize::from(accept && remapping == 2));
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn external_callback_can_parse_an_inherited_fragment() {
     // SAFETY: Parent and child callbacks use the same serialized test-owned state.
     unsafe {

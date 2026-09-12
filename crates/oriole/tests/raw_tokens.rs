@@ -9,6 +9,8 @@ fn terminal_errors_retain_complete_raw_markup_in_every_feed_boundary() {
             "<?xml version='1.0'?>",
             ErrorKind::MisplacedXmlDeclaration,
         ),
+        ("", "<?XML?>", ErrorKind::InvalidToken),
+        ("<r>", "<?XmL encoding='UTF8'?>", ErrorKind::InvalidToken),
         ("<r>", "<n a='1' a='2'/>", ErrorKind::DuplicateAttribute),
         ("<r>", "<missing:n/>", ErrorKind::UndefinedPrefix),
         ("<r>", "</wrong>", ErrorKind::TagMismatch),

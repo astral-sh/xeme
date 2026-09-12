@@ -210,6 +210,16 @@ license directory, and its extension metadata references Oriole's notices.
 
 ### Current normal generic validation
 
+The [current normal installed result](../../docs/validation/2026-09-12/pbs-current-normal/)
+for selected runtime `6320d7b7` is recorded from
+[PR164 attempt 1](https://github.com/astral-sh/oriole/actions/runs/34697381695/attempts/1).
+Archive validation and custom checks pass; the installed parser identifies Oriole
+and completes 1,024 threaded parses on glibc 2.17. Both installed XML campaigns
+retain the two known text-grouping failures, including the main campaign's retries,
+so the workflow remains failed. This generic build uses normal Rust ThinLTO and
+PBS's CPython `noopt` variant, with no PGO. Installed-interpreter performance was
+not measured.
+
 To validate a newly selected runtime, open a dedicated integration pull request
 from its published commit. The [PBS distribution workflow](../../.github/workflows/pbs.yml)
 runs for changes to this integration directory or that workflow when the head

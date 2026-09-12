@@ -420,9 +420,19 @@ fn every_allocation_can_fail_and_all_memory_uses_the_selected_suite() {
 
 #[test]
 fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
-    fn frames(allocator: Allocator) -> Result<(), Error> {
-        let mut parser = Parser::try_new_in(Config::default(), allocator)?;
-        parser.feed(b"<r>inline\nabcdefghijklmnopqrstuvwxyz1234567890<n a='first' b='value'/><![CDATA[abcdefghijklmnopqrstuvwxyz1234567890]]><n a='second' b='new'/>fallback\r\n<n a='literal' b='other'/><n a='&amp;'/><n a='last'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/>abcdefghijklmnopqrstuvwxyz1234567890</r>", true)?;
+    fn frames(
+        allocator: Allocator,
+        namespace_separator: Option<char>,
+        input: &[u8],
+    ) -> Result<(), Error> {
+        let mut parser = Parser::try_new_in(
+            Config {
+                namespace_separator,
+                ..Config::default()
+            },
+            allocator,
+        )?;
+        parser.feed(input, true)?;
         let mut frame = parser.adapter_frame();
         let result = (|| {
             loop {
@@ -475,7 +485,14 @@ fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
         parser.finish_adapter_frame(frame);
         result
     }
-    check_allocations(frames);
+    check_allocations(|allocator| {
+        frames(allocator, None, b"<r>inline\nabcdefghijklmnopqrstuvwxyz1234567890<n a='first' b='value'/><![CDATA[abcdefghijklmnopqrstuvwxyz1234567890]]><n a='second' b='new'/>fallback\r\n<n a='literal' b='other'/><n a='&amp;'/><n a='last'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/>abcdefghijklmnopqrstuvwxyz1234567890</r>")?;
+        frames(allocator, Some('|'), b"<r xmlns:p='urn:p'><p:n a='first'/><p:n a='next'/><n xmlns='urn:default'><n a='value'/></n><p:n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><p:n a='last'/></r>")?;
+        // A warm oversized raw-name owner precedes nested equal serialized names.
+        // Their packed owners must survive both empty and explicit End delivery.
+        frames(allocator, Some('\0'), b"<r xmlns:p='p:'><abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz/><p:n><p:n><p:n a='v'/></p:n></p:n></r>")?;
+        frames(allocator, Some(':'), b"<r xmlns:p='p'><abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz/><p:n><p:n><p:n a='v'/></p:n></p:n></r>")
+    });
 }
 
 #[test]

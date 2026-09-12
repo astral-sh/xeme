@@ -2983,7 +2983,7 @@ impl Parser {
         token: lexical::Slice<'_>,
         position: Position,
         planned: tag::Planned,
-        frame: Option<&mut AdapterFrame>,
+        mut frame: Option<&mut AdapterFrame>,
     ) -> Result<(), Error> {
         if self.closed_root {
             return Err(self.err(
@@ -3002,7 +3002,7 @@ impl Parser {
             take_name(body, self.config.name_rules)
                 .ok_or_else(|| self.err_at(ErrorKind::InvalidToken, "invalid element name", 1))?
         };
-        if let Some(frame) = frame.filter(|_| {
+        if let Some(frame) = frame.as_deref_mut().filter(|_| {
             matches!(planned, tag::Planned::Complete { .. })
                 && token.len() <= arena::MAX_ARENA_BYTES
                 && self.raw_attributes.len() <= arena::MAX_ARENA_ATTRIBUTES
@@ -3016,7 +3016,19 @@ impl Parser {
                             name != "xmlns" && !name.contains(':')
                         })))
         }) {
-            return self.parse_start_frame(token, position, raw_name, rest, frame);
+            return self.parse_start_frame::<false>(token, position, raw_name, rest, frame);
+        }
+        if let Some(frame) = frame.filter(|_| {
+            matches!(planned, tag::Planned::Complete { .. })
+                && !self.source().has_conversions()
+                && self.raw_attributes.len() <= arena::MAX_ARENA_ATTRIBUTES
+                && self.raw_attributes.iter().all(|attribute| {
+                    let name = attribute.name(rest);
+                    name != "xmlns" && !name.contains(':')
+                })
+                && self.expanded_name_fits_frame(raw_name, token.len())
+        }) {
+            return self.parse_start_frame::<true>(token, position, raw_name, rest, frame);
         }
         if self.config.namespace_separator.is_some() && !self.config.name_rules.is_qname(raw_name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid qualified element name"));
@@ -3351,9 +3363,38 @@ impl Parser {
         Ok(())
     }
 
-    /// Lower a validated literal tag whose names need no namespace expansion.
+    /// Check storage eligibility without charging URI work or changing error order.
+    fn expanded_name_fits_frame(&self, name: &str, token_bytes: usize) -> bool {
+        let Some(separator) = self.config.namespace_separator else {
+            return false;
+        };
+        if !self.config.name_rules.is_qname(name) {
+            return false;
+        }
+        let uri = match name.split_once(':') {
+            Some(("xmlns", _)) => return false,
+            Some((prefix, _)) => self.namespaces.get(prefix),
+            None => self.namespaces.get(""),
+        };
+        let Some(uri) = uri else {
+            return false;
+        };
+        // Literal fields and their NULs fit within the token. Its raw QName
+        // also covers a triplet's prefix; add the URI and both possible separators.
+        let separators = if separator == '\0' {
+            0
+        } else {
+            2 * separator.len_utf8()
+        };
+        token_bytes
+            .checked_add(uri.len())
+            .and_then(|bytes| bytes.checked_add(separators))
+            .is_some_and(|bytes| bytes <= arena::MAX_ARENA_BYTES)
+    }
+
+    /// Lower a literal tag, optionally expanding only its element name.
     /// Keep fallible copies in semantic order and publish after any end event.
-    fn parse_start_frame(
+    fn parse_start_frame<const EXPAND_ELEMENT: bool>(
         &mut self,
         token: lexical::Slice<'_>,
         position: Position,
@@ -3393,19 +3434,51 @@ impl Parser {
             frame.push_attribute(attr_name, value)?;
         }
         self.id_attribute_index = None;
-        frame.set_name(name)?;
+        let expanded_name = if EXPAND_ELEMENT {
+            let reusable = self.event_recycling.take_name();
+            Some(self.expand_name(name, false, self.config.namespace_triplets, reusable)?)
+        } else {
+            frame.set_name(name)?;
+            None
+        };
         self.seen_root = true;
         self.declaration_allowed = false;
-        let reusable = self.event_recycling.take_name();
-        let raw_name = recycling::copy_name(name, reusable, self.allocator)?;
+        let stack_name = if let Some(mut value) = expanded_name {
+            // Detach callback bytes before extending the stack's packed owner.
+            // Matching and End delivery keep the same raw/expanded slices.
+            frame.set_name(&value)?;
+            let expanded_end = value.len();
+            let shared_suffix = value.ends_with(name);
+            let additional = if shared_suffix { 0 } else { name.len() };
+            value.try_reserve(
+                additional
+                    .checked_add(1)
+                    .ok_or(AllocError::CapacityOverflow)?,
+            )?;
+            let raw_start = if shared_suffix {
+                expanded_end - name.len()
+            } else {
+                value.try_push_str(name)?;
+                expanded_end
+            };
+            ElementName {
+                value,
+                raw_start,
+                expanded_end,
+            }
+        } else {
+            let reusable = self.event_recycling.take_name();
+            let value = recycling::copy_name(name, reusable, self.allocator)?;
+            ElementName {
+                raw_start: 0,
+                expanded_end: value.len(),
+                value,
+            }
+        };
         try_push(
             &mut self.stack,
             Element {
-                name: ElementName {
-                    raw_start: 0,
-                    expanded_end: raw_name.len(),
-                    value: raw_name,
-                },
+                name: stack_name,
                 raw_encoding: None,
                 bindings: Vec::new_in(self.allocator),
             },

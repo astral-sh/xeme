@@ -3536,6 +3536,7 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
     struct ArenaState {
         parser: XML_Parser,
         starts: usize,
+        name: &'static [u8],
         raw: Vec<String>,
         ends: Vec<String>,
     }
@@ -3564,10 +3565,10 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
         // SAFETY: All pointers are callback-lived. Raw state pointers prevent
         // retaining a mutable State reference across nested DefaultCurrent.
         unsafe {
-            if CStr::from_ptr(name).to_bytes() != b"n" {
+            let state = data.cast::<ArenaState>();
+            if CStr::from_ptr(name).to_bytes() != (*state).name {
                 return;
             }
-            let state = data.cast::<ArenaState>();
             let parser = (*state).parser;
             (*state).starts += 1;
             let value = CStr::from_ptr(*attrs.add(1)).to_bytes().to_vec();
@@ -3582,7 +3583,7 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
             XML_ParserFree(parser);
             assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
             assert_eq!(XML_Parse(parser, c"<reenter/>".as_ptr(), 10, 1), ERROR);
-            assert_eq!(CStr::from_ptr(name).to_bytes(), b"n");
+            assert_eq!(CStr::from_ptr(name).to_bytes(), (*state).name);
             assert_eq!(CStr::from_ptr(*attrs.add(1)).to_bytes(), value);
             if (*state).starts == 2 {
                 assert_eq!(XML_GetSpecifiedAttributeCount(parser), 4);
@@ -3595,51 +3596,76 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
     }
     // SAFETY: Each parser and state stays live through its callbacks and resumes.
     unsafe {
-        let input = b"<r><n a='first'/><n a='second' b='more'/></r>";
-        for width in [1, 7, input.len()] {
-            let parser = XML_ParserCreate(ptr::null());
-            let mut state = ArenaState {
-                parser,
-                ..ArenaState::default()
-            };
-            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
-            XML_SetStartElementHandler(parser, Some(start));
-            XML_SetDefaultHandler(parser, Some(raw));
-            for (index, chunk) in input.chunks(width).enumerate() {
-                let status = XML_Parse(
-                    parser,
-                    chunk.as_ptr().cast(),
-                    chunk.len() as c_int,
-                    c_int::from((index + 1) * width >= input.len()),
-                );
-                if status == SUSPENDED {
-                    assert_eq!(
-                        (*parser).core.current_raw(),
-                        Some("<n a='second' b='more'/>")
-                    );
-                    assert_eq!(XML_GetCurrentByteIndex(parser), 17);
-                    let raw_count = state.raw.len();
-                    XML_DefaultCurrent(parser);
-                    assert_eq!(state.raw.len(), raw_count);
-                    assert_eq!(XML_ResumeParser(parser), OK);
+        for (input, namespace, name, expected_ends) in [
+            (
+                b"<r><n a='first'/><n a='second' b='more'/></r>".as_slice(),
+                false,
+                b"n".as_slice(),
+                ["n", "r"],
+            ),
+            (
+                b"<r xmlns='urn'><n a='first'/><n a='second' b='more'/></r>".as_slice(),
+                true,
+                b"urn|n".as_slice(),
+                ["urn|n", "urn|r"],
+            ),
+        ] {
+            for width in [1, 7, input.len()] {
+                let parser = if namespace {
+                    XML_ParserCreateNS(ptr::null(), b'|' as c_char)
                 } else {
-                    assert_eq!(status, OK);
+                    XML_ParserCreate(ptr::null())
+                };
+                let mut state = ArenaState {
+                    parser,
+                    name,
+                    ..ArenaState::default()
+                };
+                XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                XML_SetStartElementHandler(parser, Some(start));
+                XML_SetDefaultHandler(parser, Some(raw));
+                for (index, chunk) in input.chunks(width).enumerate() {
+                    let status = XML_Parse(
+                        parser,
+                        chunk.as_ptr().cast(),
+                        chunk.len() as c_int,
+                        c_int::from((index + 1) * width >= input.len()),
+                    );
+                    if status == SUSPENDED {
+                        assert_eq!(
+                            (*parser).core.current_raw(),
+                            Some("<n a='second' b='more'/>")
+                        );
+                        assert_eq!(
+                            XML_GetCurrentByteIndex(parser) as usize,
+                            input
+                                .windows(b"<n a='second'".len())
+                                .position(|value| value == b"<n a='second'")
+                                .unwrap()
+                        );
+                        let raw_count = state.raw.len();
+                        XML_DefaultCurrent(parser);
+                        assert_eq!(state.raw.len(), raw_count);
+                        assert_eq!(XML_ResumeParser(parser), OK);
+                    } else {
+                        assert_eq!(status, OK);
+                    }
                 }
+                assert_eq!(state.starts, 2);
+                assert_eq!(
+                    state
+                        .raw
+                        .iter()
+                        .filter(|value| !value.is_empty())
+                        .collect::<Vec<_>>(),
+                    [
+                        &"<n a='first'/>".to_owned(),
+                        &"<n a='second' b='more'/>".to_owned()
+                    ]
+                );
+                assert_eq!(state.ends, expected_ends);
+                XML_ParserFree(parser);
             }
-            assert_eq!(state.starts, 2);
-            assert_eq!(
-                state
-                    .raw
-                    .iter()
-                    .filter(|value| !value.is_empty())
-                    .collect::<Vec<_>>(),
-                [
-                    &"<n a='first'/>".to_owned(),
-                    &"<n a='second' b='more'/>".to_owned()
-                ]
-            );
-            assert_eq!(state.ends, ["n", "r"]);
-            XML_ParserFree(parser);
         }
     }
 }

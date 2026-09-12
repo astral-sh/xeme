@@ -383,10 +383,45 @@ fn raw_qnames_are_checked_before_decoded_namespace_expansion() {
         (b"<a\x80: xmlns:a='u'/>", "u|"),
         (b"<a\x80:b:c xmlns:a='u'/>", "u|b:c"),
         (b"<a\x80:b\x80:c xmlns:a='u'/>", "u|b:c"),
+        (b"<\x80:r xmlns='u'/>", "u|r"),
+        (b"<\x80: xmlns='u'/>", "u|"),
+        (b"<root xmlns='u'><\x80:r/></root>", "u|r"),
     ] {
         for width in [1, document.len()] {
             let events = parse_ascii_aliases_with_map(document, width, map(), Some('|')).unwrap();
             assert!(events.iter().any(|event| matches!(&event.kind, EventKind::StartElement { name: actual, .. } if actual == name)));
+        }
+    }
+    // A decoded leading colon has an explicit empty prefix, including on an
+    // attribute. It differs from an ordinary unprefixed attribute.
+    let document = b"<r xmlns='u' \x80:a='v' plain='w'/>";
+    for width in [1, document.len()] {
+        let events = parse_ascii_aliases_with_map(document, width, map(), Some('|')).unwrap();
+        let attributes = events
+            .iter()
+            .find_map(|event| match &event.kind {
+                EventKind::StartElement { attributes, .. } => Some(attributes),
+                _ => None,
+            })
+            .unwrap();
+        assert_eq!(attributes.len(), 2);
+        assert_eq!(attributes[0].name, "u|a");
+        assert_eq!(attributes[0].value, "v");
+        assert_eq!(attributes[1].name, "plain");
+        assert_eq!(attributes[1].value, "w");
+    }
+    for document in [
+        b"<\x80:r/>".as_slice(),
+        b"<r \x80:a='v'/>",
+        b"<r xmlns='u'><\x80:n xmlns=''/></r>",
+    ] {
+        for width in [1, document.len()] {
+            assert_eq!(
+                parse_ascii_aliases_with_map(document, width, map(), Some('|'))
+                    .unwrap_err()
+                    .kind,
+                ErrorKind::UndefinedPrefix
+            );
         }
     }
     for document in [b"<a: xmlns:a='u'/>".as_slice(), b"<a:b:c xmlns:a='u'/>"] {

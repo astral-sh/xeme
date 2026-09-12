@@ -114,13 +114,44 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         allocator,
     )?;
     parser.set_default_events(true);
-    parser.feed("\r\n<!DOCTYPE r [ \n<!ENTITY internal '<p:À/>'><!ENTITY external SYSTEM 'child'><!NOTATION n SYSTEM 'notation'><!ATTLIST r a NMTOKENS ' a  b '>\t]>\n<r xmlns:p='urn:p' p:attr='v'>a\r\nb\nc&internal;&external;<!--c--><![CDATA[x]]></r>\r\n".as_bytes(), true)?;
+    parser.feed("\r\n<!DOCTYPE r [ \n<!ENTITY internal '<p:À/>'><!ENTITY external SYSTEM 'child'><!NOTATION n SYSTEM 'notation'><!ATTLIST r a NMTOKENS ' a  b '>\t]>\n<r xmlns='urn:default' xmlns:p='urn:p' p:attr='v'><scope xmlns='urn:inner'><plain/><scope xmlns=''><plain/></scope><plain/></scope>a\r\nb\nc&internal;&external;<!--c--><![CDATA[x]]></r>\r\n".as_bytes(), true)?;
     while let Some(event) = next_event(&mut parser)? {
         if let EventKind::ExternalEntityReference(reference) = event.kind {
+            assert_eq!(
+                reference.context.as_deref(),
+                Some(
+                    "=urn:default\u{c}p=urn:p\u{c}xml=http://www.w3.org/XML/1998/namespace\u{c}external"
+                )
+            );
             let mut child =
                 parser.external_child_with_encoding(reference.context.as_deref(), None)?;
-            child.feed(b"<?xml encoding='UTF-8'?><p:x a='value'/>text", true)?;
-            while next_event(&mut child)?.is_some() {}
+            child.feed(b"<?xml encoding='UTF-8'?><plain/><n xmlns='urn:child'><inner/></n><p:x a='value'/>text", true)?;
+            let expected = [
+                "urn:default|plain",
+                "urn:child|n",
+                "urn:child|inner",
+                "urn:p|x|p",
+            ];
+            let mut starts = 0;
+            while let Some(event) = next_event(&mut child)? {
+                if let EventKind::StartElement { name, .. } = event.kind {
+                    assert_eq!(name, expected[starts]);
+                    starts += 1;
+                }
+            }
+            assert_eq!(starts, expected.len());
+            for (context, expected) in [("=urn:override", "urn:override|plain"), ("=", "plain")] {
+                let mut child = parser.external_child_with_encoding(Some(context), None)?;
+                child.feed(b"<plain/>", true)?;
+                let mut seen = false;
+                while let Some(event) = next_event(&mut child)? {
+                    if let EventKind::StartElement { name, .. } = event.kind {
+                        assert_eq!(name, expected);
+                        seen = true;
+                    }
+                }
+                assert!(seen);
+            }
         }
     }
     // Branches revisit completed entities; depth forces both explicit-stack and
@@ -602,8 +633,15 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
         CALLS.set(0);
         GLOBAL_CALLS.set(0);
         TRACK_GLOBAL.set(true);
-        let mut parser = Parser::try_new_in(Config::default(), allocator).unwrap();
-        parser.feed(b"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p 'unused'><!ATTLIST r a CDATA 'v'><!ATTLIST n b CDATA 'w'>]><r/>", true).unwrap();
+        let mut parser = Parser::try_new_in(
+            Config {
+                namespace_separator: Some('|'),
+                ..Config::default()
+            },
+            allocator,
+        )
+        .unwrap();
+        parser.feed(b"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p 'unused'><!ATTLIST r a CDATA 'v'><!ATTLIST n b CDATA 'w'>]><r xmlns='urn:default'>", false).unwrap();
         while parser.next_event().unwrap().is_some() {}
         let retained = parser.external_child(None, None).unwrap();
         let before = CALLS.get();
@@ -631,7 +669,8 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
                     assert_eq!(value, "ok");
                     text_seen = true;
                 }
-                EventKind::StartElement { attributes, .. } => {
+                EventKind::StartElement { name, attributes } => {
+                    assert_eq!(name, "urn:default|n");
                     assert_eq!(attributes.len(), 1);
                     assert_eq!(attributes[0].name, "b");
                     assert_eq!(attributes[0].value, "w");
@@ -641,8 +680,29 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
             }
         }
         assert!(text_seen && default_seen);
+        // The live parent slot also survives every failed transaction; the
+        // retained child above alone would only prove its independent snapshot.
+        let mut current = parser.external_child(Some(""), None).unwrap();
+        current.feed(b"<n/>", true).unwrap();
+        let mut current_seen = false;
+        while let Some(event) = current.next_event().unwrap() {
+            if let EventKind::StartElement { name, .. } = event.kind {
+                assert_eq!(name, "urn:default|n");
+                current_seen = true;
+            }
+        }
+        assert!(current_seen);
+        drop(current);
         parser.set_hash_salt(*b"0123456789abcdef").unwrap();
         assert_eq!(parser.hash_salt(), *b"0123456789abcdef");
+        parser.feed(b"<n/></r>", true).unwrap();
+        let mut restored = false;
+        while let Some(event) = parser.next_event().unwrap() {
+            if let EventKind::EndNamespace { prefix: None } = event.kind {
+                restored = true;
+            }
+        }
+        assert!(restored && parser.is_finished());
         drop(child);
         drop(retained);
         drop(parser);

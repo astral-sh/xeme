@@ -273,7 +273,8 @@ fn namespace_identity_frames_follow_default_binding_scope() {
 
 #[test]
 fn sparse_namespace_scopes_preserve_shadowing_and_event_order() {
-    let body = "<p:n xmlns:p='two'><leaf/><e xmlns=''><leaf/></e></p:n><p:s/><e xmlns:p='three'/><p:t/></r>";
+    let body =
+        "<p:n xmlns:p='two'><leaf/><e xmlns=''><leaf/></e></p:n><p:s/><e xmlns:p='three'/><p:t/>";
     let expected = [
         "ns+  outer",
         "ns+ p one",
@@ -302,11 +303,29 @@ fn sparse_namespace_scopes_preserve_shadowing_and_event_order() {
         "ns- p",
         "ns- ",
     ];
-    for root in [
-        "<r xmlns='outer' xmlns:p='one'>",
-        "<!DOCTYPE r [<!ATTLIST r xmlns CDATA 'outer' xmlns:p CDATA 'one'>]><r>",
+    for (root, external) in [
+        ("<r xmlns='outer' xmlns:p='one'>", ""),
+        (
+            "<!DOCTYPE r [<!ATTLIST r xmlns CDATA 'outer' xmlns:p CDATA 'one'>]><r>",
+            "",
+        ),
+        (
+            "<!DOCTYPE r [<!ENTITY ext SYSTEM 'child'>]><r xmlns='outer' xmlns:p='one'>",
+            "&ext;",
+        ),
+        (
+            "<!DOCTYPE r [<!ENTITY ext SYSTEM 'child'><!ATTLIST r xmlns CDATA 'outer' xmlns:p CDATA 'one'>]><r>",
+            "&ext;",
+        ),
     ] {
-        let xml = format!("{root}{body}");
+        let xml = format!("{root}{body}{external}</r>");
+        let mut expected = expected.to_vec();
+        if !external.is_empty() {
+            expected.insert(
+                expected.len() - 3,
+                "external =outer\u{c}p=one\u{c}xml=http://www.w3.org/XML/1998/namespace\u{c}ext",
+            );
+        }
         for utf16 in [false, true] {
             let input = if utf16 {
                 [0xfeff]
@@ -339,6 +358,9 @@ fn sparse_namespace_scopes_preserve_shadowing_and_event_order() {
                             EventKind::EndElement { name } => format!("end {name}"),
                             EventKind::EndNamespace { prefix } => {
                                 format!("ns- {}", prefix.as_deref().unwrap_or(""))
+                            }
+                            EventKind::ExternalEntityReference(reference) => {
+                                format!("external {}", reference.context.as_deref().unwrap())
                             }
                             _ => continue,
                         };

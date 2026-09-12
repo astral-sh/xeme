@@ -114,6 +114,27 @@ fn structural_and_index_work_counts_even_for_empty_values() {
         drain(&mut parent);
         assert_child_rejected_before_allocation(&parent, Some(""));
     }
+
+    // A dedicated default binding still owes the original logical key+URI
+    // storage charge, plus its URI bytes both at expansion and child cloning.
+    let required = 2 * size_of::<(oriole_storage::String, oriole_storage::String)>()
+        + "xml".len()
+        + "http://www.w3.org/XML/1998/namespace".len()
+        + 2 * "u".len();
+    for budget in [required - 1, required] {
+        let mut parent = parser(budget);
+        parent.feed(b"<r xmlns='u'>", false).unwrap();
+        drain(&mut parent);
+        if budget < required {
+            assert_child_rejected_before_allocation(&parent, Some(""));
+        } else {
+            let mut child = parent.external_child_with_encoding(Some(""), None).unwrap();
+            child.feed(b"", true).unwrap();
+            drain(&mut child);
+        }
+        parent.feed(b"</r>", true).unwrap();
+        drain(&mut parent);
+    }
 }
 
 #[test]

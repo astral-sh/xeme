@@ -1,0 +1,1171 @@
+diff --git a/crates/oriole/src/encoding.rs b/crates/oriole/src/encoding.rs
+index 1b108e4..b73e56f 100644
+--- a/crates/oriole/src/encoding.rs
++++ b/crates/oriole/src/encoding.rs
+@@ -1,4 +1,4 @@
+-use crate::{Error, ErrorKind, Position, ScanMode};
++use crate::{DeclarationContext, Error, ErrorKind, Position, ScanMode};
+ use oriole_storage::{Allocator, Box, String, Vec, try_box, try_extend_from_slice};
+ 
+ #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+@@ -53,6 +53,7 @@ impl Detection {
+         final_input: bool,
+         max_token: usize,
+         external_content: bool,
++        declaration_context: DeclarationContext,
+     ) -> Result<Option<(Encoding, usize)>, Error> {
+         // An explicitly labelled external text entity can begin with ordinary
+         // Latin-1 bytes that happen to spell a Unicode byte-order mark.
+@@ -161,6 +162,23 @@ impl Detection {
+                         let encoding = Encoding::named(name);
+                         let mismatch = name.eq_ignore_ascii_case("UTF-16")
+                             || matches!(encoding, Some(Encoding::Utf16Le | Encoding::Utf16Be));
++                        if encoding.is_none()
++                            && !mismatch
++                            && declaration.len() + 2 <= max_token
++                            && declaration
++                                .bytes()
++                                .all(|byte| required_ascii(i32::from(byte)))
++                            && crate::malformed_ascii_declaration(
++                                &declaration[5..],
++                                declaration_context,
++                            )
++                        {
++                            // These bytes are invariant under every custom map.
++                            // Let ordinary token parsing publish the grammar error before any
++                            // unknown-encoding callback; never decode a valid
++                            // unknown encoding by assuming UTF-8.
++                            return Ok(Some((Encoding::Utf8, skip)));
++                        }
+                         if encoding.is_none() || mismatch {
+                             let offset = declaration.len() - rest.len() + 1;
+                             let mut position = Position {
+@@ -279,6 +297,7 @@ impl Decoder {
+         source: &mut Source,
+         max_token: usize,
+         external_content: bool,
++        declaration_context: DeclarationContext,
+     ) -> Result<(), Error> {
+         if self.encoding == Some(Encoding::Utf8)
+             && self.conversion.is_none()
+@@ -311,6 +330,7 @@ impl Decoder {
+                 final_input,
+                 max_token,
+                 external_content,
++                declaration_context,
+             )?
+             else {
+                 return Ok(());
+@@ -808,6 +828,7 @@ impl InputContext {
+         final_input: bool,
+         max_token: usize,
+         external_content: bool,
++        declaration_context: DeclarationContext,
+     ) -> Result<(), Error> {
+         debug_assert!(self.native);
+         if decoder.encoding == Some(Encoding::Utf8) {
+@@ -820,6 +841,7 @@ impl InputContext {
+             final_input,
+             max_token,
+             external_content,
++            declaration_context,
+         );
+         match detected {
+             Ok(None) => Ok(()),
+@@ -843,7 +865,14 @@ impl InputContext {
+                 source.raw_index = skip;
+                 source.column = usize::from(skip != 0);
+                 decoder.pending.drain(..skip);
+-                decoder.feed(&[], final_input, source, max_token, external_content)
++                decoder.feed(
++                    &[],
++                    final_input,
++                    source,
++                    max_token,
++                    external_content,
++                    declaration_context,
++                )
+             }
+         }
+     }
+@@ -1580,9 +1609,22 @@ mod tests {
+                     for (part, final_input) in [(&bytes[..split], false), (&bytes[split..], true)] {
+                         // A nonempty pending buffer selects the unchanged path.
+                         buffered.append_pending(part).unwrap();
+-                        let expected =
+-                            buffered.feed(&[], final_input, &mut buffered_source, 64, false);
+-                        let actual = direct.feed(part, final_input, &mut direct_source, 64, false);
++                        let expected = buffered.feed(
++                            &[],
++                            final_input,
++                            &mut buffered_source,
++                            64,
++                            false,
++                            DeclarationContext::Document,
++                        );
++                        let actual = direct.feed(
++                            part,
++                            final_input,
++                            &mut direct_source,
++                            64,
++                            false,
++                            DeclarationContext::Document,
++                        );
+                         assert_eq!(actual, expected, "{bytes:?}, split {split}, warm {warm}");
+                         assert_eq!(direct.pending, buffered.pending);
+                         assert_eq!(direct.pending_cursor, buffered.pending_cursor);
+@@ -1623,7 +1665,14 @@ mod tests {
+                 // block or growth. Restoring pending must not request one.
+                 tracker.set_activation_threshold(0);
+                 let error = decoder
+-                    .feed(&bytes, true, &mut source, 1024, false)
++                    .feed(
++                        &bytes,
++                        true,
++                        &mut source,
++                        1024,
++                        false,
++                        DeclarationContext::Document,
++                    )
+                     .unwrap_err();
+                 assert_eq!(error, Error::bare(ErrorKind::NoMemory, "out of memory"));
+                 assert_eq!(decoder.pending.as_slice(), bytes.as_slice());
+@@ -1635,7 +1684,16 @@ mod tests {
+                 assert_eq!(tracker.live_bytes(), live);
+                 tracker.set_activation_threshold(u64::MAX);
+                 // The retained bytes are available to the ordinary decoder path.
+-                decoder.feed(&[], true, &mut source, 1024, false).unwrap();
++                decoder
++                    .feed(
++                        &[],
++                        true,
++                        &mut source,
++                        1024,
++                        false,
++                        DeclarationContext::Document,
++                    )
++                    .unwrap();
+                 assert!(decoder.pending.is_empty());
+                 assert_eq!(source.text.len(), prefix.len() + bytes.len());
+                 assert_eq!(
+diff --git a/crates/oriole/src/lib.rs b/crates/oriole/src/lib.rs
+index bbdaeb5..8006ae9 100644
+--- a/crates/oriole/src/lib.rs
++++ b/crates/oriole/src/lib.rs
+@@ -168,6 +168,8 @@ pub enum ErrorKind {
+     ReservedNamespaceUri,
+     LimitExceeded,
+     Finished,
++    /// Malformed declaration at the start of an external text entity.
++    TextDeclaration,
+ }
+ 
+ impl fmt::Display for Error {
+@@ -1277,6 +1279,14 @@ impl Parser {
+             .map_or((&[], 0), |context| context.view(&self.sources[0]))
+     }
+ 
++    fn declaration_context(&self) -> DeclarationContext {
++        if self.fragment && !self.is_external_value() {
++            DeclarationContext::Text
++        } else {
++            DeclarationContext::Document
++        }
++    }
++
+     fn feed_inner(&mut self, bytes: &[u8], is_final: bool, native: bool) -> Result<(), Error> {
+         if let Some(error) = &self.error {
+             return Err(*error);
+@@ -1306,6 +1316,7 @@ impl Parser {
+             }
+             return Ok(());
+         }
++        let declaration_context = self.declaration_context();
+         let decoded = if native {
+             self.input_context
+                 .as_mut()
+@@ -1316,6 +1327,7 @@ impl Parser {
+                     is_final,
+                     self.config.limits.max_token_bytes,
+                     self.fragment && !self.external_subset,
++                    declaration_context,
+                 )
+         } else {
+             self.decoder.feed(
+@@ -1324,6 +1336,7 @@ impl Parser {
+                 &mut self.sources[0],
+                 self.config.limits.max_token_bytes,
+                 self.fragment && !self.external_subset,
++                declaration_context,
+             )
+         };
+         if let Err(error) = decoded {
+@@ -1452,12 +1465,14 @@ impl Parser {
+         self.mark_parameter_read();
+         self.error = None;
+         self.decoding_error = None;
++        let declaration_context = self.declaration_context();
+         if let Err(error) = self.decoder.feed(
+             &[],
+             self.final_input,
+             &mut self.sources[0],
+             self.config.limits.max_token_bytes,
+             self.fragment && !self.external_subset,
++            declaration_context,
+         ) {
+             self.decoding_error = Some((error.kind, error.message));
+         }
+@@ -1493,12 +1508,14 @@ impl Parser {
+             self.error = Some(error);
+             return Err(error);
+         }
++        let declaration_context = self.declaration_context();
+         if let Err(error) = self.decoder.feed(
+             &[],
+             self.final_input,
+             &mut self.sources[0],
+             self.config.limits.max_token_bytes,
+             self.fragment && !self.external_subset,
++            declaration_context,
+         ) {
+             self.decoding_error = Some((error.kind, error.message));
+         }
+@@ -3029,12 +3046,20 @@ impl Parser {
+             ));
+         }
+         if target.eq_ignore_ascii_case("xml") {
+-            if target != "xml" || !self.declaration_allowed || self.sources.len() > 1 {
++            if target != "xml" {
++                return Err(self.err(
++                    ErrorKind::InvalidToken,
++                    "reserved processing instruction target",
++                ));
++            }
++            if !self.declaration_allowed || self.sources.len() > 1 {
+                 return Err(self.err(
+                     ErrorKind::MisplacedXmlDeclaration,
+                     "XML declaration is not at the beginning",
+                 ));
+             }
++            let context = self.declaration_context();
++            let declaration_error = context.error_kind();
+             let mut attrs = Vec::new_in(self.allocator);
+             parse_raw_attributes(rest, false, &mut attrs, 3, self.config.name_rules).map_err(
+                 |error| {
+@@ -3042,112 +3067,57 @@ impl Parser {
+                         if error.kind == ErrorKind::NoMemory {
+                             ErrorKind::NoMemory
+                         } else {
+-                            ErrorKind::XmlDeclaration
++                            declaration_error
+                         },
+                         error.message,
+                         2 + target.len() + error.position.byte_index,
+                     )
+                 },
+             )?;
+-            if self.fragment && !self.is_external_value() {
+-                let mut attrs = attrs.into_iter().map(|attribute| attribute.parts(rest));
+-                let first = attrs
+-                    .next()
+-                    .ok_or_else(|| self.err(ErrorKind::XmlDeclaration, "empty text declaration"))?;
+-                let (version, encoding_attr) = if first.0 == "version" {
+-                    (
+-                        Some(token.for_slice(first.1).decode(self.allocator)?),
+-                        attrs.next(),
+-                    )
+-                } else {
+-                    (None, Some(first))
+-                };
+-                let (name, encoding, _, _) = encoding_attr.ok_or_else(|| {
+-                    self.err(
+-                        ErrorKind::XmlDeclaration,
+-                        "text declaration requires an encoding",
+-                    )
+-                })?;
+-                let encoding = token.for_slice(encoding).decoded(self.allocator)?;
+-                if name != "encoding" || !valid_encoding_name(&encoding) || attrs.next().is_some() {
+-                    return Err(self.err(ErrorKind::XmlDeclaration, "invalid text declaration"));
+-                }
++            let allocator = self.allocator;
++            let Declaration {
++                version,
++                encoding,
++                standalone,
++            } = declaration_fields(rest, &attrs, context, |value| {
++                token.for_slice(value).decoded(allocator)
++            })
++            .map_err(|failure| match failure {
++                DeclarationFailure::Allocation(error) => Error::from(error),
++                DeclarationFailure::Syntax {
++                    message,
++                    offset: Some(offset),
++                } => self.err_at(declaration_error, message, 2 + target.len() + offset),
++                DeclarationFailure::Syntax {
++                    message,
++                    offset: None,
++                } => self.err(declaration_error, message),
++            })?;
++            let version = version
++                .map(|version| version.into_owned(allocator))
++                .transpose()?;
++            // Grammar is complete before an encoding error can invoke an adapter callback.
++            if let Some(encoding) = &encoding {
+                 self.decoder
+-                    .check_declaration(&encoding)
++                    .check_declaration(encoding)
+                     .map_err(|error| self.err(error.kind, error.message))?;
++            }
++            if context == DeclarationContext::Text {
+                 self.declaration_allowed = false;
+                 self.emit(
+                     EventKind::TextDeclaration {
+                         version,
+-                        encoding: string(&encoding, self.allocator)?,
++                        encoding: string(&encoding.expect("validated text encoding"), allocator)?,
+                     },
+                     position,
+                 )?;
+                 return Ok(());
+             }
+-            let version = attrs
+-                .first()
+-                .map(|attribute| {
+-                    token
+-                        .for_slice(attribute.value(rest))
+-                        .decoded(self.allocator)
+-                })
++            let version = version.expect("validated document version");
++            let encoding = encoding
++                .map(|encoding| encoding.into_owned(allocator))
+                 .transpose()?;
+-            if attrs.is_empty()
+-                || attrs[0].name(rest) != "version"
+-                || !version.as_ref().is_some_and(|version| {
+-                    !version.is_empty()
+-                        && version.bytes().all(|byte| {
+-                            byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_')
+-                        })
+-                })
+-            {
+-                return Err(self.err_at(
+-                    ErrorKind::XmlDeclaration,
+-                    "XML declaration must begin with a version",
+-                    2 + target.len() + attrs.first().map_or(0, |attribute| attribute.name_start),
+-                ));
+-            }
+-            let version = version
+-                .expect("validated declaration version")
+-                .into_owned(self.allocator)?;
+-            let mut encoding = None;
+-            let mut standalone = None;
+-            for attribute in attrs.into_iter().skip(1) {
+-                let (name, value, _, _) = attribute.parts(rest);
+-                match name {
+-                    "encoding" if encoding.is_none() && standalone.is_none() => {
+-                        let value = token.for_slice(value).decoded(self.allocator)?;
+-                        if !valid_encoding_name(&value) {
+-                            return Err(
+-                                self.err(ErrorKind::XmlDeclaration, "invalid encoding name")
+-                            );
+-                        }
+-                        self.decoder
+-                            .check_declaration(&value)
+-                            .map_err(|error| self.err(error.kind, error.message))?;
+-                        encoding = Some(value.into_owned(self.allocator)?);
+-                    }
+-                    "standalone" if standalone.is_none() => {
+-                        standalone = Some(match value {
+-                            "yes" => true,
+-                            "no" => false,
+-                            _ => {
+-                                return Err(self.err(
+-                                    ErrorKind::XmlDeclaration,
+-                                    "invalid standalone declaration",
+-                                ));
+-                            }
+-                        });
+-                    }
+-                    _ => {
+-                        return Err(self.err(
+-                            ErrorKind::XmlDeclaration,
+-                            "invalid XML declaration attribute",
+-                        ));
+-                    }
+-                }
+-            }
++            drop(attrs);
+             self.standalone =
+                 standalone == Some(true) || (self.is_external_value() && self.standalone);
+             if standalone == Some(true) && self.parameter_mode == 1 {
+@@ -4240,6 +4210,156 @@ impl RawAttribute {
+     }
+ }
+ 
++/// Declaration grammar is independent of the encoding-detection BOM policy.
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++enum DeclarationContext {
++    Document,
++    Text,
++}
++
++impl DeclarationContext {
++    fn error_kind(self) -> ErrorKind {
++        match self {
++            Self::Document => ErrorKind::XmlDeclaration,
++            Self::Text => ErrorKind::TextDeclaration,
++        }
++    }
++}
++
++struct Declaration<'a> {
++    version: Option<lexical::Decoded<'a>>,
++    encoding: Option<lexical::Decoded<'a>>,
++    standalone: Option<bool>,
++}
++
++enum DeclarationFailure {
++    Syntax {
++        message: &'static str,
++        offset: Option<usize>,
++    },
++    Allocation(AllocError),
++}
++
++/// Validate complete fields before checking their declared encoding. The caller
++/// supplies lexical decoding; bootstrap ASCII values use borrowed slices only.
++fn declaration_fields<'a>(
++    rest: &'a str,
++    attrs: &[RawAttribute],
++    context: DeclarationContext,
++    mut decode: impl FnMut(&'a str) -> Result<lexical::Decoded<'a>, AllocError>,
++) -> Result<Declaration<'a>, DeclarationFailure> {
++    let syntax = |message| DeclarationFailure::Syntax {
++        message,
++        offset: None,
++    };
++    let mut decode = |value: &'a str| decode(value).map_err(DeclarationFailure::Allocation);
++    if context == DeclarationContext::Text {
++        let mut attrs = attrs.iter().map(|attribute| attribute.parts(rest));
++        let first = attrs
++            .next()
++            .ok_or_else(|| syntax("empty text declaration"))?;
++        let (version, encoding_attr) = if first.0 == "version" {
++            (Some(decode(first.1)?), attrs.next())
++        } else {
++            (None, Some(first))
++        };
++        let (name, encoding, _, _) =
++            encoding_attr.ok_or_else(|| syntax("text declaration requires an encoding"))?;
++        let encoding = decode(encoding)?;
++        if name != "encoding" || !valid_encoding_name(&encoding) || attrs.next().is_some() {
++            return Err(syntax("invalid text declaration"));
++        }
++        return Ok(Declaration {
++            version,
++            encoding: Some(encoding),
++            standalone: None,
++        });
++    }
++    let version = attrs
++        .first()
++        .map(|attribute| decode(attribute.value(rest)))
++        .transpose()?;
++    if attrs.is_empty()
++        || attrs[0].name(rest) != "version"
++        || !version.as_ref().is_some_and(|version| {
++            !version.is_empty()
++                && version
++                    .bytes()
++                    .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_'))
++        })
++    {
++        return Err(DeclarationFailure::Syntax {
++            message: "XML declaration must begin with a version",
++            offset: Some(attrs.first().map_or(0, |attribute| attribute.name_start)),
++        });
++    }
++    let mut encoding = None;
++    let mut standalone = None;
++    for attribute in attrs.iter().skip(1) {
++        let (name, value, _, _) = attribute.parts(rest);
++        match name {
++            "encoding" if encoding.is_none() && standalone.is_none() => {
++                let value = decode(value)?;
++                if !valid_encoding_name(&value) {
++                    return Err(syntax("invalid encoding name"));
++                }
++                encoding = Some(value);
++            }
++            "standalone" if standalone.is_none() => {
++                standalone = Some(match value {
++                    "yes" => true,
++                    "no" => false,
++                    _ => return Err(syntax("invalid standalone declaration")),
++                });
++            }
++            _ => return Err(syntax("invalid XML declaration attribute")),
++        }
++    }
++    Ok(Declaration {
++        version,
++        encoding,
++        standalone,
++    })
++}
++
++/// Prove malformed syntax only in a complete bounded ASCII bootstrap declaration.
++/// Ordinary parsing still reports the error after token limits, raw publication
++/// and source accounting. This helper creates no owned values or parser state.
++fn malformed_ascii_declaration(rest: &str, context: DeclarationContext) -> bool {
++    debug_assert!(rest.is_ascii());
++    if invalid_xml_char(rest).is_some() {
++        return true;
++    }
++    let empty = RawAttribute {
++        name_start: 0,
++        name_end: 0,
++        value_start: 0,
++        value_end: 0,
++    };
++    let mut attrs = [empty; 3];
++    let mut count = 0;
++    let mut scanner = tag::AttributeScanner::new(0);
++    loop {
++        // Fourth/Fifth edition name rules agree for this proven ASCII input.
++        match scanner.next(rest, true, false, false, 3, NameRules::default()) {
++            Ok(tag::Step::Attribute(attribute)) => {
++                attrs[count] = attribute;
++                count += 1;
++            }
++            Ok(tag::Step::End) => {
++                return declaration_fields(rest, &attrs[..count], context, |value| {
++                    Ok(lexical::Decoded::Borrowed(value))
++                })
++                .is_err();
++            }
++            Err(_) => return true,
++            Ok(tag::Step::Incomplete | tag::Step::TagEnd { .. }) => {
++                unreachable!("complete attribute view excludes a tag delimiter")
++            }
++        }
++    }
++}
++
+ fn parse_raw_attributes(
+     text: &str,
+     allow_refs: bool,
+diff --git a/crates/oriole/tests/allocation.rs b/crates/oriole/tests/allocation.rs
+index dec571b..37aa437 100644
+--- a/crates/oriole/tests/allocation.rs
++++ b/crates/oriole/tests/allocation.rs
+@@ -585,6 +585,48 @@ fn check_allocations(workload: fn(Allocator) -> Result<(), Error>) {
+     FAIL_AT.set(0);
+ }
+ 
++#[test]
++fn malformed_declarations_preserve_every_selected_allocation_failure() {
++    fn declarations(allocator: Allocator) -> Result<(), Error> {
++        for native in [false, true] {
++            for context in [None, Some(Some("")), Some(None)] {
++                for input in [
++                    b"<?xml version='1.0' encoding 'UTF-8'?>".as_slice(),
++                    b"<?xml version='1.0' encoding='UTF-8' extra='x'?>",
++                    b"<?xml encoding='UTF8' version='1.0'?>",
++                    b"<?xml version='1.0' encoding='UTF8' extra='x'?>",
++                ] {
++                    let parent = Parser::try_new_in(Config::default(), allocator)?;
++                    let mut parser = match context {
++                        None => Parser::try_new_in(Config::default(), allocator)?,
++                        Some(context) => parent.external_child(context, None)?,
++                    };
++                    if native {
++                        parser.enable_input_context();
++                    }
++                    parser.feed(input, true)?;
++                    let error = next_event(&mut parser).unwrap_err();
++                    if error.kind == ErrorKind::NoMemory {
++                        return Err(error);
++                    }
++                    assert_eq!(
++                        error.kind,
++                        if context.is_none() {
++                            ErrorKind::XmlDeclaration
++                        } else {
++                            ErrorKind::TextDeclaration
++                        },
++                    );
++                    assert_eq!(parser.next_event().unwrap_err(), error);
++                    assert_eq!(parser.feed(&[], true).unwrap_err(), error);
++                }
++            }
++        }
++        Ok(())
++    }
++    check_allocations(declarations);
++}
++
+ #[test]
+ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
+     // SAFETY: The complete libc-backed suite retains ownership on failure and
+diff --git a/crates/oriole/tests/external_grammar.rs b/crates/oriole/tests/external_grammar.rs
+index 8279af0..0a38ed6 100644
+--- a/crates/oriole/tests/external_grammar.rs
++++ b/crates/oriole/tests/external_grammar.rs
+@@ -1,5 +1,112 @@
+ use oriole::{Config, ErrorKind, EventKind, Parser};
+ 
++#[test]
++fn declaration_errors_distinguish_documents_from_external_text() {
++    let cases = [
++        (
++            "<?xml?>",
++            Some(ErrorKind::XmlDeclaration),
++            Some(ErrorKind::TextDeclaration),
++        ),
++        (
++            "<?xml version='1.0'?>",
++            None,
++            Some(ErrorKind::TextDeclaration),
++        ),
++        (
++            "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>",
++            None,
++            Some(ErrorKind::TextDeclaration),
++        ),
++        (
++            "<?xml version='1.0' encoding 'UTF-8'?>",
++            Some(ErrorKind::XmlDeclaration),
++            Some(ErrorKind::TextDeclaration),
++        ),
++        (
++            "<?xml encoding='UTF-8'?>",
++            Some(ErrorKind::XmlDeclaration),
++            None,
++        ),
++        (
++            "<?xml encoding='UTF8' version='1.0'?>",
++            Some(ErrorKind::XmlDeclaration),
++            Some(ErrorKind::TextDeclaration),
++        ),
++        (
++            "<?xml version='1.0' encoding='UTF8' extra='x'?>",
++            Some(ErrorKind::XmlDeclaration),
++            Some(ErrorKind::TextDeclaration),
++        ),
++        (
++            "<?xml version='1.0' encoding='UTF8'?>",
++            Some(ErrorKind::UnknownEncoding),
++            Some(ErrorKind::UnknownEncoding),
++        ),
++        (
++            "<?XML encoding='UTF8'?>",
++            Some(ErrorKind::InvalidToken),
++            Some(ErrorKind::InvalidToken),
++        ),
++        (
++            "<?XmL?>",
++            Some(ErrorKind::InvalidToken),
++            Some(ErrorKind::InvalidToken),
++        ),
++        ("<?xml-stylesheet?>", None, None),
++    ];
++    for (token, document_error, text_error) in cases {
++        // None is a document; Some holds the general or parameter/subset context.
++        for context in [None, Some(Some("")), Some(None)] {
++            let expected = if context.is_none() {
++                document_error
++            } else {
++                text_error
++            };
++            let input = if context.is_none() {
++                format!("{token}<r/>")
++            } else {
++                token.to_owned()
++            };
++            let mut first_error = None;
++            for width in 1..=input.len() {
++                let parent = Parser::new(Config::default());
++                let mut parser = match context {
++                    None => Parser::new(Config::default()),
++                    Some(context) => parent.external_child(context, None).unwrap(),
++                };
++                let mut actual = None;
++                'feed: for (index, bytes) in input.as_bytes().chunks(width).enumerate() {
++                    parser
++                        .feed(bytes, (index + 1) * width >= input.len())
++                        .unwrap();
++                    loop {
++                        match parser.next_event() {
++                            Ok(Some(_)) => {}
++                            Ok(None) => break,
++                            Err(error) => {
++                                assert_eq!(parser.next_event().unwrap_err(), error);
++                                assert_eq!(parser.feed(&[], true).unwrap_err(), error);
++                                actual = Some(error);
++                                break 'feed;
++                            }
++                        }
++                    }
++                }
++                assert_eq!(
++                    actual.map(|error| error.kind),
++                    expected,
++                    "{token}, {context:?}, {width}"
++                );
++                if let Some(error) = actual {
++                    // Classification does not make coordinates depend on feed boundaries.
++                    assert_eq!(*first_error.get_or_insert(error), error);
++                }
++            }
++        }
++    }
++}
++
+ #[derive(Clone, Copy)]
+ enum Read {
+     Skip,
+diff --git a/crates/oriole/tests/raw_tokens.rs b/crates/oriole/tests/raw_tokens.rs
+index 7939e3f..554d66f 100644
+--- a/crates/oriole/tests/raw_tokens.rs
++++ b/crates/oriole/tests/raw_tokens.rs
+@@ -9,6 +9,8 @@ fn terminal_errors_retain_complete_raw_markup_in_every_feed_boundary() {
+             "<?xml version='1.0'?>",
+             ErrorKind::MisplacedXmlDeclaration,
+         ),
++        ("", "<?XML?>", ErrorKind::InvalidToken),
++        ("<r>", "<?XmL encoding='UTF8'?>", ErrorKind::InvalidToken),
+         ("<r>", "<n a='1' a='2'/>", ErrorKind::DuplicateAttribute),
+         ("<r>", "<missing:n/>", ErrorKind::UndefinedPrefix),
+         ("<r>", "</wrong>", ErrorKind::TagMismatch),
+diff --git a/crates/oriole_expat/src/lib.rs b/crates/oriole_expat/src/lib.rs
+index 3d01724..85700d3 100644
+--- a/crates/oriole_expat/src/lib.rs
++++ b/crates/oriole_expat/src/lib.rs
+@@ -244,6 +244,7 @@ fn error_code(kind: &ErrorKind) -> c_int {
+         ErrorKind::ExternalEntityInAttribute => 16,
+         ErrorKind::MisplacedXmlDeclaration => 17,
+         ErrorKind::XmlDeclaration => 30,
++        ErrorKind::TextDeclaration => 31,
+         ErrorKind::PublicId => 32,
+         ErrorKind::UndeclaringPrefix => 28,
+         ErrorKind::UnknownEncoding => 18,
+diff --git a/crates/oriole_expat/src/tests.rs b/crates/oriole_expat/src/tests.rs
+index 02e8d8c..5cf9dd4 100644
+--- a/crates/oriole_expat/src/tests.rs
++++ b/crates/oriole_expat/src/tests.rs
+@@ -820,6 +820,414 @@ unsafe extern "C" fn external_entity(
+     }
+ }
+ 
++#[test]
++fn external_declaration_errors_keep_their_codes_in_each_child_context() {
++    struct DeclarationCase {
++        input: &'static [u8],
++        width: usize,
++        expected: c_int,
++        parameter: bool,
++        calls: usize,
++    }
++    unsafe extern "C" fn external(
++        parent: XML_Parser,
++        context: *const c_char,
++        _: *const c_char,
++        _: *const c_char,
++        _: *const c_char,
++    ) -> c_int {
++        // SAFETY: State and input are test-owned, and the child is freed before
++        // returning to its parent. No borrowed state is held across parser calls.
++        unsafe {
++            let state = XML_GetUserData(parent).cast::<DeclarationCase>();
++            let (input, width, expected, parameter) = (
++                (*state).input,
++                (*state).width,
++                (*state).expected,
++                (*state).parameter,
++            );
++            assert_eq!(context.is_null(), parameter);
++            let child = XML_ExternalEntityParserCreate(parent, context, ptr::null());
++            assert!(!child.is_null());
++            let mut status = OK;
++            for (index, bytes) in input.chunks(width).enumerate() {
++                status = XML_Parse(
++                    child,
++                    bytes.as_ptr().cast(),
++                    bytes.len() as c_int,
++                    c_int::from((index + 1) * width >= input.len()),
++                );
++                if status == ERROR {
++                    break;
++                }
++            }
++            assert_eq!(status, ERROR);
++            assert_eq!(XML_GetErrorCode(child), expected);
++            let position = (
++                XML_GetCurrentByteIndex(child),
++                XML_GetCurrentLineNumber(child),
++                XML_GetCurrentColumnNumber(child),
++            );
++            assert_eq!(XML_Parse(child, c"".as_ptr(), 0, 1), ERROR);
++            assert_eq!(XML_GetErrorCode(child), expected);
++            assert_eq!(
++                (
++                    XML_GetCurrentByteIndex(child),
++                    XML_GetCurrentLineNumber(child),
++                    XML_GetCurrentColumnNumber(child)
++                ),
++                position
++            );
++            XML_ParserFree(child);
++            (*state).calls += 1;
++            ERROR
++        }
++    }
++    let documents = [
++        (
++            b"<!DOCTYPE r [<!ENTITY e SYSTEM 'e'>]><r>&e;</r>".as_slice(),
++            false,
++        ),
++        (b"<!DOCTYPE r SYSTEM 'e'><r/>", true),
++        (b"<!DOCTYPE r [<!ENTITY % e SYSTEM 'e'>%e;]><r/>", true),
++    ];
++    for (input, expected) in [
++        (b"<?xml version='1.0'?>".as_slice(), 31),
++        (
++            b"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>",
++            31,
++        ),
++        (b"<?xml version='1.0' encoding 'UTF-8'?>", 31),
++        (b"<?XML encoding='UTF8'?>", 4),
++        (b"<?xml encoding='UTF8' version='1.0'?>", 31),
++        (b"<?xml version='1.0' encoding='UTF8' extra='x'?>", 31),
++        (b"<?xml version='1.0' encoding='UTF8'?>", 18),
++    ] {
++        for (document, parameter) in documents {
++            for width in [1, 7, input.len()] {
++                let mut state = DeclarationCase {
++                    input,
++                    width,
++                    expected,
++                    parameter,
++                    calls: 0,
++                };
++                // SAFETY: Callback state stays live through all parent/child calls.
++                unsafe {
++                    let parent = XML_ParserCreate(ptr::null());
++                    assert!(!parent.is_null());
++                    XML_SetUserData(parent, ptr::from_mut(&mut state).cast());
++                    XML_SetExternalEntityRefHandler(parent, Some(external));
++                    assert_eq!(XML_SetParamEntityParsing(parent, 2), 1);
++                    assert_eq!(
++                        XML_Parse(parent, document.as_ptr().cast(), document.len() as c_int, 1),
++                        ERROR
++                    );
++                    assert_eq!(XML_GetErrorCode(parent), 21);
++                    XML_ParserFree(parent);
++                }
++                assert_eq!(state.calls, 1);
++            }
++        }
++    }
++}
++
++#[test]
++fn unknown_encoding_callbacks_follow_complete_declaration_grammar() {
++    #[derive(Default)]
++    struct EncodingState {
++        requested: Vec<String>,
++        accept: bool,
++        releases: usize,
++        remapping: u8,
++        conversions: usize,
++    }
++    unsafe extern "C" fn release(data: *mut c_void) {
++        // SAFETY: Test state outlives every parser using this encoding instance.
++        unsafe {
++            (*data.cast::<EncodingState>()).releases += 1;
++        }
++    }
++    unsafe extern "C" fn convert(data: *mut c_void, bytes: *const c_char) -> c_int {
++        // SAFETY: The registered map requests exactly two bytes; the state lives
++        // until the parser releases the encoding instance.
++        unsafe {
++            assert_eq!(std::slice::from_raw_parts(bytes.cast::<u8>(), 2), b"@$");
++            (*data.cast::<EncodingState>()).conversions += 1;
++        }
++        i32::from(b'1')
++    }
++    unsafe extern "C" fn unknown(
++        data: *mut c_void,
++        name: *const c_char,
++        info: *mut XML_Encoding,
++    ) -> c_int {
++        // SAFETY: The name and writable record belong to this callback; state
++        // remains live until the parser and any child have both been destroyed.
++        unsafe {
++            let state = data.cast::<EncodingState>();
++            (*state)
++                .requested
++                .push(CStr::from_ptr(name).to_str().unwrap().to_owned());
++            if !(*state).accept {
++                return ERROR;
++            }
++            (*info).map = std::array::from_fn(|index| index as i32);
++            match (*state).remapping {
++                1 => (*info).map[1] = 0x100,
++                2 => {
++                    (*info).map[usize::from(b'@')] = -2;
++                    (*info).convert = Some(convert);
++                }
++                _ => {}
++            }
++            (*info).data = data;
++            (*info).release = Some(release);
++            OK
++        }
++    }
++    // Unrequested ASCII, explicit UTF-8, explicit custom, sniffed UTF-16,
++    // and ASCII bytes with a mismatching UTF-16 declaration.
++    for mode in 0..5 {
++        // Context: root, directly created general child, parameter/subset child.
++        for context in 0..3 {
++            for case in 0..4 {
++                let encoding = if mode >= 3 { "UTF-16" } else { "UTF8" };
++                let header = match case {
++                    0 => format!("<?xml encoding='{encoding}' version='1.0'?>"),
++                    1 => format!("<?xml version='1.0' encoding='{encoding}' extra='x'?>"),
++                    2 => format!("<?xml version='1.0' encoding='{encoding}'?>"),
++                    _ => format!("<?XML encoding='{encoding}'?>"),
++                };
++                let document = if context == 2 {
++                    header.clone()
++                } else {
++                    format!("{header}<r/>")
++                };
++                for bom in [false, true] {
++                    // Explicit custom encodings reject a BOM before grammar;
++                    // UTF-16 uses its own BOM in its single iteration.
++                    if bom && mode != 0 {
++                        continue;
++                    }
++                    let bytes = if mode == 3 {
++                        [
++                            b"\xff\xfe".as_slice(),
++                            &document
++                                .encode_utf16()
++                                .flat_map(u16::to_le_bytes)
++                                .collect::<Vec<_>>(),
++                        ]
++                        .concat()
++                    } else if bom {
++                        [b"\xef\xbb\xbf".as_slice(), document.as_bytes()].concat()
++                    } else {
++                        document.as_bytes().to_vec()
++                    };
++                    for accept in [false, true] {
++                        let calls = usize::from(mode == 2 || (mode == 0 && case == 2));
++                        let grammar_error = if context == 0 { 30 } else { 31 };
++                        let expected = if mode == 4 && case != 3 {
++                            19
++                        } else if calls != 0 && !accept {
++                            18
++                        } else if case == 3 {
++                            4
++                        } else if case < 2 {
++                            grammar_error
++                        } else {
++                            0
++                        };
++                        let mut first_position = None;
++                        for split in 0..=bytes.len() {
++                            let mut state = EncodingState {
++                                accept,
++                                ..EncodingState::default()
++                            };
++                            // SAFETY: All handles, input spans and callback state
++                            // are test-owned. No state borrow crosses a parser call.
++                            unsafe {
++                                let requested = match mode {
++                                    1 => c"UTF-8".as_ptr(),
++                                    2 => c"custom".as_ptr(),
++                                    _ => ptr::null(),
++                                };
++                                let parent = XML_ParserCreate(if context == 0 {
++                                    requested
++                                } else {
++                                    ptr::null()
++                                });
++                                assert!(!parent.is_null());
++                                let parser = if context == 0 {
++                                    parent
++                                } else {
++                                    XML_ExternalEntityParserCreate(
++                                        parent,
++                                        if context == 1 {
++                                            c"".as_ptr()
++                                        } else {
++                                            ptr::null()
++                                        },
++                                        requested,
++                                    )
++                                };
++                                assert!(!parser.is_null());
++                                XML_SetUnknownEncodingHandler(
++                                    parser,
++                                    Some(unknown),
++                                    ptr::from_mut(&mut state).cast(),
++                                );
++                                let mut status = OK;
++                                for (part, final_input) in
++                                    [(&bytes[..split], 0), (&bytes[split..], 1)]
++                                {
++                                    status = XML_Parse(
++                                        parser,
++                                        part.as_ptr().cast(),
++                                        part.len() as c_int,
++                                        final_input,
++                                    );
++                                    if status == ERROR {
++                                        break;
++                                    }
++                                }
++                                assert_eq!(
++                                    status,
++                                    if expected == 0 { OK } else { ERROR },
++                                    "mode={mode}, context={context}, case={case}, split={split}, accept={accept}"
++                                );
++                                assert_eq!(XML_GetErrorCode(parser), expected);
++                                if expected != 0 {
++                                    let position = (
++                                        XML_GetCurrentByteIndex(parser),
++                                        XML_GetCurrentLineNumber(parser),
++                                        XML_GetCurrentColumnNumber(parser),
++                                    );
++                                    assert_eq!(*first_position.get_or_insert(position), position);
++                                }
++                                if mode == 0 && case < 2 && context != 2 {
++                                    assert_eq!((*parser).core.current_raw(), Some(header.as_str()));
++                                }
++                                if context != 0 {
++                                    XML_ParserFree(parser);
++                                }
++                                XML_ParserFree(parent);
++                            }
++                            assert_eq!(state.requested.len(), calls);
++                            if calls != 0 {
++                                assert_eq!(
++                                    state.requested,
++                                    [if mode == 2 { "custom" } else { "UTF8" }]
++                                );
++                            }
++                            assert_eq!(state.releases, usize::from(calls != 0 && accept));
++                        }
++                    }
++                }
++            }
++        }
++    }
++
++    // ASCII bytes outside required markup may decode differently. Preserve the
++    // existing custom-map path before deciding grammar, including a multibyte
++    // sequence whose decoded document version is valid. TextDecl versions keep
++    // their existing permissive grammar.
++    for remapping in 1..=2 {
++        let version = if remapping == 1 { "\u{1}" } else { "@$" };
++        for context in 0..3 {
++            for explicit in [false, true] {
++                for malformed_tail in [false, true] {
++                    let tail = if malformed_tail { " extra='x'" } else { "" };
++                    let header = format!("<?xml version='{version}' encoding='X-CUSTOM'{tail}?>");
++                    let document = if context == 2 {
++                        header
++                    } else {
++                        format!("{header}<r/>")
++                    };
++                    let bytes = document.as_bytes();
++                    for accept in [false, true] {
++                        let expected = if !accept {
++                            18
++                        } else if malformed_tail || (remapping == 1 && context == 0) {
++                            if context == 0 { 30 } else { 31 }
++                        } else {
++                            0
++                        };
++                        for split in 0..=bytes.len() {
++                            let mut state = EncodingState {
++                                accept,
++                                remapping,
++                                ..EncodingState::default()
++                            };
++                            // SAFETY: Handles and callback state remain live across
++                            // both feeds; state is read only after freeing all handles.
++                            unsafe {
++                                let requested = if explicit {
++                                    c"X-CUSTOM".as_ptr()
++                                } else {
++                                    ptr::null()
++                                };
++                                let parent = XML_ParserCreate(if context == 0 {
++                                    requested
++                                } else {
++                                    ptr::null()
++                                });
++                                assert!(!parent.is_null());
++                                let parser = if context == 0 {
++                                    parent
++                                } else {
++                                    XML_ExternalEntityParserCreate(
++                                        parent,
++                                        if context == 1 {
++                                            c"".as_ptr()
++                                        } else {
++                                            ptr::null()
++                                        },
++                                        requested,
++                                    )
++                                };
++                                assert!(!parser.is_null());
++                                XML_SetUnknownEncodingHandler(
++                                    parser,
++                                    Some(unknown),
++                                    ptr::from_mut(&mut state).cast(),
++                                );
++                                let mut status = OK;
++                                for (part, final_input) in
++                                    [(&bytes[..split], 0), (&bytes[split..], 1)]
++                                {
++                                    status = XML_Parse(
++                                        parser,
++                                        part.as_ptr().cast(),
++                                        part.len() as c_int,
++                                        final_input,
++                                    );
++                                    if status == ERROR {
++                                        break;
++                                    }
++                                }
++                                assert_eq!(
++                                    status,
++                                    if expected == 0 { OK } else { ERROR },
++                                    "remapping={remapping}, context={context}, explicit={explicit}, malformed_tail={malformed_tail}, accept={accept}, split={split}"
++                                );
++                                assert_eq!(XML_GetErrorCode(parser), expected);
++                                if context != 0 {
++                                    XML_ParserFree(parser);
++                                }
++                                XML_ParserFree(parent);
++                            }
++                            assert_eq!(state.requested, ["X-CUSTOM"]);
++                            assert_eq!(state.releases, usize::from(accept));
++                            assert_eq!(state.conversions, usize::from(accept && remapping == 2));
++                        }
++                    }
++                }
++            }
++        }
++    }
++}
++
+ #[test]
+ fn external_callback_can_parse_an_inherited_fragment() {
+     // SAFETY: Parent and child callbacks use the same serialized test-owned state.

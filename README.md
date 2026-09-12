@@ -16,16 +16,16 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole (normal) | Expat (normal) | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 39.394 ms | 29.031 ms | 1.359× |
-| Wayland protocol | 0.921 ms | 1.066 ms | 0.863× |
-| Maven POM | 0.666 ms | 0.437 ms | 1.519× |
-| Batik SVG | 0.124 ms | 0.134 ms | 0.924× |
-| GTK UI | 0.277 ms | 0.215 ms | 1.280× |
-| DocBook XSL | 0.234 ms | 0.186 ms | 1.230× |
+| Vulkan registry | 36.366 ms | 28.906 ms | 1.266× |
+| Wayland protocol | 0.887 ms | 1.069 ms | 0.840× |
+| Maven POM | 0.589 ms | 0.440 ms | 1.332× |
+| Batik SVG | 0.124 ms | 0.134 ms | 0.931× |
+| GTK UI | 0.248 ms | 0.212 ms | 1.165× |
+| DocBook XSL | 0.225 ms | 0.189 ms | 1.192× |
 
-The selected baseline’s [normal-build measurements](docs/validation/2026-09-12/shared-native-raw-text/) use six pinned XML projects, 4 KiB chunks and namespaces disabled on a shared Linux host. Times are medians of seven process medians; ratios are medians of paired ratios. Across the 24 real-project conditions in each confirmation run, Oriole takes **1.2659× Expat’s native time and 1.0975× its CPython time**. The Python aggregate and both consumer aggregates meet the roughly 1.20× target; native remains above it.
+The [normal-build measurements](docs/validation/2026-09-12/native-start-end-namespace-declaration/) use six pinned XML projects, 4 KiB chunks and namespaces disabled on a shared Linux host. Times are medians of seven process medians; ratios are medians of paired ratios. Across the 24 real-project conditions in confirmation, the selected runtime takes **1.1841× Expat’s native time and 1.0558× its CPython time**. Both aggregates meet the current 20% target in two epochs; individual outliers and generated-workload regressions remain in the report.
 
-Qualification of the selected baseline (`67c704c`, normal library `e59d89d6`) preserves **4,349 API passes, 391 failures and no timeouts**, six passing C consumers, and two strict CPython grouping failures. Separate semantic and allocation diagnostics pass. W3C acceptance matches Expat, with 960 mandatory mismatches retained per engine. **Six Rust ASan/fuzz harnesses pass for that selected baseline.** The [installed PBS trial](docs/validation/2026-09-12/shared-native-raw-text-pbs/) completed with the same two grouping failures and remains failed. The [matched-End draft](docs/validation/2026-09-12/matched-native-end-raw/) remains unselected, with its Rust ASan/fuzz qualification pending. The [compatibility guide](docs/compatibility.md) records the remaining gates.
+The exact tested source `5d983f7e` passes 483 Rust tests and preserves **4,349 API passes, 391 failures and no timeouts**, six passing C consumers, and two strict CPython grouping failures. Separate semantic and allocation diagnostics, six Rust ASan/fuzz harnesses and current-source CI pass. W3C acceptance matches Expat, with 960 shared catalog failures retained. The installed PBS trial retains the same two grouping failures. This runtime is selected for a **controlled, opt-in Linux CPython 3.12.13 trial**; the [compatibility guide](docs/compatibility.md) records its experimental status and known differences.
 
 ## Installation
 

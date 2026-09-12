@@ -1,5 +1,17 @@
 # Benchmarks
 
+## Current normal-build results
+
+The [combined Start/End, namespace and declaration report](../docs/validation/2026-09-12/native-start-end-namespace-declaration/) measures exact tested runtime `5d983f7e` against the raw-view baseline `67c704c` and normal Expat 2.8.4. Native real-project time is 0.9314× raw-view baseline / 1.1822× Expat initially and 0.9316× / 1.1841× in confirmation. CPython is 0.9625× / 1.0554× initially and 0.9609× / 1.0558× in confirmation; confirmation ElementTree is 1.0914× and pyexpat 1.0214× Expat. Both native and Python meet the current 20% aggregate target in both epochs.
+
+All four epochs remain separate: 104 condition rows, 2,496 workers and 265,080 samples, with all 12 adverse rows across nine distinct conditions retained. Native confirmation wins 22/24 real conditions and Python 23/24. Native namespace-on remains 1.2352× Expat, generated controls 3.5118×, and entity controls regress 5.85–5.90% versus the raw-view baseline. Individual outliers are not waived. The [six README rows](../docs/validation/2026-09-12/native-start-end-namespace-declaration/combined/native-confirmation/readme-benchmarks.json) use confirmation 4 KiB/namespaces-off data: medians of seven process medians, with paired-ratio medians computed separately.
+
+The report retains all-condition CSVs, compiler/source/library bindings, raw-reader arithmetic and shared-host observations. The runtime is selected for a controlled opt-in Linux CPython 3.12.13 trial after completed bounded qualification. The [compatibility guide](../docs/compatibility.md) retains known failures and the experimental scope; these measurements do not establish production interchangeability.
+
+## Historical checkpoints
+
+These records retain the exact source, numbers, goals and decisions from their own checkpoints. Their historical 1.10× goals are not the current 1.20× aggregate target.
+
 The [outer-whitespace report](../docs/validation/2026-09-12/outer-whitespace-separated-dispatch/) records runtime `6320d7b7`, based on PR162’s `87acc5a9`. A transient native space/TAB proof avoids repeated scanning of long prolog/epilog whitespace; uncertain suffixes preserve the existing path, callback boundaries, eager coordinates and accounting order. The ordinary inner Text plan expression is retained.
 
 The targeted probe and full original matrix preserve the three-second alarm: both chunk-0 `test_misc_input_2gb` rows change from selected-control timeout 14 to candidate pass 0. The full matrix records 4,349 passes, 391 failures and no timeouts, with all other 4,738 ordered outcomes exact. Six C consumers pass. Strict shared/static CPython each retain 802 methods, 809 rendered outcomes and the same two grouping failures (raw exit 2); both separate semantic tests pass per linkage. Separate diagnostics pass all 300 retry configurations after raising exactly 25 local retry maxima to 512, and all 12 buffer-continuation configurations after replacing exactly two second-empty-call allocation-result assertions with unconstrained observations. Remaining semantic/tail assertions stay unchanged. Retry probes use 15-second tests, 4 GiB address space and 3 GiB RSS limits; buffer probes retain three seconds, 1 GiB and 768 MiB. These uninstrumented consumers do not fix the original 391 failures or establish exhaustive OOM coverage; the buffer fixture is not a callback-text bytes/count oracle. Current-source Rust ASan passes all six harnesses through corpus replay and bounded exploration, with leak detection disabled.
@@ -44,6 +56,8 @@ no observations are pooled. The host was shared: counters and CPU affinity do no
 establish isolation or statistical significance. The preceding
 [namespace study](../docs/validation/2026-09-12/sparse-namespace-storage/) retains its
 own source and measurements.
+
+## Running benchmarks
 
 New Oriole performance work uses ordinary `-O3`, ThinLTO and one codegen unit; the
 normal Expat control separately uses GCC 13.3 `-O3` without LTO. PGO experiments

@@ -1,0 +1,8 @@
+{
+  "session": 39464,
+  "exit_code": 1,
+  "failure": "reader expected two final newlines in pbs-validate.log; actual log has one",
+  "correction": "require exact two validation lines and archive name, independent of final newline",
+  "raw_artifacts_mutated": false,
+  "targets_rerun": false
+}

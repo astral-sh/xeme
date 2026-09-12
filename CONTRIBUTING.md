@@ -33,7 +33,7 @@ requests separately from elapsed time and peak process memory. Report regression
 and negative experiments. A new dependency or data structure needs a demonstrated
 benefit that justifies its complexity.
 
-The performance target is within roughly 10% of Expat on representative,
+The performance target is within roughly 20% of Expat on representative,
 held-out project XML, measured both through the C interface and through CPython.
 Report individual workload results alongside aggregates, and keep generated
 stress workloads separate. Compiler and allocator experiments must meet the

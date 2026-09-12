@@ -1,0 +1,474 @@
+{
+  "mode": "normal",
+  "external_input_hashes": {
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus-manifest.json": "c725b079ba4f0b19912880f53c6f0ac83758711071151abc8765d1e06491ff42",
+    "/tmp/oriole-grammar-bench-plain/native-driver": "e9478cd0f8572b08ab513377795a07754086a9cdf2c06748183db3c69d232e23",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml": "cf31c965cf6e788697139601da0c7e02a75a9b6c7ac764e7641f5521ffd9da06",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml": "7eb8569529235c85e16d15612fc367da4538b7d515b13e32ec48ba0742c42610",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml": "5dbb69898d881458df5735b8c50c5166d21aa2d69659d21eea4d888a295b3b3f",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg": "15ab08890f4e57be784d687d3522ef8799486e725826f8abeec29c6cde38050f",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui": "2620a2b6553ce99cc564eb3d359eb9cb9c7b8f259e0ccc1aa49bb3534a38101d",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl": "7f13c5f4977faa028462910cf6d3fdeeeab64d87553f1fff12f0afa8f1c49818",
+    "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml": "1a1beb69a6a29bc1314d6a95ee96e87eafd8cbaa832a66b2f6e35d60513b8eb0",
+    "/tmp/oriole-grammar-bench-plain/entities.xml": "886867572522d64996e8396ae12a85c634966b960c47dbcf548a62659e1eb333"
+  },
+  "conditions": [
+    {
+      "name": "vulkan",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+      "chunk": 4096,
+      "namespaces": false,
+      "iterations": 7
+    },
+    {
+      "name": "vulkan",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+      "chunk": 4096,
+      "namespaces": true,
+      "iterations": 7
+    },
+    {
+      "name": "wayland",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+      "chunk": 4096,
+      "namespaces": false,
+      "iterations": 64
+    },
+    {
+      "name": "wayland",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+      "chunk": 4096,
+      "namespaces": true,
+      "iterations": 64
+    },
+    {
+      "name": "maven",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+      "chunk": 4096,
+      "namespaces": false,
+      "iterations": 128
+    },
+    {
+      "name": "maven",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+      "chunk": 4096,
+      "namespaces": true,
+      "iterations": 128
+    },
+    {
+      "name": "batik",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+      "chunk": 4096,
+      "namespaces": false,
+      "iterations": 512
+    },
+    {
+      "name": "batik",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+      "chunk": 4096,
+      "namespaces": true,
+      "iterations": 512
+    },
+    {
+      "name": "gtk",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+      "chunk": 4096,
+      "namespaces": false,
+      "iterations": 256
+    },
+    {
+      "name": "gtk",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+      "chunk": 4096,
+      "namespaces": true,
+      "iterations": 256
+    },
+    {
+      "name": "docbook",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+      "chunk": 4096,
+      "namespaces": false,
+      "iterations": 256
+    },
+    {
+      "name": "docbook",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+      "chunk": 4096,
+      "namespaces": true,
+      "iterations": 256
+    },
+    {
+      "name": "generated-rare-declarations",
+      "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+      "chunk": 4096,
+      "namespaces": false,
+      "iterations": 32
+    },
+    {
+      "name": "generated-entities",
+      "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+      "chunk": 4096,
+      "namespaces": false,
+      "iterations": 32
+    },
+    {
+      "name": "vulkan",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+      "chunk": 65536,
+      "namespaces": false,
+      "iterations": 7
+    },
+    {
+      "name": "vulkan",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+      "chunk": 65536,
+      "namespaces": true,
+      "iterations": 7
+    },
+    {
+      "name": "wayland",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+      "chunk": 65536,
+      "namespaces": false,
+      "iterations": 64
+    },
+    {
+      "name": "wayland",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+      "chunk": 65536,
+      "namespaces": true,
+      "iterations": 64
+    },
+    {
+      "name": "maven",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+      "chunk": 65536,
+      "namespaces": false,
+      "iterations": 128
+    },
+    {
+      "name": "maven",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+      "chunk": 65536,
+      "namespaces": true,
+      "iterations": 128
+    },
+    {
+      "name": "batik",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+      "chunk": 65536,
+      "namespaces": false,
+      "iterations": 512
+    },
+    {
+      "name": "batik",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+      "chunk": 65536,
+      "namespaces": true,
+      "iterations": 512
+    },
+    {
+      "name": "gtk",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+      "chunk": 65536,
+      "namespaces": false,
+      "iterations": 256
+    },
+    {
+      "name": "gtk",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+      "chunk": 65536,
+      "namespaces": true,
+      "iterations": 256
+    },
+    {
+      "name": "docbook",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+      "chunk": 65536,
+      "namespaces": false,
+      "iterations": 256
+    },
+    {
+      "name": "docbook",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+      "chunk": 65536,
+      "namespaces": true,
+      "iterations": 256
+    },
+    {
+      "name": "generated-rare-declarations",
+      "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+      "chunk": 65536,
+      "namespaces": false,
+      "iterations": 32
+    },
+    {
+      "name": "generated-entities",
+      "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+      "chunk": 65536,
+      "namespaces": false,
+      "iterations": 32
+    }
+  ],
+  "pairs": 7,
+  "seed": 2026091003,
+  "counts": {
+    "conditions": 28,
+    "real_conditions": 24,
+    "generated_conditions": 4,
+    "preflights": 84,
+    "timed_workers": 588,
+    "workers": 672,
+    "samples": 106176
+  },
+  "status": "passed",
+  "execution_status": "unexecuted",
+  "origin": "/tmp/oriole-core-owned-text-raw-study/native",
+  "parent_files": {
+    "run.py": "5f41a419e800e95954424e2a85d2ee988609d830db18dc85c469af801cd8aef5",
+    "native_screen.py": "ba4becaa2db451b24dbec2608339c4cdd8d334e10b63aae97e84fc46cc66e2b0"
+  },
+  "files": {
+    "run.py": "5f41a419e800e95954424e2a85d2ee988609d830db18dc85c469af801cd8aef5",
+    "native_screen.py": "6f2a30dae06c143e77793b71aa326d4bcf59d825f302c6a50a350195d5e44e43"
+  },
+  "changes": {
+    "native_screen.py": [
+      {
+        "old": "Fixed three-engine matched normal core-owned NativeText raw-view native screen.",
+        "new": "Fixed three-engine matched Start + End + namespace + declaration composition native screen.",
+        "count": 1
+      },
+      {
+        "old": "root = Path('/tmp/oriole-core-owned-text-raw-study/native')",
+        "new": "root = Path('/tmp/oriole-native-start-end-namespace-declaration-study/native')",
+        "count": 1
+      },
+      {
+        "old": "'control': Path('/tmp/oriole-outer-whitespace-separated-dispatch-study/normal/liboriole_expat.so')",
+        "new": "'control': Path('/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so')",
+        "count": 1
+      },
+      {
+        "old": "'candidate': Path('/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so')",
+        "new": "'candidate': Path('/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so')",
+        "count": 1
+      },
+      {
+        "old": "accepted whitespace baseline and core-owned NativeText raw-view candidate.",
+        "new": "selected raw-view e59d baseline and Start + End + namespace + declaration composition candidate.",
+        "count": 1
+      }
+    ],
+    "run.py": [],
+    "read_results.py": [
+      {
+        "old": "ROOT = Path('/tmp/oriole-core-owned-text-raw-study')",
+        "new": "ROOT = Path('/tmp/oriole-native-start-end-namespace-declaration-study')",
+        "count": 1
+      },
+      {
+        "old": "assert libraries['candidate']['sha256'] == 'e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6'",
+        "new": "assert libraries['candidate']['sha256'] == '@CANDIDATE_SO_SHA256@'",
+        "count": 1
+      },
+      {
+        "old": "assert libraries['control']['sha256'] == 'ce0a648ccd0c661e88e9c29643bb1d3893abfac3976ebc603b28f40eb0623229'",
+        "new": "assert libraries['control']['sha256'] == 'e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6'",
+        "count": 1
+      },
+      {
+        "old": "assert source['base'] == '2c4d21647efdefe0b7da977ca206b8552c32f0f3'",
+        "new": "assert source['base'] == '9c632547af2253b9672a92fac320c70af3263bb8'",
+        "count": 1
+      },
+      {
+        "old": "assert binding['source_count'] == 74 and set(binding['source_delta']) == {'crates/oriole/src/arena.rs', 'crates/oriole/src/dtd.rs', 'crates/oriole/src/dtd/attlist.rs', 'crates/oriole/src/encoding.rs', 'crates/oriole/src/lib.rs', 'crates/oriole/tests/allocation.rs', 'crates/oriole_expat/src/context_text_tests.rs', 'crates/oriole_expat/src/lib.rs', 'crates/oriole_expat/src/tests.rs'}",
+        "new": "assert binding['source_count'] == 74 and set(binding['source_delta']) == {'crates/oriole/src/arena.rs', 'crates/oriole/src/encoding.rs', 'crates/oriole/src/lib.rs', 'crates/oriole/tests/adapter_frame.rs', 'crates/oriole/tests/allocation.rs', 'crates/oriole/tests/external_grammar.rs', 'crates/oriole/tests/external_limits.rs', 'crates/oriole/tests/multibyte.rs', 'crates/oriole/tests/raw_tokens.rs', 'crates/oriole_expat/src/lib.rs', 'crates/oriole_expat/src/tests.rs', 'crates/oriole_expat/tests/memory.rs'}\nassert binding['tests'] == {'passed':483,'groups':35,'failures':0,'ignored':0}\nfixture = 'crates/oriole_expat/src/context_text_tests.rs'\nbaseline_record = adaptation['baseline_source_record']\ncontrol_record = adaptation['compiled_control_source_record']\nassert sha(baseline_record['path']) == baseline_record['sha256'] == binding['baseline_source_manifest_sha256']\nassert sha(control_record['path']) == control_record['sha256'] == binding['control_source_manifest_sha256']\nbaseline = load(baseline_record['path'])\ncompiled_control = load(control_record['path'])\nassert baseline['base'] == source['base'] and set(baseline['sha256']) == set(compiled_control['sha256']) == set(source['sha256'])\nbase_delta = {p: {'control': compiled_control['sha256'][p], 'baseline': h} for p, h in baseline['sha256'].items() if h != compiled_control['sha256'][p]}\nassert set(base_delta) == {'crates/oriole/src/lib.rs', 'crates/oriole/tests/allocation.rs', 'crates/oriole_expat/src/tests.rs', fixture}\nassert base_delta == binding['baseline_control_source_delta'] == adaptation['baseline_control_source_delta']\ndelta = {p: {'control': baseline['sha256'][p], 'candidate': h} for p, h in source['sha256'].items() if h != baseline['sha256'][p]}\ncontrol_delta = {p: {'control': compiled_control['sha256'][p], 'candidate': h} for p, h in source['sha256'].items() if h != compiled_control['sha256'][p]}\nassert delta == binding['source_delta'] == adaptation['source_delta'] and len(delta) == 12\nassert control_delta == binding['compiled_control_source_delta'] == adaptation['compiled_control_source_delta'] and len(control_delta) == 13\nassert set(control_delta) == set(delta) | {fixture}\nassert binding['control_fixture_correction'] == adaptation['control_fixture_correction']\nassert source['sha256'][fixture] == baseline['sha256'][fixture] == binding['control_fixture_correction']['corrected_sha256']",
+        "count": 1
+      },
+      {
+        "old": "assert source['sha256']['crates/oriole/src/lib.rs'] == 'f2c1e99ec4e59b894b9cc3825d258babff6cfff1ba5659f209f7af0ccfdfd80e'",
+        "new": "assert source['sha256']['crates/oriole/src/lib.rs'] == '@FORMATTED_LIB_RS_SHA256@'",
+        "count": 1
+      },
+      {
+        "old": "Reuse the completed whitespace normal reader with source, library and output bindings for core-owned-NativeText-raw-view.",
+        "new": "Reuse the completed raw-view normal reader with source, library and output bindings for Start + End + namespace + declaration composition.",
+        "count": 1
+      },
+      {
+        "old": "Only this core-owned-NativeText-raw-view normal native campaign is reconstructed here.",
+        "new": "Only this native-start-end-namespace-declaration normal native campaign is reconstructed here.",
+        "count": 1
+      }
+    ]
+  },
+  "inverse_text_and_ast_equal": true,
+  "libraries": {
+    "candidate": {
+      "path": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025"
+    },
+    "control": {
+      "path": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+      "sha256": "e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6"
+    },
+    "expat": {
+      "path": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+    }
+  },
+  "selected_normal_protocol": {
+    "path": "/tmp/oriole-core-owned-text-raw-study/native/native-screen/protocol.json",
+    "sha256": "6089ae675e7dd6c0c529046fda78b593e02eb14b7f84aee13096f0ec852b2497"
+  },
+  "source_delta": {
+    "crates/oriole/src/arena.rs": {
+      "control": "dfa1af5097ee1c7e573442a455dcda698f36c2f09f4ad9395bf274145bff6aa8",
+      "candidate": "e75d9443c5813ad540a05d47bd1078c694c137606bd589945abb16c23c7be25a"
+    },
+    "crates/oriole/src/encoding.rs": {
+      "control": "cfcc35b40386997ab03a69ebfd602ae5b3cfa1f19751f56c6ea39a76d4aa1696",
+      "candidate": "fc5d7b95f83433a80a32b038ff9b773219f6513e2e8da5afe5f92bd468033bc0"
+    },
+    "crates/oriole/src/lib.rs": {
+      "control": "4c50a28a0ba7fa8ac3cf725fee2626cf382a22022b226901084f68e4cfda721e",
+      "candidate": "339ba2b24308e4672da689f661bc78e8d3cbda590c873acf8c8b0aa69a12980d"
+    },
+    "crates/oriole/tests/adapter_frame.rs": {
+      "control": "9e3804d7b72b94d8cfaf8041a2d6eabeb79c0b17d47dc13f15b3122a907c6cda",
+      "candidate": "d5572119681b3ddf487255ab8aa6214c0f0545eb60c4d9c7a1acd3f13dcf6946"
+    },
+    "crates/oriole/tests/allocation.rs": {
+      "control": "48933246de42c8e6333e9aa9f8bc010a9f1a7ad79fe2bd3dc75f1a58a0399b7d",
+      "candidate": "2d71c4781228dd0a36f5d32de6648bb053501f4c9ef2d00e333329a04d815081"
+    },
+    "crates/oriole/tests/external_grammar.rs": {
+      "control": "5304e0fa552b1d990a43aa426a4f7af65546605a1e959ede570154d3b9b1ec0c",
+      "candidate": "ae5f1fb93838f380fc053caf529b3caaa3be439284baca379108148f101117d2"
+    },
+    "crates/oriole/tests/external_limits.rs": {
+      "control": "77ae194e6094feb63209321bbdf1dc7b55d2b53bbb61a02be07ae0759a1a9ef5",
+      "candidate": "22b0f7245dcc8c2896cb8626d11c8ff9c464a5199e12e62dd361b140524c815b"
+    },
+    "crates/oriole/tests/multibyte.rs": {
+      "control": "30d9506ed6468dfeae4bcecdd9373dfbeb0a61be9261befd91f2191df7959ecd",
+      "candidate": "71153cc3ed2aa370b41a13a225b9a2495ede07585eb22ecfe86088cb1437d3e2"
+    },
+    "crates/oriole/tests/raw_tokens.rs": {
+      "control": "3675681faa7b5e5c8e80a4ebc82914ca57c72a819542dc5b81bbd3c0fac06b7e",
+      "candidate": "5ba9d436ed0d6ddbaf962beb1e6f2d72aa94ce0bfd23afa87db7cf488ce5f603"
+    },
+    "crates/oriole_expat/src/lib.rs": {
+      "control": "159454c61bdd6361adc493eecf9d69731b2ca826d90a92529599f1b813a70001",
+      "candidate": "9af4fa9388d84248f086f040d295317bf9ce2aacb533c7293f5fbc09c3fa9cb4"
+    },
+    "crates/oriole_expat/src/tests.rs": {
+      "control": "47c1a63ae73b27f224f8bfd01f43acdc9ae756c304c866f7240f4acd03298afb",
+      "candidate": "098bb0f21996ec781f0060698e1ad03de10810f0e71d8160b26e1cc3b74f8a80"
+    },
+    "crates/oriole_expat/tests/memory.rs": {
+      "control": "f7d5cc3a30f5b990409b0c0928fa66eedc5c46de46fee5440286a62448c7f053",
+      "candidate": "bcce5f45d1fbe0de5c2a702c958ed6656de544909edf9d8594f8edff66da8632"
+    }
+  },
+  "compiled_control_source_delta": {
+    "crates/oriole/src/arena.rs": {
+      "control": "dfa1af5097ee1c7e573442a455dcda698f36c2f09f4ad9395bf274145bff6aa8",
+      "candidate": "e75d9443c5813ad540a05d47bd1078c694c137606bd589945abb16c23c7be25a"
+    },
+    "crates/oriole/src/encoding.rs": {
+      "control": "cfcc35b40386997ab03a69ebfd602ae5b3cfa1f19751f56c6ea39a76d4aa1696",
+      "candidate": "fc5d7b95f83433a80a32b038ff9b773219f6513e2e8da5afe5f92bd468033bc0"
+    },
+    "crates/oriole/src/lib.rs": {
+      "control": "f2c1e99ec4e59b894b9cc3825d258babff6cfff1ba5659f209f7af0ccfdfd80e",
+      "candidate": "339ba2b24308e4672da689f661bc78e8d3cbda590c873acf8c8b0aa69a12980d"
+    },
+    "crates/oriole/tests/adapter_frame.rs": {
+      "control": "9e3804d7b72b94d8cfaf8041a2d6eabeb79c0b17d47dc13f15b3122a907c6cda",
+      "candidate": "d5572119681b3ddf487255ab8aa6214c0f0545eb60c4d9c7a1acd3f13dcf6946"
+    },
+    "crates/oriole/tests/allocation.rs": {
+      "control": "bb2d867c8b95dc11eba2260f3b421cb89a88610b3cb59d839891b41e7467193f",
+      "candidate": "2d71c4781228dd0a36f5d32de6648bb053501f4c9ef2d00e333329a04d815081"
+    },
+    "crates/oriole/tests/external_grammar.rs": {
+      "control": "5304e0fa552b1d990a43aa426a4f7af65546605a1e959ede570154d3b9b1ec0c",
+      "candidate": "ae5f1fb93838f380fc053caf529b3caaa3be439284baca379108148f101117d2"
+    },
+    "crates/oriole/tests/external_limits.rs": {
+      "control": "77ae194e6094feb63209321bbdf1dc7b55d2b53bbb61a02be07ae0759a1a9ef5",
+      "candidate": "22b0f7245dcc8c2896cb8626d11c8ff9c464a5199e12e62dd361b140524c815b"
+    },
+    "crates/oriole/tests/multibyte.rs": {
+      "control": "30d9506ed6468dfeae4bcecdd9373dfbeb0a61be9261befd91f2191df7959ecd",
+      "candidate": "71153cc3ed2aa370b41a13a225b9a2495ede07585eb22ecfe86088cb1437d3e2"
+    },
+    "crates/oriole/tests/raw_tokens.rs": {
+      "control": "3675681faa7b5e5c8e80a4ebc82914ca57c72a819542dc5b81bbd3c0fac06b7e",
+      "candidate": "5ba9d436ed0d6ddbaf962beb1e6f2d72aa94ce0bfd23afa87db7cf488ce5f603"
+    },
+    "crates/oriole_expat/src/context_text_tests.rs": {
+      "control": "87936014a0a2fbd4d0443a17dd441ce2e028dc3ac27dd66d86b0bd3466024e3e",
+      "candidate": "5b74bfe9be84234e4e4438998685b1f91381c82fffde248b8f8822873cd9d254"
+    },
+    "crates/oriole_expat/src/lib.rs": {
+      "control": "159454c61bdd6361adc493eecf9d69731b2ca826d90a92529599f1b813a70001",
+      "candidate": "9af4fa9388d84248f086f040d295317bf9ce2aacb533c7293f5fbc09c3fa9cb4"
+    },
+    "crates/oriole_expat/src/tests.rs": {
+      "control": "704ce215e54cf427b891c5c4fe934b5495c3b360d9526369c0a70ab8333e6af1",
+      "candidate": "098bb0f21996ec781f0060698e1ad03de10810f0e71d8160b26e1cc3b74f8a80"
+    },
+    "crates/oriole_expat/tests/memory.rs": {
+      "control": "f7d5cc3a30f5b990409b0c0928fa66eedc5c46de46fee5440286a62448c7f053",
+      "candidate": "bcce5f45d1fbe0de5c2a702c958ed6656de544909edf9d8594f8edff66da8632"
+    }
+  },
+  "baseline_control_source_delta": {
+    "crates/oriole/src/lib.rs": {
+      "control": "f2c1e99ec4e59b894b9cc3825d258babff6cfff1ba5659f209f7af0ccfdfd80e",
+      "baseline": "4c50a28a0ba7fa8ac3cf725fee2626cf382a22022b226901084f68e4cfda721e"
+    },
+    "crates/oriole/tests/allocation.rs": {
+      "control": "bb2d867c8b95dc11eba2260f3b421cb89a88610b3cb59d839891b41e7467193f",
+      "baseline": "48933246de42c8e6333e9aa9f8bc010a9f1a7ad79fe2bd3dc75f1a58a0399b7d"
+    },
+    "crates/oriole_expat/src/context_text_tests.rs": {
+      "control": "87936014a0a2fbd4d0443a17dd441ce2e028dc3ac27dd66d86b0bd3466024e3e",
+      "baseline": "5b74bfe9be84234e4e4438998685b1f91381c82fffde248b8f8822873cd9d254"
+    },
+    "crates/oriole_expat/src/tests.rs": {
+      "control": "704ce215e54cf427b891c5c4fe934b5495c3b360d9526369c0a70ab8333e6af1",
+      "baseline": "47c1a63ae73b27f224f8bfd01f43acdc9ae756c304c866f7240f4acd03298afb"
+    }
+  },
+  "baseline_source_record": {
+    "path": "/tmp/oriole-native-start-end-namespace-declaration-preparation/baseline-source.json",
+    "sha256": "ed7219761a3fd2ce1bc98c2887eaeb4d9f9bc1ee14c239bf3626f232040ea6cb"
+  },
+  "compiled_control_source_record": {
+    "path": "/tmp/oriole-core-owned-text-raw-study/source.json",
+    "sha256": "05550226c63ecefdb8607f04a23efedaadcf77e449207f18e7be7c31b2426b38"
+  },
+  "control_fixture_correction": {
+    "path": "/tmp/oriole-start-token-owner-transfer-source-proposal-revision02/baseline-fixture-fix.patch",
+    "sha256": "3a0726c2c12fd6acbbb87acb4e692fc0f6707e6511fa8b2e38994209f4569568",
+    "original_sha256": "87936014a0a2fbd4d0443a17dd441ce2e028dc3ac27dd66d86b0bd3466024e3e",
+    "corrected_sha256": "5b74bfe9be84234e4e4438998685b1f91381c82fffde248b8f8822873cd9d254",
+    "prior_base": "de144aff865a498c8854248bdaf5be250cf29f5d"
+  },
+  "candidate_source": "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration",
+  "candidate_source_record": {
+    "path": "/tmp/oriole-native-start-end-namespace-declaration-study/source.json",
+    "sha256": "49bf5914f1882d4a881bbea45e92a5bb9d56744df06d6a6bd26c069c680146c1"
+  },
+  "candidate_build_record": {
+    "path": "/tmp/oriole-native-start-end-namespace-declaration-study/build.json",
+    "sha256": "f8a2e27ab9c4dbc958fc36ef6e8804eb8f63e71c564609624cdc44c0d457e48c"
+  },
+  "binding_review": "/tmp/oriole-native-start-end-namespace-declaration-study/build-binding.json",
+  "scope": "Combined direct-source Start, matched native End, default namespace slot and declaration grammar on PR168 base9c632547 versus the exact already-built raw-view e59d control and normal Expat7a333. Twelve incremental files differ from the published base; thirteen differ from compiled e59d. Baseline already contains the three matched-End files and a separate cfg(test) fixture correction, recorded independently. No control rebuild, new compiler flags or PGO. All 28 conditions, seven pairs, workers, bounds and arithmetic unchanged. CPU affinity does not imply isolation. No targets during materialization."
+}

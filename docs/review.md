@@ -1,6 +1,21 @@
 # Reviewing Oriole
 
-## Current shared native/raw Text candidate
+## Current native Start/End, namespace and declaration composition
+
+The [combined report](validation/2026-09-12/native-start-end-namespace-declaration/) records selected trial runtime `5d983f7e` and normal library `c3e65339`. [Matched-End PR168](https://github.com/astral-sh/oriole/pull/168) is followed by [direct-source Start PR169](https://github.com/astral-sh/oriole/pull/169), [default namespace PR170](https://github.com/astral-sh/oriole/pull/170) and [declaration grammar PR171](https://github.com/astral-sh/oriole/pull/171). The [step patches](validation/2026-09-12/native-start-end-namespace-declaration/source/steps/) and [independent composition review](validation/2026-09-12/native-start-end-namespace-declaration/source/independent-review.json) retain the complete test union and shared default-slot eligibility integration.
+
+Review the direct-source borrow and raw-on-error publication, matched-End input retention, default-URI ownership/undo/import paths, and declaration grammar before unknown-encoding callbacks. Generic, empty-tag, converted-input and namespace-expanding fallbacks retain their contracts. Allocator routing and structural/live limits remain intact; allocation schedules can change. Adding public Rust `ErrorKind::TextDeclaration` requires downstream exhaustive matches to handle that variant; C error 31 and the ABI are unchanged. The core remains safe Rust.
+
+The exact final source passes 483 Rust tests in 35 groups and all seven ordinary commands. Normal qualification preserves all 4,740 API outcomes, with 391 failures, six passing C consumers, and the same two strict grouping failures per linkage. Separate semantic, 300/12 allocation and 18 declaration-callback checks pass; W3C retains 960 mandatory failures per engine. Current-source six-harness Rust ASan/fuzz and all 15 ordinary CI jobs pass; both Miri callback modes pass 15 focused checks. Installed structure, identity, custom checks and glibc 2.17 threaded parsing pass; PBS retains only the two known grouping failures. The [compatibility guide](compatibility.md) scopes selection to a controlled opt-in Linux CPython 3.12.13 trial and classifies the shared W3C failures.
+
+Native and Python meet the current 20% aggregate target in both epochs: confirmation is 1.1841× and 1.0558× Expat. The [complete performance summary](validation/2026-09-12/native-start-end-namespace-declaration/combined/performance-summary.json) retains 104 epoch-condition rows, 2,496 workers, 265,080 samples and all 12 adverse rows across nine distinct conditions. No samples are pooled and no individual outlier is waived. The [six README rows](validation/2026-09-12/native-start-end-namespace-declaration/combined/native-confirmation/readme-benchmarks.json) independently reconstruct confirmation raw samples. Source identity is exact; standalone measurements do not establish per-layer additive gains or intermediate binary results.
+
+## Historical checkpoints
+
+### Shared native/raw Text checkpoint
+
+This snapshot retains its original source identities, numbers and historical 1.10× goal; it does not qualify the current composition.
+
 
 The [report](validation/2026-09-12/shared-native-raw-text/) binds the exact nine-file raw-view snapshot on PR165 `2c4d216`, its ordinary build and normal `e59d89d6` library. The root native UTF-8 owner also supplies Expat input context; a bounded checked raw Text range avoids an additional copy and participates in retention. Owned conversion/invalid-input/raw-override fallbacks, allocator routing, limits, eager positions, sticky errors and detached C callback ownership remain explicit. The core remains safe Rust. The later [source commit binding](validation/2026-09-12/shared-native-raw-text/source/published-source-binding.json) records `67c704c123b8661a3ad1f91bd48c2f0be4996096` after testing and verifies all 330 source, auxiliary, harness and seed files byte for byte. Allocation schedules and retained capacity may change.
 
@@ -14,9 +29,9 @@ Six current-source Rust ASan/fuzz harnesses pass: 69,199 replay executions and 7
 
 The [completed installed PBS trial and CI record](validation/2026-09-12/shared-native-raw-text-pbs/) retain the failed installed suites: the same two grouping assertions fail on the host, repeat in host retries, and fail on glibc 2.17. Archive structure, installed identity, custom checks and the 1,024-parse threaded smoke pass. PBS tested `47776625` with runtime `67c704c`; final CI at `008d818` passes all 15 ordinary jobs after CI-inventory and test-fixture borrow fixes, with PGO skipped. Production bytes are unchanged, but PBS did not run the later fixture snapshot. This installed result makes no speed claim.
 
-## Historical checkpoints
+### Earlier checkpoints
 
-The following records describe their own source and checkpoint. Their sanitizer, distribution and performance results do not qualify the current raw-view candidate.
+The following records describe their own source and checkpoint. Their sanitizer, distribution and performance results do not qualify the current composition.
 
 The [outer-whitespace report](validation/2026-09-12/outer-whitespace-separated-dispatch/) records runtime `6320d7b7`, based on PR162’s `87acc5a9`. A transient native space/TAB proof avoids repeated scanning of long prolog/epilog whitespace; uncertain suffixes preserve the existing path, callback boundaries, eager coordinates and accounting order. The ordinary inner Text plan expression is retained.
 

@@ -1,0 +1,33 @@
+{
+  "status": "milestone_complete_selected_for_controlled_opt_in_trial",
+  "selected_runtime_commit": "5d983f7e09a095fc6c9a94c6ce05ef5a8ec95c8d",
+  "scope": "Controlled, opt-in Linux x86-64 CPython 3.12.13 trial; experimental, not a fully interchangeable or production-certified Expat replacement.",
+  "decision": "Select the exact tested combined runtime. The current 20% aggregate native real-project and Python target is met in both epochs, current-source bounded ASan and CI completed without new findings, and installed PBS preserves only the known grouping failures. No further optimization or qualification cycle is required for this milestone.",
+  "basis": "Root decision after reviewing the terminal saved readbacks and the accepted trial scope.",
+  "performance_decision_sha256": "a02fa3d0dd39d51a0e716e8f5126723017c6fa98ff28a89f9baf812cfcebc8a4",
+  "qualified_source_binding_sha256": "d6389363351dda50fa0c2682198935ace2469a5965c5cd9ffde882f1d0ab3157",
+  "asan_readback_sha256": "9bc0667d7173a6063c590edd61c915f117d4dc8b83b73ab775a8154d19e3f9b5",
+  "ci_readback_sha256": "596f27439a7817384b8a1d03ce802cbd991a5b7a356ec32cba206a592855846c",
+  "pbs_readback_sha256": "4883c15376f9c1777461f79925d82f9a1f87357110b1ecd3fba2f6b112a8c457",
+  "preserved_outcomes": {
+    "api": {
+      "pass": 4349,
+      "fail": 391,
+      "timeout": 0
+    },
+    "strict_grouping_failures_per_linkage": 2,
+    "w3c_mandatory_shared_failures_per_engine": 960,
+    "pbs_workflow": "failure",
+    "installed_host_failures_including_retries": 4,
+    "installed_glibc_failures": 2
+  },
+  "known_scope_limits": [
+    "Callback grouping and error/position differences remain documented.",
+    "Individual and generated-workload outliers remain; the 20% target is aggregate.",
+    "Bounded fuzzing does not establish exhaustive memory safety; leak detection was disabled.",
+    "No installed-interpreter performance comparison was performed."
+  ],
+  "prior_pending_records": "Historical performance/preparation/readback snapshots remain exact; this terminal decision supersedes their pending adoption fields.",
+  "pending_milestone_gates": [],
+  "targets_executed_by_staging": false
+}

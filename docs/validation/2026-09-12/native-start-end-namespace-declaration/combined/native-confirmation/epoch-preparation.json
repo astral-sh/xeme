@@ -1,0 +1,29 @@
+{
+  "status": "held_prepared_no_targets",
+  "original_python_review_sha256": "787b95f6749cbb5f129fcecd4544a25ede352a3bd97ab1b80b09d191695bb71a",
+  "original_native_review_sha256": "f43a0c124edce9cde8ac5eedbd6fb38dd232494118ce8afc3d6647805f1df923",
+  "finalizer_sha256": "3c4e8783b9992403b437acd3a4ec58ebd9f80c7715628beee85fdbb598bac669",
+  "pins": {
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/monitor-host.py": "bcfd3b9bba19053d43663b9cb79a74cfbf0d6124039b40a72bd9f232bdea4cc4",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/native/adaptation.json": "e0a01dc126c7544c9fe48cfa70feabe16f21965f04a02948fb621665682f3fbb",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/native/native_screen.py": "112a2b483c5a298b6e48515a2f96a1ce347c77cf285a4d886fe0b152bc362f94",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/native/native_screen.py.patch": "cf9a9640fe2fc2791335309bb1bb747d02a55477990eb36b9d74f071b12cda8b",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/native/preparation.json": "cf66babb4f9e9483468f732131c0e6acdb282570ad485f10b0249121889271b2",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/native/read_results.py": "e2a423d0b86539b11fdeb1bf6150029fb29d630649d293d119ec3a788d916d47",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/native/read_results.py.patch": "98d6ca12a8ab86c5236f7f2578608ec1c814d20c3fd4fb58b7a7529045390bea",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/native/run.py": "a7b6b92a6e35f4ce6722146d239c41d9568c44bb0cce1bb3dd7c636906d7bde1",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/native/run.py.patch": "fe8a9fa08fd64650bfab7c946384fde033566eade36315f2ebc3b58a466954e1",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/observe-host.py": "a0df67eb5c89a0ffbf30ee377dd0302aff64ca2336fedef9f4af1655710a2cb7",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/python/consumer_screen.py": "ae67c15f46cde2f4913a76f249707972d73dae49eb1b8d313e6f21e713702958",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/python/consumer_screen.py.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/python/elapsed_review.py": "043f038407ef8f5f39463f5ea4e33f28aced91cb0eec53c68974b45c9cd4b2a8",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/python/elapsed_review.py.patch": "85d4bea690d8fb7c0cc143b79ae448a49e6eccb49d2c6ed1d8d3ba431aa5396e",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/python/preflight_review.py": "67ad466b9f904fc0bd0c7b134f971572df46a97f14ef0b741ae3e8d472b6ce73",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/python/preflight_review.py.patch": "84612b3510fd37c56065d78a1727735d3c691fafc49628dcedeccd056b7fbfad",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/python/preparation.json": "070fa86a4f7ec9df93b341f5b68f5ecab2c5cb236c2e4e1a120597fe148f3366",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/python/python_worker.py": "4bc0ccffedb5048412b9cfc3638d28dcb30f711891c3784f3fbd3c0eb536ab68",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/python/python_worker.py.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/python/run.py": "4be6ab429ed0562200965eb45eca45713421274fb4afb25a05b61fd9fe28d892",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/python/run.py.patch": "d3da73f6e2d7410310642e3fbc63a71baa4c81d85a5e1ce8eb20fb932a0e98b9"
+  }
+}

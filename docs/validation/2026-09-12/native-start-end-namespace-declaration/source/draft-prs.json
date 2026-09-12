@@ -1,0 +1,26 @@
+[
+  {
+    "baseRefName": "charlie/codex-oriole-matched-native-end-raw",
+    "headRefName": "charlie/codex-oriole-native-start-direct",
+    "headRefOid": "1370d75bd3170daf179648cda620d79c39e4e9aa",
+    "isDraft": true,
+    "number": 169,
+    "url": "https://github.com/astral-sh/oriole/pull/169"
+  },
+  {
+    "baseRefName": "charlie/codex-oriole-native-start-direct",
+    "headRefName": "charlie/codex-oriole-native-default-namespace",
+    "headRefOid": "001539e738642e442cefe589f4222d05242eaa3a",
+    "isDraft": true,
+    "number": 170,
+    "url": "https://github.com/astral-sh/oriole/pull/170"
+  },
+  {
+    "baseRefName": "charlie/codex-oriole-native-default-namespace",
+    "headRefName": "charlie/codex-oriole-native-declaration-grammar",
+    "headRefOid": "5d983f7e09a095fc6c9a94c6ce05ef5a8ec95c8d",
+    "isDraft": true,
+    "number": 171,
+    "url": "https://github.com/astral-sh/oriole/pull/171"
+  }
+]

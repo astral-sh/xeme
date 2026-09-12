@@ -1,0 +1,98 @@
+{
+  "artifact_id": 10306863717,
+  "archive_sha256": "e133b26022858678c957e024dbe9eef4ed70c6ead02dfa8d0865f22db3c5446b",
+  "archive_bytes": 648999,
+  "members": [
+    {
+      "path": "oriole-bundle/build.log",
+      "bytes": 12021,
+      "compressed": 1852,
+      "sha256": "47dc5468f37a305c73a2a43d07c5819936550ec443706b9eaa754add6d658ffb"
+    },
+    {
+      "path": "oriole-bundle/manifest.json",
+      "bytes": 16216,
+      "compressed": 5489,
+      "sha256": "3757cb6cf6fe64e1b8380b3169e8edcb56fb9772d456191c009eb51c4a4f6d73"
+    },
+    {
+      "path": "pbs-archive-sha256.txt",
+      "bytes": 140,
+      "compressed": 120,
+      "sha256": "69bd1213e38d20f353bf17c38eb28575076317139418eb164fc550ec9d29ce22"
+    },
+    {
+      "path": "pbs-build.log",
+      "bytes": 13288034,
+      "compressed": 576584,
+      "sha256": "474be3852bd7a1a3fc90be6759dcc61052d94deb2eca1bbc66174a75e6359705"
+    },
+    {
+      "path": "pbs-custom-tests.log",
+      "bytes": 191,
+      "compressed": 108,
+      "sha256": "29bd4a04a95b3551ebaa53404762e9848a788e761241b796e3d15fae2fbcd31a"
+    },
+    {
+      "path": "pbs-glibc217-tests.log",
+      "bytes": 3417,
+      "compressed": 1174,
+      "sha256": "39c878235d1c8c7db958c1615fa5ea1b66112c975884e9c83154ac21815a5201"
+    },
+    {
+      "path": "pbs-host-cpu.json",
+      "bytes": 103,
+      "compressed": 90,
+      "sha256": "f4bd5b9dbb3d8a46f5837fcdf8b2b84001649c32dbe552b221b563d2772c4a4e"
+    },
+    {
+      "path": "pbs-installed-provenance.json",
+      "bytes": 505,
+      "compressed": 303,
+      "sha256": "a5420094f46ef38d4fa7d93d39eac1f22b2cf5fb80685fd68e45890725756c5b"
+    },
+    {
+      "path": "pbs-tls-probe/fallback-symbols.txt",
+      "bytes": 16091,
+      "compressed": 2205,
+      "sha256": "c83bc9e9035036d197f48f506a5cc612bbf124e1f6237da9c99ef199dab4c43e"
+    },
+    {
+      "path": "pbs-tls-probe/manifest.json",
+      "bytes": 2914,
+      "compressed": 841,
+      "sha256": "1791ee8c7700d0180dc85c7c106f3133fc5cc9a77f2bf14fcd7ae9e9a0861900"
+    },
+    {
+      "path": "pbs-tls-probe/native-symbols.txt",
+      "bytes": 16100,
+      "compressed": 2208,
+      "sha256": "3f33269db97d4083e3a261a9038328a140e1ab50856ec86afc98668623f599e5"
+    },
+    {
+      "path": "pbs-tls-probe/shared-symbols.txt",
+      "bytes": 276972,
+      "compressed": 50537,
+      "sha256": "ffb597307f2abe315564dcd06fdab3a8a12fa34b95b821bdb230f603a137631b"
+    },
+    {
+      "path": "pbs-validate.log",
+      "bytes": 164,
+      "compressed": 94,
+      "sha256": "935d625520356f45f647403349b5b5cea27000431f9208be2935a8e9159a77ab"
+    },
+    {
+      "path": "pbs-validator-build.log",
+      "bytes": 25380,
+      "compressed": 4176,
+      "sha256": "44b55a89aedb108718c76d5949cb71d118d2f5601bab1a7628e77d050b247d12"
+    },
+    {
+      "path": "pbs-xml-tests.log",
+      "bytes": 5337,
+      "compressed": 1108,
+      "sha256": "efe9c7ea02affc925742dc50693622c2cb97fbb89325a519e759bf3d14c81a57"
+    }
+  ],
+  "distribution_downloaded": false
+}

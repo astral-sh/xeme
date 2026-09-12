@@ -1,0 +1,514 @@
+diff --git a/crates/oriole/src/lib.rs b/crates/oriole/src/lib.rs
+index bbdaeb5..8feb77e 100644
+--- a/crates/oriole/src/lib.rs
++++ b/crates/oriole/src/lib.rs
+@@ -562,7 +562,10 @@ pub struct Parser {
+     // Nonempty undo blocks correspond in order to the declaring elements in
+     // `stack`. Elements without declarations leave their ancestors' blocks alone.
+     namespace_scopes: Vec<NamespaceBindings>,
++    // Only nonempty prefixes live in the salted map. This slot owns the sole
++    // current default URI; scope undo records keep the displaced owners.
+     namespaces: HashMap<String, String>,
++    default_namespace: Option<String>,
+     tables: DtdTables,
+     shared_tables: OnceLock<Shared<oriole_storage::TryLock<DtdTables>>>,
+     parameter_mode: u8,
+@@ -650,6 +653,7 @@ impl Parser {
+             input_context: None,
+             sources,
+             namespaces,
++            default_namespace: None,
+             pending: Queue::new_in(allocator),
+             stack: Vec::new_in(allocator),
+             namespace_scopes: Vec::new_in(allocator),
+@@ -710,6 +714,37 @@ impl Parser {
+         self.allocator
+     }
+ 
++    /// Iterate both owners; None denotes the default prefix without inventing
++    /// an empty String owner or widening the temporary two-reference records.
++    fn namespace_bindings(&self) -> impl Iterator<Item = (Option<&String>, &String)> {
++        self.namespaces
++            .iter()
++            .map(|(prefix, uri)| (Some(prefix), uri))
++            .chain(self.default_namespace.as_ref().map(|uri| (None, uri)))
++    }
++
++    /// Install one authoritative owner, retaining fallible prefixed-map growth.
++    fn insert_namespace(
++        &mut self,
++        prefix: String,
++        uri: String,
++    ) -> Result<Option<String>, AllocError> {
++        if prefix.is_empty() {
++            Ok(self.default_namespace.replace(uri))
++        } else {
++            try_insert(&mut self.namespaces, prefix, uri)
++        }
++    }
++
++    /// Remove the active binding so its owner can become an undo record.
++    fn remove_namespace(&mut self, prefix: &str) -> Option<String> {
++        if prefix.is_empty() {
++            self.default_namespace.take()
++        } else {
++            self.namespaces.remove(prefix)
++        }
++    }
++
+     /// Return this parser's local caller salt, without exposing secret randomized keys.
+     /// Parameter children share their DTD seed separately from local namespace and
+     /// active-name indexes, so changing another parser's seed does not change this value.
+@@ -915,6 +950,7 @@ impl Parser {
+             child.shared_tables = OnceLock::from(owner.expect("parameter DTD owner"));
+         }
+         child.namespaces.clear();
++        child.default_namespace = self.default_namespace.try_clone()?;
+         for (prefix, uri) in &self.namespaces {
+             try_insert(&mut child.namespaces, prefix.try_clone()?, uri.try_clone()?)?;
+         }
+@@ -945,10 +981,9 @@ impl Parser {
+             for part in context.split('\u{c}').filter(|part| !part.is_empty()) {
+                 if let Some((prefix, uri)) = part.split_once('=') {
+                     if uri.is_empty() {
+-                        child.namespaces.remove(prefix);
++                        child.remove_namespace(prefix);
+                     } else {
+-                        try_insert(
+-                            &mut child.namespaces,
++                        child.insert_namespace(
+                             string(prefix, self.allocator)?,
+                             string(uri, self.allocator)?,
+                         )?;
+@@ -1029,9 +1064,10 @@ impl Parser {
+         context: Option<&str>,
+         encoding: Option<&str>,
+     ) -> Result<(), Error> {
+-        for (prefix, uri) in &self.namespaces {
++        for (prefix, uri) in self.namespace_bindings() {
++            // Preserve the logical key/URI charge even for the dedicated slot.
+             self.charge_expansion(size_of::<(String, String)>())?;
+-            self.charge_expansion(prefix.len())?;
++            self.charge_expansion(prefix.map_or(0, |prefix| prefix.len()))?;
+             self.charge_expansion(uri.len())?;
+         }
+         for name in &self.entity_chain {
+@@ -2939,11 +2975,12 @@ impl Parser {
+             let mut context = String::new_in(self.allocator);
+             if self.config.namespace_separator.is_some() {
+                 let mut bindings = Vec::new_in(self.allocator);
+-                for binding in &self.namespaces {
++                for binding in self.namespace_bindings() {
+                     try_push(&mut bindings, binding)?;
+                 }
+-                bindings.sort_unstable_by_key(|(prefix, _)| *prefix);
++                bindings.sort_unstable_by_key(|(prefix, _)| prefix.map_or("", String::as_str));
+                 for (prefix, uri) in bindings {
++                    let prefix = prefix.map_or("", String::as_str);
+                     self.charge_expansion(prefix.len())?;
+                     self.charge_expansion(uri.len())?;
+                     self.charge_expansion(2)?;
+@@ -3214,7 +3251,7 @@ impl Parser {
+                 // tags can share this storage only when expansion is identity.
+                 && (self.config.namespace_separator.is_none()
+                     || (!raw_name.contains(':')
+-                        && !self.namespaces.contains_key("")
++                        && self.default_namespace.is_none()
+                         && self.raw_attributes.iter().all(|attribute| {
+                             let name = attribute.name(rest);
+                             name != "xmlns" && !name.contains(':')
+@@ -3430,13 +3467,9 @@ impl Parser {
+                         ));
+                     }
+                     let previous = if uri.is_empty() {
+-                        self.namespaces.remove(prefix)
++                        self.remove_namespace(prefix)
+                     } else {
+-                        try_insert(
+-                            &mut self.namespaces,
+-                            string(prefix, self.allocator)?,
+-                            uri.try_clone()?,
+-                        )?
++                        self.insert_namespace(string(prefix, self.allocator)?, uri.try_clone()?)?
+                     };
+                     try_push(&mut bindings, (string(prefix, self.allocator)?, previous))?;
+                     self.emit(
+@@ -3587,8 +3620,9 @@ impl Parser {
+         }
+         let uri = match name.split_once(':') {
+             Some(("xmlns", _)) => return false,
++            Some(("", _)) => self.default_namespace.as_ref(),
+             Some((prefix, _)) => self.namespaces.get(prefix),
+-            None => self.namespaces.get(""),
++            None => self.default_namespace.as_ref(),
+         };
+         let Some(uri) = uri else {
+             return false;
+@@ -3787,10 +3821,10 @@ impl Parser {
+         for (prefix, previous) in bindings.into_iter().flatten().rev() {
+             match previous {
+                 Some(uri) => {
+-                    try_insert(&mut self.namespaces, prefix.try_clone()?, uri)?;
++                    self.insert_namespace(prefix.try_clone()?, uri)?;
+                 }
+                 None => {
+-                    self.namespaces.remove(&prefix);
++                    self.remove_namespace(&prefix);
+                 }
+             }
+             self.emit(
+@@ -3861,10 +3895,13 @@ impl Parser {
+                         "xmlns cannot prefix an element or ordinary attribute",
+                     ));
+                 }
++                Some("") => Some(self.default_namespace.as_ref().ok_or_else(|| {
++                    self.err(ErrorKind::UndefinedPrefix, "unbound namespace prefix")
++                })?),
+                 Some(prefix) => Some(self.namespaces.get(prefix).ok_or_else(|| {
+                     self.err(ErrorKind::UndefinedPrefix, "unbound namespace prefix")
+                 })?),
+-                None if !attribute => self.namespaces.get(""),
++                None if !attribute => self.default_namespace.as_ref(),
+                 None => None,
+             };
+         let Some(uri) = uri else {
+@@ -4825,11 +4862,18 @@ mod hash_salt_tests {
+             ..Config::default()
+         });
+         parser.set_param_entity_parsing(2);
+-        parser.feed(b"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p \"<!ATTLIST n b CDATA 'v'>\">%p;<!ATTLIST r a CDATA 'v'>]><r>", false).unwrap();
++        parser.feed(b"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p \"<!ATTLIST n b CDATA 'v'>\">%p;<!ATTLIST r a CDATA 'v'>]><r xmlns='urn:default'>", false).unwrap();
+         while parser.next_event().unwrap().is_some() {}
+         let previous = parser.namespaces.hasher().hash_one("xml");
++        let default_owner = parser.default_namespace.as_ref().unwrap().as_ptr();
+         parser.set_hash_salt(*b"0123456789abcdef").unwrap();
+         assert_ne!(parser.namespaces.hasher().hash_one("xml"), previous);
++        assert_eq!(parser.default_namespace.as_deref(), Some("urn:default"));
++        assert_eq!(
++            parser.default_namespace.as_ref().unwrap().as_ptr(),
++            default_owner
++        );
++        assert!(!parser.namespaces.contains_key(""));
+         parser
+             .with_dtd_tables(|parser| {
+                 assert_eq!(parser.tables.entities.hasher().salt(), parser.hash_salt());
+@@ -4853,12 +4897,45 @@ mod hash_salt_tests {
+                 Ok(())
+             })
+             .unwrap();
+-        let mut child = parser.external_child(Some(""), None).unwrap();
+-        assert_eq!(child.hash_salt(), parser.hash_salt());
+-        child.feed(b"<n>&e;</n>", true).unwrap();
+-        while child.next_event().unwrap().is_some() {}
++        for (context, uri) in [
++            ("", Some("urn:default")),
++            ("=urn:child", Some("urn:child")),
++            ("=", None),
++        ] {
++            let mut child = parser.external_child(Some(context), None).unwrap();
++            assert_eq!(child.hash_salt(), parser.hash_salt());
++            assert_eq!(child.default_namespace.as_deref(), uri);
++            assert!(!child.namespaces.contains_key(""));
++            let mut parameter = child.external_child(None, None).unwrap();
++            assert_eq!(parameter.default_namespace.as_deref(), uri);
++            parameter.feed(b"", true).unwrap();
++            while parameter.next_event().unwrap().is_some() {}
++            child.feed(b"<n>&e;</n>", true).unwrap();
++            let mut start = false;
++            while let Some(event) = child.next_event().unwrap() {
++                if let EventKind::StartElement { name, attributes } = event.kind {
++                    assert_eq!(
++                        name,
++                        match uri {
++                            Some("urn:default") => "urn:default|n",
++                            Some(_) => "urn:child|n",
++                            None => "n",
++                        }
++                    );
++                    assert_eq!(attributes[0].name, "b");
++                    start = true;
++                }
++            }
++            assert!(start);
++            assert_eq!(child.default_namespace.as_deref(), uri);
++        }
++        assert_eq!(
++            parser.default_namespace.as_ref().unwrap().as_ptr(),
++            default_owner
++        );
+         parser.feed(b"<n>&e;</n></r>", true).unwrap();
+         while parser.next_event().unwrap().is_some() {}
++        assert!(parser.default_namespace.is_none());
+     }
+ 
+     #[test]
+@@ -4873,8 +4950,16 @@ mod hash_salt_tests {
+             assert!(child.namespaces.is_empty());
+             assert_eq!(child.hash_salt(), parser.hash_salt());
+         }
+-        let mut child = parser.external_child(Some("xml=urn:custom"), None).unwrap();
++        let mut child = parser
++            .external_child(Some("=urn:hidden\u{c}xml=urn:custom"), None)
++            .unwrap();
+         assert_eq!(child.namespaces.get("xml").unwrap(), "urn:custom");
++        assert_eq!(child.default_namespace.as_deref(), Some("urn:hidden"));
++        assert!(!child.namespaces.contains_key(""));
++        let inherited = child.external_child(Some(""), None).unwrap();
++        assert_eq!(inherited.default_namespace.as_deref(), Some("urn:hidden"));
++        let removed = child.external_child(Some("="), None).unwrap();
++        assert!(removed.default_namespace.is_none());
+         child.feed(b"<xml:r/>", true).unwrap();
+         while let Some(event) = child.next_event().unwrap() {
+             if let EventKind::StartElement { name, .. } = event.kind {
+diff --git a/crates/oriole/tests/adapter_frame.rs b/crates/oriole/tests/adapter_frame.rs
+index d8a0bee..19290a1 100644
+--- a/crates/oriole/tests/adapter_frame.rs
++++ b/crates/oriole/tests/adapter_frame.rs
+@@ -236,7 +236,8 @@ fn namespace_identity_frames_follow_default_binding_scope() {
+ 
+ #[test]
+ fn sparse_namespace_scopes_preserve_shadowing_and_event_order() {
+-    let body = "<p:n xmlns:p='two'><leaf/><e xmlns=''><leaf/></e></p:n><p:s/><e xmlns:p='three'/><p:t/></r>";
++    let body =
++        "<p:n xmlns:p='two'><leaf/><e xmlns=''><leaf/></e></p:n><p:s/><e xmlns:p='three'/><p:t/>";
+     let expected = [
+         "ns+  outer",
+         "ns+ p one",
+@@ -265,11 +266,29 @@ fn sparse_namespace_scopes_preserve_shadowing_and_event_order() {
+         "ns- p",
+         "ns- ",
+     ];
+-    for root in [
+-        "<r xmlns='outer' xmlns:p='one'>",
+-        "<!DOCTYPE r [<!ATTLIST r xmlns CDATA 'outer' xmlns:p CDATA 'one'>]><r>",
++    for (root, external) in [
++        ("<r xmlns='outer' xmlns:p='one'>", ""),
++        (
++            "<!DOCTYPE r [<!ATTLIST r xmlns CDATA 'outer' xmlns:p CDATA 'one'>]><r>",
++            "",
++        ),
++        (
++            "<!DOCTYPE r [<!ENTITY ext SYSTEM 'child'>]><r xmlns='outer' xmlns:p='one'>",
++            "&ext;",
++        ),
++        (
++            "<!DOCTYPE r [<!ENTITY ext SYSTEM 'child'><!ATTLIST r xmlns CDATA 'outer' xmlns:p CDATA 'one'>]><r>",
++            "&ext;",
++        ),
+     ] {
+-        let xml = format!("{root}{body}");
++        let xml = format!("{root}{body}{external}</r>");
++        let mut expected = expected.to_vec();
++        if !external.is_empty() {
++            expected.insert(
++                expected.len() - 3,
++                "external =outer\u{c}p=one\u{c}xml=http://www.w3.org/XML/1998/namespace\u{c}ext",
++            );
++        }
+         for utf16 in [false, true] {
+             let input = if utf16 {
+                 [0xfeff]
+@@ -303,6 +322,9 @@ fn sparse_namespace_scopes_preserve_shadowing_and_event_order() {
+                             EventKind::EndNamespace { prefix } => {
+                                 format!("ns- {}", prefix.as_deref().unwrap_or(""))
+                             }
++                            EventKind::ExternalEntityReference(reference) => {
++                                format!("external {}", reference.context.as_deref().unwrap())
++                            }
+                             _ => continue,
+                         };
+                         records.push(record);
+diff --git a/crates/oriole/tests/allocation.rs b/crates/oriole/tests/allocation.rs
+index dec571b..4c82cda 100644
+--- a/crates/oriole/tests/allocation.rs
++++ b/crates/oriole/tests/allocation.rs
+@@ -114,13 +114,44 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
+         allocator,
+     )?;
+     parser.set_default_events(true);
+-    parser.feed("\r\n<!DOCTYPE r [ \n<!ENTITY internal '<p:À/>'><!ENTITY external SYSTEM 'child'><!NOTATION n SYSTEM 'notation'><!ATTLIST r a NMTOKENS ' a  b '>\t]>\n<r xmlns:p='urn:p' p:attr='v'>a\r\nb\nc&internal;&external;<!--c--><![CDATA[x]]></r>\r\n".as_bytes(), true)?;
++    parser.feed("\r\n<!DOCTYPE r [ \n<!ENTITY internal '<p:À/>'><!ENTITY external SYSTEM 'child'><!NOTATION n SYSTEM 'notation'><!ATTLIST r a NMTOKENS ' a  b '>\t]>\n<r xmlns='urn:default' xmlns:p='urn:p' p:attr='v'><scope xmlns='urn:inner'><plain/><scope xmlns=''><plain/></scope><plain/></scope>a\r\nb\nc&internal;&external;<!--c--><![CDATA[x]]></r>\r\n".as_bytes(), true)?;
+     while let Some(event) = next_event(&mut parser)? {
+         if let EventKind::ExternalEntityReference(reference) = event.kind {
++            assert_eq!(
++                reference.context.as_deref(),
++                Some(
++                    "=urn:default\u{c}p=urn:p\u{c}xml=http://www.w3.org/XML/1998/namespace\u{c}external"
++                )
++            );
+             let mut child =
+                 parser.external_child_with_encoding(reference.context.as_deref(), None)?;
+-            child.feed(b"<?xml encoding='UTF-8'?><p:x a='value'/>text", true)?;
+-            while next_event(&mut child)?.is_some() {}
++            child.feed(b"<?xml encoding='UTF-8'?><plain/><n xmlns='urn:child'><inner/></n><p:x a='value'/>text", true)?;
++            let expected = [
++                "urn:default|plain",
++                "urn:child|n",
++                "urn:child|inner",
++                "urn:p|x|p",
++            ];
++            let mut starts = 0;
++            while let Some(event) = next_event(&mut child)? {
++                if let EventKind::StartElement { name, .. } = event.kind {
++                    assert_eq!(name, expected[starts]);
++                    starts += 1;
++                }
++            }
++            assert_eq!(starts, expected.len());
++            for (context, expected) in [("=urn:override", "urn:override|plain"), ("=", "plain")] {
++                let mut child = parser.external_child_with_encoding(Some(context), None)?;
++                child.feed(b"<plain/>", true)?;
++                let mut seen = false;
++                while let Some(event) = next_event(&mut child)? {
++                    if let EventKind::StartElement { name, .. } = event.kind {
++                        assert_eq!(name, expected);
++                        seen = true;
++                    }
++                }
++                assert!(seen);
++            }
+         }
+     }
+     // Branches revisit completed entities; depth forces both explicit-stack and
+@@ -602,8 +633,15 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
+         CALLS.set(0);
+         GLOBAL_CALLS.set(0);
+         TRACK_GLOBAL.set(true);
+-        let mut parser = Parser::try_new_in(Config::default(), allocator).unwrap();
+-        parser.feed(b"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p 'unused'><!ATTLIST r a CDATA 'v'><!ATTLIST n b CDATA 'w'>]><r/>", true).unwrap();
++        let mut parser = Parser::try_new_in(
++            Config {
++                namespace_separator: Some('|'),
++                ..Config::default()
++            },
++            allocator,
++        )
++        .unwrap();
++        parser.feed(b"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p 'unused'><!ATTLIST r a CDATA 'v'><!ATTLIST n b CDATA 'w'>]><r xmlns='urn:default'>", false).unwrap();
+         while parser.next_event().unwrap().is_some() {}
+         let retained = parser.external_child(None, None).unwrap();
+         let before = CALLS.get();
+@@ -631,7 +669,8 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
+                     assert_eq!(value, "ok");
+                     text_seen = true;
+                 }
+-                EventKind::StartElement { attributes, .. } => {
++                EventKind::StartElement { name, attributes } => {
++                    assert_eq!(name, "urn:default|n");
+                     assert_eq!(attributes.len(), 1);
+                     assert_eq!(attributes[0].name, "b");
+                     assert_eq!(attributes[0].value, "w");
+@@ -641,8 +680,29 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
+             }
+         }
+         assert!(text_seen && default_seen);
++        // The live parent slot also survives every failed transaction; the
++        // retained child above alone would only prove its independent snapshot.
++        let mut current = parser.external_child(Some(""), None).unwrap();
++        current.feed(b"<n/>", true).unwrap();
++        let mut current_seen = false;
++        while let Some(event) = current.next_event().unwrap() {
++            if let EventKind::StartElement { name, .. } = event.kind {
++                assert_eq!(name, "urn:default|n");
++                current_seen = true;
++            }
++        }
++        assert!(current_seen);
++        drop(current);
+         parser.set_hash_salt(*b"0123456789abcdef").unwrap();
+         assert_eq!(parser.hash_salt(), *b"0123456789abcdef");
++        parser.feed(b"<n/></r>", true).unwrap();
++        let mut restored = false;
++        while let Some(event) = parser.next_event().unwrap() {
++            if let EventKind::EndNamespace { prefix: None } = event.kind {
++                restored = true;
++            }
++        }
++        assert!(restored && parser.is_finished());
+         drop(child);
+         drop(retained);
+         drop(parser);
+diff --git a/crates/oriole/tests/external_limits.rs b/crates/oriole/tests/external_limits.rs
+index 6301e1a..1145512 100644
+--- a/crates/oriole/tests/external_limits.rs
++++ b/crates/oriole/tests/external_limits.rs
+@@ -114,6 +114,27 @@ fn structural_and_index_work_counts_even_for_empty_values() {
+         drain(&mut parent);
+         assert_child_rejected_before_allocation(&parent, Some(""));
+     }
++
++    // A dedicated default binding still owes the original logical key+URI
++    // storage charge, plus its URI bytes both at expansion and child cloning.
++    let required = 2 * size_of::<(oriole_storage::String, oriole_storage::String)>()
++        + "xml".len()
++        + "http://www.w3.org/XML/1998/namespace".len()
++        + 2 * "u".len();
++    for budget in [required - 1, required] {
++        let mut parent = parser(budget);
++        parent.feed(b"<r xmlns='u'>", false).unwrap();
++        drain(&mut parent);
++        if budget < required {
++            assert_child_rejected_before_allocation(&parent, Some(""));
++        } else {
++            let mut child = parent.external_child_with_encoding(Some(""), None).unwrap();
++            child.feed(b"", true).unwrap();
++            drain(&mut child);
++        }
++        parent.feed(b"</r>", true).unwrap();
++        drain(&mut parent);
++    }
+ }
+ 
+ #[test]
+diff --git a/crates/oriole/tests/multibyte.rs b/crates/oriole/tests/multibyte.rs
+index f1eb968..f1a9436 100644
+--- a/crates/oriole/tests/multibyte.rs
++++ b/crates/oriole/tests/multibyte.rs
+@@ -383,12 +383,47 @@ fn raw_qnames_are_checked_before_decoded_namespace_expansion() {
+         (b"<a\x80: xmlns:a='u'/>", "u|"),
+         (b"<a\x80:b:c xmlns:a='u'/>", "u|b:c"),
+         (b"<a\x80:b\x80:c xmlns:a='u'/>", "u|b:c"),
++        (b"<\x80:r xmlns='u'/>", "u|r"),
++        (b"<\x80: xmlns='u'/>", "u|"),
++        (b"<root xmlns='u'><\x80:r/></root>", "u|r"),
+     ] {
+         for width in [1, document.len()] {
+             let events = parse_ascii_aliases_with_map(document, width, map(), Some('|')).unwrap();
+             assert!(events.iter().any(|event| matches!(&event.kind, EventKind::StartElement { name: actual, .. } if actual == name)));
+         }
+     }
++    // A decoded leading colon has an explicit empty prefix, including on an
++    // attribute. It differs from an ordinary unprefixed attribute.
++    let document = b"<r xmlns='u' \x80:a='v' plain='w'/>";
++    for width in [1, document.len()] {
++        let events = parse_ascii_aliases_with_map(document, width, map(), Some('|')).unwrap();
++        let attributes = events
++            .iter()
++            .find_map(|event| match &event.kind {
++                EventKind::StartElement { attributes, .. } => Some(attributes),
++                _ => None,
++            })
++            .unwrap();
++        assert_eq!(attributes.len(), 2);
++        assert_eq!(attributes[0].name, "u|a");
++        assert_eq!(attributes[0].value, "v");
++        assert_eq!(attributes[1].name, "plain");
++        assert_eq!(attributes[1].value, "w");
++    }
++    for document in [
++        b"<\x80:r/>".as_slice(),
++        b"<r \x80:a='v'/>",
++        b"<r xmlns='u'><\x80:n xmlns=''/></r>",
++    ] {
++        for width in [1, document.len()] {
++            assert_eq!(
++                parse_ascii_aliases_with_map(document, width, map(), Some('|'))
++                    .unwrap_err()
++                    .kind,
++                ErrorKind::UndefinedPrefix
++            );
++        }
++    }
+     for document in [b"<a: xmlns:a='u'/>".as_slice(), b"<a:b:c xmlns:a='u'/>"] {
+         assert_eq!(
+             parse_ascii_aliases_with_map(document, 1, map(), Some('|'))

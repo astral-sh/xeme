@@ -14,28 +14,24 @@ A streaming XML parser and Expat C interface, written in Rust.
 - Embed the safe Rust parser or use the Expat-compatible C interface.
 - Try an opt-in python-build-standalone integration for CPython's XML consumers.
 
-| Project XML | Oriole (PGO) | Expat (PGO) | Oriole / Expat |
+| Project XML | Oriole (normal) | Expat (normal) | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 35.853 ms | 24.132 ms | 1.47× |
-| Wayland protocol | 0.906 ms | 0.947 ms | 0.95× |
-| Maven POM | 0.575 ms | 0.360 ms | 1.58× |
-| Batik SVG | 0.104 ms | 0.125 ms | 0.83× |
-| GTK UI | 0.255 ms | 0.176 ms | 1.44× |
-| DocBook XSL | 0.187 ms | 0.164 ms | 1.14× |
+| Vulkan registry | 50.623 ms | 29.073 ms | 1.751× |
+| Wayland protocol | 1.177 ms | 1.066 ms | 1.104× |
+| Maven POM | 0.847 ms | 0.444 ms | 1.914× |
+| Batik SVG | 0.134 ms | 0.134 ms | 0.997× |
+| GTK UI | 0.360 ms | 0.213 ms | 1.686× |
+| DocBook XSL | 0.272 ms | 0.185 ms | 1.463× |
 
-These [native measurements](docs/validation/2026-09-11/reference-frames/) use the selected character-reference frame runtime and original XML from six pinned projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host. Both parsers use PGO trained on generated XML; these projects are held out of training. Times are medians of seven process medians; ratios are medians of paired ratios. Expat is version 2.8.4.
+These [native measurements](docs/validation/2026-09-12/expanded-start/) use the expanded namespace Start runtime and original XML from six pinned projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host. Both parsers use normal release builds: Oriole uses O3 and ThinLTO with Ohm rustc 1.98.1-dev; Expat 2.8.4 uses GCC 13.3 O3 without LTO. Times are medians of seven process medians; ratios are medians of paired ratios.
 
-The selected runtime takes **1.33× Expat PGO's native time and 1.12× its CPython time** across the respective 24 real-project conditions. Both exceed our target of roughly 1.10×; nine of 24 individual CPython PGO conditions fall within it. The [full report](docs/validation/2026-09-11/reference-frames/) retains every condition, sample and regression.
+Across their respective 24 real-project conditions, the candidate takes **1.54× Expat's native time and 1.24× its CPython time**, improvements of 3.40% and 2.58% against the previous selected runtime. Both remain above our target of roughly 1.10×; four of 24 individual CPython conditions fall within it. The [full report](docs/validation/2026-09-12/expanded-start/) retains every condition and regression.
 
-An opt-in [x86-64-v3 PGO build](docs/validation/2026-09-11/reference-v3/) takes **1.094× generic Expat's CPython time** overall: 1.128× for ElementTree and 1.062× for pyexpat. Eleven of 24 conditions fall within 1.10×; native time remains 1.30× Expat. These host-module measurements do not establish installed distribution performance. The generic build remains the default.
+ThinLTO is the default. The earlier [C allocator study](benchmarks/results/2026-09-11/c-allocators/) found less than 0.2% aggregate time change with jemalloc or mimalloc and higher peak resident memory, so the C allocator default remains unchanged.
 
-The [packaged v3 PGO trial](docs/validation/2026-09-12/v3-distribution/) verifies the shipped parser and passes 1,024 threaded parses on glibc 2.17. The distribution preserves text, callback-controlled buffering and CDATA order in supplemental checks; its strict upstream suites retain two callback-grouping failures. Installed distribution performance remains unmeasured.
+Current-source compatibility checks preserve **4,347 passing / 391 failing / two timed-out API configurations**, plus two text-grouping failures across 802 strict CPython method outcomes per linkage. Six C consumers and supplemental shared/static callback-semantic checks pass. The [compatibility guide](docs/compatibility.md) separates current gates from earlier results; the [review guide](docs/review.md) links source reviews, adversarial tests and measurements.
 
-ThinLTO is the default, and [PGO is opt-in](tools/pgo/). The [C allocator study](benchmarks/results/2026-09-11/c-allocators/) finds less than 0.2% aggregate time change with jemalloc or mimalloc and higher peak resident memory, so the C allocator default remains unchanged.
-
-Compatibility testing records **4,347 passing / 391 failing / two timed-out upstream API configurations**, plus two text-grouping failures across 802 CPython method outcomes per linkage. The [compatibility guide](docs/compatibility.md) explains the remaining allocation, resource, diagnostic and callback differences. The [review guide](docs/review.md) links the adversarial tests, sanitizer campaigns, distribution trials and optimization studies.
-
-Fresh [selected-runtime validation](docs/validation/2026-09-11/reference-validation/) adds 9.94 million sanitizer-backed fuzz executions without findings and a PGO CPython distribution that runs on glibc 2.17. Its strict XML gates retain the same two callback assertions.
+Earlier [PGO measurements](docs/validation/2026-09-11/reference-frames/) and [opt-in x86-64-v3 results](docs/validation/2026-09-11/reference-v3/) describe the previous `4064b065` source. They have not been remeasured for this change. Its [sanitizer and PBS validation](docs/validation/2026-09-11/reference-validation/) and [installed v3 distribution trial](docs/validation/2026-09-12/v3-distribution/), including glibc 2.17 probes, also apply only to that previous source.
 
 ## Installation
 

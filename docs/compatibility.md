@@ -5,16 +5,18 @@ well-formedness, callback compatibility, and safe resource use are separate gate
 A symbol existing or a document parsing successfully does not establish callback
 or CPython compatibility.
 
-The selected runtime includes [detached character-reference frames](validation/2026-09-11/reference-frames/). Fresh PGO measurements take 1.3261× Expat natively and 1.1179× through CPython across their respective 24 real-project conditions. Nine of 24 individual CPython PGO conditions meet the roughly 1.10× target; both aggregate results remain above it. Shared and static strict CPython runs retain 802 tests, two failures and 14 skip records with the explicit consumer cleanup backport. Separate [selected-runtime validation](validation/2026-09-11/reference-validation/) now refreshes both sustained ASan and stable PGO PBS evidence on the same runtime source: seven 600-second campaigns completed 9,939,415 executions without findings, and the PBS interpreter passed its glibc 2.17 identity and 1,024-threaded-parse probe. The strict distribution XML gates still fail on the same two callback assertions.
+The [expanded namespace Start candidate](validation/2026-09-12/expanded-start/) takes 1.5424× Expat's normal native time and 1.2396× its normal CPython time across their respective 24 real-project conditions, improvements of 3.40% and 2.58% against the previous selected runtime. Four of 24 CPython conditions meet the roughly 1.10× target; both aggregates remain above it. Fresh checks preserve all 4,740 original API outcomes and all 802 strict CPython method outcomes per linkage: 4,347 API passes, 391 assertion failures and two timeouts; the same two strict callback-grouping failures remain, and both strict suites exit 2. The strict consumers use the explicit upstream allocation-failure cleanup backport; benchmark consumers are unmodified. Six C consumers and two supplemental semantic tests per linkage pass. The C harnesses use ASan/UBSan, with uninstrumented Rust release libraries and leak detection disabled.
 
-The [current streaming report](validation/2026-09-11/streaming-input-bounds/)
+The previous `4064b065` source has separate [benchmark and compatibility evidence](validation/2026-09-11/reference-frames/), [sustained ASan and PBS validation](validation/2026-09-11/reference-validation/) and an [installed v3 distribution trial](validation/2026-09-12/v3-distribution/). Those source-specific sanitizer, glibc 2.17 and installed-consumer results do not validate the new candidate.
+
+The [earlier streaming report](validation/2026-09-11/streaming-input-bounds/)
 records the latest input/work-policy validation, including actual streams through
 257 MiB and a separate 2,049 MiB text stream. The
 [earlier integration report](validation/2026-09-10/start-frame-integration/) and
 [full checkpoint](validation/2026-09-10/) retain their own source-specific runtime,
 fuzzing and distribution evidence.
 
-The original API matrix passes 4,347 of 4,740 configurations: 391 assertion failures and two timeouts remain, spanning 38 test names. The [exact failure census](validation/2026-09-11/api-failure-census/) retains every result and reached source assertion:
+The current candidate preserves the original API matrix outcomes from `4064b065`: 4,347 of 4,740 configurations pass; 391 assertion failures and two timeouts remain, spanning 38 test names. The [exact failure census](validation/2026-09-11/api-failure-census/) retains every result and reached source assertion:
 
 | Reached failure | Configurations |
 | --- | ---: |
@@ -24,15 +26,13 @@ The original API matrix passes 4,347 of 4,740 configurations: 391 assertion fail
 | Deferral allocation-growth assertion | 1 |
 | Three-second timeout on a 2 GiB case | 2 |
 
-These failures do not establish a new XML-content defect, but an early allocation assertion does not validate later semantic assertions that were never reached. A separate [current-source allocation diagnostic](validation/2026-09-11/allocation-semantic-coverage/) passes all 72 configurations of six tests after raising retry and resource limits. It reaches their original text and handler assertions without changing the original matrix or declaring those failures fixed. Callback presence checks do not establish exact argument values, ordering or positions.
+These failures do not establish a new XML-content defect, but an early allocation assertion does not validate later semantic assertions that were never reached. A separate [earlier-source allocation diagnostic](validation/2026-09-11/allocation-semantic-coverage/) passes all 72 configurations of six tests after raising retry and resource limits. It reaches their original text and handler assertions without changing the original matrix or declaring those failures fixed. Callback presence checks do not establish exact argument values, ordering or positions.
 
 A further [buffer-state diagnostic and assertion audit](validation/2026-09-11/buffer-state/) accounts for all 34 nonpassing allocation-test names. The six earlier cases exhaust their post-loop text and handler-flag assertions. A separate copy of `test_nsalloc_parse_buffer` records its successful empty call, then passes all original suspension, callback-clearing, resume and finished-state assertions in 12 configurations at the original limits. Neither diagnostic replaces the original allocation-schedule failures or proves exhaustive allocation-failure coverage.
 
-The [selected runtime's benchmark report](validation/2026-09-11/reference-frames/) retains all normal/PGO native and CPython conditions. Native and CPython PGO aggregates both exceed the roughly 1.10× Expat target. The two strict CPython text-grouping failures remain explicit; no passing original API configuration regressed.
+The previous `4064b065` [normal/PGO benchmark report](validation/2026-09-11/reference-frames/) and [optional x86-64-v3 experiment](validation/2026-09-11/reference-v3/) retain their own performance and unchanged API/strict-suite outcomes. Their optimized results have not been remeasured on the expanded namespace Start candidate.
 
-The optional [x86-64-v3 build](validation/2026-09-11/reference-v3/) preserves the same original API and strict CPython outcomes. Its PGO host-module benchmark averages 1.0943× generic Expat through CPython, including 1.1278× for ElementTree; native time remains 1.3011×. This CPU-specific result does not replace the generic measurements or establish installed distribution performance.
-
-The [stable v3 PGO distribution trial](validation/2026-09-12/v3-distribution/) verifies the installed target, manifest and exact optimized static archive. The glibc 2.17 identity and 1,024-threaded-parse probe pass. Its XML suite still reports 802 tests and two callback-grouping failures; host retries produce 806 executions and four failure records for those same two methods. Supplemental checks pass in the actual installed interpreter and the separately built shared/static consumers, preserving every text character, callback-controlled buffering and element/CDATA ordering. These results support accepting the documented text fragmentation difference; they do not change the original strict outcomes or establish installed performance.
+The [stable v3 PGO distribution trial](validation/2026-09-12/v3-distribution/) also uses the previous source. It verifies the installed target, manifest and optimized static archive, and passes the glibc 2.17 identity and 1,024-threaded-parse probe. Its XML suite reports 802 tests and two callback-grouping failures; host retries produce 806 executions and four failure records for those same two methods. Supplemental checks preserve text, callback-controlled buffering and element/CDATA order in that installed interpreter and separate shared/static consumers. These results do not establish installed performance or validation of the new source.
 
 ## Differential testing
 
@@ -162,7 +162,7 @@ requires more than `XML_Parse`:
 | Introspection | Error constants/strings, positions, version structure, feature list |
 | Integration | The `pyexpat` C capsule used by `_elementtree`, including identical callbacks and allocator ownership |
 
-The [current streaming consumer result](validation/2026-09-11/streaming-input-bounds/#cpython-consumer-checks)
+The [earlier-source streaming consumer result](validation/2026-09-11/streaming-input-bounds/#cpython-consumer-checks)
 uses an allocation-failure cleanup backport in `Modules/pyexpat.c`, with unchanged
 upstream tests. Shared and static linkage each preserve all 802 method outcomes
 from the earlier unmodified-consumer control: the same two failures, three

@@ -1,0 +1,353 @@
+diff --git a/crates/oriole/src/lib.rs b/crates/oriole/src/lib.rs
+index bbdaeb5..ed7e389 100644
+--- a/crates/oriole/src/lib.rs
++++ b/crates/oriole/src/lib.rs
+@@ -1882,7 +1882,7 @@ impl Parser {
+                 .expect("retained native raw start");
+             let end = offset.checked_add(raw.count.get()).expect("native raw end");
+             let bytes = context.get(offset..end).expect("retained native raw range");
+-            // Only this validated Text span is UTF-8. A later feed may have
++            // Only this validated native span is UTF-8. A later feed may have
+             // moved the context to separate storage with an invalid suffix.
+             return Some(std::str::from_utf8(bytes).expect("native raw UTF-8"));
+         }
+@@ -2358,6 +2358,31 @@ impl Parser {
+             }
+             self.account_source(end)?;
+             let position = self.source().position(end);
++            if matched_end.is_some()
++                && output.c_text_context
++                && self.input_context.is_some()
++                && !self.seen_doctype
++                && !self.foreign_dtd
++                && self.shared_tables.get().is_none()
++                && self
++                    .stack
++                    .last()
++                    .is_some_and(|element| element.namespace_scope.is_none())
++                && let Some(frame) = output.frame.as_deref_mut()
++            {
++                // Matching proves native UTF-8 spelling and a nonempty range.
++                // Keep the existing detached name; raw markup stays in context.
++                self.prepare_end_frame(frame);
++                self.native_raw = Some(NativeRawRange {
++                    start: position.byte_index,
++                    count: NonZeroUsize::new(end).expect("nonempty matched End"),
++                });
++                // Accounting above is complete and name detachment allocates
++                // nothing. Commit ordinary Unicode coordinates before delivery.
++                self.consume(end)?;
++                frame.publish(position);
++                continue;
++            }
+             let mut token = std::mem::replace(
+                 &mut self.token_scratch,
+                 lexical::Buffer::new_in(self.allocator),
+@@ -5176,12 +5201,125 @@ mod native_raw_context_tests {
+         }
+     }
+ 
++    #[test]
++    fn matched_native_end_raw_keeps_owned_names_and_mode_boundaries() {
++        for (opening, closing, separator, scoped) in [
++            ("<é>", "</é>", None, false),
++            ("<é>", "</é >", None, false),
++            ("<é>", "</é>", Some('|'), false),
++            ("<é xmlns='urn'>", "</é>", Some('|'), true),
++        ] {
++            for enabled in [false, true] {
++                // Generic, C-context, and a foreign frame's owned fallback.
++                for mode in 0..3 {
++                    let mut parser = Parser::new(Config {
++                        namespace_separator: separator,
++                        ..Config::default()
++                    });
++                    if enabled {
++                        parser.enable_input_context();
++                    }
++                    let input = format!("\u{feff}<r>{opening}\r{closing}\n<z/></r>");
++                    parser.feed(input.as_bytes(), true).unwrap();
++                    while let Some(event) = parser.next_event().unwrap() {
++                        if matches!(event.kind, EventKind::Text(_)) {
++                            break;
++                        }
++                    }
++                    assert_eq!(parser.current_raw(), Some("\r"));
++                    let raw_owner = (parser.current_raw.as_ptr(), parser.current_raw.capacity());
++                    let scratch = (parser.token_scratch.as_ptr(), parser.token_scratch.len());
++                    let name_owner = parser.stack.last().unwrap().name.value.as_ptr();
++                    let mut foreign = Parser::new(Config::default());
++                    let mut frame = if mode == 2 {
++                        foreign.adapter_frame()
++                    } else {
++                        parser.adapter_frame()
++                    };
++                    let mut event = None;
++                    if mode == 0 {
++                        parser.next_event_for_adapter_into(&mut event, &mut frame)
++                    } else {
++                        parser.next_event_for_c_text_context_into(&mut event, &mut frame)
++                    }
++                    .unwrap()
++                    .unwrap();
++                    let (name, position) = if let Some(name) = frame.take_end_name() {
++                        assert!(event.is_none());
++                        (name, frame.position())
++                    } else {
++                        let event = event.take().unwrap();
++                        let EventKind::EndElement { name } = event.kind else {
++                            panic!("closing token must deliver End first");
++                        };
++                        (name, event.position)
++                    };
++                    assert_eq!(name, if scoped { "urn|é" } else { "é" });
++                    assert_eq!(name.as_ptr(), name_owner);
++                    assert_eq!(
++                        (position.byte_index, position.byte_count),
++                        (input.find(closing).unwrap(), closing.len())
++                    );
++                    assert_eq!((position.line, position.column), (2, 0));
++                    let consumed = parser.source().position(0);
++                    assert_eq!(
++                        (consumed.line, consumed.column),
++                        (2, closing.chars().count())
++                    );
++                    let viewed = enabled && mode == 1 && !scoped && closing == "</é>";
++                    assert_eq!(parser.native_raw.is_some(), viewed);
++                    assert_eq!(parser.current_raw(), Some(closing));
++                    if viewed {
++                        assert_eq!(parser.current_raw.as_str(), "\r");
++                        assert_eq!(
++                            (parser.current_raw.as_ptr(), parser.current_raw.capacity()),
++                            raw_owner
++                        );
++                        assert_eq!(
++                            (parser.token_scratch.as_ptr(), parser.token_scratch.len()),
++                            scratch
++                        );
++                        let (context, start) = parser.input_context();
++                        assert_eq!(
++                            parser.current_raw().unwrap().as_ptr(),
++                            context[position.byte_index - start..].as_ptr()
++                        );
++                    }
++                    // Ordinary handoff drains namespace undo and the empty tag,
++                    // then replaces the view with the final owned root End.
++                    while parser.next_event().unwrap().is_some() {}
++                    assert!(parser.native_raw.is_none());
++                    assert_eq!(parser.current_raw(), Some("</r>"));
++                    assert_eq!(parser.source().position(0).line, 3);
++                    if mode == 2 {
++                        foreign.finish_adapter_frame(frame);
++                    } else {
++                        parser.finish_adapter_frame(frame);
++                    }
++                }
++            }
++        }
++    }
++
+     #[test]
+     fn native_raw_retention_survives_compaction_and_invalid_context_suffixes() {
+         let text = format!("{}x", "€".repeat(1333));
++        let end_name = "é".repeat(2050);
++        let end_tag = format!("</{end_name}>");
+         let mut unaligned = false;
+-        for padding in 0..3 {
+-            let input = format!("<r>{}{}<n/>{text}", "€".repeat(23_000), "x".repeat(padding));
++        for case in 0..6 {
++            let padding = case % 3;
++            let tail = if case < 3 {
++                text.clone()
++            } else {
++                format!("<{end_name}>{end_tag}")
++            };
++            let raw_text = if case < 3 {
++                text.as_str()
++            } else {
++                end_tag.as_str()
++            };
++            let input = format!("<r>{}{}<n/>{tail}", "€".repeat(23_000), "x".repeat(padding));
+             for suffix in [b"\xff".as_slice(), b"\xc3"] {
+                 let mut parser = Parser::new(Config::default());
+                 parser.enable_input_context();
+@@ -5194,7 +5332,7 @@ mod native_raw_context_tests {
+                     .is_some()
+                 {}
+                 let raw = parser.native_raw.unwrap();
+-                assert_eq!(parser.current_raw(), Some(text.as_str()));
++                assert_eq!(parser.current_raw(), Some(raw_text));
+                 // A completed frame can be cleared without discarding raw.
+                 assert!(!frame.is_active());
+                 parser.feed(b"", false).unwrap();
+@@ -5206,14 +5344,14 @@ mod native_raw_context_tests {
+                 unaligned |= physical_extra != 0;
+                 parser.feed(suffix, false).unwrap();
+                 assert!(std::str::from_utf8(parser.input_context().0).is_err());
+-                assert_eq!(parser.current_raw(), Some(text.as_str()));
++                assert_eq!(parser.current_raw(), Some(raw_text));
+                 assert_ne!(
+                     parser.input_context().0.as_ptr(),
+                     parser.sources[0].text.as_bytes().as_ptr()
+                 );
+                 if suffix == b"\xc3" {
+                     parser.feed(b"\xa9</r>", true).unwrap();
+-                    assert_eq!(parser.current_raw(), Some(text.as_str()));
++                    assert_eq!(parser.current_raw(), Some(raw_text));
+                     parser
+                         .next_event_for_c_text_context_into(&mut event, &mut frame)
+                         .unwrap()
+@@ -5223,7 +5361,7 @@ mod native_raw_context_tests {
+                     while parser.next_event().unwrap().is_some() {}
+                 } else {
+                     assert!(parser.next_event().is_err());
+-                    assert_eq!(parser.current_raw(), Some(text.as_str()));
++                    assert_eq!(parser.current_raw(), Some(raw_text));
+                 }
+                 parser.finish_adapter_frame(frame);
+             }
+diff --git a/crates/oriole/tests/allocation.rs b/crates/oriole/tests/allocation.rs
+index dec571b..015069e 100644
+--- a/crates/oriole/tests/allocation.rs
++++ b/crates/oriole/tests/allocation.rs
+@@ -958,11 +958,29 @@ fn native_raw_context_views_survive_every_feed_allocation_failure() {
+     fn workload(allocator: Allocator) -> Result<(), Error> {
+         // The first suffix forces native growth; the second forces Separate.
+         let large = [b'x'; 65_536];
+-        for suffix in [large.as_slice(), b"\xff"] {
++        for (input, raw, offset, suffix) in [
++            (
++                b"<r>twelve-bytes".as_slice(),
++                "twelve-bytes",
++                3,
++                large.as_slice(),
++            ),
++            (
++                b"<r>twelve-bytes".as_slice(),
++                "twelve-bytes",
++                3,
++                b"\xff".as_slice(),
++            ),
++            (b"<r><n></n>".as_slice(), "</n>", 6, large.as_slice()),
++            (b"<r><n></n>".as_slice(), "</n>", 6, b"\xff".as_slice()),
++        ] {
+             let mut parser = Parser::try_new_in(Config::default(), allocator)?;
+             parser.enable_input_context();
+-            parser.feed(b"<r>twelve-bytes", false)?;
++            parser.feed(input, false)?;
+             assert!(next_event(&mut parser)?.is_some());
++            if raw == "</n>" {
++                assert!(next_event(&mut parser)?.is_some());
++            }
+             let mut frame = parser.adapter_frame();
+             let result = (|| -> Result<(), Error> {
+                 let mut event = None;
+@@ -972,20 +990,25 @@ fn native_raw_context_views_survive_every_feed_allocation_failure() {
+                         .next_event_for_c_text_context_into(&mut event, &mut frame)?
+                         .is_some()
+                 );
+-                assert_eq!(frame.native_text_range_for_c(), Some((3, 12)));
+-                assert_eq!(parser.current_raw(), Some("twelve-bytes"));
++                if raw == "</n>" {
++                    assert!(event.is_none());
++                    assert_eq!(frame.take_end_name().unwrap(), "n");
++                } else {
++                    assert_eq!(frame.native_text_range_for_c(), Some((3, 12)));
++                }
++                assert_eq!(parser.current_raw(), Some(raw));
+                 assert_eq!(
+                     CALLS.get(),
+                     before,
+-                    "short native Text needs no raw allocation"
++                    "native raw projection needs no token allocation"
+                 );
+                 let (context, start) = parser.input_context();
+                 assert_eq!(
+                     parser.current_raw().unwrap().as_ptr(),
+-                    context[3 - start..].as_ptr()
++                    context[offset - start..].as_ptr()
+                 );
+                 let fed = parser.feed(suffix, false);
+-                assert_eq!(parser.current_raw(), Some("twelve-bytes"));
++                assert_eq!(parser.current_raw(), Some(raw));
+                 if let Err(error) = fed {
+                     assert_eq!(error.kind, ErrorKind::NoMemory);
+                     let calls = CALLS.get();
+diff --git a/crates/oriole_expat/src/tests.rs b/crates/oriole_expat/src/tests.rs
+index 02e8d8c..272503e 100644
+--- a/crates/oriole_expat/src/tests.rs
++++ b/crates/oriole_expat/src/tests.rs
+@@ -1869,12 +1869,38 @@ fn detached_end_charges_the_name_before_handlers_or_default_fallback() {
+ 
+ #[test]
+ fn detached_end_owner_survives_default_current_children_stop_and_reset_rejection() {
++    unsafe fn check_raw_context(parser: XML_Parser, raw: &[u8]) {
++        // SAFETY: Called during the guarded End callback; the checked window
++        // is read completely before any nested parser operation.
++        unsafe {
++            let mut offset = 0;
++            let mut size = 0;
++            let context = XML_GetInputContext(parser, &mut offset, &mut size);
++            assert!(!context.is_null() && offset >= 0 && size >= offset);
++            assert!(raw.len() <= (size - offset) as usize);
++            assert_eq!(
++                std::slice::from_raw_parts(context.cast::<u8>().add(offset as usize), raw.len()),
++                raw
++            );
++        }
++    }
+     unsafe extern "C" fn held_end(data: *mut c_void, name: *const c_char) {
+         // SAFETY: Only scalar handles and independently owned name bytes cross
+         // nested callbacks; each State access ends before another C API call.
+         unsafe {
+             let parser = (*data.cast::<State>()).parser;
+             let before = CStr::from_ptr(name).to_bytes().to_vec();
++            let raw = format!("</{}>", std::str::from_utf8(&before).unwrap());
++            let position = (
++                XML_GetCurrentByteIndex(parser),
++                XML_GetCurrentByteCount(parser),
++                XML_GetCurrentLineNumber(parser),
++                XML_GetCurrentColumnNumber(parser),
++            );
++            assert_eq!(position.0 as usize, before.len() + 9);
++            assert_eq!(position.1 as usize, raw.len());
++            assert_eq!((position.2, position.3), (2, 0));
++            check_raw_context(parser, raw.as_bytes());
+             (*data.cast::<State>())
+                 .events
+                 .push(format!("held:{}", std::str::from_utf8(&before).unwrap()));
+@@ -1891,13 +1917,22 @@ fn detached_end_owner_survives_default_current_children_stop_and_reset_rejection
+             assert_eq!(XML_StopParser(parser, 1), OK);
+             XML_DefaultCurrent(parser);
+             assert_eq!(CStr::from_ptr(name).to_bytes(), before);
++            check_raw_context(parser, raw.as_bytes());
++            assert_eq!(
++                (
++                    XML_GetCurrentByteIndex(parser),
++                    XML_GetCurrentByteCount(parser),
++                    XML_GetCurrentLineNumber(parser),
++                    XML_GetCurrentColumnNumber(parser),
++                ),
++                position
++            );
+         }
+     }
+-    for length in [1, 4097] {
++    for name in ["n".to_owned(), "é".to_owned(), "n".repeat(4097)] {
+         // SAFETY: Input, State and both callback functions outlive synchronous use.
+         unsafe {
+-            let name = "n".repeat(length);
+-            let document = format!("<r><{name}></{name}><e/></r>");
++            let document = format!("\u{feff}<r><{name}>\r</{name}><e/></r>");
+             let mut state = State::default();
+             let parser = configured(&mut state);
+             XML_SetEndElementHandler(parser, Some(held_end));
+@@ -1911,6 +1946,8 @@ fn detached_end_owner_survives_default_current_children_stop_and_reset_rejection
+                 format!("text:</{name}>"),
+                 format!("text:</{name}>")
+             ]));
++            // Renew userdata after the inspection before callbacks write it.
++            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+             assert_eq!(XML_ResumeParser(parser), OK);
+             assert!(
+                 state

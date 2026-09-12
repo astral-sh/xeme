@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "jobs": [
+    {
+      "label": "time",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3",
+        "-I",
+        "-S",
+        "/tmp/oriole-matched-native-end-raw-confirmation/python/consumer_screen.py",
+        "--phase",
+        "time",
+        "--kind",
+        "python",
+        "--build",
+        "/tmp/oriole-matched-native-end-raw-study/python/consumers/build.json",
+        "--input",
+        "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus-manifest.json",
+        "--output",
+        "/tmp/oriole-matched-native-end-raw-confirmation/python/screen"
+      ],
+      "timeout_seconds": 1200,
+      "start": 1789245181.982293,
+      "exit": 0,
+      "end": 1789245389.1956584,
+      "log_sha256": "388f726667dfb9646ad3dc27d853ca5bf03019270a53e853164927836b04e84d"
+    }
+  ],
+  "controller_sha256": "3c639f063f3e4070847f21d06252d9b619f6d0b59af23ab658e5872a6c3b7c18",
+  "scope": "Six previously built O2 modules reused in original directories; zero compiles. Fresh canonical preflights on CPU3; separate confirmation elapsed study with CPU0 affinity on a shared host. Worker and measurement boundaries unchanged. Per-worker300s and aggregate timing1200s retained. Process group killed on outer timeout/interruption."
+}

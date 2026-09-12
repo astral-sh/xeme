@@ -1,0 +1,205 @@
+{
+  "status": "completed_saved_qualification_comparison",
+  "candidate_library_sha256": "5ca9644b5d782a6beaae7a8b1ddd16045480d4566b7eb77e317c7ac25a2258fe",
+  "selected_library_sha256": "e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6",
+  "targets_executed_by_reader": false,
+  "all_target_processes_reaped": true,
+  "pins": {
+    "/tmp/oriole-core-owned-text-raw-allocation-retry/run01/report.json": "58a316e06d2e4f4a06ff1cc382672c8c80daeca3558cca9d5a43766810112af2",
+    "/tmp/oriole-core-owned-text-raw-allocation-retry/run01/saved-readback.json": "7be3d8545512548805e73944aaaff50e75b8f25b7d3238bb7f76284486ea3023",
+    "/tmp/oriole-core-owned-text-raw-allocation-retry/run01/tests.log": "205b275e95cd5e0e5ab498788cfe9d6cfac88b441f1e20c222154ccc37dd7c30",
+    "/tmp/oriole-core-owned-text-raw-allocation-retry/run01/build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-matched-native-end-raw-allocation-retry/run01/report.json": "2f0b900ffb352a6ff90f65d7136c437330502b0cbbf4eb43e165e27b198ebced",
+    "/tmp/oriole-matched-native-end-raw-allocation-retry/run01/saved-readback.json": "9fcc4baa512c76b818f5c8a41b385326a72c931eb0ce811a4fe964f541007692",
+    "/tmp/oriole-matched-native-end-raw-allocation-retry/run01/tests.log": "8e11e9a097567b01266dfb0949db3773a964fa987fdc205ba2fbf51fae989f4b",
+    "/tmp/oriole-matched-native-end-raw-allocation-retry/run01/build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-core-owned-text-raw-buffer-tail/run01/report.json": "6b361275c83e8fcfd4362f5ba6bfd3131fdab29fbd27b7ec22f7e0b99a540e71",
+    "/tmp/oriole-core-owned-text-raw-buffer-tail/run01/saved-readback.json": "c74c7409fc8513f5a3d07c083b95a22a79890655325cf9e81a49f52a66fa26f0",
+    "/tmp/oriole-core-owned-text-raw-buffer-tail/run01/tests.log": "cbc65d8beaeef732ff5fbc13691959f65071e9c107d95d033cd63151ccb6d0ea",
+    "/tmp/oriole-core-owned-text-raw-buffer-tail/run01/build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-matched-native-end-raw-buffer-tail/run01/report.json": "defce0c7da7978c3d01ee517de61f7a6da45e55ad492733114cef897d43c8685",
+    "/tmp/oriole-matched-native-end-raw-buffer-tail/run01/saved-readback.json": "903443e7d0b175e833338aaf4655b749336cc9f6dfe76fa2698113b42c1cf8fc",
+    "/tmp/oriole-matched-native-end-raw-buffer-tail/run01/tests.log": "9427771e8f80effbc085cccdd396a0422279c02d233e9b912b0d4d6ecf84347f",
+    "/tmp/oriole-matched-native-end-raw-buffer-tail/run01/build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-matched-native-end-raw-correctness/w3c-saved-readback.json": "697accf088f4c03eccbf9da9e5c685c92e3a359c7742104d95f74a646c74f4a1"
+  },
+  "supplementals": {
+    "allocation-retry": {
+      "rows": 300,
+      "outcomes": {
+        "pass": 300
+      },
+      "all_pass": true,
+      "outcome_differences": [],
+      "command_exits": [
+        0,
+        0
+      ]
+    },
+    "buffer-tail": {
+      "rows": 12,
+      "outcomes": {
+        "pass": 12
+      },
+      "all_pass": true,
+      "outcome_differences": [],
+      "command_exits": [
+        0,
+        0
+      ],
+      "observation_differences": [],
+      "candidate_observations": [
+        {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_nsalloc_parse_buffer",
+          "status": 1,
+          "error": 0,
+          "allocation_count": 0
+        },
+        {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_nsalloc_parse_buffer",
+          "status": 1,
+          "error": 0,
+          "allocation_count": 0
+        },
+        {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_nsalloc_parse_buffer",
+          "status": 1,
+          "error": 0,
+          "allocation_count": 0
+        },
+        {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_nsalloc_parse_buffer",
+          "status": 1,
+          "error": 0,
+          "allocation_count": 0
+        },
+        {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_nsalloc_parse_buffer",
+          "status": 1,
+          "error": 0,
+          "allocation_count": 0
+        },
+        {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_nsalloc_parse_buffer",
+          "status": 1,
+          "error": 0,
+          "allocation_count": 0
+        },
+        {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_nsalloc_parse_buffer",
+          "status": 1,
+          "error": 0,
+          "allocation_count": 0
+        },
+        {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_nsalloc_parse_buffer",
+          "status": 1,
+          "error": 0,
+          "allocation_count": 0
+        },
+        {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_nsalloc_parse_buffer",
+          "status": 1,
+          "error": 0,
+          "allocation_count": 0
+        },
+        {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_nsalloc_parse_buffer",
+          "status": 1,
+          "error": 0,
+          "allocation_count": 0
+        },
+        {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_nsalloc_parse_buffer",
+          "status": 1,
+          "error": 0,
+          "allocation_count": 0
+        },
+        {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_nsalloc_parse_buffer",
+          "status": 1,
+          "error": 0,
+          "allocation_count": 0
+        }
+      ]
+    }
+  },
+  "w3c": {
+    "status": "saved_w3c_raw_classification_verified_conformance_failed",
+    "engines": {
+      "reference": {
+        "mandatory_pass": 4962,
+        "mandatory_fail": 960,
+        "optional_observations": 81,
+        "inconclusive": 0,
+        "resolver_errors": 0,
+        "mismatch_types": {
+          "not-wf": 6,
+          "invalid": 36,
+          "valid": 918
+        },
+        "child_outcomes": 792
+      },
+      "oriole": {
+        "mandatory_pass": 4962,
+        "mandatory_fail": 960,
+        "optional_observations": 81,
+        "inconclusive": 0,
+        "resolver_errors": 0,
+        "mismatch_types": {
+          "not-wf": 6,
+          "invalid": 36,
+          "valid": 918
+        },
+        "child_outcomes": 792
+      }
+    },
+    "rows_per_engine": 6003,
+    "skipped_by_reason": {
+      "Earlier XML edition only": 310,
+      "XML 1.1": 274
+    },
+    "selected_raw_view_comparison": {
+      "oriole": {
+        "rows": 6003,
+        "changed_rows": 0,
+        "differences": []
+      },
+      "reference": {
+        "rows": 6003,
+        "changed_rows": 0,
+        "differences": []
+      }
+    },
+    "result_field_difference_counts": {
+      "status": 0,
+      "error": 225,
+      "index": 1695,
+      "children": 21,
+      "loaded": 0,
+      "resolver_errors": 0
+    },
+    "supervisor_raw_exit": 1,
+    "all_processes_reaped": true
+  },
+  "limitations": [
+    "W3C conformance remains failed: 960 mandatory mismatches per engine; acceptance equality does not waive them.",
+    "W3C captures acceptance, error, byte-index and child/resolver fields, not a canonical callback stream.",
+    "Retry test maxima remain512 and stop at first semantic success; this is not exhaustive allocation-failure testing.",
+    "Buffer-tail keeps the original two unconstrained allocation observations and all remaining assertions; original baseline failures are not reclassified.",
+    "Normal C and Rust libraries are uninstrumented; no ASan or elapsed-performance evidence is produced here."
+  ],
+  "reader_sha256": "00b7e67ff72206b401a3c81da30ba91005c0d61b608e4da031f5ef209a728e5e"
+}

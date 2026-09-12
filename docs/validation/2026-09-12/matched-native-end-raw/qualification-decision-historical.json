@@ -1,0 +1,543 @@
+{
+  "status": "advance_to_compatibility_qualification",
+  "runtime_selected": false,
+  "published_runtime": "67c704c123b8661a3ad1f91bd48c2f0be4996096",
+  "candidate_libraries": {
+    "liboriole_expat.so": "5ca9644b5d782a6beaae7a8b1ddd16045480d4566b7eb77e317c7ac25a2258fe",
+    "liboriole_expat.a": "0e03a6aef524eb621b2ef67983303e8e6d4f45eac19cbf0e8f21c08c829ebfed"
+  },
+  "source_sha256": "c428d62aa77d92493e7d4654bd0a1b3be128ca1228976929e0d93985c31bf6df",
+  "build_binding_sha256": "7d78bc923c9da5b21c51b0887d40be9a41032e40f05a1775f800b81cc095aab8",
+  "tests": {
+    "passed": 476,
+    "groups": 35,
+    "failures": 0,
+    "ignored": 0
+  },
+  "epochs": {
+    "initial": {
+      "native": {
+        "real": {
+          "conditions": 24,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9841434714458671,
+            "candidate_over_expat": 1.2525897109010709,
+            "control_over_expat": 1.2707211374254501
+          },
+          "candidate_faster_than_control": 19
+        },
+        "generated": {
+          "conditions": 4,
+          "geomean_ratios": {
+            "candidate_over_control": 1.0131528883147065,
+            "candidate_over_expat": 3.4492472025131757,
+            "control_over_expat": 3.403823532575319
+          },
+          "candidate_faster_than_control": 1
+        },
+        "real_namespaces_off": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9842206094840452,
+            "candidate_over_expat": 1.193248122422252,
+            "control_over_expat": 1.2112582398856975
+          },
+          "candidate_faster_than_control": 9
+        },
+        "real_namespaces_on": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 0.984066339453363,
+            "candidate_over_expat": 1.3148824241770032,
+            "control_over_expat": 1.33310317810693
+          },
+          "candidate_faster_than_control": 10
+        }
+      },
+      "python": {
+        "all": {
+          "conditions": 24,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9910174940651046,
+            "control_over_expat": 1.0949579414811077,
+            "candidate_over_expat": 1.0842766849986996
+          },
+          "candidate_lower_than_control": 17,
+          "candidate_within_1_10_of_expat": 9
+        },
+        "elementtree": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9899739664798777,
+            "control_over_expat": 1.1367905042080173,
+            "candidate_over_expat": 1.1250652542658663
+          },
+          "candidate_lower_than_control": 8,
+          "candidate_within_1_10_of_expat": 4
+        },
+        "pyexpat-events": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9920621216285714,
+            "control_over_expat": 1.0546647682000307,
+            "candidate_over_expat": 1.0449668809645307
+          },
+          "candidate_lower_than_control": 9,
+          "candidate_within_1_10_of_expat": 5
+        }
+      },
+      "native_adverse": [
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 7
+          },
+          "candidate_over_control": 1.0460238147560108
+        },
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 7
+          },
+          "candidate_over_control": 1.0323252084673424
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 512
+          },
+          "candidate_over_control": 1.0032728931002894
+        },
+        {
+          "condition": {
+            "name": "generated-rare-declarations",
+            "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 32
+          },
+          "candidate_over_control": 1.000737881103408
+        },
+        {
+          "condition": {
+            "name": "generated-entities",
+            "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 32
+          },
+          "candidate_over_control": 1.0320211725756416
+        },
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 7
+          },
+          "candidate_over_control": 1.0542133452962905
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 512
+          },
+          "candidate_over_control": 1.0210573752022778
+        },
+        {
+          "condition": {
+            "name": "generated-entities",
+            "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 32
+          },
+          "candidate_over_control": 1.023269574254375
+        }
+      ],
+      "python_adverse": [
+        {
+          "condition": {
+            "name": "wayland",
+            "chunk": 4096,
+            "mode": "elementtree",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "iterations": 16
+          },
+          "candidate_over_control": 1.0088525917606421,
+          "control_over_expat": 0.8391124170993134,
+          "candidate_over_expat": 0.8467696031308625
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "chunk": 4096,
+            "mode": "pyexpat-events",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "iterations": 16
+          },
+          "candidate_over_control": 1.0033621379788487,
+          "control_over_expat": 0.6740875103733237,
+          "candidate_over_expat": 0.6752817792283415
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "chunk": 4096,
+            "mode": "elementtree",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "iterations": 128
+          },
+          "candidate_over_control": 1.0029022717002836,
+          "control_over_expat": 1.1477223651350996,
+          "candidate_over_expat": 1.156774655113174
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "chunk": 4096,
+            "mode": "pyexpat-events",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "iterations": 128
+          },
+          "candidate_over_control": 1.011324518165758,
+          "control_over_expat": 1.0687889022245793,
+          "candidate_over_expat": 1.0765276687126395
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "chunk": 4096,
+            "mode": "elementtree",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "iterations": 64
+          },
+          "candidate_over_control": 1.0068724404099119,
+          "control_over_expat": 1.3318797218606917,
+          "candidate_over_expat": 1.338338311333783
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "chunk": 65536,
+            "mode": "elementtree",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "iterations": 64
+          },
+          "candidate_over_control": 1.0101791960545317,
+          "control_over_expat": 1.2612089664422337,
+          "candidate_over_expat": 1.2603366782654983
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "chunk": 65536,
+            "mode": "pyexpat-events",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "iterations": 64
+          },
+          "candidate_over_control": 1.002194634090847,
+          "control_over_expat": 1.2462450720205296,
+          "candidate_over_expat": 1.2494726723427627
+        }
+      ],
+      "pins": {
+        "/tmp/oriole-matched-native-end-raw-study/native/review.json": "af8be5d73198f591966967e9bb395969add2c42502fbb3165f571a4cec59093d",
+        "/tmp/oriole-matched-native-end-raw-study/python/normal-review.json": "a1bcac00831bd780f4cfbe10a6a37c45d68c6a555a9c31f3a901f27ee72131ac",
+        "/tmp/oriole-matched-native-end-raw-study/host-before-native.json": "e45bad48e75243e9c41e1c1e1cb5067b738ea92deef2951c8a79f0bb8364c6aa",
+        "/tmp/oriole-matched-native-end-raw-study/host-during-native.json": "65f6949c1ff36c67339ee8f8015e8cab4a8dd74ad0f2566b7a81a23713de48cd",
+        "/tmp/oriole-matched-native-end-raw-study/host-before-python.json": "9ef919acf65d028680311893227a791f37745dbe341cfcf254a408b631482cfe",
+        "/tmp/oriole-matched-native-end-raw-study/host-during-python.json": "adcd20e844647449b1c9aaa6bf31ae7ef33ef9e8aecfe50d45eae929c259c7e0"
+      }
+    },
+    "confirmation": {
+      "native": {
+        "real": {
+          "conditions": 24,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9876961759670133,
+            "candidate_over_expat": 1.2546489040251243,
+            "control_over_expat": 1.2683791719593809
+          },
+          "candidate_faster_than_control": 17
+        },
+        "generated": {
+          "conditions": 4,
+          "geomean_ratios": {
+            "candidate_over_control": 1.013490922948506,
+            "candidate_over_expat": 3.461543385813205,
+            "control_over_expat": 3.414458346390958
+          },
+          "candidate_faster_than_control": 0
+        },
+        "real_namespaces_off": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 0.98799387537465,
+            "candidate_over_expat": 1.196955852201673,
+            "control_over_expat": 1.209042520808487
+          },
+          "candidate_faster_than_control": 8
+        },
+        "real_namespaces_on": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9873985662612862,
+            "candidate_over_expat": 1.3151227503303278,
+            "control_over_expat": 1.3306279110717871
+          },
+          "candidate_faster_than_control": 9
+        }
+      },
+      "python": {
+        "all": {
+          "conditions": 24,
+          "geomean_ratios": {
+            "candidate_over_control": 0.989398962091166,
+            "control_over_expat": 1.0961022478854645,
+            "candidate_over_expat": 1.0861065550228897
+          },
+          "candidate_lower_than_control": 20,
+          "candidate_within_1_10_of_expat": 10
+        },
+        "elementtree": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 0.984714727576673,
+            "control_over_expat": 1.1402015728165273,
+            "candidate_over_expat": 1.1252538494286588
+          },
+          "candidate_lower_than_control": 11,
+          "candidate_within_1_10_of_expat": 3
+        },
+        "pyexpat-events": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9941054792550114,
+            "control_over_expat": 1.0537085428252562,
+            "candidate_over_expat": 1.0483211850042888
+          },
+          "candidate_lower_than_control": 9,
+          "candidate_within_1_10_of_expat": 7
+        }
+      },
+      "native_adverse": [
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 7
+          },
+          "candidate_over_control": 1.0532317125921606
+        },
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 7
+          },
+          "candidate_over_control": 1.032387463193067
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 64
+          },
+          "candidate_over_control": 1.0001843147595888
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 64
+          },
+          "candidate_over_control": 1.0056534482919732
+        },
+        {
+          "condition": {
+            "name": "generated-rare-declarations",
+            "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 32
+          },
+          "candidate_over_control": 1.0021330219347748
+        },
+        {
+          "condition": {
+            "name": "generated-entities",
+            "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 32
+          },
+          "candidate_over_control": 1.0202499018939222
+        },
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 7
+          },
+          "candidate_over_control": 1.0254439936543769
+        },
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 7
+          },
+          "candidate_over_control": 1.0436945677239569
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 512
+          },
+          "candidate_over_control": 1.0087317762692922
+        },
+        {
+          "condition": {
+            "name": "generated-rare-declarations",
+            "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 32
+          },
+          "candidate_over_control": 1.0023529868536003
+        },
+        {
+          "condition": {
+            "name": "generated-entities",
+            "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 32
+          },
+          "candidate_over_control": 1.029501135627964
+        }
+      ],
+      "python_adverse": [
+        {
+          "condition": {
+            "name": "vulkan",
+            "chunk": 4096,
+            "mode": "pyexpat-events",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "iterations": 3
+          },
+          "candidate_over_control": 1.005480471934581,
+          "control_over_expat": 1.089528890769856,
+          "candidate_over_expat": 1.0989350053971478
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "chunk": 65536,
+            "mode": "elementtree",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "iterations": 16
+          },
+          "candidate_over_control": 1.009867742318289,
+          "control_over_expat": 0.8097799305807974,
+          "candidate_over_expat": 0.8105032390921962
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "chunk": 4096,
+            "mode": "pyexpat-events",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "iterations": 64
+          },
+          "candidate_over_control": 1.0025327485768156,
+          "control_over_expat": 1.0923768435783152,
+          "candidate_over_expat": 1.0901772840252126
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "chunk": 65536,
+            "mode": "pyexpat-events",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "iterations": 64
+          },
+          "candidate_over_control": 1.00320508894338,
+          "control_over_expat": 1.2353435516980202,
+          "candidate_over_expat": 1.2385053330130855
+        }
+      ],
+      "pins": {
+        "/tmp/oriole-matched-native-end-raw-confirmation/native/review.json": "b5ac23d55129c5c90a34092b45b4edc86566a5760e33c5f9c267a1db2f446711",
+        "/tmp/oriole-matched-native-end-raw-confirmation/python/normal-review.json": "f8557bbfd435b4853a9544b3570217f50c085d4381661b623d6135a0865d63d2",
+        "/tmp/oriole-matched-native-end-raw-confirmation/host-before-native.json": "b4d82d45a726c8e241b95adc95e2a74d257577b064cceab6c000b0e0a7258e40",
+        "/tmp/oriole-matched-native-end-raw-confirmation/host-during-native.json": "d333273d5267d8d5966563c0dc7f11791c15d7e248216d8a2edd257d0e7e5f3a",
+        "/tmp/oriole-matched-native-end-raw-confirmation/host-before-python.json": "c015d59e6b54b8381e024f76b02c52d14d247a2807c0a2bfaa1b0b2550704a72",
+        "/tmp/oriole-matched-native-end-raw-confirmation/host-during-python.json": "d506921cdcb1be50dc4a55338c3d0d59bda5fd0107326745c53322eb89b33ac2"
+      }
+    }
+  },
+  "reason": "Both unchanged measurement epochs improve aggregate native parsing and both Python consumer modes. The small production change merits compatibility qualification. This decision explicitly accepts investigating a tradeoff: native Vulkan regresses in three initial and all four confirmation conditions, and generated controls regress in aggregate. No claim of universal improvement, statistical significance, full-application speed, performance-goal completion or runtime selection.",
+  "qualification_remaining": [
+    "Original4740 API configurations with unchanged bounds and all outcomes retained",
+    "Six C consumers and strict shared/static CPython suites",
+    "Relevant W3C and allocation/buffer semantic diagnostics",
+    "Both Miri models including extended detached-End C test",
+    "Current-source sanitizer/fuzz qualification and resource availability",
+    "Review and publish qualified follow-up in native PR stack"
+  ],
+  "disk": "Last observed6.6GiB free; future Rust ASan retains its8GiB starting guard. No artifacts or shared build cache removed.",
+  "confirmation_sessions": {
+    "materializer": 19381,
+    "native_host_before": 26353,
+    "native_controller": 77472,
+    "native_monitor": 10500,
+    "native_reader": 14214,
+    "python_preflight": 9079,
+    "python_preflight_reader": 40171,
+    "python_host_before": 98164,
+    "python_controller": 29849,
+    "python_monitor": 92934,
+    "python_reader": 83662
+  },
+  "all_confirmation_sessions_reaped_zero": true,
+  "other_progress": {
+    "selected_profile": {
+      "path": "/tmp/oriole-raw-view-normal-profile-preparation/saved-instruction-readback.json",
+      "sha256": "c0f16d181b92547efc502731119f9ae984340706dfaf52fea4a1876c6aea8f2e"
+    },
+    "unknown_encoding_callback_probe": {
+      "path": "/tmp/oriole-unknown-encoding-callback-diagnostic/report.json",
+      "sha256": "ad0016e6358c407688d6d83aa63493712052d419f6e704d37fc9cd0177a8e41e"
+    }
+  }
+}

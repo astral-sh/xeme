@@ -1,0 +1,42 @@
+{
+  "status": "held_completed_build_pending_root_release",
+  "targets_executed": false,
+  "controller_origin": "/tmp/oriole-start-token-frame-correctness-preparation/held/strict_cpython.py",
+  "controller_origin_sha256": "222051adb7ea80ebdd51829e344ef48fc80bd8de74981d6a73f0a3f849e4a396",
+  "controller_sha256": "8043754a25c4e1760bb6e48c763cf6812787b15afcc92113d359eff05efd3d08",
+  "complete_shared_static_execution_loop_byte_exact": true,
+  "candidate_source_commit": null,
+  "measured_source_base_commit": "008d818237fe0d6f8c04a000a98ad69ab5780ceb",
+  "baseline": "/tmp/oriole-reference-frame-strict-cpython",
+  "baseline_outcomes": {
+    "shared": {
+      "methods": 802,
+      "failures": {
+        "test.test_pyexpat.BufferTextTest.test1": "FAIL",
+        "test.test_sax.CDATAHandlerTest.test_handlers": "FAIL"
+      },
+      "raw_exit": 2
+    },
+    "static": {
+      "methods": 802,
+      "failures": {
+        "test.test_pyexpat.BufferTextTest.test1": "FAIL",
+        "test.test_sax.CDATAHandlerTest.test_handlers": "FAIL"
+      },
+      "raw_exit": 2
+    }
+  },
+  "consumer_fix": {
+    "cpython_revision": "3bb231a6a5dc02b95658877318bf61501a7209e9",
+    "cpython_version": "3.12.13",
+    "upstream_issue": "https://github.com/python/cpython/issues/144984",
+    "upstream_pull_request": "https://github.com/python/cpython/pull/144992",
+    "upstream_commit": "e6b9a1406980fbb1d4032eca9cc0b4f8f252b716",
+    "source_sha256": "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0",
+    "patched_source_sha256": "1c3cf2ee6dfa568cf833742ad786880f4816042705689a116a4f308b7a9d95f2",
+    "patch_sha256": "10999b7171ce016e249c47c7f12d562f05a28aadf17791d61664090928f736a2",
+    "scope": "Backports only Modules/pyexpat.c from the upstream fix; no CPython tests or other files are changed."
+  },
+  "static_pins_sha256": "006302dbd521a2e8d9c300bdc9a6908b7b201fdfa3ec68aba561289a2d6b7b22",
+  "scope": "Original strict consumer-cleanup backport and historical two failures per linkage remain the comparison oracle; separate unchanged two semantic tests per linkage. Candidate outcomes pending. All target execution held."
+}

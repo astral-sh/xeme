@@ -1,0 +1,9 @@
+{
+  "source_commit": "410f7608405f9ffd46697fa380b120b86496f771",
+  "pre_rebase_commit": "bc8f8c0096f3ce9e2fb13b7f8c7201472845c127",
+  "stack_base": "01566fb8e7f7e765d4e6a45b6ad063beb2421a45",
+  "all78_compiled_source_files_exact": true,
+  "runtime_selected": false,
+  "normal_source_sha256": "c428d62aa77d92493e7d4654bd0a1b3be128ca1228976929e0d93985c31bf6df",
+  "normal_build_binding_sha256": "7d78bc923c9da5b21c51b0887d40be9a41032e40f05a1775f800b81cc095aab8"
+}

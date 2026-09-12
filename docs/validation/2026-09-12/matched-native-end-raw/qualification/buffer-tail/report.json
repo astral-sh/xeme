@@ -1,0 +1,378 @@
+{
+  "status": "complete",
+  "scope": "Twelve separate supplemental test_nsalloc_parse_buffer continuations. Exactly the existing two second-empty-call allocation-result assertions become an unconstrained status/error/counter observation; stdio include added. Every API call, earlier assertion and remaining tail assertion unchanged. Original4740 and prior12 untouched; no retry or fixed OOM controls changed.",
+  "preparation_sha256": "49875a548576fb09c60da9bb971ce27d7492005784b66d898ff675a2fcb5af6a",
+  "controller_sha256": "f1f5a2eb275e1c93fe195ec816796f8b1d9f5d0b8086475d5e9f81df74429a22",
+  "scripts_sha256": "e69a901b1cbf75a49761fc0f0da322792c94b3b5c4f4e106080dc1fa7df46954",
+  "runtime_commit": null,
+  "base_commit": "008d818237fe0d6f8c04a000a98ad69ab5780ceb",
+  "candidate_patch_sha256": "1df8e708c774f958c32ded7b484849f41a86ed8c299476bc36a91f54fc124455",
+  "runtime_checks": [
+    {
+      "argv": [
+        "/usr/bin/git",
+        "--no-optional-locks",
+        "-C",
+        "/home/dev-user/code/oss/oriole-matched-native-end-raw",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0,
+      "reaped": true,
+      "stdout": "008d818237fe0d6f8c04a000a98ad69ab5780ceb\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "--no-optional-locks",
+        "-C",
+        "/home/dev-user/code/oss/oriole-matched-native-end-raw",
+        "diff",
+        "--no-ext-diff",
+        "--binary",
+        "008d818237fe0d6f8c04a000a98ad69ab5780ceb",
+        "--",
+        "Cargo.lock",
+        "Cargo.toml",
+        "benchmarks/inprocess/Cargo.lock",
+        "benchmarks/inprocess/Cargo.toml",
+        "crates/oriole/Cargo.toml",
+        "crates/oriole/examples/frame_coverage.rs",
+        "crates/oriole/src/accounting.rs",
+        "crates/oriole/src/active.rs",
+        "crates/oriole/src/arena.rs",
+        "crates/oriole/src/context_text_tests.rs",
+        "crates/oriole/src/dtd.rs",
+        "crates/oriole/src/dtd/attlist.rs",
+        "crates/oriole/src/dtd/composition.rs",
+        "crates/oriole/src/dtd/grammar.rs",
+        "crates/oriole/src/dtd/semantic.rs",
+        "crates/oriole/src/dtd_tables.rs",
+        "crates/oriole/src/encoding.rs",
+        "crates/oriole/src/lexical.rs",
+        "crates/oriole/src/lib.rs",
+        "crates/oriole/src/names.rs",
+        "crates/oriole/src/recycling.rs",
+        "crates/oriole/src/tag.rs",
+        "crates/oriole/src/text.rs",
+        "crates/oriole/src/value.rs",
+        "crates/oriole/src/value_lexer.rs",
+        "crates/oriole/tests/adapter_frame.rs",
+        "crates/oriole/tests/allocation.rs",
+        "crates/oriole/tests/amplification.rs",
+        "crates/oriole/tests/attribute_entities.rs",
+        "crates/oriole/tests/conditional.rs",
+        "crates/oriole/tests/declaration_tokens.rs",
+        "crates/oriole/tests/diagnostics.rs",
+        "crates/oriole/tests/encodings.rs",
+        "crates/oriole/tests/entity_depth.rs",
+        "crates/oriole/tests/event_output.rs",
+        "crates/oriole/tests/external_grammar.rs",
+        "crates/oriole/tests/external_headers.rs",
+        "crates/oriole/tests/external_limits.rs",
+        "crates/oriole/tests/external_values.rs",
+        "crates/oriole/tests/foreign_dtd.rs",
+        "crates/oriole/tests/malformed_dtd.rs",
+        "crates/oriole/tests/missing_parameters.rs",
+        "crates/oriole/tests/multibyte.rs",
+        "crates/oriole/tests/name_rules.rs",
+        "crates/oriole/tests/parameter_values.rs",
+        "crates/oriole/tests/parser.rs",
+        "crates/oriole/tests/positions.rs",
+        "crates/oriole/tests/prolog.rs",
+        "crates/oriole/tests/raw_tokens.rs",
+        "crates/oriole/tests/recycling.rs",
+        "crates/oriole/tests/reparse_deferral.rs",
+        "crates/oriole/tests/text_coalescing.rs",
+        "crates/oriole_cli/Cargo.toml",
+        "crates/oriole_cli/src/main.rs",
+        "crates/oriole_expat/Cargo.toml",
+        "crates/oriole_expat/README.md",
+        "crates/oriole_expat/src/content_model.rs",
+        "crates/oriole_expat/src/context_text_tests.rs",
+        "crates/oriole_expat/src/lib.rs",
+        "crates/oriole_expat/src/tests.rs",
+        "crates/oriole_expat/tests/memory.rs",
+        "crates/oriole_storage/Cargo.toml",
+        "crates/oriole_storage/src/allocator.rs",
+        "crates/oriole_storage/src/hashing.rs",
+        "crates/oriole_storage/src/lib.rs",
+        "crates/oriole_storage/src/queue.rs",
+        "crates/oriole_storage/src/shared.rs",
+        "crates/oriole_storage/src/string.rs",
+        "crates/oriole_storage/src/tests.rs",
+        "crates/oriole_storage/src/tracking.rs",
+        "crates/oriole_storage/src/try_lock.rs",
+        "fuzz/Cargo.lock",
+        "fuzz/Cargo.toml",
+        "include/expat.h",
+        "tests/c/UPSTREAM-NOTICES.txt",
+        "tests/c/adversarial.c",
+        "tests/c/allocations.c",
+        "tests/c/integration.c"
+      ],
+      "exit": 0,
+      "reaped": true,
+      "stdout": "diff --git a/crates/oriole/src/lib.rs b/crates/oriole/src/lib.rs\nindex bbdaeb5..ed7e389 100644\n--- a/crates/oriole/src/lib.rs\n+++ b/crates/oriole/src/lib.rs\n@@ -1882,7 +1882,7 @@ impl Parser {\n                 .expect(\"retained native raw start\");\n             let end = offset.checked_add(raw.count.get()).expect(\"native raw end\");\n             let bytes = context.get(offset..end).expect(\"retained native raw range\");\n-            // Only this validated Text span is UTF-8. A later feed may have\n+            // Only this validated native span is UTF-8. A later feed may have\n             // moved the context to separate storage with an invalid suffix.\n             return Some(std::str::from_utf8(bytes).expect(\"native raw UTF-8\"));\n         }\n@@ -2358,6 +2358,31 @@ impl Parser {\n             }\n             self.account_source(end)?;\n             let position = self.source().position(end);\n+            if matched_end.is_some()\n+                && output.c_text_context\n+                && self.input_context.is_some()\n+                && !self.seen_doctype\n+                && !self.foreign_dtd\n+                && self.shared_tables.get().is_none()\n+                && self\n+                    .stack\n+                    .last()\n+                    .is_some_and(|element| element.namespace_scope.is_none())\n+                && let Some(frame) = output.frame.as_deref_mut()\n+            {\n+                // Matching proves native UTF-8 spelling and a nonempty range.\n+                // Keep the existing detached name; raw markup stays in context.\n+                self.prepare_end_frame(frame);\n+                self.native_raw = Some(NativeRawRange {\n+                    start: position.byte_index,\n+                    count: NonZeroUsize::new(end).expect(\"nonempty matched End\"),\n+                });\n+                // Accounting above is complete and name detachment allocates\n+                // nothing. Commit ordinary Unicode coordinates before delivery.\n+                self.consume(end)?;\n+                frame.publish(position);\n+                continue;\n+            }\n             let mut token = std::mem::replace(\n                 &mut self.token_scratch,\n                 lexical::Buffer::new_in(self.allocator),\n@@ -5176,12 +5201,125 @@ mod native_raw_context_tests {\n         }\n     }\n \n+    #[test]\n+    fn matched_native_end_raw_keeps_owned_names_and_mode_boundaries() {\n+        for (opening, closing, separator, scoped) in [\n+            (\"<\u00e9>\", \"</\u00e9>\", None, false),\n+            (\"<\u00e9>\", \"</\u00e9 >\", None, false),\n+            (\"<\u00e9>\", \"</\u00e9>\", Some('|'), false),\n+            (\"<\u00e9 xmlns='urn'>\", \"</\u00e9>\", Some('|'), true),\n+        ] {\n+            for enabled in [false, true] {\n+                // Generic, C-context, and a foreign frame's owned fallback.\n+                for mode in 0..3 {\n+                    let mut parser = Parser::new(Config {\n+                        namespace_separator: separator,\n+                        ..Config::default()\n+                    });\n+                    if enabled {\n+                        parser.enable_input_context();\n+                    }\n+                    let input = format!(\"\\u{feff}<r>{opening}\\r{closing}\\n<z/></r>\");\n+                    parser.feed(input.as_bytes(), true).unwrap();\n+                    while let Some(event) = parser.next_event().unwrap() {\n+                        if matches!(event.kind, EventKind::Text(_)) {\n+                            break;\n+                        }\n+                    }\n+                    assert_eq!(parser.current_raw(), Some(\"\\r\"));\n+                    let raw_owner = (parser.current_raw.as_ptr(), parser.current_raw.capacity());\n+                    let scratch = (parser.token_scratch.as_ptr(), parser.token_scratch.len());\n+                    let name_owner = parser.stack.last().unwrap().name.value.as_ptr();\n+                    let mut foreign = Parser::new(Config::default());\n+                    let mut frame = if mode == 2 {\n+                        foreign.adapter_frame()\n+                    } else {\n+                        parser.adapter_frame()\n+                    };\n+                    let mut event = None;\n+                    if mode == 0 {\n+                        parser.next_event_for_adapter_into(&mut event, &mut frame)\n+                    } else {\n+                        parser.next_event_for_c_text_context_into(&mut event, &mut frame)\n+                    }\n+                    .unwrap()\n+                    .unwrap();\n+                    let (name, position) = if let Some(name) = frame.take_end_name() {\n+                        assert!(event.is_none());\n+                        (name, frame.position())\n+                    } else {\n+                        let event = event.take().unwrap();\n+                        let EventKind::EndElement { name } = event.kind else {\n+                            panic!(\"closing token must deliver End first\");\n+                        };\n+                        (name, event.position)\n+                    };\n+                    assert_eq!(name, if scoped { \"urn|\u00e9\" } else { \"\u00e9\" });\n+                    assert_eq!(name.as_ptr(), name_owner);\n+                    assert_eq!(\n+                        (position.byte_index, position.byte_count),\n+                        (input.find(closing).unwrap(), closing.len())\n+                    );\n+                    assert_eq!((position.line, position.column), (2, 0));\n+                    let consumed = parser.source().position(0);\n+                    assert_eq!(\n+                        (consumed.line, consumed.column),\n+                        (2, closing.chars().count())\n+                    );\n+                    let viewed = enabled && mode == 1 && !scoped && closing == \"</\u00e9>\";\n+                    assert_eq!(parser.native_raw.is_some(), viewed);\n+                    assert_eq!(parser.current_raw(), Some(closing));\n+                    if viewed {\n+                        assert_eq!(parser.current_raw.as_str(), \"\\r\");\n+                        assert_eq!(\n+                            (parser.current_raw.as_ptr(), parser.current_raw.capacity()),\n+                            raw_owner\n+                        );\n+                        assert_eq!(\n+                            (parser.token_scratch.as_ptr(), parser.token_scratch.len()),\n+                            scratch\n+                        );\n+                        let (context, start) = parser.input_context();\n+                        assert_eq!(\n+                            parser.current_raw().unwrap().as_ptr(),\n+                            context[position.byte_index - start..].as_ptr()\n+                        );\n+                    }\n+                    // Ordinary handoff drains namespace undo and the empty tag,\n+                    // then replaces the view with the final owned root End.\n+                    while parser.next_event().unwrap().is_some() {}\n+                    assert!(parser.native_raw.is_none());\n+                    assert_eq!(parser.current_raw(), Some(\"</r>\"));\n+                    assert_eq!(parser.source().position(0).line, 3);\n+                    if mode == 2 {\n+                        foreign.finish_adapter_frame(frame);\n+                    } else {\n+                        parser.finish_adapter_frame(frame);\n+                    }\n+                }\n+            }\n+        }\n+    }\n+\n     #[test]\n     fn native_raw_retention_survives_compaction_and_invalid_context_suffixes() {\n         let text = format!(\"{}x\", \"\u20ac\".repeat(1333));\n+        let end_name = \"\u00e9\".repeat(2050);\n+        let end_tag = format!(\"</{end_name}>\");\n         let mut unaligned = false;\n-        for padding in 0..3 {\n-            let input = format!(\"<r>{}{}<n/>{text}\", \"\u20ac\".repeat(23_000), \"x\".repeat(padding));\n+        for case in 0..6 {\n+            let padding = case % 3;\n+            let tail = if case < 3 {\n+                text.clone()\n+            } else {\n+                format!(\"<{end_name}>{end_tag}\")\n+            };\n+            let raw_text = if case < 3 {\n+                text.as_str()\n+            } else {\n+                end_tag.as_str()\n+            };\n+            let input = format!(\"<r>{}{}<n/>{tail}\", \"\u20ac\".repeat(23_000), \"x\".repeat(padding));\n             for suffix in [b\"\\xff\".as_slice(), b\"\\xc3\"] {\n                 let mut parser = Parser::new(Config::default());\n                 parser.enable_input_context();\n@@ -5194,7 +5332,7 @@ mod native_raw_context_tests {\n                     .is_some()\n                 {}\n                 let raw = parser.native_raw.unwrap();\n-                assert_eq!(parser.current_raw(), Some(text.as_str()));\n+                assert_eq!(parser.current_raw(), Some(raw_text));\n                 // A completed frame can be cleared without discarding raw.\n                 assert!(!frame.is_active());\n                 parser.feed(b\"\", false).unwrap();\n@@ -5206,14 +5344,14 @@ mod native_raw_context_tests {\n                 unaligned |= physical_extra != 0;\n                 parser.feed(suffix, false).unwrap();\n                 assert!(std::str::from_utf8(parser.input_context().0).is_err());\n-                assert_eq!(parser.current_raw(), Some(text.as_str()));\n+                assert_eq!(parser.current_raw(), Some(raw_text));\n                 assert_ne!(\n                     parser.input_context().0.as_ptr(),\n                     parser.sources[0].text.as_bytes().as_ptr()\n                 );\n                 if suffix == b\"\\xc3\" {\n                     parser.feed(b\"\\xa9</r>\", true).unwrap();\n-                    assert_eq!(parser.current_raw(), Some(text.as_str()));\n+                    assert_eq!(parser.current_raw(), Some(raw_text));\n                     parser\n                         .next_event_for_c_text_context_into(&mut event, &mut frame)\n                         .unwrap()\n@@ -5223,7 +5361,7 @@ mod native_raw_context_tests {\n                     while parser.next_event().unwrap().is_some() {}\n                 } else {\n                     assert!(parser.next_event().is_err());\n-                    assert_eq!(parser.current_raw(), Some(text.as_str()));\n+                    assert_eq!(parser.current_raw(), Some(raw_text));\n                 }\n                 parser.finish_adapter_frame(frame);\n             }\ndiff --git a/crates/oriole/tests/allocation.rs b/crates/oriole/tests/allocation.rs\nindex dec571b..015069e 100644\n--- a/crates/oriole/tests/allocation.rs\n+++ b/crates/oriole/tests/allocation.rs\n@@ -958,11 +958,29 @@ fn native_raw_context_views_survive_every_feed_allocation_failure() {\n     fn workload(allocator: Allocator) -> Result<(), Error> {\n         // The first suffix forces native growth; the second forces Separate.\n         let large = [b'x'; 65_536];\n-        for suffix in [large.as_slice(), b\"\\xff\"] {\n+        for (input, raw, offset, suffix) in [\n+            (\n+                b\"<r>twelve-bytes\".as_slice(),\n+                \"twelve-bytes\",\n+                3,\n+                large.as_slice(),\n+            ),\n+            (\n+                b\"<r>twelve-bytes\".as_slice(),\n+                \"twelve-bytes\",\n+                3,\n+                b\"\\xff\".as_slice(),\n+            ),\n+            (b\"<r><n></n>\".as_slice(), \"</n>\", 6, large.as_slice()),\n+            (b\"<r><n></n>\".as_slice(), \"</n>\", 6, b\"\\xff\".as_slice()),\n+        ] {\n             let mut parser = Parser::try_new_in(Config::default(), allocator)?;\n             parser.enable_input_context();\n-            parser.feed(b\"<r>twelve-bytes\", false)?;\n+            parser.feed(input, false)?;\n             assert!(next_event(&mut parser)?.is_some());\n+            if raw == \"</n>\" {\n+                assert!(next_event(&mut parser)?.is_some());\n+            }\n             let mut frame = parser.adapter_frame();\n             let result = (|| -> Result<(), Error> {\n                 let mut event = None;\n@@ -972,20 +990,25 @@ fn native_raw_context_views_survive_every_feed_allocation_failure() {\n                         .next_event_for_c_text_context_into(&mut event, &mut frame)?\n                         .is_some()\n                 );\n-                assert_eq!(frame.native_text_range_for_c(), Some((3, 12)));\n-                assert_eq!(parser.current_raw(), Some(\"twelve-bytes\"));\n+                if raw == \"</n>\" {\n+                    assert!(event.is_none());\n+                    assert_eq!(frame.take_end_name().unwrap(), \"n\");\n+                } else {\n+                    assert_eq!(frame.native_text_range_for_c(), Some((3, 12)));\n+                }\n+                assert_eq!(parser.current_raw(), Some(raw));\n                 assert_eq!(\n                     CALLS.get(),\n                     before,\n-                    \"short native Text needs no raw allocation\"\n+                    \"native raw projection needs no token allocation\"\n                 );\n                 let (context, start) = parser.input_context();\n                 assert_eq!(\n                     parser.current_raw().unwrap().as_ptr(),\n-                    context[3 - start..].as_ptr()\n+                    context[offset - start..].as_ptr()\n                 );\n                 let fed = parser.feed(suffix, false);\n-                assert_eq!(parser.current_raw(), Some(\"twelve-bytes\"));\n+                assert_eq!(parser.current_raw(), Some(raw));\n                 if let Err(error) = fed {\n                     assert_eq!(error.kind, ErrorKind::NoMemory);\n                     let calls = CALLS.get();\ndiff --git a/crates/oriole_expat/src/tests.rs b/crates/oriole_expat/src/tests.rs\nindex 02e8d8c..272503e 100644\n--- a/crates/oriole_expat/src/tests.rs\n+++ b/crates/oriole_expat/src/tests.rs\n@@ -1869,12 +1869,38 @@ fn detached_end_charges_the_name_before_handlers_or_default_fallback() {\n \n #[test]\n fn detached_end_owner_survives_default_current_children_stop_and_reset_rejection() {\n+    unsafe fn check_raw_context(parser: XML_Parser, raw: &[u8]) {\n+        // SAFETY: Called during the guarded End callback; the checked window\n+        // is read completely before any nested parser operation.\n+        unsafe {\n+            let mut offset = 0;\n+            let mut size = 0;\n+            let context = XML_GetInputContext(parser, &mut offset, &mut size);\n+            assert!(!context.is_null() && offset >= 0 && size >= offset);\n+            assert!(raw.len() <= (size - offset) as usize);\n+            assert_eq!(\n+                std::slice::from_raw_parts(context.cast::<u8>().add(offset as usize), raw.len()),\n+                raw\n+            );\n+        }\n+    }\n     unsafe extern \"C\" fn held_end(data: *mut c_void, name: *const c_char) {\n         // SAFETY: Only scalar handles and independently owned name bytes cross\n         // nested callbacks; each State access ends before another C API call.\n         unsafe {\n             let parser = (*data.cast::<State>()).parser;\n             let before = CStr::from_ptr(name).to_bytes().to_vec();\n+            let raw = format!(\"</{}>\", std::str::from_utf8(&before).unwrap());\n+            let position = (\n+                XML_GetCurrentByteIndex(parser),\n+                XML_GetCurrentByteCount(parser),\n+                XML_GetCurrentLineNumber(parser),\n+                XML_GetCurrentColumnNumber(parser),\n+            );\n+            assert_eq!(position.0 as usize, before.len() + 9);\n+            assert_eq!(position.1 as usize, raw.len());\n+            assert_eq!((position.2, position.3), (2, 0));\n+            check_raw_context(parser, raw.as_bytes());\n             (*data.cast::<State>())\n                 .events\n                 .push(format!(\"held:{}\", std::str::from_utf8(&before).unwrap()));\n@@ -1891,13 +1917,22 @@ fn detached_end_owner_survives_default_current_children_stop_and_reset_rejection\n             assert_eq!(XML_StopParser(parser, 1), OK);\n             XML_DefaultCurrent(parser);\n             assert_eq!(CStr::from_ptr(name).to_bytes(), before);\n+            check_raw_context(parser, raw.as_bytes());\n+            assert_eq!(\n+                (\n+                    XML_GetCurrentByteIndex(parser),\n+                    XML_GetCurrentByteCount(parser),\n+                    XML_GetCurrentLineNumber(parser),\n+                    XML_GetCurrentColumnNumber(parser),\n+                ),\n+                position\n+            );\n         }\n     }\n-    for length in [1, 4097] {\n+    for name in [\"n\".to_owned(), \"\u00e9\".to_owned(), \"n\".repeat(4097)] {\n         // SAFETY: Input, State and both callback functions outlive synchronous use.\n         unsafe {\n-            let name = \"n\".repeat(length);\n-            let document = format!(\"<r><{name}></{name}><e/></r>\");\n+            let document = format!(\"\\u{feff}<r><{name}>\\r</{name}><e/></r>\");\n             let mut state = State::default();\n             let parser = configured(&mut state);\n             XML_SetEndElementHandler(parser, Some(held_end));\n@@ -1911,6 +1946,8 @@ fn detached_end_owner_survives_default_current_children_stop_and_reset_rejection\n                 format!(\"text:</{name}>\"),\n                 format!(\"text:</{name}>\")\n             ]));\n+            // Renew userdata after the inspection before callbacks write it.\n+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());\n             assert_eq!(XML_ResumeParser(parser), OK);\n             assert!(\n                 state\n",
+      "stderr": ""
+    }
+  ],
+  "commands": [
+    {
+      "label": "compile",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-gcc-13",
+        "-O1",
+        "-DXML_TESTING",
+        "-D_GNU_SOURCE",
+        "-I/tmp/oriole-matched-native-end-raw-buffer-tail/adapted",
+        "-I/tmp/oriole-matched-native-end-raw-buffer-tail/lib",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/acc_tests.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/alloc_tests.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/basic_tests.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/bridge.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/chardata.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/common.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/dummy.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/handlers.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/memcheck.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/minicheck.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/misc_tests.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/ns_tests.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/nsalloc_tests.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/runtests.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/adapted/structdata.c",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/liboriole_expat.so",
+        "-Wl,-rpath,/tmp/oriole-matched-native-end-raw-buffer-tail",
+        "-lm",
+        "-ldl",
+        "-o",
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/run01/runtests"
+      ],
+      "timeout_seconds": 120,
+      "start": 1789246381.7508452,
+      "outer_timed_out": false,
+      "pid": 13,
+      "exit": 0,
+      "descendant_cleanup": {
+        "status": "completed",
+        "signalled": [],
+        "reaped": []
+      },
+      "reaped": true,
+      "end": 1789246384.2637239,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "diagnostic",
+      "argv": [
+        "/tmp/oriole-matched-native-end-raw-buffer-tail/run01/runtests",
+        "--verbose"
+      ],
+      "timeout_seconds": 240,
+      "start": 1789246384.271539,
+      "outer_timed_out": false,
+      "pid": 46,
+      "exit": 0,
+      "descendant_cleanup": {
+        "status": "completed",
+        "signalled": [],
+        "reaped": []
+      },
+      "reaped": true,
+      "end": 1789246384.3092616,
+      "log_sha256": "9427771e8f80effbc085cccdd396a0422279c02d233e9b912b0d4d6ecf84347f"
+    }
+  ],
+  "commands_sha256": "deb963e0db8d1c884603956843277b446a3fdab1b62bfe7061dbe47a141132ac",
+  "original_before": true,
+  "library_sha256_before": "5ca9644b5d782a6beaae7a8b1ddd16045480d4566b7eb77e317c7ac25a2258fe",
+  "environment": {
+    "PATH": "/usr/bin:/bin",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "TMPDIR": "/tmp",
+    "ORIOLE_CHUNK_MASK": "63",
+    "ORIOLE_DEFERRAL_MASK": "3",
+    "ORIOLE_TEST_TIMEOUT": "3",
+    "ORIOLE_MEMORY_MIB": "1024",
+    "ORIOLE_RSS_MIB": "768",
+    "ORIOLE_SELECTED_TESTS": "test_nsalloc_parse_buffer"
+  },
+  "binary_sha256": "938210470045916676befc62d5b446d52dc39efcf93328bf25f37887e32ef0b4",
+  "results": [
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "outcome": "pass",
+      "code": 0
+    }
+  ],
+  "outcomes": {
+    "pass": 12
+  },
+  "selection_complete": true,
+  "library_origins": [
+    "/tmp/oriole-matched-native-end-raw-buffer-tail/liboriole_expat.so"
+  ],
+  "library_origin_verified": true,
+  "empty_buffer_observations": [
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    }
+  ],
+  "observation_selection_complete": true,
+  "all_diagnostic_contexts_passed": true,
+  "original_tree_unchanged_on_exit": true,
+  "library_sha256_after": "5ca9644b5d782a6beaae7a8b1ddd16045480d4566b7eb77e317c7ac25a2258fe",
+  "source_and_inputs_unchanged": true,
+  "staged_sources_unchanged": true
+}

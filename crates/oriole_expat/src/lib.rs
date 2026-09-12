@@ -1349,7 +1349,9 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterF
     loop {
         // SAFETY: Pending lexical fragments belong to a previously suspended event.
         unsafe {
-            drain_default_fragments(parser);
+            if !(*parser).default_pending.is_empty() {
+                drain_default_fragments(parser);
+            }
         }
         let mut event = None;
         // SAFETY: No references to parser fields escape this scope or cross

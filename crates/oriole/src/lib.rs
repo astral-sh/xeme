@@ -1896,8 +1896,17 @@ impl Parser {
         }
         Ok(())
     }
+    #[inline]
     fn account_source(&mut self, count: usize) -> Result<(), Error> {
         let bytes = self.source().accounting_bytes(count);
+        if bytes == 0 {
+            return Ok(());
+        }
+        self.account_source_bytes(bytes)
+    }
+
+    /// Charge a nonempty source delta before advancing its accounting cursor.
+    fn account_source_bytes(&mut self, bytes: usize) -> Result<(), Error> {
         if !self
             .expanded
             .account(bytes, self.fragment || self.sources.len() > 1, true)
@@ -1964,7 +1973,9 @@ impl Parser {
         // Encoding detection consumes a BOM without producing a text token.
         // Charge that prefix even for empty input or an incomplete next token.
         self.account_source(0)?;
-        if let Some((_, position)) = self.active_parameter_reference.take() {
+        if self.active_parameter_reference.is_some()
+            && let Some((_, position)) = self.active_parameter_reference.take()
+        {
             if self
                 .parameter_state
                 .get()

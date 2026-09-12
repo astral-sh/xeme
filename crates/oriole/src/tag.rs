@@ -1,6 +1,7 @@
 //! Resumable lexical boundaries shared by complete and incremental tag parsing.
 
 use oriole_storage::Vec;
+use wide::{i8x16, u8x16};
 
 use crate::names::is_xml_char;
 use crate::{ErrorKind, NameRules, RawAttribute};
@@ -280,7 +281,23 @@ fn literal_value_end(bytes: &[u8], quote: u8, literal_ascii: &mut bool) -> Optio
     let quotes = u64::from(quote) * ones;
     let mut offset = 0;
     loop {
-        if let Some(chunk) = bytes[offset..].first_chunk::<8>() {
+        if let Some(chunk) = bytes[offset..].first_chunk::<16>() {
+            let lanes = u8x16::new(*chunk).cast_signed();
+            // Negative lanes include every non-ASCII byte. All controls need
+            // the original normalization path; only the first stop matters.
+            let stops = (lanes.simd_lt(i8x16::splat(0x20))
+                | lanes.simd_eq(i8x16::splat(quote as i8))
+                | lanes.simd_eq(i8x16::splat(b'<' as i8))
+                | lanes.simd_eq(i8x16::splat(b'&' as i8)))
+            .to_bitmask();
+            if stops == 0 {
+                offset += 16;
+                continue;
+            }
+            // Preserve the scalar delimiter/uncertainty ordering below while
+            // skipping the proven prefix without overlapping word probes.
+            offset += stops.trailing_zeros() as usize;
+        } else if let Some(chunk) = bytes[offset..].first_chunk::<8>() {
             let word = u64::from_le_bytes(*chunk);
             let control = word.wrapping_sub(0x2020_2020_2020_2020) & !word;
             let quote = word ^ quotes;
@@ -469,6 +486,80 @@ mod tests {
         std::vec::Vec<[usize; 4]>,
         Option<(ErrorKind, &'static str, usize)>,
     );
+
+    #[test]
+    fn vector_literal_prefix_matches_byte_oracle_at_every_lane_and_tail() {
+        fn check(bytes: &[u8], quote: u8) {
+            let end = bytes
+                .iter()
+                .position(|byte| *byte == quote || *byte == b'<');
+            let prefix = &bytes[..end.unwrap_or(bytes.len())];
+            for initially_literal in [false, true] {
+                let mut literal_ascii = initially_literal;
+                assert_eq!(
+                    literal_value_end(bytes, quote, &mut literal_ascii),
+                    end,
+                    "{bytes:?} quote={quote} initially_literal={initially_literal}"
+                );
+                assert_eq!(
+                    literal_ascii,
+                    initially_literal
+                        && prefix
+                            .iter()
+                            .all(|byte| byte.is_ascii() && *byte >= b' ' && *byte != b'&'),
+                    "{bytes:?} quote={quote} initially_literal={initially_literal}"
+                );
+            }
+        }
+
+        for quote in *b"'\"" {
+            for byte in 0..=u8::MAX {
+                for lane in 0..32 {
+                    // Even lane zero has a full vector, with ignored invalid
+                    // bytes after the eventual quote; later lanes skip a block.
+                    let mut bytes = [b'x'; 64];
+                    bytes[lane] = byte;
+                    bytes[48] = quote;
+                    bytes[49] = 0xff;
+                    bytes[50] = b'&';
+                    check(&bytes, quote);
+                }
+            }
+            for boundary in [8, 16, 32] {
+                for uncertain in [b'&', b'\t', b'\r', b'\n', 0, 0xff] {
+                    for delimiter in [quote, b'<'] {
+                        for delimiter_first in [false, true] {
+                            let mut bytes = [b'x'; 64];
+                            let pair = if delimiter_first {
+                                [delimiter, uncertain]
+                            } else {
+                                [uncertain, delimiter]
+                            };
+                            bytes[boundary - 1..=boundary].copy_from_slice(&pair);
+                            bytes[48] = quote;
+                            check(&bytes, quote);
+                        }
+                    }
+                }
+            }
+            for prefix in [0, 16, 32] {
+                for tail in 0..32 {
+                    let mut bytes = vec![b'x'; prefix + tail];
+                    check(&bytes, quote);
+                    if let Some(last) = bytes.last_mut() {
+                        *last = quote;
+                        check(&bytes, quote);
+                    }
+                    for special in [b'<', b'&', b'\t', 0xff] {
+                        if let Some(last) = bytes.last_mut() {
+                            *last = special;
+                            check(&bytes, quote);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     #[test]
     fn literal_values_match_separate_checks_at_word_and_unicode_boundaries() {

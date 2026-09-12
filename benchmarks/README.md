@@ -1,7 +1,20 @@
 # Benchmarks
 
+The [quoted-attribute lane-mask study](../docs/validation/2026-09-12/attribute-lane-masks/)
+records selected `91038723` and the separately rejected compact-owner experiment.
+Confirmation observes 2.39% less native real-input time and 1.60% less CPython time
+against LF, remaining 1.3886× and 1.1535× Expat. Five of 24 Python conditions meet
+the roughly 1.10× goal. The [project table](../README.md) uses only confirmation
+4 KiB/namespaces-off measurements: medians of seven process medians, with ratios
+computed separately as medians of paired ratios. All three native real-input,
+two generated and four Python confirmation regressions remain; generated time
+increases 3.08%, including entity cases of 7.37% and 10.04%. The separate initial
+epoch and rejected compact owner remain in the report. All five campaigns retain
+132 conditions and 39 adverse rows, with no pooled samples or medians. Before/during
+host observations and CPU0 affinity do not establish isolation or statistical significance.
+
 The [SIMD Text lane-mask study](../docs/validation/2026-09-12/text-lane-masks/)
-contains the current normal-build measurements and validation records. Confirmation
+contains the preceding LF source’s normal-build measurements and validation records. Confirmation
 observes 1.55% less native real-input time and 1.21% less CPython time against the
 preceding namespace runtime, remaining 1.4248× and 1.1745× Expat. Every regression,
 the separate initial LF epoch and the rejected fixed16 experiment remain recorded;

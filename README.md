@@ -16,16 +16,16 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole (normal) | Expat (normal) | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 46.037 ms | 28.757 ms | 1.610× |
-| Wayland protocol | 1.063 ms | 1.068 ms | 0.997× |
-| Maven POM | 0.772 ms | 0.436 ms | 1.789× |
-| Batik SVG | 0.129 ms | 0.134 ms | 0.960× |
-| GTK UI | 0.320 ms | 0.215 ms | 1.481× |
-| DocBook XSL | 0.256 ms | 0.186 ms | 1.378× |
+| Vulkan registry | 44.647 ms | 29.000 ms | 1.549× |
+| Wayland protocol | 1.010 ms | 1.071 ms | 0.943× |
+| Maven POM | 0.763 ms | 0.442 ms | 1.726× |
+| Batik SVG | 0.130 ms | 0.133 ms | 0.976× |
+| GTK UI | 0.305 ms | 0.215 ms | 1.416× |
+| DocBook XSL | 0.253 ms | 0.186 ms | 1.363× |
 
-These [native measurements](docs/validation/2026-09-12/text-lane-masks/) use SIMD Text scanning with the selected sparse namespace storage and fused attribute scanner on original XML from six pinned projects, 4 KiB chunks and namespaces disabled. They come from a monitored confirmation window on a shared Linux AMD EPYC-Milan host; CPU affinity does not establish isolation. Oriole uses normal O3/ThinLTO with Ohm rustc 1.98.1-dev; Expat 2.8.4 uses GCC 13.3 O3 without LTO. Times are medians of seven process medians; ratios are medians of paired ratios.
+These [native measurements](docs/validation/2026-09-12/attribute-lane-masks/) use the selected quoted-attribute SIMD classifier with the LF Text scanner on original XML from six pinned projects, 4 KiB chunks and namespaces disabled. They come from a monitored confirmation window on a shared Linux AMD EPYC-Milan host, with elapsed work pinned to CPU0; affinity does not establish isolation. Oriole uses normal O3/ThinLTO and one codegen unit with Ohm rustc 1.98.1-dev; Expat 2.8.4 uses GCC 13.3 O3 without LTO. Times are medians of seven process medians; ratios are medians of paired ratios.
 
-Across their respective 24 real-project conditions, confirmation takes **1.42× Expat's native time and 1.17× its CPython time**, observed reductions of 1.55% and 1.21% against the preceding namespace runtime. Both aggregates remain above the roughly 1.10× target; four of 24 CPython conditions meet it. Native improves in 22 conditions and CPython in 23; the [full report](docs/validation/2026-09-12/text-lane-masks/) retains every regression, the separate initial measurements and the rejected fixed-width SIMD experiment. Both LF measurement epochs show modest aggregate gains; this is not a statistical-significance claim.
+Across their respective 24 real-project conditions, confirmation takes **1.39× Expat's native time and 1.15× its CPython time**, observed reductions of 2.39% and 1.60% against the preceding LF runtime. Both aggregates remain above the roughly 1.10× target; five of 24 CPython conditions meet it. Native improves in 21 conditions and CPython in 20. Generated time increases 3.08%, including entity regressions of 7.37% and 10.04%; the [full report](docs/validation/2026-09-12/attribute-lane-masks/) retains every regression, separate initial measurements and the rejected compact-owner experiment. Both attribute epochs show modest aggregate gains on real-project inputs; this is not a statistical-significance claim.
 
 ThinLTO is the default. The earlier [C allocator study](benchmarks/results/2026-09-11/c-allocators/) found less than 0.2% aggregate time change with jemalloc or mimalloc and higher peak resident memory, so the C allocator default remains unchanged.
 

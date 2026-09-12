@@ -23,6 +23,7 @@ use oriole_storage::{
     try_insert, try_push, try_set_insert,
 };
 use std::fmt;
+use std::num::NonZeroUsize;
 use std::sync::OnceLock;
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -331,11 +332,14 @@ pub enum EventKind {
     },
 }
 
+/// Owned namespace undo records, freed when their declaring element closes.
+type NamespaceBindings = Vec<(String, Option<String>)>;
+
 #[derive(Debug)]
 struct Element {
     name: ElementName,
     raw_encoding: Option<oriole_storage::Box<Vec<lexical::NameEncoding>>>,
-    bindings: Vec<(String, Option<String>)>,
+    namespace_scope: Option<NonZeroUsize>,
 }
 
 /// Keep raw matching and a different expanded spelling in one stack owner.
@@ -548,6 +552,9 @@ pub struct Parser {
     sources: Vec<Source>,
     pending: Queue<PendingEvent>,
     stack: Vec<Element>,
+    // Nonempty undo blocks correspond in order to the declaring elements in
+    // `stack`. Elements without declarations leave their ancestors' blocks alone.
+    namespace_scopes: Vec<NamespaceBindings>,
     namespaces: HashMap<String, String>,
     tables: DtdTables,
     shared_tables: OnceLock<Shared<oriole_storage::TryLock<DtdTables>>>,
@@ -636,6 +643,7 @@ impl Parser {
             namespaces,
             pending: Queue::new_in(allocator),
             stack: Vec::new_in(allocator),
+            namespace_scopes: Vec::new_in(allocator),
             tables,
             shared_tables: OnceLock::new(),
             parameter_mode: 0,
@@ -2277,7 +2285,7 @@ impl Parser {
                             && self
                                 .stack
                                 .last()
-                                .is_some_and(|element| element.bindings.is_empty())
+                                .is_some_and(|element| element.namespace_scope.is_none())
                             && let Some(frame) = output.frame.as_deref_mut()
                         {
                             self.prepare_end_frame(frame);
@@ -3350,18 +3358,28 @@ impl Parser {
             };
             (value, 0)
         };
-        try_push(
-            &mut self.stack,
-            Element {
-                name: ElementName {
-                    value: stack_name,
-                    raw_start,
-                    expanded_end,
-                },
-                raw_encoding,
-                bindings,
+        // Reserve both slots before moving either owner. An error still drops
+        // the local undo block without restoring the already updated map.
+        self.stack.try_reserve(1).map_err(AllocError::from)?;
+        let namespace_scope = if bindings.is_empty() {
+            None
+        } else {
+            self.namespace_scopes
+                .try_reserve(1)
+                .map_err(AllocError::from)?;
+            self.namespace_scopes.push(bindings);
+            // The successful reserve bounds the length; after push it is nonzero.
+            NonZeroUsize::new(self.namespace_scopes.len())
+        };
+        self.stack.push(Element {
+            name: ElementName {
+                value: stack_name,
+                raw_start,
+                expanded_end,
             },
-        )?;
+            raw_encoding,
+            namespace_scope,
+        });
         self.emit(
             EventKind::StartElement {
                 name: expanded_name,
@@ -3519,7 +3537,7 @@ impl Parser {
             Element {
                 name: stack_name,
                 raw_encoding: None,
-                bindings: Vec::new_in(self.allocator),
+                namespace_scope: None,
             },
         )?;
         if token.ends_with("/>") {
@@ -3578,13 +3596,18 @@ impl Parser {
             .stack
             .pop()
             .ok_or_else(|| self.err(ErrorKind::TagMismatch, "unexpected end tag"))?;
+        // Detach before any fallible emission or restoration. Errors must drop
+        // the unprocessed undo records, not leave an orphaned parser-owned block.
+        let bindings = element
+            .namespace_scope
+            .map(|scope| self.take_namespace_scope(scope));
         self.emit(
             EventKind::EndElement {
                 name: element.name.into_event_name(),
             },
             position,
         )?;
-        for (prefix, previous) in element.bindings.into_iter().rev() {
+        for (prefix, previous) in bindings.into_iter().flatten().rev() {
             match previous {
                 Some(uri) => {
                     try_insert(&mut self.namespaces, prefix.try_clone()?, uri)?;
@@ -3606,6 +3629,21 @@ impl Parser {
         Ok(())
     }
 
+    /// Detach the closing element's top block while bounding empty-pool retention.
+    fn take_namespace_scope(&mut self, scope: NonZeroUsize) -> NamespaceBindings {
+        debug_assert_eq!(scope.get(), self.namespace_scopes.len());
+        let bindings = self
+            .namespace_scopes
+            .pop()
+            .expect("declaring element owns the top namespace scope");
+        if self.namespace_scopes.is_empty()
+            && self.namespace_scopes.capacity() > 4096 / size_of::<NamespaceBindings>()
+        {
+            self.namespace_scopes = Vec::new_in(self.allocator);
+        }
+        bindings
+    }
+
     /// Move a matched native End name out without an Event or namespace undo.
     fn prepare_end_frame(&mut self, frame: &mut AdapterFrame) {
         debug_assert!(self.pending.is_empty() && !frame.is_active());
@@ -3614,7 +3652,7 @@ impl Parser {
             .stack
             .pop()
             .expect("matched end has an opening element");
-        debug_assert!(element.bindings.is_empty() && element.raw_encoding.is_none());
+        debug_assert!(element.namespace_scope.is_none() && element.raw_encoding.is_none());
         frame.prepare_end(element.name.into_event_name());
         if self.stack.is_empty() {
             self.closed_root = true;
@@ -4415,6 +4453,48 @@ mod matching_end_tests {
             parser.next_event().unwrap().unwrap().kind,
             EventKind::EndElement { .. }
         ));
+    }
+}
+
+#[cfg(test)]
+mod namespace_scope_tests {
+    use super::*;
+
+    #[test]
+    fn large_namespace_scope_metadata_is_released_while_root_stays_open() {
+        let mut parser = Parser::new(Config {
+            namespace_separator: Some('|'),
+            ..Config::default()
+        });
+        parser.feed(b"<r>", false).unwrap();
+        while parser.next_event().unwrap().is_some() {}
+        assert_eq!(parser.namespace_scopes.capacity(), 0);
+
+        // Exceed the retention allowance without closing the ordinary root.
+        for _ in 0..128 {
+            parser.feed(b"<n xmlns:p='u'>", false).unwrap();
+            while parser.next_event().unwrap().is_some() {}
+        }
+        assert!(parser.namespace_scopes.capacity() > 4096 / size_of::<NamespaceBindings>());
+        for _ in 0..128 {
+            parser.feed(b"</n>", false).unwrap();
+            while parser.next_event().unwrap().is_some() {}
+        }
+        assert_eq!(parser.stack.len(), 1);
+        assert!(!parser.closed_root);
+        assert!(!parser.namespaces.contains_key("p"));
+        assert_eq!(parser.namespace_scopes.capacity(), 0);
+
+        // A later small scope remains reusable, with all binding storage gone.
+        parser.feed(b"<e xmlns:p='v'/>", false).unwrap();
+        while parser.next_event().unwrap().is_some() {}
+        assert!(parser.namespace_scopes.is_empty());
+        assert!(parser.namespace_scopes.capacity() > 0);
+        assert!(parser.namespace_scopes.capacity() <= 4096 / size_of::<NamespaceBindings>());
+        assert!(!parser.namespaces.contains_key("p"));
+        parser.feed(b"</r>", true).unwrap();
+        while parser.next_event().unwrap().is_some() {}
+        assert!(parser.is_finished());
     }
 }
 

@@ -205,6 +205,92 @@ fn namespace_identity_frames_follow_default_binding_scope() {
 }
 
 #[test]
+fn sparse_namespace_scopes_preserve_shadowing_and_event_order() {
+    let body = "<p:n xmlns:p='two'><leaf/><e xmlns=''><leaf/></e></p:n><p:s/><e xmlns:p='three'/><p:t/></r>";
+    let expected = [
+        "ns+  outer",
+        "ns+ p one",
+        "start outer|r",
+        "ns+ p two",
+        "start two|n",
+        "start outer|leaf",
+        "end outer|leaf",
+        "ns+  ",
+        "start e",
+        "start leaf",
+        "end leaf",
+        "end e",
+        "ns- ",
+        "end two|n",
+        "ns- p",
+        "start one|s",
+        "end one|s",
+        "ns+ p three",
+        "start outer|e",
+        "end outer|e",
+        "ns- p",
+        "start one|t",
+        "end one|t",
+        "end outer|r",
+        "ns- p",
+        "ns- ",
+    ];
+    for root in [
+        "<r xmlns='outer' xmlns:p='one'>",
+        "<!DOCTYPE r [<!ATTLIST r xmlns CDATA 'outer' xmlns:p CDATA 'one'>]><r>",
+    ] {
+        let xml = format!("{root}{body}");
+        for utf16 in [false, true] {
+            let input = if utf16 {
+                [0xfeff]
+                    .into_iter()
+                    .chain(xml.encode_utf16())
+                    .flat_map(u16::to_le_bytes)
+                    .collect::<std::vec::Vec<_>>()
+            } else {
+                xml.as_bytes().to_vec()
+            };
+            for chunk in [1, input.len()] {
+                let config = Config {
+                    namespace_separator: Some('|'),
+                    ..Config::default()
+                };
+                let mut parser = Parser::new(config.clone());
+                let mut records = std::vec::Vec::new();
+                for (index, bytes) in input.chunks(chunk).enumerate() {
+                    parser
+                        .feed(bytes, (index + 1) * chunk >= input.len())
+                        .unwrap();
+                    while let Some(event) = parser.next_event().unwrap() {
+                        let record = match event.kind {
+                            EventKind::StartNamespace { prefix, uri } => format!(
+                                "ns+ {} {}",
+                                prefix.as_deref().unwrap_or(""),
+                                uri.as_deref().unwrap_or("")
+                            ),
+                            EventKind::StartElement { name, .. } => format!("start {name}"),
+                            EventKind::EndElement { name } => format!("end {name}"),
+                            EventKind::EndNamespace { prefix } => {
+                                format!("ns- {}", prefix.as_deref().unwrap_or(""))
+                            }
+                            _ => continue,
+                        };
+                        records.push(record);
+                    }
+                }
+                assert!(parser.is_finished());
+                assert_eq!(records, expected, "{root} {utf16} {chunk}");
+                assert_eq!(
+                    collect(&input, chunk, config.clone(), true).0,
+                    collect(&input, chunk, config, false).0,
+                    "{root} {utf16} {chunk}"
+                );
+            }
+        }
+    }
+}
+
+#[test]
 fn namespace_plans_preserve_errors_and_owned_expansions() {
     for input in [
         "<r xmlns:p='urn:p'><p:n a='v'/><p:n p:a='v'/><plain a='v'/></r>",
@@ -419,6 +505,10 @@ fn detached_end_frames_keep_native_and_namespace_undo_boundaries() {
         ("<r><n></n ></r >", vec![]),
         ("<r xmlns:p='u'><p:n></p:n></r>", vec!["u|n"]),
         ("<r xmlns='u'><n></n></r>", vec!["u|n"]),
+        (
+            "<r xmlns:p='one'><p:n xmlns:p='two'><p:c></p:c></p:n><p:c></p:c></r>",
+            vec!["two|c", "one|c"],
+        ),
         ("<!DOCTYPE r><r><n></n></r>", vec![]),
     ] {
         for utf16 in [false, true] {

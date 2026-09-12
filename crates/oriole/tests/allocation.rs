@@ -488,6 +488,9 @@ fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
     check_allocations(|allocator| {
         frames(allocator, None, b"<r>inline\nabcdefghijklmnopqrstuvwxyz1234567890<n a='first' b='value'/><![CDATA[abcdefghijklmnopqrstuvwxyz1234567890]]><n a='second' b='new'/>fallback\r\n<n a='literal' b='other'/><n a='&amp;'/><n a='last'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/>abcdefghijklmnopqrstuvwxyz1234567890</r>")?;
         frames(allocator, Some('|'), b"<r xmlns:p='urn:p'><p:n a='first'/><p:n a='next'/><n xmlns='urn:default'><n a='value'/></n><p:n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><p:n a='last'/></r>")?;
+        // Grow both stacks with live undo blocks, then restore shadowed prefixes.
+        // Four root declarations also exercise Start publication after commitment.
+        frames(allocator, Some('|'), b"<r xmlns:p='one' xmlns:q='q' xmlns:s='s' xmlns:t='t'><n xmlns:p='two'><n xmlns:p='three'><n xmlns:p='four'><n xmlns:p='five'><n xmlns:p='six'><p:leaf></p:leaf><e xmlns:p='empty'/><p:leaf/></n></n></n></n></n><p:leaf/></r>")?;
         // More live prefixed names than cache slots force fresh packed owners;
         // grow the spelling while the expansion scratch is returned for reuse.
         frames(allocator, Some('|'), b"<r xmlns:p='urn:example'><p:node><p:node><p:node><p:longer a='v'/></p:node></p:node></p:node><p:node/></r>")?;

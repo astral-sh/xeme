@@ -16,7 +16,10 @@ import sys
 import tarfile
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
+
+import pbs_target
 
 DIRECTORY = Path(__file__).resolve().parent
 REVISION = "a4553880293fe9d1bb62747d34ab0e5121d3554f"
@@ -34,13 +37,24 @@ def validate_archive_recipe() -> None:
             for target in node.targets
         )
     )
-    for cargo in (["cargo"], ["cargo", "+ohm"]):
+    for cargo, cargo_args in (
+        (["cargo"], []),
+        (["cargo", "+ohm"], ["-Zohm-defaults=no"]),
+    ):
         # Evaluate only the reviewed recipe's command-list expression.
         arguments = eval(
             compile(ast.Expression(command), "archive-command", "eval"),
-            {"cargo": cargo, "TARGET": "x86_64-unknown-linux-gnu"},
+            {
+                "cargo": cargo,
+                "args": SimpleNamespace(cargo_arg=cargo_args),
+                "TARGET": "x86_64-unknown-linux-gnu",
+            },
         )
-        assert arguments[: len(cargo) + 1] == [*cargo, "rustc"]
+        assert arguments[: len(cargo) + len(cargo_args) + 1] == [
+            *cargo,
+            *cargo_args,
+            "rustc",
+        ]
         separator = arguments.index("--")
         cargo_arguments = arguments[:separator]
         assert "--lib" in cargo_arguments
@@ -268,6 +282,9 @@ def main() -> None:
             "format": 1,
             "pbs_revision": REVISION,
             "target": "x86_64-unknown-linux-gnu",
+            "rust_target": "x86_64-unknown-linux-gnu",
+            "target_cpu": None,
+            "rustflags": "-C relocation-model=pic -C panic=unwind",
             "files": {
                 name: hashlib.sha256(data).hexdigest() for name, data in files.items()
             },
@@ -376,6 +393,43 @@ def main() -> None:
                     pass
                 else:
                     raise AssertionError("unsupported build was accepted")
+            for target, target_cpu in pbs_target.TARGETS.items():
+                manifest.update(target=target, target_cpu=target_cpu)
+                manifest["rustflags"] = "-C relocation-model=pic -C panic=unwind" + (
+                    f" -C target-cpu={target_cpu}" if target_cpu else ""
+                )
+                (bundle / "manifest.json").write_text(json.dumps(manifest))
+                accepted = Environment()
+                install(accepted, "linux_x86_64", target, "3.12.13", "noopt")
+                installed = json.loads(
+                    accepted.copies["/build", "LICENSE.oriole-build.txt"]
+                )
+                pbs_target.validate(installed, target)
+                for key, value in [
+                    ("target", "other"),
+                    ("rust_target", "x86_64_v3-unknown-linux-gnu"),
+                    ("target_cpu", "native"),
+                    ("target_cpu", None if target_cpu else "x86-64-v3"),
+                    ("rustflags", manifest["rustflags"] + " -C target-feature=+avx2"),
+                ]:
+                    original = manifest[key]
+                    manifest[key] = value
+                    (bundle / "manifest.json").write_text(json.dumps(manifest))
+                    rejected = Environment()
+                    try:
+                        install(rejected, "linux_x86_64", target, "3.12.13", "noopt")
+                    except ValueError:
+                        pass
+                    else:
+                        raise AssertionError(f"mismatched {key} accepted")
+                    assert not rejected.copies and not rejected.commands
+                    manifest[key] = original
+            manifest.update(
+                target=pbs_target.RUST_TARGET,
+                target_cpu=None,
+                rustflags="-C relocation-model=pic -C panic=unwind",
+            )
+            (bundle / "manifest.json").write_text(json.dumps(manifest))
             (bundle / "expat.h").write_bytes(b"mismatched header")
             rejected = Environment()
             try:

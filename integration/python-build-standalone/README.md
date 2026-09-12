@@ -3,7 +3,8 @@
 This recipe overlays Oriole's static archive and public header in the CPython build
 container for [PBS revision `a4553880`](https://github.com/astral-sh/python-build-standalone/tree/a4553880293fe9d1bb62747d34ab0e5121d3554f).
 It is opt-in and initially supports CPython **3.12.13**, a Linux x86_64 host,
-the `x86_64-unknown-linux-gnu` target, and Docker builds of shared Python.
+the generic `x86_64-unknown-linux-gnu` target, an explicit
+`x86_64_v3-unknown-linux-gnu` opt-in, and Docker builds of shared Python.
 
 The ordinary Expat dependency still builds and remains in PBS's dependency cache.
 The overlay replaces it only inside the selected CPython build container. A phony
@@ -20,10 +21,53 @@ component installed:
 python3 integration/python-build-standalone/prepare.py --output /absolute/oriole-bundle
 ```
 
-For local Ohm development, add `--toolchain ohm` and set a separate
+For local Ohm development, add `--toolchain ohm --cargo-arg=-Zohm-defaults=no` and set a separate
 `CARGO_TARGET_DIR` and shared `CARGO_BUILD_BUILD_DIR` as instructed by the workspace.
 The output directory must not already exist. A failed build leaves its log there;
 use a new output directory when retrying.
+
+Both normal and PGO bundles reject inherited Rust flags, compiler wrappers,
+Cargo profile environment overrides and configured Rust flags. Both verify all
+three fresh workspace compiler vectors, including the ABI target, CPU selection,
+PIC, unwinding, ThinLTO and one codegen unit. Use a fresh `CARGO_TARGET_DIR` for a
+normal build so cached compilations cannot omit this evidence.
+
+### Explicit x86-64-v3 trial
+
+Generic remains the default. To select a distribution that requires x86-64-v3:
+
+```sh
+python3 integration/python-build-standalone/prepare.py \
+  --output /absolute/oriole-v3-bundle --pbs-target x86_64_v3-unknown-linux-gnu
+bash integration/python-build-standalone/run.sh \
+  /absolute/pbs-oriole /absolute/oriole-v3-bundle x86_64_v3-unknown-linux-gnu
+```
+
+The same `--pbs-target` option combines with `--pgo --llvm-profdata ...`. PBS uses
+its existing v3 target for the whole distribution; Rust retains the generic ABI
+triple `x86_64-unknown-linux-gnu` and adds only `-C target-cpu=x86-64-v3`. The bundle
+records `target`, `rust_target`, `target_cpu`, actual compiler vectors and host
+checks. A v3 bundle passed to the two-argument, generic `run.sh` invocation is
+rejected. Unknown targets and hidden CPU/feature overrides are rejected too.
+
+Before training or execution, the v3 path compiles and runs a small GCC CPU/OS
+guard with fixed `-march=x86-64 -mtune=generic` flags and a clean environment.
+Inherited `CC`, `CFLAGS` and compiler-search overrides do not affect that guard.
+Its GCC builtin checks the complete v3 level, including usable AVX OS state;
+checking only `avx2` would be insufficient. The generic path does not compile a
+guard. A supported CPU does not establish old-glibc compatibility: the actual
+distribution still needs the glibc 2.17 and threaded-TLS gates below.
+
+The manual workflow's `pbs_target` choice defaults to generic. Artifact names
+include the product target and normal/PGO mode. Installed provenance checks bind
+the distribution filename, `PYTHON.json.target_triple`, installed bundle manifest
+and exact static archive before running the installed parser. PBS's v3 archive
+filename expresses its CPU requirement, but does not identify Oriole by itself;
+these experimental artifacts must remain outside release pools.
+
+This wiring enables a controlled trial. Local v3 PGO Python results do not
+establish installed-distribution performance, native parity, complete
+compatibility or readiness for default deployment.
 
 The script builds with position-independent code and unwinding enabled, captures
 `rustc --print=native-static-libs`, and rejects source changes during compilation.
@@ -42,7 +86,8 @@ The bundle contains:
 - `LICENSE.oriole.txt`: Oriole, dependency, Expat-header, and Rust runtime notices.
 - `cpython-external-parser.patch`: the upstream CPython child-parser cleanup fix,
   backported to 3.12.13 with recorded source and patch hashes.
-- `manifest.json`: source and file hashes, target, toolchain, and build command.
+- `manifest.json`: source and file hashes, PBS/Rust/CPU targets, toolchain, actual
+  compiler vectors, host check and build command.
 
 ### Optional fresh PGO bundle
 
@@ -101,8 +146,9 @@ workflow to be present on the repository's default branch.
 The [recorded local PGO bundle](../../docs/validation/2026-09-11/pbs-pgo-bundle/)
 passed its fresh Ohm build and both C consumers. The [normal stable PBS baseline](../../docs/validation/2026-09-11/pbs-independent-checks/)
 passed the archive validator and actual glibc 2.17 threaded parsing, while retaining
-the two known strict XML callback assertions. The new stable PGO distribution
-trial remains pending.
+the two known strict XML callback assertions. The selected reference-frame stable
+PGO distribution is recorded in [its validation packet](../../docs/validation/2026-09-11/reference-validation/pbs/).
+The explicit v3 PBS distribution trial remains pending.
 
 The archive is built for the GNU target, but target compatibility remains a PBS
 validation gate. At the pinned revision, PBS links x86_64 against a Debian Jessie

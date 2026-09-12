@@ -22,6 +22,8 @@ The [compact-coordinate experiment](validation/2026-09-11/compact-coordinates/) 
 
 The [buffer-state diagnostic](validation/2026-09-11/buffer-state/) reaches the unchanged continuation of an upstream test blocked by an allocation-schedule assertion. All 12 configurations pass at the original resource limits. Its accompanying audit accounts for all 34 nonpassing allocation-test names and distinguishes blocked assertions from existing permanent coverage and additional possible output checks. The selected runtime and original API matrix are unchanged.
 
+The [optional x86-64-v3 experiment](validation/2026-09-11/reference-v3/) keeps the selected parser source and generic default unchanged. PGO time improves by 1.82% natively and 1.17% through CPython; the Python aggregate is 1.0943× generic Expat, with only 11 of 24 conditions within 1.10×. Every adverse condition and unchanged API/strict-suite failure is retained. Normal Python improves by 1.70% but remains 1.2391× Expat; a stable v3 PBS distribution remains pending.
+
 ## Review order
 
 | Area | Layers | Main questions |

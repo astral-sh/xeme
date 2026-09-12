@@ -1,18 +1,23 @@
 """Exercise the bundle handoff using saved-build fixtures, without a compiler."""
 
 import json
+import os
 import shlex
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 
+import pbs_target
 import pgo_bundle
 from pgo import build
 
 
 class PgoBundleTests(unittest.TestCase):
     def setUp(self):
+        self.target_cpu = None
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
@@ -135,9 +140,13 @@ class PgoBundleTests(unittest.TestCase):
             "relocation-model=pic",
             "panic=unwind",
         ]
+        if self.target_cpu:
+            options += [f"target-cpu={self.target_cpu}"]
         options += (
             [f"profile-generate={self.run_directory / 'raw-profiles'}"]
             if phase == "generate"
+            else []
+            if phase == "normal"
             else [
                 f"profile-use={self.run_directory / 'merged.profdata'}",
                 "llvm-args=-pgo-warn-missing-function",
@@ -156,7 +165,97 @@ class PgoBundleTests(unittest.TestCase):
         )
 
     def verify(self):
-        return pgo_bundle.verify(self.output, self.source, self.env, None, [])
+        return pgo_bundle.verify(
+            self.output, self.source, self.env, None, [], self.target_cpu
+        )
+
+    def test_v3_requires_matching_requested_and_both_effective_phase_flags(self):
+        self.target_cpu = "x86-64-v3"
+        self.manifest["base_rustflags"] = pgo_bundle.flags(self.target_cpu)
+        for phase in ("generate", "use"):
+            text = "\n".join(
+                self.vector(phase, name)
+                for name in ("oriole_storage", "oriole", "oriole_expat")
+            )
+            if phase == "use":
+                text += "\nnote: native-static-libs: -lgcc_s -lpthread -lc\n"
+            command = next(c for c in self.commands if c["label"] == f"build-{phase}")
+            log = self.run_directory / command["log"]
+            log.write_text(text)
+            command["log_sha256"] = build.digest(log)
+        self.save()
+        archive, _, provenance, _ = self.verify()
+        self.assertEqual(archive, self.run_directory / "use/liboriole_expat.a")
+        self.assertEqual(set(provenance["compiler_vectors"]), {"generate", "use"})
+        with self.assertRaises(build.BuildError):
+            pgo_bundle.verify(self.output, self.source, self.env, None, [])
+        for phase in ("generate", "use"):
+            command = next(c for c in self.commands if c["label"] == f"build-{phase}")
+            log = self.run_directory / command["log"]
+            original = log.read_text()
+            log.write_text(
+                original.replace("target-cpu=x86-64-v3", "target-cpu=native")
+            )
+            command["log_sha256"] = build.digest(log)
+            self.save()
+            with self.assertRaises(build.BuildError):
+                self.verify()
+            log.write_text(original)
+            command["log_sha256"] = build.digest(log)
+            self.save()
+
+    def test_normal_vectors_check_generic_and_v3_without_profile_options(self):
+        for cpu in (None, "x86-64-v3"):
+            self.target_cpu = cpu
+            text = "\n".join(
+                self.vector("normal", name)
+                for name in ("oriole_storage", "oriole", "oriole_expat")
+            )
+            self.assertEqual(
+                len(
+                    pgo_bundle.verify_vectors(
+                        text, "normal", self.run_directory, self.compiler, cpu
+                    )
+                ),
+                3,
+            )
+            for option in (
+                "target-feature=+avx2",
+                "target-cpu=native",
+                "profile-use=/old",
+                "target-cpu=x86-64-v3",
+            ):
+                with (
+                    self.subTest(cpu=cpu, option=option),
+                    self.assertRaises(build.BuildError),
+                ):
+                    pgo_bundle.verify_vectors(
+                        text.replace("panic=unwind", f"panic=unwind -C {option}"),
+                        "normal",
+                        self.run_directory,
+                        self.compiler,
+                        cpu,
+                    )
+
+    def test_hidden_rust_overrides_are_rejected_before_build(self):
+        for key in (
+            "RUSTFLAGS",
+            "CARGO_ENCODED_RUSTFLAGS",
+            "CARGO_BUILD_RUSTFLAGS",
+            "CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS",
+            "CARGO_PROFILE_RELEASE_LTO",
+            "RUSTC_WRAPPER",
+        ):
+            with self.subTest(key=key), self.assertRaises(build.BuildError):
+                pgo_bundle.reject_overrides(
+                    self.source, {**self.env, key: "unreviewed"}
+                )
+        config = Path(self.env["CARGO_HOME"]) / "config.toml"
+        config.write_text(
+            '[target.x86_64-unknown-linux-gnu]\nrustflags = ["-Ctarget-cpu=native"]\n'
+        )
+        with self.assertRaises(build.BuildError):
+            pgo_bundle.reject_overrides(self.source, self.env)
 
     def test_selects_exact_use_archive_and_native_dependencies(self):
         archive, libraries, provenance, command = self.verify()
@@ -272,6 +371,77 @@ class PgoBundleTests(unittest.TestCase):
             pgo_bundle.verify_vectors(
                 "Fresh oriole", "use", self.run_directory, self.compiler
             )
+
+
+class TargetTests(unittest.TestCase):
+    def test_generic_host_check_does_not_compile_or_execute_a_guard(self):
+        with (
+            patch.object(pbs_target.platform, "system", return_value="Linux"),
+            patch.object(pbs_target.platform, "machine", return_value="x86_64"),
+            patch.object(pbs_target.subprocess, "run") as run,
+        ):
+            result = pbs_target.check_host(pbs_target.RUST_TARGET)
+            self.assertIsNone(result["target_cpu"])
+            run.assert_not_called()
+
+    def test_explicit_mapping_and_bundle_mismatches(self):
+        self.assertIsNone(pbs_target.cpu(pbs_target.RUST_TARGET))
+        for target, cpu in pbs_target.TARGETS.items():
+            manifest = {
+                "target": target,
+                "rust_target": pbs_target.RUST_TARGET,
+                "target_cpu": cpu,
+            }
+            pbs_target.validate(manifest, target)
+            for key, value in (
+                ("target", "other"),
+                ("rust_target", target + "-wrong"),
+                ("target_cpu", "native"),
+                ("target_cpu", None if cpu else "x86-64-v3"),
+            ):
+                with (
+                    self.subTest(target=target, key=key),
+                    self.assertRaises(ValueError),
+                ):
+                    pbs_target.validate({**manifest, key: value}, target)
+            del manifest["target_cpu"]
+            with self.assertRaises(ValueError):
+                pbs_target.validate(manifest, target)
+        with self.assertRaises(ValueError):
+            pbs_target.cpu("x86_64_v4-unknown-linux-gnu")
+
+    def test_cpu_guard_ignores_injected_compiler_flags_and_rejects_missing_support(
+        self,
+    ):
+        calls = []
+
+        def run(command, **kwargs):
+            calls.append((command, kwargs))
+            self.assertEqual(kwargs["env"], {"PATH": "/usr/bin:/bin", "LC_ALL": "C"})
+            if len(calls) == 1:
+                self.assertEqual(
+                    command[1:5], ["-std=c11", "-O2", "-march=x86-64", "-mtune=generic"]
+                )
+                Path(command[-1]).write_bytes(b"fixture guard, never executed")
+                return subprocess.CompletedProcess(command, 0, "", "")
+            return subprocess.CompletedProcess(command, 1, "", "missing v3 OS support")
+
+        with (
+            patch.dict(
+                os.environ,
+                {
+                    "CC": "/untrusted",
+                    "CFLAGS": "-march=native",
+                    "GCC_EXEC_PREFIX": "/wrong",
+                },
+            ),
+            patch.object(pbs_target.platform, "system", return_value="Linux"),
+            patch.object(pbs_target.platform, "machine", return_value="x86_64"),
+            patch.object(pbs_target.subprocess, "run", side_effect=run),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "OS support"):
+                pbs_target.check_host("x86_64_v3-unknown-linux-gnu")
+        self.assertEqual(len(calls), 2)
 
 
 if __name__ == "__main__":

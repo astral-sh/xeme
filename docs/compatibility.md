@@ -30,6 +30,8 @@ A further [buffer-state diagnostic and assertion audit](validation/2026-09-11/bu
 
 The [selected runtime's benchmark report](validation/2026-09-11/reference-frames/) retains all normal/PGO native and CPython conditions. Native and CPython PGO aggregates both exceed the roughly 1.10× Expat target. The two strict CPython text-grouping failures remain explicit; no passing original API configuration regressed.
 
+The optional [x86-64-v3 build](validation/2026-09-11/reference-v3/) preserves the same original API and strict CPython outcomes. Its PGO host-module benchmark averages 1.0943× generic Expat through CPython, including 1.1278× for ElementTree; native time remains 1.3011×. This CPU-specific result does not replace the generic measurements or establish installed distribution performance.
+
 ## Differential testing
 
 ```console

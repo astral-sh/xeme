@@ -5,7 +5,10 @@ from __future__ import annotations
 import json
 import shlex
 import sys
+import tomllib
 from pathlib import Path
+
+import pbs_target
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools"))
 from pgo import build
@@ -14,14 +17,63 @@ TARGET = "x86_64-unknown-linux-gnu"
 FLAGS = ["-C", "relocation-model=pic", "-C", "panic=unwind"]
 
 
+def flags(target_cpu: str | None) -> list[str]:
+    require(target_cpu in pbs_target.TARGETS.values(), "Unsupported PBS CPU")
+    return FLAGS + (["-C", f"target-cpu={target_cpu}"] if target_cpu else [])
+
+
+def reject_overrides(source: Path, env: dict[str, str]) -> None:
+    """Keep normal and PGO recipes independent of hidden compiler overrides."""
+    for key, value in env.items():
+        if value and (
+            key
+            in {
+                "RUSTFLAGS",
+                "CARGO_ENCODED_RUSTFLAGS",
+                "RUSTC",
+                "RUSTC_WRAPPER",
+                "RUSTC_WORKSPACE_WRAPPER",
+            }
+            or key.startswith("CARGO_PROFILE_")
+            or (
+                key.startswith("CARGO_")
+                and key.endswith(
+                    ("RUSTFLAGS", "RUSTC", "RUSTC_WRAPPER", "RUSTC_WORKSPACE_WRAPPER")
+                )
+            )
+        ):
+            raise build.BuildError(
+                f"Unset compiler override {key}; select --pbs-target explicitly"
+            )
+
+    def visit(value: dict) -> None:
+        for key, item in value.items():
+            if (
+                key
+                in {"rustflags", "rustc", "rustc-wrapper", "rustc-workspace-wrapper"}
+                and item
+            ):
+                raise build.BuildError(f"Remove Cargo configuration override {key}")
+            if isinstance(item, dict):
+                visit(item)
+
+    for path in build.cargo_configs(source, env):
+        visit(tomllib.loads(Path(path).read_text()))
+
+
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise build.BuildError(message)
 
 
-def verify_vectors(text: str, phase: str, run: Path, compiler: Path) -> None:
+def verify_vectors(
+    text: str, phase: str, run: Path, compiler: Path, target_cpu: str | None = None
+) -> list[list[str]]:
     """Check the effective workspace options, including Cargo config overrides."""
     crates = []
+    vectors = []
+    flags(target_cpu)
+    require(phase in ("normal", "generate", "use"), "Unknown compiler phase")
     for line in text.splitlines():
         if "Running `" not in line or "--crate-name " not in line:
             continue
@@ -30,6 +82,7 @@ def verify_vectors(text: str, phase: str, run: Path, compiler: Path) -> None:
         if name not in ("oriole_storage", "oriole", "oriole_expat"):
             continue
         crates.append(name)
+        vectors.append(arguments)
         require(Path(arguments[0]).resolve() == compiler, "PGO compiler path mismatch")
         require(
             "--target" in arguments
@@ -58,9 +111,13 @@ def verify_vectors(text: str, phase: str, run: Path, compiler: Path) -> None:
             "relocation-model=pic",
             "panic=unwind",
         ]
+        if target_cpu:
+            expected += [f"target-cpu={target_cpu}"]
         expected += (
             [f"profile-generate={run / 'raw-profiles'}"]
             if phase == "generate"
+            else []
+            if phase == "normal"
             else [
                 f"profile-use={run / 'merged.profdata'}",
                 "llvm-args=-pgo-warn-missing-function",
@@ -83,6 +140,7 @@ def verify_vectors(text: str, phase: str, run: Path, compiler: Path) -> None:
         sorted(crates) == ["oriole", "oriole_expat", "oriole_storage"],
         "Missing fresh workspace PGO compilations",
     )
+    return vectors
 
 
 def verify(
@@ -91,6 +149,7 @@ def verify(
     env: dict[str, str],
     toolchain: str | None,
     cargo_args: list[str],
+    target_cpu: str | None = None,
 ) -> tuple[Path, list[str], dict, list[str]]:
     """Validate a freshly completed run before selecting its exact static archive."""
     latest = json.loads((output / "latest.json").read_text())
@@ -116,7 +175,8 @@ def verify(
         "PGO target/toolchain mismatch",
     )
     require(
-        manifest["cargo_args"] == cargo_args and manifest["base_rustflags"] == FLAGS,
+        manifest["cargo_args"] == cargo_args
+        and manifest["base_rustflags"] == flags(target_cpu),
         "PGO requested build flags mismatch",
     )
     build.require_unchanged(
@@ -163,9 +223,14 @@ def verify(
     )
     compiler = compiler.resolve(strict=True)
     require(str(compiler) in manifest["tools_sha256"], "Untracked PGO compiler")
+    vectors = {}
     for phase in ("generate", "use"):
-        verify_vectors(
-            (run / commands[f"build-{phase}"]["log"]).read_text(), phase, run, compiler
+        vectors[phase] = verify_vectors(
+            (run / commands[f"build-{phase}"]["log"]).read_text(),
+            phase,
+            run,
+            compiler,
+            target_cpu,
         )
     use_log = (run / commands["build-use"]["log"]).read_text()
     build.check_profile_output(use_log)
@@ -214,6 +279,7 @@ def verify(
             "manifest_sha256": build.digest(path),
             "compiler": str(compiler),
             "manifest": manifest,
+            "compiler_vectors": vectors,
         },
         commands["build-use"]["argv"],
     )

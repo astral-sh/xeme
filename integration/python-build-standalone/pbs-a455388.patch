@@ -33,7 +33,7 @@
  import json
  import os
  import pathlib
-@@ -738,6 +739,69 @@
+@@ -738,6 +739,78 @@
      return bi
  
  
@@ -44,10 +44,11 @@
 +    location = os.environ.get("PYBUILD_ORIOLE_BUNDLE")
 +    if not location:
 +        return
++    cpu_targets = {"x86_64-unknown-linux-gnu": None, "x86_64_v3-unknown-linux-gnu": "x86-64-v3"}
 +    if (
 +        host_platform != "linux_x86_64"
 +        or platform.system() != "Linux"
-+        or target_triple != "x86_64-unknown-linux-gnu"
++        or target_triple not in cpu_targets
 +        or python_version != "3.12.13"
 +        or "static" in build_options.split("+")
 +        or not build_env.is_isolated
@@ -57,9 +58,17 @@
 +        )
 +    bundle = pathlib.Path(location).resolve()
 +    manifest = json.loads((bundle / "manifest.json").read_text())
++    target_cpu = cpu_targets[target_triple]
++    rustflags = "-C relocation-model=pic -C panic=unwind"
++    if target_cpu:
++        rustflags += f" -C target-cpu={target_cpu}"
 +    if (
 +        manifest.get("format") != 1
 +        or manifest.get("target") != target_triple
++        or manifest.get("rust_target") != "x86_64-unknown-linux-gnu"
++        or "target_cpu" not in manifest
++        or manifest["target_cpu"] != target_cpu
++        or manifest.get("rustflags") != rustflags
 +        or manifest.get("pbs_revision") != "a4553880293fe9d1bb62747d34ab0e5121d3554f"
 +    ):
 +        raise ValueError("Oriole bundle target or recipe revision does not match")
@@ -103,7 +112,7 @@
  def build_cpython(
      settings,
      client,
-@@ -804,6 +868,14 @@
+@@ -804,6 +877,14 @@
  
          for p in sorted(packages):
              build_env.install_artifact_archive(BUILD, p, target_triple, build_options)

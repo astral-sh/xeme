@@ -1,0 +1,12 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 9ee9b16..253605d 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -147,6 +147,7 @@ jobs:
+                   "context_text_foreign_generation_uses_owned_events",
+               },
+               "c": {
++                  "context_input_allocation_failures_preserve_sticky_errors_and_owners",
+                   "context_text_pointer_survives_reentry_suspend_and_abort",
+                   "context_text_offsets_compaction_split_utf8_and_sizes",
+                   "context_text_default_and_excluded_paths_keep_exact_bytes",

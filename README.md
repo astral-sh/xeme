@@ -25,7 +25,7 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 These [normal-build measurements](docs/validation/2026-09-12/shared-native-raw-text/) use six pinned XML projects, 4 KiB chunks and namespaces disabled on a shared Linux host. Times are medians of seven process medians; ratios are medians of paired ratios. Across the 24 real-project conditions in each confirmation run, Oriole takes **1.2659× Expat’s native time and 1.0975× its CPython time**. The Python aggregate meets the roughly 1.10× goal; native and ElementTree remain above it.
 
-Current qualification preserves **4,349 API passes, 391 failures and no timeouts**, six passing C consumers, and two strict CPython grouping failures. Separate semantic and allocation diagnostics pass. W3C acceptance matches Expat, with 960 mandatory mismatches retained per engine. **Six current-source Rust ASan/fuzz harnesses pass.** The [compatibility guide](docs/compatibility.md) records the remaining gates.
+Current qualification preserves **4,349 API passes, 391 failures and no timeouts**, six passing C consumers, and two strict CPython grouping failures. Separate semantic and allocation diagnostics pass. W3C acceptance matches Expat, with 960 mandatory mismatches retained per engine. **Six current-source Rust ASan/fuzz harnesses pass.** The [installed PBS trial](docs/validation/2026-09-12/shared-native-raw-text-pbs/) completed with the same two grouping failures and remains failed. The [compatibility guide](docs/compatibility.md) records the remaining gates.
 
 ## Installation
 

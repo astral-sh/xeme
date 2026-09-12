@@ -1,0 +1,1044 @@
+﻿2026-09-12T18:57:07.4462574Z Current runner version: '2.337.0'
+2026-09-12T18:57:07.4470635Z Runner name: 'github-ubuntu-24.04-x86_64-4-1002479551'
+2026-09-12T18:57:07.4472035Z Runner group name: 'default'
+2026-09-12T18:57:07.4490365Z ##[group]Runner Image Provisioner
+2026-09-12T18:57:07.4491170Z Hosted Compute Agent
+2026-09-12T18:57:07.4492180Z Version: 20260828.587
+2026-09-12T18:57:07.4492906Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+2026-09-12T18:57:07.4493672Z Build Date: 2026-08-28T16:44:25Z
+2026-09-12T18:57:07.4494332Z Worker ID: {63e6d20f-2ce7-4dbe-887d-4470074864cf}
+2026-09-12T18:57:07.4495115Z Azure Region: westcentralus
+2026-09-12T18:57:07.4495746Z ##[endgroup]
+2026-09-12T18:57:07.4497464Z ##[group]Operating System
+2026-09-12T18:57:07.4498139Z Ubuntu
+2026-09-12T18:57:07.4498634Z 24.04.5
+2026-09-12T18:57:07.4499204Z LTS
+2026-09-12T18:57:07.4499703Z ##[endgroup]
+2026-09-12T18:57:07.4500278Z ##[group]Runner Image
+2026-09-12T18:57:07.4500917Z Image: ubuntu-24.04
+2026-09-12T18:57:07.4501961Z Version: 20260907.300.1
+2026-09-12T18:57:07.4503183Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260907.300/images/ubuntu/Ubuntu2404-Readme.md
+2026-09-12T18:57:07.4504649Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260907.300
+2026-09-12T18:57:07.4505649Z ##[endgroup]
+2026-09-12T18:57:07.4506788Z ##[group]GITHUB_TOKEN Permissions
+2026-09-12T18:57:07.4508658Z Contents: read
+2026-09-12T18:57:07.4509258Z Metadata: read
+2026-09-12T18:57:07.4510352Z ##[endgroup]
+2026-09-12T18:57:07.4512700Z Secret source: Actions
+2026-09-12T18:57:07.4513791Z Cache mode: write
+2026-09-12T18:57:07.4514819Z Prepare workflow directory
+2026-09-12T18:57:07.5046201Z Prepare all required actions
+2026-09-12T18:57:07.5095820Z Getting action download info
+2026-09-12T18:57:07.8182972Z Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-09-12T18:57:07.9397016Z Download action repository 'dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0' (SHA:d1031067263f94b142dd6c0ce24c5eb9d02d52a0)
+2026-09-12T18:57:08.2617238Z Complete job name: C callback aliasing (tree)
+2026-09-12T18:57:08.3316987Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-09-12T18:57:08.3326185Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+2026-09-12T18:57:08.3327103Z with:
+2026-09-12T18:57:08.3327549Z   repository: astral-sh/oriole
+2026-09-12T18:57:08.3331141Z   token: ***
+2026-09-12T18:57:08.3331780Z   ssh-strict: true
+2026-09-12T18:57:08.3332219Z   ssh-user: git
+2026-09-12T18:57:08.3332657Z   persist-credentials: true
+2026-09-12T18:57:08.3333138Z   clean: true
+2026-09-12T18:57:08.3333579Z   sparse-checkout-cone-mode: true
+2026-09-12T18:57:08.3334098Z   fetch-depth: 1
+2026-09-12T18:57:08.3334550Z   fetch-tags: false
+2026-09-12T18:57:08.3334993Z   show-progress: true
+2026-09-12T18:57:08.3335460Z   lfs: false
+2026-09-12T18:57:08.3335871Z   submodules: false
+2026-09-12T18:57:08.3336361Z   set-safe-directory: true
+2026-09-12T18:57:08.3336875Z   allow-unsafe-pr-checkout: false
+2026-09-12T18:57:08.3337649Z env:
+2026-09-12T18:57:08.3338083Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:57:08.3338590Z ##[endgroup]
+2026-09-12T18:57:08.4349646Z Syncing repository: astral-sh/oriole
+2026-09-12T18:57:08.4351882Z ##[group]Getting Git version info
+2026-09-12T18:57:08.4352627Z Working directory is '/home/runner/work/oriole/oriole'
+2026-09-12T18:57:08.4353598Z [command]/usr/bin/git version
+2026-09-12T18:57:08.4426361Z git version 2.55.0
+2026-09-12T18:57:08.4447427Z ##[endgroup]
+2026-09-12T18:57:08.4460992Z Temporarily overriding HOME='/home/runner/work/_temp/b3bcec90-506e-45d5-b5e9-808024e19602' before making global git config changes
+2026-09-12T18:57:08.4462805Z Adding repository directory to the temporary git global config as a safe directory
+2026-09-12T18:57:08.4466620Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/oriole/oriole
+2026-09-12T18:57:08.4514235Z Deleting the contents of '/home/runner/work/oriole/oriole'
+2026-09-12T18:57:08.4518174Z ##[group]Initializing the repository
+2026-09-12T18:57:08.4522355Z [command]/usr/bin/git init /home/runner/work/oriole/oriole
+2026-09-12T18:57:08.4625870Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-09-12T18:57:08.4627013Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-09-12T18:57:08.4627958Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-09-12T18:57:08.4629196Z hint: call:
+2026-09-12T18:57:08.4629906Z hint:
+2026-09-12T18:57:08.4630865Z hint: 	git config --global init.defaultBranch <name>
+2026-09-12T18:57:08.4632255Z hint:
+2026-09-12T18:57:08.4633363Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-09-12T18:57:08.4635174Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-09-12T18:57:08.4636627Z hint:
+2026-09-12T18:57:08.4637377Z hint: 	git branch -m <name>
+2026-09-12T18:57:08.4638224Z hint:
+2026-09-12T18:57:08.4639319Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-09-12T18:57:08.4641214Z Initialized empty Git repository in /home/runner/work/oriole/oriole/.git/
+2026-09-12T18:57:08.4644320Z [command]/usr/bin/git remote add origin https://github.com/astral-sh/oriole
+2026-09-12T18:57:08.4683036Z ##[endgroup]
+2026-09-12T18:57:08.4684378Z ##[group]Disabling automatic garbage collection
+2026-09-12T18:57:08.4687715Z [command]/usr/bin/git config --local gc.auto 0
+2026-09-12T18:57:08.4718146Z ##[endgroup]
+2026-09-12T18:57:08.4719823Z ##[group]Setting up auth
+2026-09-12T18:57:08.4725450Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-12T18:57:08.4756260Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-12T18:57:08.5096725Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-12T18:57:08.5129777Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-12T18:57:08.5362971Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-12T18:57:08.5395804Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-12T18:57:08.5625790Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-09-12T18:57:08.5659733Z ##[endgroup]
+2026-09-12T18:57:08.5668846Z ##[group]Fetching the repository
+2026-09-12T18:57:08.5670546Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +de144aff865a498c8854248bdaf5be250cf29f5d:refs/remotes/origin/charlie/codex-oriole-core-owned-text-raw
+2026-09-12T18:58:26.0848301Z From https://github.com/astral-sh/oriole
+2026-09-12T18:58:26.0852884Z  * [new ref]         de144aff865a498c8854248bdaf5be250cf29f5d -> origin/charlie/codex-oriole-core-owned-text-raw
+2026-09-12T18:58:26.0855162Z ##[endgroup]
+2026-09-12T18:58:26.0855641Z ##[group]Determining the checkout info
+2026-09-12T18:58:26.0856250Z ##[endgroup]
+2026-09-12T18:58:26.0860544Z [command]/usr/bin/git sparse-checkout disable
+2026-09-12T18:58:26.0907357Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-09-12T18:58:26.0933813Z ##[group]Checking out the ref
+2026-09-12T18:58:26.0938570Z [command]/usr/bin/git checkout --progress --force -B charlie/codex-oriole-core-owned-text-raw refs/remotes/origin/charlie/codex-oriole-core-owned-text-raw
+2026-09-12T18:58:27.1576576Z Updating files:  51% (1461/2824)
+2026-09-12T18:58:27.1653911Z Updating files:  52% (1469/2824)
+2026-09-12T18:58:27.2187541Z Updating files:  53% (1497/2824)
+2026-09-12T18:58:27.2592944Z Updating files:  54% (1525/2824)
+2026-09-12T18:58:27.2879107Z Updating files:  55% (1554/2824)
+2026-09-12T18:58:27.3122228Z Updating files:  56% (1582/2824)
+2026-09-12T18:58:27.3168803Z Updating files:  57% (1610/2824)
+2026-09-12T18:58:27.3781140Z Updating files:  58% (1638/2824)
+2026-09-12T18:58:27.4219155Z Updating files:  59% (1667/2824)
+2026-09-12T18:58:27.4903929Z Updating files:  60% (1695/2824)
+2026-09-12T18:58:27.5089581Z Updating files:  61% (1723/2824)
+2026-09-12T18:58:27.5266487Z Updating files:  62% (1751/2824)
+2026-09-12T18:58:27.5577923Z Updating files:  63% (1780/2824)
+2026-09-12T18:58:27.5957529Z Updating files:  64% (1808/2824)
+2026-09-12T18:58:27.6048091Z Updating files:  65% (1836/2824)
+2026-09-12T18:58:27.6114131Z Updating files:  66% (1864/2824)
+2026-09-12T18:58:27.6131354Z Updating files:  67% (1893/2824)
+2026-09-12T18:58:27.6141003Z Updating files:  68% (1921/2824)
+2026-09-12T18:58:27.6409936Z Updating files:  69% (1949/2824)
+2026-09-12T18:58:27.6423915Z Updating files:  70% (1977/2824)
+2026-09-12T18:58:27.6490859Z Updating files:  71% (2006/2824)
+2026-09-12T18:58:27.6799413Z Updating files:  72% (2034/2824)
+2026-09-12T18:58:27.7319802Z Updating files:  73% (2062/2824)
+2026-09-12T18:58:27.8039881Z Updating files:  74% (2090/2824)
+2026-09-12T18:58:27.8354131Z Updating files:  75% (2118/2824)
+2026-09-12T18:58:28.0185427Z Updating files:  76% (2147/2824)
+2026-09-12T18:58:28.0582989Z Updating files:  77% (2175/2824)
+2026-09-12T18:58:28.1103060Z Updating files:  78% (2203/2824)
+2026-09-12T18:58:28.2596860Z Updating files:  78% (2205/2824)
+2026-09-12T18:58:28.3405246Z Updating files:  79% (2231/2824)
+2026-09-12T18:58:28.4015953Z Updating files:  80% (2260/2824)
+2026-09-12T18:58:28.4081084Z Updating files:  81% (2288/2824)
+2026-09-12T18:58:28.4132652Z Updating files:  82% (2316/2824)
+2026-09-12T18:58:28.4205840Z Updating files:  83% (2344/2824)
+2026-09-12T18:58:28.4324885Z Updating files:  84% (2373/2824)
+2026-09-12T18:58:28.5233778Z Updating files:  85% (2401/2824)
+2026-09-12T18:58:28.5346285Z Updating files:  86% (2429/2824)
+2026-09-12T18:58:28.5374972Z Updating files:  87% (2457/2824)
+2026-09-12T18:58:28.5384018Z Updating files:  88% (2486/2824)
+2026-09-12T18:58:28.5393241Z Updating files:  89% (2514/2824)
+2026-09-12T18:58:28.5402447Z Updating files:  90% (2542/2824)
+2026-09-12T18:58:28.5411870Z Updating files:  91% (2570/2824)
+2026-09-12T18:58:28.5421330Z Updating files:  92% (2599/2824)
+2026-09-12T18:58:28.5433737Z Updating files:  93% (2627/2824)
+2026-09-12T18:58:28.5444563Z Updating files:  94% (2655/2824)
+2026-09-12T18:58:28.5455813Z Updating files:  95% (2683/2824)
+2026-09-12T18:58:28.5470985Z Updating files:  96% (2712/2824)
+2026-09-12T18:58:28.5487073Z Updating files:  97% (2740/2824)
+2026-09-12T18:58:28.5504957Z Updating files:  98% (2768/2824)
+2026-09-12T18:58:28.5528930Z Updating files:  99% (2796/2824)
+2026-09-12T18:58:28.5529679Z Updating files: 100% (2824/2824)
+2026-09-12T18:58:28.5530307Z Updating files: 100% (2824/2824), done.
+2026-09-12T18:58:28.5576195Z Switched to a new branch 'charlie/codex-oriole-core-owned-text-raw'
+2026-09-12T18:58:28.5582959Z branch 'charlie/codex-oriole-core-owned-text-raw' set up to track 'origin/charlie/codex-oriole-core-owned-text-raw'.
+2026-09-12T18:58:28.5718422Z ##[endgroup]
+2026-09-12T18:58:28.5776747Z [command]/usr/bin/git log -1 --format=%H
+2026-09-12T18:58:28.5794128Z de144aff865a498c8854248bdaf5be250cf29f5d
+2026-09-12T18:58:28.6203085Z ##[group]Run dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+2026-09-12T18:58:28.6203528Z with:
+2026-09-12T18:58:28.6203743Z   toolchain: nightly-2026-09-10
+2026-09-12T18:58:28.6204007Z   components: miri, rust-src
+2026-09-12T18:58:28.6204240Z env:
+2026-09-12T18:58:28.6204446Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:28.6204698Z ##[endgroup]
+2026-09-12T18:58:28.6268286Z ##[start-action display=Parse toolchain version;id=__dtolnay_rust-toolchain.parse]
+2026-09-12T18:58:28.6322182Z ##[group]Run if [[ -z $toolchain ]]; then
+2026-09-12T18:58:28.6322573Z [36;1mif [[ -z $toolchain ]]; then[0m
+2026-09-12T18:58:28.6323124Z [36;1m  # GitHub does not enforce `required: true` inputs itself. https://github.com/actions/runner/issues/1070[0m
+2026-09-12T18:58:28.6323718Z [36;1m  echo "'toolchain' is a required input" >&2[0m
+2026-09-12T18:58:28.6324026Z [36;1m  exit 1[0m
+2026-09-12T18:58:28.6324410Z [36;1melif [[ $toolchain =~ ^stable' '[0-9]+' '(year|month|week|day)s?' 'ago$ ]]; then[0m
+2026-09-12T18:58:28.6324832Z [36;1m  if [[ Linux == macOS ]]; then[0m
+2026-09-12T18:58:28.6325372Z [36;1m    echo "toolchain=1.$((($(date -v-$(sed 's/stable \([0-9]*\) \(.\).*/\1\2/' <<< $toolchain) +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT[0m
+2026-09-12T18:58:28.6325902Z [36;1m  else[0m
+2026-09-12T18:58:28.6326314Z [36;1m    echo "toolchain=1.$((($(date --date "${toolchain#stable }" +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT[0m
+2026-09-12T18:58:28.6326797Z [36;1m  fi[0m
+2026-09-12T18:58:28.6327109Z [36;1melif [[ $toolchain =~ ^stable' 'minus' '[0-9]+' 'releases?$ ]]; then[0m
+2026-09-12T18:58:28.6327665Z [36;1m  echo "toolchain=1.$((($(date +%s)/60/60/24-16569)/7/6-${toolchain//[^0-9]/}))" >> $GITHUB_OUTPUT[0m
+2026-09-12T18:58:28.6328138Z [36;1melif [[ $toolchain =~ ^1\.[0-9]+$ ]]; then[0m
+2026-09-12T18:58:28.6328669Z [36;1m  echo "toolchain=1.$((i=${toolchain#1.}, c=($(date +%s)/60/60/24-16569)/7/6, i+9*i*(10*i<=c)+90*i*(100*i<=c)))" >> $GITHUB_OUTPUT[0m
+2026-09-12T18:58:28.6329186Z [36;1melse[0m
+2026-09-12T18:58:28.6329437Z [36;1m  echo "toolchain=$toolchain" >> $GITHUB_OUTPUT[0m
+2026-09-12T18:58:28.6329734Z [36;1mfi[0m
+2026-09-12T18:58:28.6370036Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-12T18:58:28.6370408Z env:
+2026-09-12T18:58:28.6370634Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:28.6370900Z   toolchain: nightly-2026-09-10
+2026-09-12T18:58:28.6371160Z ##[endgroup]
+2026-09-12T18:58:28.6478266Z ##[end-action id=__dtolnay_rust-toolchain.parse;outcome=success;conclusion=success;duration_ms=20]
+2026-09-12T18:58:28.6490617Z ##[start-action display=Construct rustup command line;id=__dtolnay_rust-toolchain.flags]
+2026-09-12T18:58:28.6517650Z ##[group]Run echo "targets=$(for t in ${targets//,/ }; do echo -n ' --target' $t; done)" >> $GITHUB_OUTPUT
+2026-09-12T18:58:28.6518330Z [36;1mecho "targets=$(for t in ${targets//,/ }; do echo -n ' --target' $t; done)" >> $GITHUB_OUTPUT[0m
+2026-09-12T18:58:28.6519008Z [36;1mecho "components=$(for c in ${components//,/ }; do echo -n ' --component' $c; done)" >> $GITHUB_OUTPUT[0m
+2026-09-12T18:58:28.6519509Z [36;1mecho "downgrade=" >> $GITHUB_OUTPUT[0m
+2026-09-12T18:58:28.6552224Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-12T18:58:28.6552579Z env:
+2026-09-12T18:58:28.6552790Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:28.6553045Z   targets: 
+2026-09-12T18:58:28.6553261Z   components: miri, rust-src
+2026-09-12T18:58:28.6553508Z ##[endgroup]
+2026-09-12T18:58:28.6620506Z ##[end-action id=__dtolnay_rust-toolchain.flags;outcome=success;conclusion=success;duration_ms=12]
+2026-09-12T18:58:28.6623049Z ##[start-action display=Set $CARGO_HOME;id=__dtolnay_rust-toolchain.__run]
+2026-09-12T18:58:28.6640287Z ##[group]Run echo CARGO_HOME=${CARGO_HOME:-"$HOME/.cargo"} >> $GITHUB_ENV
+2026-09-12T18:58:28.6640760Z [36;1mecho CARGO_HOME=${CARGO_HOME:-"$HOME/.cargo"} >> $GITHUB_ENV[0m
+2026-09-12T18:58:28.6673391Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-12T18:58:28.6673951Z env:
+2026-09-12T18:58:28.6674171Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:28.6674426Z ##[endgroup]
+2026-09-12T18:58:28.6732681Z ##[end-action id=__dtolnay_rust-toolchain.__run;outcome=success;conclusion=success;duration_ms=10]
+2026-09-12T18:58:28.6734898Z ##[start-action display=Install rustup if needed;id=__dtolnay_rust-toolchain.__run_2]
+2026-09-12T18:58:28.6758709Z ##[group]Run if ! command -v rustup &>/dev/null; then
+2026-09-12T18:58:28.6759076Z [36;1mif ! command -v rustup &>/dev/null; then[0m
+2026-09-12T18:58:28.6759850Z [36;1m  curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://sh.rustup.rs | sh -s -- --default-toolchain none -y[0m
+2026-09-12T18:58:28.6760598Z [36;1m  echo "$CARGO_HOME/bin" >> $GITHUB_PATH[0m
+2026-09-12T18:58:28.6760891Z [36;1mfi[0m
+2026-09-12T18:58:28.6793418Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-12T18:58:28.6793778Z env:
+2026-09-12T18:58:28.6794008Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:28.6794291Z   CARGO_HOME: /home/runner/.cargo
+2026-09-12T18:58:28.6794543Z ##[endgroup]
+2026-09-12T18:58:28.6851378Z ##[end-action id=__dtolnay_rust-toolchain.__run_2;outcome=success;conclusion=success;duration_ms=11]
+2026-09-12T18:58:28.6853989Z ##[start-action display=Install rustup if needed on windows;id=__dtolnay_rust-toolchain.__run_3]
+2026-09-12T18:58:28.6860101Z ##[end-action id=__dtolnay_rust-toolchain.__run_3;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-09-12T18:58:28.6871379Z ##[start-action display=rustup toolchain install nightly-2026-09-10;id=__dtolnay_rust-toolchain.__run_4]
+2026-09-12T18:58:28.6890155Z ##[group]Run rustup toolchain install nightly-2026-09-10 --component miri --component rust-src --profile minimal --no-self-update
+2026-09-12T18:58:28.6891039Z [36;1mrustup toolchain install nightly-2026-09-10 --component miri --component rust-src --profile minimal --no-self-update[0m
+2026-09-12T18:58:28.6923818Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-12T18:58:28.6924176Z env:
+2026-09-12T18:58:28.6924387Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:28.6924657Z   CARGO_HOME: /home/runner/.cargo
+2026-09-12T18:58:28.6924927Z   RUSTUP_PERMIT_COPY_RENAME: 1
+2026-09-12T18:58:28.6925176Z ##[endgroup]
+2026-09-12T18:58:28.7363701Z info: syncing channel updates for nightly-2026-09-10-x86_64-unknown-linux-gnu
+2026-09-12T18:58:29.0312865Z info: latest update on 2026-09-10 for version 1.100.0-nightly (a36d05efa 2026-09-09)
+2026-09-12T18:58:29.0314029Z info: downloading 5 components
+2026-09-12T18:58:38.4875641Z 
+2026-09-12T18:58:38.4939972Z   nightly-2026-09-10-x86_64-unknown-linux-gnu installed - rustc 1.100.0-nightly (a36d05efa 2026-09-09)
+2026-09-12T18:58:38.4940449Z 
+2026-09-12T18:58:38.4985972Z ##[end-action id=__dtolnay_rust-toolchain.__run_4;outcome=success;conclusion=success;duration_ms=9811]
+2026-09-12T18:58:38.4993694Z ##[start-action display=rustup default nightly-2026-09-10;id=__dtolnay_rust-toolchain.__run_5]
+2026-09-12T18:58:38.5345667Z ##[group]Run rustup default nightly-2026-09-10
+2026-09-12T18:58:38.5346040Z [36;1mrustup default nightly-2026-09-10[0m
+2026-09-12T18:58:38.5382253Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-12T18:58:38.5382590Z env:
+2026-09-12T18:58:38.5382797Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:38.5383062Z   CARGO_HOME: /home/runner/.cargo
+2026-09-12T18:58:38.5383327Z ##[endgroup]
+2026-09-12T18:58:38.5874835Z info: using existing install for nightly-2026-09-10-x86_64-unknown-linux-gnu
+2026-09-12T18:58:38.5888020Z info: default toolchain set to nightly-2026-09-10-x86_64-unknown-linux-gnu
+2026-09-12T18:58:38.5888526Z 
+2026-09-12T18:58:38.5957126Z   nightly-2026-09-10-x86_64-unknown-linux-gnu unchanged - rustc 1.100.0-nightly (a36d05efa 2026-09-09)
+2026-09-12T18:58:38.5957584Z 
+2026-09-12T18:58:38.5974414Z ##[end-action id=__dtolnay_rust-toolchain.__run_5;outcome=success;conclusion=success;duration_ms=97]
+2026-09-12T18:58:38.5977353Z ##[start-action display=Create cachekey;id=__dtolnay_rust-toolchain.rustc-version]
+2026-09-12T18:58:38.6288946Z ##[group]Run DATE=$(rustc +nightly-2026-09-10 --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')
+2026-09-12T18:58:38.6290478Z [36;1mDATE=$(rustc +nightly-2026-09-10 --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')[0m
+2026-09-12T18:58:38.6292163Z [36;1mHASH=$(rustc +nightly-2026-09-10 --version --verbose | sed -ne 's/^commit-hash: //p')[0m
+2026-09-12T18:58:38.6293096Z [36;1mecho "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT[0m
+2026-09-12T18:58:38.6344343Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-12T18:58:38.6344693Z env:
+2026-09-12T18:58:38.6344901Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:38.6345171Z   CARGO_HOME: /home/runner/.cargo
+2026-09-12T18:58:38.6345428Z ##[endgroup]
+2026-09-12T18:58:38.6663759Z ##[end-action id=__dtolnay_rust-toolchain.rustc-version;outcome=success;conclusion=success;duration_ms=68]
+2026-09-12T18:58:38.6666500Z ##[start-action display=Disable incremental compilation;id=__dtolnay_rust-toolchain.__run_6]
+2026-09-12T18:58:38.6762641Z ##[group]Run if [ -z "${CARGO_INCREMENTAL+set}" ]; then
+2026-09-12T18:58:38.6763044Z [36;1mif [ -z "${CARGO_INCREMENTAL+set}" ]; then[0m
+2026-09-12T18:58:38.6763386Z [36;1m  echo CARGO_INCREMENTAL=0 >> $GITHUB_ENV[0m
+2026-09-12T18:58:38.6763682Z [36;1mfi[0m
+2026-09-12T18:58:38.6801049Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-12T18:58:38.6801396Z env:
+2026-09-12T18:58:38.6801921Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:38.6802194Z   CARGO_HOME: /home/runner/.cargo
+2026-09-12T18:58:38.6802440Z ##[endgroup]
+2026-09-12T18:58:38.6890721Z ##[end-action id=__dtolnay_rust-toolchain.__run_6;outcome=success;conclusion=success;duration_ms=22]
+2026-09-12T18:58:38.6894333Z ##[start-action display=Enable colors in Cargo output;id=__dtolnay_rust-toolchain.__run_7]
+2026-09-12T18:58:38.6913888Z ##[group]Run if [ -z "${CARGO_TERM_COLOR+set}" ]; then
+2026-09-12T18:58:38.6914255Z [36;1mif [ -z "${CARGO_TERM_COLOR+set}" ]; then[0m
+2026-09-12T18:58:38.6914805Z [36;1m  echo CARGO_TERM_COLOR=always >> $GITHUB_ENV[0m
+2026-09-12T18:58:38.6915100Z [36;1mfi[0m
+2026-09-12T18:58:38.6949030Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-12T18:58:38.6949373Z env:
+2026-09-12T18:58:38.6949589Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:38.6949864Z   CARGO_HOME: /home/runner/.cargo
+2026-09-12T18:58:38.6950114Z   CARGO_INCREMENTAL: 0
+2026-09-12T18:58:38.6950328Z ##[endgroup]
+2026-09-12T18:58:38.7256333Z ##[end-action id=__dtolnay_rust-toolchain.__run_7;outcome=success;conclusion=success;duration_ms=36]
+2026-09-12T18:58:38.7259613Z ##[start-action display=Enable Cargo sparse registry;id=__dtolnay_rust-toolchain.__run_8]
+2026-09-12T18:58:38.7284524Z ##[group]Run # implemented in 1.66, stabilized in 1.68, made default in 1.70
+2026-09-12T18:58:38.7285401Z [36;1m# implemented in 1.66, stabilized in 1.68, made default in 1.70[0m
+2026-09-12T18:58:38.7286725Z [36;1mif [ -z "${CARGO_REGISTRIES_CRATES_IO_PROTOCOL+set}" -o -f "/home/runner/work/_temp"/.implicit_cargo_registries_crates_io_protocol ]; then[0m
+2026-09-12T18:58:38.7288031Z [36;1m  if rustc +nightly-2026-09-10 --version --verbose | grep -q '^release: 1\.6[89]\.'; then[0m
+2026-09-12T18:58:38.7288682Z [36;1m    touch "/home/runner/work/_temp"/.implicit_cargo_registries_crates_io_protocol || true[0m
+2026-09-12T18:58:38.7290020Z [36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse >> $GITHUB_ENV[0m
+2026-09-12T18:58:38.7290990Z [36;1m  elif rustc +nightly-2026-09-10 --version --verbose | grep -q '^release: 1\.6[67]\.'; then[0m
+2026-09-12T18:58:38.7292346Z [36;1m    touch "/home/runner/work/_temp"/.implicit_cargo_registries_crates_io_protocol || true[0m
+2026-09-12T18:58:38.7293282Z [36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=git >> $GITHUB_ENV[0m
+2026-09-12T18:58:38.7293874Z [36;1m  fi[0m
+2026-09-12T18:58:38.7294242Z [36;1mfi[0m
+2026-09-12T18:58:38.7332765Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-12T18:58:38.7333129Z env:
+2026-09-12T18:58:38.7333357Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:38.7333632Z   CARGO_HOME: /home/runner/.cargo
+2026-09-12T18:58:38.7333898Z   CARGO_INCREMENTAL: 0
+2026-09-12T18:58:38.7334129Z   CARGO_TERM_COLOR: always
+2026-09-12T18:58:38.7334524Z ##[endgroup]
+2026-09-12T18:58:38.7614105Z ##[end-action id=__dtolnay_rust-toolchain.__run_8;outcome=success;conclusion=success;duration_ms=35]
+2026-09-12T18:58:38.7616861Z ##[start-action display=Work around spurious network errors in curl 8.0;id=__dtolnay_rust-toolchain.__run_9]
+2026-09-12T18:58:38.8841723Z ##[group]Run # https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation
+2026-09-12T18:58:38.8843281Z [36;1m# https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation[0m
+2026-09-12T18:58:38.8844409Z [36;1mif rustc +nightly-2026-09-10 --version --verbose | grep -q '^release: 1\.7[01]\.'; then[0m
+2026-09-12T18:58:38.8845272Z [36;1m  echo CARGO_HTTP_MULTIPLEXING=false >> $GITHUB_ENV[0m
+2026-09-12T18:58:38.8845811Z [36;1mfi[0m
+2026-09-12T18:58:38.8886072Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-12T18:58:38.8886429Z env:
+2026-09-12T18:58:38.8886641Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:38.8886926Z   CARGO_HOME: /home/runner/.cargo
+2026-09-12T18:58:38.8887180Z   CARGO_INCREMENTAL: 0
+2026-09-12T18:58:38.8887400Z   CARGO_TERM_COLOR: always
+2026-09-12T18:58:38.8887620Z ##[endgroup]
+2026-09-12T18:58:38.9917491Z ##[end-action id=__dtolnay_rust-toolchain.__run_9;outcome=success;conclusion=success;duration_ms=229]
+2026-09-12T18:58:38.9922236Z ##[start-action display=rustc +nightly-2026-09-10 --version --verbose;id=__dtolnay_rust-toolchain.__run_10]
+2026-09-12T18:58:39.1369642Z ##[group]Run rustc +nightly-2026-09-10 --version --verbose
+2026-09-12T18:58:39.1370108Z [36;1mrustc +nightly-2026-09-10 --version --verbose[0m
+2026-09-12T18:58:39.1404688Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-12T18:58:39.1405030Z env:
+2026-09-12T18:58:39.1405236Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:39.1405521Z   CARGO_HOME: /home/runner/.cargo
+2026-09-12T18:58:39.1405779Z   CARGO_INCREMENTAL: 0
+2026-09-12T18:58:39.1406015Z   CARGO_TERM_COLOR: always
+2026-09-12T18:58:39.1406246Z ##[endgroup]
+2026-09-12T18:58:39.1555549Z rustc 1.100.0-nightly (a36d05efa 2026-09-09)
+2026-09-12T18:58:39.1556339Z binary: rustc
+2026-09-12T18:58:39.1556806Z commit-hash: a36d05efab632d1ddf902b6a5c33b6d5d3b64131
+2026-09-12T18:58:39.1557219Z commit-date: 2026-09-09
+2026-09-12T18:58:39.1557596Z host: x86_64-unknown-linux-gnu
+2026-09-12T18:58:39.1558046Z release: 1.100.0-nightly
+2026-09-12T18:58:39.1558573Z LLVM version: 23.1.1
+2026-09-12T18:58:39.1572669Z ##[end-action id=__dtolnay_rust-toolchain.__run_10;outcome=success;conclusion=success;duration_ms=164]
+2026-09-12T18:58:39.2771699Z ##[group]Run rustc --version --verbose
+2026-09-12T18:58:39.2772111Z [36;1mrustc --version --verbose[0m
+2026-09-12T18:58:39.2772385Z [36;1mcargo miri --version[0m
+2026-09-12T18:58:39.2772633Z [36;1mcargo miri setup[0m
+2026-09-12T18:58:39.2807983Z shell: /usr/bin/bash -e {0}
+2026-09-12T18:58:39.2808234Z env:
+2026-09-12T18:58:39.2808438Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:39.2808709Z   CARGO_HOME: /home/runner/.cargo
+2026-09-12T18:58:39.2808978Z   CARGO_INCREMENTAL: 0
+2026-09-12T18:58:39.2809201Z   CARGO_TERM_COLOR: always
+2026-09-12T18:58:39.2809423Z ##[endgroup]
+2026-09-12T18:58:39.2958998Z rustc 1.100.0-nightly (a36d05efa 2026-09-09)
+2026-09-12T18:58:39.2959673Z binary: rustc
+2026-09-12T18:58:39.2960256Z commit-hash: a36d05efab632d1ddf902b6a5c33b6d5d3b64131
+2026-09-12T18:58:39.2960925Z commit-date: 2026-09-09
+2026-09-12T18:58:39.2961421Z host: x86_64-unknown-linux-gnu
+2026-09-12T18:58:39.2962246Z release: 1.100.0-nightly
+2026-09-12T18:58:39.2962708Z LLVM version: 23.1.1
+2026-09-12T18:58:39.3354051Z miri 0.1.0 (a36d05efab 2026-09-09)
+2026-09-12T18:58:39.3924779Z Preparing a sysroot for Miri (target: x86_64-unknown-linux-gnu)...
+2026-09-12T18:58:39.4333283Z [1m[92m    Updating[0m crates.io index
+2026-09-12T18:58:39.6315189Z [1m[92m Downloading[0m crates ...
+2026-09-12T18:58:39.7301703Z [1m[92m  Downloaded[0m adler2 v2.0.1
+2026-09-12T18:58:39.7517839Z [1m[92m  Downloaded[0m addr2line v0.27.1
+2026-09-12T18:58:39.7536329Z [1m[92m  Downloaded[0m getopts v0.2.24
+2026-09-12T18:58:39.7686443Z [1m[92m  Downloaded[0m rustc-literal-escaper v0.0.8
+2026-09-12T18:58:39.7701264Z [1m[92m  Downloaded[0m foldhash v0.2.0
+2026-09-12T18:58:39.7714192Z [1m[92m  Downloaded[0m cfg-if v1.0.4
+2026-09-12T18:58:39.7802492Z [1m[92m  Downloaded[0m rustc-demangle v0.1.28
+2026-09-12T18:58:39.8124708Z [1m[92m  Downloaded[0m miniz_oxide v0.9.1
+2026-09-12T18:58:39.8154974Z [1m[92m  Downloaded[0m memchr v2.8.3
+2026-09-12T18:58:39.8317465Z [1m[92m  Downloaded[0m hashbrown v0.17.1
+2026-09-12T18:58:39.8493330Z [1m[92m  Downloaded[0m object v0.39.1
+2026-09-12T18:58:39.8605275Z [1m[92m  Downloaded[0m gimli v0.34.0
+2026-09-12T18:58:39.8679591Z [1m[92m  Downloaded[0m libc v0.2.189
+2026-09-12T18:58:39.9364329Z [1m[92m   Compiling[0m compiler_builtins v0.1.160 (/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)
+2026-09-12T18:58:39.9366887Z [1m[92m   Compiling[0m core v0.0.0 (/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)
+2026-09-12T18:58:39.9368045Z [1m[92m   Compiling[0m libc v0.2.189
+2026-09-12T18:58:39.9368382Z [1m[92m   Compiling[0m object v0.39.1
+2026-09-12T18:58:40.0853616Z [1m[92m   Compiling[0m std v0.0.0 (/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std)
+2026-09-12T18:58:40.1306645Z [1m[92m   Compiling[0m test v0.0.0 (/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/test)
+2026-09-12T18:58:50.5556052Z [1m[92m   Compiling[0m rustc-std-workspace-core v1.99.0 (/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-core)
+2026-09-12T18:58:50.5558234Z [1m[92m   Compiling[0m alloc v0.0.0 (/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc)
+2026-09-12T18:58:50.5753204Z [1m[92m   Compiling[0m adler2 v2.0.1
+2026-09-12T18:58:50.5832870Z [1m[92m   Compiling[0m memchr v2.8.3
+2026-09-12T18:58:50.6232966Z [1m[92m   Compiling[0m rustc-demangle v0.1.28
+2026-09-12T18:58:50.8653457Z [1m[92m   Compiling[0m cfg-if v1.0.4
+2026-09-12T18:58:50.8842815Z [1m[92m   Compiling[0m rustc-literal-escaper v0.0.8
+2026-09-12T18:58:51.3286995Z [1m[92m   Compiling[0m unwind v0.0.0 (/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/unwind)
+2026-09-12T18:58:52.6177690Z [1m[92m   Compiling[0m rustc-std-workspace-alloc v1.99.0 (/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-alloc)
+2026-09-12T18:58:52.6180730Z [1m[92m   Compiling[0m panic_unwind v0.0.0 (/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/panic_unwind)
+2026-09-12T18:58:52.6187566Z [1m[92m   Compiling[0m panic_abort v0.0.0 (/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/panic_abort)
+2026-09-12T18:58:52.6473571Z [1m[92m   Compiling[0m gimli v0.34.0
+2026-09-12T18:58:52.6503265Z [1m[92m   Compiling[0m std_detect v0.1.5 (/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std_detect)
+2026-09-12T18:58:52.6532619Z [1m[92m   Compiling[0m miniz_oxide v0.9.1
+2026-09-12T18:58:52.7363100Z [1m[92m   Compiling[0m hashbrown v0.17.1
+2026-09-12T18:58:54.3417605Z [1m[92m   Compiling[0m addr2line v0.27.1
+2026-09-12T18:58:57.1213726Z [1m[92m   Compiling[0m rustc-std-workspace-std v1.99.0 (/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/rustc-std-workspace-std)
+2026-09-12T18:58:57.1216360Z [1m[92m   Compiling[0m proc_macro v0.0.0 (/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/proc_macro)
+2026-09-12T18:58:57.1361327Z [1m[92m   Compiling[0m getopts v0.2.24
+2026-09-12T18:58:57.8487963Z [1m[92m   Compiling[0m sysroot v0.0.0 (/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/sysroot)
+2026-09-12T18:58:57.8630527Z [1m[92m   Compiling[0m custom-local-sysroot v0.0.0 (/tmp/.tmpj2ehig)
+2026-09-12T18:58:57.8780852Z [1m[33mwarning[0m[1m: unused dependency `sysroot`[0m
+2026-09-12T18:58:57.8781798Z   [1m[94m--> [0mCargo.toml:18:15
+2026-09-12T18:58:57.8782198Z    [1m[94m|[0m
+2026-09-12T18:58:57.8782505Z [1m[94m18[0m [1m[94m|[0m [dependencies.sysroot]
+2026-09-12T18:58:57.8782906Z    [1m[94m|[0m               [1m[33m^^^^^^^^[0m
+2026-09-12T18:58:57.8783212Z    [1m[94m|[0m
+2026-09-12T18:58:57.8788509Z    [1m[94m= [0m[1mnote[0m: `cargo::unused_dependencies` is set to `warn` by default
+2026-09-12T18:58:57.8789107Z [1m[96mhelp[0m: consider removing the dependency on `sysroot`
+2026-09-12T18:58:57.8789644Z [1m[33mwarning[0m: `custom-local-sysroot` (manifest) generated 1 warning
+2026-09-12T18:58:57.8790241Z [1m[92m    Finished[0m `custom_sysroot` profile [optimized] target(s) in 18.48s
+2026-09-12T18:58:57.9467048Z A sysroot for Miri is now available in `/home/runner/.cache/miri`.
+2026-09-12T18:58:57.9500107Z ##[group]Run cargo miri test --locked -p oriole --lib context_text_ -- --list > "$RUNNER_TEMP/miri-core-tests"
+2026-09-12T18:58:57.9500922Z [36;1mcargo miri test --locked -p oriole --lib context_text_ -- --list > "$RUNNER_TEMP/miri-core-tests"[0m
+2026-09-12T18:58:57.9501910Z [36;1mcargo miri test --locked -p oriole_expat --lib context_text_ -- --list > "$RUNNER_TEMP/miri-c-tests"[0m
+2026-09-12T18:58:57.9502422Z [36;1mpython3 - <<'PY'[0m
+2026-09-12T18:58:57.9502655Z [36;1mimport os[0m
+2026-09-12T18:58:57.9502877Z [36;1mfrom pathlib import Path[0m
+2026-09-12T18:58:57.9503122Z [36;1m[0m
+2026-09-12T18:58:57.9503309Z [36;1mexpected = {[0m
+2026-09-12T18:58:57.9503523Z [36;1m    "core": {[0m
+2026-09-12T18:58:57.9503862Z [36;1m        "context_text_native_prefix_precedes_late_accounting_error",[0m
+2026-09-12T18:58:57.9504287Z [36;1m        "context_text_bounds_and_ordinary_api_reuse",[0m
+2026-09-12T18:58:57.9504705Z [36;1m        "context_text_excluded_sources_keep_owned_text",[0m
+2026-09-12T18:58:57.9505103Z [36;1m        "context_text_foreign_generation_uses_owned_events",[0m
+2026-09-12T18:58:57.9505428Z [36;1m    },[0m
+2026-09-12T18:58:57.9505620Z [36;1m    "c": {[0m
+2026-09-12T18:58:57.9505959Z [36;1m        "context_input_allocation_failures_preserve_sticky_errors_and_owners",[0m
+2026-09-12T18:58:57.9506458Z [36;1m        "context_text_pointer_survives_reentry_suspend_and_abort",[0m
+2026-09-12T18:58:57.9506901Z [36;1m        "context_text_offsets_compaction_split_utf8_and_sizes",[0m
+2026-09-12T18:58:57.9507347Z [36;1m        "context_text_default_and_excluded_paths_keep_exact_bytes",[0m
+2026-09-12T18:58:57.9507781Z [36;1m        "context_text_frame_and_raw_oom_match_owned_mode",[0m
+2026-09-12T18:58:57.9508174Z [36;1m        "context_text_invalid_host_range_fails_closed",[0m
+2026-09-12T18:58:57.9508569Z [36;1m        "context_text_warmed_reservations_do_not_allocate",[0m
+2026-09-12T18:58:57.9509008Z [36;1m        "context_text_late_handler_after_suspension_uses_eager_raw",[0m
+2026-09-12T18:58:57.9509364Z [36;1m    },[0m
+2026-09-12T18:58:57.9509562Z [36;1m}[0m
+2026-09-12T18:58:57.9509787Z [36;1mfor target, names in expected.items():[0m
+2026-09-12T18:58:57.9510276Z [36;1m    lines = (Path(os.environ["RUNNER_TEMP"]) / f"miri-{target}-tests").read_text().splitlines()[0m
+2026-09-12T18:58:57.9510905Z [36;1m    actual = {line.removesuffix(": test") for line in lines if line.endswith(": test")}[0m
+2026-09-12T18:58:57.9511742Z [36;1m    assert actual == {f"context_text_tests::{name}" for name in names}, (target, actual)[0m
+2026-09-12T18:58:57.9512220Z [36;1mPY[0m
+2026-09-12T18:58:57.9546555Z shell: /usr/bin/bash -e {0}
+2026-09-12T18:58:57.9546973Z env:
+2026-09-12T18:58:57.9547179Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:58:57.9547453Z   CARGO_HOME: /home/runner/.cargo
+2026-09-12T18:58:57.9547701Z   CARGO_INCREMENTAL: 0
+2026-09-12T18:58:57.9547927Z   CARGO_TERM_COLOR: always
+2026-09-12T18:58:57.9548146Z ##[endgroup]
+2026-09-12T18:58:58.0371643Z [1m[33mwarning[0m[1m: unused workspace dependency `serde`[0m
+2026-09-12T18:58:58.0372500Z   [1m[94m--> [0mCargo.toml:15:1
+2026-09-12T18:58:58.0372983Z    [1m[94m|[0m
+2026-09-12T18:58:58.0373612Z [1m[94m15[0m [1m[94m|[0m serde = { version = "1.0", features = ["derive"] }
+2026-09-12T18:58:58.0374287Z    [1m[94m|[0m [1m[33m^^^^^[0m
+2026-09-12T18:58:58.0374743Z    [1m[94m|[0m
+2026-09-12T18:58:58.0375705Z    [1m[94m= [0m[1mnote[0m: `cargo::unused_workspace_dependencies` is set to `warn` by default
+2026-09-12T18:58:58.0376665Z [1m[96mhelp[0m: consider removing the workspace dependency `serde`
+2026-09-12T18:58:58.0377249Z [1m[33mwarning[0m[1m: unused workspace dependency `serde_json`[0m
+2026-09-12T18:58:58.0377671Z   [1m[94m--> [0mCargo.toml:16:1
+2026-09-12T18:58:58.0377941Z    [1m[94m|[0m
+2026-09-12T18:58:58.0378206Z [1m[94m16[0m [1m[94m|[0m serde_json = "1.0"
+2026-09-12T18:58:58.0378542Z    [1m[94m|[0m [1m[33m^^^^^^^^^^[0m
+2026-09-12T18:58:58.0379110Z    [1m[94m|[0m
+2026-09-12T18:58:58.0379493Z [1m[96mhelp[0m: consider removing the workspace dependency `serde_json`
+2026-09-12T18:58:58.0380019Z [1m[33mwarning[0m: workspace (manifest) generated 2 warnings
+2026-09-12T18:58:58.0640895Z [1m[92m    Updating[0m crates.io index
+2026-09-12T18:58:58.2573976Z [1m[92m Downloading[0m crates ...
+2026-09-12T18:58:58.3454064Z [1m[92m  Downloaded[0m allocator-api2 v0.2.21
+2026-09-12T18:58:58.3873258Z [1m[92m  Downloaded[0m bytemuck v1.25.2
+2026-09-12T18:58:58.3961824Z [1m[92m  Downloaded[0m hashbrown v0.16.1
+2026-09-12T18:58:58.4012858Z [1m[92m  Downloaded[0m safe_arch v1.2.0
+2026-09-12T18:58:58.4058392Z [1m[92m  Downloaded[0m wide v1.7.0
+2026-09-12T18:58:58.4272616Z [1m[92m   Compiling[0m bytemuck v1.25.2
+2026-09-12T18:58:58.4273385Z [1m[92m   Compiling[0m allocator-api2 v0.2.21
+2026-09-12T18:58:58.4274051Z [1m[92m   Compiling[0m memchr v2.8.3
+2026-09-12T18:58:58.5732938Z [1m[92m   Compiling[0m safe_arch v1.2.0
+2026-09-12T18:58:58.7480803Z [1m[92m   Compiling[0m hashbrown v0.16.1
+2026-09-12T18:58:58.8415313Z [1m[92m   Compiling[0m wide v1.7.0
+2026-09-12T18:58:59.1202241Z [1m[92m   Compiling[0m oriole_storage v0.0.1 (/home/runner/work/oriole/oriole/crates/oriole_storage)
+2026-09-12T18:58:59.1771962Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:58:59.1773601Z   [1m[94m--> [0mcrates/oriole_storage/src/shared.rs:37:14
+2026-09-12T18:58:59.1774380Z    [1m[94m|[0m
+2026-09-12T18:58:59.1775394Z [1m[94m37[0m [1m[94m|[0m             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+2026-09-12T18:58:59.1776535Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:58:59.1777284Z    [1m[94m|[0m
+2026-09-12T18:58:59.1777983Z    [1m[94m= [0m[1mnote[0m: `#[warn(deprecated)]` on by default
+2026-09-12T18:58:59.1778966Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:58:59.1779786Z    [1m[94m|[0m
+2026-09-12T18:58:59.1780887Z [1m[94m37[0m [91m- [0m            .[91mfetch_update[0m(Ordering::Relaxed, Ordering::Relaxed, |count| {
+2026-09-12T18:58:59.1782829Z [1m[94m37[0m [92m+ [0m            .[92mtry_update[0m(Ordering::Relaxed, Ordering::Relaxed, |count| {
+2026-09-12T18:58:59.1783899Z    [1m[94m|[0m
+2026-09-12T18:58:59.1784242Z 
+2026-09-12T18:58:59.1859586Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:58:59.1861116Z   [1m[94m--> [0mcrates/oriole_storage/src/tracking.rs:60:14
+2026-09-12T18:58:59.1862156Z    [1m[94m|[0m
+2026-09-12T18:58:59.1863774Z [1m[94m60[0m [1m[94m|[0m             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
+2026-09-12T18:58:59.1864732Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:58:59.1889423Z    [1m[94m|[0m
+2026-09-12T18:58:59.1890078Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:58:59.1890751Z    [1m[94m|[0m
+2026-09-12T18:58:59.1891999Z [1m[94m60[0m [91m- [0m            .[91mfetch_update[0m(Ordering::Relaxed, Ordering::Relaxed, |value| {
+2026-09-12T18:58:59.1893400Z [1m[94m60[0m [92m+ [0m            .[92mtry_update[0m(Ordering::Relaxed, Ordering::Relaxed, |value| {
+2026-09-12T18:58:59.1894233Z    [1m[94m|[0m
+2026-09-12T18:58:59.1894458Z 
+2026-09-12T18:58:59.1895737Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:58:59.1897051Z   [1m[94m--> [0mcrates/oriole_storage/src/tracking.rs:84:14
+2026-09-12T18:58:59.1897717Z    [1m[94m|[0m
+2026-09-12T18:58:59.1898646Z [1m[94m84[0m [1m[94m|[0m             .fetch_update(Ordering::AcqRel, Ordering::Relaxed, |current| {
+2026-09-12T18:58:59.1899613Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:58:59.1900554Z    [1m[94m|[0m
+2026-09-12T18:58:59.1902026Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:58:59.1902956Z    [1m[94m|[0m
+2026-09-12T18:58:59.1904227Z [1m[94m84[0m [91m- [0m            .[91mfetch_update[0m(Ordering::AcqRel, Ordering::Relaxed, |current| {
+2026-09-12T18:58:59.1905854Z [1m[94m84[0m [92m+ [0m            .[92mtry_update[0m(Ordering::AcqRel, Ordering::Relaxed, |current| {
+2026-09-12T18:58:59.1906848Z    [1m[94m|[0m
+2026-09-12T18:58:59.1907233Z 
+2026-09-12T18:58:59.2565995Z [1m[33mwarning[0m: `oriole_storage` (lib) generated 3 warnings (run `cargo fix --lib -p oriole_storage` to apply 3 suggestions)
+2026-09-12T18:59:02.7615099Z [1m[92m   Compiling[0m oriole v0.0.1 (/home/runner/work/oriole/oriole/crates/oriole)
+2026-09-12T18:59:02.7732685Z [1m[92m    Finished[0m `test` profile [unoptimized + debuginfo] target(s) in 4.74s
+2026-09-12T18:59:02.7747958Z [1m[92m     Running[0m unittests src/lib.rs (target/miri/x86_64-unknown-linux-gnu/debug/build/oriole/00320b1a89db29d5/out/oriole-00320b1a89db29d5)
+2026-09-12T18:59:02.9414763Z warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+2026-09-12T18:59:02.9416281Z   --> crates/oriole/src/accounting.rs:66:14
+2026-09-12T18:59:02.9416986Z    |
+2026-09-12T18:59:02.9417707Z 66 |             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
+2026-09-12T18:59:02.9418659Z    |              ^^^^^^^^^^^^
+2026-09-12T18:59:02.9419276Z    |
+2026-09-12T18:59:02.9419831Z    = note: `#[warn(deprecated)]` on by default
+2026-09-12T18:59:02.9420694Z help: replace the use of the deprecated method
+2026-09-12T18:59:02.9493492Z    |
+2026-09-12T18:59:02.9494164Z 66 -             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
+2026-09-12T18:59:02.9495064Z 66 +             .try_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
+2026-09-12T18:59:02.9495688Z    |
+2026-09-12T18:59:02.9495876Z 
+2026-09-12T18:59:03.1519918Z warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+2026-09-12T18:59:03.1521118Z   --> crates/oriole/src/recycling.rs:36:14
+2026-09-12T18:59:03.1522120Z    |
+2026-09-12T18:59:03.1522841Z 36 |             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+2026-09-12T18:59:03.1523638Z    |              ^^^^^^^^^^^^
+2026-09-12T18:59:03.1523929Z    |
+2026-09-12T18:59:03.1524207Z help: replace the use of the deprecated method
+2026-09-12T18:59:03.1524562Z    |
+2026-09-12T18:59:03.1524985Z 36 -             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+2026-09-12T18:59:03.1525674Z 36 +             .try_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+2026-09-12T18:59:03.1526575Z    |
+2026-09-12T18:59:03.1526708Z 
+2026-09-12T18:59:03.3179633Z warning: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency
+2026-09-12T18:59:03.3180743Z     --> crates/oriole/src/lib.rs:3915:14
+2026-09-12T18:59:03.3181094Z      |
+2026-09-12T18:59:03.3181778Z 3915 |             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
+2026-09-12T18:59:03.3182285Z      |              ^^^^^^^^^^^^
+2026-09-12T18:59:03.3182567Z      |
+2026-09-12T18:59:03.3182842Z help: replace the use of the deprecated method
+2026-09-12T18:59:03.3183207Z      |
+2026-09-12T18:59:03.3183607Z 3915 -             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
+2026-09-12T18:59:03.3184214Z 3915 +             .try_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
+2026-09-12T18:59:03.3184655Z      |
+2026-09-12T18:59:03.3184776Z 
+2026-09-12T18:59:05.3509783Z warning: 3 warnings emitted
+2026-09-12T18:59:05.3510239Z 
+2026-09-12T18:59:05.4368343Z [1m[33mwarning[0m[1m: unused workspace dependency `serde`[0m
+2026-09-12T18:59:05.4369135Z   [1m[94m--> [0mCargo.toml:15:1
+2026-09-12T18:59:05.4369612Z    [1m[94m|[0m
+2026-09-12T18:59:05.4370564Z [1m[94m15[0m [1m[94m|[0m serde = { version = "1.0", features = ["derive"] }
+2026-09-12T18:59:05.4371300Z    [1m[94m|[0m [1m[33m^^^^^[0m
+2026-09-12T18:59:05.4372065Z    [1m[94m|[0m
+2026-09-12T18:59:05.4373027Z    [1m[94m= [0m[1mnote[0m: `cargo::unused_workspace_dependencies` is set to `warn` by default
+2026-09-12T18:59:05.4374028Z [1m[96mhelp[0m: consider removing the workspace dependency `serde`
+2026-09-12T18:59:05.4374907Z [1m[33mwarning[0m[1m: unused workspace dependency `serde_json`[0m
+2026-09-12T18:59:05.4375625Z   [1m[94m--> [0mCargo.toml:16:1
+2026-09-12T18:59:05.4376111Z    [1m[94m|[0m
+2026-09-12T18:59:05.4376594Z [1m[94m16[0m [1m[94m|[0m serde_json = "1.0"
+2026-09-12T18:59:05.4377193Z    [1m[94m|[0m [1m[33m^^^^^^^^^^[0m
+2026-09-12T18:59:05.4377683Z    [1m[94m|[0m
+2026-09-12T18:59:05.4378317Z [1m[96mhelp[0m: consider removing the workspace dependency `serde_json`
+2026-09-12T18:59:05.4379218Z [1m[33mwarning[0m: workspace (manifest) generated 2 warnings
+2026-09-12T18:59:05.4420285Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:05.4421958Z   [1m[94m--> [0mcrates/oriole_storage/src/shared.rs:37:14
+2026-09-12T18:59:05.4422575Z    [1m[94m|[0m
+2026-09-12T18:59:05.4423439Z [1m[94m37[0m [1m[94m|[0m             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+2026-09-12T18:59:05.4424278Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:05.4424783Z    [1m[94m|[0m
+2026-09-12T18:59:05.4425321Z    [1m[94m= [0m[1mnote[0m: `#[warn(deprecated)]` on by default
+2026-09-12T18:59:05.4426096Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:05.4426703Z    [1m[94m|[0m
+2026-09-12T18:59:05.4427585Z [1m[94m37[0m [91m- [0m            .[91mfetch_update[0m(Ordering::Relaxed, Ordering::Relaxed, |count| {
+2026-09-12T18:59:05.4428666Z [1m[94m37[0m [92m+ [0m            .[92mtry_update[0m(Ordering::Relaxed, Ordering::Relaxed, |count| {
+2026-09-12T18:59:05.4429135Z    [1m[94m|[0m
+2026-09-12T18:59:05.4429265Z 
+2026-09-12T18:59:05.4429817Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:05.4430571Z   [1m[94m--> [0mcrates/oriole_storage/src/tracking.rs:60:14
+2026-09-12T18:59:05.4430909Z    [1m[94m|[0m
+2026-09-12T18:59:05.4431414Z [1m[94m60[0m [1m[94m|[0m             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
+2026-09-12T18:59:05.4432554Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:05.4432883Z    [1m[94m|[0m
+2026-09-12T18:59:05.4433407Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:05.4433747Z    [1m[94m|[0m
+2026-09-12T18:59:05.4434255Z [1m[94m60[0m [91m- [0m            .[91mfetch_update[0m(Ordering::Relaxed, Ordering::Relaxed, |value| {
+2026-09-12T18:59:05.4434963Z [1m[94m60[0m [92m+ [0m            .[92mtry_update[0m(Ordering::Relaxed, Ordering::Relaxed, |value| {
+2026-09-12T18:59:05.4435410Z    [1m[94m|[0m
+2026-09-12T18:59:05.4435526Z 
+2026-09-12T18:59:05.4436052Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:05.4436736Z   [1m[94m--> [0mcrates/oriole_storage/src/tracking.rs:84:14
+2026-09-12T18:59:05.4437068Z    [1m[94m|[0m
+2026-09-12T18:59:05.4437532Z [1m[94m84[0m [1m[94m|[0m             .fetch_update(Ordering::AcqRel, Ordering::Relaxed, |current| {
+2026-09-12T18:59:05.4438022Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:05.4438324Z    [1m[94m|[0m
+2026-09-12T18:59:05.4438625Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:05.4438949Z    [1m[94m|[0m
+2026-09-12T18:59:05.4439661Z [1m[94m84[0m [91m- [0m            .[91mfetch_update[0m(Ordering::AcqRel, Ordering::Relaxed, |current| {
+2026-09-12T18:59:05.4440366Z [1m[94m84[0m [92m+ [0m            .[92mtry_update[0m(Ordering::AcqRel, Ordering::Relaxed, |current| {
+2026-09-12T18:59:05.4440800Z    [1m[94m|[0m
+2026-09-12T18:59:05.4440914Z 
+2026-09-12T18:59:05.4441369Z [1m[33mwarning[0m: `oriole_storage` (lib) generated 3 warnings (run `cargo fix --lib -p oriole_storage` to apply 3 suggestions)
+2026-09-12T18:59:05.4442550Z [1m[92m   Compiling[0m oriole v0.0.1 (/home/runner/work/oriole/oriole/crates/oriole)
+2026-09-12T18:59:05.5644741Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:05.5646057Z   [1m[94m--> [0mcrates/oriole/src/accounting.rs:66:14
+2026-09-12T18:59:05.5646691Z    [1m[94m|[0m
+2026-09-12T18:59:05.5647613Z [1m[94m66[0m [1m[94m|[0m             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
+2026-09-12T18:59:05.5648582Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:05.5649141Z    [1m[94m|[0m
+2026-09-12T18:59:05.5649742Z    [1m[94m= [0m[1mnote[0m: `#[warn(deprecated)]` on by default
+2026-09-12T18:59:05.5650521Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:05.5651152Z    [1m[94m|[0m
+2026-09-12T18:59:05.5652578Z [1m[94m66[0m [91m- [0m            .[91mfetch_update[0m(Ordering::Relaxed, Ordering::Relaxed, |current| {
+2026-09-12T18:59:05.5653989Z [1m[94m66[0m [92m+ [0m            .[92mtry_update[0m(Ordering::Relaxed, Ordering::Relaxed, |current| {
+2026-09-12T18:59:05.5654808Z    [1m[94m|[0m
+2026-09-12T18:59:05.5655031Z 
+2026-09-12T18:59:05.6936039Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:05.6937440Z   [1m[94m--> [0mcrates/oriole/src/recycling.rs:36:14
+2026-09-12T18:59:05.6938065Z    [1m[94m|[0m
+2026-09-12T18:59:05.6939115Z [1m[94m36[0m [1m[94m|[0m             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+2026-09-12T18:59:05.6940166Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:05.6940749Z    [1m[94m|[0m
+2026-09-12T18:59:05.6941334Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:05.6942305Z    [1m[94m|[0m
+2026-09-12T18:59:05.6943332Z [1m[94m36[0m [91m- [0m            .[91mfetch_update[0m(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+2026-09-12T18:59:05.6944877Z [1m[94m36[0m [92m+ [0m            .[92mtry_update[0m(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+2026-09-12T18:59:05.6945842Z    [1m[94m|[0m
+2026-09-12T18:59:05.6946373Z 
+2026-09-12T18:59:05.8062748Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:05.8063745Z     [1m[94m--> [0mcrates/oriole/src/lib.rs:3915:14
+2026-09-12T18:59:05.8064193Z      [1m[94m|[0m
+2026-09-12T18:59:05.8064868Z [1m[94m3915[0m [1m[94m|[0m             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
+2026-09-12T18:59:05.8065545Z      [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:05.8065939Z      [1m[94m|[0m
+2026-09-12T18:59:05.8066334Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:05.8066762Z      [1m[94m|[0m
+2026-09-12T18:59:05.8067402Z [1m[94m3915[0m [91m- [0m            .[91mfetch_update[0m(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
+2026-09-12T18:59:05.8068163Z [1m[94m3915[0m [92m+ [0m            .[92mtry_update[0m(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
+2026-09-12T18:59:05.8068641Z      [1m[94m|[0m
+2026-09-12T18:59:05.8068775Z 
+2026-09-12T18:59:06.4578433Z [1m[33mwarning[0m: `oriole` (lib) generated 3 warnings (run `cargo fix --lib -p oriole` to apply 3 suggestions)
+2026-09-12T18:59:06.4579510Z [1m[92m   Compiling[0m oriole_expat v0.0.1 (/home/runner/work/oriole/oriole/crates/oriole_expat)
+2026-09-12T18:59:06.4688561Z [1m[92m    Finished[0m `test` profile [unoptimized + debuginfo] target(s) in 1.03s
+2026-09-12T18:59:06.4693926Z [1m[92m     Running[0m unittests src/lib.rs (target/miri/x86_64-unknown-linux-gnu/debug/build/oriole_expat/4eb661d04e0e09cc/out/oriole_expat-4eb661d04e0e09cc)
+2026-09-12T18:59:08.5065544Z ##[group]Run cargo miri test --locked -p oriole --lib context_text_
+2026-09-12T18:59:08.5066073Z [36;1mcargo miri test --locked -p oriole --lib context_text_[0m
+2026-09-12T18:59:08.5100252Z shell: /usr/bin/bash -e {0}
+2026-09-12T18:59:08.5100503Z env:
+2026-09-12T18:59:08.5100709Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:59:08.5100990Z   CARGO_HOME: /home/runner/.cargo
+2026-09-12T18:59:08.5101254Z   CARGO_INCREMENTAL: 0
+2026-09-12T18:59:08.5101765Z   CARGO_TERM_COLOR: always
+2026-09-12T18:59:08.5102002Z ##[endgroup]
+2026-09-12T18:59:08.5919691Z [1m[33mwarning[0m[1m: unused workspace dependency `serde`[0m
+2026-09-12T18:59:08.5920459Z   [1m[94m--> [0mCargo.toml:15:1
+2026-09-12T18:59:08.5920939Z    [1m[94m|[0m
+2026-09-12T18:59:08.5921773Z [1m[94m15[0m [1m[94m|[0m serde = { version = "1.0", features = ["derive"] }
+2026-09-12T18:59:08.5922494Z    [1m[94m|[0m [1m[33m^^^^^[0m
+2026-09-12T18:59:08.5922966Z    [1m[94m|[0m
+2026-09-12T18:59:08.5923958Z    [1m[94m= [0m[1mnote[0m: `cargo::unused_workspace_dependencies` is set to `warn` by default
+2026-09-12T18:59:08.5924957Z [1m[96mhelp[0m: consider removing the workspace dependency `serde`
+2026-09-12T18:59:08.5925815Z [1m[33mwarning[0m[1m: unused workspace dependency `serde_json`[0m
+2026-09-12T18:59:08.5926510Z   [1m[94m--> [0mCargo.toml:16:1
+2026-09-12T18:59:08.5927007Z    [1m[94m|[0m
+2026-09-12T18:59:08.5927484Z [1m[94m16[0m [1m[94m|[0m serde_json = "1.0"
+2026-09-12T18:59:08.5928086Z    [1m[94m|[0m [1m[33m^^^^^^^^^^[0m
+2026-09-12T18:59:08.5928584Z    [1m[94m|[0m
+2026-09-12T18:59:08.5929215Z [1m[96mhelp[0m: consider removing the workspace dependency `serde_json`
+2026-09-12T18:59:08.5930094Z [1m[33mwarning[0m: workspace (manifest) generated 2 warnings
+2026-09-12T18:59:08.5967201Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:08.5968554Z   [1m[94m--> [0mcrates/oriole_storage/src/shared.rs:37:14
+2026-09-12T18:59:08.5969168Z    [1m[94m|[0m
+2026-09-12T18:59:08.5970015Z [1m[94m37[0m [1m[94m|[0m             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+2026-09-12T18:59:08.5970925Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:08.5971713Z    [1m[94m|[0m
+2026-09-12T18:59:08.5972392Z    [1m[94m= [0m[1mnote[0m: `#[warn(deprecated)]` on by default
+2026-09-12T18:59:08.5973122Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:08.5973486Z    [1m[94m|[0m
+2026-09-12T18:59:08.5974004Z [1m[94m37[0m [91m- [0m            .[91mfetch_update[0m(Ordering::Relaxed, Ordering::Relaxed, |count| {
+2026-09-12T18:59:08.5974726Z [1m[94m37[0m [92m+ [0m            .[92mtry_update[0m(Ordering::Relaxed, Ordering::Relaxed, |count| {
+2026-09-12T18:59:08.5975179Z    [1m[94m|[0m
+2026-09-12T18:59:08.5975302Z 
+2026-09-12T18:59:08.5975829Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:08.5976525Z   [1m[94m--> [0mcrates/oriole_storage/src/tracking.rs:60:14
+2026-09-12T18:59:08.5976862Z    [1m[94m|[0m
+2026-09-12T18:59:08.5977312Z [1m[94m60[0m [1m[94m|[0m             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
+2026-09-12T18:59:08.5977802Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:08.5978103Z    [1m[94m|[0m
+2026-09-12T18:59:08.5978395Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:08.5978722Z    [1m[94m|[0m
+2026-09-12T18:59:08.5979192Z [1m[94m60[0m [91m- [0m            .[91mfetch_update[0m(Ordering::Relaxed, Ordering::Relaxed, |value| {
+2026-09-12T18:59:08.5979875Z [1m[94m60[0m [92m+ [0m            .[92mtry_update[0m(Ordering::Relaxed, Ordering::Relaxed, |value| {
+2026-09-12T18:59:08.5980303Z    [1m[94m|[0m
+2026-09-12T18:59:08.5980412Z 
+2026-09-12T18:59:08.5981212Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:08.5982228Z   [1m[94m--> [0mcrates/oriole_storage/src/tracking.rs:84:14
+2026-09-12T18:59:08.5982567Z    [1m[94m|[0m
+2026-09-12T18:59:08.5983040Z [1m[94m84[0m [1m[94m|[0m             .fetch_update(Ordering::AcqRel, Ordering::Relaxed, |current| {
+2026-09-12T18:59:08.5983542Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:08.5983838Z    [1m[94m|[0m
+2026-09-12T18:59:08.5984136Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:08.5984456Z    [1m[94m|[0m
+2026-09-12T18:59:08.5984926Z [1m[94m84[0m [91m- [0m            .[91mfetch_update[0m(Ordering::AcqRel, Ordering::Relaxed, |current| {
+2026-09-12T18:59:08.5985649Z [1m[94m84[0m [92m+ [0m            .[92mtry_update[0m(Ordering::AcqRel, Ordering::Relaxed, |current| {
+2026-09-12T18:59:08.5986084Z    [1m[94m|[0m
+2026-09-12T18:59:08.5986202Z 
+2026-09-12T18:59:08.5986664Z [1m[33mwarning[0m: `oriole_storage` (lib) generated 3 warnings (run `cargo fix --lib -p oriole_storage` to apply 3 suggestions)
+2026-09-12T18:59:08.5987400Z [1m[92m    Finished[0m `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+2026-09-12T18:59:08.5988251Z [1m[92m     Running[0m unittests src/lib.rs (target/miri/x86_64-unknown-linux-gnu/debug/build/oriole/00320b1a89db29d5/out/oriole-00320b1a89db29d5)
+2026-09-12T18:59:08.7600411Z warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+2026-09-12T18:59:08.7601185Z   --> crates/oriole/src/accounting.rs:66:14
+2026-09-12T18:59:08.7601819Z    |
+2026-09-12T18:59:08.7602196Z 66 |             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
+2026-09-12T18:59:08.7602694Z    |              ^^^^^^^^^^^^
+2026-09-12T18:59:08.7602938Z    |
+2026-09-12T18:59:08.7603148Z    = note: `#[warn(deprecated)]` on by default
+2026-09-12T18:59:08.7603515Z help: replace the use of the deprecated method
+2026-09-12T18:59:08.7603804Z    |
+2026-09-12T18:59:08.7604098Z 66 -             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
+2026-09-12T18:59:08.7604607Z 66 +             .try_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
+2026-09-12T18:59:08.7604966Z    |
+2026-09-12T18:59:08.7605070Z 
+2026-09-12T18:59:08.9742674Z warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+2026-09-12T18:59:08.9743782Z   --> crates/oriole/src/recycling.rs:36:14
+2026-09-12T18:59:08.9744280Z    |
+2026-09-12T18:59:08.9744890Z 36 |             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+2026-09-12T18:59:08.9745639Z    |              ^^^^^^^^^^^^
+2026-09-12T18:59:08.9746069Z    |
+2026-09-12T18:59:08.9746470Z help: replace the use of the deprecated method
+2026-09-12T18:59:08.9747004Z    |
+2026-09-12T18:59:08.9747650Z 36 -             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+2026-09-12T18:59:08.9748670Z 36 +             .try_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+2026-09-12T18:59:08.9749377Z    |
+2026-09-12T18:59:08.9749562Z 
+2026-09-12T18:59:09.1411228Z warning: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency
+2026-09-12T18:59:09.1412604Z     --> crates/oriole/src/lib.rs:3915:14
+2026-09-12T18:59:09.1413095Z      |
+2026-09-12T18:59:09.1413662Z 3915 |             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
+2026-09-12T18:59:09.1414358Z      |              ^^^^^^^^^^^^
+2026-09-12T18:59:09.1414775Z      |
+2026-09-12T18:59:09.1415187Z help: replace the use of the deprecated method
+2026-09-12T18:59:09.1415695Z      |
+2026-09-12T18:59:09.1416251Z 3915 -             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
+2026-09-12T18:59:09.1417701Z 3915 +             .try_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
+2026-09-12T18:59:09.1418393Z      |
+2026-09-12T18:59:09.1418580Z 
+2026-09-12T18:59:11.1344711Z 
+2026-09-12T18:59:11.1346637Z running 4 tests
+2026-09-12T18:59:16.7534446Z test context_text_tests::context_text_bounds_and_ordinary_api_reuse ... ok
+2026-09-12T18:59:20.0054093Z test context_text_tests::context_text_excluded_sources_keep_owned_text ... ok
+2026-09-12T18:59:20.2425614Z test context_text_tests::context_text_foreign_generation_uses_owned_events ... ok
+2026-09-12T18:59:20.6040570Z test context_text_tests::context_text_native_prefix_precedes_late_accounting_error ... ok
+2026-09-12T18:59:20.6218637Z 
+2026-09-12T18:59:20.6790847Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 93 filtered out; finished in 9.45s
+2026-09-12T18:59:20.6791340Z 
+2026-09-12T18:59:20.7200952Z warning: 3 warnings emitted
+2026-09-12T18:59:20.7201196Z 
+2026-09-12T18:59:20.7302820Z ##[group]Run cargo miri test --locked -p oriole_expat --lib context_text_
+2026-09-12T18:59:20.7303446Z [36;1mcargo miri test --locked -p oriole_expat --lib context_text_[0m
+2026-09-12T18:59:20.7337632Z shell: /usr/bin/bash -e {0}
+2026-09-12T18:59:20.7337890Z env:
+2026-09-12T18:59:20.7338095Z   MIRIFLAGS: -Zmiri-tree-borrows
+2026-09-12T18:59:20.7338373Z   CARGO_HOME: /home/runner/.cargo
+2026-09-12T18:59:20.7338625Z   CARGO_INCREMENTAL: 0
+2026-09-12T18:59:20.7338843Z   CARGO_TERM_COLOR: always
+2026-09-12T18:59:20.7339075Z ##[endgroup]
+2026-09-12T18:59:20.8158363Z [1m[33mwarning[0m[1m: unused workspace dependency `serde`[0m
+2026-09-12T18:59:20.8159145Z   [1m[94m--> [0mCargo.toml:15:1
+2026-09-12T18:59:20.8159620Z    [1m[94m|[0m
+2026-09-12T18:59:20.8160255Z [1m[94m15[0m [1m[94m|[0m serde = { version = "1.0", features = ["derive"] }
+2026-09-12T18:59:20.8160949Z    [1m[94m|[0m [1m[33m^^^^^[0m
+2026-09-12T18:59:20.8161418Z    [1m[94m|[0m
+2026-09-12T18:59:20.8162693Z    [1m[94m= [0m[1mnote[0m: `cargo::unused_workspace_dependencies` is set to `warn` by default
+2026-09-12T18:59:20.8163701Z [1m[96mhelp[0m: consider removing the workspace dependency `serde`
+2026-09-12T18:59:20.8164563Z [1m[33mwarning[0m[1m: unused workspace dependency `serde_json`[0m
+2026-09-12T18:59:20.8165269Z   [1m[94m--> [0mCargo.toml:16:1
+2026-09-12T18:59:20.8165736Z    [1m[94m|[0m
+2026-09-12T18:59:20.8166211Z [1m[94m16[0m [1m[94m|[0m serde_json = "1.0"
+2026-09-12T18:59:20.8166792Z    [1m[94m|[0m [1m[33m^^^^^^^^^^[0m
+2026-09-12T18:59:20.8167671Z    [1m[94m|[0m
+2026-09-12T18:59:20.8168312Z [1m[96mhelp[0m: consider removing the workspace dependency `serde_json`
+2026-09-12T18:59:20.8169173Z [1m[33mwarning[0m: workspace (manifest) generated 2 warnings
+2026-09-12T18:59:20.8207004Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:20.8208724Z   [1m[94m--> [0mcrates/oriole_storage/src/shared.rs:37:14
+2026-09-12T18:59:20.8209613Z    [1m[94m|[0m
+2026-09-12T18:59:20.8210522Z [1m[94m37[0m [1m[94m|[0m             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+2026-09-12T18:59:20.8211231Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:20.8211928Z    [1m[94m|[0m
+2026-09-12T18:59:20.8212285Z    [1m[94m= [0m[1mnote[0m: `#[warn(deprecated)]` on by default
+2026-09-12T18:59:20.8212746Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:20.8213109Z    [1m[94m|[0m
+2026-09-12T18:59:20.8213633Z [1m[94m37[0m [91m- [0m            .[91mfetch_update[0m(Ordering::Relaxed, Ordering::Relaxed, |count| {
+2026-09-12T18:59:20.8214368Z [1m[94m37[0m [92m+ [0m            .[92mtry_update[0m(Ordering::Relaxed, Ordering::Relaxed, |count| {
+2026-09-12T18:59:20.8214822Z    [1m[94m|[0m
+2026-09-12T18:59:20.8214939Z 
+2026-09-12T18:59:20.8215504Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:20.8216197Z   [1m[94m--> [0mcrates/oriole_storage/src/tracking.rs:60:14
+2026-09-12T18:59:20.8216535Z    [1m[94m|[0m
+2026-09-12T18:59:20.8216988Z [1m[94m60[0m [1m[94m|[0m             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
+2026-09-12T18:59:20.8217480Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:20.8217800Z    [1m[94m|[0m
+2026-09-12T18:59:20.8218114Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:20.8218456Z    [1m[94m|[0m
+2026-09-12T18:59:20.8218936Z [1m[94m60[0m [91m- [0m            .[91mfetch_update[0m(Ordering::Relaxed, Ordering::Relaxed, |value| {
+2026-09-12T18:59:20.8219636Z [1m[94m60[0m [92m+ [0m            .[92mtry_update[0m(Ordering::Relaxed, Ordering::Relaxed, |value| {
+2026-09-12T18:59:20.8220073Z    [1m[94m|[0m
+2026-09-12T18:59:20.8220187Z 
+2026-09-12T18:59:20.8220992Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:20.8222069Z   [1m[94m--> [0mcrates/oriole_storage/src/tracking.rs:84:14
+2026-09-12T18:59:20.8222426Z    [1m[94m|[0m
+2026-09-12T18:59:20.8222900Z [1m[94m84[0m [1m[94m|[0m             .fetch_update(Ordering::AcqRel, Ordering::Relaxed, |current| {
+2026-09-12T18:59:20.8223395Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:20.8223704Z    [1m[94m|[0m
+2026-09-12T18:59:20.8224003Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:20.8224330Z    [1m[94m|[0m
+2026-09-12T18:59:20.8224807Z [1m[94m84[0m [91m- [0m            .[91mfetch_update[0m(Ordering::AcqRel, Ordering::Relaxed, |current| {
+2026-09-12T18:59:20.8225520Z [1m[94m84[0m [92m+ [0m            .[92mtry_update[0m(Ordering::AcqRel, Ordering::Relaxed, |current| {
+2026-09-12T18:59:20.8225954Z    [1m[94m|[0m
+2026-09-12T18:59:20.8226076Z 
+2026-09-12T18:59:20.8226540Z [1m[33mwarning[0m: `oriole_storage` (lib) generated 3 warnings (run `cargo fix --lib -p oriole_storage` to apply 3 suggestions)
+2026-09-12T18:59:20.8227541Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:20.8228208Z   [1m[94m--> [0mcrates/oriole/src/accounting.rs:66:14
+2026-09-12T18:59:20.8228528Z    [1m[94m|[0m
+2026-09-12T18:59:20.8228994Z [1m[94m66[0m [1m[94m|[0m             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
+2026-09-12T18:59:20.8229657Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:20.8229954Z    [1m[94m|[0m
+2026-09-12T18:59:20.8230260Z    [1m[94m= [0m[1mnote[0m: `#[warn(deprecated)]` on by default
+2026-09-12T18:59:20.8230694Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:20.8231028Z    [1m[94m|[0m
+2026-09-12T18:59:20.8231759Z [1m[94m66[0m [91m- [0m            .[91mfetch_update[0m(Ordering::Relaxed, Ordering::Relaxed, |current| {
+2026-09-12T18:59:20.8232505Z [1m[94m66[0m [92m+ [0m            .[92mtry_update[0m(Ordering::Relaxed, Ordering::Relaxed, |current| {
+2026-09-12T18:59:20.8232947Z    [1m[94m|[0m
+2026-09-12T18:59:20.8233065Z 
+2026-09-12T18:59:20.8233572Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:20.8234227Z   [1m[94m--> [0mcrates/oriole/src/recycling.rs:36:14
+2026-09-12T18:59:20.8234539Z    [1m[94m|[0m
+2026-09-12T18:59:20.8235054Z [1m[94m36[0m [1m[94m|[0m             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+2026-09-12T18:59:20.8235591Z    [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:20.8235896Z    [1m[94m|[0m
+2026-09-12T18:59:20.8236194Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:20.8236532Z    [1m[94m|[0m
+2026-09-12T18:59:20.8237059Z [1m[94m36[0m [91m- [0m            .[91mfetch_update[0m(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+2026-09-12T18:59:20.8237848Z [1m[94m36[0m [92m+ [0m            .[92mtry_update[0m(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+2026-09-12T18:59:20.8238324Z    [1m[94m|[0m
+2026-09-12T18:59:20.8238438Z 
+2026-09-12T18:59:20.8238962Z [1m[33mwarning[0m[1m: use of deprecated method `std::sync::atomic::Atomic::<usize>::fetch_update`: renamed to `try_update` for consistency[0m
+2026-09-12T18:59:20.8239629Z     [1m[94m--> [0mcrates/oriole/src/lib.rs:3915:14
+2026-09-12T18:59:20.8239939Z      [1m[94m|[0m
+2026-09-12T18:59:20.8240420Z [1m[94m3915[0m [1m[94m|[0m             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
+2026-09-12T18:59:20.8240928Z      [1m[94m|[0m              [1m[33m^^^^^^^^^^^^[0m
+2026-09-12T18:59:20.8241233Z      [1m[94m|[0m
+2026-09-12T18:59:20.8241958Z [1m[96mhelp[0m: replace the use of the deprecated method
+2026-09-12T18:59:20.8242327Z      [1m[94m|[0m
+2026-09-12T18:59:20.8242840Z [1m[94m3915[0m [91m- [0m            .[91mfetch_update[0m(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
+2026-09-12T18:59:20.8243586Z [1m[94m3915[0m [92m+ [0m            .[92mtry_update[0m(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
+2026-09-12T18:59:20.8244036Z      [1m[94m|[0m
+2026-09-12T18:59:20.8244151Z 
+2026-09-12T18:59:20.8244537Z [1m[33mwarning[0m: `oriole` (lib) generated 3 warnings (run `cargo fix --lib -p oriole` to apply 3 suggestions)
+2026-09-12T18:59:20.8245210Z [1m[92m    Finished[0m `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+2026-09-12T18:59:20.8246139Z [1m[92m     Running[0m unittests src/lib.rs (target/miri/x86_64-unknown-linux-gnu/debug/build/oriole_expat/4eb661d04e0e09cc/out/oriole_expat-4eb661d04e0e09cc)
+2026-09-12T18:59:22.7323316Z 
+2026-09-12T18:59:22.7323852Z running 8 tests
+2026-09-12T18:59:23.1433563Z warning: integer-to-pointer cast
+2026-09-12T18:59:23.1434229Z  --> crates/oriole_storage/src/allocator.rs:293:8
+2026-09-12T18:59:23.1434778Z   |
+2026-09-12T18:59:23.1435136Z   = note: integer-to-pointer cast
+2026-09-12T18:59:23.1435589Z   |
+2026-09-12T18:59:23.1436758Z   = help: this program is using integer-to-pointer casts or (equivalently) `ptr::with_exposed_provenance`, which means that Miri might miss pointer bugs in this program
+2026-09-12T18:59:23.1438576Z   = help: see https://doc.rust-lang.org/nightly/std/ptr/fn.with_exposed_provenance.html for more details on that operation
+2026-09-12T18:59:23.1441023Z   = help: to ensure that Miri does not miss bugs in your program, use Strict Provenance APIs (https://doc.rust-lang.org/nightly/std/ptr/index.html#strict-provenance, https://crates.io/crates/sptr) instead
+2026-09-12T18:59:23.1443710Z   = help: you can then set `MIRIFLAGS=-Zmiri-strict-provenance` to ensure you are not relying on `with_exposed_provenance` semantics
+2026-09-12T18:59:23.1445340Z   = help: Tree Borrows does not support integer-to-pointer casts, so the program is likely to go wrong when this pointer gets used
+2026-09-12T18:59:23.1446418Z   = note: this is on thread `context_text_te`
+2026-09-12T18:59:23.1446951Z   = note: stack backtrace:
+2026-09-12T18:59:23.1447429Z           0: oriole_storage::Allocator::header_for
+2026-09-12T18:59:23.1448080Z               at crates/oriole_storage/src/allocator.rs:293:9: 293:79
+2026-09-12T18:59:23.1448917Z           1: <oriole_storage::Allocator as oriole_storage::AllocatorApi>::deallocate
+2026-09-12T18:59:23.1449757Z               at crates/oriole_storage/src/allocator.rs:448:31: 448:65
+2026-09-12T18:59:23.1450748Z           2: <allocator_api2::stable::raw_vec::RawVec<u8, oriole_storage::Allocator> as std::ops::Drop>::drop
+2026-09-12T18:59:23.1452548Z               at /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/allocator-api2-0.2.21/src/stable/raw_vec.rs:602:22: 602:56
+2026-09-12T18:59:23.1454694Z           3: std::ptr::drop_glue::<allocator_api2::stable::raw_vec::RawVec<u8, oriole_storage::Allocator>> - shim(Some(allocator_api2::stable::raw_vec::RawVec<u8, oriole_storage::Allocator>))
+2026-09-12T18:59:23.1456725Z               at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:848:1: 850:25
+2026-09-12T18:59:23.1458682Z           4: std::ptr::drop_glue::<allocator_api2::stable::vec::Vec<u8, oriole_storage::Allocator>> - shim(Some(allocator_api2::stable::vec::Vec<u8, oriole_storage::Allocator>))
+2026-09-12T18:59:23.1460655Z               at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ptr/mod.rs:848:1: 850:25
+2026-09-12T18:59:23.1462305Z           5: std::mem::drop::<allocator_api2::stable::vec::Vec<u8, oriole_storage::Allocator>>
+2026-09-12T18:59:23.1464033Z               at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/mem/mod.rs:1049:1: 1049:2
+2026-09-12T18:59:23.1465285Z           6: oriole::AdapterFrame::finish
+2026-09-12T18:59:23.1465853Z               at crates/oriole/src/arena.rs:51:9: 51:25
+2026-09-12T18:59:23.1466433Z           7: oriole::Parser::finish_adapter_frame
+2026-09-12T18:59:23.1467023Z               at crates/oriole/src/lib.rs:1638:21: 1638:35
+2026-09-12T18:59:23.1467566Z           8: run_events
+2026-09-12T18:59:23.1468044Z               at crates/oriole_expat/src/lib.rs:1339:9: 1339:51
+2026-09-12T18:59:23.1468639Z           9: XML_Parse::{closure#0}::{closure#0}
+2026-09-12T18:59:23.1469235Z               at crates/oriole_expat/src/lib.rs:1705:17: 1705:35
+2026-09-12T18:59:23.1470135Z           10: <{closure@crates/oriole_expat/src/lib.rs:1673:56: 1673:58} as std::ops::FnOnce<()>>::call_once - shim
+2026-09-12T18:59:23.1471967Z               at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5: 250:71
+2026-09-12T18:59:23.1473723Z           11: <std::panic::AssertUnwindSafe<{closure@crates/oriole_expat/src/lib.rs:1673:56: 1673:58}> as std::ops::FnOnce<()>>::call_once
+2026-09-12T18:59:23.1475523Z               at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/panic/unwind_safe.rs:275:9: 275:19
+2026-09-12T18:59:23.1477348Z           12: std::panicking::catch_unwind::do_call::<std::panic::AssertUnwindSafe<{closure@crates/oriole_expat/src/lib.rs:1673:56: 1673:58}>, i32>
+2026-09-12T18:59:23.1479355Z               at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:573:43: 573:46
+2026-09-12T18:59:23.1481084Z           13: std::panicking::catch_unwind::<i32, std::panic::AssertUnwindSafe<{closure@crates/oriole_expat/src/lib.rs:1673:56: 1673:58}>>
+2026-09-12T18:59:23.1483036Z               at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:541:19: 541:77
+2026-09-12T18:59:23.1484837Z           14: std::panic::catch_unwind::<std::panic::AssertUnwindSafe<{closure@crates/oriole_expat/src/lib.rs:1673:56: 1673:58}>, i32>
+2026-09-12T18:59:23.1486501Z               at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panic.rs:359:14: 359:40
+2026-09-12T18:59:23.1487648Z           15: XML_Parse::{closure#0}
+2026-09-12T18:59:23.1488187Z               at crates/oriole_expat/src/lib.rs:1673:26: 1706:16
+2026-09-12T18:59:23.1489119Z           16: <{closure@crates/oriole_expat/src/lib.rs:1627:21: 1627:23} as std::ops::FnOnce<()>>::call_once - shim
+2026-09-12T18:59:23.1490715Z               at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5: 250:71
+2026-09-12T18:59:23.1492475Z           17: oriole_storage::with_tracking::<i32, {closure@crates/oriole_expat/src/lib.rs:1627:21: 1627:23}>
+2026-09-12T18:59:23.1493389Z               at crates/oriole_storage/src/tracking.rs:122:5: 122:16
+2026-09-12T18:59:23.1494265Z           18: with_parser_tracking::<i32, {closure@crates/oriole_expat/src/lib.rs:1627:21: 1627:23}>
+2026-09-12T18:59:23.1495110Z               at crates/oriole_expat/src/lib.rs:374:5: 374:39
+2026-09-12T18:59:23.1495658Z           19: XML_Parse
+2026-09-12T18:59:23.1496121Z               at crates/oriole_expat/src/lib.rs:1712:14: 1712:53
+2026-09-12T18:59:23.1496706Z           20: context_text_tests::parse
+2026-09-12T18:59:23.1497365Z               at crates/oriole_expat/src/context_text_tests.rs:232:13: 237:14
+2026-09-12T18:59:23.1498367Z           21: context_text_tests::context_input_allocation_failures_preserve_sticky_errors_and_owners
+2026-09-12T18:59:23.1499364Z               at crates/oriole_expat/src/context_text_tests.rs:677:30: 677:67
+2026-09-12T18:59:23.1500411Z           22: context_text_tests::context_input_allocation_failures_preserve_sticky_errors_and_owners::{closure#0}
+2026-09-12T18:59:23.1501963Z               at crates/oriole_expat/src/context_text_tests.rs:639:73: 639:73
+2026-09-12T18:59:23.1502517Z 
+2026-09-12T18:59:24.7774251Z error: Undefined Behavior: write access through <531906> at alloc193903[0x10] is forbidden
+2026-09-12T18:59:24.7775678Z     --> /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:3024:9
+2026-09-12T18:59:24.7776697Z      |
+2026-09-12T18:59:24.7777023Z 3024 |         self.len += count;
+2026-09-12T18:59:24.7777521Z      |         ^^^^^^^^^^^^^^^^^ Undefined Behavior occurred here
+2026-09-12T18:59:24.7778000Z      |
+2026-09-12T18:59:24.7778919Z      = help: this indicates a potential bug in the program: it performed an invalid operation, but the Tree Borrows rules it violated are still experimental
+2026-09-12T18:59:24.7780462Z      = help: see https://github.com/rust-lang/unsafe-code-guidelines/blob/master/wip/tree-borrows.md for further information
+2026-09-12T18:59:24.7781929Z      = help: the accessed tag <531906> is a child of the conflicting tag <512239>
+2026-09-12T18:59:24.7782923Z      = help: the conflicting tag <512239> has state Frozen which forbids this child write access
+2026-09-12T18:59:24.7783706Z help: the accessed tag <531906> was created here
+2026-09-12T18:59:24.7784260Z     --> crates/oriole_expat/src/context_text_tests.rs:158:9
+2026-09-12T18:59:24.7784730Z      |
+2026-09-12T18:59:24.7785073Z  158 |         (*state).text.extend_from_slice(&original);
+2026-09-12T18:59:24.7785543Z      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-09-12T18:59:24.7786557Z help: the conflicting tag <512239> was created here, in the initial state Reserved
+2026-09-12T18:59:24.7787273Z     --> crates/oriole_expat/src/context_text_tests.rs:673:41
+2026-09-12T18:59:24.7787752Z      |
+2026-09-12T18:59:24.7788205Z  673 |                 XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+2026-09-12T18:59:24.7788817Z      |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-09-12T18:59:24.7789693Z help: the conflicting tag <512239> later transitioned to Unique due to a child write access at offsets [0x10..0x18]
+2026-09-12T18:59:24.7790602Z     --> crates/oriole_expat/src/context_text_tests.rs:158:9
+2026-09-12T18:59:24.7791079Z      |
+2026-09-12T18:59:24.7791625Z  158 |         (*state).text.extend_from_slice(&original);
+2026-09-12T18:59:24.7792134Z      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-09-12T18:59:24.7792871Z      = help: this transition corresponds to the first write to a 2-phase borrowed mutable reference
+2026-09-12T18:59:24.7794116Z help: the conflicting tag <512239> later transitioned to Frozen due to a reborrow (acting as a foreign read access) at offsets [0x0..0x18]
+2026-09-12T18:59:24.7795136Z     --> crates/oriole_expat/src/context_text_tests.rs:683:54
+2026-09-12T18:59:24.7795637Z      |
+2026-09-12T18:59:24.7796051Z  683 |                         assert!(expected.starts_with(&state.text));
+2026-09-12T18:59:24.7796621Z      |                                                      ^^^^^^^^^^^
+2026-09-12T18:59:24.7797231Z      = help: this transition corresponds to a loss of write permissions
+2026-09-12T18:59:24.7797824Z      = note: this is on thread `context_text_te`
+2026-09-12T18:59:24.7798283Z      = note: stack backtrace:
+2026-09-12T18:59:24.7798742Z              0: std::vec::Vec::<u8>::append_elements_unreserved
+2026-09-12T18:59:24.7799863Z                  at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:3024:9: 3024:26
+2026-09-12T18:59:24.7800967Z              1: std::vec::Vec::<u8>::append_elements
+2026-09-12T18:59:24.7802374Z                  at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:2998:13: 2998:51
+2026-09-12T18:59:24.7803767Z              2: <std::vec::Vec<u8> as std::vec::spec_extend::SpecExtend<&u8, std::slice::Iter<'_, u8>>>::spec_extend
+2026-09-12T18:59:24.7805374Z                  at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/spec_extend.rs:58:18: 58:45
+2026-09-12T18:59:24.7806548Z              3: std::vec::Vec::<u8>::extend_from_slice
+2026-09-12T18:59:24.7807638Z                  at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/vec/mod.rs:3648:9: 3648:39
+2026-09-12T18:59:24.7808710Z              4: context_text_tests::text
+2026-09-12T18:59:24.7809279Z                  at crates/oriole_expat/src/context_text_tests.rs:158:9: 158:51
+2026-09-12T18:59:24.7809851Z              5: dispatch_context_text
+2026-09-12T18:59:24.7810328Z                  at crates/oriole_expat/src/lib.rs:1326:14: 1326:44
+2026-09-12T18:59:24.7810832Z              6: run_events_with_frame
+2026-09-12T18:59:24.7811299Z                  at crates/oriole_expat/src/lib.rs:1411:21: 1411:64
+2026-09-12T18:59:24.7811982Z              7: run_events
+2026-09-12T18:59:24.7812407Z                  at crates/oriole_expat/src/lib.rs:1338:22: 1338:63
+2026-09-12T18:59:24.7812959Z              8: XML_Parse::{closure#0}::{closure#0}
+2026-09-12T18:59:24.7813543Z                  at crates/oriole_expat/src/lib.rs:1705:17: 1705:35
+2026-09-12T18:59:24.7814397Z              9: <{closure@crates/oriole_expat/src/lib.rs:1673:56: 1673:58} as std::ops::FnOnce<()>>::call_once - shim
+2026-09-12T18:59:24.7815827Z                  at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5: 250:71
+2026-09-12T18:59:24.7817584Z              10: <std::panic::AssertUnwindSafe<{closure@crates/oriole_expat/src/lib.rs:1673:56: 1673:58}> as std::ops::FnOnce<()>>::call_once
+2026-09-12T18:59:24.7819184Z                  at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/panic/unwind_safe.rs:275:9: 275:19
+2026-09-12T18:59:24.7820883Z              11: std::panicking::catch_unwind::do_call::<std::panic::AssertUnwindSafe<{closure@crates/oriole_expat/src/lib.rs:1673:56: 1673:58}>, i32>
+2026-09-12T18:59:24.7822759Z                  at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:573:43: 573:46
+2026-09-12T18:59:24.7824401Z              12: std::panicking::catch_unwind::<i32, std::panic::AssertUnwindSafe<{closure@crates/oriole_expat/src/lib.rs:1673:56: 1673:58}>>
+2026-09-12T18:59:24.7826055Z                  at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panicking.rs:541:19: 541:77
+2026-09-12T18:59:24.7827657Z              13: std::panic::catch_unwind::<std::panic::AssertUnwindSafe<{closure@crates/oriole_expat/src/lib.rs:1673:56: 1673:58}>, i32>
+2026-09-12T18:59:24.7829208Z                  at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/panic.rs:359:14: 359:40
+2026-09-12T18:59:24.7830284Z              14: XML_Parse::{closure#0}
+2026-09-12T18:59:24.7830778Z                  at crates/oriole_expat/src/lib.rs:1673:26: 1706:16
+2026-09-12T18:59:24.7831795Z              15: <{closure@crates/oriole_expat/src/lib.rs:1627:21: 1627:23} as std::ops::FnOnce<()>>::call_once - shim
+2026-09-12T18:59:24.7833249Z                  at /home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5: 250:71
+2026-09-12T18:59:24.7834713Z              16: oriole_storage::with_tracking::<i32, {closure@crates/oriole_expat/src/lib.rs:1627:21: 1627:23}>
+2026-09-12T18:59:24.7835614Z                  at crates/oriole_storage/src/tracking.rs:122:5: 122:16
+2026-09-12T18:59:24.7836400Z              17: with_parser_tracking::<i32, {closure@crates/oriole_expat/src/lib.rs:1627:21: 1627:23}>
+2026-09-12T18:59:24.7837149Z                  at crates/oriole_expat/src/lib.rs:374:5: 374:39
+2026-09-12T18:59:24.7837787Z              18: XML_Parse
+2026-09-12T18:59:24.7838210Z                  at crates/oriole_expat/src/lib.rs:1712:14: 1712:53
+2026-09-12T18:59:24.7838757Z              19: context_text_tests::parse
+2026-09-12T18:59:24.7839311Z                  at crates/oriole_expat/src/context_text_tests.rs:232:13: 237:14
+2026-09-12T18:59:24.7840207Z              20: context_text_tests::context_input_allocation_failures_preserve_sticky_errors_and_owners
+2026-09-12T18:59:24.7841115Z                  at crates/oriole_expat/src/context_text_tests.rs:685:36: 685:75
+2026-09-12T18:59:24.7842314Z              21: context_text_tests::context_input_allocation_failures_preserve_sticky_errors_and_owners::{closure#0}
+2026-09-12T18:59:24.7843309Z                  at crates/oriole_expat/src/context_text_tests.rs:639:73: 639:73
+2026-09-12T18:59:24.7843758Z 
+2026-09-12T18:59:24.7844235Z note: some details are omitted, run with `MIRIFLAGS=-Zmiri-backtrace=full` for a verbose backtrace
+2026-09-12T18:59:24.7844847Z 
+2026-09-12T18:59:24.7896894Z error: aborting due to 1 previous error; 1 warning emitted
+2026-09-12T18:59:24.7897351Z 
+2026-09-12T18:59:24.7932607Z [1m[91merror[0m: test failed, to rerun pass `-p oriole_expat --lib`
+2026-09-12T18:59:24.7933124Z 
+2026-09-12T18:59:24.7933234Z Caused by:
+2026-09-12T18:59:24.7934450Z   process didn't exit successfully: `/home/runner/.rustup/toolchains/nightly-2026-09-10-x86_64-unknown-linux-gnu/bin/cargo-miri runner /home/runner/work/oriole/oriole/target/miri/x86_64-unknown-linux-gnu/debug/build/oriole_expat/4eb661d04e0e09cc/out/oriole_expat-4eb661d04e0e09cc context_text_` (exit status: 1)
+2026-09-12T18:59:24.7936315Z [1m[92mnote[0m: test exited abnormally; to see the full output pass --no-capture to the harness.
+2026-09-12T18:59:24.7945865Z test context_text_tests::context_input_allocation_failures_preserve_sticky_errors_and_owners ... 
+2026-09-12T18:59:24.7957255Z ##[error]Process completed with exit code 1.
+2026-09-12T18:59:24.8102240Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-09-12T18:59:24.8103835Z Post job cleanup.
+2026-09-12T18:59:24.8946081Z [command]/usr/bin/git version
+2026-09-12T18:59:24.8981557Z git version 2.55.0
+2026-09-12T18:59:24.9019658Z Temporarily overriding HOME='/home/runner/work/_temp/a7fada62-26a5-4232-bf5b-49b56738252f' before making global git config changes
+2026-09-12T18:59:24.9021407Z Adding repository directory to the temporary git global config as a safe directory
+2026-09-12T18:59:24.9026002Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/oriole/oriole
+2026-09-12T18:59:24.9060889Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-12T18:59:24.9094469Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-12T18:59:24.9315233Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-12T18:59:24.9340743Z http.https://github.com/.extraheader
+2026-09-12T18:59:24.9351291Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-09-12T18:59:24.9382364Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-12T18:59:24.9597989Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-12T18:59:24.9627897Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-12T18:59:24.9970759Z Cleaning up orphan processes
+2026-09-12T18:59:25.0257477Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

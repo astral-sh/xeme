@@ -488,6 +488,9 @@ fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
     check_allocations(|allocator| {
         frames(allocator, None, b"<r>inline\nabcdefghijklmnopqrstuvwxyz1234567890<n a='first' b='value'/><![CDATA[abcdefghijklmnopqrstuvwxyz1234567890]]><n a='second' b='new'/>fallback\r\n<n a='literal' b='other'/><n a='&amp;'/><n a='last'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/>abcdefghijklmnopqrstuvwxyz1234567890</r>")?;
         frames(allocator, Some('|'), b"<r xmlns:p='urn:p'><p:n a='first'/><p:n a='next'/><n xmlns='urn:default'><n a='value'/></n><p:n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><p:n a='last'/></r>")?;
+        // Two wide literal tags warm the lexical and callback buffers. The last
+        // tag then uses one warmed span, including an empty and Unicode value.
+        frames(allocator, None, "<r><n a='abcdefghijklmnopqrstuvwxyz' b='abcdefghijklmnopqrstuvwxyz' c='abcdefghijklmnopqrstuvwxyz'/><n a='abcdefghijklmnopqrstuvwxyz' b='abcdefghijklmnopqrstuvwxyz' c='abcdefghijklmnopqrstuvwxyz'/><n π = '😀' empty=\"\" tail='λ'/></r>".as_bytes())?;
         // Grow both stacks with live undo blocks, then restore shadowed prefixes.
         // Four root declarations also exercise Start publication after commitment.
         frames(allocator, Some('|'), b"<r xmlns:p='one' xmlns:q='q' xmlns:s='s' xmlns:t='t'><n xmlns:p='two'><n xmlns:p='three'><n xmlns:p='four'><n xmlns:p='five'><n xmlns:p='six'><p:leaf></p:leaf><e xmlns:p='empty'/><p:leaf/></n></n></n></n></n><p:leaf/></r>")?;
@@ -922,6 +925,29 @@ fn output_slots_clear_at_every_selected_allocation_failure() {
                 }
             }
         }
+        Ok(())
+    }
+    check_allocations(workload);
+}
+
+#[test]
+fn warmed_utf8_source_growth_preserves_selected_allocator_failures() {
+    fn workload(allocator: Allocator) -> Result<(), Error> {
+        let mut parser = Parser::try_new_in(Config::default(), allocator)?;
+        parser.feed(b"<r>", false)?;
+        // Repeated equal feeds warm pending while the unconsumed source grows.
+        // Its later growth must remain fallible through the selected suite.
+        for _ in 0..4 {
+            parser.feed(&[b'x'; 1024], false)?;
+        }
+        parser.feed(b"</r>", true)?;
+        let mut text_bytes = 0;
+        while let Some(event) = next_event(&mut parser)? {
+            if let EventKind::Text(value) = event.kind {
+                text_bytes += value.len();
+            }
+        }
+        assert_eq!(text_bytes, 4096);
         Ok(())
     }
     check_allocations(workload);

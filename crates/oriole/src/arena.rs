@@ -2,9 +2,9 @@
 
 use std::ops::Range;
 
-use oriole_storage::{AllocError, Allocator, String, Vec};
+use oriole_storage::{AllocError, Allocator, String, Vec, try_extend_from_slice};
 
-use crate::{Position, RecyclingToken};
+use crate::{Position, RawAttribute, RecyclingToken};
 
 pub(crate) const MAX_ARENA_BYTES: usize = 4 * 1024;
 pub(crate) const INLINE_TEXT_BYTES: usize = 23;
@@ -36,7 +36,7 @@ enum Payload {
 #[derive(Debug)]
 pub struct AdapterFrame {
     pub(crate) generation: RecyclingToken,
-    bytes: String,
+    bytes: Vec<u8>,
     attributes: Vec<ArenaAttribute>,
     name: Range<usize>,
     position: Position,
@@ -56,7 +56,7 @@ impl AdapterFrame {
     pub(crate) fn new(allocator: Allocator, generation: RecyclingToken) -> Self {
         Self {
             generation,
-            bytes: String::new_in(allocator),
+            bytes: Vec::new_in(allocator),
             attributes: Vec::new_in(allocator),
             name: 0..0,
             position: Position::default(),
@@ -74,7 +74,7 @@ impl AdapterFrame {
         self.callback_bytes = 0;
         self.position = Position::default();
         if self.bytes.capacity() > MAX_ARENA_BYTES {
-            self.bytes = String::new_in(self.bytes.allocator());
+            self.bytes = Vec::new_in(*self.bytes.allocator());
         } else {
             self.bytes.clear();
         }
@@ -101,7 +101,7 @@ impl AdapterFrame {
             // Reserve exactly the bounded span. Amortized growth from a prior
             // start tag could otherwise retain more than the 4 KiB byte limit.
             self.bytes.try_reserve_exact(text.len())?;
-            self.bytes.try_push_str(text)?;
+            try_extend_from_slice(&mut self.bytes, text.as_bytes())?;
             self.payload = Payload::HeapText;
         }
         self.callback_bytes = text.len();
@@ -145,8 +145,8 @@ impl AdapterFrame {
             self.bytes.try_reserve(required)?;
         }
         let start = self.bytes.len();
-        self.bytes.try_push_str(text)?;
-        self.bytes.try_push('\0')?;
+        try_extend_from_slice(&mut self.bytes, text.as_bytes())?;
+        try_extend_from_slice(&mut self.bytes, b"\0")?;
         self.callback_bytes = count;
         Ok(start..self.bytes.len())
     }
@@ -157,6 +157,44 @@ impl AdapterFrame {
         let name = self.append(name)?;
         debug_assert!(self.attributes.len() < self.attributes.capacity());
         self.attributes.push(ArenaAttribute { name, value });
+        Ok(())
+    }
+
+    /// Use a literal span only when its bytes and the later name already fit.
+    /// Cold paths retain value-before-name growth and its allocation error order.
+    pub(crate) fn fits_literal_attributes(&self, rest: &str, name: &str) -> bool {
+        debug_assert!(!self.active && self.bytes.is_empty() && self.attributes.is_empty());
+        rest.len()
+            .checked_add(name.len())
+            .and_then(|bytes| bytes.checked_add(1))
+            .is_some_and(|bytes| bytes <= MAX_ARENA_BYTES && bytes <= self.bytes.capacity())
+    }
+
+    /// Copy validated literal fields together, patching only ASCII delimiters.
+    /// The caller has checked duplicates, reserved records, and proved byte capacity.
+    pub(crate) fn push_literal_attributes(
+        &mut self,
+        rest: &str,
+        attributes: &[RawAttribute],
+    ) -> Result<(), AllocError> {
+        debug_assert!(!self.active && self.bytes.is_empty() && self.attributes.is_empty());
+        debug_assert!(rest.len() <= self.bytes.capacity() && rest.len() <= MAX_ARENA_BYTES);
+        debug_assert!(attributes.len() <= self.attributes.capacity());
+        // The capacity check inside this existing bulk helper cannot grow here.
+        try_extend_from_slice(&mut self.bytes, rest.as_bytes())?;
+        for attribute in attributes {
+            debug_assert!(rest.as_bytes()[attribute.name_end].is_ascii());
+            debug_assert!(matches!(rest.as_bytes()[attribute.value_end], b'\'' | b'"'));
+            self.bytes[attribute.name_end] = 0;
+            self.bytes[attribute.value_end] = 0;
+            self.attributes.push(ArenaAttribute {
+                name: attribute.name_start..attribute.name_end + 1,
+                value: attribute.value_start..attribute.value_end + 1,
+            });
+            self.callback_bytes += attribute.name_end - attribute.name_start + attribute.value_end
+                - attribute.value_start;
+        }
+        debug_assert!(self.callback_bytes <= rest.len());
         Ok(())
     }
 
@@ -219,7 +257,7 @@ impl AdapterFrame {
         match self.payload {
             Payload::Start | Payload::End(_) => None,
             Payload::InlineText => Some(&self.inline[..self.callback_bytes]),
-            Payload::HeapText => Some(self.bytes.as_bytes()),
+            Payload::HeapText => Some(self.bytes.as_slice()),
             Payload::NativeText { .. } => panic!("C-context Text requires the host range resolver"),
         }
     }
@@ -245,7 +283,7 @@ impl AdapterFrame {
             !matches!(self.payload, Payload::NativeText { .. }),
             "C-context Text has no name bytes"
         );
-        &self.bytes.as_bytes()[self.name.clone()]
+        &self.bytes.as_slice()[self.name.clone()]
     }
 
     /// Attribute name/value bytes including each final NUL, in source order.
@@ -256,8 +294,8 @@ impl AdapterFrame {
         );
         self.attributes.iter().map(|attribute| {
             (
-                &self.bytes.as_bytes()[attribute.name.clone()],
-                &self.bytes.as_bytes()[attribute.value.clone()],
+                &self.bytes.as_slice()[attribute.name.clone()],
+                &self.bytes.as_slice()[attribute.value.clone()],
             )
         })
     }
@@ -272,6 +310,123 @@ impl AdapterFrame {
 mod tests {
     use super::*;
     use crate::{Config, Parser};
+
+    #[test]
+    fn warmed_literal_spans_keep_byte_ranges_and_capacity() {
+        let mut parser = Parser::new(Config::default());
+        let mut frame = parser.adapter_frame();
+        let rest = "\tπ = '😀>\"'\r\n empty=\"\" tail = \"λ ' >\"\t";
+        let name = "élément";
+        let mut attributes = Vec::new_in(Allocator::System);
+        crate::parse_raw_attributes(
+            rest,
+            false,
+            &mut attributes,
+            MAX_ARENA_ATTRIBUTES,
+            crate::NameRules::FifthEdition,
+        )
+        .unwrap();
+        assert!(!frame.fits_literal_attributes(rest, name));
+        let required = rest.len() + name.len() + 1;
+        frame.prepare_text(&"x".repeat(required - 1)).unwrap();
+        frame.clear();
+        assert!(!frame.fits_literal_attributes(rest, name));
+        frame.prepare_text(&"x".repeat(required)).unwrap();
+        frame.clear();
+        frame.prepare(attributes.len()).unwrap();
+        assert!(frame.fits_literal_attributes(rest, name));
+        assert!(!frame.fits_literal_attributes(&"x".repeat(MAX_ARENA_BYTES), name));
+        let pointer = frame.bytes.as_ptr();
+        let capacity = frame.bytes.capacity();
+        let records = frame.attributes.as_ptr();
+        frame.push_literal_attributes(rest, &attributes).unwrap();
+        frame.set_name(name).unwrap();
+        frame.publish(Position::default());
+        assert_eq!(frame.bytes.as_ptr(), pointer);
+        assert_eq!(frame.bytes.capacity(), capacity);
+        assert_eq!(frame.attributes.as_ptr(), records);
+        assert_eq!(frame.bytes.len(), required);
+        assert_eq!(frame.name_bytes(), "élément\0".as_bytes());
+        let expected = [
+            ("π\0".as_bytes(), "😀>\"\0".as_bytes()),
+            (b"empty\0".as_slice(), b"\0".as_slice()),
+            (b"tail\0".as_slice(), "λ ' >\0".as_bytes()),
+        ];
+        assert!(frame.attributes().eq(expected));
+        assert_eq!(
+            frame.callback_bytes(),
+            name.len()
+                + expected
+                    .iter()
+                    .map(|(n, v)| n.len() + v.len() - 2)
+                    .sum::<usize>()
+        );
+        let mut copied = rest.as_bytes().to_vec();
+        for attribute in &attributes {
+            copied[attribute.name_end] = 0;
+            copied[attribute.value_end] = 0;
+        }
+        assert_eq!(&frame.bytes[..rest.len()], copied.as_slice());
+        parser.finish_adapter_frame(frame);
+    }
+
+    #[test]
+    fn warmed_parser_start_uses_the_literal_span() {
+        let warm = "<n a='abcdefghijklmnopqrstuvwxyz' b='abcdefghijklmnopqrstuvwxyz' c='abcdefghijklmnopqrstuvwxyz'/>";
+        let rest = " a='v' empty='' π='λ' ";
+        let target = format!("<n{rest}/>");
+        let input = format!("<r>{warm}{warm}{target}</r>");
+        let mut parser = Parser::new(Config::default());
+        let mut frame = parser.adapter_frame();
+        parser.feed(input.as_bytes(), true).unwrap();
+        let mut warmed = None;
+        let mut observed = false;
+        loop {
+            let mut event = None;
+            let Some(token) = parser
+                .next_event_for_adapter_into(&mut event, &mut frame)
+                .unwrap()
+            else {
+                break;
+            };
+            if let Some(name) = frame.take_end_name() {
+                parser.recycle_end_element(token, name);
+            } else if frame.is_active() {
+                if parser.current_raw() == Some(warm) {
+                    warmed = Some((frame.bytes.as_ptr(), frame.bytes.capacity()));
+                } else if parser.current_raw() == Some(target.as_str()) {
+                    assert_eq!(
+                        (frame.bytes.as_ptr(), frame.bytes.capacity()),
+                        warmed.unwrap()
+                    );
+                    // Packed per-field appends cannot produce this source-span
+                    // length and element-name offset, even with identical events.
+                    assert_eq!(frame.bytes.len(), rest.len() + 2);
+                    assert_eq!(frame.name, rest.len()..rest.len() + 2);
+                    assert_eq!(frame.bytes[0], b' ');
+                    assert_eq!(frame.name_bytes(), b"n\0");
+                    assert!(frame.attributes().eq([
+                        (b"a\0".as_slice(), b"v\0".as_slice()),
+                        (b"empty\0".as_slice(), b"\0".as_slice()),
+                        ("π\0".as_bytes(), "λ\0".as_bytes()),
+                    ]));
+                    observed = true;
+                }
+            } else if let Some(event) = event {
+                match event.kind {
+                    crate::EventKind::StartElement { name, attributes } => {
+                        parser.recycle_start_element(token, name, attributes)
+                    }
+                    crate::EventKind::EndElement { name } => {
+                        parser.recycle_end_element(token, name)
+                    }
+                    _ => {}
+                }
+            }
+        }
+        assert!(observed);
+        parser.finish_adapter_frame(frame);
+    }
 
     #[test]
     fn detached_end_keeps_the_warmed_start_arena_and_oversized_owner_separate() {
@@ -291,7 +446,7 @@ mod tests {
         }
         assert!(frame.is_active() && event.is_none());
         assert_eq!(frame.name_bytes(), b"n\0");
-        let pointer = frame.bytes.as_bytes().as_ptr();
+        let pointer = frame.bytes.as_slice().as_ptr();
         let capacity = frame.bytes.capacity();
         let attribute_capacity = frame.attributes.capacity();
         let token = parser
@@ -307,7 +462,7 @@ mod tests {
             .unwrap();
         assert!(frame.is_active() && event.is_none());
         assert_eq!(frame.name_bytes(), b"n\0");
-        assert_eq!(frame.bytes.as_bytes().as_ptr(), pointer);
+        assert_eq!(frame.bytes.as_slice().as_ptr(), pointer);
         assert_eq!(frame.bytes.capacity(), capacity);
         assert_eq!(frame.attributes.capacity(), attribute_capacity);
         parser.finish_adapter_frame(frame);

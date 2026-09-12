@@ -108,6 +108,26 @@ impl Decoder {
         max_token: usize,
         external_content: bool,
     ) -> Result<(), Error> {
+        if self.encoding == Some(Encoding::Utf8)
+            && self.conversion.is_none()
+            && self.pending.is_empty()
+            && self.pending_cursor == 0
+            && self.pending.capacity() >= bytes.len()
+            && let Ok(text) = std::str::from_utf8(bytes)
+        {
+            // The ordinary pending append cannot allocate in this state. Copy
+            // directly into the source, retaining its existing growth policy.
+            if let Err(error) = source
+                .text
+                .try_push_str_with_minimum(text, max_token.min(1024))
+            {
+                // Preserve the ordinary failure state. Empty length and the
+                // checked capacity make this restoration allocation-free.
+                try_extend_from_slice(&mut self.pending, bytes)?;
+                return Err(error.into());
+            }
+            return Ok(());
+        }
         try_extend_from_slice(&mut self.pending, bytes)?;
         if self.conversion.is_some() {
             return Ok(());
@@ -1329,6 +1349,103 @@ fn advance_long_position(text: &str, line: &mut usize, column: &mut usize, previ
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn warmed_utf8_feeds_match_buffered_splits_and_errors() {
+        for bytes in [
+            b"".as_slice(),
+            b"plain ASCII\r\n<r/>",
+            b"raw\0\x01\x7f<&",
+            "\n\u{feff}é雪😀<r/>".as_bytes(),
+            b"prefix\xfftail",
+            b"prefix\xf0\x9f",
+        ] {
+            for split in 0..=bytes.len() {
+                for warm in [false, true] {
+                    let make = || {
+                        let mut decoder = Decoder::new(None, Allocator::System).unwrap();
+                        decoder.encoding = Some(Encoding::Utf8);
+                        if warm {
+                            decoder.append_pending(&[0; 64]).unwrap();
+                            decoder.pending.clear();
+                        }
+                        let mut source =
+                            Source::new(Allocator::System, crate::NameRules::default());
+                        source.text.try_push_str("head\r").unwrap();
+                        source.consume(5);
+                        (decoder, source)
+                    };
+                    let (mut direct, mut direct_source) = make();
+                    let (mut buffered, mut buffered_source) = make();
+                    for (part, final_input) in [(&bytes[..split], false), (&bytes[split..], true)] {
+                        // A nonempty pending buffer selects the unchanged path.
+                        buffered.append_pending(part).unwrap();
+                        let expected =
+                            buffered.feed(&[], final_input, &mut buffered_source, 64, false);
+                        let actual = direct.feed(part, final_input, &mut direct_source, 64, false);
+                        assert_eq!(actual, expected, "{bytes:?}, split {split}, warm {warm}");
+                        assert_eq!(direct.pending, buffered.pending);
+                        assert_eq!(direct.pending_cursor, buffered.pending_cursor);
+                        assert_eq!(direct.encoding, buffered.encoding);
+                        assert_eq!(direct_source.text.as_str(), buffered_source.text.as_str());
+                        assert_eq!(direct_source.position(0), buffered_source.position(0));
+                        assert_eq!(direct_source.end_position(), buffered_source.end_position());
+                        assert_eq!(direct_source.accounted_raw, buffered_source.accounted_raw);
+                        if actual.is_err() {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn warmed_utf8_source_failure_retains_pending_without_growth() {
+        use oriole_storage::{AllocationTracker, with_tracking};
+
+        for prefix in ["", "old"] {
+            let tracker = AllocationTracker::try_new_in(Allocator::System).unwrap();
+            with_tracking(&tracker, || {
+                let allocator = Allocator::TrackedSystem;
+                let mut decoder = Decoder::new(None, allocator).unwrap();
+                decoder.encoding = Some(Encoding::Utf8);
+                let bytes = [b'x'; 2048];
+                decoder.append_pending(&bytes).unwrap();
+                decoder.pending.clear();
+                let pending_pointer = decoder.pending.as_ptr();
+                let pending_capacity = decoder.pending.capacity();
+                let mut source = Source::new(allocator, crate::NameRules::default());
+                source.text.try_push_str(prefix).unwrap();
+                let position = source.position(0);
+                let live = tracker.live_bytes();
+                // Reject the next backing allocation, including Source's first
+                // block or growth. Restoring pending must not request one.
+                tracker.set_activation_threshold(0);
+                let error = decoder
+                    .feed(&bytes, true, &mut source, 1024, false)
+                    .unwrap_err();
+                assert_eq!(error, Error::bare(ErrorKind::NoMemory, "out of memory"));
+                assert_eq!(decoder.pending.as_slice(), bytes.as_slice());
+                assert_eq!(decoder.pending_cursor, 0);
+                assert_eq!(decoder.pending.as_ptr(), pending_pointer);
+                assert_eq!(decoder.pending.capacity(), pending_capacity);
+                assert_eq!(source.text.as_str(), prefix);
+                assert_eq!(source.position(0), position);
+                assert_eq!(tracker.live_bytes(), live);
+                tracker.set_activation_threshold(u64::MAX);
+                // The retained bytes are available to the ordinary decoder path.
+                decoder.feed(&[], true, &mut source, 1024, false).unwrap();
+                assert!(decoder.pending.is_empty());
+                assert_eq!(source.text.len(), prefix.len() + bytes.len());
+                assert_eq!(
+                    &source.text.as_str()[prefix.len()..],
+                    std::str::from_utf8(&bytes).unwrap()
+                );
+            });
+            assert_eq!(tracker.live_bytes(), 0);
+        }
+    }
 
     #[test]
     fn proven_ascii_tag_matches_eager_coordinates_and_compaction() {

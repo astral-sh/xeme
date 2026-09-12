@@ -183,6 +183,36 @@ fn literal_frames_keep_duplicate_checks_and_selected_name_rules() {
 }
 
 #[test]
+fn warmed_literal_spans_preserve_raw_duplicates_and_fallback_boundaries() {
+    for count in [1, 8, 9, 128, 129] {
+        let warm = (0..count)
+            .map(|index| format!(" a{index}='abcdefghijkl'"))
+            .collect::<std::string::String>();
+        let attributes = (1..count)
+            .map(|index| format!(" a{index} = ''"))
+            .collect::<std::string::String>();
+        for suffix in ["", " π='duplicate'", " ref='&amp;'", " normalized='a\r\nb'"] {
+            let input =
+                format!("<r><n{warm}/><n{warm}/><élément\tπ = '😀>\"'{attributes}{suffix} /></r>");
+            for namespace_separator in [None, Some('💥')] {
+                for chunk in [1, 7, 16, input.len()] {
+                    let config = Config {
+                        namespace_separator,
+                        ..Config::default()
+                    };
+                    let owned = collect(input.as_bytes(), chunk, config.clone(), false);
+                    let adapter = collect(input.as_bytes(), chunk, config, true);
+                    assert_eq!(
+                        adapter.0, owned.0,
+                        "{count} {suffix:?} {namespace_separator:?} {chunk}"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn namespace_identity_frames_follow_default_binding_scope() {
     let input = "<r><warm a='v'/><plain b='v'/><n xmlns='urn:default'><plain a='v'/><n xmlns=''><plain a='v'/></n><plain a='v'/></n><plain a='v'/></r>";
     for separator in ['|', '\0', 'x'] {

@@ -1585,7 +1585,25 @@ impl Parser {
         if let Some(error) = &self.error {
             return Err(*error);
         }
-        let mut result = self.next_event_inner(output);
+        if let Err(error) = self.next_event_inner(output) {
+            self.finish_event_error(error, output)?;
+        }
+        if let Some(event) = output.event {
+            self.last_position = event.position;
+        }
+        if output.has_frame() {
+            self.last_position = output.frame.as_ref().unwrap().position();
+        }
+        Ok(())
+    }
+
+    /// Apply decoder precedence and preserve queued or published error prefixes.
+    fn finish_event_error(
+        &mut self,
+        error: Error,
+        output: &mut EventOutput<'_>,
+    ) -> Result<(), Error> {
+        let mut result = Err(error);
         if let (Err(error), Some((kind, message))) = (&result, self.decoding_error)
             && matches!(
                 error.kind,
@@ -1665,14 +1683,6 @@ impl Parser {
                 *output.event = Some(event);
                 result = Ok(());
             }
-        }
-        if result.is_ok()
-            && let Some(event) = output.event
-        {
-            self.last_position = event.position;
-        }
-        if result.is_ok() && output.has_frame() {
-            self.last_position = output.frame.as_ref().unwrap().position();
         }
         result
     }
@@ -3481,6 +3491,8 @@ impl Parser {
         self.event_recycling
             .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
         frame.prepare(raw_attrs.len())?;
+        let literal_span =
+            !EXPAND_ELEMENT && !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);
         let mut names = (raw_attrs.len() > 8)
             .then(|| HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator));
         for (index, attribute) in raw_attrs.iter().enumerate() {
@@ -3499,7 +3511,12 @@ impl Parser {
                     1 + name.len() + attribute_offset,
                 ));
             }
-            frame.push_attribute(attr_name, value)?;
+            if !literal_span {
+                frame.push_attribute(attr_name, value)?;
+            }
+        }
+        if literal_span {
+            frame.push_literal_attributes(rest, &raw_attrs)?;
         }
         self.id_attribute_index = None;
         let expanded_name = if EXPAND_ELEMENT {

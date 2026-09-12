@@ -996,6 +996,22 @@ impl Source {
         self.finish_consume(count);
     }
 
+    /// Consume a nonempty native ASCII tag proven to contain no line breaks.
+    /// The caller must complete semantic work and accounting before this mutation.
+    pub(crate) fn consume_ascii_tag(&mut self, count: usize) {
+        debug_assert!(self.native_utf8_byte_index().is_some() && !self.has_conversions());
+        debug_assert!(
+            count > 0
+                && self.remaining()[..count]
+                    .bytes()
+                    .all(|byte| byte.is_ascii() && !matches!(byte, b'\r' | b'\n'))
+        );
+        self.raw_index += self.raw_len(0, count);
+        self.column += count;
+        self.previous_cr = false;
+        self.finish_consume(count);
+    }
+
     /// Commit native text whose scanner already computed the eager position delta.
     pub(crate) fn consume_text(&mut self, plan: crate::text::TextPlan) {
         debug_assert!(self.native_utf8_byte_index().is_some() && !self.has_conversions());
@@ -1313,6 +1329,50 @@ fn advance_long_position(text: &str, line: &mut usize, column: &mut usize, previ
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn proven_ascii_tag_matches_eager_coordinates_and_compaction() {
+        for tag in ["<r>", "<r/>", "<abcdefgh>", "<p:r/>"] {
+            for prefix in [0, 65_530, 65_533] {
+                for previous_cr in [false, true] {
+                    let make_source = || {
+                        let mut source =
+                            Source::new(Allocator::System, crate::NameRules::default());
+                        source.text.try_push_str(&"x".repeat(prefix)).unwrap();
+                        source.text.try_push_str(tag).unwrap();
+                        source.text.try_push_str("\nTAIL").unwrap();
+                        source.cursor = prefix;
+                        source.raw_index = prefix;
+                        source.line = 7;
+                        source.column = 11;
+                        source.previous_cr = previous_cr;
+                        source.scan.mode = Some(ScanMode::Tag);
+                        source.deferred_size = 12;
+                        source
+                    };
+                    let mut eager = make_source();
+                    let mut proven = make_source();
+                    eager.consume(tag.len());
+                    proven.consume_ascii_tag(tag.len());
+                    assert_eq!(proven.position(0), eager.position(0));
+                    assert_eq!(proven.previous_cr, eager.previous_cr);
+                    assert_eq!(proven.remaining(), eager.remaining());
+                    assert_eq!(proven.cursor, eager.cursor);
+                    assert_eq!(proven.cursor == 0, prefix + tag.len() >= 65_536);
+                    assert!(proven.scan.mode.is_none());
+                    assert_eq!(proven.deferred_size, 0);
+                    // A prior CR must not absorb the LF after an intervening tag.
+                    eager.consume(1);
+                    proven.consume(1);
+                    assert_eq!(proven.position(0), eager.position(0));
+                    assert_eq!(
+                        (proven.line, proven.column, proven.previous_cr),
+                        (8, 0, false)
+                    );
+                }
+            }
+        }
+    }
 
     #[test]
     fn planned_text_matches_eager_consumption_and_compaction() {

@@ -368,13 +368,18 @@ pub(crate) struct TagScanner {
     source_index: Option<usize>,
     offset: usize,
     name_end: Option<usize>,
+    name_ascii: bool,
     attributes: Option<AttributeScanner>,
     disabled: bool,
 }
 
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Planned {
-    Complete { end: usize, name_end: usize },
+    Complete {
+        end: usize,
+        name_end: usize,
+        ascii_bare: bool,
+    },
     Incomplete,
     Fallback,
 }
@@ -432,9 +437,21 @@ impl TagScanner {
                 if !rules.is_name_start(first) {
                     return Planned::Fallback;
                 }
+                self.name_ascii = first.is_ascii();
                 self.offset += first.len_utf8();
             }
-            self.offset = name_end(text, self.offset, rules);
+            // Reuse the native name walk; complete/general name scans stay unchanged.
+            let start = self.offset;
+            self.offset = text[start..]
+                .char_indices()
+                .find(|(_, character)| {
+                    if !rules.is_name_char(*character) {
+                        return true;
+                    }
+                    self.name_ascii &= character.is_ascii();
+                    false
+                })
+                .map_or(text.len(), |(index, _)| start + index);
             if self.offset == text.len() {
                 return Planned::Incomplete;
             }
@@ -462,7 +479,14 @@ impl TagScanner {
                 Ok(Step::TagEnd { end, empty }) => {
                     debug_assert_eq!(empty, text[..end].ends_with("/>"));
                     return if end <= token_limit {
-                        Planned::Complete { end, name_end }
+                        Planned::Complete {
+                            end,
+                            name_end,
+                            // Only the ASCII name and immediate closing syntax:
+                            // attributes or any intervening whitespace lose this proof.
+                            ascii_bare: self.name_ascii
+                                && end - name_end == if empty { 2 } else { 1 },
+                        }
                     } else {
                         Planned::Fallback
                     };
@@ -559,6 +583,71 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn bare_ascii_position_proof_preserves_plans_across_splits() {
+        for name in ["r", "abcdefgh", "p:r", "é", "aé", "éa"] {
+            for suffix in [">", "/>", " >", "\t/>", "\r\n>", " a='v'>"] {
+                let input = format!("<{name}{suffix}");
+                let expected = name.is_ascii() && matches!(suffix, ">" | "/>");
+                for split in (0..=input.len()).filter(|n| input.is_char_boundary(*n)) {
+                    let mut records = Vec::new_in(Allocator::System);
+                    records.try_reserve_exact(1).unwrap();
+                    let pointer = records.as_ptr();
+                    let mut scanner = TagScanner::default();
+                    // Repeated unchanged input must neither lose nor manufacture a proof.
+                    for end in [split, split, input.len(), input.len()] {
+                        let plan = scanner.scan(
+                            &input[..end],
+                            0,
+                            input.len(),
+                            1,
+                            NameRules::default(),
+                            &mut records,
+                        );
+                        if end < input.len() {
+                            assert!(matches!(plan, Planned::Incomplete), "{input:?} {end}");
+                        } else {
+                            let Planned::Complete {
+                                end, ascii_bare, ..
+                            } = plan
+                            else {
+                                panic!("valid native plan lost: {input:?}");
+                            };
+                            assert_eq!(end, input.len());
+                            assert_eq!(ascii_bare, expected, "{input:?} split={split}");
+                        }
+                    }
+                    assert_eq!(records.as_ptr(), pointer);
+                    // Source-index reset must replace a previous non-ASCII name proof.
+                    assert!(matches!(
+                        scanner.scan("<fresh/>", 100, 100, 1, NameRules::default(), &mut records),
+                        Planned::Complete {
+                            ascii_bare: true,
+                            ..
+                        }
+                    ));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn bare_tag_semantic_error_does_not_consume_source_coordinates() {
+        let mut parser = crate::Parser::new(crate::Config {
+            namespace_separator: Some('|'),
+            ..crate::Config::default()
+        });
+        parser.feed(b"<r><p:n>", true).unwrap();
+        parser.next_event().unwrap().unwrap();
+        let before = parser.source().position(0);
+        let remaining = parser.source().remaining().to_owned();
+        let error = parser.next_event().unwrap_err();
+        assert_eq!(error.kind, ErrorKind::UndefinedPrefix);
+        assert_eq!(error.position, before);
+        assert_eq!(parser.source().position(0), before);
+        assert_eq!(parser.source().remaining(), remaining);
     }
 
     #[test]
@@ -709,7 +798,7 @@ mod tests {
             ));
             assert!(matches!(
                 scanner.scan(input, 0, 100, 2, NameRules::default(), &mut records),
-                Planned::Complete { end, name_end: 2 } if end == input.len()
+                Planned::Complete { end, name_end: 2, .. } if end == input.len()
             ));
             assert_eq!(records.len(), 2);
             assert_eq!(records[0].value(&input[2..]), "é😀");
@@ -878,6 +967,7 @@ mod tests {
                                 Planned::Complete {
                                     end: tag_end,
                                     name_end,
+                                    ..
                                 } => {
                                     assert_eq!(
                                         reference,
@@ -978,7 +1068,7 @@ mod tests {
         // A distinct physical token can use the available capacity again.
         assert!(matches!(
             scanner.scan(input, 1, 100, 10, NameRules::default(), &mut records),
-            Planned::Complete { end, name_end: 2 } if end == input.len()
+            Planned::Complete { end, name_end: 2, .. } if end == input.len()
         ));
         assert_eq!(records.len(), 2);
         assert_eq!(records.as_ptr(), pointer);

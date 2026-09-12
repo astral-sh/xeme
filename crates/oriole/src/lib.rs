@@ -2314,7 +2314,20 @@ impl Parser {
             token.swap_decoded(&mut self.current_raw)?;
             parsed?;
             self.token_scratch = token;
-            self.consume(end)?;
+            if matches!(
+                planned,
+                tag::Planned::Complete {
+                    ascii_bare: true,
+                    ..
+                }
+            ) && self.source().native_utf8_byte_index().is_some()
+                && !self.source().has_conversions()
+            {
+                self.account_source(end)?;
+                self.source_mut().consume_ascii_tag(end);
+            } else {
+                self.consume(end)?;
+            }
             if framed_end {
                 // Native token publication only swaps owners. Consume sees the
                 // bytes already charged above, so neither can fail after the

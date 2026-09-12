@@ -16,16 +16,16 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole (normal) | Expat (normal) | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 40.920 ms | 28.653 ms | 1.429× |
-| Wayland protocol | 0.956 ms | 1.062 ms | 0.903× |
-| Maven POM | 0.675 ms | 0.437 ms | 1.551× |
-| Batik SVG | 0.128 ms | 0.134 ms | 0.953× |
-| GTK UI | 0.284 ms | 0.216 ms | 1.315× |
-| DocBook XSL | 0.237 ms | 0.187 ms | 1.266× |
+| Vulkan registry | 39.394 ms | 29.031 ms | 1.359× |
+| Wayland protocol | 0.921 ms | 1.066 ms | 0.863× |
+| Maven POM | 0.666 ms | 0.437 ms | 1.519× |
+| Batik SVG | 0.124 ms | 0.134 ms | 0.924× |
+| GTK UI | 0.277 ms | 0.215 ms | 1.280× |
+| DocBook XSL | 0.234 ms | 0.186 ms | 1.230× |
 
-These [normal-build measurements](docs/validation/2026-09-12/outer-whitespace-separated-dispatch/) use six pinned XML projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host, with elapsed work pinned to CPU0. Oriole uses Ohm rustc 1.98.1-dev with O3/ThinLTO; Expat 2.8.4 uses GCC 13.3 O3 without LTO. Times are medians of seven process medians; ratios are medians of paired ratios. Across the 24 real-project conditions in each confirmation run, Oriole takes **1.2950× Expat’s native time and 1.1182× its CPython time**. Native time is roughly tied with the preceding runtime; CPython time is 0.74% lower. Both aggregates remain above the roughly 1.10× goal.
+These [normal-build measurements](docs/validation/2026-09-12/shared-native-raw-text/) use six pinned XML projects, 4 KiB chunks and namespaces disabled on a shared Linux host. Times are medians of seven process medians; ratios are medians of paired ratios. Across the 24 real-project conditions in each confirmation run, Oriole takes **1.2659× Expat’s native time and 1.0975× its CPython time**. The Python aggregate meets the roughly 1.10× goal; native and ElementTree remain above it.
 
-Both original 2-GiB whitespace API cases now pass the unchanged three-second alarm. The full upstream matrix records **4,349 passes, 391 failures and no timeouts**, with the other 4,738 ordered outcomes unchanged. Six C consumers pass. Strict CPython retains its two grouping failures; separate semantic and allocation-continuation diagnostics pass. Current-source Rust ASan passes all six harnesses through corpus replay and bounded exploration, with leak detection disabled. The [compatibility guide](docs/compatibility.md) records the remaining production-readiness gates and separates current results from historical validation.
+Current qualification preserves **4,349 API passes, 391 failures and no timeouts**, six passing C consumers, and two strict CPython grouping failures. Separate semantic and allocation diagnostics pass. W3C acceptance matches Expat, with 960 mandatory mismatches retained per engine. **Six current-source Rust ASan/fuzz harnesses pass.** The [compatibility guide](docs/compatibility.md) records the remaining gates.
 
 ## Installation
 

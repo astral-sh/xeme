@@ -1,0 +1,1253 @@
+{
+  "source_copy_manifest_sha256": "8fed05393edaff2c9c409c3d3f6ea41d4bc6b4851be9104887e6ab700094e49f",
+  "status": "staged_asan_complete_source_commit_bound",
+  "public_report_path": "docs/validation/2026-09-12/shared-native-raw-text/",
+  "runtime_commit": "67c704c123b8661a3ad1f91bd48c2f0be4996096",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 8904,
+      "sha256": "f35046b74e667d13f20d6d65756be226b0f2da5f02a861804bb7c419f4b796f3",
+      "source": "/tmp/oriole-core-owned-text-raw-publication-notes.md",
+      "source_sha256": "aaeef14a62578e5ed22e67bd74f8ccc9a94faae153f28c25be53e1e7ea7e2388",
+      "role": "current draft scope, measurements, qualification failures and pending ASan"
+    },
+    {
+      "path": "source/source.json",
+      "bytes": 8118,
+      "sha256": "05550226c63ecefdb8607f04a23efedaadcf77e449207f18e7be7c31b2426b38",
+      "source": "/tmp/oriole-core-owned-text-raw-study/source.json",
+      "source_sha256": "05550226c63ecefdb8607f04a23efedaadcf77e449207f18e7be7c31b2426b38",
+      "role": "exact uncommitted nine-file source on selected base"
+    },
+    {
+      "path": "source/candidate.patch",
+      "bytes": 86969,
+      "sha256": "b45f30b117f4a094a58f99989075edea9ec9f478abbd9fb6413e0e0257c1b9f8",
+      "source": "/tmp/oriole-core-owned-text-raw-study/candidate.patch",
+      "source_sha256": "b45f30b117f4a094a58f99989075edea9ec9f478abbd9fb6413e0e0257c1b9f8",
+      "role": "exact uncommitted nine-file source on selected base"
+    },
+    {
+      "path": "build/build-binding.json",
+      "bytes": 15200,
+      "sha256": "b2027cd81bd1dc5830d338d757e8d2e7d77ee3758029e7443967f3da0ff23975",
+      "source": "/tmp/oriole-core-owned-text-raw-study/build-binding.json",
+      "source_sha256": "b2027cd81bd1dc5830d338d757e8d2e7d77ee3758029e7443967f3da0ff23975",
+      "role": "ordinary seven-command build and actual compiler/library identity"
+    },
+    {
+      "path": "build/build.json",
+      "bytes": 14786,
+      "sha256": "5a5ec1d16bac14554b84acbf50576cf47fe810ea3480ed6d9100968da60c6c76",
+      "source": "/tmp/oriole-core-owned-text-raw-study/build.json",
+      "source_sha256": "5a5ec1d16bac14554b84acbf50576cf47fe810ea3480ed6d9100968da60c6c76",
+      "role": "ordinary seven-command build and actual compiler/library identity"
+    },
+    {
+      "path": "build/rustc-version.log",
+      "bytes": 219,
+      "sha256": "7f8aefa1f89997f46b979665c40b511a92cdf04f6c8463fbec02d30743fb3d6f",
+      "source": "/tmp/oriole-core-owned-text-raw-study/rustc-version.log",
+      "source_sha256": "7f8aefa1f89997f46b979665c40b511a92cdf04f6c8463fbec02d30743fb3d6f",
+      "role": "ordinary seven-command build and actual compiler/library identity"
+    },
+    {
+      "path": "build/tests.log",
+      "bytes": 45437,
+      "sha256": "da4990cd72fd082ca69d91feed66f51eced8c02729e1153435c9f1d09bc90041",
+      "source": "/tmp/oriole-core-owned-text-raw-study/tests.log",
+      "source_sha256": "da4990cd72fd082ca69d91feed66f51eced8c02729e1153435c9f1d09bc90041",
+      "role": "ordinary seven-command build and actual compiler/library identity"
+    },
+    {
+      "path": "build/clippy.log",
+      "bytes": 817,
+      "sha256": "76851f9345f1d555f1f6a5b23f6f0f8eec9674eab2fb562ac54aac6a86602e90",
+      "source": "/tmp/oriole-core-owned-text-raw-study/clippy.log",
+      "source_sha256": "76851f9345f1d555f1f6a5b23f6f0f8eec9674eab2fb562ac54aac6a86602e90",
+      "role": "ordinary seven-command build and actual compiler/library identity"
+    },
+    {
+      "path": "build/benchmark-clippy.log",
+      "bytes": 576,
+      "sha256": "ffb6b28e24af4819b7cd7914449669aaf28654abe6c8efdc00900aa9b42c8143",
+      "source": "/tmp/oriole-core-owned-text-raw-study/benchmark-clippy.log",
+      "source_sha256": "ffb6b28e24af4819b7cd7914449669aaf28654abe6c8efdc00900aa9b42c8143",
+      "role": "ordinary seven-command build and actual compiler/library identity"
+    },
+    {
+      "path": "build/fmt.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "/tmp/oriole-core-owned-text-raw-study/fmt.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "ordinary seven-command build and actual compiler/library identity"
+    },
+    {
+      "path": "build/benchmark-fmt.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "/tmp/oriole-core-owned-text-raw-study/benchmark-fmt.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "ordinary seven-command build and actual compiler/library identity"
+    },
+    {
+      "path": "build/release.log",
+      "bytes": 11987,
+      "sha256": "dfa36b9d1e321590f87c605c44c6030ebaef4856c362d4b002189a92a0141e1e",
+      "source": "/tmp/oriole-core-owned-text-raw-study/release.log",
+      "source_sha256": "dfa36b9d1e321590f87c605c44c6030ebaef4856c362d4b002189a92a0141e1e",
+      "role": "ordinary seven-command build and actual compiler/library identity"
+    },
+    {
+      "path": "build/tools/build.py",
+      "bytes": 7952,
+      "sha256": "89dba11bb1a8aa6f1334ad426beee678e3ca5c4acc532d7e0b9066a694fd4699",
+      "source": "/tmp/oriole-core-owned-text-raw-preparation/build.py",
+      "source_sha256": "89dba11bb1a8aa6f1334ad426beee678e3ca5c4acc532d7e0b9066a694fd4699",
+      "role": "saved ordinary build and binding implementation"
+    },
+    {
+      "path": "build/tools/bind_build.py",
+      "bytes": 12700,
+      "sha256": "013939a1cbd940c63263548adf8ab13a1c1a9065c22c2dd5fe7d5308a522a882",
+      "source": "/tmp/oriole-core-owned-text-raw-preparation/bind_build.py",
+      "source_sha256": "013939a1cbd940c63263548adf8ab13a1c1a9065c22c2dd5fe7d5308a522a882",
+      "role": "saved ordinary build and binding implementation"
+    },
+    {
+      "path": "build/fixture-corrections/test-fix.json",
+      "bytes": 1442,
+      "sha256": "f3bbf1997569ad36983759f4d6c6cbff296b57bfc24878972756def7d2b6d288",
+      "source": "/tmp/oriole-core-owned-text-raw-preparation/test-fix.json",
+      "source_sha256": "f3bbf1997569ad36983759f4d6c6cbff296b57bfc24878972756def7d2b6d288",
+      "role": "disclosed test-only corrections; earlier failures retained separately"
+    },
+    {
+      "path": "build/fixture-corrections/test-fix.patch",
+      "bytes": 986,
+      "sha256": "f291b38e069058e93b484582a97d6b9ad9a8d0c02594be215c57e1df6b17242c",
+      "source": "/tmp/oriole-core-owned-text-raw-preparation/test-fix.patch",
+      "source_sha256": "f291b38e069058e93b484582a97d6b9ad9a8d0c02594be215c57e1df6b17242c",
+      "role": "disclosed test-only corrections; earlier failures retained separately"
+    },
+    {
+      "path": "build/fixture-corrections/allocation-test-fix.json",
+      "bytes": 2263,
+      "sha256": "94926b51ad4a0f69a8681b173b90e12a826814f37b0ec2c0ee49b07d7c740149",
+      "source": "/tmp/oriole-core-owned-text-raw-preparation/allocation-test-fix.json",
+      "source_sha256": "94926b51ad4a0f69a8681b173b90e12a826814f37b0ec2c0ee49b07d7c740149",
+      "role": "disclosed test-only corrections; earlier failures retained separately"
+    },
+    {
+      "path": "build/fixture-corrections/allocation-test-fix.patch",
+      "bytes": 1045,
+      "sha256": "246958afea8ffac1921470db11c807da0e23dbbbe12eabb4f97660ba0ede5467",
+      "source": "/tmp/oriole-core-owned-text-raw-preparation/allocation-test-fix.patch",
+      "source_sha256": "246958afea8ffac1921470db11c807da0e23dbbbe12eabb4f97660ba0ede5467",
+      "role": "disclosed test-only corrections; earlier failures retained separately"
+    },
+    {
+      "path": "measurements/initial/native/review.json",
+      "bytes": 39131,
+      "sha256": "945186da68ed7e4ebd6e9624f9b7c5ce55591b9a060f526a4abcee1e77d49a81",
+      "source": "/tmp/oriole-core-owned-text-raw-study/native/review.json",
+      "source_sha256": "945186da68ed7e4ebd6e9624f9b7c5ce55591b9a060f526a4abcee1e77d49a81",
+      "role": "complete condition rows, all paired ratios, aggregates, limitations, and raw evidence pins"
+    },
+    {
+      "path": "measurements/initial/native/conditions.csv",
+      "bytes": 2249,
+      "sha256": "3362b49e629825267ae11e8a81fa60b9cb08b152f0a09d55130f0afdcf1152a7",
+      "source": "/tmp/oriole-core-owned-text-raw-study/native/conditions.csv",
+      "source_sha256": "3362b49e629825267ae11e8a81fa60b9cb08b152f0a09d55130f0afdcf1152a7",
+      "role": "all condition rows in compact tabular form"
+    },
+    {
+      "path": "measurements/initial/native/controller.json",
+      "bytes": 1286,
+      "sha256": "89791a996ce54a635a4bc9422255415fdd1233e1787c909b8108e54142e02133",
+      "source": "/tmp/oriole-core-owned-text-raw-study/native/controller.json",
+      "source_sha256": "89791a996ce54a635a4bc9422255415fdd1233e1787c909b8108e54142e02133",
+      "role": "original preflight/elapsed controller result"
+    },
+    {
+      "path": "measurements/initial/native/protocol.json",
+      "bytes": 8908,
+      "sha256": "6089ae675e7dd6c0c529046fda78b593e02eb14b7f84aee13096f0ec852b2497",
+      "source": "/tmp/oriole-core-owned-text-raw-study/native/native-screen/protocol.json",
+      "source_sha256": "6089ae675e7dd6c0c529046fda78b593e02eb14b7f84aee13096f0ec852b2497",
+      "role": "exact native workload/method/library definitions"
+    },
+    {
+      "path": "measurements/initial/python/normal-review.json",
+      "bytes": 387874,
+      "sha256": "ba6c181c2ad373c0f2e76fee85ca1a94d06f8454e65074f3d5af98a46ff19389",
+      "source": "/tmp/oriole-core-owned-text-raw-study/python/normal-review.json",
+      "source_sha256": "ba6c181c2ad373c0f2e76fee85ca1a94d06f8454e65074f3d5af98a46ff19389",
+      "role": "complete condition rows, all paired ratios, aggregates, limitations, and raw evidence pins"
+    },
+    {
+      "path": "measurements/initial/python/normal-conditions.csv",
+      "bytes": 2163,
+      "sha256": "f40be80eb65177d2eccf4e7587990dd80f1681b556e40526315c1395b2961444",
+      "source": "/tmp/oriole-core-owned-text-raw-study/python/normal-conditions.csv",
+      "source_sha256": "f40be80eb65177d2eccf4e7587990dd80f1681b556e40526315c1395b2961444",
+      "role": "all condition rows in compact tabular form"
+    },
+    {
+      "path": "measurements/initial/python/time-controller.json",
+      "bytes": 1255,
+      "sha256": "dd8e9797cc3f933d3b70d5703842049e30306dc1044e8c3a24217299810268f8",
+      "source": "/tmp/oriole-core-owned-text-raw-study/python/time-controller.json",
+      "source_sha256": "dd8e9797cc3f933d3b70d5703842049e30306dc1044e8c3a24217299810268f8",
+      "role": "original elapsed controller result"
+    },
+    {
+      "path": "measurements/initial/python/preflight-review.json",
+      "bytes": 92751,
+      "sha256": "f73e9d2f033ba6093a0b371cc0cb8f07da68e0a83774ad1b80c2f77808db4872",
+      "source": "/tmp/oriole-core-owned-text-raw-study/python/preflight-review.json",
+      "source_sha256": "f73e9d2f033ba6093a0b371cc0cb8f07da68e0a83774ad1b80c2f77808db4872",
+      "role": "canonical outputs and actual consumer origins"
+    },
+    {
+      "path": "measurements/initial/host/host-before-native.json",
+      "bytes": 782,
+      "sha256": "27e919fdb80db035dd55740805bac0337f4f4ec01b050c68beef2cf99a2534aa",
+      "source": "/tmp/oriole-core-owned-text-raw-study/host-before-native.json",
+      "source_sha256": "27e919fdb80db035dd55740805bac0337f4f4ec01b050c68beef2cf99a2534aa",
+      "role": "all before/during host observations, including initial busy-host observation"
+    },
+    {
+      "path": "measurements/initial/host/host-before-python-after-busy.json",
+      "bytes": 782,
+      "sha256": "0dacf00436c3492e2a66952c8bb023ede9beee050b37a8cbb54088e47d871ef7",
+      "source": "/tmp/oriole-core-owned-text-raw-study/host-before-python-after-busy.json",
+      "source_sha256": "0dacf00436c3492e2a66952c8bb023ede9beee050b37a8cbb54088e47d871ef7",
+      "role": "all before/during host observations, including initial busy-host observation"
+    },
+    {
+      "path": "measurements/initial/host/host-before-python.json",
+      "bytes": 768,
+      "sha256": "6806104e1e71cf42bbecc9b8980c262953d1d4c72b6791e35e17c020ed6461b2",
+      "source": "/tmp/oriole-core-owned-text-raw-study/host-before-python.json",
+      "source_sha256": "6806104e1e71cf42bbecc9b8980c262953d1d4c72b6791e35e17c020ed6461b2",
+      "role": "all before/during host observations, including initial busy-host observation"
+    },
+    {
+      "path": "measurements/initial/host/host-during-native.json",
+      "bytes": 5006,
+      "sha256": "e96f77d47cdb6d382d7468f2fc6db79c5aa89c2031a057b23f3d39cbec5f6933",
+      "source": "/tmp/oriole-core-owned-text-raw-study/host-during-native.json",
+      "source_sha256": "e96f77d47cdb6d382d7468f2fc6db79c5aa89c2031a057b23f3d39cbec5f6933",
+      "role": "all before/during host observations, including initial busy-host observation"
+    },
+    {
+      "path": "measurements/initial/host/host-during-python.json",
+      "bytes": 12016,
+      "sha256": "b9212be09fe8897027de7cb8f4abb022f02247c0fec1278a0f2c3a60e4e4d47b",
+      "source": "/tmp/oriole-core-owned-text-raw-study/host-during-python.json",
+      "source_sha256": "b9212be09fe8897027de7cb8f4abb022f02247c0fec1278a0f2c3a60e4e4d47b",
+      "role": "all before/during host observations, including initial busy-host observation"
+    },
+    {
+      "path": "measurements/confirmation/native/review.json",
+      "bytes": 43445,
+      "sha256": "ab13fd1b34dfc33f29c24fb07f9272c124bd642a70911774f3e6746285213312",
+      "source": "/tmp/oriole-core-owned-text-raw-confirmation/native/review.json",
+      "source_sha256": "ab13fd1b34dfc33f29c24fb07f9272c124bd642a70911774f3e6746285213312",
+      "role": "complete condition rows, all paired ratios, aggregates, limitations, and raw evidence pins"
+    },
+    {
+      "path": "measurements/confirmation/native/conditions.csv",
+      "bytes": 2247,
+      "sha256": "a7080d9aef7f8d7877a7410ccd3fbc9efd9d57fb9eea0be898dae1797a9fd9c6",
+      "source": "/tmp/oriole-core-owned-text-raw-confirmation/native/conditions.csv",
+      "source_sha256": "a7080d9aef7f8d7877a7410ccd3fbc9efd9d57fb9eea0be898dae1797a9fd9c6",
+      "role": "all condition rows in compact tabular form"
+    },
+    {
+      "path": "measurements/confirmation/native/controller.json",
+      "bytes": 1304,
+      "sha256": "49855d6b415b65e5c98d20e9cc76e646b84ec79ea47829740ee4a3b063e2f847",
+      "source": "/tmp/oriole-core-owned-text-raw-confirmation/native/controller.json",
+      "source_sha256": "49855d6b415b65e5c98d20e9cc76e646b84ec79ea47829740ee4a3b063e2f847",
+      "role": "original preflight/elapsed controller result"
+    },
+    {
+      "path": "measurements/confirmation/native/protocol.json",
+      "bytes": 8915,
+      "sha256": "e1cae051da2d09945041b6a2c957be334a950aa7273c418a6e00540299cf7398",
+      "source": "/tmp/oriole-core-owned-text-raw-confirmation/native/native-screen/protocol.json",
+      "source_sha256": "e1cae051da2d09945041b6a2c957be334a950aa7273c418a6e00540299cf7398",
+      "role": "exact native workload/method/library definitions"
+    },
+    {
+      "path": "measurements/confirmation/python/normal-review.json",
+      "bytes": 407028,
+      "sha256": "a9609f9f95e5f951e55f01494cbea35afe8745b3d4684e30974854613b4e2288",
+      "source": "/tmp/oriole-core-owned-text-raw-confirmation/python/normal-review.json",
+      "source_sha256": "a9609f9f95e5f951e55f01494cbea35afe8745b3d4684e30974854613b4e2288",
+      "role": "complete condition rows, all paired ratios, aggregates, limitations, and raw evidence pins"
+    },
+    {
+      "path": "measurements/confirmation/python/normal-conditions.csv",
+      "bytes": 2163,
+      "sha256": "5edcdd93d12958e61476166554fb33354966ec72e08b98e617a3f4e1ea280614",
+      "source": "/tmp/oriole-core-owned-text-raw-confirmation/python/normal-conditions.csv",
+      "source_sha256": "5edcdd93d12958e61476166554fb33354966ec72e08b98e617a3f4e1ea280614",
+      "role": "all condition rows in compact tabular form"
+    },
+    {
+      "path": "measurements/confirmation/python/time-controller.json",
+      "bytes": 1356,
+      "sha256": "f5f66eaf5f0fefab5ccbaeb0bc41b07e1f44aaba36f0e7e9fafc05286307c658",
+      "source": "/tmp/oriole-core-owned-text-raw-confirmation/python/time-controller.json",
+      "source_sha256": "f5f66eaf5f0fefab5ccbaeb0bc41b07e1f44aaba36f0e7e9fafc05286307c658",
+      "role": "original elapsed controller result"
+    },
+    {
+      "path": "measurements/confirmation/python/preflight-review.json",
+      "bytes": 101187,
+      "sha256": "e7788e93c914a6fc3b4e4e7824eab3a1808bdeb83d79c847242d57936eaf9f73",
+      "source": "/tmp/oriole-core-owned-text-raw-confirmation/python/preflight-review.json",
+      "source_sha256": "e7788e93c914a6fc3b4e4e7824eab3a1808bdeb83d79c847242d57936eaf9f73",
+      "role": "canonical outputs and actual consumer origins"
+    },
+    {
+      "path": "measurements/confirmation/host/host-before-native.json",
+      "bytes": 783,
+      "sha256": "370b4372c1c78a55c606e41aa8b6b24391eeb77d3f2f169d1d98f36a5bcdf76b",
+      "source": "/tmp/oriole-core-owned-text-raw-confirmation/host-before-native.json",
+      "source_sha256": "370b4372c1c78a55c606e41aa8b6b24391eeb77d3f2f169d1d98f36a5bcdf76b",
+      "role": "all before/during host observations, including initial busy-host observation"
+    },
+    {
+      "path": "measurements/confirmation/host/host-before-python.json",
+      "bytes": 770,
+      "sha256": "dc066c004bb2beb8bc568301c987996378b0f5446f677b74f8a46a871929e391",
+      "source": "/tmp/oriole-core-owned-text-raw-confirmation/host-before-python.json",
+      "source_sha256": "dc066c004bb2beb8bc568301c987996378b0f5446f677b74f8a46a871929e391",
+      "role": "all before/during host observations, including initial busy-host observation"
+    },
+    {
+      "path": "measurements/confirmation/host/host-during-native.json",
+      "bytes": 5002,
+      "sha256": "c538fe8cc389a8addee3b2508d7e97421552155a54061cca5939b669df891865",
+      "source": "/tmp/oriole-core-owned-text-raw-confirmation/host-during-native.json",
+      "source_sha256": "c538fe8cc389a8addee3b2508d7e97421552155a54061cca5939b669df891865",
+      "role": "all before/during host observations, including initial busy-host observation"
+    },
+    {
+      "path": "measurements/confirmation/host/host-during-python.json",
+      "bytes": 10805,
+      "sha256": "89828b15c7720add2d4865e571da9e209b3e170fa03a941eb9342affcfbcee21",
+      "source": "/tmp/oriole-core-owned-text-raw-confirmation/host-during-python.json",
+      "source_sha256": "89828b15c7720add2d4865e571da9e209b3e170fa03a941eb9342affcfbcee21",
+      "role": "all before/during host observations, including initial busy-host observation"
+    },
+    {
+      "path": "measurements/consumer-binding.json",
+      "bytes": 37652,
+      "sha256": "14c37cb1f3711ca922d4a532c16ebbf4000af0b6ce299e9e5bf7abfa99e09965",
+      "source": "/tmp/oriole-core-owned-text-raw-study/python/consumer-binding.json",
+      "source_sha256": "14c37cb1f3711ca922d4a532c16ebbf4000af0b6ce299e9e5bf7abfa99e09965",
+      "role": "two actual O2 candidate modules and four reused selected/Expat modules"
+    },
+    {
+      "path": "qualification/api-c-readback.json",
+      "bytes": 62022,
+      "sha256": "1a5edef95b879cb57582f889c3dad276d91b36993327e0588468c6ec00f0ba0e",
+      "source": "/tmp/oriole-core-owned-text-raw-correctness/api-c-readback.json",
+      "source_sha256": "1a5edef95b879cb57582f889c3dad276d91b36993327e0588468c6ec00f0ba0e",
+      "role": "current exact-source qualification with unchanged failures and explicit scope"
+    },
+    {
+      "path": "qualification/strict-semantic-readback.json",
+      "bytes": 189115,
+      "sha256": "2b281b05806825489609a3152ddf4558fa8a06edaef3c4d6b5ce45bcaf9fa52d",
+      "source": "/tmp/oriole-core-owned-text-raw-correctness/strict-semantic-readback.json",
+      "source_sha256": "2b281b05806825489609a3152ddf4558fa8a06edaef3c4d6b5ce45bcaf9fa52d",
+      "role": "current exact-source qualification with unchanged failures and explicit scope"
+    },
+    {
+      "path": "qualification/w3c-saved-readback.json",
+      "bytes": 27197,
+      "sha256": "59b7b2de5bab66a03ae1cc19432b121fc238dbdd36a7cd2efcf6833d05b271e5",
+      "source": "/tmp/oriole-core-owned-text-raw-correctness/w3c-saved-readback.json",
+      "source_sha256": "59b7b2de5bab66a03ae1cc19432b121fc238dbdd36a7cd2efcf6833d05b271e5",
+      "role": "current exact-source qualification with unchanged failures and explicit scope"
+    },
+    {
+      "path": "qualification/W3C-classification.md",
+      "bytes": 4065,
+      "sha256": "ecaab558ff4b9f59358a0e4c71170a6942a3088daaea5636e9bc0065e0ee70fa",
+      "source": "/tmp/oriole-core-owned-text-raw-correctness/W3C-classification.md",
+      "source_sha256": "baa3744ac7a6f39eec0a769404c6b9b5dc978c3d4e31826b5a82d108bf241bcd",
+      "role": "current exact-source qualification with unchanged failures and explicit scope"
+    },
+    {
+      "path": "qualification/api-original-results.json",
+      "bytes": 682982,
+      "sha256": "3720775bc940c14fdb25706ba791e77da545c48c8d74e923180ef44a8e910543",
+      "source": "/tmp/oriole-core-owned-text-raw-correctness/api-native/upstream-api/results.json",
+      "source_sha256": "3720775bc940c14fdb25706ba791e77da545c48c8d74e923180ef44a8e910543",
+      "role": "all 4740 original ordered API outcomes, including every failure"
+    },
+    {
+      "path": "qualification/w3c/summary.json",
+      "bytes": 1349775,
+      "sha256": "9849b0a88e4d9dc62baa3f2c2428ad60da762d66f6c9a64d32e536600a97e984",
+      "source": "/tmp/oriole-core-owned-text-raw-correctness/w3c/summary.json",
+      "source_sha256": "9849b0a88e4d9dc62baa3f2c2428ad60da762d66f6c9a64d32e536600a97e984",
+      "role": "all W3C mandatory/optional classifications, skips and acceptance differences"
+    },
+    {
+      "path": "qualification/w3c-supervision.json",
+      "bytes": 2125,
+      "sha256": "ee6b968f832e0409643918dc91f3b6e218d1a519c1e465d23f5fdf49487b40f7",
+      "source": "/tmp/oriole-core-owned-text-raw-correctness/w3c-supervision/receipt.json",
+      "source_sha256": "ee6b968f832e0409643918dc91f3b6e218d1a519c1e465d23f5fdf49487b40f7",
+      "role": "raw conformance exit 1 and completed worker cleanup"
+    },
+    {
+      "path": "qualification/allocation-retry/saved-readback.json",
+      "bytes": 1379,
+      "sha256": "7be3d8545512548805e73944aaaff50e75b8f25b7d3238bb7f76284486ea3023",
+      "source": "/tmp/oriole-core-owned-text-raw-allocation-retry/run01/saved-readback.json",
+      "source_sha256": "7be3d8545512548805e73944aaaff50e75b8f25b7d3238bb7f76284486ea3023",
+      "role": "supplemental diagnostic only; preserves exact outcomes and cleanup"
+    },
+    {
+      "path": "qualification/allocation-retry/report.json",
+      "bytes": 141677,
+      "sha256": "58a316e06d2e4f4a06ff1cc382672c8c80daeca3558cca9d5a43766810112af2",
+      "source": "/tmp/oriole-core-owned-text-raw-allocation-retry/run01/report.json",
+      "source_sha256": "58a316e06d2e4f4a06ff1cc382672c8c80daeca3558cca9d5a43766810112af2",
+      "role": "supplemental diagnostic only; preserves exact outcomes and cleanup"
+    },
+    {
+      "path": "qualification/allocation-retry/tests.log",
+      "bytes": 41499,
+      "sha256": "205b275e95cd5e0e5ab498788cfe9d6cfac88b441f1e20c222154ccc37dd7c30",
+      "source": "/tmp/oriole-core-owned-text-raw-allocation-retry/run01/tests.log",
+      "source_sha256": "205b275e95cd5e0e5ab498788cfe9d6cfac88b441f1e20c222154ccc37dd7c30",
+      "role": "supplemental diagnostic only; preserves exact outcomes and cleanup"
+    },
+    {
+      "path": "qualification/allocation-retry/build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "/tmp/oriole-core-owned-text-raw-allocation-retry/run01/build.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "supplemental diagnostic only; preserves exact outcomes and cleanup"
+    },
+    {
+      "path": "qualification/allocation-retry/retry-ceilings.patch",
+      "bytes": 6712,
+      "sha256": "703c57622db66df7b0d793272bd67c33c8a6502492771c8657226e13f60ec9b6",
+      "source": "/tmp/oriole-core-owned-text-raw-allocation-retry-preparation/retry-ceilings.patch",
+      "source_sha256": "703c57622db66df7b0d793272bd67c33c8a6502492771c8657226e13f60ec9b6",
+      "role": "explicit allowed source edits and unchanged semantic/timeout/memory bounds"
+    },
+    {
+      "path": "qualification/allocation-retry/README.md",
+      "bytes": 1964,
+      "sha256": "bd427370af9d55681a467e620df2f12f9ce3e3ffea615ddce26be3cc3ef04c7b",
+      "source": "/tmp/oriole-core-owned-text-raw-allocation-retry-preparation/README.md",
+      "source_sha256": "bd427370af9d55681a467e620df2f12f9ce3e3ffea615ddce26be3cc3ef04c7b",
+      "role": "explicit allowed source edits and unchanged semantic/timeout/memory bounds"
+    },
+    {
+      "path": "qualification/allocation-retry/commands.json",
+      "bytes": 3091,
+      "sha256": "e1ab5d9cb700e7a4944bd8f40181395210b1ce3f207191d3da0482d75e6eb594",
+      "source": "/tmp/oriole-core-owned-text-raw-allocation-retry-preparation/commands.json",
+      "source_sha256": "e1ab5d9cb700e7a4944bd8f40181395210b1ce3f207191d3da0482d75e6eb594",
+      "role": "explicit allowed source edits and unchanged semantic/timeout/memory bounds"
+    },
+    {
+      "path": "qualification/buffer-tail/saved-readback.json",
+      "bytes": 3536,
+      "sha256": "c74c7409fc8513f5a3d07c083b95a22a79890655325cf9e81a49f52a66fa26f0",
+      "source": "/tmp/oriole-core-owned-text-raw-buffer-tail/run01/saved-readback.json",
+      "source_sha256": "c74c7409fc8513f5a3d07c083b95a22a79890655325cf9e81a49f52a66fa26f0",
+      "role": "supplemental diagnostic only; preserves exact outcomes and cleanup"
+    },
+    {
+      "path": "qualification/buffer-tail/report.json",
+      "bytes": 101835,
+      "sha256": "6b361275c83e8fcfd4362f5ba6bfd3131fdab29fbd27b7ec22f7e0b99a540e71",
+      "source": "/tmp/oriole-core-owned-text-raw-buffer-tail/run01/report.json",
+      "source_sha256": "6b361275c83e8fcfd4362f5ba6bfd3131fdab29fbd27b7ec22f7e0b99a540e71",
+      "role": "supplemental diagnostic only; preserves exact outcomes and cleanup"
+    },
+    {
+      "path": "qualification/buffer-tail/tests.log",
+      "bytes": 2541,
+      "sha256": "cbc65d8beaeef732ff5fbc13691959f65071e9c107d95d033cd63151ccb6d0ea",
+      "source": "/tmp/oriole-core-owned-text-raw-buffer-tail/run01/tests.log",
+      "source_sha256": "cbc65d8beaeef732ff5fbc13691959f65071e9c107d95d033cd63151ccb6d0ea",
+      "role": "supplemental diagnostic only; preserves exact outcomes and cleanup"
+    },
+    {
+      "path": "qualification/buffer-tail/build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "/tmp/oriole-core-owned-text-raw-buffer-tail/run01/build.log",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "supplemental diagnostic only; preserves exact outcomes and cleanup"
+    },
+    {
+      "path": "qualification/buffer-tail/diagnostic.patch",
+      "bytes": 937,
+      "sha256": "9e1a204cee148112a27112813986dc0922437c65842ca96db54901f14d028158",
+      "source": "/tmp/oriole-core-owned-text-raw-buffer-tail-preparation/diagnostic.patch",
+      "source_sha256": "9e1a204cee148112a27112813986dc0922437c65842ca96db54901f14d028158",
+      "role": "explicit allowed source edits and unchanged semantic/timeout/memory bounds"
+    },
+    {
+      "path": "qualification/buffer-tail/README.md",
+      "bytes": 2054,
+      "sha256": "758ce14fdaf36c04b8652fa68dc73fafa9424a4bb7b896ea2811f432d636b360",
+      "source": "/tmp/oriole-core-owned-text-raw-buffer-tail-preparation/README.md",
+      "source_sha256": "758ce14fdaf36c04b8652fa68dc73fafa9424a4bb7b896ea2811f432d636b360",
+      "role": "explicit allowed source edits and unchanged semantic/timeout/memory bounds"
+    },
+    {
+      "path": "qualification/buffer-tail/commands.json",
+      "bytes": 2286,
+      "sha256": "158d2327464b7bbc8bb9b1637f884f34f4c58fcbbe0c80a194f235a614741873",
+      "source": "/tmp/oriole-core-owned-text-raw-buffer-tail-preparation/commands.json",
+      "source_sha256": "158d2327464b7bbc8bb9b1637f884f34f4c58fcbbe0c80a194f235a614741873",
+      "role": "explicit allowed source edits and unchanged semantic/timeout/memory bounds"
+    },
+    {
+      "path": "qualification/buffer-tail/observation-transform.json",
+      "bytes": 1313,
+      "sha256": "cefd0e0df9a8e4d0cb972483a9fc3ea4512b3f37ce15d0c699f617b4fc2f674b",
+      "source": "/tmp/oriole-core-owned-text-raw-buffer-tail-preparation/observation-transform.json",
+      "source_sha256": "cefd0e0df9a8e4d0cb972483a9fc3ea4512b3f37ce15d0c699f617b4fc2f674b",
+      "role": "exact two assertions replaced by observations"
+    },
+    {
+      "path": "EXPERIMENTS.md",
+      "bytes": 7325,
+      "sha256": "f6ddd681277bbdc7cd12dbd41323f61654e18b16684c40200fbb687abc092f13",
+      "source": "/tmp/oriole-simd-arena-allocator-experiment-summary-revision03.md",
+      "source_sha256": "152f130f5b4389b1935b7d9d424e827b73c9f40c02c5b7485e157ed4d7ac60a4",
+      "role": "completed experiment comparison, with all prior versions retained locally"
+    },
+    {
+      "path": "experiments/text-32/study/native-review.json",
+      "bytes": 57089,
+      "sha256": "f33dbc4d7e6e1f39303b2162054bae8d5661996b36f3b31e8d94f8963bd10677",
+      "source": "/tmp/oriole-text-32-study/native/review.json",
+      "source_sha256": "f33dbc4d7e6e1f39303b2162054bae8d5661996b36f3b31e8d94f8963bd10677",
+      "role": "complete saved condition rows and adverse cases for the experiment"
+    },
+    {
+      "path": "experiments/text-32/study/python-normal-review.json",
+      "bytes": 378667,
+      "sha256": "0d639c2cc36d5d7a612154cb7ff4ef657f38fb8548699d9fcf7fa1703d787981",
+      "source": "/tmp/oriole-text-32-study/python/normal-review.json",
+      "source_sha256": "0d639c2cc36d5d7a612154cb7ff4ef657f38fb8548699d9fcf7fa1703d787981",
+      "role": "complete saved condition rows and adverse cases for the experiment"
+    },
+    {
+      "path": "experiments/text-32/final-decision.json",
+      "bytes": 35845,
+      "sha256": "9746af219e6c87f218dab1ace42111dd4f1e8f561dc970a380b9b4fdd31ea36b",
+      "source": "/tmp/oriole-text-32-study/final-decision.json",
+      "source_sha256": "9746af219e6c87f218dab1ace42111dd4f1e8f561dc970a380b9b4fdd31ea36b",
+      "role": "recorded selection decision; superseded pending decision retained when present"
+    },
+    {
+      "path": "experiments/eight-name-cache/study/native-review.json",
+      "bytes": 64161,
+      "sha256": "cef9beae4cc26a8281c3fbff42f167307bd016dcf1966e3fbbfd06e380c9f0b5",
+      "source": "/tmp/oriole-eight-name-cache-study/native/review.json",
+      "source_sha256": "cef9beae4cc26a8281c3fbff42f167307bd016dcf1966e3fbbfd06e380c9f0b5",
+      "role": "complete saved condition rows and adverse cases for the experiment"
+    },
+    {
+      "path": "experiments/eight-name-cache/final-decision.json",
+      "bytes": 26925,
+      "sha256": "b6517500d198539f681987932f4659b51f87c9b28f806b457af3f18b3ce7b303",
+      "source": "/tmp/oriole-eight-name-cache-study/final-decision.json",
+      "source_sha256": "b6517500d198539f681987932f4659b51f87c9b28f806b457af3f18b3ce7b303",
+      "role": "recorded selection decision; superseded pending decision retained when present"
+    },
+    {
+      "path": "experiments/amortized-frame-records/study/native-review.json",
+      "bytes": 100407,
+      "sha256": "3dee0df32d1b251175330099c4ad6739b1fcc7a009fb35684641fc677a30d124",
+      "source": "/tmp/oriole-amortized-frame-records-study/native/review.json",
+      "source_sha256": "3dee0df32d1b251175330099c4ad6739b1fcc7a009fb35684641fc677a30d124",
+      "role": "complete saved condition rows and adverse cases for the experiment"
+    },
+    {
+      "path": "experiments/amortized-frame-records/final-decision.json",
+      "bytes": 63144,
+      "sha256": "34310723a61b58d720ef78e6cf74c1fa13f3c534f0237caa8db52ba72ca564e0",
+      "source": "/tmp/oriole-amortized-frame-records-study/final-decision.json",
+      "source_sha256": "34310723a61b58d720ef78e6cf74c1fa13f3c534f0237caa8db52ba72ca564e0",
+      "role": "recorded selection decision; superseded pending decision retained when present"
+    },
+    {
+      "path": "experiments/inline-stack-name/study/native-review.json",
+      "bytes": 76611,
+      "sha256": "1cafae5c4ff5e8825e379737af0ec8e37d105c964a104a0d76f4edd139c3c8ae",
+      "source": "/tmp/oriole-inline-stack-name-study/native/review.json",
+      "source_sha256": "1cafae5c4ff5e8825e379737af0ec8e37d105c964a104a0d76f4edd139c3c8ae",
+      "role": "complete saved condition rows and adverse cases for the experiment"
+    },
+    {
+      "path": "experiments/inline-stack-name/decision.json",
+      "bytes": 39422,
+      "sha256": "8322471fb5721aa387e830553ef6269eefe3a252f365cae0e480772b4e0d4791",
+      "source": "/tmp/oriole-inline-stack-name-study/decision.json",
+      "source_sha256": "8322471fb5721aa387e830553ef6269eefe3a252f365cae0e480772b4e0d4791",
+      "role": "recorded selection decision; superseded pending decision retained when present"
+    },
+    {
+      "path": "experiments/planned-scalar-name/study/native-review.json",
+      "bytes": 46094,
+      "sha256": "9ce91aa2aa40ad0d63eebf2821c72352f9bf86d3dffdc82710c2ffa2f7b3cd87",
+      "source": "/tmp/oriole-planned-scalar-name-study/native/review.json",
+      "source_sha256": "9ce91aa2aa40ad0d63eebf2821c72352f9bf86d3dffdc82710c2ffa2f7b3cd87",
+      "role": "complete saved condition rows and adverse cases for the experiment"
+    },
+    {
+      "path": "experiments/planned-scalar-name/study/python-normal-review.json",
+      "bytes": 393093,
+      "sha256": "fdf1962013fdff29b50708823b212a081bc7215cafe764a3885484f39bbc37ea",
+      "source": "/tmp/oriole-planned-scalar-name-study/python/normal-review.json",
+      "source_sha256": "fdf1962013fdff29b50708823b212a081bc7215cafe764a3885484f39bbc37ea",
+      "role": "complete saved condition rows and adverse cases for the experiment"
+    },
+    {
+      "path": "experiments/planned-scalar-name/confirmation/native-review.json",
+      "bytes": 44852,
+      "sha256": "1fc2f810824e45d2bb2cbb7bae9de53ded8ff5e234f14de6cc9b8c9f9d4f63f7",
+      "source": "/tmp/oriole-planned-scalar-name-confirmation/native/review.json",
+      "source_sha256": "1fc2f810824e45d2bb2cbb7bae9de53ded8ff5e234f14de6cc9b8c9f9d4f63f7",
+      "role": "complete saved condition rows and adverse cases for the experiment"
+    },
+    {
+      "path": "experiments/planned-scalar-name/confirmation/python-normal-review.json",
+      "bytes": 416551,
+      "sha256": "d729bbc6a3fcedce338c05a3cb75b280de1cc43c33fa01f5e285334a2faca6b8",
+      "source": "/tmp/oriole-planned-scalar-name-confirmation/python/normal-review.json",
+      "source_sha256": "d729bbc6a3fcedce338c05a3cb75b280de1cc43c33fa01f5e285334a2faca6b8",
+      "role": "complete saved condition rows and adverse cases for the experiment"
+    },
+    {
+      "path": "experiments/inline-stack-name-bytes/study/native-review.json",
+      "bytes": 55865,
+      "sha256": "e26336b4bf7f52136335a4eb5541569b007cac9b4c051746e77ff09728960aed",
+      "source": "/tmp/oriole-inline-stack-name-bytes-study/native/review.json",
+      "source_sha256": "e26336b4bf7f52136335a4eb5541569b007cac9b4c051746e77ff09728960aed",
+      "role": "complete saved condition rows and adverse cases for the experiment"
+    },
+    {
+      "path": "experiments/inline-stack-name-bytes/study/python-normal-review.json",
+      "bytes": 407491,
+      "sha256": "80b4af475a7907284bf69f220d3bc8fe122adad23b93a86fba8ac9121f243850",
+      "source": "/tmp/oriole-inline-stack-name-bytes-study/python/normal-review.json",
+      "source_sha256": "80b4af475a7907284bf69f220d3bc8fe122adad23b93a86fba8ac9121f243850",
+      "role": "complete saved condition rows and adverse cases for the experiment"
+    },
+    {
+      "path": "experiments/inline-stack-name-bytes/final-decision.json",
+      "bytes": 962,
+      "sha256": "82b9ee91cdea4add355c2368526d6226699296958e62ff72c7226ef0365608c4",
+      "source": "/tmp/oriole-inline-stack-name-bytes-study/final-decision.json",
+      "source_sha256": "82b9ee91cdea4add355c2368526d6226699296958e62ff72c7226ef0365608c4",
+      "role": "recorded selection decision; superseded pending decision retained when present"
+    },
+    {
+      "path": "experiments/inline-stack-name-bytes/decision.json",
+      "bytes": 18439,
+      "sha256": "d0ef42bde90a05df95c489a4391f7176aa8394a0c8055b2474b6109792bc6f47",
+      "source": "/tmp/oriole-inline-stack-name-bytes-study/decision.json",
+      "source_sha256": "d0ef42bde90a05df95c489a4391f7176aa8394a0c8055b2474b6109792bc6f47",
+      "role": "recorded selection decision; superseded pending decision retained when present"
+    },
+    {
+      "path": "experiments/general-start-tail/study/native-review.json",
+      "bytes": 50236,
+      "sha256": "8874b63433c2f34d512e20afe0e267f87a53ae031e08dd7b6ef79c6b082c51b0",
+      "source": "/tmp/oriole-general-start-tail-study/native/review.json",
+      "source_sha256": "8874b63433c2f34d512e20afe0e267f87a53ae031e08dd7b6ef79c6b082c51b0",
+      "role": "complete saved condition rows and adverse cases for the experiment"
+    },
+    {
+      "path": "experiments/general-start-tail/study/python-normal-review.json",
+      "bytes": 393071,
+      "sha256": "8ffbba879c8432da008371a84809473c608784bb0bca37c9b9e35c9053361f9e",
+      "source": "/tmp/oriole-general-start-tail-study/python/normal-review.json",
+      "source_sha256": "8ffbba879c8432da008371a84809473c608784bb0bca37c9b9e35c9053361f9e",
+      "role": "complete saved condition rows and adverse cases for the experiment"
+    },
+    {
+      "path": "experiments/general-start-tail/final-decision.json",
+      "bytes": 879,
+      "sha256": "9244fcdd43804bcab2fe864abb40c746203c0544d3d9dab3eabed6f6dcad76f8",
+      "source": "/tmp/oriole-general-start-tail-study/final-decision.json",
+      "source_sha256": "9244fcdd43804bcab2fe864abb40c746203c0544d3d9dab3eabed6f6dcad76f8",
+      "role": "recorded selection decision; superseded pending decision retained when present"
+    },
+    {
+      "path": "experiments/general-start-tail/decision.json",
+      "bytes": 12875,
+      "sha256": "3b72871be7cce1348dd536b942057aef1bfe7e2720c3fd36a42353e5b04659fa",
+      "source": "/tmp/oriole-general-start-tail-study/decision.json",
+      "source_sha256": "3b72871be7cce1348dd536b942057aef1bfe7e2720c3fd36a42353e5b04659fa",
+      "role": "recorded selection decision; superseded pending decision retained when present"
+    },
+    {
+      "path": "experiments/historical-thinlto/native-groups.json",
+      "bytes": 1525,
+      "sha256": "dc6d9f9367fdf7d5f1b78dc4a18c1d885cf3564bbdd9b9ba7a0829505c85b2da",
+      "source": "/tmp/oriole-thinlto-native-independent-review/groups.json",
+      "source_sha256": "dc6d9f9367fdf7d5f1b78dc4a18c1d885cf3564bbdd9b9ba7a0829505c85b2da",
+      "role": "historical evidence with its original source/build scope; no new PGO work"
+    },
+    {
+      "path": "experiments/historical-thinlto/python-review.json",
+      "bytes": 8010,
+      "sha256": "ab405c08444a293805cd7317a2223cc1a28bb061d22b27d54c3bde8e5e7e44bf",
+      "source": "/tmp/oriole-thinlto-python-independent-review/review.json",
+      "source_sha256": "ab405c08444a293805cd7317a2223cc1a28bb061d22b27d54c3bde8e5e7e44bf",
+      "role": "historical evidence with its original source/build scope; no new PGO work"
+    },
+    {
+      "path": "experiments/historical-allocators/RESULTS.md",
+      "bytes": 5597,
+      "sha256": "4142380fff3f5a6d4941f1ff0b9cd8bb1cc66f305c10999f591d6d4713197259",
+      "source": "/tmp/oriole-pgo-allocator-native-study/RESULTS.md",
+      "source_sha256": "4142380fff3f5a6d4941f1ff0b9cd8bb1cc66f305c10999f591d6d4713197259",
+      "role": "historical evidence with its original source/build scope; no new PGO work"
+    },
+    {
+      "path": "source/references/w3c.py",
+      "bytes": 14160,
+      "sha256": "8dd92a55c42f3fab591ff3752bdb51ed0bf23659ce0d5541dbb1df0f84caddc7",
+      "source": "/tmp/oriole-final-consumer-validation/tools/w3c.py",
+      "source_sha256": "8dd92a55c42f3fab591ff3752bdb51ed0bf23659ce0d5541dbb1df0f84caddc7",
+      "role": "exact source snapshot supporting W3C edition classification; original licenses retained"
+    },
+    {
+      "path": "source/references/oriole_expat/lib.rs",
+      "bytes": 104703,
+      "sha256": "159454c61bdd6361adc493eecf9d69731b2ca826d90a92529599f1b813a70001",
+      "source": "/home/dev-user/code/oss/oriole-core-owned-text-raw/crates/oriole_expat/src/lib.rs",
+      "source_sha256": "159454c61bdd6361adc493eecf9d69731b2ca826d90a92529599f1b813a70001",
+      "role": "exact source snapshot supporting W3C edition classification; original licenses retained"
+    },
+    {
+      "path": "source/references/oriole/names.rs",
+      "bytes": 12028,
+      "sha256": "4514e938d2556886d35599e62e3f5c1488e8adca2d705cd504692821eac506c6",
+      "source": "/home/dev-user/code/oss/oriole-installed-trial-results/crates/oriole/src/names.rs",
+      "source_sha256": "4514e938d2556886d35599e62e3f5c1488e8adca2d705cd504692821eac506c6",
+      "role": "exact source snapshot supporting W3C edition classification; original licenses retained"
+    },
+    {
+      "path": "source/references/expat/README.md.txt",
+      "bytes": 9934,
+      "sha256": "bc8c10be26f855656732fd63f22c69eb9446ebf4b64b0e7c64d4b95886667c63",
+      "source": "/tmp/oriole-pgo-study/expat-source/README.md",
+      "source_sha256": "bc8c10be26f855656732fd63f22c69eb9446ebf4b64b0e7c64d4b95886667c63",
+      "role": "exact source snapshot supporting W3C edition classification; original licenses retained"
+    },
+    {
+      "path": "source/references/expat/xmltok.c",
+      "bytes": 54964,
+      "sha256": "f2732a8e91fd901d75431d35edc421e1ff3893a275c4de1cc855b3d4deadfd37",
+      "source": "/tmp/oriole-pgo-study/expat-source/lib/xmltok.c",
+      "source_sha256": "f2732a8e91fd901d75431d35edc421e1ff3893a275c4de1cc855b3d4deadfd37",
+      "role": "exact source snapshot supporting W3C edition classification; original licenses retained"
+    },
+    {
+      "path": "source/references/expat/xmltok_impl.c",
+      "bytes": 53812,
+      "sha256": "c7b197b596192ad3f8c872ae9c0524e7dd85da10cb4bfdf29d630e12782dfbf7",
+      "source": "/tmp/oriole-pgo-study/expat-source/lib/xmltok_impl.c",
+      "source_sha256": "c7b197b596192ad3f8c872ae9c0524e7dd85da10cb4bfdf29d630e12782dfbf7",
+      "role": "exact source snapshot supporting W3C edition classification; original licenses retained"
+    },
+    {
+      "path": "measurements/readme-benchmarks.json",
+      "bytes": 6063,
+      "sha256": "4de3ebeced786618f2986cd5412166990d9cfb83734a461f100f979f9341ea20",
+      "source": "/tmp/oriole-core-owned-text-raw-readme-benchmarks.json",
+      "source_sha256": "4de3ebeced786618f2986cd5412166990d9cfb83734a461f100f979f9341ea20",
+      "role": "confirmation 4 KiB/ns-off medians independently reconstructed by root"
+    },
+    {
+      "path": "LOCAL_RAW_ARTIFACTS.md",
+      "bytes": 5336,
+      "sha256": "c9033cbc58b0a4793788b37b00fda9b59e87cdb10ffafa4639c7e213f0c40d40",
+      "source": "/tmp/oriole-core-owned-text-raw-publication-copy-manifest.json",
+      "source_sha256": "8fed05393edaff2c9c409c3d3f6ea41d4bc6b4851be9104887e6ab700094e49f",
+      "role": "generated local-retention index; explicitly not public hosting"
+    },
+    {
+      "path": "source/independent-source-review.json",
+      "bytes": 4155,
+      "sha256": "867c4d9040f5460ee951f1874875f872e038251defb67c2186e44638541a0d92",
+      "source": "/tmp/oriole-core-owned-text-raw-independent-source-review.json",
+      "source_sha256": "867c4d9040f5460ee951f1874875f872e038251defb67c2186e44638541a0d92",
+      "role": "Independent source review of raw-view proposal and input-owner composition; later formatting and fixture corrections are separately retained."
+    },
+    {
+      "path": "measurements/readme-table-independent-review.json",
+      "bytes": 25805,
+      "sha256": "ecea225da23c98b236c7736c65d977c8dbad8e8dcbe7891e1fb152185f9115dc",
+      "source": "/tmp/oriole-core-owned-text-raw-readme-table-independent-review.json",
+      "source_sha256": "ecea225da23c98b236c7736c65d977c8dbad8e8dcbe7891e1fb152185f9115dc",
+      "role": "Independent saved reconstruction of six README rows from 126 workers, including sample arrays and paired ratios."
+    },
+    {
+      "path": "qualification/asan/report.json",
+      "bytes": 1133807,
+      "sha256": "6b81576692ce58dead8ceec594f6c15e689a9c65945bb96fb50797551fe3e1ff",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/report.json",
+      "source_sha256": "6b81576692ce58dead8ceec594f6c15e689a9c65945bb96fb50797551fe3e1ff",
+      "role": "Completed campaign and target/corpus identities; no corpus bytes."
+    },
+    {
+      "path": "qualification/asan/readback.json",
+      "bytes": 90302,
+      "sha256": "2588bd3ee6f33ff27df92e4d7d74f3a94d9177167eb5f247b48ec957e257f7f9",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-independent-review.json",
+      "source_sha256": "2588bd3ee6f33ff27df92e4d7d74f3a94d9177167eb5f247b48ec957e257f7f9",
+      "role": "Completed saved ASan reconstruction, including limits and authorship scope."
+    },
+    {
+      "path": "qualification/asan/command-manifest.json",
+      "bytes": 49073,
+      "sha256": "9fb3d95c969dc23f79b1c983c32b0b7e907022b473b44e332716ca0ff16d6035",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/command-manifest.json",
+      "source_sha256": "9fb3d95c969dc23f79b1c983c32b0b7e907022b473b44e332716ca0ff16d6035",
+      "role": "Released command/source/corpus/tool manifest."
+    },
+    {
+      "path": "qualification/asan/command-manifest-held.json",
+      "bytes": 49069,
+      "sha256": "2cb5526ff1f1e7f4890ca90a92d2e9df0c23b2b3ab903c337bf8c886f9a95b45",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-preparation/command-manifest-held.json",
+      "source_sha256": "2cb5526ff1f1e7f4890ca90a92d2e9df0c23b2b3ab903c337bf8c886f9a95b45",
+      "role": "Original held manifest; only release status changes."
+    },
+    {
+      "path": "qualification/asan/runner.py",
+      "bytes": 20589,
+      "sha256": "ff714fb14b9c70210723a73b60d807cdcbe44d0eb0eaa0484d1da53104582a4e",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/runner.py",
+      "source_sha256": "ff714fb14b9c70210723a73b60d807cdcbe44d0eb0eaa0484d1da53104582a4e",
+      "role": "Exact completed campaign controller."
+    },
+    {
+      "path": "qualification/asan/read.py",
+      "bytes": 20358,
+      "sha256": "6aa8a5d910992ccf0eeb9f7bb2760a83b1af8343368dc92a8d5becf9345065c6",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-preparation/read.py",
+      "source_sha256": "6aa8a5d910992ccf0eeb9f7bb2760a83b1af8343368dc92a8d5becf9345065c6",
+      "role": "Exact completed saved reader; absolute local paths are retained."
+    },
+    {
+      "path": "qualification/asan/commands.json",
+      "bytes": 705,
+      "sha256": "96a217fcfa4274175a57d61e89e74889502a5c1694d9ca08a2662784ae3d93bf",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-preparation/commands.json",
+      "source_sha256": "96a217fcfa4274175a57d61e89e74889502a5c1694d9ca08a2662784ae3d93bf",
+      "role": "Command templates; actual arguments and outcomes are in report/readback."
+    },
+    {
+      "path": "qualification/asan/compiler-proof.json",
+      "bytes": 70405,
+      "sha256": "facd271313ffb37728a5e192cfd5d91c21accd111605a1417534905b04c91085",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/compiler-proof.json",
+      "source_sha256": "facd271313ffb37728a5e192cfd5d91c21accd111605a1417534905b04c91085",
+      "role": "All compiler vectors and nine required ASan crate/harness invocations."
+    },
+    {
+      "path": "qualification/asan/rustc.log",
+      "bytes": 219,
+      "sha256": "7f8aefa1f89997f46b979665c40b511a92cdf04f6c8463fbec02d30743fb3d6f",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/rustc.log",
+      "source_sha256": "7f8aefa1f89997f46b979665c40b511a92cdf04f6c8463fbec02d30743fb3d6f",
+      "role": "Completed rustc command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/cargo-fuzz.log",
+      "bytes": 18,
+      "sha256": "3e2aa5c2baaf44e5a4968cc3fedb864f4717f85b713deacf3fc4294162358ca1",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/cargo-fuzz.log",
+      "source_sha256": "3e2aa5c2baaf44e5a4968cc3fedb864f4717f85b713deacf3fc4294162358ca1",
+      "role": "Completed cargo-fuzz command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/clang.log",
+      "bytes": 110,
+      "sha256": "3635b8631d4ebcd8ed7586f4e01e7a6b44407de9d38db6e01daca9c242ed7a53",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/clang.log",
+      "source_sha256": "3635b8631d4ebcd8ed7586f4e01e7a6b44407de9d38db6e01daca9c242ed7a53",
+      "role": "Completed clang command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/build.log",
+      "bytes": 39473,
+      "sha256": "82c7b2017aa174acbc80389afae66c3036c8f52a7e7bffb2e694adc38ede9df7",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/build.log",
+      "source_sha256": "82c7b2017aa174acbc80389afae66c3036c8f52a7e7bffb2e694adc38ede9df7",
+      "role": "Completed build command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/instrumentation/parse.log",
+      "bytes": 151942,
+      "sha256": "743dfb75ff9bc7c12c53a63887405cb59bfe776db644967916fd8f2c369497f9",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/instrumentation/parse.log",
+      "source_sha256": "743dfb75ff9bc7c12c53a63887405cb59bfe776db644967916fd8f2c369497f9",
+      "role": "Completed instrumentation/parse command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/instrumentation/streaming.log",
+      "bytes": 151942,
+      "sha256": "8af953b69bd4b28997f596ef2a39087d156ae3981a68821437baa283e422b253",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/instrumentation/streaming.log",
+      "source_sha256": "8af953b69bd4b28997f596ef2a39087d156ae3981a68821437baa283e422b253",
+      "role": "Completed instrumentation/streaming command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/instrumentation/ffi.log",
+      "bytes": 151993,
+      "sha256": "9618a2023423a983e166607a902871e8685331f2b8af0a4d55060523b9c8eaa1",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/instrumentation/ffi.log",
+      "source_sha256": "9618a2023423a983e166607a902871e8685331f2b8af0a4d55060523b9c8eaa1",
+      "role": "Completed instrumentation/ffi command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/instrumentation/ffi_family.log",
+      "bytes": 151993,
+      "sha256": "7fdf6dee01dfbe9c59194b367ed3f0ad867ead514088c8f49adbb2ac6e4e2af6",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/instrumentation/ffi_family.log",
+      "source_sha256": "7fdf6dee01dfbe9c59194b367ed3f0ad867ead514088c8f49adbb2ac6e4e2af6",
+      "role": "Completed instrumentation/ffi_family command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/instrumentation/multibyte.log",
+      "bytes": 151993,
+      "sha256": "81d656955a786f37a4cf257ee5d93df66bae19e8f4efa3fed2b3512d486b71e9",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/instrumentation/multibyte.log",
+      "source_sha256": "81d656955a786f37a4cf257ee5d93df66bae19e8f4efa3fed2b3512d486b71e9",
+      "role": "Completed instrumentation/multibyte command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/instrumentation/value_family.log",
+      "bytes": 151993,
+      "sha256": "b1d83ac177137308e22acfcdff5d10aa0df8a7f36f5b0b07b5e1d04ba80d3a40",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/instrumentation/value_family.log",
+      "source_sha256": "b1d83ac177137308e22acfcdff5d10aa0df8a7f36f5b0b07b5e1d04ba80d3a40",
+      "role": "Completed instrumentation/value_family command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/campaigns/parse/replay.log",
+      "bytes": 702,
+      "sha256": "21d3b9b403b9aaa762660592eebc53b95946ddab28ac7e6b687455d809fdc8f6",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/campaigns/parse/replay.log",
+      "source_sha256": "21d3b9b403b9aaa762660592eebc53b95946ddab28ac7e6b687455d809fdc8f6",
+      "role": "Completed campaigns/parse/replay command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/campaigns/streaming/replay.log",
+      "bytes": 706,
+      "sha256": "49561550d5de7d49855cbc30317ebaf81367b40115979bff0f0dc45b1871fbff",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/campaigns/streaming/replay.log",
+      "source_sha256": "49561550d5de7d49855cbc30317ebaf81367b40115979bff0f0dc45b1871fbff",
+      "role": "Completed campaigns/streaming/replay command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/campaigns/ffi/replay.log",
+      "bytes": 772,
+      "sha256": "4beca1babfed4fc07f16ae1ad876f794c461dd91e76184ad6b5edd9f00e9f99d",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/campaigns/ffi/replay.log",
+      "source_sha256": "4beca1babfed4fc07f16ae1ad876f794c461dd91e76184ad6b5edd9f00e9f99d",
+      "role": "Completed campaigns/ffi/replay command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/campaigns/parse/exploration.log",
+      "bytes": 387825,
+      "sha256": "d837038e310794ed4c0ebf822e4e8b9521f71d7e5ad56ecdb0f8845e860f9a3d",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/campaigns/parse/exploration.log",
+      "source_sha256": "d837038e310794ed4c0ebf822e4e8b9521f71d7e5ad56ecdb0f8845e860f9a3d",
+      "role": "Completed campaigns/parse/exploration command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/campaigns/ffi/exploration.log",
+      "bytes": 348237,
+      "sha256": "b240220381bdc0745c578e9678bee1a37e0fd4e1d57b946592b51b5040febc5e",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/campaigns/ffi/exploration.log",
+      "source_sha256": "b240220381bdc0745c578e9678bee1a37e0fd4e1d57b946592b51b5040febc5e",
+      "role": "Completed campaigns/ffi/exploration command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/campaigns/streaming/exploration.log",
+      "bytes": 236432,
+      "sha256": "81bc4fc56cbdaca2d4157453412798241cff59e37099a8c6efa6f5d945d6cce8",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/campaigns/streaming/exploration.log",
+      "source_sha256": "81bc4fc56cbdaca2d4157453412798241cff59e37099a8c6efa6f5d945d6cce8",
+      "role": "Completed campaigns/streaming/exploration command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/campaigns/multibyte/replay.log",
+      "bytes": 777,
+      "sha256": "e6ae308ece64ff3b12f2749637c4c2ed572ec60a27820155d87066e0b82ad9c2",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/campaigns/multibyte/replay.log",
+      "source_sha256": "e6ae308ece64ff3b12f2749637c4c2ed572ec60a27820155d87066e0b82ad9c2",
+      "role": "Completed campaigns/multibyte/replay command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/campaigns/ffi_family/replay.log",
+      "bytes": 847,
+      "sha256": "3e8a73623c81db9c7f640db323268c7bcf75e7d0d7cab8fdb3f064c4d72acb57",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/campaigns/ffi_family/replay.log",
+      "source_sha256": "3e8a73623c81db9c7f640db323268c7bcf75e7d0d7cab8fdb3f064c4d72acb57",
+      "role": "Completed campaigns/ffi_family/replay command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/campaigns/value_family/replay.log",
+      "bytes": 768,
+      "sha256": "5398e1dcb632f0ca64b0f22d77b816f550b62716d57e1f8bb431b0367719e26f",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/campaigns/value_family/replay.log",
+      "source_sha256": "5398e1dcb632f0ca64b0f22d77b816f550b62716d57e1f8bb431b0367719e26f",
+      "role": "Completed campaigns/value_family/replay command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/campaigns/value_family/exploration.log",
+      "bytes": 108968,
+      "sha256": "0a1ee7b6fb990cc3e3f11fc36661a0fa8c7b5be51d49bd1b24ca83596d06a757",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/campaigns/value_family/exploration.log",
+      "source_sha256": "0a1ee7b6fb990cc3e3f11fc36661a0fa8c7b5be51d49bd1b24ca83596d06a757",
+      "role": "Completed campaigns/value_family/exploration command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/campaigns/multibyte/exploration.log",
+      "bytes": 245982,
+      "sha256": "673521e478d61bf5fac7b3bbc6576fc415e2279ef4551d17ea4940d0c890ab3f",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/campaigns/multibyte/exploration.log",
+      "source_sha256": "673521e478d61bf5fac7b3bbc6576fc415e2279ef4551d17ea4940d0c890ab3f",
+      "role": "Completed campaigns/multibyte/exploration command output; exit0 and reaping in report."
+    },
+    {
+      "path": "qualification/asan/campaigns/ffi_family/exploration.log",
+      "bytes": 141193,
+      "sha256": "b3dd5549279028ff6e2fd6f787da3552abe49994458ec41f8c5f94d959c0c080",
+      "source": "/tmp/oriole-core-owned-text-raw-asan-study/campaigns/ffi_family/exploration.log",
+      "source_sha256": "b3dd5549279028ff6e2fd6f787da3552abe49994458ec41f8c5f94d959c0c080",
+      "role": "Completed campaigns/ffi_family/exploration command output; exit0 and reaping in report."
+    },
+    {
+      "path": "source/published-source-binding.json",
+      "bytes": 42185,
+      "sha256": "9aa5ddb65f22a35381eefe83768f3770f715fec86b151dd3113033c365c6c1f9",
+      "source": "/tmp/oriole-core-owned-text-raw-published-source-binding.json",
+      "source_sha256": "9aa5ddb65f22a35381eefe83768f3770f715fec86b151dd3113033c365c6c1f9",
+      "role": "Later commit exactly matches all330 tested files; prior commands did not run from that commit."
+    },
+    {
+      "path": "qualification/asan/README.md",
+      "bytes": 3412,
+      "sha256": "c443f0530f851633a57cca9d9c5df99ab3f0028c4d8914128a001c8642599be5",
+      "source": "/tmp/oriole-core-owned-text-raw-finalize-staging.py",
+      "source_sha256": "ae21d2a4a86b9e024403ad73a11d61c602f824ef73081b865a3d22f6a1386172",
+      "role": "Generated exact completed counts, fixed bounds and qualification limitations."
+    }
+  ],
+  "markdown_link_rewrites": [
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-core-owned-text-raw-publication-notes.md",
+      "to": "README.md"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-thinlto-native-independent-review/groups.json",
+      "to": "experiments/historical-thinlto/native-groups.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-thinlto-python-independent-review/review.json",
+      "to": "experiments/historical-thinlto/python-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-pgo-allocator-native-study/RESULTS.md",
+      "to": "experiments/historical-allocators/RESULTS.md"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-text-32-study/native/review.json",
+      "to": "experiments/text-32/study/native-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-text-32-study/python/normal-review.json",
+      "to": "experiments/text-32/study/python-normal-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-eight-name-cache-study/native/review.json",
+      "to": "experiments/eight-name-cache/study/native-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-amortized-frame-records-study/native/review.json",
+      "to": "experiments/amortized-frame-records/study/native-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-inline-stack-name-study/native/review.json",
+      "to": "experiments/inline-stack-name/study/native-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-planned-scalar-name-study/native/review.json",
+      "to": "experiments/planned-scalar-name/study/native-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-planned-scalar-name-study/python/normal-review.json",
+      "to": "experiments/planned-scalar-name/study/python-normal-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-planned-scalar-name-confirmation/native/review.json",
+      "to": "experiments/planned-scalar-name/confirmation/native-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-planned-scalar-name-confirmation/python/normal-review.json",
+      "to": "experiments/planned-scalar-name/confirmation/python-normal-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-core-owned-text-raw-study/native/review.json",
+      "to": "measurements/initial/native/review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-core-owned-text-raw-study/python/normal-review.json",
+      "to": "measurements/initial/python/normal-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-core-owned-text-raw-confirmation/native/review.json",
+      "to": "measurements/confirmation/native/review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-core-owned-text-raw-confirmation/python/normal-review.json",
+      "to": "measurements/confirmation/python/normal-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-inline-stack-name-bytes-study/native/review.json",
+      "to": "experiments/inline-stack-name-bytes/study/native-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-inline-stack-name-bytes-study/python/normal-review.json",
+      "to": "experiments/inline-stack-name-bytes/study/python-normal-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-inline-stack-name-bytes-study/final-decision.json",
+      "to": "experiments/inline-stack-name-bytes/final-decision.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-general-start-tail-study/native/review.json",
+      "to": "experiments/general-start-tail/study/native-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-general-start-tail-study/python/normal-review.json",
+      "to": "experiments/general-start-tail/study/python-normal-review.json"
+    },
+    {
+      "document": "EXPERIMENTS.md",
+      "from": "/tmp/oriole-general-start-tail-study/final-decision.json",
+      "to": "experiments/general-start-tail/final-decision.json"
+    },
+    {
+      "document": "qualification/W3C-classification.md",
+      "from": "w3c/summary.json",
+      "to": "w3c/summary.json"
+    },
+    {
+      "document": "qualification/W3C-classification.md",
+      "from": "w3c-saved-readback.json",
+      "to": "w3c-saved-readback.json"
+    },
+    {
+      "document": "qualification/W3C-classification.md",
+      "from": "/tmp/oriole-final-consumer-validation/tools/w3c.py:227",
+      "to": "../source/references/w3c.py#L238"
+    },
+    {
+      "document": "qualification/W3C-classification.md",
+      "from": "/home/dev-user/code/oss/oriole-core-owned-text-raw/crates/oriole_expat/src/lib.rs:301",
+      "to": "../source/references/oriole_expat/lib.rs#L301"
+    },
+    {
+      "document": "qualification/W3C-classification.md",
+      "from": "/home/dev-user/code/oss/oriole-installed-trial-results/crates/oriole/src/names.rs:39",
+      "to": "../source/references/oriole/names.rs#L39"
+    },
+    {
+      "document": "qualification/W3C-classification.md",
+      "from": "/tmp/oriole-pgo-study/expat-source/README.md:23",
+      "to": "../source/references/expat/README.md.txt#L23"
+    },
+    {
+      "document": "qualification/W3C-classification.md",
+      "from": "/tmp/oriole-pgo-study/expat-source/lib/xmltok.c:147",
+      "to": "../source/references/expat/xmltok.c#L147"
+    },
+    {
+      "document": "qualification/W3C-classification.md",
+      "from": "/tmp/oriole-pgo-study/expat-source/lib/xmltok_impl.c:72",
+      "to": "../source/references/expat/xmltok_impl.c#L72"
+    }
+  ],
+  "raw_hosting": "Local retained paths only; no public raw archive URLs supplied.",
+  "revision": {
+    "previous_staging_sha256": "5d7d69fe0f4799c1297583fa181d4aef0e820bab4bd617878f8e36fe9d69034f",
+    "changes": [
+      "Verified methodology paragraph; project performance target wording.",
+      "Two independent review records copied and linked.",
+      "W3C source anchor corrected from line227 to238."
+    ],
+    "methodology_inputs": {
+      "/tmp/oriole-core-owned-text-raw-study/build.json": "5a5ec1d16bac14554b84acbf50576cf47fe810ea3480ed6d9100968da60c6c76",
+      "/tmp/oriole-core-owned-text-raw-study/native/native-screen/protocol.json": "6089ae675e7dd6c0c529046fda78b593e02eb14b7f84aee13096f0ec852b2497",
+      "/tmp/oriole-core-owned-text-raw-study/native/run.py": "5f41a419e800e95954424e2a85d2ee988609d830db18dc85c469af801cd8aef5",
+      "/tmp/oriole-core-owned-text-raw-study/python/preparation.json": "1a38c1b2eee23cf8787c116bc1e33f89f31683594280832d7f4b584a26691125",
+      "/tmp/oriole-core-owned-text-raw-study/python/run.py": "03089c11873a549b427f17a3433cae7c7bed468a8be7b06ea446e7115ae5f002",
+      "/tmp/oriole-core-owned-text-raw-study/python/consumers/build.json": "0b285acd00bc1605e3b4ba726e494dcd165bd446bc02f53a11977ebafe7cb529",
+      "/tmp/oriole-pgo-study/expat-control-build.json": "88445a98ce2f5c8bb9825c89f24078b8c1f04032723266e4b0211e45646cf319"
+    }
+  },
+  "asan_completed_inputs": {
+    "manifest_sha256": "9fb3d95c969dc23f79b1c983c32b0b7e907022b473b44e332716ca0ff16d6035",
+    "report_sha256": "6b81576692ce58dead8ceec594f6c15e689a9c65945bb96fb50797551fe3e1ff",
+    "readback_sha256": "2588bd3ee6f33ff27df92e4d7d74f3a94d9177167eb5f247b48ec957e257f7f9"
+  },
+  "previous_copy_index_sha256": "ab9e36fb8eda45f386132df6e552acf722c60ef980c2c158674149e6a41a7332"
+}

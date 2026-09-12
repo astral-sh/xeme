@@ -1,0 +1,14 @@
+    Checking allocator-api2 v0.2.21
+    Checking hashbrown v0.16.1
+    Checking bytemuck v1.25.2
+    Checking safe_arch v1.2.0
+    Checking wide v1.7.0
+    Checking oriole_storage v0.0.1 (/home/dev-user/code/oss/oriole-core-owned-text-raw/crates/oriole_storage)
+    Checking memchr v2.8.3
+    Checking oriole v0.0.1 (/home/dev-user/code/oss/oriole-core-owned-text-raw/crates/oriole)
+    Checking libc v0.2.189
+    Checking tikv-jemalloc-sys v0.6.1+5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7
+    Checking tikv-jemallocator v0.6.1
+    Checking oriole_expat v0.0.1 (/home/dev-user/code/oss/oriole-core-owned-text-raw/crates/oriole_expat)
+    Checking oriole_cli v0.0.1 (/home/dev-user/code/oss/oriole-core-owned-text-raw/crates/oriole_cli)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 17.39s

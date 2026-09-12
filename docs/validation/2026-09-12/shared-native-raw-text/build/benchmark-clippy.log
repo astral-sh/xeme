@@ -1,0 +1,10 @@
+    Checking bytemuck v1.25.2
+    Checking allocator-api2 v0.2.21
+    Checking hashbrown v0.16.1
+    Checking safe_arch v1.2.0
+    Checking wide v1.7.0
+    Checking oriole_storage v0.0.1 (/home/dev-user/code/oss/oriole-core-owned-text-raw/crates/oriole_storage)
+    Checking memchr v2.8.3
+    Checking oriole v0.0.1 (/home/dev-user/code/oss/oriole-core-owned-text-raw/crates/oriole)
+    Checking oriole-inprocess-benchmark v0.0.0 (/home/dev-user/code/oss/oriole-core-owned-text-raw/benchmarks/inprocess)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.82s

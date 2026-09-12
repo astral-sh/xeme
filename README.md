@@ -16,14 +16,14 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole (normal) | Expat (normal) | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 42.999 ms | 28.767 ms | 1.500× |
-| Wayland protocol | 0.996 ms | 1.076 ms | 0.929× |
-| Maven POM | 0.710 ms | 0.438 ms | 1.622× |
-| Batik SVG | 0.129 ms | 0.134 ms | 0.961× |
-| GTK UI | 0.296 ms | 0.216 ms | 1.375× |
-| DocBook XSL | 0.247 ms | 0.191 ms | 1.295× |
+| Vulkan registry | 41.218 ms | 28.941 ms | 1.420× |
+| Wayland protocol | 0.944 ms | 1.076 ms | 0.877× |
+| Maven POM | 0.685 ms | 0.445 ms | 1.544× |
+| Batik SVG | 0.128 ms | 0.134 ms | 0.957× |
+| GTK UI | 0.282 ms | 0.216 ms | 1.307× |
+| DocBook XSL | 0.235 ms | 0.187 ms | 1.251× |
 
-These [normal-build measurements](docs/validation/2026-09-12/empty-state-guards/) use six pinned XML projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host, with elapsed work pinned to CPU0. Oriole uses Ohm rustc 1.98.1-dev with O3/ThinLTO; Expat uses GCC 13.3 O3 without LTO. Times are medians of seven process medians; ratios are medians of paired ratios. Across the 24 real-project conditions in each confirmation run, Oriole takes **1.34× Expat’s native time and 1.14× its CPython time**, above the roughly 1.10× goal.
+These [normal-build measurements](docs/validation/2026-09-12/buffered-delivery/) use six pinned XML projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host, with elapsed work pinned to CPU0. Oriole uses Ohm rustc 1.98.1-dev with O3/ThinLTO; Expat uses GCC 13.3 O3 without LTO. Times are medians of seven process medians; ratios are medians of paired ratios. Across the 24 real-project conditions in each confirmation run, Oriole takes **1.2969× Expat’s native time and 1.1197× its CPython time**. Both aggregates remain above the roughly 10% performance goal.
 
 Current compatibility checks preserve **4,347 passing / 391 failing / two timed-out API configurations** and two strict CPython text-grouping failures. Six C consumers and supplemental semantic checks pass. The [compatibility guide](docs/compatibility.md) records the remaining production-readiness gates and separates current results from historical validation.
 

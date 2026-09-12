@@ -1869,12 +1869,38 @@ fn detached_end_charges_the_name_before_handlers_or_default_fallback() {
 
 #[test]
 fn detached_end_owner_survives_default_current_children_stop_and_reset_rejection() {
+    unsafe fn check_raw_context(parser: XML_Parser, raw: &[u8]) {
+        // SAFETY: Called during the guarded End callback; the checked window
+        // is read completely before any nested parser operation.
+        unsafe {
+            let mut offset = 0;
+            let mut size = 0;
+            let context = XML_GetInputContext(parser, &mut offset, &mut size);
+            assert!(!context.is_null() && offset >= 0 && size >= offset);
+            assert!(raw.len() <= (size - offset) as usize);
+            assert_eq!(
+                std::slice::from_raw_parts(context.cast::<u8>().add(offset as usize), raw.len()),
+                raw
+            );
+        }
+    }
     unsafe extern "C" fn held_end(data: *mut c_void, name: *const c_char) {
         // SAFETY: Only scalar handles and independently owned name bytes cross
         // nested callbacks; each State access ends before another C API call.
         unsafe {
             let parser = (*data.cast::<State>()).parser;
             let before = CStr::from_ptr(name).to_bytes().to_vec();
+            let raw = format!("</{}>", std::str::from_utf8(&before).unwrap());
+            let position = (
+                XML_GetCurrentByteIndex(parser),
+                XML_GetCurrentByteCount(parser),
+                XML_GetCurrentLineNumber(parser),
+                XML_GetCurrentColumnNumber(parser),
+            );
+            assert_eq!(position.0 as usize, before.len() + 9);
+            assert_eq!(position.1 as usize, raw.len());
+            assert_eq!((position.2, position.3), (2, 0));
+            check_raw_context(parser, raw.as_bytes());
             (*data.cast::<State>())
                 .events
                 .push(format!("held:{}", std::str::from_utf8(&before).unwrap()));
@@ -1891,13 +1917,22 @@ fn detached_end_owner_survives_default_current_children_stop_and_reset_rejection
             assert_eq!(XML_StopParser(parser, 1), OK);
             XML_DefaultCurrent(parser);
             assert_eq!(CStr::from_ptr(name).to_bytes(), before);
+            check_raw_context(parser, raw.as_bytes());
+            assert_eq!(
+                (
+                    XML_GetCurrentByteIndex(parser),
+                    XML_GetCurrentByteCount(parser),
+                    XML_GetCurrentLineNumber(parser),
+                    XML_GetCurrentColumnNumber(parser),
+                ),
+                position
+            );
         }
     }
-    for length in [1, 4097] {
+    for name in ["n".to_owned(), "é".to_owned(), "n".repeat(4097)] {
         // SAFETY: Input, State and both callback functions outlive synchronous use.
         unsafe {
-            let name = "n".repeat(length);
-            let document = format!("<r><{name}></{name}><e/></r>");
+            let document = format!("\u{feff}<r><{name}>\r</{name}><e/></r>");
             let mut state = State::default();
             let parser = configured(&mut state);
             XML_SetEndElementHandler(parser, Some(held_end));
@@ -1911,6 +1946,8 @@ fn detached_end_owner_survives_default_current_children_stop_and_reset_rejection
                 format!("text:</{name}>"),
                 format!("text:</{name}>")
             ]));
+            // Renew userdata after the inspection before callbacks write it.
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
             assert_eq!(XML_ResumeParser(parser), OK);
             assert!(
                 state

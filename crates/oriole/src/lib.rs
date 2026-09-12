@@ -1882,7 +1882,7 @@ impl Parser {
                 .expect("retained native raw start");
             let end = offset.checked_add(raw.count.get()).expect("native raw end");
             let bytes = context.get(offset..end).expect("retained native raw range");
-            // Only this validated Text span is UTF-8. A later feed may have
+            // Only this validated native span is UTF-8. A later feed may have
             // moved the context to separate storage with an invalid suffix.
             return Some(std::str::from_utf8(bytes).expect("native raw UTF-8"));
         }
@@ -2358,6 +2358,31 @@ impl Parser {
             }
             self.account_source(end)?;
             let position = self.source().position(end);
+            if matched_end.is_some()
+                && output.c_text_context
+                && self.input_context.is_some()
+                && !self.seen_doctype
+                && !self.foreign_dtd
+                && self.shared_tables.get().is_none()
+                && self
+                    .stack
+                    .last()
+                    .is_some_and(|element| element.namespace_scope.is_none())
+                && let Some(frame) = output.frame.as_deref_mut()
+            {
+                // Matching proves native UTF-8 spelling and a nonempty range.
+                // Keep the existing detached name; raw markup stays in context.
+                self.prepare_end_frame(frame);
+                self.native_raw = Some(NativeRawRange {
+                    start: position.byte_index,
+                    count: NonZeroUsize::new(end).expect("nonempty matched End"),
+                });
+                // Accounting above is complete and name detachment allocates
+                // nothing. Commit ordinary Unicode coordinates before delivery.
+                self.consume(end)?;
+                frame.publish(position);
+                continue;
+            }
             let mut token = std::mem::replace(
                 &mut self.token_scratch,
                 lexical::Buffer::new_in(self.allocator),
@@ -5177,11 +5202,124 @@ mod native_raw_context_tests {
     }
 
     #[test]
+    fn matched_native_end_raw_keeps_owned_names_and_mode_boundaries() {
+        for (opening, closing, separator, scoped) in [
+            ("<é>", "</é>", None, false),
+            ("<é>", "</é >", None, false),
+            ("<é>", "</é>", Some('|'), false),
+            ("<é xmlns='urn'>", "</é>", Some('|'), true),
+        ] {
+            for enabled in [false, true] {
+                // Generic, C-context, and a foreign frame's owned fallback.
+                for mode in 0..3 {
+                    let mut parser = Parser::new(Config {
+                        namespace_separator: separator,
+                        ..Config::default()
+                    });
+                    if enabled {
+                        parser.enable_input_context();
+                    }
+                    let input = format!("\u{feff}<r>{opening}\r{closing}\n<z/></r>");
+                    parser.feed(input.as_bytes(), true).unwrap();
+                    while let Some(event) = parser.next_event().unwrap() {
+                        if matches!(event.kind, EventKind::Text(_)) {
+                            break;
+                        }
+                    }
+                    assert_eq!(parser.current_raw(), Some("\r"));
+                    let raw_owner = (parser.current_raw.as_ptr(), parser.current_raw.capacity());
+                    let scratch = (parser.token_scratch.as_ptr(), parser.token_scratch.len());
+                    let name_owner = parser.stack.last().unwrap().name.value.as_ptr();
+                    let mut foreign = Parser::new(Config::default());
+                    let mut frame = if mode == 2 {
+                        foreign.adapter_frame()
+                    } else {
+                        parser.adapter_frame()
+                    };
+                    let mut event = None;
+                    if mode == 0 {
+                        parser.next_event_for_adapter_into(&mut event, &mut frame)
+                    } else {
+                        parser.next_event_for_c_text_context_into(&mut event, &mut frame)
+                    }
+                    .unwrap()
+                    .unwrap();
+                    let (name, position) = if let Some(name) = frame.take_end_name() {
+                        assert!(event.is_none());
+                        (name, frame.position())
+                    } else {
+                        let event = event.take().unwrap();
+                        let EventKind::EndElement { name } = event.kind else {
+                            panic!("closing token must deliver End first");
+                        };
+                        (name, event.position)
+                    };
+                    assert_eq!(name, if scoped { "urn|é" } else { "é" });
+                    assert_eq!(name.as_ptr(), name_owner);
+                    assert_eq!(
+                        (position.byte_index, position.byte_count),
+                        (input.find(closing).unwrap(), closing.len())
+                    );
+                    assert_eq!((position.line, position.column), (2, 0));
+                    let consumed = parser.source().position(0);
+                    assert_eq!(
+                        (consumed.line, consumed.column),
+                        (2, closing.chars().count())
+                    );
+                    let viewed = enabled && mode == 1 && !scoped && closing == "</é>";
+                    assert_eq!(parser.native_raw.is_some(), viewed);
+                    assert_eq!(parser.current_raw(), Some(closing));
+                    if viewed {
+                        assert_eq!(parser.current_raw.as_str(), "\r");
+                        assert_eq!(
+                            (parser.current_raw.as_ptr(), parser.current_raw.capacity()),
+                            raw_owner
+                        );
+                        assert_eq!(
+                            (parser.token_scratch.as_ptr(), parser.token_scratch.len()),
+                            scratch
+                        );
+                        let (context, start) = parser.input_context();
+                        assert_eq!(
+                            parser.current_raw().unwrap().as_ptr(),
+                            context[position.byte_index - start..].as_ptr()
+                        );
+                    }
+                    // Ordinary handoff drains namespace undo and the empty tag,
+                    // then replaces the view with the final owned root End.
+                    while parser.next_event().unwrap().is_some() {}
+                    assert!(parser.native_raw.is_none());
+                    assert_eq!(parser.current_raw(), Some("</r>"));
+                    assert_eq!(parser.source().position(0).line, 3);
+                    if mode == 2 {
+                        foreign.finish_adapter_frame(frame);
+                    } else {
+                        parser.finish_adapter_frame(frame);
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
     fn native_raw_retention_survives_compaction_and_invalid_context_suffixes() {
         let text = format!("{}x", "€".repeat(1333));
+        let end_name = "é".repeat(2050);
+        let end_tag = format!("</{end_name}>");
         let mut unaligned = false;
-        for padding in 0..3 {
-            let input = format!("<r>{}{}<n/>{text}", "€".repeat(23_000), "x".repeat(padding));
+        for case in 0..6 {
+            let padding = case % 3;
+            let tail = if case < 3 {
+                text.clone()
+            } else {
+                format!("<{end_name}>{end_tag}")
+            };
+            let raw_text = if case < 3 {
+                text.as_str()
+            } else {
+                end_tag.as_str()
+            };
+            let input = format!("<r>{}{}<n/>{tail}", "€".repeat(23_000), "x".repeat(padding));
             for suffix in [b"\xff".as_slice(), b"\xc3"] {
                 let mut parser = Parser::new(Config::default());
                 parser.enable_input_context();
@@ -5194,7 +5332,7 @@ mod native_raw_context_tests {
                     .is_some()
                 {}
                 let raw = parser.native_raw.unwrap();
-                assert_eq!(parser.current_raw(), Some(text.as_str()));
+                assert_eq!(parser.current_raw(), Some(raw_text));
                 // A completed frame can be cleared without discarding raw.
                 assert!(!frame.is_active());
                 parser.feed(b"", false).unwrap();
@@ -5206,14 +5344,14 @@ mod native_raw_context_tests {
                 unaligned |= physical_extra != 0;
                 parser.feed(suffix, false).unwrap();
                 assert!(std::str::from_utf8(parser.input_context().0).is_err());
-                assert_eq!(parser.current_raw(), Some(text.as_str()));
+                assert_eq!(parser.current_raw(), Some(raw_text));
                 assert_ne!(
                     parser.input_context().0.as_ptr(),
                     parser.sources[0].text.as_bytes().as_ptr()
                 );
                 if suffix == b"\xc3" {
                     parser.feed(b"\xa9</r>", true).unwrap();
-                    assert_eq!(parser.current_raw(), Some(text.as_str()));
+                    assert_eq!(parser.current_raw(), Some(raw_text));
                     parser
                         .next_event_for_c_text_context_into(&mut event, &mut frame)
                         .unwrap()
@@ -5223,7 +5361,7 @@ mod native_raw_context_tests {
                     while parser.next_event().unwrap().is_some() {}
                 } else {
                     assert!(parser.next_event().is_err());
-                    assert_eq!(parser.current_raw(), Some(text.as_str()));
+                    assert_eq!(parser.current_raw(), Some(raw_text));
                 }
                 parser.finish_adapter_frame(frame);
             }

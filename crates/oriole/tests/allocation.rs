@@ -958,11 +958,29 @@ fn native_raw_context_views_survive_every_feed_allocation_failure() {
     fn workload(allocator: Allocator) -> Result<(), Error> {
         // The first suffix forces native growth; the second forces Separate.
         let large = [b'x'; 65_536];
-        for suffix in [large.as_slice(), b"\xff"] {
+        for (input, raw, offset, suffix) in [
+            (
+                b"<r>twelve-bytes".as_slice(),
+                "twelve-bytes",
+                3,
+                large.as_slice(),
+            ),
+            (
+                b"<r>twelve-bytes".as_slice(),
+                "twelve-bytes",
+                3,
+                b"\xff".as_slice(),
+            ),
+            (b"<r><n></n>".as_slice(), "</n>", 6, large.as_slice()),
+            (b"<r><n></n>".as_slice(), "</n>", 6, b"\xff".as_slice()),
+        ] {
             let mut parser = Parser::try_new_in(Config::default(), allocator)?;
             parser.enable_input_context();
-            parser.feed(b"<r>twelve-bytes", false)?;
+            parser.feed(input, false)?;
             assert!(next_event(&mut parser)?.is_some());
+            if raw == "</n>" {
+                assert!(next_event(&mut parser)?.is_some());
+            }
             let mut frame = parser.adapter_frame();
             let result = (|| -> Result<(), Error> {
                 let mut event = None;
@@ -972,20 +990,25 @@ fn native_raw_context_views_survive_every_feed_allocation_failure() {
                         .next_event_for_c_text_context_into(&mut event, &mut frame)?
                         .is_some()
                 );
-                assert_eq!(frame.native_text_range_for_c(), Some((3, 12)));
-                assert_eq!(parser.current_raw(), Some("twelve-bytes"));
+                if raw == "</n>" {
+                    assert!(event.is_none());
+                    assert_eq!(frame.take_end_name().unwrap(), "n");
+                } else {
+                    assert_eq!(frame.native_text_range_for_c(), Some((3, 12)));
+                }
+                assert_eq!(parser.current_raw(), Some(raw));
                 assert_eq!(
                     CALLS.get(),
                     before,
-                    "short native Text needs no raw allocation"
+                    "native raw projection needs no token allocation"
                 );
                 let (context, start) = parser.input_context();
                 assert_eq!(
                     parser.current_raw().unwrap().as_ptr(),
-                    context[3 - start..].as_ptr()
+                    context[offset - start..].as_ptr()
                 );
                 let fed = parser.feed(suffix, false);
-                assert_eq!(parser.current_raw(), Some("twelve-bytes"));
+                assert_eq!(parser.current_raw(), Some(raw));
                 if let Err(error) = fed {
                     assert_eq!(error.kind, ErrorKind::NoMemory);
                     let calls = CALLS.get();

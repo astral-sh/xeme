@@ -16,16 +16,16 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole (normal) | Expat (normal) | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 49.282 ms | 28.701 ms | 1.707× |
-| Wayland protocol | 1.131 ms | 1.059 ms | 1.068× |
-| Maven POM | 0.843 ms | 0.436 ms | 1.916× |
-| Batik SVG | 0.132 ms | 0.134 ms | 0.983× |
-| GTK UI | 0.350 ms | 0.213 ms | 1.646× |
-| DocBook XSL | 0.263 ms | 0.187 ms | 1.395× |
+| Vulkan registry | 47.516 ms | 28.622 ms | 1.645× |
+| Wayland protocol | 1.097 ms | 1.064 ms | 1.033× |
+| Maven POM | 0.824 ms | 0.440 ms | 1.846× |
+| Batik SVG | 0.133 ms | 0.135 ms | 0.984× |
+| GTK UI | 0.350 ms | 0.212 ms | 1.633× |
+| DocBook XSL | 0.271 ms | 0.184 ms | 1.464× |
 
-These [native measurements](docs/validation/2026-09-12/fused-attribute-normal/) use the fused attribute scanner and original XML from six pinned projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host. Both parsers use normal release builds: Oriole uses O3 and ThinLTO with Ohm rustc 1.98.1-dev; Expat 2.8.4 uses GCC 13.3 O3 without LTO. Times are medians of seven process medians; ratios are medians of paired ratios.
+These [native measurements](docs/validation/2026-09-12/native-ascii-text-plan/) use the native ASCII Text plan with the fused attribute scanner and original XML from six pinned projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host. Both parsers use normal release builds: Oriole uses O3 and ThinLTO with Ohm rustc 1.98.1-dev; Expat 2.8.4 uses GCC 13.3 O3 without LTO. Times are medians of seven process medians; ratios are medians of paired ratios.
 
-Across their respective 24 real-project conditions, the candidate takes **1.51× Expat's native time and 1.22× its CPython time**, improvements of 1.91% and 1.44% against the previous selected runtime. Both remain above our target of roughly 1.10×; four of 24 individual CPython conditions fall within it. The [full report](docs/validation/2026-09-12/fused-attribute-normal/) retains every condition and regression.
+Across their respective 24 real-project conditions, the candidate takes **1.48× Expat's native time and 1.19× its CPython time**, improvements of 1.87% and 2.14% against the previous selected runtime. Both remain above our target of roughly 1.10×; four of 24 individual CPython conditions fall within it. Native improves in 20 conditions, with a largest regression of 3.29% on DocBook; all 24 CPython conditions improve. The [full report](docs/validation/2026-09-12/native-ascii-text-plan/) retains every condition, both generated rare-declaration regressions, and the separate isolated Text experiment.
 
 ThinLTO is the default. The earlier [C allocator study](benchmarks/results/2026-09-11/c-allocators/) found less than 0.2% aggregate time change with jemalloc or mimalloc and higher peak resident memory, so the C allocator default remains unchanged.
 

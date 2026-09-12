@@ -1,17 +1,20 @@
 # Benchmarks
 
-The [sparse namespace storage study](../docs/validation/2026-09-12/sparse-namespace-storage/)
-contains the current normal-build measurements and validation records. A monitored
-confirmation observes 1.35% less native real-input time and 1.11% less CPython
-time against the preceding Text runtime. Native namespace-enabled time is
-essentially flat; all regressions and the separate initial shared-host campaign
-remain recorded. The host was shared: observed CPU counters and affinity do not
-establish enforced isolation.
+The [SIMD Text lane-mask study](../docs/validation/2026-09-12/text-lane-masks/)
+contains the current normal-build measurements and validation records. Confirmation
+observes 1.55% less native real-input time and 1.21% less CPython time against the
+preceding namespace runtime, remaining 1.4248× and 1.1745× Expat. Every regression,
+the separate initial LF epoch and the rejected fixed16 experiment remain recorded;
+no observations are pooled. The host was shared: counters and CPU affinity do not
+establish isolation or statistical significance. The preceding
+[namespace study](../docs/validation/2026-09-12/sparse-namespace-storage/) retains its
+own source and measurements.
 
-New performance work uses ordinary `-O3`, ThinLTO and one codegen unit. PGO
-experiments have stopped; the existing workflow remains available only by explicit
-manual request. Historical studies below retain their original build identities,
-values and limitations.
+New Oriole performance work uses ordinary `-O3`, ThinLTO and one codegen unit; the
+normal Expat control separately uses GCC 13.3 `-O3` without LTO. PGO experiments
+have stopped; the existing workflow remains available only by explicit manual
+request. Historical studies below retain their original build identities, values
+and limitations.
 
 See the [historical native and consumer measurements](results/2026-09-11/native-byte-count/),
 [historical PGO/LTO measurements](results/2026-09-11/pgo-lto/),

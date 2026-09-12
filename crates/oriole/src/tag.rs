@@ -23,6 +23,7 @@ pub(crate) struct AttributeScanner {
     name_end: usize,
     value_start: usize,
     count: usize,
+    literal_ascii: bool,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -50,12 +51,36 @@ impl AttributeScanner {
             name_end: 0,
             value_start: 0,
             count: 0,
+            literal_ascii: true,
         }
     }
 
     /// Resume over an append-only UTF-8 input. Attribute ranges own no references.
     /// `tag_end` permits the closing syntax excluded by complete attribute views.
     pub(crate) fn next(
+        &mut self,
+        text: &str,
+        final_input: bool,
+        tag_end: bool,
+        allow_refs: bool,
+        limit: usize,
+        rules: NameRules,
+    ) -> Result<Step, Failure> {
+        self.next_impl::<false>(text, final_input, tag_end, allow_refs, limit, rules)
+    }
+
+    /// Resume native tag planning while checking ordinary ASCII values in place.
+    fn next_literal(
+        &mut self,
+        text: &str,
+        limit: usize,
+        rules: NameRules,
+    ) -> Result<Step, Failure> {
+        self.next_impl::<true>(text, false, true, true, limit, rules)
+    }
+
+    /// Keep general attribute scanning separate from the native value proof.
+    fn next_impl<const LITERAL: bool>(
         &mut self,
         text: &str,
         final_input: bool,
@@ -169,11 +194,16 @@ impl AttributeScanner {
                     };
                     self.offset += 1;
                     self.value_start = self.offset;
+                    if LITERAL {
+                        self.literal_ascii = true;
+                    }
                     self.phase = Phase::Value(quote);
                 }
                 Phase::Value(quote) => {
                     let suffix = &text.as_bytes()[self.offset..];
-                    let next = if tag_end {
+                    let next = if LITERAL {
+                        literal_value_end(suffix, quote, &mut self.literal_ascii)
+                    } else if tag_end {
                         memchr::memchr2(quote, b'<', suffix)
                     } else {
                         memchr::memchr(quote, suffix)
@@ -197,18 +227,20 @@ impl AttributeScanner {
                             end,
                         ));
                     }
-                    let value = &text[self.value_start..end];
-                    // Complete views reject '<' before '&' even when '&' occurs
-                    // earlier. Keep that precedence when input arrives in parts.
-                    if let Some(offset) = value
-                        .find('<')
-                        .or_else(|| (!allow_refs).then(|| value.find('&')).flatten())
-                    {
-                        return Err(fail(
-                            ErrorKind::InvalidToken,
-                            "invalid character in attribute value",
-                            self.value_start + offset,
-                        ));
+                    if !LITERAL {
+                        let value = &text[self.value_start..end];
+                        // Complete views reject '<' before '&' even when '&' occurs
+                        // earlier. Keep that precedence when input arrives in parts.
+                        if let Some(offset) = value
+                            .find('<')
+                            .or_else(|| (!allow_refs).then(|| value.find('&')).flatten())
+                        {
+                            return Err(fail(
+                                ErrorKind::InvalidToken,
+                                "invalid character in attribute value",
+                                self.value_start + offset,
+                            ));
+                        }
                     }
                     let attribute = RawAttribute {
                         name_start: self.name_start,
@@ -234,6 +266,48 @@ impl AttributeScanner {
         {
             self.offset += 1;
         }
+    }
+}
+
+/// Find the closing quote or '<', recording whether all value bytes are literal ASCII.
+/// Special values keep the original completed-value predicate and error ordering.
+fn literal_value_end(bytes: &[u8], quote: u8, literal_ascii: &mut bool) -> Option<usize> {
+    if !*literal_ascii {
+        return memchr::memchr2(quote, b'<', bytes);
+    }
+    let ones = 0x0101_0101_0101_0101;
+    let high = 0x8080_8080_8080_8080;
+    let quotes = u64::from(quote) * ones;
+    let mut offset = 0;
+    loop {
+        if let Some(chunk) = bytes[offset..].first_chunk::<8>() {
+            let word = u64::from_le_bytes(*chunk);
+            let control = word.wrapping_sub(0x2020_2020_2020_2020) & !word;
+            let quote = word ^ quotes;
+            let less = word ^ 0x3c3c_3c3c_3c3c_3c3c;
+            let amp = word ^ 0x2626_2626_2626_2626;
+            let special = word
+                | control
+                | (quote.wrapping_sub(ones) & !quote)
+                | (less.wrapping_sub(ones) & !less)
+                | (amp.wrapping_sub(ones) & !amp);
+            // A clear mask proves all eight bytes are ordinary ASCII. A set
+            // mask only selects scalar handling; no propagated borrow is an offset.
+            if special & high == 0 {
+                offset += 8;
+                continue;
+            }
+        }
+        let byte = *bytes.get(offset)?;
+        if byte == quote || byte == b'<' {
+            return Some(offset);
+        }
+        if byte < b' ' || byte == b'&' || !byte.is_ascii() {
+            *literal_ascii = false;
+            return memchr::memchr2(quote, b'<', &bytes[offset..])
+                .map(|relative| offset + relative);
+        }
+        offset += 1;
     }
 }
 
@@ -353,10 +427,12 @@ impl TagScanner {
         let name_end = self.name_end.unwrap();
         let scanner = self.attributes.as_mut().unwrap();
         loop {
-            match scanner.next(text, false, true, true, attribute_limit, rules) {
+            match scanner.next_literal(text, attribute_limit, rules) {
                 Ok(Step::Attribute(mut attribute)) => {
                     let value = attribute.value(text);
-                    if records.len() == records.capacity() || !is_literal_value(value) {
+                    if records.len() == records.capacity()
+                        || (!scanner.literal_ascii && !is_literal_value(value))
+                    {
                         return Planned::Fallback;
                     }
                     attribute.name_start -= name_end;
@@ -402,6 +478,23 @@ mod tests {
                 .any(|byte| matches!(byte, b'&' | b'\t' | b'\r' | b'\n'))
                 && invalid_xml_char(text).is_none();
             assert_eq!(is_literal_value(text), expected, "{text:?}");
+            for quote in *b"'\"" {
+                let expected_end = text.bytes().position(|byte| byte == quote || byte == b'<');
+                let mut literal_ascii = true;
+                assert_eq!(
+                    literal_value_end(text.as_bytes(), quote, &mut literal_ascii),
+                    expected_end,
+                    "{text:?} quote={quote}"
+                );
+                let prefix = &text[..expected_end.unwrap_or(text.len())];
+                assert_eq!(
+                    literal_ascii,
+                    prefix
+                        .bytes()
+                        .all(|byte| byte.is_ascii() && byte >= b' ' && byte != b'&'),
+                    "{text:?} quote={quote}"
+                );
+            }
         }
 
         check("");
@@ -436,6 +529,132 @@ mod tests {
                     ));
                 }
             }
+        }
+    }
+
+    #[test]
+    fn fused_values_preserve_steps_and_eligibility_across_incremental_feeds() {
+        for quote in ['\'', '"'] {
+            for prefix in [0, 7, 8, 9, 15, 16, 17, 128] {
+                for special in [
+                    "", "&", "<", "&before<", "\t", "\r\n", "\0", "é", "😀", "\u{fffe}", "'", "\"",
+                ] {
+                    let input = format!(
+                        " a={quote}{}{special}abcdefghij{quote} b='next'>",
+                        "x".repeat(prefix)
+                    );
+                    let mut general = AttributeScanner::new(0);
+                    let mut fused = AttributeScanner::new(0);
+                    'feeds: for end in (0..=input.len()).filter(|end| input.is_char_boundary(*end))
+                    {
+                        // The second visit adds no input, including inside values.
+                        for _ in 0..2 {
+                            loop {
+                                let expected = general.next(
+                                    &input[..end],
+                                    false,
+                                    true,
+                                    true,
+                                    2,
+                                    NameRules::default(),
+                                );
+                                let observed =
+                                    fused.next_literal(&input[..end], 2, NameRules::default());
+                                match (expected, observed) {
+                                    (Ok(Step::Attribute(a)), Ok(Step::Attribute(b))) => {
+                                        assert_eq!(
+                                            [a.name_start, a.name_end, a.value_start, a.value_end],
+                                            [b.name_start, b.name_end, b.value_start, b.value_end],
+                                            "{input:?} end={end}"
+                                        );
+                                        let value = a.value(&input);
+                                        assert_eq!(
+                                            fused.literal_ascii,
+                                            value.bytes().all(|byte| {
+                                                byte.is_ascii() && byte >= b' ' && byte != b'&'
+                                            }),
+                                            "{input:?} end={end}"
+                                        );
+                                    }
+                                    (Ok(Step::Incomplete), Ok(Step::Incomplete)) => break,
+                                    (
+                                        Ok(Step::TagEnd { end: a, empty: ae }),
+                                        Ok(Step::TagEnd { end: b, empty: be }),
+                                    ) => {
+                                        assert_eq!((a, ae), (b, be));
+                                        break 'feeds;
+                                    }
+                                    (Err(a), Err(b)) => {
+                                        assert_eq!(a, b, "{input:?} end={end}");
+                                        break 'feeds;
+                                    }
+                                    (a, b) => panic!("{input:?} end={end}: {a:?} != {b:?}"),
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn fused_plans_preserve_unicode_eligibility_and_special_value_timing() {
+        let input = "<r a=\"é😀\" b=\"ascii\">";
+        for split in (0..input.len()).filter(|split| input.is_char_boundary(*split)) {
+            let mut records = Vec::new_in(Allocator::System);
+            records.try_reserve_exact(2).unwrap();
+            let mut scanner = TagScanner::default();
+            assert!(matches!(
+                scanner.scan(
+                    &input[..split],
+                    0,
+                    100,
+                    2,
+                    NameRules::default(),
+                    &mut records
+                ),
+                Planned::Incomplete
+            ));
+            assert!(matches!(
+                scanner.scan(input, 0, 100, 2, NameRules::default(), &mut records),
+                Planned::Complete { end, name_end: 2 } if end == input.len()
+            ));
+            assert_eq!(records.len(), 2);
+            assert_eq!(records[0].value(&input[2..]), "é😀");
+            assert_eq!(records[1].value(&input[2..]), "ascii");
+        }
+
+        let prefix = "<r a=\"x&tail";
+        for delimiter in ['"', '<'] {
+            let mut records = Vec::new_in(Allocator::System);
+            records.try_reserve_exact(1).unwrap();
+            let mut scanner = TagScanner::default();
+            for end in 0..=prefix.len() {
+                assert!(matches!(
+                    scanner.scan(
+                        &prefix[..end],
+                        0,
+                        100,
+                        1,
+                        NameRules::default(),
+                        &mut records
+                    ),
+                    Planned::Incomplete
+                ));
+            }
+            assert!(matches!(
+                scanner.scan(
+                    &format!("{prefix}{delimiter}"),
+                    0,
+                    100,
+                    1,
+                    NameRules::default(),
+                    &mut records
+                ),
+                Planned::Fallback
+            ));
+            assert!(records.is_empty());
         }
     }
 

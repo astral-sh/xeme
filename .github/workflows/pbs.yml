@@ -36,7 +36,7 @@ jobs:
     timeout-minutes: 180
     env:
       ORIOLE_PBS_TARGET: ${{ inputs.pbs_target || 'x86_64-unknown-linux-gnu' }}
-      ORIOLE_PGO: ${{ (github.event_name == 'workflow_dispatch' && inputs.pgo) || (github.event_name == 'pull_request' && startsWith(github.head_ref, 'charlie/codex-oriole-pbs-pgo-')) }}
+      ORIOLE_PGO: ${{ github.event_name == 'workflow_dispatch' && inputs.pgo }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:

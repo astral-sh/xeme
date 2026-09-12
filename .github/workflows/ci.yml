@@ -5,6 +5,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      pgo:
+        description: Run the optional profile-guided library validation
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -286,6 +292,7 @@ jobs:
 
   pgo:
     name: Profile-guided library
+    if: github.event_name == 'workflow_dispatch' && inputs.pgo
     runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
     timeout-minutes: 20
     steps:

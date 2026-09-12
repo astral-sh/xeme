@@ -1,7 +1,20 @@
 # Benchmarks
 
-See the [current native and consumer measurements](results/2026-09-11/native-byte-count/),
-[current PGO/LTO measurements](results/2026-09-11/pgo-lto/),
+The [sparse namespace storage study](../docs/validation/2026-09-12/sparse-namespace-storage/)
+contains the current normal-build measurements and validation records. A monitored
+confirmation observes 1.35% less native real-input time and 1.11% less CPython
+time against the preceding Text runtime. Native namespace-enabled time is
+essentially flat; all regressions and the separate initial shared-host campaign
+remain recorded. The host was shared: observed CPU counters and affinity do not
+establish enforced isolation.
+
+New performance work uses ordinary `-O3`, ThinLTO and one codegen unit. PGO
+experiments have stopped; the existing workflow remains available only by explicit
+manual request. Historical studies below retain their original build identities,
+values and limitations.
+
+See the [historical native and consumer measurements](results/2026-09-11/native-byte-count/),
+[historical PGO/LTO measurements](results/2026-09-11/pgo-lto/),
 [explicit C allocator measurements](results/2026-09-11/c-allocators/),
 [earlier full runtime measurements](results/2026-09-10/final-runtime/),
 [DTD runtime checkpoint](results/2026-09-10/dtd-checkpoint/),
@@ -109,14 +122,14 @@ mode. Positions and Default callbacks remain separate compatibility checks.
 
 The [pinned corpus](projects/README.md) contains original XML from Vulkan, Wayland, Maven, Batik, GTK and DocBook. The runners compare native callbacks, matched CPython consumers and complete Wayland code-generation commands, validating all outputs before reporting timings. See the [baseline results](results/2026-09-10/real-project-baseline/README.md) and [reproduction commands](projects/RERUN.md).
 
-## Profile-guided builds
+## Historical profile-guided builds
 
 The optional [PGO workflow](../tools/pgo/) builds an instrumented library, trains on
 a fixed generated corpus, and rebuilds with a fresh profile. It preserves runtime
 configuration and keeps real project XML out of training. Every run records source,
 compiler, profile and library identities.
 
-The [current PGO/LTO study](results/2026-09-11/pgo-lto/) measures runtime `be22a27` with effective C-only ThinLTO and freshly generated profiles. PGO reduces native time by 24.8% and CPython consumer time by 15.5%; Oriole still takes 1.40× and 1.15× Expat's time with both parsers trained. Fat LTO without PGO helps little, while fat LTO with a fresh PGO profile regresses native time by 6.8% relative to ThinLTO PGO. All 24 project conditions per consumer campaign and the separate generated controls remain included.
+The [historical PGO/LTO study](results/2026-09-11/pgo-lto/) measures runtime `be22a27` with effective C-only ThinLTO and freshly generated profiles. PGO reduces native time by 24.8% and CPython consumer time by 15.5%; Oriole still takes 1.40× and 1.15× Expat's time with both parsers trained. Fat LTO without PGO helps little, while fat LTO with a fresh PGO profile regresses native time by 6.8% relative to ThinLTO PGO. All 24 project conditions per consumer campaign and the separate generated controls remain included.
 
 The [earlier matched-build study](results/2026-09-10/version-consistent-pgo/) measures
 runtime `4b11ace` through native callbacks, unchanged CPython consumers and the

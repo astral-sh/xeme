@@ -16,22 +16,16 @@ A streaming XML parser and Expat C interface, written in Rust.
 
 | Project XML | Oriole (normal) | Expat (normal) | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 43.747 ms | 29.110 ms | 1.507× |
-| Wayland protocol | 0.995 ms | 1.072 ms | 0.928× |
-| Maven POM | 0.737 ms | 0.436 ms | 1.699× |
-| Batik SVG | 0.130 ms | 0.134 ms | 0.973× |
-| GTK UI | 0.300 ms | 0.214 ms | 1.404× |
-| DocBook XSL | 0.250 ms | 0.188 ms | 1.309× |
+| Vulkan registry | 42.999 ms | 28.767 ms | 1.500× |
+| Wayland protocol | 0.996 ms | 1.076 ms | 0.929× |
+| Maven POM | 0.710 ms | 0.438 ms | 1.622× |
+| Batik SVG | 0.129 ms | 0.134 ms | 0.961× |
+| GTK UI | 0.296 ms | 0.216 ms | 1.375× |
+| DocBook XSL | 0.247 ms | 0.191 ms | 1.295× |
 
-These [native measurements](docs/validation/2026-09-12/eager-bare-tag-positions/) use the selected eager-position shortcut for bare ASCII opening tags, with the preceding attribute and Text scanners, on original XML from six pinned projects, 4 KiB chunks and namespaces disabled. They come from a monitored confirmation window on a shared Linux AMD EPYC-Milan host, with elapsed work pinned to CPU0; affinity does not establish isolation. Oriole uses normal O3/ThinLTO and one codegen unit with Ohm rustc 1.98.1-dev; Expat 2.8.4 uses GCC 13.3 O3 without LTO. Times are medians of seven process medians; ratios are medians of paired ratios.
+These [normal-build measurements](docs/validation/2026-09-12/empty-state-guards/) use six pinned XML projects, 4 KiB chunks and namespaces disabled on a shared Linux AMD EPYC-Milan host, with elapsed work pinned to CPU0. Oriole uses Ohm rustc 1.98.1-dev with O3/ThinLTO; Expat uses GCC 13.3 O3 without LTO. Times are medians of seven process medians; ratios are medians of paired ratios. Across the 24 real-project conditions in each confirmation run, Oriole takes **1.34× Expat’s native time and 1.14× its CPython time**, above the roughly 1.10× goal.
 
-Across their respective 24 real-project conditions, confirmation takes **1.36× Expat's native time and 1.15× its CPython time**, observed reductions of 2.10% and 0.40% against the preceding attribute runtime. Both aggregates remain above the roughly 1.10× target; five of 24 CPython conditions meet it. The pyexpat aggregate is 1.0998× Expat and ElementTree is 1.2045×. Native improves in 23 conditions and CPython in 16. Generated time decreases 3.98%, while the two rare-declaration cases regress 2.38% and 1.20%; Batik's 4 KiB/namespaces-off native case regresses 0.23%. The [full report](docs/validation/2026-09-12/eager-bare-tag-positions/) retains all eight Python confirmation regressions and all 20 adverse rows across separate initial and confirmation runs. The small Python gains are observations, not a statistical-significance claim; the performance and production-readiness goals remain open.
-
-ThinLTO is the default. The earlier [C allocator study](benchmarks/results/2026-09-11/c-allocators/) found less than 0.2% aggregate time change with jemalloc or mimalloc and higher peak resident memory, so the C allocator default remains unchanged.
-
-Current-source compatibility checks preserve **4,347 passing / 391 failing / two timed-out API configurations**, plus two text-grouping failures across 802 strict CPython method outcomes per linkage. Six C consumers and supplemental shared/static callback-semantic checks pass. The [compatibility guide](docs/compatibility.md) separates current gates from earlier results; the [review guide](docs/review.md) links source reviews, adversarial tests and measurements.
-
-Earlier [PGO measurements](docs/validation/2026-09-11/reference-frames/) and [opt-in x86-64-v3 results](docs/validation/2026-09-11/reference-v3/) describe the previous `4064b065` source. They have not been remeasured for this change. Its [sanitizer and PBS validation](docs/validation/2026-09-11/reference-validation/) and [installed v3 distribution trial](docs/validation/2026-09-12/v3-distribution/), including glibc 2.17 probes, also apply only to that previous source.
+Current compatibility checks preserve **4,347 passing / 391 failing / two timed-out API configurations** and two strict CPython text-grouping failures. Six C consumers and supplemental semantic checks pass. The [compatibility guide](docs/compatibility.md) records the remaining production-readiness gates and separates current results from historical validation.
 
 ## Installation
 

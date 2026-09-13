@@ -1,0 +1,31 @@
+[build-system]
+requires = ["maturin>=1.12,<2"]
+build-backend = "maturin"
+
+[project]
+name = "xeme"
+description = "Incremental XML parsing with owned events and configurable resource limits"
+readme = "crates/xeme_python/README.md"
+requires-python = ">=3.10"
+license = "MIT OR Apache-2.0"
+license-files = ["LICENSE-MIT", "LICENSE-APACHE"]
+dynamic = ["version"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Rust",
+    "Topic :: Text Processing :: Markup :: XML",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Repository = "https://github.com/astral-sh/xeme"
+Documentation = "https://github.com/astral-sh/xeme/tree/main/crates/xeme_python"
+
+[tool.maturin]
+manifest-path = "crates/xeme_python/Cargo.toml"
+python-source = "crates/xeme_python/python"
+module-name = "xeme._native"
+# Source archives omit unrelated workspace members, so Cargo must prune their
+# lockfile entries. CI passes --locked when building wheels from the checkout.
+include = [{ path = "crates/xeme_python/tests/**/*.py", format = "sdist" }]

@@ -48,6 +48,14 @@ Library crates leave global allocator selection to the embedding application.
 See [XML denial-of-service protections](security.md) for entity-expansion and
 large-token protections, and the limits required when a caller decompresses input.
 
+## Python API
+
+The `xeme` Python package parses bytes incrementally into events, with namespace
+options, resource limits, and source positions. Install it from this checkout
+with `uv pip install .`. See the [Python API guide](../crates/xeme_python/README.md)
+for examples and supported events. This API is separate from `pyexpat`'s callback
+interface.
+
 ## Expat consumers
 
 The [C interface](../crates/xeme_expat/) exports shared and static libraries with
@@ -67,6 +75,7 @@ XML extensions against Xeme and runs their upstream tests. See the
 | [`xeme_storage`](../crates/xeme_storage) | Fallible storage, allocator ownership, and resource accounting |
 | [`xeme_expat`](../crates/xeme_expat) | Expat C interface and callback integration |
 | [`xeme_cli`](../crates/xeme_cli) | Command-line XML checker |
+| [`xeme_python`](../crates/xeme_python) | Python event API and extension package |
 
 See [contributing](../CONTRIBUTING.md) for development commands and acceptance
 criteria, [fuzzing](../fuzz/README.md) for the adversarial harnesses, and the

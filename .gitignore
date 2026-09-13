@@ -1,6 +1,9 @@
 /target/
 **/__pycache__/
 .venv/
+/dist/
+/crates/xeme_python/python/xeme/*.so
+/crates/xeme_python/python/xeme/*.pyd
 .DS_Store
 /fuzz/target/
 /fuzz/artifacts/

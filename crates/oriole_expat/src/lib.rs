@@ -2188,7 +2188,7 @@ getter!(XML_GetErrorCode, c_int, INVALID_ARGUMENT, error);
 getter!(
     XML_GetSpecifiedAttributeCount,
     c_int,
-    0,
+    -1,
     specified_attributes
 );
 
@@ -2672,7 +2672,7 @@ pub struct XML_Feature {
 // SAFETY: The feature table is immutable and points only to static C strings.
 unsafe impl Sync for XML_Feature {}
 
-static FEATURES: [XML_Feature; 10] = [
+static FEATURES: [XML_Feature; 11] = [
     XML_Feature {
         feature: 6,
         name: c"sizeof(XML_Char)".as_ptr(),
@@ -2682,6 +2682,11 @@ static FEATURES: [XML_Feature; 10] = [
         feature: 7,
         name: c"sizeof(XML_LChar)".as_ptr(),
         value: 1,
+    },
+    XML_Feature {
+        feature: 3,
+        name: c"XML_DTD".as_ptr(),
+        value: 0,
     },
     XML_Feature {
         feature: 8,
@@ -2706,7 +2711,7 @@ static FEATURES: [XML_Feature; 10] = [
     XML_Feature {
         feature: 13,
         name: c"XML_GE".as_ptr(),
-        value: 1,
+        value: 0,
     },
     XML_Feature {
         feature: 14,

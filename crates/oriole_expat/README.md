@@ -142,7 +142,7 @@ The following Expat modes are explicitly unsupported:
   been decoded. A leading custom-encoding declaration may request its encoding
   handler before delivering the XML-declaration callback; Expat reverses this
   callback order in its value processor.
-- Wide-character and `XML_LARGE_SIZE` builds: the header rejects these configurations.
+- Wide-character, `XML_LARGE_SIZE`, and `XML_ATTR_INFO` builds: the header rejects these configurations.
 
 `XML_SetHashSalt` and `XML_SetHashSalt16Bytes` mix the caller salt into randomized
 hashing; a predictable salt does not replace the secret random keys. They update

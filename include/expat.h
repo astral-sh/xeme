@@ -66,6 +66,9 @@ typedef char XML_LChar;
 #  ifdef XML_LARGE_SIZE
 #    error "Oriole does not support XML_LARGE_SIZE"
 #  endif
+#  ifdef XML_ATTR_INFO
+#    error "Oriole does not support XML_ATTR_INFO"
+#  endif
 typedef long XML_Index;
 typedef unsigned long XML_Size;
 

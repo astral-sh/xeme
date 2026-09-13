@@ -1,0 +1,509 @@
+{
+  "status": "all_74_tested_source_and_4_auxiliary_files_match_final_commit",
+  "scope": "Read-only Git blob comparison. Ordinary build, initial native timing and completed normal qualification used the original dirty snapshot on base9c. These later commits contain identical tested files; no target was executed from the publication checkout by this binding.",
+  "tested_source_base": "9c632547af2253b9672a92fac320c70af3263bb8",
+  "tested_source_manifest_sha256": "49bf5914f1882d4a881bbea45e92a5bb9d56744df06d6a6bd26c069c680146c1",
+  "tested_build_binding_sha256": "f73d8c14f5e9127761fe33da9cb627c90b87e77c858dbf4e04e6308aa2c28cd9",
+  "qualification_summary_sha256": "a34ee8f870ba0b0ba9cd583a9818585d59d0e67831b0e34f0a178f2344eef4b7",
+  "publication_commits_sha256": "cf162033da6d5d454b77b9c617aeb9ba5a6ecddd5f1caf62b605ddbb7dd79037",
+  "publication_checkout": "/home/dev-user/code/oss/oriole-native-composition-publication",
+  "git_common_dir": "/home/dev-user/code/oss/oriole/.git",
+  "final_source_commit": "5d983f7e09a095fc6c9a94c6ce05ef5a8ec95c8d",
+  "commit_chain": [
+    {
+      "branch": "charlie/codex-oriole-native-start-direct",
+      "parent": "9c632547af2253b9672a92fac320c70af3263bb8",
+      "commit": "1370d75bd3170daf179648cda620d79c39e4e9aa",
+      "patch_sha256": "97ec4e42660a9979243d1cebf5efb2e010591fe2b69c18c36e003b3480e70627"
+    },
+    {
+      "branch": "charlie/codex-oriole-native-default-namespace",
+      "parent": "1370d75bd3170daf179648cda620d79c39e4e9aa",
+      "commit": "001539e738642e442cefe589f4222d05242eaa3a",
+      "patch_sha256": "f7a2276c1349ab0b83c961509b63f6b2621c849973d4d10a04f6b2f7db850a29"
+    },
+    {
+      "branch": "charlie/codex-oriole-native-declaration-grammar",
+      "parent": "001539e738642e442cefe589f4222d05242eaa3a",
+      "commit": "5d983f7e09a095fc6c9a94c6ce05ef5a8ec95c8d",
+      "patch_sha256": "e912015d61952f8668d8a808bbe08d03765cc02d9b8d61f346847ac9c4cfe9af"
+    }
+  ],
+  "source_files": 74,
+  "auxiliary_files": 4,
+  "files": {
+    "Cargo.lock": {
+      "git_blob": "f81c36da2c068523afe81f7fa890297f68e2b80c",
+      "sha256": "7c61e01863f122b613f6df8941f78c79126991c2e350fabf7d33611c1e4f138b",
+      "bytes": 3615,
+      "scope": "tested-source"
+    },
+    "Cargo.toml": {
+      "git_blob": "362fe738794ca22f85c86ca26f16e346e5ef01f6",
+      "sha256": "bc83cd58b6b099db2c14e163f47bcaaffaafb4add9ce5cf0a6da97015667fbe9",
+      "bytes": 678,
+      "scope": "tested-source"
+    },
+    "crates/oriole/Cargo.toml": {
+      "git_blob": "d6a0afa4a296d0a656a3135a6555cf5ec1c6dcd4",
+      "sha256": "184f5834d4daf1ae9c01a5ed5ecdd611097a9bdd6fe0c060a4c440d5c9b999d0",
+      "bytes": 367,
+      "scope": "tested-source"
+    },
+    "crates/oriole/examples/frame_coverage.rs": {
+      "git_blob": "b88f1147a633414f0984727becfa29bf9b4e06ac",
+      "sha256": "fa48a74a2451e46654f1dd47f9f84f81964261cd7223bf757adab7b96c48a46d",
+      "bytes": 2312,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/accounting.rs": {
+      "git_blob": "eda57591f35e627c2dbce7c07674f4a1f2e6c39b",
+      "sha256": "ad77fcdfc2ed0fbfbc18a330df1a263eca914377d7230ad46b2224c93756a566",
+      "bytes": 4791,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/active.rs": {
+      "git_blob": "6f4e5ef7875483016be76a3250e3d3bad70fedcc",
+      "sha256": "de402225be109e6385f0fd7f5159285029ac532fcb1bef5b5e16389bbbf528ca",
+      "bytes": 3731,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/arena.rs": {
+      "git_blob": "ff94d3e53dcef47d7cc37452f4903c1f260f9b91",
+      "sha256": "e75d9443c5813ad540a05d47bd1078c694c137606bd589945abb16c23c7be25a",
+      "bytes": 24912,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/context_text_tests.rs": {
+      "git_blob": "f92e3e7ff328b3dcf0672492174d37efac5fe879",
+      "sha256": "d5782e6476a407f9b375bd8b27ce61094424fc542a861b520f357f40c2a84ca3",
+      "bytes": 6898,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/dtd.rs": {
+      "git_blob": "2408cf1002be7266d47263e6c516ffa1f004f20b",
+      "sha256": "d1305787e3ae112027472ba01673b4b258cf8a879cf89394c3a64730fe847089",
+      "bytes": 83231,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/dtd/attlist.rs": {
+      "git_blob": "5ac7924cd0c94cb47af0069c0b79b28e477cf3b8",
+      "sha256": "67001c8c2619010a677db807ce2fb8081214c35967b6a802fe5d4e8f63675c0f",
+      "bytes": 23962,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/dtd/composition.rs": {
+      "git_blob": "09117d0b41ef155871a0a17090fb345edcb87c5b",
+      "sha256": "e83214c16960ba6813f878057d9fb42036f4de77da5a4552a933d4edae385557",
+      "bytes": 29218,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/dtd/grammar.rs": {
+      "git_blob": "a335a05b9da87c877122a8d459c28db98e257e45",
+      "sha256": "bb92d1b1227d347a68712d48af58634bb4535414b5ae0ecbdf58c960045590ad",
+      "bytes": 34353,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/dtd/semantic.rs": {
+      "git_blob": "b85bc946741a26dea44deda6e588f5fc961ef13f",
+      "sha256": "956867a7d3e3932284243f21221cd5df47e592236ec8af6e475e267f841f9381",
+      "bytes": 23302,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/dtd_tables.rs": {
+      "git_blob": "7f27a49e71404b222a63947f8c86f9d406c1255f",
+      "sha256": "3ae11444bcd5fee85d740f731e6c40a0982984f641fad767e08102d111b30ab3",
+      "bytes": 16846,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/encoding.rs": {
+      "git_blob": "b73e56f0dfaff0e17fe88af0d5dcb2ec889a45bc",
+      "sha256": "fc5d7b95f83433a80a32b038ff9b773219f6513e2e8da5afe5f92bd468033bc0",
+      "bytes": 83754,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/lexical.rs": {
+      "git_blob": "51ee346ae885f6c3a9a33cde246c7fe18fa535e9",
+      "sha256": "397ced901b220557d0384c67f4acc9b61b1b6ae1bc0dda65db3720b709ce4ff0",
+      "bytes": 16046,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/lib.rs": {
+      "git_blob": "98eb5f78c8cccd16208c1e8beceafdff26cb34cf",
+      "sha256": "339ba2b24308e4672da689f661bc78e8d3cbda590c873acf8c8b0aa69a12980d",
+      "bytes": 239388,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/names.rs": {
+      "git_blob": "dee6a82780e4d127ea05369ca14ce25b58a9f74f",
+      "sha256": "4514e938d2556886d35599e62e3f5c1488e8adca2d705cd504692821eac506c6",
+      "bytes": 12028,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/recycling.rs": {
+      "git_blob": "bbcb5c779cd39c01f4a577dfc32a71a359492c30",
+      "sha256": "06307e76b6673f5f70d6ed38da999942dd4dc2bc12fbfa2e18c836e2a5adb0a8",
+      "bytes": 19641,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/tag.rs": {
+      "git_blob": "8d366724c57cd0761063d7477bf8a9cc576b8d27",
+      "sha256": "cc60c55cda0ea06f999f35d467760fdac050acab3a2769b5a9d2cf4ef2254600",
+      "bytes": 46253,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/text.rs": {
+      "git_blob": "8d3e1d31d33130a736a57a836b2e718556469177",
+      "sha256": "78d628274ed5fa16538b52af422a06ffaf1ac244ad4fb7d1d24553692d11f2cf",
+      "bytes": 15199,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/value.rs": {
+      "git_blob": "0412e8cd95c1ee97fb13e4f500851ddd974a73f9",
+      "sha256": "10db353fe7a2d9d134692b0a4505c7cfda542cffc2fc34b3058a93fef0dd6a1f",
+      "bytes": 23701,
+      "scope": "tested-source"
+    },
+    "crates/oriole/src/value_lexer.rs": {
+      "git_blob": "b772de0190f530fede86b3d9df3fe6f8723e6775",
+      "sha256": "859c2d7d468aca9062dda8e0dac82c300bb4aadfadcea2e11fa5e2b3af4f5767",
+      "bytes": 18136,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/adapter_frame.rs": {
+      "git_blob": "13115e6e2b840a1ce1886d5999172e7cc1bee4e9",
+      "sha256": "d5572119681b3ddf487255ab8aa6214c0f0545eb60c4d9c7a1acd3f13dcf6946",
+      "bytes": 33649,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/allocation.rs": {
+      "git_blob": "72b858dab884a9bd477c997eefb6adc271441568",
+      "sha256": "2d71c4781228dd0a36f5d32de6648bb053501f4c9ef2d00e333329a04d815081",
+      "bytes": 50938,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/amplification.rs": {
+      "git_blob": "b71ad41d29bed31e9e63039a9de635da69349ed2",
+      "sha256": "29075bd9ab5a2fcffd43a4f31ff0b512f434e05c907b9e5d1e5478c59f156ceb",
+      "bytes": 5402,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/attribute_entities.rs": {
+      "git_blob": "c31f7bc6e99675f1710e914c58c4ad7077fc258e",
+      "sha256": "3c89f8b08f649e2a5b1ad46681efb4f321fe40094a513bdaeff1a74f4d17c6bb",
+      "bytes": 13517,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/conditional.rs": {
+      "git_blob": "87f68d1c717649fcca49111b582cb72557cd8070",
+      "sha256": "ab51046976caa8eb315022b65198cbfd28c9cf220d983e177a13b5b4290eecbb",
+      "bytes": 18077,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/declaration_tokens.rs": {
+      "git_blob": "eed424078afa498d8b0fb48d2d3c8cce2118511b",
+      "sha256": "ba05dd5a4604ea4f776ad8e6b9c313c7336debc37e279c291283cd419b0137bd",
+      "bytes": 9955,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/diagnostics.rs": {
+      "git_blob": "dc88384010f42df305fae782824abcc633d00124",
+      "sha256": "6ea5df60e64fe16077c6e1a72a414d999f220e114617b36e5f171f1323a6f816",
+      "bytes": 5555,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/encodings.rs": {
+      "git_blob": "666584ad35268f63e9662f5d0292afbd8c16ada7",
+      "sha256": "b452c223984f828c08469d67c3ffc60aa5c15631e3f221f87c8cb16b8cacd32b",
+      "bytes": 11704,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/entity_depth.rs": {
+      "git_blob": "5b39c4719125c4d26bfb43f2ba590d15426e40b1",
+      "sha256": "724c330559ba3b73b629da8613cd188e023e2e94cf5603eb2faef70951fe24a9",
+      "bytes": 8747,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/event_output.rs": {
+      "git_blob": "b06bca3f189901be70c6fe392e30cce9819da44d",
+      "sha256": "05564387414f821ec4264f0f1b37351180b2b2c825e1fa4cd5dbbd0f459ac847",
+      "bytes": 5086,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/external_grammar.rs": {
+      "git_blob": "0a38ed6b9504521c6997d00019dfb8348b4efdb7",
+      "sha256": "ae5f1fb93838f380fc053caf529b3caaa3be439284baca379108148f101117d2",
+      "bytes": 18425,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/external_headers.rs": {
+      "git_blob": "886f0439c2b70366fb349a7de963c57165ff3ee7",
+      "sha256": "37fe9747abe3e3c871ceb7c4f298918f56e0ca2b61627a9204a6ec731acd086d",
+      "bytes": 15607,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/external_limits.rs": {
+      "git_blob": "1145512cec87cb8f59908b2029c686583c5d13fe",
+      "sha256": "22b0f7245dcc8c2896cb8626d11c8ff9c464a5199e12e62dd361b140524c815b",
+      "bytes": 7775,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/external_values.rs": {
+      "git_blob": "18ff69d26051062203e870e40052df8082e4e5b4",
+      "sha256": "3863f74f3cb93ac1c4fd88e5325428983cd89df813ab1bcb05e265d916ae6c37",
+      "bytes": 21842,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/foreign_dtd.rs": {
+      "git_blob": "ec0ba86df2a62ef0e5ff5e240639470632f682b8",
+      "sha256": "e8308aa2dcb36bf97aec6329d8a837acfea57f63ccee77dc6efc184cb49a7e99",
+      "bytes": 4662,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/malformed_dtd.rs": {
+      "git_blob": "d6fad6d97f14682f7462848739a0ebb37fd71d14",
+      "sha256": "1786635f19d97bd128dba25efcf65403f6a7b3590678496a6edef8882999247a",
+      "bytes": 2974,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/missing_parameters.rs": {
+      "git_blob": "ef0e833384b284dc0ab674117090f8d6895e2654",
+      "sha256": "3038876c244d3959c67f9a76fdb57f616d197e895fd7500c6e15ff5fd9824096",
+      "bytes": 7926,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/multibyte.rs": {
+      "git_blob": "f1a94365631637be4344dd891c62a4a4718cd735",
+      "sha256": "71153cc3ed2aa370b41a13a225b9a2495ede07585eb22ecfe86088cb1437d3e2",
+      "bytes": 20510,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/name_rules.rs": {
+      "git_blob": "d83d6c9d5c88c6b5c9eb064aa469c8e1073982cc",
+      "sha256": "6c433434852a1e520f63e9484540797c47c7c57b93eab77aa3715a4532c9b018",
+      "bytes": 9296,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/parameter_values.rs": {
+      "git_blob": "715df64b5233880831699db5a43b8ca4c46781f9",
+      "sha256": "d76f7e5b47b56fdede165a56f19f9f7a982bf75611f76ee74692bfd9cc9cb503",
+      "bytes": 11834,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/parser.rs": {
+      "git_blob": "b7d890e2fece3db763d69b246bcba6f2d6a00288",
+      "sha256": "52931b46bfa8fc327fb56b8df3ad7539c40525f52a4eb690b3497177ff767898",
+      "bytes": 59720,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/positions.rs": {
+      "git_blob": "c3df97ff8a4f459b3170e85758c251d29ba9696c",
+      "sha256": "451af1c98f7ddb86f1b7bd01f6fc91ece080c5c7bbe008e0d2942cc90e9e5dfd",
+      "bytes": 5918,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/prolog.rs": {
+      "git_blob": "74c7fcc79182bb9131b65afc51b16c9fabb295d9",
+      "sha256": "bfd55c9767fabfbeaf26472c1514eed5f6cf9d9648082cf637e7cf2f833c2c63",
+      "bytes": 5145,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/raw_tokens.rs": {
+      "git_blob": "554d66fcc3c7b09b4ca5bbd847bc87a5a2b8a8a8",
+      "sha256": "5ba9d436ed0d6ddbaf962beb1e6f2d72aa94ce0bfd23afa87db7cf488ce5f603",
+      "bytes": 3039,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/recycling.rs": {
+      "git_blob": "603f26fbb9efedd9c0e709fd49b5510053cec9e7",
+      "sha256": "12132edd1e33b8fb0568b234bbf7d48e5de38873cc27d331436a4ca6c2b5fb15",
+      "bytes": 3156,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/reparse_deferral.rs": {
+      "git_blob": "63b44aa737c5d95b4a8abb7478eeb7eb971bc18c",
+      "sha256": "9f954325d028d1775fa47291af27eddec5913c76e2ec413e0c555eb549913709",
+      "bytes": 6203,
+      "scope": "tested-source"
+    },
+    "crates/oriole/tests/text_coalescing.rs": {
+      "git_blob": "d8376e26e670da7de461f80ee8e261f02cd94e4c",
+      "sha256": "9d53070c4bb512018af7209c9d0a82698e3cdf08d6bd4a35ed89abab63c3017f",
+      "bytes": 9696,
+      "scope": "tested-source"
+    },
+    "crates/oriole_cli/Cargo.toml": {
+      "git_blob": "26d00c3b96b5edabddf884cb4708b0c490869991",
+      "sha256": "f51a77480b35fef0c59a7f3b06194d1692f3984d7d87468445974c6836804c5d",
+      "bytes": 839,
+      "scope": "tested-source"
+    },
+    "crates/oriole_cli/src/main.rs": {
+      "git_blob": "e96c00d3ed717981bb2739a22a6ea416158c5621",
+      "sha256": "b1556990da5da6a3b91ed66e857e79d26ba4084f503be240649a10cea3ed6083",
+      "bytes": 4165,
+      "scope": "tested-source"
+    },
+    "crates/oriole_expat/Cargo.toml": {
+      "git_blob": "0d58b9cca7d5a92d3b10f29514cc6fce4ac087d4",
+      "sha256": "8ec06203f4a6ec67f6eebac4ef6e1d34de34e933c8fc057f9e23d3df3f3bd215",
+      "bytes": 423,
+      "scope": "tested-source"
+    },
+    "crates/oriole_expat/README.md": {
+      "git_blob": "316c464305b3a50be18afabfe4a8cb7815e011a2",
+      "sha256": "b2b9439d6455b0cb7f3a5c4f0659c69253c0800f0ee58f9da26e4e0fbd6c0474",
+      "bytes": 12673,
+      "scope": "tested-source"
+    },
+    "crates/oriole_expat/src/content_model.rs": {
+      "git_blob": "5275fc70ab6bb6cae0b6e6e77213e592ae51fa70",
+      "sha256": "0dd9baea94af469fc3e702b6504c5a976a256f2db38e96ee3eab8d2cd6f066f2",
+      "bytes": 9021,
+      "scope": "tested-source"
+    },
+    "crates/oriole_expat/src/context_text_tests.rs": {
+      "git_blob": "0ce1bcd21e4f78a0028f5c9ea4166aeae057284b",
+      "sha256": "5b74bfe9be84234e4e4438998685b1f91381c82fffde248b8f8822873cd9d254",
+      "bytes": 28670,
+      "scope": "tested-source"
+    },
+    "crates/oriole_expat/src/lib.rs": {
+      "git_blob": "85700d3f031340bfe7aec3eee99e62cc2e0babcd",
+      "sha256": "9af4fa9388d84248f086f040d295317bf9ce2aacb533c7293f5fbc09c3fa9cb4",
+      "bytes": 104745,
+      "scope": "tested-source"
+    },
+    "crates/oriole_expat/src/tests.rs": {
+      "git_blob": "76c6e3f01a471ddb63e8615131ad699948a20cdb",
+      "sha256": "098bb0f21996ec781f0060698e1ad03de10810f0e71d8160b26e1cc3b74f8a80",
+      "bytes": 213372,
+      "scope": "tested-source"
+    },
+    "crates/oriole_expat/tests/memory.rs": {
+      "git_blob": "11fbef8786e28b85b3a7430734c88eeed7a69a3e",
+      "sha256": "bcce5f45d1fbe0de5c2a702c958ed6656de544909edf9d8594f8edff66da8632",
+      "bytes": 14012,
+      "scope": "tested-source"
+    },
+    "crates/oriole_storage/Cargo.toml": {
+      "git_blob": "53418ad450d7858ba76972960552f7b9382addd4",
+      "sha256": "d009126c142efea7ad1b1017ff13c071330e885a43cc5e39b9f84a5168fd51d6",
+      "bytes": 402,
+      "scope": "tested-source"
+    },
+    "crates/oriole_storage/src/allocator.rs": {
+      "git_blob": "5cb26a7af2643a3c22e8df5ee041771b048c04b4",
+      "sha256": "910ce7ead099bd6a306a037c77fa276f746ac0eac59f14d8bda9b9b1c2deeac7",
+      "bytes": 33448,
+      "scope": "tested-source"
+    },
+    "crates/oriole_storage/src/hashing.rs": {
+      "git_blob": "879077ec55cd4cd7bd549d41fc5d132ffaa742a1",
+      "sha256": "f97040ee70e3a6147edf896778748aad7845c12f873b3b2688e2ad84989c4e80",
+      "bytes": 2243,
+      "scope": "tested-source"
+    },
+    "crates/oriole_storage/src/lib.rs": {
+      "git_blob": "238364e0349b8b27f6807072ca7b0275933cdd4e",
+      "sha256": "bef77200e81d340776f2e858cf679d01aa8986c27da208bc48a9afec3e069c2c",
+      "bytes": 6085,
+      "scope": "tested-source"
+    },
+    "crates/oriole_storage/src/queue.rs": {
+      "git_blob": "8cc847fc23d20e136cea4aa16d4f131d636df373",
+      "sha256": "944ae27c4cc1d453b77ce34c505b4b194ad37b42568d3fe24ebb0c5cece784a7",
+      "bytes": 2746,
+      "scope": "tested-source"
+    },
+    "crates/oriole_storage/src/shared.rs": {
+      "git_blob": "1382eafff4550d59f8b6ef65f8d813349244a253",
+      "sha256": "52def3c62ee0563c71c051cfe4c759aaddc16b378f413969592af80cf2fdf13b",
+      "bytes": 3644,
+      "scope": "tested-source"
+    },
+    "crates/oriole_storage/src/string.rs": {
+      "git_blob": "61f465a07760f31b57a65a3fae3dca0d7e3bc5bf",
+      "sha256": "801cafba67a6c83bdd13b26a4087031adb360edcc81485540adaadea15a9fad5",
+      "bytes": 10626,
+      "scope": "tested-source"
+    },
+    "crates/oriole_storage/src/tests.rs": {
+      "git_blob": "e4827e07fca2b7514cf75913b59c265225e8f385",
+      "sha256": "561ab8d0ece0e6d3f4b2e075798e0d6990a48b43b065ec3dd254473c99dd445f",
+      "bytes": 31784,
+      "scope": "tested-source"
+    },
+    "crates/oriole_storage/src/tracking.rs": {
+      "git_blob": "73d01df26de3adf0e9ad886e7536a8d1394719e1",
+      "sha256": "c6f53efa24a5c31dad71d597c42612748c3209796507a2b2eafb7368a1b69cc6",
+      "bytes": 7033,
+      "scope": "tested-source"
+    },
+    "crates/oriole_storage/src/try_lock.rs": {
+      "git_blob": "68fd1524055fb080e81c1dd3278ef605b5e3288f",
+      "sha256": "e08e75c6b2a1410d74d3fda3667e7f031dfade5eb26e0d5db5b98f6233ce6fde",
+      "bytes": 5206,
+      "scope": "tested-source"
+    },
+    "include/expat.h": {
+      "git_blob": "aabe4609b83d011c808a875e358847deb1e65960",
+      "sha256": "c8c8fda28157a2550dd0b276a717df3414d2a91728e6d0f9d9e20ed143f8d42c",
+      "bytes": 46506,
+      "scope": "tested-source"
+    },
+    "tests/c/UPSTREAM-NOTICES.txt": {
+      "git_blob": "76c3edf0ed1228992320631a7ca5d226f5dd197d",
+      "sha256": "0fecb93ea065832a4cbe43838af7a2ee98e29b2e79effa49ddbefa615a31cad7",
+      "bytes": 5488,
+      "scope": "tested-source"
+    },
+    "tests/c/adversarial.c": {
+      "git_blob": "cddaf7bd0081e32222d3367dc54e74468d28a00e",
+      "sha256": "abc52bb8d44d0bb5f9914e594b6ca2e0a7d8e6c5c9c293699a73e00dfa53793d",
+      "bytes": 3332,
+      "scope": "tested-source"
+    },
+    "tests/c/allocations.c": {
+      "git_blob": "7f39c4cbfbebdba87e2e7dfd17593fded99180ee",
+      "sha256": "1ccf833e2d8d4ec75daf1524547dd7671592c7283e5a0d45b849cacbdb662f59",
+      "bytes": 7552,
+      "scope": "tested-source"
+    },
+    "tests/c/integration.c": {
+      "git_blob": "a3239b16885bc25ae6b98cf55474eb80cfc585b5",
+      "sha256": "1e77767b31d4aa2c4bf16321dc545f0faa6ce6e401d5080f96993bbca978d399",
+      "bytes": 30375,
+      "scope": "tested-source"
+    },
+    "benchmarks/inprocess/Cargo.toml": {
+      "git_blob": "c02f32ab2c49d12cb8cc170c3c105a01dd2b4162",
+      "sha256": "eb3adacd93525be29f775d5a848774bc4e6b3920df6588f573651d396200090a",
+      "bytes": 460,
+      "scope": "auxiliary"
+    },
+    "benchmarks/inprocess/Cargo.lock": {
+      "git_blob": "49e042efa9fb8a0bc0ab3efb083f9f47f746b032",
+      "sha256": "8d1479efac23e72c412975cd77df822968afa956bb1cad564ac708deeec0edca",
+      "bytes": 3529,
+      "scope": "auxiliary"
+    },
+    "fuzz/Cargo.toml": {
+      "git_blob": "888af89a8cdeaf97575548d1f404f25d6e36f994",
+      "sha256": "1d7299d54cbed252075ce4c25380cab21407229106e07721bda27f430e913ef2",
+      "bytes": 861,
+      "scope": "auxiliary"
+    },
+    "fuzz/Cargo.lock": {
+      "git_blob": "7eb4d4606200e3ee90ba15571b81109618204354",
+      "sha256": "700077fa6ead74c662a77cbb12663a42fbceed461e0ebdd68c24a9f6657ca574",
+      "bytes": 3932,
+      "scope": "auxiliary"
+    }
+  },
+  "git_read_exit": 0,
+  "git_read_reaped": true,
+  "targets_executed": false,
+  "repo_writes": false,
+  "remaining_limits": "This source identity check does not establish confirmation, Rust ASan/fuzz, remote CI/Miri, installed PBS success, or an adoption decision."
+}

@@ -1,0 +1,62 @@
+{
+  "warning-diagnosis/failed-use-liboriole_expat.a": {
+    "sha256": "d38966178444776cc3f11c5cd1e9ae647722c67114ed21bb32cd09c4b0b7ded7",
+    "bytes": 3797836,
+    "source": "/tmp/oriole-c-library-lto-warning-diagnosis/failed-use-liboriole_expat.a"
+  },
+  "warning-diagnosis/failed-use-liboriole_expat.so": {
+    "sha256": "d6404da7e6a41c930838078e606de649ac4bea405eba9f477b59b177a6bbd838",
+    "bytes": 1297760,
+    "source": "/tmp/oriole-c-library-lto-warning-diagnosis/failed-use-liboriole_expat.so"
+  },
+  "failed-pgo/generate/liboriole_expat.a": {
+    "sha256": "88426c1715aef9359d49257680fc11f5be2d6c77def2db3765001b62427accb6",
+    "bytes": 5000272,
+    "source": "/tmp/oriole-c-library-lto-pgo-validation/runs/run-_rdl2z8c/generate/liboriole_expat.a"
+  },
+  "failed-pgo/generate/liboriole_expat.so": {
+    "sha256": "89b97790c87856cb0d1d9abec30a98e6e1ab3057c4c9258f97d634de73712576",
+    "bytes": 1699128,
+    "source": "/tmp/oriole-c-library-lto-pgo-validation/runs/run-_rdl2z8c/generate/liboriole_expat.so"
+  },
+  "successful-pgo/generate/liboriole_expat.a": {
+    "sha256": "e7aafb0f05071f889bfc61eb0f7f2bfd6e8895a7697e5495bb557491e0c1dfe3",
+    "bytes": 5000280,
+    "source": "/tmp/oriole-c-library-lto-final-pgo-validation/runs/run-0gjyf0_i/generate/liboriole_expat.a"
+  },
+  "successful-pgo/generate/liboriole_expat.so": {
+    "sha256": "0a7278f531eb372617a9c93625f661cc5cceab56ad00f5436f1694ea5072ac51",
+    "bytes": 1699128,
+    "source": "/tmp/oriole-c-library-lto-final-pgo-validation/runs/run-0gjyf0_i/generate/liboriole_expat.so"
+  },
+  "successful-pgo/use/liboriole_expat.a": {
+    "sha256": "2cdc95b6515688b7df5a2e5a05eaf8dbbcd72b1b18424241132197eb7633cd0b",
+    "bytes": 3798026,
+    "source": "/tmp/oriole-c-library-lto-final-pgo-validation/runs/run-0gjyf0_i/use/liboriole_expat.a"
+  },
+  "successful-pgo/use/liboriole_expat.so": {
+    "sha256": "c2d677b7789717169900f4de348ebf1b22988d37d0885c629f0ca2bf6228fa58",
+    "bytes": 1297928,
+    "source": "/tmp/oriole-c-library-lto-final-pgo-validation/runs/run-0gjyf0_i/use/liboriole_expat.so"
+  },
+  "pbs-02-empty-encoded-unhardened/libexpat.a": {
+    "sha256": "53a005d2e674501efc35f592d5a526779167c9fc89a7a9a1af134f3fab54e462",
+    "bytes": 3637408,
+    "source": "/tmp/oriole-c-library-lto-pbs-final-validation/libexpat.a"
+  },
+  "pbs-03-clean-unhardened/libexpat.a": {
+    "sha256": "bfad5b9d90c6a744376dab9d7dfc162b37d36582f0cbb534927b61170ec2f56f",
+    "bytes": 3637408,
+    "source": "/tmp/oriole-c-library-lto-pbs-clean-validation/libexpat.a"
+  },
+  "pbs-04-hardened-cache-reuse/libexpat.a": {
+    "sha256": "bfad5b9d90c6a744376dab9d7dfc162b37d36582f0cbb534927b61170ec2f56f",
+    "bytes": 3637408,
+    "source": "/tmp/oriole-c-library-lto-pbs-production-validation/libexpat.a"
+  },
+  "pbs-05-hardened-fresh/libexpat.a": {
+    "sha256": "bfad5b9d90c6a744376dab9d7dfc162b37d36582f0cbb534927b61170ec2f56f",
+    "bytes": 3637408,
+    "source": "/tmp/oriole-c-library-lto-pbs-production-fresh-validation/libexpat.a"
+  }
+}

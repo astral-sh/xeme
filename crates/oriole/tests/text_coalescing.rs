@@ -147,3 +147,114 @@ fn converted_windows_do_not_emit_part_of_a_later_malformed_line() {
         assert_eq!(joined, format!("a\n{}\n", "x".repeat(65_533)));
     }
 }
+
+#[test]
+fn external_children_preserve_default_coalescing() {
+    let parent = Parser::new(Config::default());
+    for mut parser in [parent.external_child(Some(""), None).unwrap(), parent] {
+        let xml = "<r>a\nb\r\nc</r>";
+        parser.feed(xml.as_bytes(), true).unwrap();
+        let mut values = Vec::new();
+        while let Some(event) = parser.next_event().unwrap() {
+            if let EventKind::Text(text) = event.kind {
+                values.push(text.to_string());
+            }
+        }
+        assert_eq!(values, ["a\nb\nc"]);
+    }
+}
+
+#[test]
+fn ascii_text_keeps_raw_spans_and_eager_positions_across_feeds() {
+    let short = "<r>\nalpha\tbeta\u{7f}\n\ngamma<n/>tail\n</r>".to_string();
+    let long = format!("<r>a\n{}<n/>\nend</r>", "x".repeat(65_534));
+    for xml in [short, long] {
+        let widths: Vec<_> = if xml.len() < 100 {
+            (1..=xml.len()).collect()
+        } else {
+            vec![4096, 65_536, xml.len()]
+        };
+        for width in widths {
+            let mut parser = Parser::new(Config::default());
+            let mut joined = String::new();
+            for (index, chunk) in xml.as_bytes().chunks(width).enumerate() {
+                parser
+                    .feed(chunk, (index + 1) * width >= xml.len())
+                    .unwrap();
+                while let Some(event) = parser.next_event().unwrap() {
+                    let position = event.position;
+                    let prefix = &xml[..position.byte_index];
+                    assert_eq!(
+                        position.line,
+                        prefix.bytes().filter(|b| *b == b'\n').count() + 1
+                    );
+                    assert_eq!(position.column, prefix.rsplit('\n').next().unwrap().len());
+                    assert_eq!(parser.position(), position);
+                    if let EventKind::Text(text) = event.kind {
+                        let raw = parser.current_raw().unwrap();
+                        assert_eq!(raw, text.as_ref());
+                        assert_eq!(position.byte_count, raw.len());
+                        assert_eq!(&xml[position.byte_index..][..raw.len()], raw);
+                        joined.push_str(&text);
+                    }
+                }
+            }
+            assert!(parser.is_finished());
+            assert_eq!(
+                joined,
+                xml.replace("<r>", "")
+                    .replace("<n/>", "")
+                    .replace("</r>", "")
+            );
+        }
+    }
+}
+
+#[test]
+fn native_text_plan_matches_ascii_fallback_events_and_errors() {
+    fn collect(input: &[u8], width: usize, encoding: Option<String>) -> Vec<String> {
+        let mut parser = Parser::new(Config {
+            encoding,
+            ..Config::default()
+        });
+        let mut records = Vec::new();
+        for (index, chunk) in input.chunks(width).enumerate() {
+            parser
+                .feed(chunk, (index + 1) * width >= input.len())
+                .unwrap();
+            loop {
+                match parser.next_event() {
+                    Ok(Some(event)) => {
+                        records.push(format!("{event:?} raw {:?}", parser.current_raw()));
+                    }
+                    Ok(None) => break,
+                    Err(error) => {
+                        records.push(format!("{error:?} raw {:?}", parser.current_raw()));
+                        return records;
+                    }
+                }
+            }
+        }
+        records
+    }
+    for data in [
+        "alpha\tbeta\n\ngamma\u{7f}&amp;tail",
+        "\nxxxxx\n<child/>\nxxxxxx\nxxxxxxxx&amp;\tend",
+        "xxxxxxx\nxxxxxxx\n<child/>\nxxxxxx\nxxxxxxxx&amp;\n\nend",
+        "\nxxxxxx\nxxxxxxxx\u{1}<child/>",
+        "\nxxxxxx\nxxxxxxxx<child/>\n\nbad]]>",
+        "a\r\nb\rc\nd",
+        "good\nbad]]>",
+        "good\nbad\u{1}]]>",
+        "good\nbad]]>\u{1}",
+    ] {
+        let xml = format!("<r>{data}</r>");
+        for width in 1..=xml.len() {
+            assert_eq!(
+                collect(xml.as_bytes(), width, None),
+                collect(xml.as_bytes(), width, Some("US-ASCII".to_string())),
+                "{data:?}, width {width}"
+            );
+        }
+    }
+}

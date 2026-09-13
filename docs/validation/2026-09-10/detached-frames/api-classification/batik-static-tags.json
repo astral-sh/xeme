@@ -1,0 +1,351 @@
+{
+  "scope": "Static quote-aware source inventory, not parser execution. Counts agree with recorded49-element native samples. Capacity warmth is not modeled; namespace-on default URI still excludes arena.",
+  "start_tags": 49,
+  "plan_lexical_candidates": 41,
+  "plain_arena_size_candidates": 41,
+  "rows": [
+    {
+      "name": "svg",
+      "bytes": 140,
+      "attrs": 6,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "title",
+      "bytes": 7,
+      "attrs": 0,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "g",
+      "bytes": 16,
+      "attrs": 1,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "defs",
+      "bytes": 6,
+      "attrs": 0,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "symbol",
+      "bytes": 64,
+      "attrs": 3,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "path",
+      "bytes": 377,
+      "attrs": 3,
+      "attribute_value_requires_fallback": true,
+      "plain_arena_size_eligible": false
+    },
+    {
+      "name": "path",
+      "bytes": 387,
+      "attrs": 3,
+      "attribute_value_requires_fallback": true,
+      "plain_arena_size_eligible": false
+    },
+    {
+      "name": "path",
+      "bytes": 364,
+      "attrs": 3,
+      "attribute_value_requires_fallback": true,
+      "plain_arena_size_eligible": false
+    },
+    {
+      "name": "font",
+      "bytes": 35,
+      "attrs": 2,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "font-face",
+      "bytes": 190,
+      "attrs": 5,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "missing-glyph",
+      "bytes": 59,
+      "attrs": 2,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "glyph",
+      "bytes": 53,
+      "attrs": 3,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "glyph",
+      "bytes": 59,
+      "attrs": 4,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "g",
+      "bytes": 44,
+      "attrs": 1,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "path",
+      "bytes": 1891,
+      "attrs": 1,
+      "attribute_value_requires_fallback": true,
+      "plain_arena_size_eligible": false
+    },
+    {
+      "name": "use",
+      "bytes": 115,
+      "attrs": 4,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "glyph",
+      "bytes": 59,
+      "attrs": 4,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "path",
+      "bytes": 1424,
+      "attrs": 2,
+      "attribute_value_requires_fallback": true,
+      "plain_arena_size_eligible": false
+    },
+    {
+      "name": "glyph",
+      "bytes": 62,
+      "attrs": 4,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "g",
+      "bytes": 69,
+      "attrs": 2,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "path",
+      "bytes": 1544,
+      "attrs": 1,
+      "attribute_value_requires_fallback": true,
+      "plain_arena_size_eligible": false
+    },
+    {
+      "name": "path",
+      "bytes": 275,
+      "attrs": 1,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "glyph",
+      "bytes": 59,
+      "attrs": 4,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "path",
+      "bytes": 2498,
+      "attrs": 2,
+      "attribute_value_requires_fallback": true,
+      "plain_arena_size_eligible": false
+    },
+    {
+      "name": "glyph",
+      "bytes": 52,
+      "attrs": 3,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "g",
+      "bytes": 28,
+      "attrs": 1,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "use",
+      "bytes": 117,
+      "attrs": 4,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "hkern",
+      "bytes": 30,
+      "attrs": 3,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "hkern",
+      "bytes": 31,
+      "attrs": 3,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "hkern",
+      "bytes": 31,
+      "attrs": 3,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "hkern",
+      "bytes": 30,
+      "attrs": 3,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "hkern",
+      "bytes": 30,
+      "attrs": 3,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "g",
+      "bytes": 57,
+      "attrs": 2,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "path",
+      "bytes": 2188,
+      "attrs": 1,
+      "attribute_value_requires_fallback": true,
+      "plain_arena_size_eligible": false
+    },
+    {
+      "name": "filter",
+      "bytes": 117,
+      "attrs": 5,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "feGaussianBlur",
+      "bytes": 52,
+      "attrs": 2,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "feOffset",
+      "bytes": 26,
+      "attrs": 2,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "feComponentTransfer",
+      "bytes": 37,
+      "attrs": 1,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "feFuncA",
+      "bytes": 50,
+      "attrs": 3,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "feComposite",
+      "bytes": 46,
+      "attrs": 2,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "g",
+      "bytes": 52,
+      "attrs": 2,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "g",
+      "bytes": 19,
+      "attrs": 1,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "text",
+      "bytes": 96,
+      "attrs": 5,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "use",
+      "bytes": 41,
+      "attrs": 1,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "g",
+      "bytes": 23,
+      "attrs": 1,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "rect",
+      "bytes": 98,
+      "attrs": 5,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "use",
+      "bytes": 109,
+      "attrs": 4,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "use",
+      "bytes": 54,
+      "attrs": 3,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    },
+    {
+      "name": "use",
+      "bytes": 35,
+      "attrs": 1,
+      "attribute_value_requires_fallback": false,
+      "plain_arena_size_eligible": true
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "scope": "Focused ForeignDtd raw-writer unit fixture only. Production prefix and all other 73 main files/four auxiliary files unchanged.",
+  "attempt01": "/tmp/oriole-core-owned-text-raw-attempt01",
+  "failed_build_sha256": "508766d3bc7f2b138a8ff656c2c805364cb8943f27f17e97c214c088a0c7da74",
+  "failed_tests_log_sha256": "e259684e35fc52e6e98c1849654efd55ad71267d6838578ff92dab20fd4374b4",
+  "prior_source_sha256": "be365601148c460add3836b3aeb5289a91bee8fa104cb516b4e1f29ea6ab3490",
+  "source_sha256": "7d3b554a5935724a2155ac749623cf75cfd92ab462fcc5f2ef85fbe34d8cc156",
+  "before_lib_sha256": "ebd3c2c4e92c697ea0ac59b68dff22816557013ded5bddea3736cc45ba38da9e",
+  "after_lib_sha256": "f2c1e99ec4e59b894b9cc3825d258babff6cfff1ba5659f209f7af0ccfdfd80e",
+  "patch_sha256": "f291b38e069058e93b484582a97d6b9ad9a8d0c02594be215c57e1df6b17242c",
+  "diagnosis": "The public parameter-mode setter was called after parsing and returned false, so start_foreign_dtd queued nothing. Popping a real external event would itself clear the raw view. The fixed test explicitly enables private mode and marks the queued foreign state delivered, then asserts retained raw before the real finish_foreign_dtd writer and cleared raw afterward.",
+  "format": {
+    "argv": [
+      "cargo",
+      "+ohm",
+      "-Zohm-defaults=no",
+      "fmt",
+      "--all"
+    ],
+    "session": 39460,
+    "exit": 0,
+    "reaped": true
+  },
+  "targets_executed_by_agent": false
+}

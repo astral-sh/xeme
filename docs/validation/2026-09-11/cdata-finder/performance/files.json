@@ -1,0 +1,50 @@
+{
+  "files": [
+    {
+      "bytes": 4769,
+      "path": "README.md",
+      "sha256": "f02875199d463650de8a0d2a89d76b6df189247d1c4068fb587bfa09db3fe48e"
+    },
+    {
+      "bytes": 2181,
+      "path": "attach-notice.py",
+      "sha256": "5f49a40ab92dfa5bfdce4c02b1c091d4523fffa8af5d04149f2a93fdba39ec84"
+    },
+    {
+      "bytes": 14100387,
+      "path": "evidence.tar.gz",
+      "sha256": "c1d57a40b866fc4f19293dcfeb821aa1dc8c536ccac3def82b714f615979ddb7"
+    },
+    {
+      "bytes": 241389,
+      "path": "members.json.gz",
+      "sha256": "2a5920cf39e1f8a466341e036f92e3e4ae24470f3ef3c68b68cfdd2c1f07390b"
+    },
+    {
+      "bytes": 14835,
+      "path": "package.py",
+      "sha256": "dc8bec57e28c690f49ab53c81deffd01136980f65f23cc2796adb98c8a118937"
+    },
+    {
+      "bytes": 5912,
+      "path": "summary.json",
+      "sha256": "3ddaded64fdcaebcc92699e0e03c2665154053209931668ad954d8d025150001"
+    },
+    {
+      "bytes": 5402,
+      "path": "tests-c-UPSTREAM-NOTICES.txt",
+      "sha256": "64293606655ef7918c7dac2d5de1ad1790b1935a6d06d5bdad4eceb71ebb8257"
+    },
+    {
+      "bytes": 380,
+      "path": "verification.json",
+      "sha256": "099d62feb00fb0e824217981e9f6ab5fe076c9d4fedd79a0f6c9a5684f07c789"
+    },
+    {
+      "bytes": 2003,
+      "path": "verify.py",
+      "sha256": "e889a7e6bfe6d872d0bc8dc8df42986b485aece51aca764de9e0b48dc5a562de"
+    }
+  ],
+  "scope": "All top-level publication files except this index; archive member and alias maps are separately sealed."
+}

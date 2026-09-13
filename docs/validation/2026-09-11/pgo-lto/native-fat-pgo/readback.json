@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "archive": {
+    "file": "evidence.tar.gz",
+    "sha256": "71a2717130fa90fcde41a4cc5554d99abc3209386829f159e26ba200d13e4729",
+    "bytes": 2122694,
+    "members": 725
+  },
+  "all_outer_member_hashes_verified": true,
+  "all_original_files_unchanged": true,
+  "nested_archives": {},
+  "source70_matches_manifest": false,
+  "excluded_binary_count": 0,
+  "generator_sha256": "e9ddf3df590181354c24a84739fc20e580cf2c249a2ab0bb01f0dfcb09a895da"
+}

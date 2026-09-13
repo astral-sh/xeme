@@ -488,9 +488,177 @@ fn buffer_reservation_cannot_bypass_input_budget() {
         assert_eq!(XML_GetErrorCode(parser), 43);
         assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
         (*parser).config.limits.max_total_bytes = 10;
+        let limits = (*parser).config.limits.clone();
+        (*parser).core.set_limits(limits).unwrap();
         assert_eq!(XML_Parse(parser, c"<root>".as_ptr(), 6, 0), OK);
         assert!(XML_GetBuffer(parser, 5).is_null());
         assert_eq!(XML_GetErrorCode(parser), 43);
+        XML_ParserFree(parser);
+    }
+}
+
+#[test]
+fn source_bound_preflight_preserves_family_and_input_storage() {
+    // SAFETY: The handles and buffers belong to this test. Lower only the core
+    // allowance so the per-source preflight rejects before family mutation.
+    unsafe {
+        for buffered in [false, true] {
+            let parser = XML_ParserCreate(ptr::null());
+            assert!(!parser.is_null());
+            let mut limits = (*parser).config.limits.clone();
+            limits.max_total_bytes = 3;
+            (*parser).core.set_limits(limits).unwrap();
+            if buffered {
+                let buffer = XML_GetBuffer(parser, 3);
+                assert!(!buffer.is_null());
+                ptr::copy_nonoverlapping(b"<r>".as_ptr(), buffer.cast(), 3);
+                assert_eq!(XML_ParseBuffer(parser, 3, 0), OK);
+            } else {
+                assert_eq!(XML_Parse(parser, c"<r>".as_ptr(), 3, 0), OK);
+            }
+            let direct = (*parser).tracker.direct_bytes();
+            let input = {
+                let family = &(*parser).family;
+                family.input_bytes.get()
+            };
+            let context = (*parser).core.input_context().0.to_vec();
+            let context_start = (*parser).core.input_context().1;
+            let buffer_capacity = (*parser).buffer.capacity();
+            assert_eq!((*parser).core.input_bytes_remaining(), 0);
+            assert!(XML_GetBuffer(parser, 1).is_null());
+            assert_eq!(XML_GetErrorCode(parser), 43);
+            assert_eq!(XML_Parse(parser, c"x".as_ptr(), 1, 1), ERROR);
+            assert_eq!(XML_GetErrorCode(parser), 43);
+            assert_eq!((*parser).tracker.direct_bytes(), direct);
+            {
+                let family = &(*parser).family;
+                assert_eq!(family.input_bytes.get(), input);
+            }
+            assert_eq!((*parser).core.input_context().0, context);
+            assert_eq!((*parser).core.input_context().1, context_start);
+            assert_eq!((*parser).buffer.capacity(), buffer_capacity);
+            assert!(!(*parser).final_buffer);
+            XML_ParserFree(parser);
+        }
+    }
+}
+
+#[test]
+fn request_bound_and_public_positions_do_not_depend_on_lifetime_quota() {
+    // SAFETY: No large allocation is attempted; the single-request gate fires
+    // before reservation. Scalar coordinates are seeded to test public widths.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        assert!(!parser.is_null());
+        (*parser).config.limits.max_total_bytes = c_long::MAX as usize;
+        (*parser)
+            .core
+            .set_limits((*parser).config.limits.clone())
+            .unwrap();
+        let live = (*parser).tracker.live_bytes();
+        assert!(XML_GetBuffer(parser, (MAX_INPUT_BYTES + 1) as c_int).is_null());
+        assert_eq!(XML_GetErrorCode(parser), 43);
+        assert_eq!((*parser).tracker.live_bytes(), live);
+        {
+            let family = &(*parser).family;
+            assert_eq!(family.input_bytes.get(), 0);
+        }
+        assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), OK);
+        (*parser).position.byte_index = c_long::MAX as usize;
+        (*parser).position.line = c_long::MAX as usize + 1;
+        (*parser).position.column = c_long::MAX as usize;
+        assert_eq!(XML_GetCurrentByteIndex(parser), c_long::MAX);
+        assert_eq!(XML_GetCurrentLineNumber(parser), c_long::MAX as c_ulong + 1);
+        assert_eq!(XML_GetCurrentColumnNumber(parser), c_long::MAX as c_ulong);
+        XML_ParserFree(parser);
+    }
+}
+
+#[test]
+fn consumed_work_credit_survives_old_children_but_not_root_reset() {
+    unsafe extern "C" fn suspend(arg: *mut c_void, _: *const c_char, _: *const *const c_char) {
+        // SAFETY: Parser-as-handler-argument supplies the active test parser.
+        unsafe { assert_eq!(XML_StopParser(arg.cast(), 1), OK) };
+    }
+    // SAFETY: Each handle is owned by this test. Scalar reads and seeded work
+    // counters occur between API calls; no parser borrow crosses a callback.
+    unsafe {
+        let parent = XML_ParserCreate(ptr::null());
+        assert!(!parent.is_null());
+        assert_eq!((*parent).config.limits.max_work_amplification, Some(100));
+        assert_eq!(
+            (*parent).core.input_bytes_remaining(),
+            (c_long::MAX as usize).min(isize::MAX as usize)
+        );
+        XML_UseParserAsHandlerArg(parent);
+        XML_SetElementHandler(parent, Some(suspend), None);
+        let document = format!("<r>{}</r>", "x".repeat(700 * 1024));
+        assert_eq!(
+            XML_Parse(parent, document.as_ptr().cast(), document.len() as c_int, 1),
+            SUSPENDED
+        );
+        // Only the opening tag has been consumed. The large buffered suffix and
+        // allocation tracker's whole-feed credit must not enlarge work credit.
+        assert_eq!((*parent).tracker.direct_bytes(), document.len() as u64);
+        assert_eq!((*parent).core.work_bytes_limit(0), 300);
+        let general = XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null());
+        let parameter = XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null());
+        assert!(!general.is_null());
+        assert!(!parameter.is_null());
+        assert_eq!((*general).core.work_bytes_limit(0), 300);
+        assert_eq!((*parameter).core.work_bytes_limit(0), 300);
+        XML_SetElementHandler(parent, None, None);
+        assert_eq!(XML_ResumeParser(parent), OK);
+        let earned = 100 * document.len();
+        assert!(earned > INITIAL_CALLBACK_BYTES);
+        assert_eq!((*parent).core.work_bytes_limit(0), earned);
+        assert_eq!((*general).core.work_bytes_limit(0), earned);
+        assert_eq!((*parameter).core.work_bytes_limit(0), earned);
+        assert_eq!(XML_ParserReset(parent, ptr::null()), 1);
+        assert_eq!((*parent).config.limits.max_work_amplification, Some(100));
+        assert_eq!((*parent).core.work_bytes_limit(0), 0);
+        assert_eq!((*general).core.work_bytes_limit(0), earned);
+        assert_eq!((*parameter).core.work_bytes_limit(0), earned);
+        {
+            let family = &(*general).family;
+            family.callback_bytes.set(INITIAL_CALLBACK_BYTES);
+        }
+        XML_SetElementHandler(general, None, None);
+        assert_eq!(XML_Parse(general, c"<c/>".as_ptr(), 4, 1), OK);
+        {
+            let family = &(*general).family;
+            assert_eq!(family.callback_bytes.get(), INITIAL_CALLBACK_BYTES + 2);
+        }
+        assert_eq!((*general).core.work_bytes_limit(0), earned);
+        assert_eq!((*parent).core.work_bytes_limit(0), 0);
+        XML_ParserFree(parent);
+        assert_eq!((*parameter).core.work_bytes_limit(0), earned);
+        XML_ParserFree(general);
+        XML_ParserFree(parameter);
+    }
+}
+
+#[test]
+fn family_input_statistic_cannot_overflow_or_grant_work_credit() {
+    // SAFETY: Only the test's shared statistic is seeded; all actual input is
+    // a small valid slice, and the parser is freed after the checked rejection.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        assert!(!parser.is_null());
+        {
+            let family = &(*parser).family;
+            family.input_bytes.set(usize::MAX - 2);
+        }
+        assert_eq!((*parser).core.work_bytes_limit(0), 0);
+        assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(parser), 43);
+        {
+            let family = &(*parser).family;
+            assert_eq!(family.input_bytes.get(), usize::MAX - 2);
+        }
+        assert_eq!((*parser).tracker.direct_bytes(), 0);
+        assert_eq!((*parser).core.work_bytes_limit(0), 0);
+        assert!((*parser).core.input_context().0.is_empty());
         XML_ParserFree(parser);
     }
 }
@@ -653,6 +821,414 @@ unsafe extern "C" fn external_entity(
 }
 
 #[test]
+fn external_declaration_errors_keep_their_codes_in_each_child_context() {
+    struct DeclarationCase {
+        input: &'static [u8],
+        width: usize,
+        expected: c_int,
+        parameter: bool,
+        calls: usize,
+    }
+    unsafe extern "C" fn external(
+        parent: XML_Parser,
+        context: *const c_char,
+        _: *const c_char,
+        _: *const c_char,
+        _: *const c_char,
+    ) -> c_int {
+        // SAFETY: State and input are test-owned, and the child is freed before
+        // returning to its parent. No borrowed state is held across parser calls.
+        unsafe {
+            let state = XML_GetUserData(parent).cast::<DeclarationCase>();
+            let (input, width, expected, parameter) = (
+                (*state).input,
+                (*state).width,
+                (*state).expected,
+                (*state).parameter,
+            );
+            assert_eq!(context.is_null(), parameter);
+            let child = XML_ExternalEntityParserCreate(parent, context, ptr::null());
+            assert!(!child.is_null());
+            let mut status = OK;
+            for (index, bytes) in input.chunks(width).enumerate() {
+                status = XML_Parse(
+                    child,
+                    bytes.as_ptr().cast(),
+                    bytes.len() as c_int,
+                    c_int::from((index + 1) * width >= input.len()),
+                );
+                if status == ERROR {
+                    break;
+                }
+            }
+            assert_eq!(status, ERROR);
+            assert_eq!(XML_GetErrorCode(child), expected);
+            let position = (
+                XML_GetCurrentByteIndex(child),
+                XML_GetCurrentLineNumber(child),
+                XML_GetCurrentColumnNumber(child),
+            );
+            assert_eq!(XML_Parse(child, c"".as_ptr(), 0, 1), ERROR);
+            assert_eq!(XML_GetErrorCode(child), expected);
+            assert_eq!(
+                (
+                    XML_GetCurrentByteIndex(child),
+                    XML_GetCurrentLineNumber(child),
+                    XML_GetCurrentColumnNumber(child)
+                ),
+                position
+            );
+            XML_ParserFree(child);
+            (*state).calls += 1;
+            ERROR
+        }
+    }
+    let documents = [
+        (
+            b"<!DOCTYPE r [<!ENTITY e SYSTEM 'e'>]><r>&e;</r>".as_slice(),
+            false,
+        ),
+        (b"<!DOCTYPE r SYSTEM 'e'><r/>", true),
+        (b"<!DOCTYPE r [<!ENTITY % e SYSTEM 'e'>%e;]><r/>", true),
+    ];
+    for (input, expected) in [
+        (b"<?xml version='1.0'?>".as_slice(), 31),
+        (
+            b"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>",
+            31,
+        ),
+        (b"<?xml version='1.0' encoding 'UTF-8'?>", 31),
+        (b"<?XML encoding='UTF8'?>", 4),
+        (b"<?xml encoding='UTF8' version='1.0'?>", 31),
+        (b"<?xml version='1.0' encoding='UTF8' extra='x'?>", 31),
+        (b"<?xml version='1.0' encoding='UTF8'?>", 18),
+    ] {
+        for (document, parameter) in documents {
+            for width in [1, 7, input.len()] {
+                let mut state = DeclarationCase {
+                    input,
+                    width,
+                    expected,
+                    parameter,
+                    calls: 0,
+                };
+                // SAFETY: Callback state stays live through all parent/child calls.
+                unsafe {
+                    let parent = XML_ParserCreate(ptr::null());
+                    assert!(!parent.is_null());
+                    XML_SetUserData(parent, ptr::from_mut(&mut state).cast());
+                    XML_SetExternalEntityRefHandler(parent, Some(external));
+                    assert_eq!(XML_SetParamEntityParsing(parent, 2), 1);
+                    assert_eq!(
+                        XML_Parse(parent, document.as_ptr().cast(), document.len() as c_int, 1),
+                        ERROR
+                    );
+                    assert_eq!(XML_GetErrorCode(parent), 21);
+                    XML_ParserFree(parent);
+                }
+                assert_eq!(state.calls, 1);
+            }
+        }
+    }
+}
+
+#[test]
+fn unknown_encoding_callbacks_follow_complete_declaration_grammar() {
+    #[derive(Default)]
+    struct EncodingState {
+        requested: Vec<String>,
+        accept: bool,
+        releases: usize,
+        remapping: u8,
+        conversions: usize,
+    }
+    unsafe extern "C" fn release(data: *mut c_void) {
+        // SAFETY: Test state outlives every parser using this encoding instance.
+        unsafe {
+            (*data.cast::<EncodingState>()).releases += 1;
+        }
+    }
+    unsafe extern "C" fn convert(data: *mut c_void, bytes: *const c_char) -> c_int {
+        // SAFETY: The registered map requests exactly two bytes; the state lives
+        // until the parser releases the encoding instance.
+        unsafe {
+            assert_eq!(std::slice::from_raw_parts(bytes.cast::<u8>(), 2), b"@$");
+            (*data.cast::<EncodingState>()).conversions += 1;
+        }
+        i32::from(b'1')
+    }
+    unsafe extern "C" fn unknown(
+        data: *mut c_void,
+        name: *const c_char,
+        info: *mut XML_Encoding,
+    ) -> c_int {
+        // SAFETY: The name and writable record belong to this callback; state
+        // remains live until the parser and any child have both been destroyed.
+        unsafe {
+            let state = data.cast::<EncodingState>();
+            (*state)
+                .requested
+                .push(CStr::from_ptr(name).to_str().unwrap().to_owned());
+            if !(*state).accept {
+                return ERROR;
+            }
+            (*info).map = std::array::from_fn(|index| index as i32);
+            match (*state).remapping {
+                1 => (*info).map[1] = 0x100,
+                2 => {
+                    (*info).map[usize::from(b'@')] = -2;
+                    (*info).convert = Some(convert);
+                }
+                _ => {}
+            }
+            (*info).data = data;
+            (*info).release = Some(release);
+            OK
+        }
+    }
+    // Unrequested ASCII, explicit UTF-8, explicit custom, sniffed UTF-16,
+    // and ASCII bytes with a mismatching UTF-16 declaration.
+    for mode in 0..5 {
+        // Context: root, directly created general child, parameter/subset child.
+        for context in 0..3 {
+            for case in 0..4 {
+                let encoding = if mode >= 3 { "UTF-16" } else { "UTF8" };
+                let header = match case {
+                    0 => format!("<?xml encoding='{encoding}' version='1.0'?>"),
+                    1 => format!("<?xml version='1.0' encoding='{encoding}' extra='x'?>"),
+                    2 => format!("<?xml version='1.0' encoding='{encoding}'?>"),
+                    _ => format!("<?XML encoding='{encoding}'?>"),
+                };
+                let document = if context == 2 {
+                    header.clone()
+                } else {
+                    format!("{header}<r/>")
+                };
+                for bom in [false, true] {
+                    // Explicit custom encodings reject a BOM before grammar;
+                    // UTF-16 uses its own BOM in its single iteration.
+                    if bom && mode != 0 {
+                        continue;
+                    }
+                    let bytes = if mode == 3 {
+                        [
+                            b"\xff\xfe".as_slice(),
+                            &document
+                                .encode_utf16()
+                                .flat_map(u16::to_le_bytes)
+                                .collect::<Vec<_>>(),
+                        ]
+                        .concat()
+                    } else if bom {
+                        [b"\xef\xbb\xbf".as_slice(), document.as_bytes()].concat()
+                    } else {
+                        document.as_bytes().to_vec()
+                    };
+                    for accept in [false, true] {
+                        let calls = usize::from(mode == 2 || (mode == 0 && case == 2));
+                        let grammar_error = if context == 0 { 30 } else { 31 };
+                        let expected = if mode == 4 && case != 3 {
+                            19
+                        } else if calls != 0 && !accept {
+                            18
+                        } else if case == 3 {
+                            4
+                        } else if case < 2 {
+                            grammar_error
+                        } else {
+                            0
+                        };
+                        let mut first_position = None;
+                        for split in 0..=bytes.len() {
+                            let mut state = EncodingState {
+                                accept,
+                                ..EncodingState::default()
+                            };
+                            // SAFETY: All handles, input spans and callback state
+                            // are test-owned. No state borrow crosses a parser call.
+                            unsafe {
+                                let requested = match mode {
+                                    1 => c"UTF-8".as_ptr(),
+                                    2 => c"custom".as_ptr(),
+                                    _ => ptr::null(),
+                                };
+                                let parent = XML_ParserCreate(if context == 0 {
+                                    requested
+                                } else {
+                                    ptr::null()
+                                });
+                                assert!(!parent.is_null());
+                                let parser = if context == 0 {
+                                    parent
+                                } else {
+                                    XML_ExternalEntityParserCreate(
+                                        parent,
+                                        if context == 1 {
+                                            c"".as_ptr()
+                                        } else {
+                                            ptr::null()
+                                        },
+                                        requested,
+                                    )
+                                };
+                                assert!(!parser.is_null());
+                                XML_SetUnknownEncodingHandler(
+                                    parser,
+                                    Some(unknown),
+                                    ptr::from_mut(&mut state).cast(),
+                                );
+                                let mut status = OK;
+                                for (part, final_input) in
+                                    [(&bytes[..split], 0), (&bytes[split..], 1)]
+                                {
+                                    status = XML_Parse(
+                                        parser,
+                                        part.as_ptr().cast(),
+                                        part.len() as c_int,
+                                        final_input,
+                                    );
+                                    if status == ERROR {
+                                        break;
+                                    }
+                                }
+                                assert_eq!(
+                                    status,
+                                    if expected == 0 { OK } else { ERROR },
+                                    "mode={mode}, context={context}, case={case}, split={split}, accept={accept}"
+                                );
+                                assert_eq!(XML_GetErrorCode(parser), expected);
+                                if expected != 0 {
+                                    let position = (
+                                        XML_GetCurrentByteIndex(parser),
+                                        XML_GetCurrentLineNumber(parser),
+                                        XML_GetCurrentColumnNumber(parser),
+                                    );
+                                    assert_eq!(*first_position.get_or_insert(position), position);
+                                }
+                                if mode == 0 && case < 2 && context != 2 {
+                                    assert_eq!((*parser).core.current_raw(), Some(header.as_str()));
+                                }
+                                if context != 0 {
+                                    XML_ParserFree(parser);
+                                }
+                                XML_ParserFree(parent);
+                            }
+                            assert_eq!(state.requested.len(), calls);
+                            if calls != 0 {
+                                assert_eq!(
+                                    state.requested,
+                                    [if mode == 2 { "custom" } else { "UTF8" }]
+                                );
+                            }
+                            assert_eq!(state.releases, usize::from(calls != 0 && accept));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ASCII bytes outside required markup may decode differently. Preserve the
+    // existing custom-map path before deciding grammar, including a multibyte
+    // sequence whose decoded document version is valid. TextDecl versions keep
+    // their existing permissive grammar.
+    for remapping in 1..=2 {
+        let version = if remapping == 1 { "\u{1}" } else { "@$" };
+        for context in 0..3 {
+            for explicit in [false, true] {
+                for malformed_tail in [false, true] {
+                    let tail = if malformed_tail { " extra='x'" } else { "" };
+                    let header = format!("<?xml version='{version}' encoding='X-CUSTOM'{tail}?>");
+                    let document = if context == 2 {
+                        header
+                    } else {
+                        format!("{header}<r/>")
+                    };
+                    let bytes = document.as_bytes();
+                    for accept in [false, true] {
+                        let expected = if !accept {
+                            18
+                        } else if malformed_tail || (remapping == 1 && context == 0) {
+                            if context == 0 { 30 } else { 31 }
+                        } else {
+                            0
+                        };
+                        for split in 0..=bytes.len() {
+                            let mut state = EncodingState {
+                                accept,
+                                remapping,
+                                ..EncodingState::default()
+                            };
+                            // SAFETY: Handles and callback state remain live across
+                            // both feeds; state is read only after freeing all handles.
+                            unsafe {
+                                let requested = if explicit {
+                                    c"X-CUSTOM".as_ptr()
+                                } else {
+                                    ptr::null()
+                                };
+                                let parent = XML_ParserCreate(if context == 0 {
+                                    requested
+                                } else {
+                                    ptr::null()
+                                });
+                                assert!(!parent.is_null());
+                                let parser = if context == 0 {
+                                    parent
+                                } else {
+                                    XML_ExternalEntityParserCreate(
+                                        parent,
+                                        if context == 1 {
+                                            c"".as_ptr()
+                                        } else {
+                                            ptr::null()
+                                        },
+                                        requested,
+                                    )
+                                };
+                                assert!(!parser.is_null());
+                                XML_SetUnknownEncodingHandler(
+                                    parser,
+                                    Some(unknown),
+                                    ptr::from_mut(&mut state).cast(),
+                                );
+                                let mut status = OK;
+                                for (part, final_input) in
+                                    [(&bytes[..split], 0), (&bytes[split..], 1)]
+                                {
+                                    status = XML_Parse(
+                                        parser,
+                                        part.as_ptr().cast(),
+                                        part.len() as c_int,
+                                        final_input,
+                                    );
+                                    if status == ERROR {
+                                        break;
+                                    }
+                                }
+                                assert_eq!(
+                                    status,
+                                    if expected == 0 { OK } else { ERROR },
+                                    "remapping={remapping}, context={context}, explicit={explicit}, malformed_tail={malformed_tail}, accept={accept}, split={split}"
+                                );
+                                assert_eq!(XML_GetErrorCode(parser), expected);
+                                if context != 0 {
+                                    XML_ParserFree(parser);
+                                }
+                                XML_ParserFree(parent);
+                            }
+                            assert_eq!(state.requested, ["X-CUSTOM"]);
+                            assert_eq!(state.releases, usize::from(accept));
+                            assert_eq!(state.conversions, usize::from(accept && remapping == 2));
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn external_callback_can_parse_an_inherited_fragment() {
     // SAFETY: Parent and child callbacks use the same serialized test-owned state.
     unsafe {
@@ -714,22 +1290,143 @@ fn external_dtd_construction_and_parsing_do_not_taint_parent() {
 }
 
 #[test]
-fn external_children_share_input_and_construction_budgets() {
+fn family_charge_preserves_zero_overflow_and_limit_boundaries() {
+    for (initial, amount, limit, success, final_value) in [
+        (0, 0, 0, true, 0),
+        (4, 0, 5, true, 4),
+        (5, 0, 5, true, 5),
+        (6, 0, 5, false, 6),
+        (4, 1, 5, true, 5),
+        (5, 1, 5, false, 5),
+        (usize::MAX, 0, usize::MAX, true, usize::MAX),
+        (usize::MAX, 1, usize::MAX, false, usize::MAX),
+        (usize::MAX - 1, 2, usize::MAX, false, usize::MAX - 1),
+    ] {
+        let counter = Cell::new(initial);
+        assert_eq!(
+            charge(&counter, amount, limit),
+            success,
+            "initial={initial}, amount={amount}, limit={limit}"
+        );
+        assert_eq!(counter.get(), final_value);
+    }
+}
+
+#[test]
+fn family_budgets_survive_child_failure_and_root_reset() {
+    // SAFETY: All handles and callback state stay live until cleanup. Counter
+    // changes happen between API calls, without borrowing a parser in a callback.
+    unsafe {
+        let counters = |parser: XML_Parser| {
+            let family = &(*parser).family;
+            (
+                family.input_bytes.get(),
+                family.callback_bytes.get(),
+                family.children.get(),
+            )
+        };
+        let mut state = State::default();
+        let parent = configured(&mut state);
+        let child = XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null());
+        let old_child = XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null());
+        assert!(!child.is_null());
+        assert!(!old_child.is_null());
+
+        // A valid child attempt consumes its slot even when allocation fails.
+        {
+            let family = &(*parent).family;
+            family.children.set(MAX_FAMILY_CHILDREN - 1);
+        }
+        let (live_bytes, direct_bytes) = {
+            let tracker = &(*parent).tracker;
+            (tracker.live_bytes(), tracker.direct_bytes())
+        };
+        assert!(live_bytes > 0);
+        assert_eq!(direct_bytes, 0);
+        assert_eq!(XML_SetAllocTrackerMaximumAmplification(parent, 1.0), 1);
+        assert_eq!(XML_SetAllocTrackerActivationThreshold(parent, 0), 1);
+        assert!(XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null()).is_null());
+        assert_eq!(counters(parent).2, MAX_FAMILY_CHILDREN);
+        {
+            let tracker = &(*parent).tracker;
+            assert_eq!(tracker.live_bytes(), live_bytes);
+        }
+        assert_eq!(
+            XML_SetAllocTrackerMaximumAmplification(
+                parent,
+                oriole_storage::MAXIMUM_AMPLIFICATION_DEFAULT
+            ),
+            1
+        );
+        assert_eq!(
+            XML_SetAllocTrackerActivationThreshold(
+                parent,
+                oriole_storage::ACTIVATION_THRESHOLD_DEFAULT
+            ),
+            1
+        );
+        assert!(XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null()).is_null());
+        assert_eq!(XML_GetErrorCode(parent), 43);
+        assert_eq!(counters(parent).2, MAX_FAMILY_CHILDREN);
+
+        {
+            let family = &(*parent).family;
+            family.callback_bytes.set(INITIAL_CALLBACK_BYTES - 2);
+        }
+        assert_eq!(XML_Parse(child, c"a".as_ptr(), 1, 1), OK);
+        assert_eq!(XML_Parse(parent, c"<r/>".as_ptr(), 4, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(parent), 43);
+        assert_eq!(state.events, ["text:a", "start:r"]);
+        for parser in [parent, child, old_child] {
+            assert_eq!(
+                counters(parser),
+                (5, INITIAL_CALLBACK_BYTES, MAX_FAMILY_CHILDREN)
+            );
+        }
+
+        assert_eq!(XML_ParserReset(parent, ptr::null()), 1);
+        assert_eq!(counters(parent), (0, 0, 0));
+        assert_eq!(XML_Parse(old_child, c"b".as_ptr(), 1, 1), ERROR);
+        assert_eq!(XML_GetErrorCode(old_child), 43);
+        assert_eq!(
+            counters(old_child),
+            (6, INITIAL_CALLBACK_BYTES, MAX_FAMILY_CHILDREN)
+        );
+        assert_eq!(state.events, ["text:a", "start:r"]);
+
+        XML_SetUserData(parent, ptr::from_mut(&mut state).cast());
+        XML_SetElementHandler(parent, Some(start), Some(end));
+        assert_eq!(XML_Parse(parent, c"<r/>".as_ptr(), 4, 1), OK);
+        assert_eq!(counters(parent), (4, 2, 0));
+        assert_eq!(state.events, ["text:a", "start:r", "start:r", "end:r"]);
+        XML_ParserFree(old_child);
+        XML_ParserFree(child);
+        XML_ParserFree(parent);
+    }
+}
+
+#[test]
+fn external_children_have_source_allowances_and_shared_construction_bounds() {
     // SAFETY: Limits are lowered directly in this internal test to avoid large allocations.
     unsafe {
         let parent = XML_ParserCreate(ptr::null());
         (*parent).config.limits.max_total_bytes = 6;
+        let limits = (*parent).config.limits.clone();
+        (*parent).core.set_limits(limits).unwrap();
         let child = XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null());
         assert!(!child.is_null());
         assert_eq!(XML_Parse(child, c"<x/>".as_ptr(), 4, 1), OK);
-        assert_eq!(XML_Parse(parent, c"<r/>".as_ptr(), 4, 1), ERROR);
-        assert_eq!(XML_GetErrorCode(parent), 43);
+        assert_eq!(XML_Parse(parent, c"<r/>".as_ptr(), 4, 1), OK);
+        {
+            let family = &(*parent).family;
+            assert_eq!(family.input_bytes.get(), 8);
+        }
+        assert_eq!((*parent).core.input_bytes_remaining(), 2);
+        assert_eq!((*child).core.input_bytes_remaining(), 2);
         XML_ParserFree(child);
         assert_eq!(XML_ParserReset(parent, ptr::null()), 1);
         let family = &(*parent).family;
-        family
-            .children
-            .store(MAX_FAMILY_CHILDREN, Ordering::Relaxed);
+        family.children.set(MAX_FAMILY_CHILDREN);
         assert!(XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null()).is_null());
         assert_eq!(XML_GetErrorCode(parent), 43);
         XML_ParserFree(parent);
@@ -1207,6 +1904,150 @@ fn default_handler_receives_outside_root_whitespace_without_character_data() {
             );
             assert!(state.events.is_empty());
             XML_ParserFree(parser);
+
+            for length in [15, 16, 17, 65_537] {
+                for split_crlf in [false, true] {
+                    let mut state = State::default();
+                    let parser = configured(&mut state);
+                    if expand {
+                        XML_SetDefaultHandlerExpand(parser, Some(text));
+                    } else {
+                        XML_SetDefaultHandler(parser, Some(text));
+                    }
+                    assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 0), OK);
+                    state.events.clear();
+                    let prefix: String = " \t".chars().cycle().take(length).collect();
+                    let input = format!("{prefix}{}", if split_crlf { "\r" } else { "\r\n\t" });
+                    assert_eq!(
+                        XML_Parse(
+                            parser,
+                            input.as_ptr().cast(),
+                            input.len() as c_int,
+                            i32::from(!split_crlf)
+                        ),
+                        OK
+                    );
+                    if split_crlf {
+                        assert_eq!(state.events, [format!("text:{prefix}")]);
+                        assert_eq!(XML_Parse(parser, c"\n\t".as_ptr(), 2, 1), OK);
+                    }
+                    assert_eq!(
+                        state.events,
+                        [
+                            format!("text:{prefix}"),
+                            "text:\r\n".to_string(),
+                            "text:\t".to_string()
+                        ]
+                    );
+                    XML_ParserFree(parser);
+                }
+            }
+
+            // A valid whitespace prefix is not always a separate token before
+            // an error. Whole-feed uncertain suffixes must keep that distinction.
+            for (suffix, code, emits_prefix, emits_newline) in [
+                ("x", 9, false, false),
+                ("é", 9, false, false),
+                ("]]>", 9, false, false),
+                ("\u{1}", 4, true, false),
+                ("&missing;", 4, true, false),
+                ("<extra/>", 9, true, false),
+                ("\r\nx", 9, true, true),
+            ] {
+                for split in [false, true] {
+                    let mut state = State::default();
+                    let parser = configured(&mut state);
+                    if expand {
+                        XML_SetDefaultHandlerExpand(parser, Some(text));
+                    } else {
+                        XML_SetDefaultHandler(parser, Some(text));
+                    }
+                    assert_eq!(XML_Parse(parser, c"<r/>".as_ptr(), 4, 0), OK);
+                    state.events.clear();
+                    let prefix = " ".repeat(17);
+                    let input = if split {
+                        prefix.clone()
+                    } else {
+                        format!("{prefix}{suffix}")
+                    };
+                    let mut status = XML_Parse(
+                        parser,
+                        input.as_ptr().cast(),
+                        input.len() as c_int,
+                        i32::from(!split),
+                    );
+                    if split {
+                        assert_eq!(status, OK);
+                        status =
+                            XML_Parse(parser, suffix.as_ptr().cast(), suffix.len() as c_int, 1);
+                    }
+                    assert_eq!(status, ERROR, "{suffix:?}, split {split}");
+                    assert_eq!(XML_GetErrorCode(parser), code);
+                    let mut expected = Vec::new();
+                    let mut offset = 4;
+                    if split || emits_prefix {
+                        expected.push(format!("text:{prefix}"));
+                        offset += prefix.len();
+                    }
+                    if emits_newline {
+                        expected.push("text:\r\n".to_string());
+                        offset += 2;
+                    }
+                    assert_eq!(state.events, expected, "{suffix:?}, split {split}");
+                    assert_eq!(XML_GetCurrentByteIndex(parser), offset as c_long);
+                    assert_eq!(
+                        XML_GetCurrentLineNumber(parser),
+                        if emits_newline { 2 } else { 1 }
+                    );
+                    assert_eq!(
+                        XML_GetCurrentColumnNumber(parser),
+                        if emits_newline { 0 } else { offset as c_ulong }
+                    );
+                    XML_ParserFree(parser);
+                }
+            }
+
+            // The earlier prolog-quote limit still publishes whitespace before
+            // diagnosing a quoted token, including across vector-sized feeds.
+            let prefix = " ".repeat(17);
+            let input = format!("{prefix}\"x\"y");
+            for width in [1, 15, 16, 17, input.len()] {
+                let mut state = State::default();
+                let parser = configured(&mut state);
+                assert_eq!(XML_SetReparseDeferralEnabled(parser, 0), 1);
+                if expand {
+                    XML_SetDefaultHandlerExpand(parser, Some(text));
+                } else {
+                    XML_SetDefaultHandler(parser, Some(text));
+                }
+                let mut status = OK;
+                for (index, chunk) in input.as_bytes().chunks(width).enumerate() {
+                    status = XML_Parse(
+                        parser,
+                        chunk.as_ptr().cast(),
+                        chunk.len() as c_int,
+                        i32::from((index + 1) * width >= input.len()),
+                    );
+                    if status == ERROR {
+                        break;
+                    }
+                }
+                assert_eq!(status, ERROR);
+                assert_eq!(XML_GetErrorCode(parser), 4);
+                assert_eq!(
+                    XML_GetCurrentByteIndex(parser),
+                    (prefix.len() + 3) as c_long
+                );
+                assert_eq!(
+                    state
+                        .events
+                        .iter()
+                        .map(|event| event.strip_prefix("text:").unwrap())
+                        .collect::<String>(),
+                    prefix
+                );
+                XML_ParserFree(parser);
+            }
         }
     }
 }
@@ -1300,7 +2141,7 @@ fn default_whitespace_counts_toward_the_shared_event_budget() {
             let family = &(*parser).family;
             family
                 .callback_bytes
-                .store(MAX_FAMILY_CALLBACK_BYTES - remaining, Ordering::Relaxed);
+                .set(INITIAL_CALLBACK_BYTES - remaining);
             let status = XML_Parse(parser, c"  ".as_ptr(), 2, 0);
             if remaining == 1 {
                 assert_eq!(status, ERROR);
@@ -1310,6 +2151,223 @@ fn default_whitespace_counts_toward_the_shared_event_budget() {
                 assert_eq!(status, OK);
                 assert_eq!(state.events, ["text:  "]);
             }
+            XML_ParserFree(parser);
+        }
+    }
+}
+
+#[test]
+fn arena_start_enforces_exact_callback_budget_with_default_fallback() {
+    for start_handler in [false, true] {
+        for remaining in [2, 3] {
+            // SAFETY: All owners remain live; this test manually holds the same
+            // dispatch guard as the adapter and never borrows the core in a callback.
+            unsafe {
+                let mut state = State::default();
+                let parser = configured(&mut state);
+                XML_SetStartElementHandler(parser, start_handler.then_some(start));
+                XML_SetDefaultHandler(parser, Some(text));
+                (*parser)
+                    .core
+                    .feed(b"<r><warm a='first'/><n a='v'>", false)
+                    .unwrap();
+                for _ in 0..3 {
+                    (*parser).core.next_event().unwrap().unwrap();
+                }
+                let mut frame = (*parser).core.adapter_frame();
+                let mut event = None;
+                (*parser)
+                    .core
+                    .next_event_for_adapter_into(&mut event, &mut frame)
+                    .unwrap()
+                    .unwrap();
+                assert!(frame.is_active());
+                assert!(event.is_none());
+                assert_eq!(frame.callback_bytes(), 3);
+                let family = &(*parser).family;
+                family
+                    .callback_bytes
+                    .set(INITIAL_CALLBACK_BYTES - remaining);
+                (*parser).busy = true;
+                dispatch_start_frame(parser, &frame).unwrap();
+                (*parser).busy = false;
+                let family = &(*parser).family;
+                if remaining == 2 {
+                    assert_eq!(XML_GetErrorCode(parser), 43);
+                    assert!(state.events.is_empty());
+                    assert_eq!(family.callback_bytes.get(), INITIAL_CALLBACK_BYTES - 2);
+                } else {
+                    assert_eq!(XML_GetErrorCode(parser), 0);
+                    if start_handler {
+                        assert_eq!(state.events, ["start:n", "a=v"]);
+                    } else {
+                        assert_eq!(state.events, ["text:<n a='v'>"]);
+                    }
+                    assert_eq!(family.callback_bytes.get(), INITIAL_CALLBACK_BYTES);
+                }
+                (*parser).core.finish_adapter_frame(frame);
+                XML_ParserFree(parser);
+            }
+        }
+    }
+}
+
+#[test]
+fn detached_end_charges_the_name_before_handlers_or_default_fallback() {
+    for end_handler in [false, true] {
+        for default_handler in [false, true] {
+            for remaining in [3, 4] {
+                // SAFETY: The test owns State and the parser through all callbacks.
+                unsafe {
+                    let mut state = State::default();
+                    let parser = configured(&mut state);
+                    let opening = c"<root><name a='v'>";
+                    assert_eq!(
+                        XML_Parse(
+                            parser,
+                            opening.as_ptr(),
+                            opening.to_bytes().len() as c_int,
+                            0
+                        ),
+                        OK
+                    );
+                    state.events.clear();
+                    XML_SetEndElementHandler(parser, end_handler.then_some(end));
+                    XML_SetDefaultHandler(parser, default_handler.then_some(text));
+                    {
+                        let family = &(*parser).family;
+                        family
+                            .callback_bytes
+                            .set(INITIAL_CALLBACK_BYTES - remaining);
+                    }
+                    let status = XML_Parse(parser, c"</name>".as_ptr(), 7, 0);
+                    let charged = {
+                        let family = &(*parser).family;
+                        family.callback_bytes.get()
+                    };
+                    if remaining == 3 {
+                        assert_eq!(status, ERROR);
+                        assert_eq!(XML_GetErrorCode(parser), 43);
+                        assert!(state.events.is_empty());
+                        assert_eq!(charged, INITIAL_CALLBACK_BYTES - 3);
+                    } else {
+                        assert_eq!(status, OK);
+                        assert_eq!(charged, INITIAL_CALLBACK_BYTES);
+                        let expected = if end_handler {
+                            vec!["end:name"]
+                        } else if default_handler {
+                            vec!["text:</name>"]
+                        } else {
+                            vec![]
+                        };
+                        assert_eq!(state.events, expected);
+                        assert_eq!(
+                            XML_GetCurrentByteIndex(parser),
+                            opening.to_bytes().len() as c_long
+                        );
+                        assert_eq!(XML_GetCurrentByteCount(parser), 7);
+                        assert_eq!(XML_GetSpecifiedAttributeCount(parser), 2);
+                    }
+                    XML_ParserFree(parser);
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn detached_end_owner_survives_default_current_children_stop_and_reset_rejection() {
+    unsafe fn check_raw_context(parser: XML_Parser, raw: &[u8]) {
+        // SAFETY: Called during the guarded End callback; the checked window
+        // is read completely before any nested parser operation.
+        unsafe {
+            let mut offset = 0;
+            let mut size = 0;
+            let context = XML_GetInputContext(parser, &mut offset, &mut size);
+            assert!(!context.is_null() && offset >= 0 && size >= offset);
+            assert!(raw.len() <= (size - offset) as usize);
+            assert_eq!(
+                std::slice::from_raw_parts(context.cast::<u8>().add(offset as usize), raw.len()),
+                raw
+            );
+        }
+    }
+    unsafe extern "C" fn held_end(data: *mut c_void, name: *const c_char) {
+        // SAFETY: Only scalar handles and independently owned name bytes cross
+        // nested callbacks; each State access ends before another C API call.
+        unsafe {
+            let parser = (*data.cast::<State>()).parser;
+            let before = CStr::from_ptr(name).to_bytes().to_vec();
+            let raw = format!("</{}>", std::str::from_utf8(&before).unwrap());
+            let position = (
+                XML_GetCurrentByteIndex(parser),
+                XML_GetCurrentByteCount(parser),
+                XML_GetCurrentLineNumber(parser),
+                XML_GetCurrentColumnNumber(parser),
+            );
+            assert_eq!(position.0 as usize, before.len() + 9);
+            assert_eq!(position.1 as usize, raw.len());
+            assert_eq!((position.2, position.3), (2, 0));
+            check_raw_context(parser, raw.as_bytes());
+            (*data.cast::<State>())
+                .events
+                .push(format!("held:{}", std::str::from_utf8(&before).unwrap()));
+            XML_DefaultCurrent(parser);
+            XML_ParserFree(parser);
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
+            let child = XML_ExternalEntityParserCreate(parser, c"".as_ptr(), ptr::null());
+            assert!(!child.is_null());
+            XML_SetElementHandler(child, None, None);
+            XML_SetDefaultHandler(child, None);
+            assert_eq!(XML_Parse(child, c"<child/>".as_ptr(), 8, 1), OK);
+            XML_ParserFree(child);
+            XML_SetEndElementHandler(parser, Some(end));
+            assert_eq!(XML_StopParser(parser, 1), OK);
+            XML_DefaultCurrent(parser);
+            assert_eq!(CStr::from_ptr(name).to_bytes(), before);
+            check_raw_context(parser, raw.as_bytes());
+            assert_eq!(
+                (
+                    XML_GetCurrentByteIndex(parser),
+                    XML_GetCurrentByteCount(parser),
+                    XML_GetCurrentLineNumber(parser),
+                    XML_GetCurrentColumnNumber(parser),
+                ),
+                position
+            );
+        }
+    }
+    for name in ["n".to_owned(), "é".to_owned(), "n".repeat(4097)] {
+        // SAFETY: Input, State and both callback functions outlive synchronous use.
+        unsafe {
+            let document = format!("\u{feff}<r><{name}>\r</{name}><e/></r>");
+            let mut state = State::default();
+            let parser = configured(&mut state);
+            XML_SetEndElementHandler(parser, Some(held_end));
+            XML_SetDefaultHandler(parser, Some(text));
+            assert_eq!(
+                XML_Parse(parser, document.as_ptr().cast(), document.len() as c_int, 1),
+                SUSPENDED
+            );
+            assert!(state.events.ends_with(&[
+                format!("held:{name}"),
+                format!("text:</{name}>"),
+                format!("text:</{name}>")
+            ]));
+            // Renew userdata after the inspection before callbacks write it.
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+            assert_eq!(XML_ResumeParser(parser), OK);
+            assert!(
+                state
+                    .events
+                    .ends_with(&["start:e".into(), "end:e".into(), "end:r".into()])
+            );
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            state.events.clear();
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+            XML_SetElementHandler(parser, Some(start), Some(end));
+            assert_eq!(XML_Parse(parser, c"<new></new>".as_ptr(), 11, 1), OK);
+            assert_eq!(state.events, ["start:new", "end:new"]);
             XML_ParserFree(parser);
         }
     }
@@ -1422,7 +2480,7 @@ fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
                     let family = &(*parser).family;
                     family
                         .callback_bytes
-                        .store(MAX_FAMILY_CALLBACK_BYTES - remaining, Ordering::Relaxed);
+                        .set(INITIAL_CALLBACK_BYTES - remaining);
                     (*parser).core.feed(b"<r/>", true).unwrap();
                     let (_, recycling) =
                         (*parser).core.next_event_for_recycling().unwrap().unwrap();
@@ -1436,11 +2494,11 @@ fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
                     );
                     let family = &(*parser).family;
                     assert_eq!(
-                        family.callback_bytes.load(Ordering::Relaxed),
+                        family.callback_bytes.get(),
                         if remaining < bytes {
-                            MAX_FAMILY_CALLBACK_BYTES - remaining
+                            INITIAL_CALLBACK_BYTES - remaining
                         } else {
-                            MAX_FAMILY_CALLBACK_BYTES
+                            INITIAL_CALLBACK_BYTES
                         }
                     );
                     XML_ParserFree(parser);
@@ -2866,7 +3924,8 @@ fn input_context_discards_consumed_eventless_whitespace() {
                     OK
                 );
                 assert!(
-                    (*parser).input_context.len() <= INPUT_CONTEXT_BYTES + whitespace.len() + 16
+                    (*parser).core.input_context().0.len()
+                        <= INPUT_CONTEXT_BYTES + whitespace.len() + 16
                 );
             }
             let suffix = if dtd {
@@ -3058,6 +4117,156 @@ fn recycling_waits_for_callbacks_and_survives_suspend_resume_and_reset() {
         assert_eq!(XML_ResumeParser(parser), OK);
         assert_eq!(state.events, ["first", "second", "reset"]);
         XML_ParserFree(parser);
+    }
+}
+
+#[test]
+fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
+    #[derive(Default)]
+    struct ArenaState {
+        parser: XML_Parser,
+        starts: usize,
+        name: &'static [u8],
+        raw: Vec<String>,
+        ends: Vec<String>,
+    }
+    unsafe extern "C" fn raw(data: *mut c_void, value: *const c_char, length: c_int) {
+        // SAFETY: The caller keeps state live and supplies callback-owned bytes.
+        unsafe {
+            let bytes = std::slice::from_raw_parts(value.cast(), length as usize);
+            (*data.cast::<ArenaState>())
+                .raw
+                .push(String::from_utf8(bytes.to_vec()).unwrap());
+        }
+    }
+    unsafe extern "C" fn end(data: *mut c_void, name: *const c_char) {
+        // SAFETY: State and name remain live during this synchronous callback.
+        unsafe {
+            (*data.cast::<ArenaState>())
+                .ends
+                .push(CStr::from_ptr(name).to_str().unwrap().to_owned());
+        }
+    }
+    unsafe extern "C" fn start(
+        data: *mut c_void,
+        name: *const c_char,
+        attrs: *const *const c_char,
+    ) {
+        // SAFETY: All pointers are callback-lived. Raw state pointers prevent
+        // retaining a mutable State reference across nested DefaultCurrent.
+        unsafe {
+            let state = data.cast::<ArenaState>();
+            if CStr::from_ptr(name).to_bytes() != (*state).name {
+                return;
+            }
+            let parser = (*state).parser;
+            (*state).starts += 1;
+            let value = CStr::from_ptr(*attrs.add(1)).to_bytes().to_vec();
+            XML_DefaultCurrent(parser);
+            let mut offset = 0;
+            let mut size = 0;
+            let context = XML_GetInputContext(parser, &mut offset, &mut size);
+            assert!(!context.is_null());
+            let context = std::slice::from_raw_parts(context.cast::<u8>(), size as usize);
+            assert!(context[offset as usize..].starts_with(b"<n a="));
+            assert_eq!(XML_SetBase(parser, c"changed".as_ptr()), OK);
+            XML_ParserFree(parser);
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
+            assert_eq!(XML_Parse(parser, c"<reenter/>".as_ptr(), 10, 1), ERROR);
+            assert_eq!(CStr::from_ptr(name).to_bytes(), (*state).name);
+            assert_eq!(CStr::from_ptr(*attrs.add(1)).to_bytes(), value);
+            if (*state).starts == 2 {
+                assert_eq!(XML_GetSpecifiedAttributeCount(parser), 4);
+                assert_eq!(CStr::from_ptr(*attrs.add(3)).to_bytes(), b"more");
+                XML_SetEndElementHandler(parser, Some(end));
+                assert_eq!(XML_StopParser(parser, 1), OK);
+                assert_eq!(CStr::from_ptr(*attrs.add(3)).to_bytes(), b"more");
+            }
+        }
+    }
+    // SAFETY: Each parser and state stays live through its callbacks and resumes.
+    unsafe {
+        for (input, namespace, name, expected_ends, second_raw) in [
+            (
+                b"<r><n a='first'/><n a='second' b='more'/></r>".as_slice(),
+                false,
+                b"n".as_slice(),
+                ["n", "r"],
+                "<n a='second' b='more'/>",
+            ),
+            (
+                b"<r><n a='first'/><n a='second' b='more'></n></r>".as_slice(),
+                false,
+                b"n".as_slice(),
+                ["n", "r"],
+                "<n a='second' b='more'>",
+            ),
+            (
+                b"<r><n a='first'/><n a='second' b='more'></n></r>".as_slice(),
+                true,
+                b"n".as_slice(),
+                ["n", "r"],
+                "<n a='second' b='more'>",
+            ),
+            (
+                b"<r xmlns='urn'><n a='first'/><n a='second' b='more'/></r>".as_slice(),
+                true,
+                b"urn|n".as_slice(),
+                ["urn|n", "urn|r"],
+                "<n a='second' b='more'/>",
+            ),
+        ] {
+            for width in [1, 7, input.len()] {
+                let parser = if namespace {
+                    XML_ParserCreateNS(ptr::null(), b'|' as c_char)
+                } else {
+                    XML_ParserCreate(ptr::null())
+                };
+                let mut state = ArenaState {
+                    parser,
+                    name,
+                    ..ArenaState::default()
+                };
+                XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                XML_SetStartElementHandler(parser, Some(start));
+                XML_SetDefaultHandler(parser, Some(raw));
+                for (index, chunk) in input.chunks(width).enumerate() {
+                    let status = XML_Parse(
+                        parser,
+                        chunk.as_ptr().cast(),
+                        chunk.len() as c_int,
+                        c_int::from((index + 1) * width >= input.len()),
+                    );
+                    if status == SUSPENDED {
+                        assert_eq!((*parser).core.current_raw(), Some(second_raw));
+                        assert_eq!(
+                            XML_GetCurrentByteIndex(parser) as usize,
+                            input
+                                .windows(b"<n a='second'".len())
+                                .position(|value| value == b"<n a='second'")
+                                .unwrap()
+                        );
+                        let raw_count = state.raw.len();
+                        XML_DefaultCurrent(parser);
+                        assert_eq!(state.raw.len(), raw_count);
+                        assert_eq!(XML_ResumeParser(parser), OK);
+                    } else {
+                        assert_eq!(status, OK);
+                    }
+                }
+                assert_eq!(state.starts, 2);
+                assert_eq!(
+                    state
+                        .raw
+                        .iter()
+                        .filter(|value| !value.is_empty())
+                        .collect::<Vec<_>>(),
+                    [&"<n a='first'/>".to_owned(), &second_raw.to_owned()]
+                );
+                assert_eq!(state.ends, expected_ends);
+                XML_ParserFree(parser);
+            }
+        }
     }
 }
 
@@ -3782,6 +4991,7 @@ fn wider_c_entity_limits_keep_cycle_and_work_guards() {
         assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
         let mut limits = (*parser).config.limits.clone();
         limits.max_entity_expansion_bytes = 7;
+        limits.max_work_amplification = None;
         (*parser).core.set_limits(limits).unwrap();
         let work = c"<!DOCTYPE r [<!ENTITY e 'leaf'>]><r>&e;&e;</r>";
         assert_eq!(
@@ -3811,7 +5021,7 @@ fn unused_ordinary_attlist_payloads_do_not_consume_adapter_event_bytes() {
                 OK
             );
             let family = &(*parser).family;
-            totals[index] = family.callback_bytes.load(Ordering::Relaxed);
+            totals[index] = family.callback_bytes.get();
             XML_ParserFree(parser);
         }
         assert_eq!(totals[1] - totals[0], 2 * (1 + 1 + 5 + 1));
@@ -3823,7 +5033,7 @@ fn unused_ordinary_attlist_payloads_do_not_consume_adapter_event_bytes() {
             let family = &(*parser).family;
             family
                 .callback_bytes
-                .store(MAX_FAMILY_CALLBACK_BYTES - remaining, Ordering::Relaxed);
+                .set(INITIAL_CALLBACK_BYTES - remaining);
             let status = XML_Parse(parser, xml.as_ptr().cast(), xml.len() as c_int, 1);
             assert_eq!(status, if remaining == totals[0] { OK } else { ERROR });
             assert_eq!(XML_GetErrorCode(parser), if status == OK { 0 } else { 43 });
@@ -3950,6 +5160,136 @@ fn ordinary_attlist_handlers_change_at_tokens_and_resume_between_attributes() {
                     XML_ParserFree(parser);
                 }
             }
+        }
+    }
+}
+
+#[test]
+fn arena_text_enforces_exact_callback_budget_with_default_fallback() {
+    for value in ["abc", "abcdefghijklmnopqrstuvwxyz0123456789"] {
+        for handler in [false, true] {
+            for remaining in [value.len() - 1, value.len()] {
+                // SAFETY: The independent frame owns callback bytes; the manual
+                // busy interval matches run_events and state lives until free.
+                unsafe {
+                    let mut state = State::default();
+                    let parser = configured(&mut state);
+                    XML_SetCharacterDataHandler(parser, handler.then_some(text));
+                    XML_SetDefaultHandler(parser, Some(text));
+                    let input = format!("<r>{value}<");
+                    (*parser).core.feed(input.as_bytes(), false).unwrap();
+                    (*parser).core.next_event().unwrap().unwrap();
+                    let mut frame = (*parser).core.adapter_frame();
+                    let mut event = None;
+                    (*parser)
+                        .core
+                        .next_event_for_adapter_into(&mut event, &mut frame)
+                        .unwrap()
+                        .unwrap();
+                    assert!(event.is_none());
+                    assert_eq!(frame.text_bytes(), Some(value.as_bytes()));
+                    let family = &(*parser).family;
+                    family
+                        .callback_bytes
+                        .set(INITIAL_CALLBACK_BYTES - remaining);
+                    (*parser).busy = true;
+                    dispatch_text_frame(parser, frame.text_bytes().unwrap()).unwrap();
+                    (*parser).busy = false;
+                    if remaining < value.len() {
+                        assert_eq!(XML_GetErrorCode(parser), 43);
+                        assert!(state.events.is_empty());
+                    } else {
+                        assert_eq!(XML_GetErrorCode(parser), 0);
+                        assert_eq!(state.events, [format!("text:{value}")]);
+                    }
+                    (*parser).core.finish_adapter_frame(frame);
+                    XML_ParserFree(parser);
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn arena_text_keeps_bytes_raw_context_and_handlers_live_through_suspension() {
+    #[derive(Default)]
+    struct TextState {
+        parser: XML_Parser,
+        first: usize,
+        later: usize,
+        raw: Vec<String>,
+    }
+    unsafe extern "C" fn raw(data: *mut c_void, bytes: *const c_char, len: c_int) {
+        // SAFETY: The caller owns this state; callback bytes remain live.
+        unsafe {
+            (*data.cast::<TextState>()).raw.push(
+                String::from_utf8(std::slice::from_raw_parts(bytes.cast(), len as usize).to_vec())
+                    .unwrap(),
+            );
+        }
+    }
+    unsafe extern "C" fn later(data: *mut c_void, _: *const c_char, _: c_int) {
+        // SAFETY: State is live through the synchronous callback.
+        unsafe {
+            (*data.cast::<TextState>()).later += 1;
+        }
+    }
+    unsafe extern "C" fn first(data: *mut c_void, bytes: *const c_char, len: c_int) {
+        // SAFETY: Raw state access avoids a mutable reference across the nested
+        // DefaultCurrent callback. Eligible Text bytes stay in the C input context,
+        // which remains stable under the busy guard through callback return.
+        unsafe {
+            let state = data.cast::<TextState>();
+            let parser = (*state).parser;
+            (*state).first += 1;
+            let original = std::slice::from_raw_parts(bytes.cast::<u8>(), len as usize).to_vec();
+            XML_DefaultCurrent(parser);
+            let mut offset = 0;
+            let mut size = 0;
+            let context = XML_GetInputContext(parser, &mut offset, &mut size);
+            assert!(!context.is_null());
+            let context = std::slice::from_raw_parts(context.cast::<u8>(), size as usize);
+            assert!(context[offset as usize..].starts_with(&original));
+            assert_eq!(XML_SetBase(parser, c"changed".as_ptr()), OK);
+            XML_ParserFree(parser);
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
+            assert_eq!(XML_Parse(parser, c"<bad/>".as_ptr(), 6, 1), ERROR);
+            XML_SetCharacterDataHandler(parser, Some(later));
+            assert_eq!(XML_StopParser(parser, 1), OK);
+            assert_eq!(
+                std::slice::from_raw_parts(bytes.cast::<u8>(), len as usize),
+                original
+            );
+        }
+    }
+    // SAFETY: Parser and user state stay live through parse, nested callbacks,
+    // suspended getters, resume, and the final parser free.
+    unsafe {
+        for value in ["abc", "abcdefghijklmnopqrstuvwxyz0123456789"] {
+            let content = format!("{value}\nend");
+            let input = format!("<r>{content}&amp;tail</r>");
+            let parser = XML_ParserCreate(ptr::null());
+            let mut state = TextState {
+                parser,
+                ..TextState::default()
+            };
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+            XML_SetCharacterDataHandler(parser, Some(first));
+            XML_SetDefaultHandler(parser, Some(raw));
+            assert_eq!(
+                XML_Parse(parser, input.as_ptr().cast(), input.len() as c_int, 1),
+                SUSPENDED
+            );
+            assert_eq!(XML_GetCurrentByteIndex(parser), 3);
+            assert_eq!(XML_GetCurrentByteCount(parser), content.len() as c_int);
+            assert_eq!((*parser).core.current_raw(), Some(content.as_str()));
+            let raw_count = state.raw.len();
+            XML_DefaultCurrent(parser);
+            assert_eq!(state.raw.len(), raw_count);
+            assert_eq!(XML_ResumeParser(parser), OK);
+            assert_eq!((state.first, state.later), (1, 2));
+            assert!(state.raw.iter().any(|raw| raw == &content));
+            XML_ParserFree(parser);
         }
     }
 }

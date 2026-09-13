@@ -1,0 +1,170 @@
+[
+  {
+    "path": "package/attempt-01.json",
+    "source": "/tmp/oriole-family-budget-cells-package-independent-review/attempt-01.json",
+    "bytes": 694,
+    "sha256": "66409838f710c3465bf3478ce24acf3ce5d0221720045574a83909d75c85bdf2"
+  },
+  {
+    "path": "package/attempt-01.stderr",
+    "source": "/tmp/oriole-family-budget-cells-package-independent-review/attempt-01.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "package/attempt-01.stdout",
+    "source": "/tmp/oriole-family-budget-cells-package-independent-review/attempt-01.stdout",
+    "bytes": 189,
+    "sha256": "a5298b7a80db76ebd8f1d55dc965b22f1a127322bc434c0b385e1ea3a080640d"
+  },
+  {
+    "path": "package/audit.py",
+    "source": "/tmp/oriole-family-budget-cells-package-independent-review/audit.py",
+    "bytes": 19775,
+    "sha256": "b00c10599f429c7aa3c36065d58bfdb5ebddcb7801fbb16ac27420a4e2a7277b"
+  },
+  {
+    "path": "package/checked-files.json",
+    "source": "/tmp/oriole-family-budget-cells-package-independent-review/checked-files.json",
+    "bytes": 538818,
+    "sha256": "887acd35b9591fb29b101818c9c1854019b1def1c4a5d65dd42f7079d8eb76a6"
+  },
+  {
+    "path": "package/checks.json",
+    "source": "/tmp/oriole-family-budget-cells-package-independent-review/checks.json",
+    "bytes": 1321688,
+    "sha256": "c6c44cc042069b68067b653db1661b99bcb4ea26f6ed6d285658e94acedbc8e5"
+  },
+  {
+    "path": "package/git-reads.json",
+    "source": "/tmp/oriole-family-budget-cells-package-independent-review/git-reads.json",
+    "bytes": 33179,
+    "sha256": "a3c3a4b277107eb470c7907016cd1de32595f1119a0d92b23a86f87a4468c97e"
+  },
+  {
+    "path": "package/observed-files.json",
+    "source": "/tmp/oriole-family-budget-cells-package-independent-review/observed-files.json",
+    "bytes": 2780,
+    "sha256": "07ce4df663a916fa719f5267124519e166f7268222619dc076f3da8288e068c7"
+  },
+  {
+    "path": "package/observed-runtime.patch",
+    "source": "/tmp/oriole-family-budget-cells-package-independent-review/observed-runtime.patch",
+    "bytes": 13034,
+    "sha256": "583eb85f93fa83350f3d3674097232eed894ff19ef6908b1657419f469457a67"
+  },
+  {
+    "path": "package/receipt.json",
+    "source": "/tmp/oriole-family-budget-cells-package-independent-review/receipt.json",
+    "bytes": 1769,
+    "sha256": "0ee4d5541762bb3a73de3fa190e30c13f7334c9708d7891c7571ee4009735828"
+  },
+  {
+    "path": "package/review.json",
+    "source": "/tmp/oriole-family-budget-cells-package-independent-review/review.json",
+    "bytes": 9729,
+    "sha256": "9cc9df1b516cbbd6369fa48d2ac27cc53eb00737e52bcfa46a937bb39846b565"
+  },
+  {
+    "path": "package/run-audit.py",
+    "source": "/tmp/oriole-family-budget-cells-package-independent-review/run-audit.py",
+    "bytes": 2184,
+    "sha256": "916517073aa28c01b75952c82e919f62c17132532f540c0ff63a2c4b70638fd8"
+  },
+  {
+    "path": "human/arithmetic.json",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/arithmetic.json",
+    "bytes": 7665,
+    "sha256": "6af55298c3bb624c704e679716f1a6f5ac4c1f96e9795a97fa00de09d22a1074"
+  },
+  {
+    "path": "human/audit.log",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/audit.log",
+    "bytes": 116,
+    "sha256": "9bc780d6e1fdeaba0f15d095cf6075a12d2f66f48bb057e206bd4f2df9e46673"
+  },
+  {
+    "path": "human/audit.py",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/audit.py",
+    "bytes": 22526,
+    "sha256": "0c97d93bd66db413eeb10d3a542352dec3a3b838cf09eb624c39f7020d69d6fb"
+  },
+  {
+    "path": "human/base-README.md",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/base-README.md",
+    "bytes": 4546,
+    "sha256": "610097253904a65ef44cd47a95e4d447ae30acd938e0f260c60157d5c38c1837"
+  },
+  {
+    "path": "human/checks.json",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/checks.json",
+    "bytes": 134480,
+    "sha256": "b4dca23b60eb18b7a5677aaf10e283b1ec6c91ff2b4b8b799af6064aa02ad694"
+  },
+  {
+    "path": "human/git-reads.json",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/git-reads.json",
+    "bytes": 25408,
+    "sha256": "6f9d371cb3dcccbd55519e27156e8d49f07202148448d53bfcc5edef23e62334"
+  },
+  {
+    "path": "human/links.json",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/links.json",
+    "bytes": 19259,
+    "sha256": "576c3760b9da15fbfbdcab6d0bba8b5a487b8e96539771c89977f76e54887bd2"
+  },
+  {
+    "path": "human/observed-docs/README.md",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/observed-docs/README.md",
+    "bytes": 4609,
+    "sha256": "b80e4e7f5f5e9ee117032fcbc387bb8faf3b7fd44684ce4a05f471aa45f71218"
+  },
+  {
+    "path": "human/observed-docs/benchmarks/results/2026-09-11/family-budget-cells/README.md",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/observed-docs/benchmarks/results/2026-09-11/family-budget-cells/README.md",
+    "bytes": 666,
+    "sha256": "08a2fad79bec76d73cf850bf85ef164a988040cb139c4952024f359ef605d5c9"
+  },
+  {
+    "path": "human/observed-docs/crates/oriole_expat/README.md",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/observed-docs/crates/oriole_expat/README.md",
+    "bytes": 12673,
+    "sha256": "b2b9439d6455b0cb7f3a5c4f0659c69253c0800f0ee58f9da26e4e0fbd6c0474"
+  },
+  {
+    "path": "human/observed-docs/docs/compatibility.md",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/observed-docs/docs/compatibility.md",
+    "bytes": 9594,
+    "sha256": "c7e3e889bea25513e2f37b1fa8250887699f8bacad9a54e00a890e67f1e02c63"
+  },
+  {
+    "path": "human/observed-docs/docs/review.md",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/observed-docs/docs/review.md",
+    "bytes": 9559,
+    "sha256": "cff194ebad680d2e162ca3cf79298e7d99034be4c9a866372cd5e04e5ac608b1"
+  },
+  {
+    "path": "human/observed-docs/docs/validation/2026-09-11/family-budget-cells/README.md",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/observed-docs/docs/validation/2026-09-11/family-budget-cells/README.md",
+    "bytes": 11612,
+    "sha256": "161aa13a828fad48d374aaa552a4956d5a1a197ffb7b51488aa8360fecc8a82c"
+  },
+  {
+    "path": "human/observed-files.json",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/observed-files.json",
+    "bytes": 2780,
+    "sha256": "07ce4df663a916fa719f5267124519e166f7268222619dc076f3da8288e068c7"
+  },
+  {
+    "path": "human/read-files.json",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/read-files.json",
+    "bytes": 19591,
+    "sha256": "954984a67d701894b27175d1cbca0adaad874d3866ca6a2717e571e8875345cd"
+  },
+  {
+    "path": "human/review.json",
+    "source": "/tmp/oriole-family-budget-cells-human-independent-review/review.json",
+    "bytes": 1917,
+    "sha256": "98e2155e2953bfd40060f0238b96b78a514d24203fd232d91c2a384818a975ec"
+  }
+]

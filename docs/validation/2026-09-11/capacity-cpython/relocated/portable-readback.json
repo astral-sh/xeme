@@ -1,0 +1,512 @@
+{
+  "status": "passed_portable_records_replay",
+  "archive_files": 3552,
+  "archive_sha256": "adb2470f9f9f6d21c98ab8c4a975354a946ff198a7c9819cfe42ba3f0536e3ab",
+  "source_files": {
+    "capacity": 72,
+    "context": 72
+  },
+  "modes": {
+    "normal": {
+      "exit": 0,
+      "counts": {
+        "conditions": 24,
+        "cohorts": 168,
+        "engines": 3,
+        "preflight_workers": 72,
+        "timed_workers": 504,
+        "all_workers": 576,
+        "samples": {
+          "preflight_warmups": 72,
+          "time_warmups": 504,
+          "time_measured": 25788
+        },
+        "all_samples": 26364
+      },
+      "aggregates": {
+        "all": {
+          "conditions": 24,
+          "geomean_ratios": {
+            "candidate_over_control": 1.0000598777156122,
+            "control_over_expat": 1.276490048482266,
+            "candidate_over_expat": 1.2758133686254862
+          },
+          "candidate_lower_than_control": 10,
+          "adverse_conditions": [
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "vulkan",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "wayland",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "wayland",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "wayland",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "wayland",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "batik",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+              "iterations": 128
+            },
+            {
+              "name": "batik",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+              "iterations": 128
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "docbook",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+              "iterations": 64
+            }
+          ]
+        },
+        "elementtree": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9995096927227376,
+            "control_over_expat": 1.3568259973385868,
+            "candidate_over_expat": 1.3593230497295339
+          },
+          "candidate_lower_than_control": 5,
+          "adverse_conditions": [
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "wayland",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "wayland",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "batik",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+              "iterations": 128
+            },
+            {
+              "name": "batik",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+              "iterations": 128
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            }
+          ]
+        },
+        "pyexpat-events": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 1.0006103655605039,
+            "control_over_expat": 1.2009106894107116,
+            "candidate_over_expat": 1.1974340844785767
+          },
+          "candidate_lower_than_control": 5,
+          "adverse_conditions": [
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "vulkan",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "wayland",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "wayland",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "docbook",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+              "iterations": 64
+            }
+          ]
+        }
+      },
+      "stdout_sha256": "956067632d1aa3e505d2d516edb2e70be7cc5a4aa2c33b7b5eb560287ab42c2e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pgo": {
+      "exit": 0,
+      "counts": {
+        "conditions": 24,
+        "cohorts": 168,
+        "engines": 3,
+        "preflight_workers": 72,
+        "timed_workers": 504,
+        "all_workers": 576,
+        "samples": {
+          "preflight_warmups": 72,
+          "time_warmups": 504,
+          "time_measured": 25788
+        },
+        "all_samples": 26364
+      },
+      "aggregates": {
+        "all": {
+          "conditions": 24,
+          "geomean_ratios": {
+            "candidate_over_control": 1.0001632484165779,
+            "control_over_expat": 1.1454009457912537,
+            "candidate_over_expat": 1.1465195124025775
+          },
+          "candidate_lower_than_control": 10,
+          "adverse_conditions": [
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "vulkan",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "vulkan",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "wayland",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "wayland",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "batik",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+              "iterations": 128
+            },
+            {
+              "name": "batik",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+              "iterations": 128
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "docbook",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+              "iterations": 64
+            },
+            {
+              "name": "docbook",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+              "iterations": 64
+            }
+          ]
+        },
+        "elementtree": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9961938187792874,
+            "control_over_expat": 1.2020059430283132,
+            "candidate_over_expat": 1.1975819298276855
+          },
+          "candidate_lower_than_control": 7,
+          "adverse_conditions": [
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "vulkan",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "wayland",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            }
+          ]
+        },
+        "pyexpat-events": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 1.0041484946262549,
+            "control_over_expat": 1.0914615973646613,
+            "candidate_over_expat": 1.0976342908822803
+          },
+          "candidate_lower_than_control": 3,
+          "adverse_conditions": [
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "vulkan",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "wayland",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "batik",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+              "iterations": 128
+            },
+            {
+              "name": "batik",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+              "iterations": 128
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "docbook",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+              "iterations": 64
+            },
+            {
+              "name": "docbook",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+              "iterations": 64
+            }
+          ]
+        }
+      },
+      "stdout_sha256": "db6cd58fe3feb9e98f1ddaa66a3dabe760db6e6a2a0641fec1adadec5b4d0a80",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "scope": "Hashes, original records, both source archives and all Python sample/output/origin/order arithmetic replayed without original paths or binary imports. Actual compiler/library byte verification belongs to the included original reviews."
+}

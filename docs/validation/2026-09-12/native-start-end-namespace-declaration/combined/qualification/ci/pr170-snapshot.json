@@ -1,0 +1,121 @@
+{
+  "pr": 170,
+  "run_id": 34722468838,
+  "head_sha": "001539e738642e442cefe589f4222d05242eaa3a",
+  "attempt": 1,
+  "status": "completed",
+  "conclusion": "success",
+  "counts": {
+    "success": 15,
+    "skipped": 1
+  },
+  "jobs": [
+    {
+      "id": 103630736090,
+      "name": "C ABI and callback safety",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736194,
+      "name": "Sanitized parser fuzz smoke",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736197,
+      "name": "lint",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736233,
+      "name": "PBS integration recipe",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736248,
+      "name": "C callback aliasing (stacked)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736266,
+      "name": "Allocator ownership (tree)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736283,
+      "name": "Test (ubuntu-24.04, 1.96.0)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736290,
+      "name": "C callback aliasing (tree)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736305,
+      "name": "Test (macos-15, stable)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736314,
+      "name": "Test (windows-latest, stable)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736324,
+      "name": "Test (ubuntu-24.04, stable)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736328,
+      "name": "CPython XML consumers (shared)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736356,
+      "name": "CPython XML consumers (static)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736388,
+      "name": "Test (ubuntu-24.04-arm, stable)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736585,
+      "name": "Allocator ownership (stacked)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 103630736942,
+      "name": "Profile-guided library",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "url": "https://github.com/astral-sh/oriole/actions/runs/34722468838",
+  "snapshot_utc": "2026-09-12T22:39:48.592562+00:00",
+  "read_only_single_snapshot": true,
+  "pins_sha256": {
+    "checks.json": "35f862531de5a5ec19a3f28ead2b5ca316af052b9626e4edb1a43a12b139fa71",
+    "checks.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "jobs.json": "82e9eb8c330c1211a9f67165cf3396c3c2816dc3f97d77d8dbb34220d0a88392",
+    "jobs.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "run.json": "91c0edc3013d7944f9926479e37e4eb58ea2f9bdca9b44e7b4bbc9a81fb51932",
+    "run.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

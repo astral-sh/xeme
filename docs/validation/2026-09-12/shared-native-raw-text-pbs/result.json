@@ -1,0 +1,216 @@
+{
+  "status": "completed_failed_pbs_validation_saved_readback",
+  "run_id": 34712464503,
+  "run_attempt": 1,
+  "event": "workflow_dispatch",
+  "run_url": "https://github.com/astral-sh/oriole/actions/runs/34712464503",
+  "tested_head": "47776625cfee5cb5f0258eec93bbb1248209113c",
+  "runtime_source_commit": "67c704c123b8661a3ad1f91bd48c2f0be4996096",
+  "later_ci_fixture_head": "008d818237fe0d6f8c04a000a98ad69ab5780ceb",
+  "later_changes": [
+    ".github/workflows/ci.yml",
+    "crates/oriole_expat/src/context_text_tests.rs"
+  ],
+  "later_head_not_executed_by_this_pbs_run": true,
+  "run_conclusion": "failure",
+  "job_conclusion": "failure",
+  "steps": {
+    "Set up job": "success",
+    "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262": "success",
+    "Run dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0": "success",
+    "Run astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d": "success",
+    "Verify the explicit CPU requirement": "success",
+    "Build the distribution validator": "success",
+    "Prepare optional PGO tools": "skipped",
+    "Build the frozen Oriole bundle": "success",
+    "Build CPython 3.12.13 with Oriole": "success",
+    "Preserve the experimental distribution": "success",
+    "Verify the installed parser identity": "success",
+    "Validate the complete distribution": "failure",
+    "Run the installed interpreter on glibc 2.17": "failure",
+    "Retain build and validation evidence": "success",
+    "Post Run astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d": "skipped",
+    "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262": "success",
+    "Complete job": "success"
+  },
+  "ordinary_build": {
+    "pbs_revision": "a4553880293fe9d1bb62747d34ab0e5121d3554f",
+    "cpython_version": "3.12.13",
+    "target": "x86_64-unknown-linux-gnu",
+    "target_cpu": null,
+    "pgo": false,
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8\n",
+    "rustflags": "-C relocation-model=pic -C panic=unwind",
+    "normal_vectors": 3,
+    "optimization": "O3, ThinLTO, one codegen unit; generic x86_64",
+    "source_files_matching_tested_git_head": 76,
+    "static_archive_sha256": "11d6e08c3c3f945973329b2c3fae6dc545ddf5a94a50b7a5ab31d3428e96a215",
+    "installed_manifest_sha256": "ddac0d4b3179e355354851d605123f524096c8d93ae5a9d25d5df7ecd9e8c726",
+    "consumer_adaptation": {
+      "cpython_revision": "3bb231a6a5dc02b95658877318bf61501a7209e9",
+      "cpython_version": "3.12.13",
+      "upstream_issue": "https://github.com/python/cpython/issues/144984",
+      "upstream_pull_request": "https://github.com/python/cpython/pull/144992",
+      "upstream_commit": "e6b9a1406980fbb1d4032eca9cc0b4f8f252b716",
+      "source_sha256": "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0",
+      "patched_source_sha256": "1c3cf2ee6dfa568cf833742ad786880f4816042705689a116a4f308b7a9d95f2",
+      "patch_sha256": "10999b7171ce016e249c47c7f12d562f05a28aadf17791d61664090928f736a2",
+      "scope": "Backports only Modules/pyexpat.c from the upstream fix; no CPython tests or other files are changed."
+    }
+  },
+  "outcomes": {
+    "structural_distribution_validation": "passed",
+    "custom_tests": {
+      "run": 22,
+      "skipped": 5,
+      "status": "passed"
+    },
+    "host_xml_suite": {
+      "status": "failed",
+      "reported_executions_including_reruns": 806,
+      "reported_failures_including_reruns": 4,
+      "reported_skips": 12,
+      "failed_modules": [
+        "test_pyexpat",
+        "test_sax"
+      ],
+      "passed_modules": [
+        "test_xml_etree",
+        "test_xml_etree_c",
+        "test_minidom",
+        "test_pulldom"
+      ],
+      "known_failure_methods": [
+        "test.test_pyexpat.BufferTextTest.test1",
+        "test.test_sax.CDATAHandlerTest.test_handlers"
+      ],
+      "rerun_behavior": "CPython test runner reran both failed modules, selecting the failed names; both failures repeated."
+    },
+    "glibc217": {
+      "status": "failed_xml_suite_after_successful_identity_and_threaded_smoke",
+      "identity_and_threaded_smoke": {
+        "glibc": [
+          "glibc",
+          "2.17"
+        ],
+        "expat": "oriole_compat_2.8.4",
+        "threaded_parses": 1024
+      },
+      "reported_executions": 802,
+      "reported_failures": 2,
+      "reported_skips": 13,
+      "same_grouping_failure_assertions": true,
+      "nested_stdlib_runner_exit": 2
+    }
+  },
+  "classification": "The two observed grouping failures match the current local strict shared/static failure names and assertions. They remain failures; no outcome is waived or relabeled. Installed identity, linking, custom checks and threaded/glibc execution success do not make the full distribution validation pass.",
+  "prior_strict_readback": {
+    "path": "/tmp/oriole-core-owned-text-raw-correctness/strict-semantic-readback.json",
+    "sha256": "2b281b05806825489609a3152ddf4558fa8a06edaef3c4d6b5ce45bcaf9fa52d"
+  },
+  "download": {
+    "artifact_id": 10304101423,
+    "name": "oriole-pbs-validation-x86_64-unknown-linux-gnu-normal",
+    "bytes": 639070,
+    "zip_sha256": "4c96ad5376acb1f0de3e42a2dda8c40167a67e279c1f5c67c649ac08a54f50c0",
+    "members": {
+      "oriole-bundle/build.log": {
+        "bytes": 12021,
+        "sha256": "cc3e0451e2bf6a0535909b25e4196e500585f12fb6539a42d4e6c63cb5231627"
+      },
+      "oriole-bundle/manifest.json": {
+        "bytes": 16216,
+        "sha256": "ddac0d4b3179e355354851d605123f524096c8d93ae5a9d25d5df7ecd9e8c726"
+      },
+      "pbs-archive-sha256.txt": {
+        "bytes": 140,
+        "sha256": "76364b0595f2591a4d3c89b96e50e5dfba5be2dad6071acd10a0752034eb9000"
+      },
+      "pbs-build.log": {
+        "bytes": 10691966,
+        "sha256": "3e2fb4c06c1b282e1a45ce6a971f34fd559dd89258f48c96ed02368a666063d8"
+      },
+      "pbs-custom-tests.log": {
+        "bytes": 191,
+        "sha256": "e7035d0e5ea3207c2d621942ff195e06fe47e1d556a624e0da7d677292cb58ec"
+      },
+      "pbs-glibc217-tests.log": {
+        "bytes": 3417,
+        "sha256": "3201bf29fe90b854af02e8ac0814ce039adc20b8a1de22fdfd236e999cf4111d"
+      },
+      "pbs-host-cpu.json": {
+        "bytes": 103,
+        "sha256": "f4bd5b9dbb3d8a46f5837fcdf8b2b84001649c32dbe552b221b563d2772c4a4e"
+      },
+      "pbs-installed-provenance.json": {
+        "bytes": 505,
+        "sha256": "2ab49fb4ca8ef7ffee7c509249fac11add38baff6e9f823de8666ccb5b78bfb5"
+      },
+      "pbs-tls-probe/fallback-symbols.txt": {
+        "bytes": 16091,
+        "sha256": "c83bc9e9035036d197f48f506a5cc612bbf124e1f6237da9c99ef199dab4c43e"
+      },
+      "pbs-tls-probe/manifest.json": {
+        "bytes": 2914,
+        "sha256": "1791ee8c7700d0180dc85c7c106f3133fc5cc9a77f2bf14fcd7ae9e9a0861900"
+      },
+      "pbs-tls-probe/native-symbols.txt": {
+        "bytes": 16100,
+        "sha256": "3f33269db97d4083e3a261a9038328a140e1ab50856ec86afc98668623f599e5"
+      },
+      "pbs-tls-probe/shared-symbols.txt": {
+        "bytes": 276972,
+        "sha256": "ffb597307f2abe315564dcd06fdab3a8a12fa34b95b821bdb230f603a137631b"
+      },
+      "pbs-validate.log": {
+        "bytes": 164,
+        "sha256": "935d625520356f45f647403349b5b5cea27000431f9208be2935a8e9159a77ab"
+      },
+      "pbs-validator-build.log": {
+        "bytes": 25380,
+        "sha256": "29b1ac836d3c63c3188786d55a75f7e95c436a0ed145b1460d78841ae38dcbc7"
+      },
+      "pbs-xml-tests.log": {
+        "bytes": 5336,
+        "sha256": "0cfaaf4fcf4fc84f498f803748e6d65984e08d9e72449a676428e502d2167d45"
+      }
+    }
+  },
+  "experimental_distribution": {
+    "artifact_id": 10303846992,
+    "artifact_zip_bytes": 47592896,
+    "downloaded": false,
+    "archive_sha256_from_remote_saved_record": "6f4443019b3155b48fd6bbc1a6bee0c16097e2d122e091c52af4a42c06bae7ee",
+    "archive": "cpython-3.12.13-x86_64-unknown-linux-gnu-noopt-20260910T0100.tar.zst",
+    "hash_verified_locally": false
+  },
+  "metadata_pins": {
+    "run-initial.json": "e029c2ca1ffffa22357e0c9a823b4872a6add58552d44c34fc08c5bca35a9ddf",
+    "jobs-initial.json": "b9465b0331364cddabf50df1b58f5ad944f8283da713b4954b642d8fda514314",
+    "015-run.json": "d9c71567deecbe18e7098489fca14b7206120fe560e44c56fb4c37105da2d031",
+    "015-jobs.json": "9b8ffa88ff598e274bb432c0904e3b36840919b27abc14eacc438a0b0e1fcace",
+    "015-check.json": "094e399973cdae68cdbc92695ad8066d84710fc41f55dbd67724aabe93090d38",
+    "015-artifacts.json": "65dd75b09fb666649745a494a3227bf24de0f7e9c534af0652ace03afd0521fb",
+    "completed-metadata.json": "620ff0c827006e890bb283584dcb2060ccf50b5247f046a51a0e4b9dbd18f9dc",
+    "reads.json": "fb8ab24d9ca484780a089053c95e642bfe91067e1bfb8db27c3eb386289e438d",
+    "monitor.py": "bf8a251e318e8012008b5a103b36169114904efccb8252f1b4529f7761b34555",
+    "later-ci-fixture-only.patch": "342461f8579365bc7192a077f3a0b5268e05db42ea4638100a2078116e45fbdb"
+  },
+  "local_execution": {
+    "gh_auto_reads_only": true,
+    "monitor_session": 96625,
+    "monitor_exit": 0,
+    "monitor_reaped": true,
+    "artifact_download_exit": 0,
+    "artifact_download_reaped": true,
+    "distribution_or_interpreter_executed": false,
+    "workflow_writes_reruns_or_cancellations": false,
+    "repository_changes": false
+  },
+  "limits": [
+    "The bundled static archive and distribution were not downloaded. Installed archive/manifest equality was executed by the pinned successful identity workflow step and is recorded in saved provenance.",
+    "Full per-method outcome equality to local strict runs is not asserted: installed runners have environment-dependent skips and automatic reruns. Original stdout and failed job conclusions are retained.",
+    "Later CI/test-fixture changes were not part of this PBS execution."
+  ],
+  "initial_read_note": "A first GET used the GitHub account name as repository owner and returned404. The verified repository origin is astral-sh/oriole; all saved successful metadata and subsequent reads use that repository."
+}

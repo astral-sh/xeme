@@ -1,0 +1,10 @@
+{
+  "status": "sealed_final_publication_review",
+  "review_sha256": "5962c3dcc35693be5b4e74a6803d9775b71ea9bd45b57fbe6deaeb9c3a37df33",
+  "details_archive": "publication-review-details.tar.gz",
+  "details_archive_sha256": "3fb70af9733a69240a69db6b3bb2ad9593f6b5c31fb5852f70d93f2531bbfd12",
+  "details_members": 20,
+  "outer_review_sha256": "4ec9eb2c7d573bf7bb8676f05d72376f8a3261fb57c3ce54dd20ca4f87f8d6df",
+  "auditor_attempts": "Initial audit string assertion omitted the comma in the correctly clarified index sentence; preserved initial script/log and punctuation-only correction. No producer changes or target runs. Corrected audit passed.",
+  "final_index": "files.json deliberately remains pending root creation after these review artifacts; no future-index claim."
+}

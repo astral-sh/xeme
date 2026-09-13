@@ -1,0 +1,1 @@
+{"status": "passed", "receipt": "/tmp/oriole-allocator-provenance-publication/verification-attempt01.json", "sha256": "cea5579adf763ec61ef5959087f18b0535f263b3f1ab878e28b40a1886509b0e", "objects": 358, "aliases": 1344, "native_totals": {"workers": 1344, "samples": 212352}}

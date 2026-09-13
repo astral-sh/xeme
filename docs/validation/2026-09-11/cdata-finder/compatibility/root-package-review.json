@@ -1,0 +1,7 @@
+{
+  "status": "pass",
+  "archive_sha256": "b5708d0a1f0897d8416ea3dba6676b274e450dce28d75849801076fc5106b0d5",
+  "members": 388,
+  "origins_byte_equal": true,
+  "scope": "Independent archive/member/origin readback; previous root outcome/consumer audit remains separate."
+}

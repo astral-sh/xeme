@@ -37,6 +37,17 @@ impl EntityBudget {
         self.threshold.store(bytes, Ordering::Relaxed);
     }
 
+    /// Bound cumulative work by consumed root bytes, retaining a fixed allowance
+    /// for small documents. Saturation never exempts the work counter's overflow
+    /// check. External bytes and input waiting in the decoder provide no credit.
+    pub(crate) fn work_limit(&self, initial: usize, factor: Option<usize>) -> usize {
+        let Some(factor) = factor else {
+            return initial;
+        };
+        let direct = usize::try_from(self.direct.load(Ordering::Relaxed)).unwrap_or(usize::MAX);
+        initial.max(direct.saturating_mul(factor))
+    }
+
     /// Count bytes before processing their token. Predefined entities contribute
     /// one extra byte without checking immediately, matching Expat's contract.
     pub(crate) fn account(&self, bytes: usize, indirect: bool, enforce: bool) -> bool {
@@ -86,6 +97,23 @@ impl EntityBudget {
 mod tests {
     use super::EntityBudget;
     use std::sync::atomic::Ordering;
+
+    #[test]
+    fn work_threshold_uses_only_direct_credit_and_saturates() {
+        let budget = EntityBudget::new();
+        assert!(budget.account(1000, true, false));
+        assert_eq!(budget.work_limit(7, Some(100)), 7);
+        assert!(budget.account(3, false, true));
+        assert_eq!(budget.work_limit(7, None), 7);
+        assert_eq!(budget.work_limit(7, Some(100)), 300);
+        assert_eq!(budget.work_limit(400, Some(100)), 400);
+        assert!(budget.set_factor(f32::INFINITY));
+        budget.set_threshold(u64::MAX);
+        assert_eq!(budget.work_limit(7, Some(100)), 300);
+        budget.direct.store(u64::MAX, Ordering::Relaxed);
+        assert_eq!(budget.work_limit(7, Some(100)), usize::MAX);
+        assert!(!budget.account(1, false, false));
+    }
 
     #[test]
     fn counters_reject_overflow_even_when_relative_limits_are_disabled() {

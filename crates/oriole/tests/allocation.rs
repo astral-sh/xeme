@@ -114,13 +114,44 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
         allocator,
     )?;
     parser.set_default_events(true);
-    parser.feed("\r\n<!DOCTYPE r [ \n<!ENTITY internal '<p:À/>'><!ENTITY external SYSTEM 'child'><!NOTATION n SYSTEM 'notation'><!ATTLIST r a NMTOKENS ' a  b '>\t]>\n<r xmlns:p='urn:p' p:attr='v'>a\r\nb\nc&internal;&external;<!--c--><![CDATA[x]]></r>\r\n".as_bytes(), true)?;
+    parser.feed("\r\n<!DOCTYPE r [ \n<!ENTITY internal '<p:À/>'><!ENTITY external SYSTEM 'child'><!NOTATION n SYSTEM 'notation'><!ATTLIST r a NMTOKENS ' a  b '>\t]>\n<r xmlns='urn:default' xmlns:p='urn:p' p:attr='v'><scope xmlns='urn:inner'><plain/><scope xmlns=''><plain/></scope><plain/></scope>a\r\nb\nc&internal;&external;<!--c--><![CDATA[x]]></r>\r\n".as_bytes(), true)?;
     while let Some(event) = next_event(&mut parser)? {
         if let EventKind::ExternalEntityReference(reference) = event.kind {
+            assert_eq!(
+                reference.context.as_deref(),
+                Some(
+                    "=urn:default\u{c}p=urn:p\u{c}xml=http://www.w3.org/XML/1998/namespace\u{c}external"
+                )
+            );
             let mut child =
                 parser.external_child_with_encoding(reference.context.as_deref(), None)?;
-            child.feed(b"<?xml encoding='UTF-8'?><p:x a='value'/>text", true)?;
-            while next_event(&mut child)?.is_some() {}
+            child.feed(b"<?xml encoding='UTF-8'?><plain/><n xmlns='urn:child'><inner/></n><p:x a='value'/>text", true)?;
+            let expected = [
+                "urn:default|plain",
+                "urn:child|n",
+                "urn:child|inner",
+                "urn:p|x|p",
+            ];
+            let mut starts = 0;
+            while let Some(event) = next_event(&mut child)? {
+                if let EventKind::StartElement { name, .. } = event.kind {
+                    assert_eq!(name, expected[starts]);
+                    starts += 1;
+                }
+            }
+            assert_eq!(starts, expected.len());
+            for (context, expected) in [("=urn:override", "urn:override|plain"), ("=", "plain")] {
+                let mut child = parser.external_child_with_encoding(Some(context), None)?;
+                child.feed(b"<plain/>", true)?;
+                let mut seen = false;
+                while let Some(event) = next_event(&mut child)? {
+                    if let EventKind::StartElement { name, .. } = event.kind {
+                        assert_eq!(name, expected);
+                        seen = true;
+                    }
+                }
+                assert!(seen);
+            }
         }
     }
     // Branches revisit completed entities; depth forces both explicit-stack and
@@ -418,6 +449,124 @@ fn every_allocation_can_fail_and_all_memory_uses_the_selected_suite() {
     check_allocations(workload);
 }
 
+#[test]
+fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
+    fn frames(
+        allocator: Allocator,
+        namespace_separator: Option<char>,
+        input: &[u8],
+    ) -> Result<(), Error> {
+        let mut parser = Parser::try_new_in(
+            Config {
+                namespace_separator,
+                ..Config::default()
+            },
+            allocator,
+        )?;
+        parser.feed(input, true)?;
+        let mut frame = parser.adapter_frame();
+        let result = (|| {
+            loop {
+                let mut event = None;
+                let result = parser.next_event_for_adapter_into(&mut event, &mut frame);
+                let token = match result {
+                    Ok(Some(token)) => token,
+                    Ok(None) => break,
+                    Err(error) => {
+                        assert!(event.is_none());
+                        assert!(!frame.is_active());
+                        let calls = CALLS.get();
+                        assert_eq!(
+                            parser
+                                .next_event_for_adapter_into(&mut event, &mut frame)
+                                .unwrap_err(),
+                            error
+                        );
+                        assert_eq!(CALLS.get(), calls);
+                        return Err(error);
+                    }
+                };
+                if frame.is_active() {
+                    assert!(event.is_none());
+                    if let Some(name) = frame.take_end_name() {
+                        assert_eq!(frame.callback_bytes(), name.len());
+                        parser.recycle_end_element(token, name);
+                    } else if let Some(bytes) = frame.text_bytes() {
+                        assert_eq!(frame.callback_bytes(), bytes.len());
+                        assert!(!bytes.is_empty());
+                    } else {
+                        assert_eq!(frame.name_bytes().last(), Some(&0));
+                        for (name, value) in frame.attributes() {
+                            assert_eq!(name.last(), Some(&0));
+                            assert_eq!(value.last(), Some(&0));
+                        }
+                    }
+                } else {
+                    match event.unwrap().kind {
+                        EventKind::StartElement { name, attributes } => {
+                            parser.recycle_start_element(token, name, attributes)
+                        }
+                        EventKind::EndElement { name } => parser.recycle_end_element(token, name),
+                        _ => {}
+                    }
+                }
+            }
+            Ok(())
+        })();
+        parser.finish_adapter_frame(frame);
+        result
+    }
+    check_allocations(|allocator| {
+        frames(allocator, None, b"<r>inline\nabcdefghijklmnopqrstuvwxyz1234567890<n a='first' b='value'/><![CDATA[abcdefghijklmnopqrstuvwxyz1234567890]]><n a='second' b='new'/>fallback\r\n<n a='literal' b='other'/><n a='&amp;'/><n a='last'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/>abcdefghijklmnopqrstuvwxyz1234567890</r>")?;
+        frames(allocator, Some('|'), b"<r xmlns:p='urn:p'><p:n a='first'/><p:n a='next'/><n xmlns='urn:default'><n a='value'/></n><p:n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><p:n a='last'/></r>")?;
+        // Two wide literal tags warm the lexical and callback buffers. The last
+        // tag then uses one warmed span, including an empty and Unicode value.
+        frames(allocator, None, "<r><n a='abcdefghijklmnopqrstuvwxyz' b='abcdefghijklmnopqrstuvwxyz' c='abcdefghijklmnopqrstuvwxyz'/><n a='abcdefghijklmnopqrstuvwxyz' b='abcdefghijklmnopqrstuvwxyz' c='abcdefghijklmnopqrstuvwxyz'/><n π = '😀' empty=\"\" tail='λ'/></r>".as_bytes())?;
+        // Grow both stacks with live undo blocks, then restore shadowed prefixes.
+        // Four root declarations also exercise Start publication after commitment.
+        frames(allocator, Some('|'), b"<r xmlns:p='one' xmlns:q='q' xmlns:s='s' xmlns:t='t'><n xmlns:p='two'><n xmlns:p='three'><n xmlns:p='four'><n xmlns:p='five'><n xmlns:p='six'><p:leaf></p:leaf><e xmlns:p='empty'/><p:leaf/></n></n></n></n></n><p:leaf/></r>")?;
+        // More live prefixed names than cache slots force fresh packed owners;
+        // grow the spelling while the expansion scratch is returned for reuse.
+        frames(allocator, Some('|'), b"<r xmlns:p='urn:example'><p:node><p:node><p:node><p:longer a='v'/></p:node></p:node></p:node><p:node/></r>")?;
+        // A warm oversized raw-name owner precedes nested equal serialized names.
+        // Their packed owners must survive both empty and explicit End delivery.
+        frames(allocator, Some('\0'), b"<r xmlns:p='p:'><abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz/><p:n><p:n><p:n a='v'/></p:n></p:n></r>")?;
+        frames(allocator, Some(':'), b"<r xmlns:p='p'><abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz/><p:n><p:n><p:n a='v'/></p:n></p:n></r>")
+    });
+}
+
+#[test]
+fn detached_end_names_reuse_selected_storage_without_new_allocations() {
+    fn ends(allocator: Allocator) -> Result<(), Error> {
+        let mut parser = Parser::try_new_in(Config::default(), allocator)?;
+        parser.feed(b"<r><n a='v'></n><n a='v'></n></r>", true)?;
+        let mut frame = parser.adapter_frame();
+        let result = (|| {
+            let mut ends = 0;
+            loop {
+                let calls = CALLS.get();
+                let mut event = None;
+                let Some(token) = parser.next_event_for_adapter_into(&mut event, &mut frame)?
+                else {
+                    break;
+                };
+                if let Some(mut name) = frame.take_end_name() {
+                    assert!(event.is_none());
+                    name.try_push('\0')?;
+                    parser.recycle_end_element(token, name);
+                    assert_eq!(CALLS.get(), calls, "warmed native End must not allocate");
+                    ends += 1;
+                }
+            }
+            assert_eq!(ends, 3);
+            Ok(())
+        })();
+        parser.finish_adapter_frame(frame);
+        result
+    }
+    check_allocations(ends);
+}
+
 fn check_allocations(workload: fn(Allocator) -> Result<(), Error>) {
     // SAFETY: The callbacks use a complete libc-backed suite with failure injection;
     // every pointer remains valid until realloc succeeds or its matching free call.
@@ -468,6 +617,48 @@ fn check_allocations(workload: fn(Allocator) -> Result<(), Error>) {
 }
 
 #[test]
+fn malformed_declarations_preserve_every_selected_allocation_failure() {
+    fn declarations(allocator: Allocator) -> Result<(), Error> {
+        for native in [false, true] {
+            for context in [None, Some(Some("")), Some(None)] {
+                for input in [
+                    b"<?xml version='1.0' encoding 'UTF-8'?>".as_slice(),
+                    b"<?xml version='1.0' encoding='UTF-8' extra='x'?>",
+                    b"<?xml encoding='UTF8' version='1.0'?>",
+                    b"<?xml version='1.0' encoding='UTF8' extra='x'?>",
+                ] {
+                    let parent = Parser::try_new_in(Config::default(), allocator)?;
+                    let mut parser = match context {
+                        None => Parser::try_new_in(Config::default(), allocator)?,
+                        Some(context) => parent.external_child(context, None)?,
+                    };
+                    if native {
+                        parser.enable_input_context();
+                    }
+                    parser.feed(input, true)?;
+                    let error = next_event(&mut parser).unwrap_err();
+                    if error.kind == ErrorKind::NoMemory {
+                        return Err(error);
+                    }
+                    assert_eq!(
+                        error.kind,
+                        if context.is_none() {
+                            ErrorKind::XmlDeclaration
+                        } else {
+                            ErrorKind::TextDeclaration
+                        },
+                    );
+                    assert_eq!(parser.next_event().unwrap_err(), error);
+                    assert_eq!(parser.feed(&[], true).unwrap_err(), error);
+                }
+            }
+        }
+        Ok(())
+    }
+    check_allocations(declarations);
+}
+
+#[test]
 fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
     // SAFETY: The complete libc-backed suite retains ownership on failure and
     // frees each successful allocation through the same callbacks.
@@ -484,8 +675,15 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
         CALLS.set(0);
         GLOBAL_CALLS.set(0);
         TRACK_GLOBAL.set(true);
-        let mut parser = Parser::try_new_in(Config::default(), allocator).unwrap();
-        parser.feed(b"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p 'unused'><!ATTLIST r a CDATA 'v'><!ATTLIST n b CDATA 'w'>]><r/>", true).unwrap();
+        let mut parser = Parser::try_new_in(
+            Config {
+                namespace_separator: Some('|'),
+                ..Config::default()
+            },
+            allocator,
+        )
+        .unwrap();
+        parser.feed(b"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p 'unused'><!ATTLIST r a CDATA 'v'><!ATTLIST n b CDATA 'w'>]><r xmlns='urn:default'>", false).unwrap();
         while parser.next_event().unwrap().is_some() {}
         let retained = parser.external_child(None, None).unwrap();
         let before = CALLS.get();
@@ -513,7 +711,8 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
                     assert_eq!(value, "ok");
                     text_seen = true;
                 }
-                EventKind::StartElement { attributes, .. } => {
+                EventKind::StartElement { name, attributes } => {
+                    assert_eq!(name, "urn:default|n");
                     assert_eq!(attributes.len(), 1);
                     assert_eq!(attributes[0].name, "b");
                     assert_eq!(attributes[0].value, "w");
@@ -523,8 +722,29 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {
             }
         }
         assert!(text_seen && default_seen);
+        // The live parent slot also survives every failed transaction; the
+        // retained child above alone would only prove its independent snapshot.
+        let mut current = parser.external_child(Some(""), None).unwrap();
+        current.feed(b"<n/>", true).unwrap();
+        let mut current_seen = false;
+        while let Some(event) = current.next_event().unwrap() {
+            if let EventKind::StartElement { name, .. } = event.kind {
+                assert_eq!(name, "urn:default|n");
+                current_seen = true;
+            }
+        }
+        assert!(current_seen);
+        drop(current);
         parser.set_hash_salt(*b"0123456789abcdef").unwrap();
         assert_eq!(parser.hash_salt(), *b"0123456789abcdef");
+        parser.feed(b"<n/></r>", true).unwrap();
+        let mut restored = false;
+        while let Some(event) = parser.next_event().unwrap() {
+            if let EventKind::EndNamespace { prefix: None } = event.kind {
+                restored = true;
+            }
+        }
+        assert!(restored && parser.is_finished());
         drop(child);
         drop(retained);
         drop(parser);
@@ -806,6 +1026,169 @@ fn output_slots_clear_at_every_selected_allocation_failure() {
                     return Err(error);
                 }
             }
+        }
+        Ok(())
+    }
+    check_allocations(workload);
+}
+
+#[test]
+fn warmed_utf8_source_growth_preserves_selected_allocator_failures() {
+    fn workload(allocator: Allocator) -> Result<(), Error> {
+        let mut parser = Parser::try_new_in(Config::default(), allocator)?;
+        parser.feed(b"<r>", false)?;
+        // Repeated equal feeds warm pending while the unconsumed source grows.
+        // Its later growth must remain fallible through the selected suite.
+        for _ in 0..4 {
+            parser.feed(&[b'x'; 1024], false)?;
+        }
+        parser.feed(b"</r>", true)?;
+        let mut text_bytes = 0;
+        while let Some(event) = next_event(&mut parser)? {
+            if let EventKind::Text(value) = event.kind {
+                text_bytes += value.len();
+            }
+        }
+        assert_eq!(text_bytes, 4096);
+        Ok(())
+    }
+    check_allocations(workload);
+}
+
+#[test]
+fn direct_start_lowering_preserves_raw_and_every_selected_allocation_failure() {
+    fn workload(allocator: Allocator) -> Result<(), Error> {
+        let mut parser = Parser::try_new_in(Config::default(), allocator)?;
+        parser.enable_input_context();
+        // Warm only lexical records. The direct Start must still perform cold
+        // frame, duplicate-table and stack-name allocations in the chosen suite.
+        parser.feed(
+            b"<r><w a='0' b='1' c='2' d='3' e='4' f='5' g='6' h='7' i='8'/>",
+            false,
+        )?;
+        while next_event(&mut parser)?.is_some() {}
+        let tag = "<longer a='zero' b='one' c='two' d='three' e='four' f='five' g='six' h='seven' i='eight'>";
+        parser.feed(tag.as_bytes(), false)?;
+        let mut frame = parser.adapter_frame();
+        let result = (|| -> Result<(), Error> {
+            let mut event = None;
+            match parser.next_event_for_c_text_context_into(&mut event, &mut frame) {
+                Ok(Some(_)) => {
+                    assert!(event.is_none() && frame.is_active());
+                    assert_eq!(frame.name_bytes(), b"longer\0");
+                    assert_eq!(frame.attributes().count(), 9);
+                    assert_eq!(parser.current_raw(), Some(tag));
+                }
+                Ok(None) => panic!("complete Start must be delivered"),
+                Err(error) => {
+                    assert_eq!(error.kind, ErrorKind::NoMemory);
+                    assert!(event.is_none() && !frame.is_active());
+                    assert_eq!(parser.current_raw(), Some(tag));
+                    let calls = CALLS.get();
+                    assert_eq!(
+                        parser
+                            .next_event_for_c_text_context_into(&mut event, &mut frame)
+                            .unwrap_err(),
+                        error
+                    );
+                    assert_eq!(parser.feed(b"ignored", true).unwrap_err(), error);
+                    assert_eq!(CALLS.get(), calls);
+                    return Err(error);
+                }
+            }
+            parser.feed(b"</longer></r>", true)?;
+            while next_event(&mut parser)?.is_some() {}
+            Ok(())
+        })();
+        parser.finish_adapter_frame(frame);
+        result
+    }
+    check_allocations(workload);
+}
+
+#[test]
+fn native_raw_context_views_survive_every_feed_allocation_failure() {
+    fn workload(allocator: Allocator) -> Result<(), Error> {
+        // The first suffix forces native growth; the second forces Separate.
+        let large = [b'x'; 65_536];
+        for (input, raw, offset, suffix) in [
+            (
+                b"<r>twelve-bytes".as_slice(),
+                "twelve-bytes",
+                3,
+                large.as_slice(),
+            ),
+            (
+                b"<r>twelve-bytes".as_slice(),
+                "twelve-bytes",
+                3,
+                b"\xff".as_slice(),
+            ),
+            (b"<r><n></n>".as_slice(), "</n>", 6, large.as_slice()),
+            (b"<r><n></n>".as_slice(), "</n>", 6, b"\xff".as_slice()),
+        ] {
+            let mut parser = Parser::try_new_in(Config::default(), allocator)?;
+            parser.enable_input_context();
+            parser.feed(input, false)?;
+            assert!(next_event(&mut parser)?.is_some());
+            if raw == "</n>" {
+                assert!(next_event(&mut parser)?.is_some());
+            }
+            let mut frame = parser.adapter_frame();
+            let result = (|| -> Result<(), Error> {
+                let mut event = None;
+                let before = CALLS.get();
+                assert!(
+                    parser
+                        .next_event_for_c_text_context_into(&mut event, &mut frame)?
+                        .is_some()
+                );
+                if raw == "</n>" {
+                    assert!(event.is_none());
+                    assert_eq!(frame.take_end_name().unwrap(), "n");
+                } else {
+                    assert_eq!(frame.native_text_range_for_c(), Some((3, 12)));
+                }
+                assert_eq!(parser.current_raw(), Some(raw));
+                assert_eq!(
+                    CALLS.get(),
+                    before,
+                    "native raw projection needs no token allocation"
+                );
+                let (context, start) = parser.input_context();
+                assert_eq!(
+                    parser.current_raw().unwrap().as_ptr(),
+                    context[offset - start..].as_ptr()
+                );
+                let fed = parser.feed(suffix, false);
+                assert_eq!(parser.current_raw(), Some(raw));
+                if let Err(error) = fed {
+                    assert_eq!(error.kind, ErrorKind::NoMemory);
+                    let calls = CALLS.get();
+                    assert_eq!(parser.next_event().unwrap_err(), error);
+                    assert_eq!(parser.feed(b"ignored", true).unwrap_err(), error);
+                    assert_eq!(CALLS.get(), calls);
+                    return Err(error);
+                }
+                // Decoder allocation errors are delivered by next_event even
+                // when feed succeeds. Drain before accepting this workload.
+                let invalid = loop {
+                    match next_event(&mut parser) {
+                        Ok(Some(_)) => {}
+                        Ok(None) => break false,
+                        Err(error)
+                            if suffix == b"\xff" && error.kind == ErrorKind::InvalidToken =>
+                        {
+                            break true;
+                        }
+                        Err(error) => return Err(error),
+                    }
+                };
+                assert_eq!(invalid, suffix == b"\xff");
+                Ok(())
+            })();
+            parser.finish_adapter_frame(frame);
+            result?;
         }
         Ok(())
     }

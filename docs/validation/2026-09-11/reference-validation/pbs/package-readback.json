@@ -1,0 +1,44 @@
+{
+  "archive_members": 149,
+  "archive_sha256": "db6445709c231d29216183723c1349b63645d4b54b3dcd4851d6fd31ff2cf5e7",
+  "distribution_and_compiled_binaries_excluded": true,
+  "files": {
+    "README.md": {
+      "bytes": 5574,
+      "sha256": "935f91d7f4f87a4ab135dacf63ebbc4f6d032d9f68b51825433185a48cb3f00f"
+    },
+    "archive-members.json": {
+      "bytes": 67441,
+      "sha256": "54f841208a0c9f2a85af8bfd52aac339e6adcafea509d77bdf8551fb89d3c9cd"
+    },
+    "evidence.tar.gz": {
+      "bytes": 2902881,
+      "sha256": "db6445709c231d29216183723c1349b63645d4b54b3dcd4851d6fd31ff2cf5e7"
+    },
+    "files.json": {
+      "bytes": 924,
+      "sha256": "f1c06ab30fa880a9090d17c2f664e48d407b93ac56f384154f6c0308b0b04fd6"
+    },
+    "independent-review.json": {
+      "bytes": 25744,
+      "sha256": "981ae3f5e3e1661c98a5075ca2c3da0252c713f633afbace27da248d685b8d19"
+    },
+    "package.py": {
+      "bytes": 7160,
+      "sha256": "c4785ba583362ba5efff8352d96722b04c1a4b21b1d8ad2acc7ff6ccac13ca6a"
+    },
+    "report.json": {
+      "bytes": 29510,
+      "sha256": "df565b6fecfbae6045a7b7653fec180047f412b1016fbff942ad50af525cf6e7"
+    }
+  },
+  "independent_review_sha256": "981ae3f5e3e1661c98a5075ca2c3da0252c713f633afbace27da248d685b8d19",
+  "limitations": "Compact package readback verifies retained data; excluded binary execution and code generation remain bounded by the original remote records and separately completed binary/archive readback.",
+  "report_sha256": "df565b6fecfbae6045a7b7653fec180047f412b1016fbff942ad50af525cf6e7",
+  "scope": "All final files/index/archive origins, nested ZIP bytes, source snapshots and selected nonbinary distribution data checked. No target/compiler/container execution.",
+  "selected_nonbinary_distribution_members": 25,
+  "source_snapshot_files": 90,
+  "status": "passed saved archive readback",
+  "validation_zip_members": 42,
+  "workflow_status_preserved": "failure: same two strict callback methods"
+}

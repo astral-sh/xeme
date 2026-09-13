@@ -1,0 +1,19 @@
+verified parse
+verified streaming
+verified ffi
+verified ffi_family
+verified multibyte
+verified value_family
+verified streaming_work
+{
+  "status": "passed",
+  "raw_audit_sha256": "a85ec7b77304da7f000d3a3bb546841cc7d7014e9310f8999fa87fb543cd5ec5",
+  "totals": {
+    "targets": 7,
+    "initial_seed_files_per_target_sum": 68893,
+    "replay_executions": 68897,
+    "campaign_executed_units": 2170731,
+    "final_disk_corpus_files_per_target_sum": 2931,
+    "failure_artifacts": 0
+  }
+}

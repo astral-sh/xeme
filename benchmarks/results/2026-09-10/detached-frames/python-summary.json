@@ -1,0 +1,53 @@
+{
+  "all": {
+    "candidate_over_published": {
+      "geomean": 0.9176098761260817,
+      "below_one": 24,
+      "conditions": 24
+    },
+    "candidate_over_expat": {
+      "geomean": 1.4777749091593189,
+      "below_one": 2,
+      "conditions": 24
+    },
+    "published_over_expat": {
+      "geomean": 1.6087669060034806,
+      "below_one": 0,
+      "conditions": 24
+    }
+  },
+  "elementtree": {
+    "candidate_over_published": {
+      "geomean": 0.9040332687845595,
+      "below_one": 12,
+      "conditions": 12
+    },
+    "candidate_over_expat": {
+      "geomean": 1.6157677375065165,
+      "below_one": 0,
+      "conditions": 12
+    },
+    "published_over_expat": {
+      "geomean": 1.7811433769771206,
+      "below_one": 0,
+      "conditions": 12
+    }
+  },
+  "pyexpat-events": {
+    "candidate_over_published": {
+      "geomean": 0.9313903744893952,
+      "below_one": 12,
+      "conditions": 12
+    },
+    "candidate_over_expat": {
+      "geomean": 1.3515672032856303,
+      "below_one": 2,
+      "conditions": 12
+    },
+    "published_over_expat": {
+      "geomean": 1.4530727797132623,
+      "below_one": 0,
+      "conditions": 12
+    }
+  }
+}

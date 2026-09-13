@@ -1,0 +1,74 @@
+{
+  "README.md": {
+    "bytes": 2881,
+    "sha256": "67b5240720a07d35b06521f2c5221d65cfd3bfbc968e3cde7679481ade206965"
+  },
+  "adaptation.patch": {
+    "bytes": 33345,
+    "sha256": "3cfda58a2741d45449a722fa8baa641417ae2f76aa0633099f08052eff6d59bd"
+  },
+  "api-outcomes.json": {
+    "bytes": 34,
+    "sha256": "745358b871615c1a5bffd794a30280860ddaa7f076d44d7a3d4acb2bfc4b7f81"
+  },
+  "attempt-01.json": {
+    "bytes": 524,
+    "sha256": "59c2dbc0291fa6b1f15b8eb2dda5672564620c7653116a3ba33ffe43f9ff0fec"
+  },
+  "attempt-01.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "attempt-01.stdout": {
+    "bytes": 197,
+    "sha256": "8b7c6fb16bd3cf4ac491313f824b47a2ee1d5dc31dee7578b4d494fa4bf98e87"
+  },
+  "audit-preparation.json": {
+    "bytes": 745,
+    "sha256": "32c7ff3c374f9c27616425b9ec28cd63804bd3601c67b984aaf3ced83755fd53"
+  },
+  "audit-setup.py": {
+    "bytes": 8029,
+    "sha256": "e7df469681ea800dbe01d5540e768e3dcdf23eed743913177d3e74c87a9ea8e3"
+  },
+  "audit-tail.py": {
+    "bytes": 7555,
+    "sha256": "df3ea2af0a909b8dc2f0b3ed89f5fd40b516e20b3746f006c111628162f1db5d"
+  },
+  "checked-files.json": {
+    "bytes": 54392,
+    "sha256": "8a6464581efaf8767c7babf39e74d23d6bfae25f1291a3f7b350082d5ca0fb40"
+  },
+  "checks.json": {
+    "bytes": 1423081,
+    "sha256": "9690730a15a61952db55214fdbd93cd43f9fb3070ff7540ef55f2fd9ef942391"
+  },
+  "generator.py": {
+    "bytes": 35218,
+    "sha256": "6e442d96ddb35c01c74488a37521efe4703e60ca63a0d45fc18f960eaf2b1c39"
+  },
+  "native-consumers.json": {
+    "bytes": 1458,
+    "sha256": "a538c1e3067cc8fa12cbba8730b581a7b45aadafbab4c209736b8b19abb44fa6"
+  },
+  "prepare-audit.py": {
+    "bytes": 2442,
+    "sha256": "cb187c7957a1d3df45a9516d3eddfbab2bba1950f4b3de00886a1a5c518b2a43"
+  },
+  "receipt.json": {
+    "bytes": 603,
+    "sha256": "fb06896279e7d5e5523b6bc5d6c49abc71582329872000d263f8cc15d5e919d3"
+  },
+  "review.json": {
+    "bytes": 4919,
+    "sha256": "7d88712eb34eec26f9612bffe611aabdb5079ae5e5e269db5e5ada2e1145f619"
+  },
+  "run-audit.py": {
+    "bytes": 849,
+    "sha256": "15a20ed31dfa1677a92cb61b33e74d2a5c403f07d0b390d849edb3378640ac3d"
+  },
+  "seal.py": {
+    "bytes": 1890,
+    "sha256": "8d238c1d807087f71862ccca4d9bbd9d09d72653adf8b09ff8f3e0f3a22d2453"
+  }
+}

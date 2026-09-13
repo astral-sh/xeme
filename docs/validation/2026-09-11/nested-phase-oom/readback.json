@@ -1,0 +1,187 @@
+{
+  "status": "passed",
+  "role": "test author and collector saved-data readback; not independent review",
+  "base_commit": "ef0eac091999c2e29e888918ac958480dbdacb4c",
+  "selected_runtime_source_sha256": "8a7da2759b67ca85f82fb29bd775392e532b3ff355340eb10f92ea7764bbe642",
+  "test_sha256": "88eae7992ed72f9bb039bbfb9a94b126b2dc0959bd2c7fb4234e55622b3264ca",
+  "new_scenarios_per_consumer": 1,
+  "consumer_runs": 5,
+  "successful_api_origin_assertions": 170,
+  "first_attempt": true,
+  "execution_session": 21567,
+  "session_exit": 0,
+  "session_reaped": true,
+  "actual_results": {
+    "expat-pgo-shared": {
+      "successful_prefix_declarations": 2,
+      "rejected_allocations": 1,
+      "child_error": "XML_ERROR_NO_MEMORY",
+      "parent_error": "XML_ERROR_EXTERNAL_ENTITY_HANDLING",
+      "live_allocations_after_cleanup": 0,
+      "api_origins": 34
+    },
+    "context-normal-shared": {
+      "successful_prefix_declarations": 2,
+      "rejected_allocations": 1,
+      "child_error": "XML_ERROR_NO_MEMORY",
+      "parent_error": "XML_ERROR_EXTERNAL_ENTITY_HANDLING",
+      "live_allocations_after_cleanup": 0,
+      "api_origins": 34
+    },
+    "context-normal-static": {
+      "successful_prefix_declarations": 2,
+      "rejected_allocations": 1,
+      "child_error": "XML_ERROR_NO_MEMORY",
+      "parent_error": "XML_ERROR_EXTERNAL_ENTITY_HANDLING",
+      "live_allocations_after_cleanup": 0,
+      "api_origins": 34
+    },
+    "context-pgo-shared": {
+      "successful_prefix_declarations": 2,
+      "rejected_allocations": 1,
+      "child_error": "XML_ERROR_NO_MEMORY",
+      "parent_error": "XML_ERROR_EXTERNAL_ENTITY_HANDLING",
+      "live_allocations_after_cleanup": 0,
+      "api_origins": 34
+    },
+    "context-pgo-static": {
+      "successful_prefix_declarations": 2,
+      "rejected_allocations": 1,
+      "child_error": "XML_ERROR_NO_MEMORY",
+      "parent_error": "XML_ERROR_EXTERNAL_ENTITY_HANDLING",
+      "live_allocations_after_cleanup": 0,
+      "api_origins": 34
+    }
+  },
+  "origin_files": {
+    "results.json": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/results.json",
+      "sha256": "51727a93ae5f547bda042717746e193f7d9a969cbb76f9a6fb161a049485e4b2"
+    },
+    "checks-preparation.json": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-preparation.json",
+      "sha256": "b1fdd382fbdc1f2afda54939cf2337a249163bc13b288c7555ad66a61f819701"
+    },
+    "run_checks.py": {
+      "path": "/tmp/oriole-nested-phase-oom/run_checks.py",
+      "sha256": "e805b5e30f2a94ac7a5896f2903d20517609f16db31917404ee1b458f9668464"
+    },
+    "prepare_checks.py": {
+      "path": "/tmp/oriole-nested-phase-oom/prepare_checks.py",
+      "sha256": "5a2e5056a6e11542791b98a664750348b040d1f00d33ebb1f910850765bb43e9"
+    },
+    "root-readback.json": {
+      "path": "/tmp/oriole-nested-phase-oom/root-readback.json",
+      "sha256": "e8b541e67cbad4433065af73d307629a6448ecae856718ec9095d849343f2882"
+    },
+    "consumer.c": {
+      "path": "/tmp/oriole-nested-phase-oom/consumer.c",
+      "sha256": "c2dfb14a08044ae5b163740653d3b4f95015f7ccebb2bc3b3cdaa36369e985a6"
+    },
+    "source/integration.c": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/integration.c",
+      "sha256": "88eae7992ed72f9bb039bbfb9a94b126b2dc0959bd2c7fb4234e55622b3264ca"
+    },
+    "source/expat.h": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/expat.h",
+      "sha256": "c8c8fda28157a2550dd0b276a717df3414d2a91728e6d0f9d9e20ed143f8d42c"
+    },
+    "source/UPSTREAM-NOTICES.txt": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/UPSTREAM-NOTICES.txt",
+      "sha256": "64293606655ef7918c7dac2d5de1ad1790b1935a6d06d5bdad4eceb71ebb8257"
+    },
+    "source/CONTRIBUTING.md": {
+      "path": "/home/dev-user/code/oss/oriole-nested-phase-oom/CONTRIBUTING.md",
+      "sha256": "a7c6eaa4a7f0ef9d9ff82bc3468c1f299ae19abe348bf404d29889f16b90dbc7"
+    },
+    "logs/compiler-version.stdout": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/compiler-version.stdout",
+      "sha256": "3e8cc208c40f60832f67377aa1b03c3e7e858f20cd5d365464944700c0bd7ad1"
+    },
+    "logs/compiler-version.stderr": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/compiler-version.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/expat-pgo-shared-build.stdout": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/expat-pgo-shared-build.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/expat-pgo-shared-build.stderr": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/expat-pgo-shared-build.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/expat-pgo-shared.stdout": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/expat-pgo-shared.stdout",
+      "sha256": "d05a04413d4ad5f20cdf857569dd9cb5514fe649e79075eea6887da39ec5d43c"
+    },
+    "logs/expat-pgo-shared.stderr": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/expat-pgo-shared.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/context-normal-shared-build.stdout": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-normal-shared-build.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/context-normal-shared-build.stderr": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-normal-shared-build.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/context-normal-shared.stdout": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-normal-shared.stdout",
+      "sha256": "96b1e969fcccfd9c761b3573b50ddc0cfe6536d50286c4293f1afe8cd00796d1"
+    },
+    "logs/context-normal-shared.stderr": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-normal-shared.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/context-normal-static-build.stdout": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-normal-static-build.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/context-normal-static-build.stderr": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-normal-static-build.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/context-normal-static.stdout": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-normal-static.stdout",
+      "sha256": "e1791565f07114bda199695c7de372331f0e7f787570470414becac63b983b68"
+    },
+    "logs/context-normal-static.stderr": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-normal-static.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/context-pgo-shared-build.stdout": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-pgo-shared-build.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/context-pgo-shared-build.stderr": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-pgo-shared-build.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/context-pgo-shared.stdout": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-pgo-shared.stdout",
+      "sha256": "24525c2cc1771ff650a76188c27814cdf7e17993a0ffd65b462c0452d0fa5b5b"
+    },
+    "logs/context-pgo-shared.stderr": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-pgo-shared.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/context-pgo-static-build.stdout": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-pgo-static-build.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/context-pgo-static-build.stderr": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-pgo-static-build.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/context-pgo-static.stdout": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-pgo-static.stdout",
+      "sha256": "6fd7d2bef55522041ac42ea6cb63945a67320002033f9a8e878f9a66d0cf52d1"
+    },
+    "logs/context-pgo-static.stderr": {
+      "path": "/tmp/oriole-nested-phase-oom/checks-attempt01/context-pgo-static.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "exclusions": "No compiler, library, executable, Cargo target, or runtime-source archive is copied. Exact library/executable/compiler identities are retained in results.json; the regression C source and public header are included."
+}

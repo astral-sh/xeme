@@ -10,6 +10,26 @@ complete feature, behavioral, or security equivalence with Expat. Consumers that
 require Expat's literal version string still distinguish Oriole. The header
 retains the upstream Expat authors' MIT notice.
 
+## Build the C libraries
+
+From the workspace root, build the shared library and static archive with:
+
+```sh
+cargo rustc --release --locked -p oriole_expat --lib --crate-type cdylib,staticlib
+```
+
+The Cargo-level crate-type override lets the release profile's ThinLTO setting
+apply to the C artifacts. The manifest also retains `rlib` for Rust tests and
+consumers; asking Cargo to emit all three types in one build suppresses that LTO
+step. Put `--crate-type` before any `--` so Cargo can prepare the dependencies for
+LTO. The command produces `liboriole_expat.so` (or `.dylib` on macOS) and
+`liboriole_expat.a` in `target/release` on Unix. An ordinary Cargo build into the
+same directory can replace those artifacts, so keep the selected C build outputs
+for consumer validation and packaging.
+
+Optional [profile-guided builds](../../tools/pgo/) use the same C-only target
+selection for both training and optimized compilation.
+
 ## Ownership and callbacks
 
 Each parser and its external-entity family require serialized access, as with

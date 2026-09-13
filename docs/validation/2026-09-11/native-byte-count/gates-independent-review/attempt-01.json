@@ -1,0 +1,15 @@
+{
+  "started_utc": "2026-09-11T02:57:45Z",
+  "command": [
+    "taskset",
+    "-c",
+    "4",
+    "python3",
+    "/tmp/oriole-native-byte-count-gates-independent-review/generator.py"
+  ],
+  "scope": "Saved C-gate audit only; no target execution.",
+  "exit": 0,
+  "generator_sha256": "6e442d96ddb35c01c74488a37521efe4703e60ca63a0d45fc18f960eaf2b1c39",
+  "stdout_sha256": "8b7c6fb16bd3cf4ac491313f824b47a2ee1d5dc31dee7578b4d494fa4bf98e87",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

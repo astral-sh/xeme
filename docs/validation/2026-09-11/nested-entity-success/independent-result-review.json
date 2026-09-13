@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "results_sha256": "b24c58eb265051add529bc444dc3ef2496da82bbb868f474ce94aa047c7ba7ac",
+  "commands": 26,
+  "workers": 24,
+  "canonical_pairs": 12,
+  "observational_declaration_position_differences": 12,
+  "allocator_balance": "Zero live bytes, live blocks and failed allocations for all24 workers",
+  "scope": "Root independent saved-output readback; original upstream failures unchanged. Not another target run."
+}

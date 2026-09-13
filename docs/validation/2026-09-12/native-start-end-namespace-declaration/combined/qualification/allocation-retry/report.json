@@ -1,0 +1,2019 @@
+{
+  "status": "complete",
+  "scope": "300 separate supplemental retry configurations; exactly 25 local retry maxima raised to512. All fixtures, semantic/schedule assertions, APIs, loops, handlers, setup and teardown unchanged. Original4740 and prior72 untouched; no fixed OOM ordinal changes.",
+  "preparation_sha256": "624aa9206519fb753cc7b3b33b986258ec2ac599b108c034a6ef28b6871f00b5",
+  "controller_sha256": "e57d8c3f2e09da1cdbd7c75fc34cdf05dec16e5260ce0e75b4304dc20730d41b",
+  "scripts_sha256": "61c6185b065eea6ad4e2d390b4ad198caea87db6418c56ac1133eae35b3dee38",
+  "runtime_commit": null,
+  "base_commit": "9c632547af2253b9672a92fac320c70af3263bb8",
+  "candidate_patch_sha256": "fb50f38354d99795ee1d9bd34ad21a1fa90a87cd1ec61bbfcb738b917cbdb95b",
+  "runtime_checks": [
+    {
+      "argv": [
+        "/usr/bin/git",
+        "--no-optional-locks",
+        "-C",
+        "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0,
+      "reaped": true,
+      "stdout": "9c632547af2253b9672a92fac320c70af3263bb8\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/git",
+        "--no-optional-locks",
+        "-C",
+        "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration",
+        "diff",
+        "--no-ext-diff",
+        "--binary",
+        "9c632547af2253b9672a92fac320c70af3263bb8",
+        "--",
+        "Cargo.lock",
+        "Cargo.toml",
+        "benchmarks/inprocess/Cargo.lock",
+        "benchmarks/inprocess/Cargo.toml",
+        "crates/oriole/Cargo.toml",
+        "crates/oriole/examples/frame_coverage.rs",
+        "crates/oriole/src/accounting.rs",
+        "crates/oriole/src/active.rs",
+        "crates/oriole/src/arena.rs",
+        "crates/oriole/src/context_text_tests.rs",
+        "crates/oriole/src/dtd.rs",
+        "crates/oriole/src/dtd/attlist.rs",
+        "crates/oriole/src/dtd/composition.rs",
+        "crates/oriole/src/dtd/grammar.rs",
+        "crates/oriole/src/dtd/semantic.rs",
+        "crates/oriole/src/dtd_tables.rs",
+        "crates/oriole/src/encoding.rs",
+        "crates/oriole/src/lexical.rs",
+        "crates/oriole/src/lib.rs",
+        "crates/oriole/src/names.rs",
+        "crates/oriole/src/recycling.rs",
+        "crates/oriole/src/tag.rs",
+        "crates/oriole/src/text.rs",
+        "crates/oriole/src/value.rs",
+        "crates/oriole/src/value_lexer.rs",
+        "crates/oriole/tests/adapter_frame.rs",
+        "crates/oriole/tests/allocation.rs",
+        "crates/oriole/tests/amplification.rs",
+        "crates/oriole/tests/attribute_entities.rs",
+        "crates/oriole/tests/conditional.rs",
+        "crates/oriole/tests/declaration_tokens.rs",
+        "crates/oriole/tests/diagnostics.rs",
+        "crates/oriole/tests/encodings.rs",
+        "crates/oriole/tests/entity_depth.rs",
+        "crates/oriole/tests/event_output.rs",
+        "crates/oriole/tests/external_grammar.rs",
+        "crates/oriole/tests/external_headers.rs",
+        "crates/oriole/tests/external_limits.rs",
+        "crates/oriole/tests/external_values.rs",
+        "crates/oriole/tests/foreign_dtd.rs",
+        "crates/oriole/tests/malformed_dtd.rs",
+        "crates/oriole/tests/missing_parameters.rs",
+        "crates/oriole/tests/multibyte.rs",
+        "crates/oriole/tests/name_rules.rs",
+        "crates/oriole/tests/parameter_values.rs",
+        "crates/oriole/tests/parser.rs",
+        "crates/oriole/tests/positions.rs",
+        "crates/oriole/tests/prolog.rs",
+        "crates/oriole/tests/raw_tokens.rs",
+        "crates/oriole/tests/recycling.rs",
+        "crates/oriole/tests/reparse_deferral.rs",
+        "crates/oriole/tests/text_coalescing.rs",
+        "crates/oriole_cli/Cargo.toml",
+        "crates/oriole_cli/src/main.rs",
+        "crates/oriole_expat/Cargo.toml",
+        "crates/oriole_expat/README.md",
+        "crates/oriole_expat/src/content_model.rs",
+        "crates/oriole_expat/src/context_text_tests.rs",
+        "crates/oriole_expat/src/lib.rs",
+        "crates/oriole_expat/src/tests.rs",
+        "crates/oriole_expat/tests/memory.rs",
+        "crates/oriole_storage/Cargo.toml",
+        "crates/oriole_storage/src/allocator.rs",
+        "crates/oriole_storage/src/hashing.rs",
+        "crates/oriole_storage/src/lib.rs",
+        "crates/oriole_storage/src/queue.rs",
+        "crates/oriole_storage/src/shared.rs",
+        "crates/oriole_storage/src/string.rs",
+        "crates/oriole_storage/src/tests.rs",
+        "crates/oriole_storage/src/tracking.rs",
+        "crates/oriole_storage/src/try_lock.rs",
+        "fuzz/Cargo.lock",
+        "fuzz/Cargo.toml",
+        "include/expat.h",
+        "tests/c/UPSTREAM-NOTICES.txt",
+        "tests/c/adversarial.c",
+        "tests/c/allocations.c",
+        "tests/c/integration.c"
+      ],
+      "exit": 0,
+      "reaped": true,
+      "stdout": "diff --git a/crates/oriole/src/arena.rs b/crates/oriole/src/arena.rs\nindex 3036184..ff94d3e 100644\n--- a/crates/oriole/src/arena.rs\n+++ b/crates/oriole/src/arena.rs\n@@ -525,6 +525,57 @@ mod tests {\n         assert!(frame.bytes.capacity() <= MAX_ARENA_BYTES);\n     }\n \n+    #[test]\n+    fn direct_start_keeps_the_warmed_text_arena_owner() {\n+        let mut parser = Parser::new(Config::default());\n+        parser.enable_input_context();\n+        parser.feed(b\"<r><w a='v' b='v'/>\", false).unwrap();\n+        while parser.next_event().unwrap().is_some() {}\n+        let text = \"x\".repeat(3000);\n+        parser.feed(text.as_bytes(), false).unwrap();\n+        let mut frame = parser.adapter_frame();\n+        let mut event = None;\n+        parser\n+            .next_event_for_c_text_context_into(&mut event, &mut frame)\n+            .unwrap()\n+            .unwrap();\n+        assert!(frame.native_text_range_for_c().is_some());\n+        let owner = frame.bytes.as_ptr();\n+        let capacity = frame.bytes.capacity();\n+        assert_eq!(capacity, 3000);\n+        let tag = \"<n a='value' b='more'>\";\n+        parser.feed(tag.as_bytes(), false).unwrap();\n+        parser\n+            .next_event_for_c_text_context_into(&mut event, &mut frame)\n+            .unwrap()\n+            .unwrap();\n+        assert!(event.is_none() && frame.is_active());\n+        assert!(parser.native_raw.is_some());\n+        assert_eq!(parser.current_raw(), Some(tag));\n+        assert_eq!(frame.bytes.as_ptr(), owner);\n+        assert_eq!(frame.bytes.capacity(), capacity);\n+        assert_eq!(frame.name_bytes(), b\"n\\0\");\n+        assert_eq!(\n+            frame.attributes().collect::<std::vec::Vec<_>>(),\n+            [\n+                (b\"a\\0\".as_slice(), b\"value\\0\".as_slice()),\n+                (b\"b\\0\".as_slice(), b\"more\\0\".as_slice()),\n+            ]\n+        );\n+        let retained =\n+            frame.bytes.capacity() + frame.attributes.capacity() * size_of::<ArenaAttribute>();\n+        assert!(retained <= RETAINED_ARENA_BYTES);\n+        parser.feed(text.as_bytes(), false).unwrap();\n+        parser\n+            .next_event_for_c_text_context_into(&mut event, &mut frame)\n+            .unwrap()\n+            .unwrap();\n+        assert!(frame.native_text_range_for_c().is_some());\n+        assert_eq!(frame.bytes.as_ptr(), owner);\n+        assert_eq!(frame.bytes.capacity(), capacity);\n+        parser.finish_adapter_frame(frame);\n+    }\n+\n     #[test]\n     fn start_after_text_stays_within_the_reserved_frame_capacity() {\n         let warm_attributes = (0..MAX_ARENA_ATTRIBUTES)\ndiff --git a/crates/oriole/src/encoding.rs b/crates/oriole/src/encoding.rs\nindex 1b108e4..b73e56f 100644\n--- a/crates/oriole/src/encoding.rs\n+++ b/crates/oriole/src/encoding.rs\n@@ -1,4 +1,4 @@\n-use crate::{Error, ErrorKind, Position, ScanMode};\n+use crate::{DeclarationContext, Error, ErrorKind, Position, ScanMode};\n use oriole_storage::{Allocator, Box, String, Vec, try_box, try_extend_from_slice};\n \n #[derive(Clone, Copy, Debug, Eq, PartialEq)]\n@@ -53,6 +53,7 @@ impl Detection {\n         final_input: bool,\n         max_token: usize,\n         external_content: bool,\n+        declaration_context: DeclarationContext,\n     ) -> Result<Option<(Encoding, usize)>, Error> {\n         // An explicitly labelled external text entity can begin with ordinary\n         // Latin-1 bytes that happen to spell a Unicode byte-order mark.\n@@ -161,6 +162,23 @@ impl Detection {\n                         let encoding = Encoding::named(name);\n                         let mismatch = name.eq_ignore_ascii_case(\"UTF-16\")\n                             || matches!(encoding, Some(Encoding::Utf16Le | Encoding::Utf16Be));\n+                        if encoding.is_none()\n+                            && !mismatch\n+                            && declaration.len() + 2 <= max_token\n+                            && declaration\n+                                .bytes()\n+                                .all(|byte| required_ascii(i32::from(byte)))\n+                            && crate::malformed_ascii_declaration(\n+                                &declaration[5..],\n+                                declaration_context,\n+                            )\n+                        {\n+                            // These bytes are invariant under every custom map.\n+                            // Let ordinary token parsing publish the grammar error before any\n+                            // unknown-encoding callback; never decode a valid\n+                            // unknown encoding by assuming UTF-8.\n+                            return Ok(Some((Encoding::Utf8, skip)));\n+                        }\n                         if encoding.is_none() || mismatch {\n                             let offset = declaration.len() - rest.len() + 1;\n                             let mut position = Position {\n@@ -279,6 +297,7 @@ impl Decoder {\n         source: &mut Source,\n         max_token: usize,\n         external_content: bool,\n+        declaration_context: DeclarationContext,\n     ) -> Result<(), Error> {\n         if self.encoding == Some(Encoding::Utf8)\n             && self.conversion.is_none()\n@@ -311,6 +330,7 @@ impl Decoder {\n                 final_input,\n                 max_token,\n                 external_content,\n+                declaration_context,\n             )?\n             else {\n                 return Ok(());\n@@ -808,6 +828,7 @@ impl InputContext {\n         final_input: bool,\n         max_token: usize,\n         external_content: bool,\n+        declaration_context: DeclarationContext,\n     ) -> Result<(), Error> {\n         debug_assert!(self.native);\n         if decoder.encoding == Some(Encoding::Utf8) {\n@@ -820,6 +841,7 @@ impl InputContext {\n             final_input,\n             max_token,\n             external_content,\n+            declaration_context,\n         );\n         match detected {\n             Ok(None) => Ok(()),\n@@ -843,7 +865,14 @@ impl InputContext {\n                 source.raw_index = skip;\n                 source.column = usize::from(skip != 0);\n                 decoder.pending.drain(..skip);\n-                decoder.feed(&[], final_input, source, max_token, external_content)\n+                decoder.feed(\n+                    &[],\n+                    final_input,\n+                    source,\n+                    max_token,\n+                    external_content,\n+                    declaration_context,\n+                )\n             }\n         }\n     }\n@@ -1580,9 +1609,22 @@ mod tests {\n                     for (part, final_input) in [(&bytes[..split], false), (&bytes[split..], true)] {\n                         // A nonempty pending buffer selects the unchanged path.\n                         buffered.append_pending(part).unwrap();\n-                        let expected =\n-                            buffered.feed(&[], final_input, &mut buffered_source, 64, false);\n-                        let actual = direct.feed(part, final_input, &mut direct_source, 64, false);\n+                        let expected = buffered.feed(\n+                            &[],\n+                            final_input,\n+                            &mut buffered_source,\n+                            64,\n+                            false,\n+                            DeclarationContext::Document,\n+                        );\n+                        let actual = direct.feed(\n+                            part,\n+                            final_input,\n+                            &mut direct_source,\n+                            64,\n+                            false,\n+                            DeclarationContext::Document,\n+                        );\n                         assert_eq!(actual, expected, \"{bytes:?}, split {split}, warm {warm}\");\n                         assert_eq!(direct.pending, buffered.pending);\n                         assert_eq!(direct.pending_cursor, buffered.pending_cursor);\n@@ -1623,7 +1665,14 @@ mod tests {\n                 // block or growth. Restoring pending must not request one.\n                 tracker.set_activation_threshold(0);\n                 let error = decoder\n-                    .feed(&bytes, true, &mut source, 1024, false)\n+                    .feed(\n+                        &bytes,\n+                        true,\n+                        &mut source,\n+                        1024,\n+                        false,\n+                        DeclarationContext::Document,\n+                    )\n                     .unwrap_err();\n                 assert_eq!(error, Error::bare(ErrorKind::NoMemory, \"out of memory\"));\n                 assert_eq!(decoder.pending.as_slice(), bytes.as_slice());\n@@ -1635,7 +1684,16 @@ mod tests {\n                 assert_eq!(tracker.live_bytes(), live);\n                 tracker.set_activation_threshold(u64::MAX);\n                 // The retained bytes are available to the ordinary decoder path.\n-                decoder.feed(&[], true, &mut source, 1024, false).unwrap();\n+                decoder\n+                    .feed(\n+                        &[],\n+                        true,\n+                        &mut source,\n+                        1024,\n+                        false,\n+                        DeclarationContext::Document,\n+                    )\n+                    .unwrap();\n                 assert!(decoder.pending.is_empty());\n                 assert_eq!(source.text.len(), prefix.len() + bytes.len());\n                 assert_eq!(\ndiff --git a/crates/oriole/src/lib.rs b/crates/oriole/src/lib.rs\nindex ed7e389..98eb5f7 100644\n--- a/crates/oriole/src/lib.rs\n+++ b/crates/oriole/src/lib.rs\n@@ -168,6 +168,8 @@ pub enum ErrorKind {\n     ReservedNamespaceUri,\n     LimitExceeded,\n     Finished,\n+    /// Malformed declaration at the start of an external text entity.\n+    TextDeclaration,\n }\n \n impl fmt::Display for Error {\n@@ -562,7 +564,10 @@ pub struct Parser {\n     // Nonempty undo blocks correspond in order to the declaring elements in\n     // `stack`. Elements without declarations leave their ancestors' blocks alone.\n     namespace_scopes: Vec<NamespaceBindings>,\n+    // Only nonempty prefixes live in the salted map. This slot owns the sole\n+    // current default URI; scope undo records keep the displaced owners.\n     namespaces: HashMap<String, String>,\n+    default_namespace: Option<String>,\n     tables: DtdTables,\n     shared_tables: OnceLock<Shared<oriole_storage::TryLock<DtdTables>>>,\n     parameter_mode: u8,\n@@ -611,6 +616,96 @@ pub struct Parser {\n     id_attribute_index: Option<usize>,\n }\n \n+/// Borrow only the fields changed by a nonempty identity Start.\n+/// Source stays in the parser, and every borrow ends before event delivery.\n+struct IdentityStartState<'a> {\n+    source: &'a Source,\n+    allocator: Allocator,\n+    limits: &'a Limits,\n+    namespaces: &'a HashMap<String, String>,\n+    raw_attributes: &'a mut Vec<RawAttribute>,\n+    event_recycling: &'a mut EventRecycling,\n+    stack: &'a mut Vec<Element>,\n+    id_attribute_index: &'a mut Option<usize>,\n+    seen_root: &'a mut bool,\n+    declaration_allowed: &'a mut bool,\n+}\n+\n+impl IdentityStartState<'_> {\n+    /// Keep the selected copy/error order for both borrowed and copied tokens.\n+    fn lower(\n+        self,\n+        name: &str,\n+        rest: &str,\n+        position: Position,\n+        frame: &mut AdapterFrame,\n+    ) -> Result<(), Error> {\n+        let mut raw_attrs = std::mem::replace(self.raw_attributes, Vec::new_in(self.allocator));\n+        if raw_attrs.len() > self.limits.max_attributes {\n+            return Err(Error {\n+                kind: ErrorKind::LimitExceeded,\n+                message: \"attribute count limit exceeded\",\n+                position: self.source.position(0),\n+            });\n+        }\n+        self.event_recycling\n+            .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);\n+        frame.prepare(raw_attrs.len())?;\n+        let literal_span = !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);\n+        let mut names = (raw_attrs.len() > 8)\n+            .then(|| HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator));\n+        for (index, attribute) in raw_attrs.iter().enumerate() {\n+            let (attr_name, value, attribute_offset, _) = attribute.parts(rest);\n+            let duplicate = if let Some(names) = &mut names {\n+                !try_set_insert(names, attr_name)?\n+            } else {\n+                raw_attrs[..index]\n+                    .iter()\n+                    .any(|attribute| attribute.name(rest) == attr_name)\n+            };\n+            if duplicate {\n+                return Err(Error {\n+                    kind: ErrorKind::DuplicateAttribute,\n+                    message: \"duplicate attribute\",\n+                    position: self\n+                        .source\n+                        .position_at(1 + name.len() + attribute_offset, 0),\n+                });\n+            }\n+            if !literal_span {\n+                frame.push_attribute(attr_name, value)?;\n+            }\n+        }\n+        if literal_span {\n+            frame.push_literal_attributes(rest, &raw_attrs)?;\n+        }\n+        *self.id_attribute_index = None;\n+        frame.set_name(name)?;\n+        *self.seen_root = true;\n+        *self.declaration_allowed = false;\n+        let reusable = self.event_recycling.take_name();\n+        let value = recycling::copy_name(name, reusable, self.allocator)?;\n+        try_push(\n+            self.stack,\n+            Element {\n+                name: ElementName {\n+                    raw_start: 0,\n+                    expanded_end: value.len(),\n+                    value,\n+                },\n+                raw_encoding: None,\n+                namespace_scope: None,\n+            },\n+        )?;\n+        if raw_attrs.capacity() <= 128 {\n+            raw_attrs.clear();\n+            *self.raw_attributes = raw_attrs;\n+        }\n+        frame.publish(position);\n+        Ok(())\n+    }\n+}\n+\n impl Parser {\n     #[must_use]\n     pub fn new(config: Config) -> Self {\n@@ -650,6 +745,7 @@ impl Parser {\n             input_context: None,\n             sources,\n             namespaces,\n+            default_namespace: None,\n             pending: Queue::new_in(allocator),\n             stack: Vec::new_in(allocator),\n             namespace_scopes: Vec::new_in(allocator),\n@@ -710,6 +806,37 @@ impl Parser {\n         self.allocator\n     }\n \n+    /// Iterate both owners; None denotes the default prefix without inventing\n+    /// an empty String owner or widening the temporary two-reference records.\n+    fn namespace_bindings(&self) -> impl Iterator<Item = (Option<&String>, &String)> {\n+        self.namespaces\n+            .iter()\n+            .map(|(prefix, uri)| (Some(prefix), uri))\n+            .chain(self.default_namespace.as_ref().map(|uri| (None, uri)))\n+    }\n+\n+    /// Install one authoritative owner, retaining fallible prefixed-map growth.\n+    fn insert_namespace(\n+        &mut self,\n+        prefix: String,\n+        uri: String,\n+    ) -> Result<Option<String>, AllocError> {\n+        if prefix.is_empty() {\n+            Ok(self.default_namespace.replace(uri))\n+        } else {\n+            try_insert(&mut self.namespaces, prefix, uri)\n+        }\n+    }\n+\n+    /// Remove the active binding so its owner can become an undo record.\n+    fn remove_namespace(&mut self, prefix: &str) -> Option<String> {\n+        if prefix.is_empty() {\n+            self.default_namespace.take()\n+        } else {\n+            self.namespaces.remove(prefix)\n+        }\n+    }\n+\n     /// Return this parser's local caller salt, without exposing secret randomized keys.\n     /// Parameter children share their DTD seed separately from local namespace and\n     /// active-name indexes, so changing another parser's seed does not change this value.\n@@ -915,6 +1042,7 @@ impl Parser {\n             child.shared_tables = OnceLock::from(owner.expect(\"parameter DTD owner\"));\n         }\n         child.namespaces.clear();\n+        child.default_namespace = self.default_namespace.try_clone()?;\n         for (prefix, uri) in &self.namespaces {\n             try_insert(&mut child.namespaces, prefix.try_clone()?, uri.try_clone()?)?;\n         }\n@@ -945,10 +1073,9 @@ impl Parser {\n             for part in context.split('\\u{c}').filter(|part| !part.is_empty()) {\n                 if let Some((prefix, uri)) = part.split_once('=') {\n                     if uri.is_empty() {\n-                        child.namespaces.remove(prefix);\n+                        child.remove_namespace(prefix);\n                     } else {\n-                        try_insert(\n-                            &mut child.namespaces,\n+                        child.insert_namespace(\n                             string(prefix, self.allocator)?,\n                             string(uri, self.allocator)?,\n                         )?;\n@@ -1029,9 +1156,10 @@ impl Parser {\n         context: Option<&str>,\n         encoding: Option<&str>,\n     ) -> Result<(), Error> {\n-        for (prefix, uri) in &self.namespaces {\n+        for (prefix, uri) in self.namespace_bindings() {\n+            // Preserve the logical key/URI charge even for the dedicated slot.\n             self.charge_expansion(size_of::<(String, String)>())?;\n-            self.charge_expansion(prefix.len())?;\n+            self.charge_expansion(prefix.map_or(0, |prefix| prefix.len()))?;\n             self.charge_expansion(uri.len())?;\n         }\n         for name in &self.entity_chain {\n@@ -1277,6 +1405,14 @@ impl Parser {\n             .map_or((&[], 0), |context| context.view(&self.sources[0]))\n     }\n \n+    fn declaration_context(&self) -> DeclarationContext {\n+        if self.fragment && !self.is_external_value() {\n+            DeclarationContext::Text\n+        } else {\n+            DeclarationContext::Document\n+        }\n+    }\n+\n     fn feed_inner(&mut self, bytes: &[u8], is_final: bool, native: bool) -> Result<(), Error> {\n         if let Some(error) = &self.error {\n             return Err(*error);\n@@ -1306,6 +1442,7 @@ impl Parser {\n             }\n             return Ok(());\n         }\n+        let declaration_context = self.declaration_context();\n         let decoded = if native {\n             self.input_context\n                 .as_mut()\n@@ -1316,6 +1453,7 @@ impl Parser {\n                     is_final,\n                     self.config.limits.max_token_bytes,\n                     self.fragment && !self.external_subset,\n+                    declaration_context,\n                 )\n         } else {\n             self.decoder.feed(\n@@ -1324,6 +1462,7 @@ impl Parser {\n                 &mut self.sources[0],\n                 self.config.limits.max_token_bytes,\n                 self.fragment && !self.external_subset,\n+                declaration_context,\n             )\n         };\n         if let Err(error) = decoded {\n@@ -1452,12 +1591,14 @@ impl Parser {\n         self.mark_parameter_read();\n         self.error = None;\n         self.decoding_error = None;\n+        let declaration_context = self.declaration_context();\n         if let Err(error) = self.decoder.feed(\n             &[],\n             self.final_input,\n             &mut self.sources[0],\n             self.config.limits.max_token_bytes,\n             self.fragment && !self.external_subset,\n+            declaration_context,\n         ) {\n             self.decoding_error = Some((error.kind, error.message));\n         }\n@@ -1493,12 +1634,14 @@ impl Parser {\n             self.error = Some(error);\n             return Err(error);\n         }\n+        let declaration_context = self.declaration_context();\n         if let Err(error) = self.decoder.feed(\n             &[],\n             self.final_input,\n             &mut self.sources[0],\n             self.config.limits.max_token_bytes,\n             self.fragment && !self.external_subset,\n+            declaration_context,\n         ) {\n             self.decoding_error = Some((error.kind, error.message));\n         }\n@@ -2383,90 +2526,126 @@ impl Parser {\n                 frame.publish(position);\n                 continue;\n             }\n-            let mut token = std::mem::replace(\n-                &mut self.token_scratch,\n-                lexical::Buffer::new_in(self.allocator),\n-            );\n-            token.clear();\n-            token.append(\n-                self.source()\n-                    .lexical_remaining()\n-                    .for_slice(&self.source().remaining()[..end]),\n-            )?;\n+            let direct_start_name = if let tag::Planned::Complete { name_end, .. } = planned\n+                && output.c_text_context\n+                && self.input_context.is_some()\n+                && !self.closed_root\n+                && self.stack.len() < self.config.limits.max_depth\n+                && end <= arena::MAX_ARENA_BYTES\n+                && self.raw_attributes.len() <= arena::MAX_ARENA_ATTRIBUTES\n+            {\n+                let token = &self.source().remaining()[..end];\n+                (!token.ends_with(\"/>\")\n+                    && self.identity_frame_names(&token[1..name_end], &token[name_end..end - 1]))\n+                .then_some(name_end)\n+            } else {\n+                None\n+            };\n             let mut framed_end = false;\n-            let parsed = (|| {\n-                if matched_end.is_none()\n-                    && !matches!(planned, tag::Planned::Complete { .. })\n-                    && let Some(offset) = invalid_xml_char(&token)\n-                {\n-                    return Err(self.err_at(\n-                        ErrorKind::InvalidToken,\n-                        \"invalid XML character\",\n-                        offset,\n-                    ));\n-                }\n-                match mode {\n-                    ScanMode::Comment => {\n-                        let text = &token[4..token.len() - 3];\n-                        if let Some(offset) = text.find(\"--\") {\n-                            return Err(self.err_at(\n-                                ErrorKind::InvalidToken,\n-                                \"double hyphen in comment\",\n-                                4 + offset + 2,\n-                            ));\n+            if let Some(name_end) = direct_start_name\n+                && let Some(frame) = output.frame.as_deref_mut()\n+            {\n+                let state = self.identity_start_state();\n+                let source = state.source;\n+                let token = &source.remaining()[..end];\n+                let parsed = state.lower(\n+                    &token[1..name_end],\n+                    &token[name_end..end - 1],\n+                    position,\n+                    frame,\n+                );\n+                // Lowering has released every source/field borrow. Publish the\n+                // complete token before either its frame or terminal error.\n+                self.native_raw = Some(NativeRawRange {\n+                    start: position.byte_index,\n+                    count: NonZeroUsize::new(end).expect(\"nonempty planned Start\"),\n+                });\n+                parsed?;\n+            } else {\n+                let mut token = std::mem::replace(\n+                    &mut self.token_scratch,\n+                    lexical::Buffer::new_in(self.allocator),\n+                );\n+                token.clear();\n+                token.append(\n+                    self.source()\n+                        .lexical_remaining()\n+                        .for_slice(&self.source().remaining()[..end]),\n+                )?;\n+                let parsed = (|| {\n+                    if matched_end.is_none()\n+                        && !matches!(planned, tag::Planned::Complete { .. })\n+                        && let Some(offset) = invalid_xml_char(&token)\n+                    {\n+                        return Err(self.err_at(\n+                            ErrorKind::InvalidToken,\n+                            \"invalid XML character\",\n+                            offset,\n+                        ));\n+                    }\n+                    match mode {\n+                        ScanMode::Comment => {\n+                            let text = &token[4..token.len() - 3];\n+                            if let Some(offset) = text.find(\"--\") {\n+                                return Err(self.err_at(\n+                                    ErrorKind::InvalidToken,\n+                                    \"double hyphen in comment\",\n+                                    4 + offset + 2,\n+                                ));\n+                            }\n+                            if text.ends_with('-') {\n+                                return Err(self.err_at(\n+                                    ErrorKind::InvalidToken,\n+                                    \"double hyphen in comment\",\n+                                    5 + text.len(),\n+                                ));\n+                            }\n+                            self.declaration_allowed = false;\n+                            self.emit(\n+                                EventKind::Comment(self.markup_text(token.view().for_slice(text))?),\n+                                position,\n+                            )?;\n                         }\n-                        if text.ends_with('-') {\n-                            return Err(self.err_at(\n-                                ErrorKind::InvalidToken,\n-                                \"double hyphen in comment\",\n-                                5 + text.len(),\n-                            ));\n+                        ScanMode::Pi => self.parse_pi(token.view(), position)?,\n+                        ScanMode::Doctype => self.parse_doctype(token.view(), position)?,\n+                        ScanMode::Tag if matched_end.is_some() => {\n+                            if !self.seen_doctype\n+                                && !self.foreign_dtd\n+                                && self.shared_tables.get().is_none()\n+                                && self\n+                                    .stack\n+                                    .last()\n+                                    .is_some_and(|element| element.namespace_scope.is_none())\n+                                && let Some(frame) = output.frame.as_deref_mut()\n+                            {\n+                                self.prepare_end_frame(frame);\n+                                framed_end = true;\n+                            } else {\n+                                self.end_element(position)?;\n+                            }\n+                        }\n+                        ScanMode::Tag if token.starts_with(\"</\") => {\n+                            self.parse_end(token.view(), position)?\n                         }\n-                        self.declaration_allowed = false;\n-                        self.emit(\n-                            EventKind::Comment(self.markup_text(token.view().for_slice(text))?),\n+                        ScanMode::Tag => self.parse_start(\n+                            token.view(),\n                             position,\n-                        )?;\n-                    }\n-                    ScanMode::Pi => self.parse_pi(token.view(), position)?,\n-                    ScanMode::Doctype => self.parse_doctype(token.view(), position)?,\n-                    ScanMode::Tag if matched_end.is_some() => {\n-                        if !self.seen_doctype\n-                            && !self.foreign_dtd\n-                            && self.shared_tables.get().is_none()\n-                            && self\n-                                .stack\n-                                .last()\n-                                .is_some_and(|element| element.namespace_scope.is_none())\n-                            && let Some(frame) = output.frame.as_deref_mut()\n-                        {\n-                            self.prepare_end_frame(frame);\n-                            framed_end = true;\n-                        } else {\n-                            self.end_element(position)?;\n+                            planned,\n+                            output.frame.as_deref_mut(),\n+                        )?,\n+                        ScanMode::DtdDeclaration => {\n+                            unreachable!(\"DTD scanner only runs in DTD context\")\n                         }\n                     }\n-                    ScanMode::Tag if token.starts_with(\"</\") => {\n-                        self.parse_end(token.view(), position)?\n-                    }\n-                    ScanMode::Tag => self.parse_start(\n-                        token.view(),\n-                        position,\n-                        planned,\n-                        output.frame.as_deref_mut(),\n-                    )?,\n-                    ScanMode::DtdDeclaration => {\n-                        unreachable!(\"DTD scanner only runs in DTD context\")\n-                    }\n-                }\n-                Ok(())\n-            })();\n-            // Parsing only writes queued raw overrides. Publish the owned token\n-            // before returning either its events or its terminal error.\n-            token.swap_decoded(&mut self.current_raw)?;\n-            self.native_raw = None;\n-            parsed?;\n-            self.token_scratch = token;\n+                    Ok(())\n+                })();\n+                // Parsing only writes queued raw overrides. Publish the owned token\n+                // before returning either its events or its terminal error.\n+                token.swap_decoded(&mut self.current_raw)?;\n+                self.native_raw = None;\n+                parsed?;\n+                self.token_scratch = token;\n+            }\n             if matches!(\n                 planned,\n                 tag::Planned::Complete {\n@@ -2964,11 +3143,12 @@ impl Parser {\n             let mut context = String::new_in(self.allocator);\n             if self.config.namespace_separator.is_some() {\n                 let mut bindings = Vec::new_in(self.allocator);\n-                for binding in &self.namespaces {\n+                for binding in self.namespace_bindings() {\n                     try_push(&mut bindings, binding)?;\n                 }\n-                bindings.sort_unstable_by_key(|(prefix, _)| *prefix);\n+                bindings.sort_unstable_by_key(|(prefix, _)| prefix.map_or(\"\", String::as_str));\n                 for (prefix, uri) in bindings {\n+                    let prefix = prefix.map_or(\"\", String::as_str);\n                     self.charge_expansion(prefix.len())?;\n                     self.charge_expansion(uri.len())?;\n                     self.charge_expansion(2)?;\n@@ -3054,12 +3234,20 @@ impl Parser {\n             ));\n         }\n         if target.eq_ignore_ascii_case(\"xml\") {\n-            if target != \"xml\" || !self.declaration_allowed || self.sources.len() > 1 {\n+            if target != \"xml\" {\n+                return Err(self.err(\n+                    ErrorKind::InvalidToken,\n+                    \"reserved processing instruction target\",\n+                ));\n+            }\n+            if !self.declaration_allowed || self.sources.len() > 1 {\n                 return Err(self.err(\n                     ErrorKind::MisplacedXmlDeclaration,\n                     \"XML declaration is not at the beginning\",\n                 ));\n             }\n+            let context = self.declaration_context();\n+            let declaration_error = context.error_kind();\n             let mut attrs = Vec::new_in(self.allocator);\n             parse_raw_attributes(rest, false, &mut attrs, 3, self.config.name_rules).map_err(\n                 |error| {\n@@ -3067,112 +3255,57 @@ impl Parser {\n                         if error.kind == ErrorKind::NoMemory {\n                             ErrorKind::NoMemory\n                         } else {\n-                            ErrorKind::XmlDeclaration\n+                            declaration_error\n                         },\n                         error.message,\n                         2 + target.len() + error.position.byte_index,\n                     )\n                 },\n             )?;\n-            if self.fragment && !self.is_external_value() {\n-                let mut attrs = attrs.into_iter().map(|attribute| attribute.parts(rest));\n-                let first = attrs\n-                    .next()\n-                    .ok_or_else(|| self.err(ErrorKind::XmlDeclaration, \"empty text declaration\"))?;\n-                let (version, encoding_attr) = if first.0 == \"version\" {\n-                    (\n-                        Some(token.for_slice(first.1).decode(self.allocator)?),\n-                        attrs.next(),\n-                    )\n-                } else {\n-                    (None, Some(first))\n-                };\n-                let (name, encoding, _, _) = encoding_attr.ok_or_else(|| {\n-                    self.err(\n-                        ErrorKind::XmlDeclaration,\n-                        \"text declaration requires an encoding\",\n-                    )\n-                })?;\n-                let encoding = token.for_slice(encoding).decoded(self.allocator)?;\n-                if name != \"encoding\" || !valid_encoding_name(&encoding) || attrs.next().is_some() {\n-                    return Err(self.err(ErrorKind::XmlDeclaration, \"invalid text declaration\"));\n-                }\n+            let allocator = self.allocator;\n+            let Declaration {\n+                version,\n+                encoding,\n+                standalone,\n+            } = declaration_fields(rest, &attrs, context, |value| {\n+                token.for_slice(value).decoded(allocator)\n+            })\n+            .map_err(|failure| match failure {\n+                DeclarationFailure::Allocation(error) => Error::from(error),\n+                DeclarationFailure::Syntax {\n+                    message,\n+                    offset: Some(offset),\n+                } => self.err_at(declaration_error, message, 2 + target.len() + offset),\n+                DeclarationFailure::Syntax {\n+                    message,\n+                    offset: None,\n+                } => self.err(declaration_error, message),\n+            })?;\n+            let version = version\n+                .map(|version| version.into_owned(allocator))\n+                .transpose()?;\n+            // Grammar is complete before an encoding error can invoke an adapter callback.\n+            if let Some(encoding) = &encoding {\n                 self.decoder\n-                    .check_declaration(&encoding)\n+                    .check_declaration(encoding)\n                     .map_err(|error| self.err(error.kind, error.message))?;\n+            }\n+            if context == DeclarationContext::Text {\n                 self.declaration_allowed = false;\n                 self.emit(\n                     EventKind::TextDeclaration {\n                         version,\n-                        encoding: string(&encoding, self.allocator)?,\n+                        encoding: string(&encoding.expect(\"validated text encoding\"), allocator)?,\n                     },\n                     position,\n                 )?;\n                 return Ok(());\n             }\n-            let version = attrs\n-                .first()\n-                .map(|attribute| {\n-                    token\n-                        .for_slice(attribute.value(rest))\n-                        .decoded(self.allocator)\n-                })\n+            let version = version.expect(\"validated document version\");\n+            let encoding = encoding\n+                .map(|encoding| encoding.into_owned(allocator))\n                 .transpose()?;\n-            if attrs.is_empty()\n-                || attrs[0].name(rest) != \"version\"\n-                || !version.as_ref().is_some_and(|version| {\n-                    !version.is_empty()\n-                        && version.bytes().all(|byte| {\n-                            byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_')\n-                        })\n-                })\n-            {\n-                return Err(self.err_at(\n-                    ErrorKind::XmlDeclaration,\n-                    \"XML declaration must begin with a version\",\n-                    2 + target.len() + attrs.first().map_or(0, |attribute| attribute.name_start),\n-                ));\n-            }\n-            let version = version\n-                .expect(\"validated declaration version\")\n-                .into_owned(self.allocator)?;\n-            let mut encoding = None;\n-            let mut standalone = None;\n-            for attribute in attrs.into_iter().skip(1) {\n-                let (name, value, _, _) = attribute.parts(rest);\n-                match name {\n-                    \"encoding\" if encoding.is_none() && standalone.is_none() => {\n-                        let value = token.for_slice(value).decoded(self.allocator)?;\n-                        if !valid_encoding_name(&value) {\n-                            return Err(\n-                                self.err(ErrorKind::XmlDeclaration, \"invalid encoding name\")\n-                            );\n-                        }\n-                        self.decoder\n-                            .check_declaration(&value)\n-                            .map_err(|error| self.err(error.kind, error.message))?;\n-                        encoding = Some(value.into_owned(self.allocator)?);\n-                    }\n-                    \"standalone\" if standalone.is_none() => {\n-                        standalone = Some(match value {\n-                            \"yes\" => true,\n-                            \"no\" => false,\n-                            _ => {\n-                                return Err(self.err(\n-                                    ErrorKind::XmlDeclaration,\n-                                    \"invalid standalone declaration\",\n-                                ));\n-                            }\n-                        });\n-                    }\n-                    _ => {\n-                        return Err(self.err(\n-                            ErrorKind::XmlDeclaration,\n-                            \"invalid XML declaration attribute\",\n-                        ));\n-                    }\n-                }\n-            }\n+            drop(attrs);\n             self.standalone =\n                 standalone == Some(true) || (self.is_external_value() && self.standalone);\n             if standalone == Some(true) && self.parameter_mode == 1 {\n@@ -3237,13 +3370,7 @@ impl Parser {\n                 && self.raw_attributes.len() <= arena::MAX_ARENA_ATTRIBUTES\n                 // A frame contains final callback spellings. Namespace-aware\n                 // tags can share this storage only when expansion is identity.\n-                && (self.config.namespace_separator.is_none()\n-                    || (!raw_name.contains(':')\n-                        && !self.namespaces.contains_key(\"\")\n-                        && self.raw_attributes.iter().all(|attribute| {\n-                            let name = attribute.name(rest);\n-                            name != \"xmlns\" && !name.contains(':')\n-                        })))\n+                && self.identity_frame_names(raw_name, rest)\n         }) {\n             return self.parse_start_frame::<false>(token, position, raw_name, rest, frame);\n         }\n@@ -3455,13 +3582,9 @@ impl Parser {\n                         ));\n                     }\n                     let previous = if uri.is_empty() {\n-                        self.namespaces.remove(prefix)\n+                        self.remove_namespace(prefix)\n                     } else {\n-                        try_insert(\n-                            &mut self.namespaces,\n-                            string(prefix, self.allocator)?,\n-                            uri.try_clone()?,\n-                        )?\n+                        self.insert_namespace(string(prefix, self.allocator)?, uri.try_clone()?)?\n                     };\n                     try_push(&mut bindings, (string(prefix, self.allocator)?, previous))?;\n                     self.emit(\n@@ -3602,6 +3725,38 @@ impl Parser {\n         Ok(())\n     }\n \n+    /// Apply the same namespace identity test before either token representation.\n+    fn identity_frame_names(&self, name: &str, rest: &str) -> bool {\n+        self.config.namespace_separator.is_none()\n+            || (!name.contains(':')\n+                && self.default_namespace.is_none()\n+                && self.raw_attributes.iter().all(|attribute| {\n+                    let name = attribute.name(rest);\n+                    name != \"xmlns\" && !name.contains(':')\n+                }))\n+    }\n+\n+    /// Split mutation fields from the live root source without moving its owner.\n+    fn identity_start_state(&mut self) -> IdentityStartState<'_> {\n+        debug_assert!(self.tables.defaults.is_empty());\n+        debug_assert!(!self.fragment && self.sources.len() == 1);\n+        IdentityStartState {\n+            source: self\n+                .sources\n+                .last()\n+                .expect(\"document source is always present\"),\n+            allocator: self.allocator,\n+            limits: &self.config.limits,\n+            namespaces: &self.namespaces,\n+            raw_attributes: &mut self.raw_attributes,\n+            event_recycling: &mut self.event_recycling,\n+            stack: &mut self.stack,\n+            id_attribute_index: &mut self.id_attribute_index,\n+            seen_root: &mut self.seen_root,\n+            declaration_allowed: &mut self.declaration_allowed,\n+        }\n+    }\n+\n     /// Check storage eligibility without charging URI work or changing error order.\n     fn expanded_name_fits_frame(&self, name: &str, token_bytes: usize) -> bool {\n         let Some(separator) = self.config.namespace_separator else {\n@@ -3612,8 +3767,9 @@ impl Parser {\n         }\n         let uri = match name.split_once(':') {\n             Some((\"xmlns\", _)) => return false,\n+            Some((\"\", _)) => self.default_namespace.as_ref(),\n             Some((prefix, _)) => self.namespaces.get(prefix),\n-            None => self.namespaces.get(\"\"),\n+            None => self.default_namespace.as_ref(),\n         };\n         let Some(uri) = uri else {\n             return false;\n@@ -3644,6 +3800,11 @@ impl Parser {\n         debug_assert!(self.tables.defaults.is_empty());\n         debug_assert!(!self.source().has_conversions());\n         debug_assert!(!self.fragment && self.sources.len() == 1);\n+        if !EXPAND_ELEMENT && !token.ends_with(\"/>\") {\n+            return self\n+                .identity_start_state()\n+                .lower(name, rest, position, frame);\n+        }\n         let mut raw_attrs =\n             std::mem::replace(&mut self.raw_attributes, Vec::new_in(self.allocator));\n         if raw_attrs.len() > self.config.limits.max_attributes {\n@@ -3812,10 +3973,10 @@ impl Parser {\n         for (prefix, previous) in bindings.into_iter().flatten().rev() {\n             match previous {\n                 Some(uri) => {\n-                    try_insert(&mut self.namespaces, prefix.try_clone()?, uri)?;\n+                    self.insert_namespace(prefix.try_clone()?, uri)?;\n                 }\n                 None => {\n-                    self.namespaces.remove(&prefix);\n+                    self.remove_namespace(&prefix);\n                 }\n             }\n             self.emit(\n@@ -3886,10 +4047,13 @@ impl Parser {\n                         \"xmlns cannot prefix an element or ordinary attribute\",\n                     ));\n                 }\n+                Some(\"\") => Some(self.default_namespace.as_ref().ok_or_else(|| {\n+                    self.err(ErrorKind::UndefinedPrefix, \"unbound namespace prefix\")\n+                })?),\n                 Some(prefix) => Some(self.namespaces.get(prefix).ok_or_else(|| {\n                     self.err(ErrorKind::UndefinedPrefix, \"unbound namespace prefix\")\n                 })?),\n-                None if !attribute => self.namespaces.get(\"\"),\n+                None if !attribute => self.default_namespace.as_ref(),\n                 None => None,\n             };\n         let Some(uri) = uri else {\n@@ -4265,6 +4429,156 @@ impl RawAttribute {\n     }\n }\n \n+/// Declaration grammar is independent of the encoding-detection BOM policy.\n+#[derive(Clone, Copy, Debug, Eq, PartialEq)]\n+enum DeclarationContext {\n+    Document,\n+    Text,\n+}\n+\n+impl DeclarationContext {\n+    fn error_kind(self) -> ErrorKind {\n+        match self {\n+            Self::Document => ErrorKind::XmlDeclaration,\n+            Self::Text => ErrorKind::TextDeclaration,\n+        }\n+    }\n+}\n+\n+struct Declaration<'a> {\n+    version: Option<lexical::Decoded<'a>>,\n+    encoding: Option<lexical::Decoded<'a>>,\n+    standalone: Option<bool>,\n+}\n+\n+enum DeclarationFailure {\n+    Syntax {\n+        message: &'static str,\n+        offset: Option<usize>,\n+    },\n+    Allocation(AllocError),\n+}\n+\n+/// Validate complete fields before checking their declared encoding. The caller\n+/// supplies lexical decoding; bootstrap ASCII values use borrowed slices only.\n+fn declaration_fields<'a>(\n+    rest: &'a str,\n+    attrs: &[RawAttribute],\n+    context: DeclarationContext,\n+    mut decode: impl FnMut(&'a str) -> Result<lexical::Decoded<'a>, AllocError>,\n+) -> Result<Declaration<'a>, DeclarationFailure> {\n+    let syntax = |message| DeclarationFailure::Syntax {\n+        message,\n+        offset: None,\n+    };\n+    let mut decode = |value: &'a str| decode(value).map_err(DeclarationFailure::Allocation);\n+    if context == DeclarationContext::Text {\n+        let mut attrs = attrs.iter().map(|attribute| attribute.parts(rest));\n+        let first = attrs\n+            .next()\n+            .ok_or_else(|| syntax(\"empty text declaration\"))?;\n+        let (version, encoding_attr) = if first.0 == \"version\" {\n+            (Some(decode(first.1)?), attrs.next())\n+        } else {\n+            (None, Some(first))\n+        };\n+        let (name, encoding, _, _) =\n+            encoding_attr.ok_or_else(|| syntax(\"text declaration requires an encoding\"))?;\n+        let encoding = decode(encoding)?;\n+        if name != \"encoding\" || !valid_encoding_name(&encoding) || attrs.next().is_some() {\n+            return Err(syntax(\"invalid text declaration\"));\n+        }\n+        return Ok(Declaration {\n+            version,\n+            encoding: Some(encoding),\n+            standalone: None,\n+        });\n+    }\n+    let version = attrs\n+        .first()\n+        .map(|attribute| decode(attribute.value(rest)))\n+        .transpose()?;\n+    if attrs.is_empty()\n+        || attrs[0].name(rest) != \"version\"\n+        || !version.as_ref().is_some_and(|version| {\n+            !version.is_empty()\n+                && version\n+                    .bytes()\n+                    .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_'))\n+        })\n+    {\n+        return Err(DeclarationFailure::Syntax {\n+            message: \"XML declaration must begin with a version\",\n+            offset: Some(attrs.first().map_or(0, |attribute| attribute.name_start)),\n+        });\n+    }\n+    let mut encoding = None;\n+    let mut standalone = None;\n+    for attribute in attrs.iter().skip(1) {\n+        let (name, value, _, _) = attribute.parts(rest);\n+        match name {\n+            \"encoding\" if encoding.is_none() && standalone.is_none() => {\n+                let value = decode(value)?;\n+                if !valid_encoding_name(&value) {\n+                    return Err(syntax(\"invalid encoding name\"));\n+                }\n+                encoding = Some(value);\n+            }\n+            \"standalone\" if standalone.is_none() => {\n+                standalone = Some(match value {\n+                    \"yes\" => true,\n+                    \"no\" => false,\n+                    _ => return Err(syntax(\"invalid standalone declaration\")),\n+                });\n+            }\n+            _ => return Err(syntax(\"invalid XML declaration attribute\")),\n+        }\n+    }\n+    Ok(Declaration {\n+        version,\n+        encoding,\n+        standalone,\n+    })\n+}\n+\n+/// Prove malformed syntax only in a complete bounded ASCII bootstrap declaration.\n+/// Ordinary parsing still reports the error after token limits, raw publication\n+/// and source accounting. This helper creates no owned values or parser state.\n+fn malformed_ascii_declaration(rest: &str, context: DeclarationContext) -> bool {\n+    debug_assert!(rest.is_ascii());\n+    if invalid_xml_char(rest).is_some() {\n+        return true;\n+    }\n+    let empty = RawAttribute {\n+        name_start: 0,\n+        name_end: 0,\n+        value_start: 0,\n+        value_end: 0,\n+    };\n+    let mut attrs = [empty; 3];\n+    let mut count = 0;\n+    let mut scanner = tag::AttributeScanner::new(0);\n+    loop {\n+        // Fourth/Fifth edition name rules agree for this proven ASCII input.\n+        match scanner.next(rest, true, false, false, 3, NameRules::default()) {\n+            Ok(tag::Step::Attribute(attribute)) => {\n+                attrs[count] = attribute;\n+                count += 1;\n+            }\n+            Ok(tag::Step::End) => {\n+                return declaration_fields(rest, &attrs[..count], context, |value| {\n+                    Ok(lexical::Decoded::Borrowed(value))\n+                })\n+                .is_err();\n+            }\n+            Err(_) => return true,\n+            Ok(tag::Step::Incomplete | tag::Step::TagEnd { .. }) => {\n+                unreachable!(\"complete attribute view excludes a tag delimiter\")\n+            }\n+        }\n+    }\n+}\n+\n fn parse_raw_attributes(\n     text: &str,\n     allow_refs: bool,\n@@ -4850,11 +5164,18 @@ mod hash_salt_tests {\n             ..Config::default()\n         });\n         parser.set_param_entity_parsing(2);\n-        parser.feed(b\"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p \\\"<!ATTLIST n b CDATA 'v'>\\\">%p;<!ATTLIST r a CDATA 'v'>]><r>\", false).unwrap();\n+        parser.feed(b\"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p \\\"<!ATTLIST n b CDATA 'v'>\\\">%p;<!ATTLIST r a CDATA 'v'>]><r xmlns='urn:default'>\", false).unwrap();\n         while parser.next_event().unwrap().is_some() {}\n         let previous = parser.namespaces.hasher().hash_one(\"xml\");\n+        let default_owner = parser.default_namespace.as_ref().unwrap().as_ptr();\n         parser.set_hash_salt(*b\"0123456789abcdef\").unwrap();\n         assert_ne!(parser.namespaces.hasher().hash_one(\"xml\"), previous);\n+        assert_eq!(parser.default_namespace.as_deref(), Some(\"urn:default\"));\n+        assert_eq!(\n+            parser.default_namespace.as_ref().unwrap().as_ptr(),\n+            default_owner\n+        );\n+        assert!(!parser.namespaces.contains_key(\"\"));\n         parser\n             .with_dtd_tables(|parser| {\n                 assert_eq!(parser.tables.entities.hasher().salt(), parser.hash_salt());\n@@ -4878,12 +5199,45 @@ mod hash_salt_tests {\n                 Ok(())\n             })\n             .unwrap();\n-        let mut child = parser.external_child(Some(\"\"), None).unwrap();\n-        assert_eq!(child.hash_salt(), parser.hash_salt());\n-        child.feed(b\"<n>&e;</n>\", true).unwrap();\n-        while child.next_event().unwrap().is_some() {}\n+        for (context, uri) in [\n+            (\"\", Some(\"urn:default\")),\n+            (\"=urn:child\", Some(\"urn:child\")),\n+            (\"=\", None),\n+        ] {\n+            let mut child = parser.external_child(Some(context), None).unwrap();\n+            assert_eq!(child.hash_salt(), parser.hash_salt());\n+            assert_eq!(child.default_namespace.as_deref(), uri);\n+            assert!(!child.namespaces.contains_key(\"\"));\n+            let mut parameter = child.external_child(None, None).unwrap();\n+            assert_eq!(parameter.default_namespace.as_deref(), uri);\n+            parameter.feed(b\"\", true).unwrap();\n+            while parameter.next_event().unwrap().is_some() {}\n+            child.feed(b\"<n>&e;</n>\", true).unwrap();\n+            let mut start = false;\n+            while let Some(event) = child.next_event().unwrap() {\n+                if let EventKind::StartElement { name, attributes } = event.kind {\n+                    assert_eq!(\n+                        name,\n+                        match uri {\n+                            Some(\"urn:default\") => \"urn:default|n\",\n+                            Some(_) => \"urn:child|n\",\n+                            None => \"n\",\n+                        }\n+                    );\n+                    assert_eq!(attributes[0].name, \"b\");\n+                    start = true;\n+                }\n+            }\n+            assert!(start);\n+            assert_eq!(child.default_namespace.as_deref(), uri);\n+        }\n+        assert_eq!(\n+            parser.default_namespace.as_ref().unwrap().as_ptr(),\n+            default_owner\n+        );\n         parser.feed(b\"<n>&e;</n></r>\", true).unwrap();\n         while parser.next_event().unwrap().is_some() {}\n+        assert!(parser.default_namespace.is_none());\n     }\n \n     #[test]\n@@ -4898,8 +5252,16 @@ mod hash_salt_tests {\n             assert!(child.namespaces.is_empty());\n             assert_eq!(child.hash_salt(), parser.hash_salt());\n         }\n-        let mut child = parser.external_child(Some(\"xml=urn:custom\"), None).unwrap();\n+        let mut child = parser\n+            .external_child(Some(\"=urn:hidden\\u{c}xml=urn:custom\"), None)\n+            .unwrap();\n         assert_eq!(child.namespaces.get(\"xml\").unwrap(), \"urn:custom\");\n+        assert_eq!(child.default_namespace.as_deref(), Some(\"urn:hidden\"));\n+        assert!(!child.namespaces.contains_key(\"\"));\n+        let inherited = child.external_child(Some(\"\"), None).unwrap();\n+        assert_eq!(inherited.default_namespace.as_deref(), Some(\"urn:hidden\"));\n+        let removed = child.external_child(Some(\"=\"), None).unwrap();\n+        assert!(removed.default_namespace.is_none());\n         child.feed(b\"<xml:r/>\", true).unwrap();\n         while let Some(event) = child.next_event().unwrap() {\n             if let EventKind::StartElement { name, .. } = event.kind {\n@@ -5156,6 +5518,160 @@ mod native_raw_context_tests {\n         (parser, frame)\n     }\n \n+    #[test]\n+    fn direct_start_raw_views_keep_copied_fallbacks_and_owner_handoffs() {\n+        for (prefix, tag, namespace, enabled, c_mode, foreign, direct) in [\n+            (\"<r><w a='v'/>\", \"<n a='x'>\", false, true, true, false, true),\n+            (\"<r><w a='v'/>\", \"<n a='x'>\", true, true, true, false, true),\n+            (\n+                \"<r xmlns='urn'><w a='v'/>\",\n+                \"<n a='x'>\",\n+                true,\n+                true,\n+                true,\n+                false,\n+                false,\n+            ),\n+            (\n+                \"<r><w a='v'/>\",\n+                \"<n a='x'/>\",\n+                false,\n+                true,\n+                true,\n+                false,\n+                false,\n+            ),\n+            (\n+                \"<r><w a='v'/>\",\n+                \"<n a='&amp;'>\",\n+                false,\n+                true,\n+                true,\n+                false,\n+                false,\n+            ),\n+            (\n+                \"<r><w a='v'/>\",\n+                \"<n a='x'>\",\n+                false,\n+                false,\n+                true,\n+                false,\n+                false,\n+            ),\n+            (\n+                \"<r><w a='v'/>\",\n+                \"<n a='x'>\",\n+                false,\n+                true,\n+                false,\n+                false,\n+                false,\n+            ),\n+            (\"<r><w a='v'/>\", \"<n a='x'>\", false, true, true, true, false),\n+        ] {\n+            let mut parser = Parser::new(Config {\n+                namespace_separator: namespace.then_some('|'),\n+                ..Config::default()\n+            });\n+            if enabled {\n+                parser.enable_input_context();\n+            }\n+            parser.feed(prefix.as_bytes(), false).unwrap();\n+            while parser.next_event().unwrap().is_some() {}\n+            parser.feed(tag.as_bytes(), false).unwrap();\n+            let old_raw = parser.current_raw.as_str().to_owned();\n+            let raw_pointer = parser.current_raw.as_ptr();\n+            let raw_capacity = parser.current_raw.capacity();\n+            let scratch = parser.token_scratch.as_bytes().as_ptr();\n+            let scratch_len = parser.token_scratch.len();\n+            let mut other = Parser::new(Config::default());\n+            let mut frame = if foreign {\n+                other.adapter_frame()\n+            } else {\n+                parser.adapter_frame()\n+            };\n+            let mut event = None;\n+            if c_mode {\n+                parser.next_event_for_c_text_context_into(&mut event, &mut frame)\n+            } else {\n+                parser.next_event_for_adapter_into(&mut event, &mut frame)\n+            }\n+            .unwrap()\n+            .unwrap();\n+            assert_eq!(parser.current_raw(), Some(tag));\n+            assert_eq!(parser.native_raw.is_some(), direct);\n+            if direct {\n+                assert_eq!(parser.current_raw.as_str(), old_raw);\n+                assert_eq!(parser.current_raw.as_ptr(), raw_pointer);\n+                assert_eq!(parser.current_raw.capacity(), raw_capacity);\n+                assert_eq!(parser.token_scratch.as_bytes().as_ptr(), scratch);\n+                assert_eq!(parser.token_scratch.len(), scratch_len);\n+                assert_eq!(frame.name_bytes(), b\"n\\0\");\n+                assert_eq!(\n+                    frame.attributes().collect::<std::vec::Vec<_>>(),\n+                    [(b\"a\\0\".as_slice(), b\"x\\0\".as_slice())]\n+                );\n+                let raw = parser.native_raw.unwrap();\n+                let (context, start) = parser.input_context();\n+                assert_eq!(\n+                    parser.current_raw().unwrap().as_ptr(),\n+                    context[raw.start - start..].as_ptr()\n+                );\n+                parser.feed(b\"</n></r>\", true).unwrap();\n+                assert_eq!(parser.current_raw(), Some(tag));\n+                while parser.next_event().unwrap().is_some() {\n+                    assert!(parser.native_raw.is_none());\n+                }\n+            }\n+            if foreign {\n+                other.finish_adapter_frame(frame);\n+            } else {\n+                parser.finish_adapter_frame(frame);\n+            }\n+        }\n+        for bytes in [arena::MAX_ARENA_BYTES, arena::MAX_ARENA_BYTES + 1] {\n+            let tag = format!(\"<n{}>\", \" \".repeat(bytes - 3));\n+            let mut parser = Parser::new(Config::default());\n+            parser.enable_input_context();\n+            parser.feed(tag.as_bytes(), false).unwrap();\n+            let mut frame = parser.adapter_frame();\n+            let mut event = None;\n+            parser\n+                .next_event_for_c_text_context_into(&mut event, &mut frame)\n+                .unwrap()\n+                .unwrap();\n+            assert_eq!(parser.native_raw.is_some(), bytes <= arena::MAX_ARENA_BYTES);\n+            assert_eq!(parser.current_raw(), Some(tag.as_str()));\n+            parser.finish_adapter_frame(frame);\n+        }\n+        for count in [arena::MAX_ARENA_ATTRIBUTES, arena::MAX_ARENA_ATTRIBUTES + 1] {\n+            let attributes = (0..count)\n+                .map(|i| format!(\" a{i}='v'\"))\n+                .collect::<std::string::String>();\n+            let mut parser = Parser::new(Config::default());\n+            parser.enable_input_context();\n+            parser\n+                .feed(format!(\"<r><w{attributes}/>\").as_bytes(), false)\n+                .unwrap();\n+            while parser.next_event().unwrap().is_some() {}\n+            let tag = format!(\"<n{attributes}>\");\n+            parser.feed(tag.as_bytes(), false).unwrap();\n+            let mut frame = parser.adapter_frame();\n+            let mut event = None;\n+            parser\n+                .next_event_for_c_text_context_into(&mut event, &mut frame)\n+                .unwrap()\n+                .unwrap();\n+            assert_eq!(\n+                parser.native_raw.is_some(),\n+                count <= arena::MAX_ARENA_ATTRIBUTES\n+            );\n+            assert_eq!(parser.current_raw(), Some(tag.as_str()));\n+            parser.finish_adapter_frame(frame);\n+        }\n+    }\n+\n     #[test]\n     fn native_raw_getters_share_context_and_allow_ordinary_handoffs() {\n         for count in [1, 23, 24, 4096, 4097] {\ndiff --git a/crates/oriole/tests/adapter_frame.rs b/crates/oriole/tests/adapter_frame.rs\nindex d8a0bee..13115e6 100644\n--- a/crates/oriole/tests/adapter_frame.rs\n+++ b/crates/oriole/tests/adapter_frame.rs\n@@ -14,8 +14,21 @@ fn collect(\n     chunk: usize,\n     config: Config,\n     adapter: bool,\n+) -> (std::vec::Vec<std::string::String>, usize) {\n+    collect_mode(input, chunk, config, adapter, false)\n+}\n+\n+fn collect_mode(\n+    input: &[u8],\n+    chunk: usize,\n+    config: Config,\n+    adapter: bool,\n+    c_context: bool,\n ) -> (std::vec::Vec<std::string::String>, usize) {\n     let mut parser = Parser::new(config);\n+    if c_context {\n+        parser.enable_input_context();\n+    }\n     let mut frame = parser.adapter_frame();\n     let mut records = std::vec::Vec::new();\n     let mut frames = 0;\n@@ -26,7 +39,9 @@ fn collect(\n         }\n         loop {\n             let mut event = None;\n-            let result = if adapter {\n+            let result = if c_context {\n+                parser.next_event_for_c_text_context_into(&mut event, &mut frame)\n+            } else if adapter {\n                 parser.next_event_for_adapter_into(&mut event, &mut frame)\n             } else {\n                 parser.next_event_for_recycling_into(&mut event)\n@@ -48,6 +63,20 @@ fn collect(\n                         kind: EventKind::EndElement { name },\n                         position: frame.position(),\n                     });\n+                } else if let Some((start, count)) = frame.native_text_range_for_c() {\n+                    let (context, base) = parser.input_context();\n+                    let bytes = &context[start - base..start - base + count];\n+                    assert_eq!(frame.callback_bytes(), bytes.len());\n+                    event = Some(Event {\n+                        kind: EventKind::Text(\n+                            Text::try_from_str_in(\n+                                std::str::from_utf8(bytes).unwrap(),\n+                                Allocator::System,\n+                            )\n+                            .unwrap(),\n+                        ),\n+                        position: frame.position(),\n+                    });\n                 } else if let Some(bytes) = frame.text_bytes() {\n                     assert_eq!(frame.callback_bytes(), bytes.len());\n                     event = Some(Event {\n@@ -117,6 +146,10 @@ fn owned_frames_preserve_events_positions_raw_and_error_order_at_every_chunk_siz\n         \"<r><n a='first'/><n a='v' b='later'\\0/></r>\",\n         \"<r><n a='first'/><n a='incomplete\",\n         \"<r><n a='first'/><n a='v'bad='x'/></r>\",\n+        \"<r><n a='first'/><\u00e9l\u00e9ment\\r\\n a='\u03b1\ud83d\ude00'>text</\u00e9l\u00e9ment></r>\",\n+        \"<r><n a='first'/><n a='v' a='duplicate'></n></r>\",\n+        \"<r xmlns='urn'><n a='first'/><n a='v'>text</n></r>\",\n+        \"<r><w a='0' b='1' c='2' d='3' e='4' f='5' g='6' h='7' i='8'/><n a='0' b='1' c='2' d='3' e='4' f='5' g='6' h='7' a='duplicate'></n></r>\",\n         \"<!DOCTYPE r [<!ATTLIST n a CDATA 'default'>]><r><n/><n b='v'/></r>\",\n     ];\n     for input in inputs {\n@@ -127,7 +160,9 @@ fn owned_frames_preserve_events_positions_raw_and_error_order_at_every_chunk_siz\n                     ..Config::default()\n                 };\n                 let owned = collect(input.as_bytes(), chunk, config.clone(), false);\n-                let adapter = collect(input.as_bytes(), chunk, config, true);\n+                let adapter = collect(input.as_bytes(), chunk, config.clone(), true);\n+                let c_context = collect_mode(input.as_bytes(), chunk, config, true, true);\n+                assert_eq!(c_context.0, owned.0, \"C context {input:?} chunk={chunk}\");\n                 assert_eq!(\n                     adapter.0, owned.0,\n                     \"{input:?} chunk={chunk} namespaces={namespace_separator:?}\"\n@@ -155,7 +190,7 @@ fn literal_frames_keep_duplicate_checks_and_selected_name_rules() {\n             (\"n\\u{200c}\", false),\n         ] {\n             let input = format!(\n-                \"<r><warm{attributes}/><{name}{attributes}{}/></r>\",\n+                \"<r><warm{attributes}/><{name}{attributes}{}/><{name}{attributes}></{name}></r>\",\n                 if duplicate { \" a0='duplicate'\" } else { \"\" }\n             );\n             for name_rules in [\n@@ -170,7 +205,9 @@ fn literal_frames_keep_duplicate_checks_and_selected_name_rules() {\n                             ..Config::default()\n                         };\n                         let owned = collect(input.as_bytes(), chunk, config.clone(), false);\n-                        let adapter = collect(input.as_bytes(), chunk, config, true);\n+                        let adapter = collect(input.as_bytes(), chunk, config.clone(), true);\n+                        let c_context = collect_mode(input.as_bytes(), chunk, config, true, true);\n+                        assert_eq!(c_context.0, owned.0, \"C context {input:?} {chunk}\");\n                         assert_eq!(\n                             adapter.0, owned.0,\n                             \"{input:?} {name_rules:?} {namespace_separator:?} {chunk}\"\n@@ -236,7 +273,8 @@ fn namespace_identity_frames_follow_default_binding_scope() {\n \n #[test]\n fn sparse_namespace_scopes_preserve_shadowing_and_event_order() {\n-    let body = \"<p:n xmlns:p='two'><leaf/><e xmlns=''><leaf/></e></p:n><p:s/><e xmlns:p='three'/><p:t/></r>\";\n+    let body =\n+        \"<p:n xmlns:p='two'><leaf/><e xmlns=''><leaf/></e></p:n><p:s/><e xmlns:p='three'/><p:t/>\";\n     let expected = [\n         \"ns+  outer\",\n         \"ns+ p one\",\n@@ -265,11 +303,29 @@ fn sparse_namespace_scopes_preserve_shadowing_and_event_order() {\n         \"ns- p\",\n         \"ns- \",\n     ];\n-    for root in [\n-        \"<r xmlns='outer' xmlns:p='one'>\",\n-        \"<!DOCTYPE r [<!ATTLIST r xmlns CDATA 'outer' xmlns:p CDATA 'one'>]><r>\",\n+    for (root, external) in [\n+        (\"<r xmlns='outer' xmlns:p='one'>\", \"\"),\n+        (\n+            \"<!DOCTYPE r [<!ATTLIST r xmlns CDATA 'outer' xmlns:p CDATA 'one'>]><r>\",\n+            \"\",\n+        ),\n+        (\n+            \"<!DOCTYPE r [<!ENTITY ext SYSTEM 'child'>]><r xmlns='outer' xmlns:p='one'>\",\n+            \"&ext;\",\n+        ),\n+        (\n+            \"<!DOCTYPE r [<!ENTITY ext SYSTEM 'child'><!ATTLIST r xmlns CDATA 'outer' xmlns:p CDATA 'one'>]><r>\",\n+            \"&ext;\",\n+        ),\n     ] {\n-        let xml = format!(\"{root}{body}\");\n+        let xml = format!(\"{root}{body}{external}</r>\");\n+        let mut expected = expected.to_vec();\n+        if !external.is_empty() {\n+            expected.insert(\n+                expected.len() - 3,\n+                \"external =outer\\u{c}p=one\\u{c}xml=http://www.w3.org/XML/1998/namespace\\u{c}ext\",\n+            );\n+        }\n         for utf16 in [false, true] {\n             let input = if utf16 {\n                 [0xfeff]\n@@ -303,6 +359,9 @@ fn sparse_namespace_scopes_preserve_shadowing_and_event_order() {\n                             EventKind::EndNamespace { prefix } => {\n                                 format!(\"ns- {}\", prefix.as_deref().unwrap_or(\"\"))\n                             }\n+                            EventKind::ExternalEntityReference(reference) => {\n+                                format!(\"external {}\", reference.context.as_deref().unwrap())\n+                            }\n                             _ => continue,\n                         };\n                         records.push(record);\ndiff --git a/crates/oriole/tests/allocation.rs b/crates/oriole/tests/allocation.rs\nindex 015069e..72b858d 100644\n--- a/crates/oriole/tests/allocation.rs\n+++ b/crates/oriole/tests/allocation.rs\n@@ -114,13 +114,44 @@ fn workload(allocator: Allocator) -> Result<(), Error> {\n         allocator,\n     )?;\n     parser.set_default_events(true);\n-    parser.feed(\"\\r\\n<!DOCTYPE r [ \\n<!ENTITY internal '<p:\u00c0/>'><!ENTITY external SYSTEM 'child'><!NOTATION n SYSTEM 'notation'><!ATTLIST r a NMTOKENS ' a  b '>\\t]>\\n<r xmlns:p='urn:p' p:attr='v'>a\\r\\nb\\nc&internal;&external;<!--c--><![CDATA[x]]></r>\\r\\n\".as_bytes(), true)?;\n+    parser.feed(\"\\r\\n<!DOCTYPE r [ \\n<!ENTITY internal '<p:\u00c0/>'><!ENTITY external SYSTEM 'child'><!NOTATION n SYSTEM 'notation'><!ATTLIST r a NMTOKENS ' a  b '>\\t]>\\n<r xmlns='urn:default' xmlns:p='urn:p' p:attr='v'><scope xmlns='urn:inner'><plain/><scope xmlns=''><plain/></scope><plain/></scope>a\\r\\nb\\nc&internal;&external;<!--c--><![CDATA[x]]></r>\\r\\n\".as_bytes(), true)?;\n     while let Some(event) = next_event(&mut parser)? {\n         if let EventKind::ExternalEntityReference(reference) = event.kind {\n+            assert_eq!(\n+                reference.context.as_deref(),\n+                Some(\n+                    \"=urn:default\\u{c}p=urn:p\\u{c}xml=http://www.w3.org/XML/1998/namespace\\u{c}external\"\n+                )\n+            );\n             let mut child =\n                 parser.external_child_with_encoding(reference.context.as_deref(), None)?;\n-            child.feed(b\"<?xml encoding='UTF-8'?><p:x a='value'/>text\", true)?;\n-            while next_event(&mut child)?.is_some() {}\n+            child.feed(b\"<?xml encoding='UTF-8'?><plain/><n xmlns='urn:child'><inner/></n><p:x a='value'/>text\", true)?;\n+            let expected = [\n+                \"urn:default|plain\",\n+                \"urn:child|n\",\n+                \"urn:child|inner\",\n+                \"urn:p|x|p\",\n+            ];\n+            let mut starts = 0;\n+            while let Some(event) = next_event(&mut child)? {\n+                if let EventKind::StartElement { name, .. } = event.kind {\n+                    assert_eq!(name, expected[starts]);\n+                    starts += 1;\n+                }\n+            }\n+            assert_eq!(starts, expected.len());\n+            for (context, expected) in [(\"=urn:override\", \"urn:override|plain\"), (\"=\", \"plain\")] {\n+                let mut child = parser.external_child_with_encoding(Some(context), None)?;\n+                child.feed(b\"<plain/>\", true)?;\n+                let mut seen = false;\n+                while let Some(event) = next_event(&mut child)? {\n+                    if let EventKind::StartElement { name, .. } = event.kind {\n+                        assert_eq!(name, expected);\n+                        seen = true;\n+                    }\n+                }\n+                assert!(seen);\n+            }\n         }\n     }\n     // Branches revisit completed entities; depth forces both explicit-stack and\n@@ -585,6 +616,48 @@ fn check_allocations(workload: fn(Allocator) -> Result<(), Error>) {\n     FAIL_AT.set(0);\n }\n \n+#[test]\n+fn malformed_declarations_preserve_every_selected_allocation_failure() {\n+    fn declarations(allocator: Allocator) -> Result<(), Error> {\n+        for native in [false, true] {\n+            for context in [None, Some(Some(\"\")), Some(None)] {\n+                for input in [\n+                    b\"<?xml version='1.0' encoding 'UTF-8'?>\".as_slice(),\n+                    b\"<?xml version='1.0' encoding='UTF-8' extra='x'?>\",\n+                    b\"<?xml encoding='UTF8' version='1.0'?>\",\n+                    b\"<?xml version='1.0' encoding='UTF8' extra='x'?>\",\n+                ] {\n+                    let parent = Parser::try_new_in(Config::default(), allocator)?;\n+                    let mut parser = match context {\n+                        None => Parser::try_new_in(Config::default(), allocator)?,\n+                        Some(context) => parent.external_child(context, None)?,\n+                    };\n+                    if native {\n+                        parser.enable_input_context();\n+                    }\n+                    parser.feed(input, true)?;\n+                    let error = next_event(&mut parser).unwrap_err();\n+                    if error.kind == ErrorKind::NoMemory {\n+                        return Err(error);\n+                    }\n+                    assert_eq!(\n+                        error.kind,\n+                        if context.is_none() {\n+                            ErrorKind::XmlDeclaration\n+                        } else {\n+                            ErrorKind::TextDeclaration\n+                        },\n+                    );\n+                    assert_eq!(parser.next_event().unwrap_err(), error);\n+                    assert_eq!(parser.feed(&[], true).unwrap_err(), error);\n+                }\n+            }\n+        }\n+        Ok(())\n+    }\n+    check_allocations(declarations);\n+}\n+\n #[test]\n fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {\n     // SAFETY: The complete libc-backed suite retains ownership on failure and\n@@ -602,8 +675,15 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {\n         CALLS.set(0);\n         GLOBAL_CALLS.set(0);\n         TRACK_GLOBAL.set(true);\n-        let mut parser = Parser::try_new_in(Config::default(), allocator).unwrap();\n-        parser.feed(b\"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p 'unused'><!ATTLIST r a CDATA 'v'><!ATTLIST n b CDATA 'w'>]><r/>\", true).unwrap();\n+        let mut parser = Parser::try_new_in(\n+            Config {\n+                namespace_separator: Some('|'),\n+                ..Config::default()\n+            },\n+            allocator,\n+        )\n+        .unwrap();\n+        parser.feed(b\"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p 'unused'><!ATTLIST r a CDATA 'v'><!ATTLIST n b CDATA 'w'>]><r xmlns='urn:default'>\", false).unwrap();\n         while parser.next_event().unwrap().is_some() {}\n         let retained = parser.external_child(None, None).unwrap();\n         let before = CALLS.get();\n@@ -631,7 +711,8 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {\n                     assert_eq!(value, \"ok\");\n                     text_seen = true;\n                 }\n-                EventKind::StartElement { attributes, .. } => {\n+                EventKind::StartElement { name, attributes } => {\n+                    assert_eq!(name, \"urn:default|n\");\n                     assert_eq!(attributes.len(), 1);\n                     assert_eq!(attributes[0].name, \"b\");\n                     assert_eq!(attributes[0].value, \"w\");\n@@ -641,8 +722,29 @@ fn hash_salt_reconfiguration_is_transactional_at_every_allocation() {\n             }\n         }\n         assert!(text_seen && default_seen);\n+        // The live parent slot also survives every failed transaction; the\n+        // retained child above alone would only prove its independent snapshot.\n+        let mut current = parser.external_child(Some(\"\"), None).unwrap();\n+        current.feed(b\"<n/>\", true).unwrap();\n+        let mut current_seen = false;\n+        while let Some(event) = current.next_event().unwrap() {\n+            if let EventKind::StartElement { name, .. } = event.kind {\n+                assert_eq!(name, \"urn:default|n\");\n+                current_seen = true;\n+            }\n+        }\n+        assert!(current_seen);\n+        drop(current);\n         parser.set_hash_salt(*b\"0123456789abcdef\").unwrap();\n         assert_eq!(parser.hash_salt(), *b\"0123456789abcdef\");\n+        parser.feed(b\"<n/></r>\", true).unwrap();\n+        let mut restored = false;\n+        while let Some(event) = parser.next_event().unwrap() {\n+            if let EventKind::EndNamespace { prefix: None } = event.kind {\n+                restored = true;\n+            }\n+        }\n+        assert!(restored && parser.is_finished());\n         drop(child);\n         drop(retained);\n         drop(parser);\n@@ -953,6 +1055,57 @@ fn warmed_utf8_source_growth_preserves_selected_allocator_failures() {\n     check_allocations(workload);\n }\n \n+#[test]\n+fn direct_start_lowering_preserves_raw_and_every_selected_allocation_failure() {\n+    fn workload(allocator: Allocator) -> Result<(), Error> {\n+        let mut parser = Parser::try_new_in(Config::default(), allocator)?;\n+        parser.enable_input_context();\n+        // Warm only lexical records. The direct Start must still perform cold\n+        // frame, duplicate-table and stack-name allocations in the chosen suite.\n+        parser.feed(\n+            b\"<r><w a='0' b='1' c='2' d='3' e='4' f='5' g='6' h='7' i='8'/>\",\n+            false,\n+        )?;\n+        while next_event(&mut parser)?.is_some() {}\n+        let tag = \"<longer a='zero' b='one' c='two' d='three' e='four' f='five' g='six' h='seven' i='eight'>\";\n+        parser.feed(tag.as_bytes(), false)?;\n+        let mut frame = parser.adapter_frame();\n+        let result = (|| -> Result<(), Error> {\n+            let mut event = None;\n+            match parser.next_event_for_c_text_context_into(&mut event, &mut frame) {\n+                Ok(Some(_)) => {\n+                    assert!(event.is_none() && frame.is_active());\n+                    assert_eq!(frame.name_bytes(), b\"longer\\0\");\n+                    assert_eq!(frame.attributes().count(), 9);\n+                    assert_eq!(parser.current_raw(), Some(tag));\n+                }\n+                Ok(None) => panic!(\"complete Start must be delivered\"),\n+                Err(error) => {\n+                    assert_eq!(error.kind, ErrorKind::NoMemory);\n+                    assert!(event.is_none() && !frame.is_active());\n+                    assert_eq!(parser.current_raw(), Some(tag));\n+                    let calls = CALLS.get();\n+                    assert_eq!(\n+                        parser\n+                            .next_event_for_c_text_context_into(&mut event, &mut frame)\n+                            .unwrap_err(),\n+                        error\n+                    );\n+                    assert_eq!(parser.feed(b\"ignored\", true).unwrap_err(), error);\n+                    assert_eq!(CALLS.get(), calls);\n+                    return Err(error);\n+                }\n+            }\n+            parser.feed(b\"</longer></r>\", true)?;\n+            while next_event(&mut parser)?.is_some() {}\n+            Ok(())\n+        })();\n+        parser.finish_adapter_frame(frame);\n+        result\n+    }\n+    check_allocations(workload);\n+}\n+\n #[test]\n fn native_raw_context_views_survive_every_feed_allocation_failure() {\n     fn workload(allocator: Allocator) -> Result<(), Error> {\ndiff --git a/crates/oriole/tests/external_grammar.rs b/crates/oriole/tests/external_grammar.rs\nindex 8279af0..0a38ed6 100644\n--- a/crates/oriole/tests/external_grammar.rs\n+++ b/crates/oriole/tests/external_grammar.rs\n@@ -1,5 +1,112 @@\n use oriole::{Config, ErrorKind, EventKind, Parser};\n \n+#[test]\n+fn declaration_errors_distinguish_documents_from_external_text() {\n+    let cases = [\n+        (\n+            \"<?xml?>\",\n+            Some(ErrorKind::XmlDeclaration),\n+            Some(ErrorKind::TextDeclaration),\n+        ),\n+        (\n+            \"<?xml version='1.0'?>\",\n+            None,\n+            Some(ErrorKind::TextDeclaration),\n+        ),\n+        (\n+            \"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\",\n+            None,\n+            Some(ErrorKind::TextDeclaration),\n+        ),\n+        (\n+            \"<?xml version='1.0' encoding 'UTF-8'?>\",\n+            Some(ErrorKind::XmlDeclaration),\n+            Some(ErrorKind::TextDeclaration),\n+        ),\n+        (\n+            \"<?xml encoding='UTF-8'?>\",\n+            Some(ErrorKind::XmlDeclaration),\n+            None,\n+        ),\n+        (\n+            \"<?xml encoding='UTF8' version='1.0'?>\",\n+            Some(ErrorKind::XmlDeclaration),\n+            Some(ErrorKind::TextDeclaration),\n+        ),\n+        (\n+            \"<?xml version='1.0' encoding='UTF8' extra='x'?>\",\n+            Some(ErrorKind::XmlDeclaration),\n+            Some(ErrorKind::TextDeclaration),\n+        ),\n+        (\n+            \"<?xml version='1.0' encoding='UTF8'?>\",\n+            Some(ErrorKind::UnknownEncoding),\n+            Some(ErrorKind::UnknownEncoding),\n+        ),\n+        (\n+            \"<?XML encoding='UTF8'?>\",\n+            Some(ErrorKind::InvalidToken),\n+            Some(ErrorKind::InvalidToken),\n+        ),\n+        (\n+            \"<?XmL?>\",\n+            Some(ErrorKind::InvalidToken),\n+            Some(ErrorKind::InvalidToken),\n+        ),\n+        (\"<?xml-stylesheet?>\", None, None),\n+    ];\n+    for (token, document_error, text_error) in cases {\n+        // None is a document; Some holds the general or parameter/subset context.\n+        for context in [None, Some(Some(\"\")), Some(None)] {\n+            let expected = if context.is_none() {\n+                document_error\n+            } else {\n+                text_error\n+            };\n+            let input = if context.is_none() {\n+                format!(\"{token}<r/>\")\n+            } else {\n+                token.to_owned()\n+            };\n+            let mut first_error = None;\n+            for width in 1..=input.len() {\n+                let parent = Parser::new(Config::default());\n+                let mut parser = match context {\n+                    None => Parser::new(Config::default()),\n+                    Some(context) => parent.external_child(context, None).unwrap(),\n+                };\n+                let mut actual = None;\n+                'feed: for (index, bytes) in input.as_bytes().chunks(width).enumerate() {\n+                    parser\n+                        .feed(bytes, (index + 1) * width >= input.len())\n+                        .unwrap();\n+                    loop {\n+                        match parser.next_event() {\n+                            Ok(Some(_)) => {}\n+                            Ok(None) => break,\n+                            Err(error) => {\n+                                assert_eq!(parser.next_event().unwrap_err(), error);\n+                                assert_eq!(parser.feed(&[], true).unwrap_err(), error);\n+                                actual = Some(error);\n+                                break 'feed;\n+                            }\n+                        }\n+                    }\n+                }\n+                assert_eq!(\n+                    actual.map(|error| error.kind),\n+                    expected,\n+                    \"{token}, {context:?}, {width}\"\n+                );\n+                if let Some(error) = actual {\n+                    // Classification does not make coordinates depend on feed boundaries.\n+                    assert_eq!(*first_error.get_or_insert(error), error);\n+                }\n+            }\n+        }\n+    }\n+}\n+\n #[derive(Clone, Copy)]\n enum Read {\n     Skip,\ndiff --git a/crates/oriole/tests/external_limits.rs b/crates/oriole/tests/external_limits.rs\nindex 6301e1a..1145512 100644\n--- a/crates/oriole/tests/external_limits.rs\n+++ b/crates/oriole/tests/external_limits.rs\n@@ -114,6 +114,27 @@ fn structural_and_index_work_counts_even_for_empty_values() {\n         drain(&mut parent);\n         assert_child_rejected_before_allocation(&parent, Some(\"\"));\n     }\n+\n+    // A dedicated default binding still owes the original logical key+URI\n+    // storage charge, plus its URI bytes both at expansion and child cloning.\n+    let required = 2 * size_of::<(oriole_storage::String, oriole_storage::String)>()\n+        + \"xml\".len()\n+        + \"http://www.w3.org/XML/1998/namespace\".len()\n+        + 2 * \"u\".len();\n+    for budget in [required - 1, required] {\n+        let mut parent = parser(budget);\n+        parent.feed(b\"<r xmlns='u'>\", false).unwrap();\n+        drain(&mut parent);\n+        if budget < required {\n+            assert_child_rejected_before_allocation(&parent, Some(\"\"));\n+        } else {\n+            let mut child = parent.external_child_with_encoding(Some(\"\"), None).unwrap();\n+            child.feed(b\"\", true).unwrap();\n+            drain(&mut child);\n+        }\n+        parent.feed(b\"</r>\", true).unwrap();\n+        drain(&mut parent);\n+    }\n }\n \n #[test]\ndiff --git a/crates/oriole/tests/multibyte.rs b/crates/oriole/tests/multibyte.rs\nindex f1eb968..f1a9436 100644\n--- a/crates/oriole/tests/multibyte.rs\n+++ b/crates/oriole/tests/multibyte.rs\n@@ -383,12 +383,47 @@ fn raw_qnames_are_checked_before_decoded_namespace_expansion() {\n         (b\"<a\\x80: xmlns:a='u'/>\", \"u|\"),\n         (b\"<a\\x80:b:c xmlns:a='u'/>\", \"u|b:c\"),\n         (b\"<a\\x80:b\\x80:c xmlns:a='u'/>\", \"u|b:c\"),\n+        (b\"<\\x80:r xmlns='u'/>\", \"u|r\"),\n+        (b\"<\\x80: xmlns='u'/>\", \"u|\"),\n+        (b\"<root xmlns='u'><\\x80:r/></root>\", \"u|r\"),\n     ] {\n         for width in [1, document.len()] {\n             let events = parse_ascii_aliases_with_map(document, width, map(), Some('|')).unwrap();\n             assert!(events.iter().any(|event| matches!(&event.kind, EventKind::StartElement { name: actual, .. } if actual == name)));\n         }\n     }\n+    // A decoded leading colon has an explicit empty prefix, including on an\n+    // attribute. It differs from an ordinary unprefixed attribute.\n+    let document = b\"<r xmlns='u' \\x80:a='v' plain='w'/>\";\n+    for width in [1, document.len()] {\n+        let events = parse_ascii_aliases_with_map(document, width, map(), Some('|')).unwrap();\n+        let attributes = events\n+            .iter()\n+            .find_map(|event| match &event.kind {\n+                EventKind::StartElement { attributes, .. } => Some(attributes),\n+                _ => None,\n+            })\n+            .unwrap();\n+        assert_eq!(attributes.len(), 2);\n+        assert_eq!(attributes[0].name, \"u|a\");\n+        assert_eq!(attributes[0].value, \"v\");\n+        assert_eq!(attributes[1].name, \"plain\");\n+        assert_eq!(attributes[1].value, \"w\");\n+    }\n+    for document in [\n+        b\"<\\x80:r/>\".as_slice(),\n+        b\"<r \\x80:a='v'/>\",\n+        b\"<r xmlns='u'><\\x80:n xmlns=''/></r>\",\n+    ] {\n+        for width in [1, document.len()] {\n+            assert_eq!(\n+                parse_ascii_aliases_with_map(document, width, map(), Some('|'))\n+                    .unwrap_err()\n+                    .kind,\n+                ErrorKind::UndefinedPrefix\n+            );\n+        }\n+    }\n     for document in [b\"<a: xmlns:a='u'/>\".as_slice(), b\"<a:b:c xmlns:a='u'/>\"] {\n         assert_eq!(\n             parse_ascii_aliases_with_map(document, 1, map(), Some('|'))\ndiff --git a/crates/oriole/tests/raw_tokens.rs b/crates/oriole/tests/raw_tokens.rs\nindex 7939e3f..554d66f 100644\n--- a/crates/oriole/tests/raw_tokens.rs\n+++ b/crates/oriole/tests/raw_tokens.rs\n@@ -9,6 +9,8 @@ fn terminal_errors_retain_complete_raw_markup_in_every_feed_boundary() {\n             \"<?xml version='1.0'?>\",\n             ErrorKind::MisplacedXmlDeclaration,\n         ),\n+        (\"\", \"<?XML?>\", ErrorKind::InvalidToken),\n+        (\"<r>\", \"<?XmL encoding='UTF8'?>\", ErrorKind::InvalidToken),\n         (\"<r>\", \"<n a='1' a='2'/>\", ErrorKind::DuplicateAttribute),\n         (\"<r>\", \"<missing:n/>\", ErrorKind::UndefinedPrefix),\n         (\"<r>\", \"</wrong>\", ErrorKind::TagMismatch),\ndiff --git a/crates/oriole_expat/src/lib.rs b/crates/oriole_expat/src/lib.rs\nindex 3d01724..85700d3 100644\n--- a/crates/oriole_expat/src/lib.rs\n+++ b/crates/oriole_expat/src/lib.rs\n@@ -244,6 +244,7 @@ fn error_code(kind: &ErrorKind) -> c_int {\n         ErrorKind::ExternalEntityInAttribute => 16,\n         ErrorKind::MisplacedXmlDeclaration => 17,\n         ErrorKind::XmlDeclaration => 30,\n+        ErrorKind::TextDeclaration => 31,\n         ErrorKind::PublicId => 32,\n         ErrorKind::UndeclaringPrefix => 28,\n         ErrorKind::UnknownEncoding => 18,\ndiff --git a/crates/oriole_expat/src/tests.rs b/crates/oriole_expat/src/tests.rs\nindex 272503e..76c6e3f 100644\n--- a/crates/oriole_expat/src/tests.rs\n+++ b/crates/oriole_expat/src/tests.rs\n@@ -820,6 +820,414 @@ unsafe extern \"C\" fn external_entity(\n     }\n }\n \n+#[test]\n+fn external_declaration_errors_keep_their_codes_in_each_child_context() {\n+    struct DeclarationCase {\n+        input: &'static [u8],\n+        width: usize,\n+        expected: c_int,\n+        parameter: bool,\n+        calls: usize,\n+    }\n+    unsafe extern \"C\" fn external(\n+        parent: XML_Parser,\n+        context: *const c_char,\n+        _: *const c_char,\n+        _: *const c_char,\n+        _: *const c_char,\n+    ) -> c_int {\n+        // SAFETY: State and input are test-owned, and the child is freed before\n+        // returning to its parent. No borrowed state is held across parser calls.\n+        unsafe {\n+            let state = XML_GetUserData(parent).cast::<DeclarationCase>();\n+            let (input, width, expected, parameter) = (\n+                (*state).input,\n+                (*state).width,\n+                (*state).expected,\n+                (*state).parameter,\n+            );\n+            assert_eq!(context.is_null(), parameter);\n+            let child = XML_ExternalEntityParserCreate(parent, context, ptr::null());\n+            assert!(!child.is_null());\n+            let mut status = OK;\n+            for (index, bytes) in input.chunks(width).enumerate() {\n+                status = XML_Parse(\n+                    child,\n+                    bytes.as_ptr().cast(),\n+                    bytes.len() as c_int,\n+                    c_int::from((index + 1) * width >= input.len()),\n+                );\n+                if status == ERROR {\n+                    break;\n+                }\n+            }\n+            assert_eq!(status, ERROR);\n+            assert_eq!(XML_GetErrorCode(child), expected);\n+            let position = (\n+                XML_GetCurrentByteIndex(child),\n+                XML_GetCurrentLineNumber(child),\n+                XML_GetCurrentColumnNumber(child),\n+            );\n+            assert_eq!(XML_Parse(child, c\"\".as_ptr(), 0, 1), ERROR);\n+            assert_eq!(XML_GetErrorCode(child), expected);\n+            assert_eq!(\n+                (\n+                    XML_GetCurrentByteIndex(child),\n+                    XML_GetCurrentLineNumber(child),\n+                    XML_GetCurrentColumnNumber(child)\n+                ),\n+                position\n+            );\n+            XML_ParserFree(child);\n+            (*state).calls += 1;\n+            ERROR\n+        }\n+    }\n+    let documents = [\n+        (\n+            b\"<!DOCTYPE r [<!ENTITY e SYSTEM 'e'>]><r>&e;</r>\".as_slice(),\n+            false,\n+        ),\n+        (b\"<!DOCTYPE r SYSTEM 'e'><r/>\", true),\n+        (b\"<!DOCTYPE r [<!ENTITY % e SYSTEM 'e'>%e;]><r/>\", true),\n+    ];\n+    for (input, expected) in [\n+        (b\"<?xml version='1.0'?>\".as_slice(), 31),\n+        (\n+            b\"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\",\n+            31,\n+        ),\n+        (b\"<?xml version='1.0' encoding 'UTF-8'?>\", 31),\n+        (b\"<?XML encoding='UTF8'?>\", 4),\n+        (b\"<?xml encoding='UTF8' version='1.0'?>\", 31),\n+        (b\"<?xml version='1.0' encoding='UTF8' extra='x'?>\", 31),\n+        (b\"<?xml version='1.0' encoding='UTF8'?>\", 18),\n+    ] {\n+        for (document, parameter) in documents {\n+            for width in [1, 7, input.len()] {\n+                let mut state = DeclarationCase {\n+                    input,\n+                    width,\n+                    expected,\n+                    parameter,\n+                    calls: 0,\n+                };\n+                // SAFETY: Callback state stays live through all parent/child calls.\n+                unsafe {\n+                    let parent = XML_ParserCreate(ptr::null());\n+                    assert!(!parent.is_null());\n+                    XML_SetUserData(parent, ptr::from_mut(&mut state).cast());\n+                    XML_SetExternalEntityRefHandler(parent, Some(external));\n+                    assert_eq!(XML_SetParamEntityParsing(parent, 2), 1);\n+                    assert_eq!(\n+                        XML_Parse(parent, document.as_ptr().cast(), document.len() as c_int, 1),\n+                        ERROR\n+                    );\n+                    assert_eq!(XML_GetErrorCode(parent), 21);\n+                    XML_ParserFree(parent);\n+                }\n+                assert_eq!(state.calls, 1);\n+            }\n+        }\n+    }\n+}\n+\n+#[test]\n+fn unknown_encoding_callbacks_follow_complete_declaration_grammar() {\n+    #[derive(Default)]\n+    struct EncodingState {\n+        requested: Vec<String>,\n+        accept: bool,\n+        releases: usize,\n+        remapping: u8,\n+        conversions: usize,\n+    }\n+    unsafe extern \"C\" fn release(data: *mut c_void) {\n+        // SAFETY: Test state outlives every parser using this encoding instance.\n+        unsafe {\n+            (*data.cast::<EncodingState>()).releases += 1;\n+        }\n+    }\n+    unsafe extern \"C\" fn convert(data: *mut c_void, bytes: *const c_char) -> c_int {\n+        // SAFETY: The registered map requests exactly two bytes; the state lives\n+        // until the parser releases the encoding instance.\n+        unsafe {\n+            assert_eq!(std::slice::from_raw_parts(bytes.cast::<u8>(), 2), b\"@$\");\n+            (*data.cast::<EncodingState>()).conversions += 1;\n+        }\n+        i32::from(b'1')\n+    }\n+    unsafe extern \"C\" fn unknown(\n+        data: *mut c_void,\n+        name: *const c_char,\n+        info: *mut XML_Encoding,\n+    ) -> c_int {\n+        // SAFETY: The name and writable record belong to this callback; state\n+        // remains live until the parser and any child have both been destroyed.\n+        unsafe {\n+            let state = data.cast::<EncodingState>();\n+            (*state)\n+                .requested\n+                .push(CStr::from_ptr(name).to_str().unwrap().to_owned());\n+            if !(*state).accept {\n+                return ERROR;\n+            }\n+            (*info).map = std::array::from_fn(|index| index as i32);\n+            match (*state).remapping {\n+                1 => (*info).map[1] = 0x100,\n+                2 => {\n+                    (*info).map[usize::from(b'@')] = -2;\n+                    (*info).convert = Some(convert);\n+                }\n+                _ => {}\n+            }\n+            (*info).data = data;\n+            (*info).release = Some(release);\n+            OK\n+        }\n+    }\n+    // Unrequested ASCII, explicit UTF-8, explicit custom, sniffed UTF-16,\n+    // and ASCII bytes with a mismatching UTF-16 declaration.\n+    for mode in 0..5 {\n+        // Context: root, directly created general child, parameter/subset child.\n+        for context in 0..3 {\n+            for case in 0..4 {\n+                let encoding = if mode >= 3 { \"UTF-16\" } else { \"UTF8\" };\n+                let header = match case {\n+                    0 => format!(\"<?xml encoding='{encoding}' version='1.0'?>\"),\n+                    1 => format!(\"<?xml version='1.0' encoding='{encoding}' extra='x'?>\"),\n+                    2 => format!(\"<?xml version='1.0' encoding='{encoding}'?>\"),\n+                    _ => format!(\"<?XML encoding='{encoding}'?>\"),\n+                };\n+                let document = if context == 2 {\n+                    header.clone()\n+                } else {\n+                    format!(\"{header}<r/>\")\n+                };\n+                for bom in [false, true] {\n+                    // Explicit custom encodings reject a BOM before grammar;\n+                    // UTF-16 uses its own BOM in its single iteration.\n+                    if bom && mode != 0 {\n+                        continue;\n+                    }\n+                    let bytes = if mode == 3 {\n+                        [\n+                            b\"\\xff\\xfe\".as_slice(),\n+                            &document\n+                                .encode_utf16()\n+                                .flat_map(u16::to_le_bytes)\n+                                .collect::<Vec<_>>(),\n+                        ]\n+                        .concat()\n+                    } else if bom {\n+                        [b\"\\xef\\xbb\\xbf\".as_slice(), document.as_bytes()].concat()\n+                    } else {\n+                        document.as_bytes().to_vec()\n+                    };\n+                    for accept in [false, true] {\n+                        let calls = usize::from(mode == 2 || (mode == 0 && case == 2));\n+                        let grammar_error = if context == 0 { 30 } else { 31 };\n+                        let expected = if mode == 4 && case != 3 {\n+                            19\n+                        } else if calls != 0 && !accept {\n+                            18\n+                        } else if case == 3 {\n+                            4\n+                        } else if case < 2 {\n+                            grammar_error\n+                        } else {\n+                            0\n+                        };\n+                        let mut first_position = None;\n+                        for split in 0..=bytes.len() {\n+                            let mut state = EncodingState {\n+                                accept,\n+                                ..EncodingState::default()\n+                            };\n+                            // SAFETY: All handles, input spans and callback state\n+                            // are test-owned. No state borrow crosses a parser call.\n+                            unsafe {\n+                                let requested = match mode {\n+                                    1 => c\"UTF-8\".as_ptr(),\n+                                    2 => c\"custom\".as_ptr(),\n+                                    _ => ptr::null(),\n+                                };\n+                                let parent = XML_ParserCreate(if context == 0 {\n+                                    requested\n+                                } else {\n+                                    ptr::null()\n+                                });\n+                                assert!(!parent.is_null());\n+                                let parser = if context == 0 {\n+                                    parent\n+                                } else {\n+                                    XML_ExternalEntityParserCreate(\n+                                        parent,\n+                                        if context == 1 {\n+                                            c\"\".as_ptr()\n+                                        } else {\n+                                            ptr::null()\n+                                        },\n+                                        requested,\n+                                    )\n+                                };\n+                                assert!(!parser.is_null());\n+                                XML_SetUnknownEncodingHandler(\n+                                    parser,\n+                                    Some(unknown),\n+                                    ptr::from_mut(&mut state).cast(),\n+                                );\n+                                let mut status = OK;\n+                                for (part, final_input) in\n+                                    [(&bytes[..split], 0), (&bytes[split..], 1)]\n+                                {\n+                                    status = XML_Parse(\n+                                        parser,\n+                                        part.as_ptr().cast(),\n+                                        part.len() as c_int,\n+                                        final_input,\n+                                    );\n+                                    if status == ERROR {\n+                                        break;\n+                                    }\n+                                }\n+                                assert_eq!(\n+                                    status,\n+                                    if expected == 0 { OK } else { ERROR },\n+                                    \"mode={mode}, context={context}, case={case}, split={split}, accept={accept}\"\n+                                );\n+                                assert_eq!(XML_GetErrorCode(parser), expected);\n+                                if expected != 0 {\n+                                    let position = (\n+                                        XML_GetCurrentByteIndex(parser),\n+                                        XML_GetCurrentLineNumber(parser),\n+                                        XML_GetCurrentColumnNumber(parser),\n+                                    );\n+                                    assert_eq!(*first_position.get_or_insert(position), position);\n+                                }\n+                                if mode == 0 && case < 2 && context != 2 {\n+                                    assert_eq!((*parser).core.current_raw(), Some(header.as_str()));\n+                                }\n+                                if context != 0 {\n+                                    XML_ParserFree(parser);\n+                                }\n+                                XML_ParserFree(parent);\n+                            }\n+                            assert_eq!(state.requested.len(), calls);\n+                            if calls != 0 {\n+                                assert_eq!(\n+                                    state.requested,\n+                                    [if mode == 2 { \"custom\" } else { \"UTF8\" }]\n+                                );\n+                            }\n+                            assert_eq!(state.releases, usize::from(calls != 0 && accept));\n+                        }\n+                    }\n+                }\n+            }\n+        }\n+    }\n+\n+    // ASCII bytes outside required markup may decode differently. Preserve the\n+    // existing custom-map path before deciding grammar, including a multibyte\n+    // sequence whose decoded document version is valid. TextDecl versions keep\n+    // their existing permissive grammar.\n+    for remapping in 1..=2 {\n+        let version = if remapping == 1 { \"\\u{1}\" } else { \"@$\" };\n+        for context in 0..3 {\n+            for explicit in [false, true] {\n+                for malformed_tail in [false, true] {\n+                    let tail = if malformed_tail { \" extra='x'\" } else { \"\" };\n+                    let header = format!(\"<?xml version='{version}' encoding='X-CUSTOM'{tail}?>\");\n+                    let document = if context == 2 {\n+                        header\n+                    } else {\n+                        format!(\"{header}<r/>\")\n+                    };\n+                    let bytes = document.as_bytes();\n+                    for accept in [false, true] {\n+                        let expected = if !accept {\n+                            18\n+                        } else if malformed_tail || (remapping == 1 && context == 0) {\n+                            if context == 0 { 30 } else { 31 }\n+                        } else {\n+                            0\n+                        };\n+                        for split in 0..=bytes.len() {\n+                            let mut state = EncodingState {\n+                                accept,\n+                                remapping,\n+                                ..EncodingState::default()\n+                            };\n+                            // SAFETY: Handles and callback state remain live across\n+                            // both feeds; state is read only after freeing all handles.\n+                            unsafe {\n+                                let requested = if explicit {\n+                                    c\"X-CUSTOM\".as_ptr()\n+                                } else {\n+                                    ptr::null()\n+                                };\n+                                let parent = XML_ParserCreate(if context == 0 {\n+                                    requested\n+                                } else {\n+                                    ptr::null()\n+                                });\n+                                assert!(!parent.is_null());\n+                                let parser = if context == 0 {\n+                                    parent\n+                                } else {\n+                                    XML_ExternalEntityParserCreate(\n+                                        parent,\n+                                        if context == 1 {\n+                                            c\"\".as_ptr()\n+                                        } else {\n+                                            ptr::null()\n+                                        },\n+                                        requested,\n+                                    )\n+                                };\n+                                assert!(!parser.is_null());\n+                                XML_SetUnknownEncodingHandler(\n+                                    parser,\n+                                    Some(unknown),\n+                                    ptr::from_mut(&mut state).cast(),\n+                                );\n+                                let mut status = OK;\n+                                for (part, final_input) in\n+                                    [(&bytes[..split], 0), (&bytes[split..], 1)]\n+                                {\n+                                    status = XML_Parse(\n+                                        parser,\n+                                        part.as_ptr().cast(),\n+                                        part.len() as c_int,\n+                                        final_input,\n+                                    );\n+                                    if status == ERROR {\n+                                        break;\n+                                    }\n+                                }\n+                                assert_eq!(\n+                                    status,\n+                                    if expected == 0 { OK } else { ERROR },\n+                                    \"remapping={remapping}, context={context}, explicit={explicit}, malformed_tail={malformed_tail}, accept={accept}, split={split}\"\n+                                );\n+                                assert_eq!(XML_GetErrorCode(parser), expected);\n+                                if context != 0 {\n+                                    XML_ParserFree(parser);\n+                                }\n+                                XML_ParserFree(parent);\n+                            }\n+                            assert_eq!(state.requested, [\"X-CUSTOM\"]);\n+                            assert_eq!(state.releases, usize::from(accept));\n+                            assert_eq!(state.conversions, usize::from(accept && remapping == 2));\n+                        }\n+                    }\n+                }\n+            }\n+        }\n+    }\n+}\n+\n #[test]\n fn external_callback_can_parse_an_inherited_fragment() {\n     // SAFETY: Parent and child callbacks use the same serialized test-owned state.\n@@ -3778,18 +4186,34 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {\n     }\n     // SAFETY: Each parser and state stays live through its callbacks and resumes.\n     unsafe {\n-        for (input, namespace, name, expected_ends) in [\n+        for (input, namespace, name, expected_ends, second_raw) in [\n             (\n                 b\"<r><n a='first'/><n a='second' b='more'/></r>\".as_slice(),\n                 false,\n                 b\"n\".as_slice(),\n                 [\"n\", \"r\"],\n+                \"<n a='second' b='more'/>\",\n+            ),\n+            (\n+                b\"<r><n a='first'/><n a='second' b='more'></n></r>\".as_slice(),\n+                false,\n+                b\"n\".as_slice(),\n+                [\"n\", \"r\"],\n+                \"<n a='second' b='more'>\",\n+            ),\n+            (\n+                b\"<r><n a='first'/><n a='second' b='more'></n></r>\".as_slice(),\n+                true,\n+                b\"n\".as_slice(),\n+                [\"n\", \"r\"],\n+                \"<n a='second' b='more'>\",\n             ),\n             (\n                 b\"<r xmlns='urn'><n a='first'/><n a='second' b='more'/></r>\".as_slice(),\n                 true,\n                 b\"urn|n\".as_slice(),\n                 [\"urn|n\", \"urn|r\"],\n+                \"<n a='second' b='more'/>\",\n             ),\n         ] {\n             for width in [1, 7, input.len()] {\n@@ -3814,10 +4238,7 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {\n                         c_int::from((index + 1) * width >= input.len()),\n                     );\n                     if status == SUSPENDED {\n-                        assert_eq!(\n-                            (*parser).core.current_raw(),\n-                            Some(\"<n a='second' b='more'/>\")\n-                        );\n+                        assert_eq!((*parser).core.current_raw(), Some(second_raw));\n                         assert_eq!(\n                             XML_GetCurrentByteIndex(parser) as usize,\n                             input\n@@ -3840,10 +4261,7 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {\n                         .iter()\n                         .filter(|value| !value.is_empty())\n                         .collect::<Vec<_>>(),\n-                    [\n-                        &\"<n a='first'/>\".to_owned(),\n-                        &\"<n a='second' b='more'/>\".to_owned()\n-                    ]\n+                    [&\"<n a='first'/>\".to_owned(), &second_raw.to_owned()]\n                 );\n                 assert_eq!(state.ends, expected_ends);\n                 XML_ParserFree(parser);\ndiff --git a/crates/oriole_expat/tests/memory.rs b/crates/oriole_expat/tests/memory.rs\nindex a0c1aff..11fbef8 100644\n--- a/crates/oriole_expat/tests/memory.rs\n+++ b/crates/oriole_expat/tests/memory.rs\n@@ -52,7 +52,9 @@ fn detached_end_uses_the_selected_owner_and_default_failure_stays_terminal() {\n             CALLBACK_PARSER.set(parser);\n             XML_UseParserAsHandlerArg(parser);\n             XML_SetStartElementHandler(parser, Some(suspend_inner));\n-            let input = c\"<r><n a='v'></n></r>\";\n+            // Warm the element/name path before the resumed End/default check.\n+            // Composed matched Ends borrow raw context and need no token-owner warmup.\n+            let input = c\"<r><w></w><n a='v'></n></r>\";\n             assert_eq!(\n                 XML_Parse(parser, input.as_ptr(), input.to_bytes().len() as i32, 1),\n                 2\n",
+      "stderr": ""
+    }
+  ],
+  "commands": [
+    {
+      "label": "compile",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-gcc-13",
+        "-O1",
+        "-DXML_TESTING",
+        "-D_GNU_SOURCE",
+        "-I/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted",
+        "-I/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/lib",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/acc_tests.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/alloc_tests.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/basic_tests.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/bridge.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/chardata.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/common.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/dummy.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/handlers.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/memcheck.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/minicheck.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/misc_tests.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/ns_tests.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/nsalloc_tests.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/runtests.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/adapted/structdata.c",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/liboriole_expat.so",
+        "-Wl,-rpath,/tmp/oriole-native-start-end-namespace-declaration-allocation-retry",
+        "-lm",
+        "-ldl",
+        "-o",
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/run01/runtests"
+      ],
+      "timeout_seconds": 120,
+      "start": 1789251394.977857,
+      "outer_timed_out": false,
+      "pid": 13,
+      "exit": 0,
+      "descendant_cleanup": {
+        "status": "completed",
+        "signalled": [],
+        "reaped": []
+      },
+      "reaped": true,
+      "end": 1789251397.2027156,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "diagnostic",
+      "argv": [
+        "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/run01/runtests",
+        "--verbose"
+      ],
+      "timeout_seconds": 1200,
+      "start": 1789251397.204476,
+      "outer_timed_out": false,
+      "pid": 46,
+      "exit": 0,
+      "descendant_cleanup": {
+        "status": "completed",
+        "signalled": [],
+        "reaped": []
+      },
+      "reaped": true,
+      "end": 1789251398.3771799,
+      "log_sha256": "e3524c8a7a7a5510d9b5785a1c61ab74b24737892a09458063237c25844d7bb1"
+    }
+  ],
+  "commands_sha256": "124fab00d67ebb4a14589c757ae6e5258d72640dfdd8b2510cc2b5a55cacbbb6",
+  "original_before": true,
+  "library_sha256_before": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+  "environment": {
+    "PATH": "/usr/bin:/bin",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "TMPDIR": "/tmp",
+    "ORIOLE_CHUNK_MASK": "63",
+    "ORIOLE_DEFERRAL_MASK": "3",
+    "ORIOLE_TEST_TIMEOUT": "15",
+    "ORIOLE_MEMORY_MIB": "4096",
+    "ORIOLE_RSS_MIB": "3072",
+    "ORIOLE_SELECTED_TESTS": "test_alloc_attribute_enum_value,test_alloc_dtd_default_handling,test_alloc_ext_entity_set_encoding,test_alloc_external_entity,test_alloc_internal_entity,test_alloc_long_attr_default_with_char_ref,test_alloc_long_attr_value,test_alloc_long_base,test_alloc_long_entity_value,test_alloc_long_notation,test_alloc_long_public_id,test_alloc_nested_groups,test_alloc_notation,test_alloc_parameter_entity,test_alloc_public_entity_value,test_alloc_public_notation,test_alloc_run_external_parser,test_alloc_set_foreign_dtd,test_alloc_system_notation,test_nsalloc_long_context,test_nsalloc_long_default_in_ext,test_nsalloc_long_element,test_nsalloc_long_systemid_in_ext,test_nsalloc_prefixed_element,test_nsalloc_realloc_long_ge_name"
+  },
+  "binary_sha256": "7bbfeb4997d327a8d31bd271f3af7d759a667f232a1746edd79336a7419273cb",
+  "results": [
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_nsalloc_long_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_nsalloc_long_context",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_nsalloc_realloc_long_ge_name",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_nsalloc_long_default_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_nsalloc_long_systemid_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_nsalloc_prefixed_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_run_external_parser",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_external_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_ext_entity_set_encoding",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_internal_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_parameter_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_attribute_enum_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_long_attr_default_with_char_ref",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_long_attr_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_long_base",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_long_public_id",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_long_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_long_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_nsalloc_long_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_nsalloc_long_context",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_nsalloc_realloc_long_ge_name",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_nsalloc_long_default_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_nsalloc_long_systemid_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_nsalloc_prefixed_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_run_external_parser",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_external_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_ext_entity_set_encoding",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_internal_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_parameter_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_attribute_enum_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_long_attr_default_with_char_ref",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_long_attr_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_long_base",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_long_public_id",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_long_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_long_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_nsalloc_long_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_nsalloc_long_context",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_nsalloc_realloc_long_ge_name",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_nsalloc_long_default_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_nsalloc_long_systemid_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_nsalloc_prefixed_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_run_external_parser",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_external_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_ext_entity_set_encoding",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_internal_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_parameter_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_attribute_enum_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_long_attr_default_with_char_ref",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_long_attr_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_long_base",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_long_public_id",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_long_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_long_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_nsalloc_long_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_nsalloc_long_context",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_nsalloc_realloc_long_ge_name",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_nsalloc_long_default_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_nsalloc_long_systemid_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_nsalloc_prefixed_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_run_external_parser",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_external_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_ext_entity_set_encoding",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_internal_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_parameter_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_attribute_enum_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_long_attr_default_with_char_ref",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_long_attr_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_long_base",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_long_public_id",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_long_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_long_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_nsalloc_long_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_nsalloc_long_context",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_nsalloc_realloc_long_ge_name",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_nsalloc_long_default_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_nsalloc_long_systemid_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_nsalloc_prefixed_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_run_external_parser",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_external_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_ext_entity_set_encoding",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_internal_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_parameter_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_attribute_enum_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_long_attr_default_with_char_ref",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_long_attr_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_long_base",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_long_public_id",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_long_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_long_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_nsalloc_long_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_nsalloc_long_context",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_nsalloc_realloc_long_ge_name",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_nsalloc_long_default_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_nsalloc_long_systemid_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_nsalloc_prefixed_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_run_external_parser",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_external_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_ext_entity_set_encoding",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_internal_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_parameter_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_attribute_enum_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_long_attr_default_with_char_ref",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_long_attr_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_long_base",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_long_public_id",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_long_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_long_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_nsalloc_long_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_nsalloc_long_context",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_nsalloc_realloc_long_ge_name",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_nsalloc_long_default_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_nsalloc_long_systemid_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_nsalloc_prefixed_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_run_external_parser",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_external_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_ext_entity_set_encoding",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_internal_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_parameter_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_attribute_enum_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_long_attr_default_with_char_ref",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_long_attr_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_long_base",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_long_public_id",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_long_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_long_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_nsalloc_long_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_nsalloc_long_context",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_nsalloc_realloc_long_ge_name",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_nsalloc_long_default_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_nsalloc_long_systemid_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_nsalloc_prefixed_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_run_external_parser",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_external_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_ext_entity_set_encoding",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_internal_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_parameter_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_attribute_enum_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_long_attr_default_with_char_ref",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_long_attr_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_long_base",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_long_public_id",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_long_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_long_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_nsalloc_long_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_nsalloc_long_context",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_nsalloc_realloc_long_ge_name",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_nsalloc_long_default_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_nsalloc_long_systemid_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_nsalloc_prefixed_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_run_external_parser",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_external_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_ext_entity_set_encoding",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_internal_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_parameter_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_attribute_enum_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_long_attr_default_with_char_ref",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_long_attr_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_long_base",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_long_public_id",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_long_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_long_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_nsalloc_long_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_nsalloc_long_context",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_nsalloc_realloc_long_ge_name",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_nsalloc_long_default_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_nsalloc_long_systemid_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_nsalloc_prefixed_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_run_external_parser",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_external_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_ext_entity_set_encoding",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_internal_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_parameter_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_attribute_enum_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_long_attr_default_with_char_ref",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_long_attr_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_long_base",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_long_public_id",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_long_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_long_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_nsalloc_long_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_nsalloc_long_context",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_nsalloc_realloc_long_ge_name",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_nsalloc_long_default_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_nsalloc_long_systemid_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_nsalloc_prefixed_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_run_external_parser",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_external_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_ext_entity_set_encoding",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_internal_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_parameter_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_attribute_enum_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_long_attr_default_with_char_ref",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_long_attr_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_long_base",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_long_public_id",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_long_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_long_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_nsalloc_long_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_nsalloc_long_context",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_nsalloc_realloc_long_ge_name",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_nsalloc_long_default_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_nsalloc_long_systemid_in_ext",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_nsalloc_prefixed_element",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_run_external_parser",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_external_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_ext_entity_set_encoding",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_internal_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_parameter_entity",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_dtd_default_handling",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_public_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_attribute_enum_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_public_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_system_notation",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_nested_groups",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_long_attr_default_with_char_ref",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_long_attr_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_long_base",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_long_public_id",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_long_entity_value",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_long_notation",
+      "outcome": "pass",
+      "code": 0
+    }
+  ],
+  "outcomes": {
+    "pass": 300
+  },
+  "selection_complete": true,
+  "library_origins": [
+    "/tmp/oriole-native-start-end-namespace-declaration-allocation-retry/liboriole_expat.so"
+  ],
+  "library_origin_verified": true,
+  "all_diagnostic_contexts_passed": true,
+  "original_tree_unchanged_on_exit": true,
+  "library_sha256_after": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+  "source_and_inputs_unchanged": true,
+  "staged_sources_unchanged": true
+}

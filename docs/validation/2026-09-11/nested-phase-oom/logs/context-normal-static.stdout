@@ -1,0 +1,3 @@
+Verified 34 API symbol origins: /tmp/oriole-nested-phase-oom/checks-attempt01/context-normal-static/integration
+C ABI full integration passed (oriole_compat_2.8.4)
+Phase-relative OOM passed: successful_declarations=2 child_error=1 parent_error=21 rejected_allocations=1 live_allocations=0

@@ -1,0 +1,14 @@
+{
+  "old_block": "  g_allocation_count = 0;\n  if (XML_ParseBuffer(g_parser, 0, XML_FALSE) != XML_STATUS_ERROR)\n    fail(\"Pre-init XML_ParseBuffer not faulted\");\n  if (XML_GetErrorCode(g_parser) != XML_ERROR_NO_MEMORY)\n    fail(\"Pre-init XML_ParseBuffer faulted for wrong reason\");",
+  "new_block": "  g_allocation_count = 0;\n  {\n    const enum XML_Status status = XML_ParseBuffer(g_parser, 0, XML_FALSE);\n    const enum XML_Error error = XML_GetErrorCode(g_parser);\n    fprintf(stderr,\n            \"ORIOLE_EMPTY_BUFFER_OBSERVATION\\tstatus=%d\\terror=%d\"\n            \"\\tallocation_count=%d\\n\",\n            (int)status, (int)error, g_allocation_count);\n  }",
+  "include_old": "#include <string.h>\n",
+  "include_new": "#include <string.h>\n#include <stdio.h>\n",
+  "original_body_sha256": "7c13a9088080f352c5209160ea316229e1a6baac53299470e8bbad9d06cdff00",
+  "diagnostic_body_sha256": "c8964c58362808c715abaabc5e56887bb6ccdeaab20d087cf83cbfc01bfb166f",
+  "entire_finalized_prior_file_identical": true,
+  "tail_byte_identical": true,
+  "api_call_sequence_identical": true,
+  "assertions_replaced": 2,
+  "source": "/tmp/oriole-expanded-start-semantic-coverage-current/buffer-tail/adapted/nsalloc_tests.c",
+  "source_sha256": "f19ede6d525af59d8643567e1fe968d59d1df305aa9f878d12765d578cdda6e7"
+}

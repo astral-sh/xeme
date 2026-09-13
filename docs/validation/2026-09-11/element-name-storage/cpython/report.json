@@ -1,0 +1,336 @@
+{
+  "status": "assembled",
+  "candidate": "a0acaf1bf8c8ae3f55030332be794cb8b9b5bea9",
+  "control": "de859c89577b2982d59b6923d682032f6a7c7800",
+  "modes": {
+    "normal": {
+      "counts": {
+        "conditions": 24,
+        "cohorts": 168,
+        "engines": 3,
+        "preflight_workers": 72,
+        "timed_workers": 504,
+        "all_workers": 576,
+        "samples": {
+          "preflight_warmups": 72,
+          "time_warmups": 504,
+          "time_measured": 25788
+        },
+        "all_samples": 26364
+      },
+      "aggregates": {
+        "all": {
+          "conditions": 24,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9883939546677487,
+            "control_over_expat": 1.2808718085024935,
+            "candidate_over_expat": 1.265575906281307
+          },
+          "candidate_lower_than_control": 20,
+          "adverse_conditions": [
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "vulkan",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            }
+          ]
+        },
+        "elementtree": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9905791376593441,
+            "control_over_expat": 1.361831982384051,
+            "candidate_over_expat": 1.3479680362780293
+          },
+          "candidate_lower_than_control": 8,
+          "adverse_conditions": [
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "vulkan",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            }
+          ]
+        },
+        "pyexpat-events": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9862135921135372,
+            "control_over_expat": 1.2047246731159325,
+            "candidate_over_expat": 1.1882198475434707
+          },
+          "candidate_lower_than_control": 12,
+          "adverse_conditions": []
+        }
+      },
+      "libraries": {
+        "candidate": {
+          "path": "/tmp/oriole-suffix-element-names-pgo-study/normal/liboriole_expat.so",
+          "sha256": "a3c819b789d0b1f950ec09f6737912b0ff8337f6dfbd4c509689544915c488cc"
+        },
+        "control": {
+          "path": "/tmp/oriole-arena-capacity-bound-pgo-study/normal/liboriole_expat.so",
+          "sha256": "c19f143945fd75234b347ffca1146b106baaffc67d6ff6ae90786dc12a6ba0ba"
+        },
+        "expat": {
+          "path": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+          "sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+        }
+      }
+    },
+    "pgo": {
+      "counts": {
+        "conditions": 24,
+        "cohorts": 168,
+        "engines": 3,
+        "preflight_workers": 72,
+        "timed_workers": 504,
+        "all_workers": 576,
+        "samples": {
+          "preflight_warmups": 72,
+          "time_warmups": 504,
+          "time_measured": 25788
+        },
+        "all_samples": 26364
+      },
+      "aggregates": {
+        "all": {
+          "conditions": 24,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9938857111764138,
+            "control_over_expat": 1.1333999415399028,
+            "candidate_over_expat": 1.128125873907407
+          },
+          "candidate_lower_than_control": 14,
+          "adverse_conditions": [
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "vulkan",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "wayland",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "wayland",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "wayland",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            }
+          ]
+        },
+        "elementtree": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9880317487202885,
+            "control_over_expat": 1.1920486743576433,
+            "candidate_over_expat": 1.1815731199393087
+          },
+          "candidate_lower_than_control": 8,
+          "adverse_conditions": [
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "wayland",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "mode": "elementtree",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            }
+          ]
+        },
+        "pyexpat-events": {
+          "conditions": 12,
+          "geomean_ratios": {
+            "candidate_over_control": 0.9997743576156013,
+            "control_over_expat": 1.0776367233283342,
+            "candidate_over_expat": 1.0770962591335194
+          },
+          "candidate_lower_than_control": 6,
+          "adverse_conditions": [
+            {
+              "name": "vulkan",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "vulkan",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+              "iterations": 3
+            },
+            {
+              "name": "wayland",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "wayland",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+              "iterations": 16
+            },
+            {
+              "name": "gtk",
+              "chunk": 4096,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            },
+            {
+              "name": "gtk",
+              "chunk": 65536,
+              "mode": "pyexpat-events",
+              "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+              "iterations": 64
+            }
+          ]
+        }
+      },
+      "libraries": {
+        "candidate": {
+          "path": "/tmp/oriole-suffix-element-names-pgo-study/pgo/runs/run-kj_rp37s/use/liboriole_expat.so",
+          "sha256": "5872374889ad673fcf7f397057de33a95a1e8f72be591b9bb996b8dbc1fd9280"
+        },
+        "control": {
+          "path": "/tmp/oriole-arena-capacity-bound-pgo-study/pgo/runs/run-lm4ku8q_/use/liboriole_expat.so",
+          "sha256": "4d97fe5b1bee1855d610ba0bfb3f865006b5f570f8722b2787fa568fc33b7e65"
+        },
+        "expat": {
+          "path": "/tmp/oriole-pgo-study/expat-use-liboriole_expat.so",
+          "sha256": "12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0"
+        }
+      }
+    }
+  },
+  "archive_files": 3702,
+  "excluded_binary_files": 24,
+  "evidence_sha256": "31c2d8ba91c0f9f67b53e868c0ade718742e27fea398e108fa84d8b0ac10e6e9",
+  "index_sha256": "551b0945bc9fd01500b5b6dfa7f2d1efe6f59c761fb04c2bd5d334ad59b077ef"
+}

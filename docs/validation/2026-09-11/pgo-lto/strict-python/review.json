@@ -1,0 +1,51 @@
+{
+  "status": "independent_strict_cpython_parity_review_passed",
+  "date_utc": "2026-09-11",
+  "scope": "Saved shared/static ThinLTO PGO strict suites, exact 802 method maps, failure bodies, skip lines, commands, source and fresh-import origins. No target executions.",
+  "source_runtime": "be22a271f8a5c004d13e515cd4024a68afe57887",
+  "source_files": 70,
+  "libraries": {
+    "/tmp/oriole-native-byte-count-pgo-study/pgo/runs/run-7_l2jvbd/use/liboriole_expat.so": "4f1518fc819bf4e8c92da914adea92acf2492cbf681de6324eeece8360186c02",
+    "/tmp/oriole-native-byte-count-pgo-study/pgo/runs/run-7_l2jvbd/use/liboriole_expat.a": "8b6ca03e6fd4be81aba81cccf10b4aa2d67e16586010477cba1e8f23a4dec97d"
+  },
+  "linkages": {
+    "shared": {
+      "methods": 802,
+      "failures": [
+        "test.test_pyexpat.BufferTextTest.test1",
+        "test.test_sax.CDATAHandlerTest.test_handlers"
+      ],
+      "expected_failures": 3,
+      "reported_skips": 14,
+      "whole_method_skips": 5,
+      "subtest_skips": 8,
+      "class_setup_skips": 1,
+      "all_method_statuses_equal_corrected_baseline": true
+    },
+    "static": {
+      "methods": 802,
+      "failures": [
+        "test.test_pyexpat.BufferTextTest.test1",
+        "test.test_sax.CDATAHandlerTest.test_handlers"
+      ],
+      "expected_failures": 3,
+      "reported_skips": 14,
+      "whole_method_skips": 5,
+      "subtest_skips": 8,
+      "class_setup_skips": 1,
+      "all_method_statuses_equal_corrected_baseline": true
+    }
+  },
+  "outcome": "Both strict suites exit 2 with the same two existing ordinary-text callback-fragmentation failures. All method statuses, full failure bodies after source-path normalization, and 14 skip lines equal the corrected original baseline. Three accelerator import checks execute successfully in both linkages.",
+  "limits": "120 seconds per CPython module; 900 seconds runner timeout; 1200 seconds outer job with process-group cleanup.",
+  "limitations": [
+    "Parity is not a green-suite claim; two failures remain. Reported 14 skips comprise five whole methods, eight subtests and one class setup; three expected failures are separate.",
+    "Persistent loader checks attest four initial/fresh extension origin records per linkage. Strict logs do not separately record XML_Parse dladdr; parser provenance uses exact library copies, compile/link arguments and probe version.",
+    "Only ThinLTO PGO shared/static variants are covered; no fat-PGO, normal-variant, PBS, sanitizer, fuzz or broad C-API certification implied.",
+    "Full failure-body comparison normalizes only source path prefixes; diagnostic content is unchanged. Successful jobs do not independently exercise timeout/failure cleanup."
+  ],
+  "blockers": [],
+  "checked_files": 119,
+  "controller_sha256": "0e5d20dabe453446a34b03ebcfc60437c8668dcb7c46414fe6a58a7940a6e417",
+  "source_manifest_sha256": "d1e021143e45331358ea63dcb20663e80d808fc7cee87510dc59e076b803451f"
+}

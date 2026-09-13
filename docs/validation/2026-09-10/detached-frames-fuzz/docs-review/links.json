@@ -1,0 +1,158 @@
+[
+  {
+    "source": "README.md",
+    "target": "benchmarks/results/2026-09-10/coalesced-search/"
+  },
+  {
+    "source": "README.md",
+    "target": "docs/validation/2026-09-10/coalesced-search/"
+  },
+  {
+    "source": "README.md",
+    "target": "tools/pgo/"
+  },
+  {
+    "source": "README.md",
+    "target": "benchmarks/results/2026-09-10/version-consistent-pgo/"
+  },
+  {
+    "source": "README.md",
+    "target": "docs/validation/2026-09-10/coalesced-search/"
+  },
+  {
+    "source": "README.md",
+    "target": "docs/compatibility.md"
+  },
+  {
+    "source": "README.md",
+    "target": "docs/validation/2026-09-10/detached-frames-fuzz/"
+  },
+  {
+    "source": "README.md",
+    "target": "docs/validation/2026-09-10/version-consistent-pbs/"
+  },
+  {
+    "source": "README.md",
+    "target": "docs/usage.md"
+  },
+  {
+    "source": "README.md",
+    "target": "docs/usage.md"
+  },
+  {
+    "source": "README.md",
+    "target": "docs/library.md"
+  },
+  {
+    "source": "README.md",
+    "target": "crates/oriole_expat/"
+  },
+  {
+    "source": "README.md",
+    "target": "CONTRIBUTING.md"
+  },
+  {
+    "source": "README.md",
+    "target": "docs/review.md"
+  },
+  {
+    "source": "README.md",
+    "target": "LICENSE-APACHE"
+  },
+  {
+    "source": "README.md",
+    "target": "LICENSE-MIT"
+  },
+  {
+    "source": "docs/review.md",
+    "target": "validation/2026-09-10/version-consistent-fuzz/"
+  },
+  {
+    "source": "docs/review.md",
+    "target": "validation/2026-09-10/final-runtime/"
+  },
+  {
+    "source": "docs/review.md",
+    "target": "../benchmarks/results/2026-09-10/final-runtime/"
+  },
+  {
+    "source": "docs/review.md",
+    "target": "validation/2026-09-10/version-consistent-runtime/"
+  },
+  {
+    "source": "docs/review.md",
+    "target": "validation/2026-09-10/entity-error-origins/"
+  },
+  {
+    "source": "docs/review.md",
+    "target": "validation/2026-09-10/buffer-reservations/"
+  },
+  {
+    "source": "docs/review.md",
+    "target": "validation/2026-09-10/version-consistent-fuzz/"
+  },
+  {
+    "source": "docs/review.md",
+    "target": "validation/2026-09-10/dtd-reparse-deferral/"
+  },
+  {
+    "source": "docs/review.md",
+    "target": "validation/2026-09-10/detached-frames/"
+  },
+  {
+    "source": "docs/review.md",
+    "target": "../crates/oriole_expat/"
+  },
+  {
+    "source": "docs/review.md",
+    "target": "../CONTRIBUTING.md#acceptance"
+  },
+  {
+    "source": "docs/review.md",
+    "target": "validation/2026-09-10/version-consistent-pbs/"
+  },
+  {
+    "source": "docs/review.md",
+    "target": "validation/2026-09-10/coalesced-search/"
+  },
+  {
+    "source": "docs/review.md",
+    "target": "validation/2026-09-10/detached-frames-fuzz/"
+  },
+  {
+    "source": "docs/validation/2026-09-10/detached-frames-fuzz/README.md",
+    "target": "evidence.tar.gz"
+  },
+  {
+    "source": "docs/validation/2026-09-10/detached-frames-fuzz/README.md",
+    "target": "final-corpus.tar.gz"
+  },
+  {
+    "source": "docs/validation/2026-09-10/detached-frames-fuzz/README.md",
+    "target": "members.json"
+  },
+  {
+    "source": "docs/validation/2026-09-10/detached-frames-fuzz/README.md",
+    "target": "final-corpus-members.json"
+  },
+  {
+    "source": "docs/validation/2026-09-10/detached-frames-fuzz/README.md",
+    "target": "independent-review/review.json"
+  },
+  {
+    "source": "docs/validation/2026-09-10/detached-frames-fuzz/README.md",
+    "target": "independent-review.tar.gz"
+  },
+  {
+    "source": "docs/validation/2026-09-10/detached-frames-fuzz/README.md",
+    "target": "independent-review-members.json"
+  },
+  {
+    "source": "docs/validation/2026-09-10/detached-frames-fuzz/README.md",
+    "target": "../version-consistent-fuzz/"
+  },
+  {
+    "source": "docs/validation/2026-09-10/detached-frames-fuzz/README.md",
+    "target": "../coalesced-search/"
+  }
+]

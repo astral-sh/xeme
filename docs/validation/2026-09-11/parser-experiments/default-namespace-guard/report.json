@@ -1,0 +1,280 @@
+{
+  "status": "assembled_negative_experiment",
+  "decision": "Unselected: both normal and PGO real-project aggregate ratios regressed.",
+  "source_manifest_sha256": "0823604d724fd28d3f5cc1fb50358f859266ed25e53b6eb4346a4efcf4e5a8e0",
+  "source_files": 72,
+  "runtime_delta": [
+    "crates/oriole/src/lib.rs"
+  ],
+  "test_delta": [
+    "crates/oriole/tests/adapter_frame.rs"
+  ],
+  "selected_runtime_unchanged": "0f28139f83b04290e62301c38d8ed489f183a88d",
+  "candidate_base": "ef0eac091999c2e29e888918ac958480dbdacb4c",
+  "local_tests": 438,
+  "actual_compiler_vectors": 9,
+  "generated_training_records": 864,
+  "native": {
+    "normal": {
+      "real": {
+        "conditions": 24,
+        "ratios": {
+          "candidate_over_control": 1.006899525703028,
+          "candidate_over_expat": 1.5858402157779385,
+          "control_over_expat": 1.5743134825885994
+        },
+        "candidate_faster_than_control": 9,
+        "candidate_faster_than_expat": 1
+      },
+      "generated": {
+        "conditions": 4,
+        "ratios": {
+          "candidate_over_control": 1.0344060212059878,
+          "candidate_over_expat": 4.878090950223274,
+          "control_over_expat": 4.7518090759831555
+        },
+        "candidate_faster_than_control": 0,
+        "candidate_faster_than_expat": 0
+      },
+      "adverse_conditions": [
+        {
+          "name": "vulkan",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.033877989075906
+        },
+        {
+          "name": "wayland",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.0135450762587923
+        },
+        {
+          "name": "maven",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.0140623438904985
+        },
+        {
+          "name": "maven",
+          "chunk": 4096,
+          "namespaces": true,
+          "ratio": 1.012942940662845
+        },
+        {
+          "name": "batik",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.0063883741343995
+        },
+        {
+          "name": "gtk",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.028639967823489
+        },
+        {
+          "name": "gtk",
+          "chunk": 4096,
+          "namespaces": true,
+          "ratio": 1.0161484812931822
+        },
+        {
+          "name": "docbook",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.006322129146955
+        },
+        {
+          "name": "generated-rare-declarations",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.0029215474744908
+        },
+        {
+          "name": "generated-entities",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.065011062817949
+        },
+        {
+          "name": "vulkan",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.0392520215978516
+        },
+        {
+          "name": "wayland",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.005523148194471
+        },
+        {
+          "name": "maven",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.0379424041997545
+        },
+        {
+          "name": "maven",
+          "chunk": 65536,
+          "namespaces": true,
+          "ratio": 1.0218636032515953
+        },
+        {
+          "name": "batik",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.000507272832081
+        },
+        {
+          "name": "gtk",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.0329095155462584
+        },
+        {
+          "name": "docbook",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.0058230729592348
+        },
+        {
+          "name": "generated-rare-declarations",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.0134526447086556
+        },
+        {
+          "name": "generated-entities",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.0576442630638452
+        }
+      ]
+    },
+    "pgo": {
+      "real": {
+        "conditions": 24,
+        "ratios": {
+          "candidate_over_control": 1.00389965762713,
+          "candidate_over_expat": 1.3649774944468265,
+          "control_over_expat": 1.3621373082501131
+        },
+        "candidate_faster_than_control": 10,
+        "candidate_faster_than_expat": 7
+      },
+      "generated": {
+        "conditions": 4,
+        "ratios": {
+          "candidate_over_control": 0.9862356246033297,
+          "candidate_over_expat": 4.9462718543104565,
+          "control_over_expat": 4.979592112822775
+        },
+        "candidate_faster_than_control": 4,
+        "candidate_faster_than_expat": 0
+      },
+      "adverse_conditions": [
+        {
+          "name": "vulkan",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.0125995158530843
+        },
+        {
+          "name": "wayland",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.0111294826471517
+        },
+        {
+          "name": "wayland",
+          "chunk": 4096,
+          "namespaces": true,
+          "ratio": 1.0020933878207277
+        },
+        {
+          "name": "maven",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.0117492626188376
+        },
+        {
+          "name": "maven",
+          "chunk": 4096,
+          "namespaces": true,
+          "ratio": 1.007108040597711
+        },
+        {
+          "name": "gtk",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.012845803665227
+        },
+        {
+          "name": "docbook",
+          "chunk": 4096,
+          "namespaces": false,
+          "ratio": 1.0065131173920052
+        },
+        {
+          "name": "docbook",
+          "chunk": 4096,
+          "namespaces": true,
+          "ratio": 1.0220622774920884
+        },
+        {
+          "name": "vulkan",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.0207222646021152
+        },
+        {
+          "name": "vulkan",
+          "chunk": 65536,
+          "namespaces": true,
+          "ratio": 1.0137628566757415
+        },
+        {
+          "name": "wayland",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.0050548400848989
+        },
+        {
+          "name": "batik",
+          "chunk": 65536,
+          "namespaces": true,
+          "ratio": 1.001031382919474
+        },
+        {
+          "name": "docbook",
+          "chunk": 65536,
+          "namespaces": false,
+          "ratio": 1.0052215572683065
+        },
+        {
+          "name": "docbook",
+          "chunk": 65536,
+          "namespaces": true,
+          "ratio": 1.0257750328531838
+        }
+      ]
+    }
+  },
+  "native_totals": {
+    "workers": 1344,
+    "samples": 212352,
+    "measured_timed_samples": 210840,
+    "timed_warmups": 1176,
+    "preflight_samples": 336
+  },
+  "archive_sha256": "f6523df9525a61b5fb1e156cc2e2c3c687d4929245fb8ab44e13fa3e23154f9b",
+  "archive_index_sha256": "46e8ea471259927c150f6a9cd06d146e5919f8c7a533b4e21471e8efd1766663",
+  "archive_bytes": 3329482,
+  "logical_files": 188,
+  "unique_files": 164,
+  "excluded_binaries_and_caches": 6,
+  "native_worker_aliases": 1344,
+  "scope": "One fixed native campaign per mode. No fresh Python elapsed, full compatibility, sanitizer or Miri campaign for this rejected optimization. All candidate preparation/build/check/audit/native first outcomes retained; older evidence retained only where needed as a comparison input."
+}

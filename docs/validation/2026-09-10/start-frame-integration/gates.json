@@ -1,0 +1,2052 @@
+{
+  "status": "correctness_parity_gates_passed",
+  "scope": "No runtime edits during gates, wall timing, or adoption decision. Original upstream suite still exits1 with393 failures.",
+  "source": {
+    "manifest_sha256": "e9eaeb4c8ee18357adbe97c91870801b41fb4553dc7259eaecc2d1d98fc5c5e4",
+    "files": 70,
+    "common_runtime_changes": [
+      "crates/oriole/src/lib.rs"
+    ],
+    "changed_tests": [
+      "crates/oriole/tests/adapter_frame.rs",
+      "crates/oriole/tests/allocation.rs"
+    ],
+    "extra_manifest_entry": null,
+    "all_live_hashes_unchanged": true
+  },
+  "libraries": {
+    "candidate": "9815cc852327d455c094b0fb72c1d33fb90a4571e67cf15965e96e2300376828",
+    "candidate_static": "92eafd42ffe68dc30db920ff5ff8d67357b2c6c4273f51b0e3e841b2bfb9ea69",
+    "direct_control": "dd16d23e4ab67938c195970bd845b2a159d7f062beda265bb673c85b79f73fc6"
+  },
+  "workspace": {
+    "tests": 398,
+    "doc-tests": 1
+  },
+  "clippy_fmt": "passed",
+  "api": {
+    "upstream_exit": 1,
+    "passed": 4347,
+    "failed": 393,
+    "all4740rows_exact": true,
+    "result_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+    "baseline_path": "/tmp/oriole-frame-integrated-gates/upstream-api",
+    "baseline_results_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+    "bounds": {
+      "per_test_seconds": 3,
+      "per_test_address_space_bytes": 1073741824,
+      "per_test_rss_limit_bytes": 805306368,
+      "total_timeout_seconds": 240
+    }
+  },
+  "native": {
+    "consumers_passed": 6,
+    "allocation_scenarios_per_linkage": 327,
+    "scope": "C ASan/UBSan, Rust release uninstrumented, leak checking disabled"
+  },
+  "malformed_baseline_comparisons": 2392,
+  "strict_baseline_traces": 3318,
+  "custom_alias_baseline_comparisons": 36456,
+  "publication": {
+    "cases": 1304,
+    "library_parses": 3912,
+    "exact_baseline": true,
+    "same_process_origins": 9,
+    "retained_reference_position_events": {
+      "default": 10416,
+      "external": 864
+    }
+  },
+  "setup_note": "Prepared from exact70-file candidate source and original end-tag-integration gate controllers; only paths/CPU and tracked changed-source/test-count expectations differ, original bounds and fixtures retained.",
+  "direct_api": {
+    "all4740rows_exact": true,
+    "candidate_results_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+    "control_results": "/tmp/oriole-end-tag-integration-gates/api-native/upstream-api/results.json",
+    "control_results_sha256": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+    "same_manifest_after_only_library_binary_output_path_normalization": true,
+    "passed": 4347,
+    "preexisting_failures": 393
+  },
+  "end_lifecycle": {
+    "status": "passed",
+    "logical_cases": 38,
+    "parser_executions": 114,
+    "candidate_control_different_cases": 0,
+    "full_raw_records_equal_historical_engine_records": {
+      "baseline": true,
+      "candidate": true,
+      "expat": true
+    },
+    "called_xml_symbols_verified_with_same_process_dladdr_per_engine": 21,
+    "worker_exits": [
+      0,
+      0,
+      0
+    ],
+    "all_expected_invariants_passed": true,
+    "max_raw_input_bytes": 8197,
+    "reference_full_different_records": 38,
+    "reference_within_handler_different_records": 14,
+    "reference_within_handler_details": [
+      {
+        "case": "namespace_restore-utf16le-chunk1-plain",
+        "differences": [
+          {
+            "path": "/events/11/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/11/position/byte_index",
+            "baseline": 116,
+            "other": 128
+          },
+          {
+            "path": "/events/11/position/column",
+            "baseline": 29,
+            "other": 35
+          },
+          {
+            "path": "/events/11/position/context_offset",
+            "baseline": 116,
+            "other": 128
+          },
+          {
+            "path": "/events/11/position/token_hex",
+            "baseline": "3c002f0070003a0061003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/23/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/23/position/byte_index",
+            "baseline": 194,
+            "other": 202
+          },
+          {
+            "path": "/events/23/position/column",
+            "baseline": 32,
+            "other": 36
+          },
+          {
+            "path": "/events/23/position/context_offset",
+            "baseline": 194,
+            "other": 202
+          },
+          {
+            "path": "/events/23/position/token_hex",
+            "baseline": "3c002f0064003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/29/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/29/position/byte_index",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/29/position/column",
+            "baseline": 43,
+            "other": 47
+          },
+          {
+            "path": "/events/29/position/context_offset",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/29/position/token_hex",
+            "baseline": "3c002f0072003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/30/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/30/position/byte_index",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/30/position/column",
+            "baseline": 43,
+            "other": 47
+          },
+          {
+            "path": "/events/30/position/context_offset",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/30/position/token_hex",
+            "baseline": "3c002f0072003e00",
+            "other": ""
+          }
+        ]
+      },
+      {
+        "case": "namespace_restore-utf16le-chunk1-suspend",
+        "differences": [
+          {
+            "path": "/calls/115/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/calls/115/position/byte_index",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/calls/115/position/column",
+            "baseline": 23,
+            "other": 29
+          },
+          {
+            "path": "/calls/115/position/context_offset",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/calls/115/position/token_hex",
+            "baseline": "3c002f0070003a0062003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/9/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/9/position/byte_index",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/9/position/column",
+            "baseline": 23,
+            "other": 29
+          },
+          {
+            "path": "/events/9/position/context_offset",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/9/position/token_hex",
+            "baseline": "3c002f0070003a0062003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/9/text_hex",
+            "baseline": "3c2f703a623e",
+            "other": ""
+          },
+          {
+            "path": "/events/10/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/10/position/byte_index",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/10/position/column",
+            "baseline": 23,
+            "other": 29
+          },
+          {
+            "path": "/events/10/position/context_offset",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/10/position/token_hex",
+            "baseline": "3c002f0070003a0062003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/13/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/13/position/byte_index",
+            "baseline": 116,
+            "other": 128
+          },
+          {
+            "path": "/events/13/position/column",
+            "baseline": 29,
+            "other": 35
+          },
+          {
+            "path": "/events/13/position/context_offset",
+            "baseline": 116,
+            "other": 128
+          },
+          {
+            "path": "/events/13/position/token_hex",
+            "baseline": "3c002f0070003a0061003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/25/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/25/position/byte_index",
+            "baseline": 194,
+            "other": 202
+          },
+          {
+            "path": "/events/25/position/column",
+            "baseline": 32,
+            "other": 36
+          },
+          {
+            "path": "/events/25/position/context_offset",
+            "baseline": 194,
+            "other": 202
+          },
+          {
+            "path": "/events/25/position/token_hex",
+            "baseline": "3c002f0064003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/31/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/31/position/byte_index",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/31/position/column",
+            "baseline": 43,
+            "other": 47
+          },
+          {
+            "path": "/events/31/position/context_offset",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/31/position/token_hex",
+            "baseline": "3c002f0072003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/32/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/32/position/byte_index",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/32/position/column",
+            "baseline": 43,
+            "other": 47
+          },
+          {
+            "path": "/events/32/position/context_offset",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/32/position/token_hex",
+            "baseline": "3c002f0072003e00",
+            "other": ""
+          }
+        ]
+      },
+      {
+        "case": "namespace_restore-utf16le-chunk1-suspend_mutate",
+        "differences": [
+          {
+            "path": "/calls/115/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/calls/115/position/byte_index",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/calls/115/position/column",
+            "baseline": 23,
+            "other": 29
+          },
+          {
+            "path": "/calls/115/position/context_offset",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/calls/115/position/token_hex",
+            "baseline": "3c002f0070003a0062003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/9/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/9/position/byte_index",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/9/position/column",
+            "baseline": 23,
+            "other": 29
+          },
+          {
+            "path": "/events/9/position/context_offset",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/9/position/token_hex",
+            "baseline": "3c002f0070003a0062003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/10/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/10/position/byte_index",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/10/position/column",
+            "baseline": 23,
+            "other": 29
+          },
+          {
+            "path": "/events/10/position/context_offset",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/10/position/token_hex",
+            "baseline": "3c002f0070003a0062003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/10/text_hex",
+            "baseline": "3c2f703a623e",
+            "other": ""
+          },
+          {
+            "path": "/events/11/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/11/position/byte_index",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/11/position/column",
+            "baseline": 23,
+            "other": 29
+          },
+          {
+            "path": "/events/11/position/context_offset",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/11/position/token_hex",
+            "baseline": "3c002f0070003a0062003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/14/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/14/position/byte_index",
+            "baseline": 116,
+            "other": 128
+          },
+          {
+            "path": "/events/14/position/column",
+            "baseline": 29,
+            "other": 35
+          },
+          {
+            "path": "/events/14/position/context_offset",
+            "baseline": 116,
+            "other": 128
+          },
+          {
+            "path": "/events/14/position/token_hex",
+            "baseline": "3c002f0070003a0061003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/26/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/26/position/byte_index",
+            "baseline": 194,
+            "other": 202
+          },
+          {
+            "path": "/events/26/position/column",
+            "baseline": 32,
+            "other": 36
+          },
+          {
+            "path": "/events/26/position/context_offset",
+            "baseline": 194,
+            "other": 202
+          },
+          {
+            "path": "/events/26/position/token_hex",
+            "baseline": "3c002f0064003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/32/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/32/position/byte_index",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/32/position/column",
+            "baseline": 43,
+            "other": 47
+          },
+          {
+            "path": "/events/32/position/context_offset",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/32/position/token_hex",
+            "baseline": "3c002f0072003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/33/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/33/position/byte_index",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/33/position/column",
+            "baseline": 43,
+            "other": 47
+          },
+          {
+            "path": "/events/33/position/context_offset",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/33/position/token_hex",
+            "baseline": "3c002f0072003e00",
+            "other": ""
+          }
+        ]
+      },
+      {
+        "case": "namespace_restore-utf16le-chunk224-plain",
+        "differences": [
+          {
+            "path": "/events/11/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/11/position/byte_index",
+            "baseline": 116,
+            "other": 128
+          },
+          {
+            "path": "/events/11/position/column",
+            "baseline": 29,
+            "other": 35
+          },
+          {
+            "path": "/events/11/position/context_offset",
+            "baseline": 116,
+            "other": 128
+          },
+          {
+            "path": "/events/11/position/token_hex",
+            "baseline": "3c002f0070003a0061003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/23/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/23/position/byte_index",
+            "baseline": 194,
+            "other": 202
+          },
+          {
+            "path": "/events/23/position/column",
+            "baseline": 32,
+            "other": 36
+          },
+          {
+            "path": "/events/23/position/context_offset",
+            "baseline": 194,
+            "other": 202
+          },
+          {
+            "path": "/events/23/position/token_hex",
+            "baseline": "3c002f0064003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/29/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/29/position/byte_index",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/29/position/column",
+            "baseline": 43,
+            "other": 47
+          },
+          {
+            "path": "/events/29/position/context_offset",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/29/position/token_hex",
+            "baseline": "3c002f0072003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/30/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/30/position/byte_index",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/30/position/column",
+            "baseline": 43,
+            "other": 47
+          },
+          {
+            "path": "/events/30/position/context_offset",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/30/position/token_hex",
+            "baseline": "3c002f0072003e00",
+            "other": ""
+          }
+        ]
+      },
+      {
+        "case": "namespace_restore-utf16le-chunk224-suspend",
+        "differences": [
+          {
+            "path": "/calls/0/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/calls/0/position/byte_index",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/calls/0/position/column",
+            "baseline": 23,
+            "other": 29
+          },
+          {
+            "path": "/calls/0/position/context_offset",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/calls/0/position/token_hex",
+            "baseline": "3c002f0070003a0062003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/9/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/9/position/byte_index",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/9/position/column",
+            "baseline": 23,
+            "other": 29
+          },
+          {
+            "path": "/events/9/position/context_offset",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/9/position/token_hex",
+            "baseline": "3c002f0070003a0062003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/9/text_hex",
+            "baseline": "3c2f703a623e",
+            "other": ""
+          },
+          {
+            "path": "/events/10/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/10/position/byte_index",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/10/position/column",
+            "baseline": 23,
+            "other": 29
+          },
+          {
+            "path": "/events/10/position/context_offset",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/10/position/token_hex",
+            "baseline": "3c002f0070003a0062003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/13/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/13/position/byte_index",
+            "baseline": 116,
+            "other": 128
+          },
+          {
+            "path": "/events/13/position/column",
+            "baseline": 29,
+            "other": 35
+          },
+          {
+            "path": "/events/13/position/context_offset",
+            "baseline": 116,
+            "other": 128
+          },
+          {
+            "path": "/events/13/position/token_hex",
+            "baseline": "3c002f0070003a0061003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/25/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/25/position/byte_index",
+            "baseline": 194,
+            "other": 202
+          },
+          {
+            "path": "/events/25/position/column",
+            "baseline": 32,
+            "other": 36
+          },
+          {
+            "path": "/events/25/position/context_offset",
+            "baseline": 194,
+            "other": 202
+          },
+          {
+            "path": "/events/25/position/token_hex",
+            "baseline": "3c002f0064003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/31/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/31/position/byte_index",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/31/position/column",
+            "baseline": 43,
+            "other": 47
+          },
+          {
+            "path": "/events/31/position/context_offset",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/31/position/token_hex",
+            "baseline": "3c002f0072003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/32/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/32/position/byte_index",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/32/position/column",
+            "baseline": 43,
+            "other": 47
+          },
+          {
+            "path": "/events/32/position/context_offset",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/32/position/token_hex",
+            "baseline": "3c002f0072003e00",
+            "other": ""
+          }
+        ]
+      },
+      {
+        "case": "namespace_restore-utf16le-chunk224-suspend_mutate",
+        "differences": [
+          {
+            "path": "/calls/0/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/calls/0/position/byte_index",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/calls/0/position/column",
+            "baseline": 23,
+            "other": 29
+          },
+          {
+            "path": "/calls/0/position/context_offset",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/calls/0/position/token_hex",
+            "baseline": "3c002f0070003a0062003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/9/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/9/position/byte_index",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/9/position/column",
+            "baseline": 23,
+            "other": 29
+          },
+          {
+            "path": "/events/9/position/context_offset",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/9/position/token_hex",
+            "baseline": "3c002f0070003a0062003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/10/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/10/position/byte_index",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/10/position/column",
+            "baseline": 23,
+            "other": 29
+          },
+          {
+            "path": "/events/10/position/context_offset",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/10/position/token_hex",
+            "baseline": "3c002f0070003a0062003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/10/text_hex",
+            "baseline": "3c2f703a623e",
+            "other": ""
+          },
+          {
+            "path": "/events/11/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/11/position/byte_index",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/11/position/column",
+            "baseline": 23,
+            "other": 29
+          },
+          {
+            "path": "/events/11/position/context_offset",
+            "baseline": 104,
+            "other": 116
+          },
+          {
+            "path": "/events/11/position/token_hex",
+            "baseline": "3c002f0070003a0062003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/14/position/byte_count",
+            "baseline": 12,
+            "other": 0
+          },
+          {
+            "path": "/events/14/position/byte_index",
+            "baseline": 116,
+            "other": 128
+          },
+          {
+            "path": "/events/14/position/column",
+            "baseline": 29,
+            "other": 35
+          },
+          {
+            "path": "/events/14/position/context_offset",
+            "baseline": 116,
+            "other": 128
+          },
+          {
+            "path": "/events/14/position/token_hex",
+            "baseline": "3c002f0070003a0061003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/26/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/26/position/byte_index",
+            "baseline": 194,
+            "other": 202
+          },
+          {
+            "path": "/events/26/position/column",
+            "baseline": 32,
+            "other": 36
+          },
+          {
+            "path": "/events/26/position/context_offset",
+            "baseline": 194,
+            "other": 202
+          },
+          {
+            "path": "/events/26/position/token_hex",
+            "baseline": "3c002f0064003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/32/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/32/position/byte_index",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/32/position/column",
+            "baseline": 43,
+            "other": 47
+          },
+          {
+            "path": "/events/32/position/context_offset",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/32/position/token_hex",
+            "baseline": "3c002f0072003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/33/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/33/position/byte_index",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/33/position/column",
+            "baseline": 43,
+            "other": 47
+          },
+          {
+            "path": "/events/33/position/context_offset",
+            "baseline": 216,
+            "other": 224
+          },
+          {
+            "path": "/events/33/position/token_hex",
+            "baseline": "3c002f0072003e00",
+            "other": ""
+          }
+        ]
+      },
+      {
+        "case": "unicode_names-utf16le-chunk1-suspend",
+        "differences": [
+          {
+            "path": "/calls/27/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/calls/27/position/byte_index",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/calls/27/position/column",
+            "baseline": 10,
+            "other": 14
+          },
+          {
+            "path": "/calls/27/position/context_offset",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/calls/27/position/token_hex",
+            "baseline": "3c002f00ea963e00",
+            "other": ""
+          },
+          {
+            "path": "/events/5/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/5/position/byte_index",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/5/position/column",
+            "baseline": 10,
+            "other": 14
+          },
+          {
+            "path": "/events/5/position/context_offset",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/5/position/token_hex",
+            "baseline": "3c002f00ea963e00",
+            "other": ""
+          },
+          {
+            "path": "/events/5/text_hex",
+            "baseline": "3c2fe99baa3e",
+            "other": ""
+          },
+          {
+            "path": "/events/6/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/6/position/byte_index",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/6/position/column",
+            "baseline": 10,
+            "other": 14
+          },
+          {
+            "path": "/events/6/position/context_offset",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/6/position/token_hex",
+            "baseline": "3c002f00ea963e00",
+            "other": ""
+          }
+        ]
+      },
+      {
+        "case": "unicode_names-utf16le-chunk1-suspend_mutate",
+        "differences": [
+          {
+            "path": "/calls/27/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/calls/27/position/byte_index",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/calls/27/position/column",
+            "baseline": 10,
+            "other": 14
+          },
+          {
+            "path": "/calls/27/position/context_offset",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/calls/27/position/token_hex",
+            "baseline": "3c002f00ea963e00",
+            "other": ""
+          },
+          {
+            "path": "/events/5/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/5/position/byte_index",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/5/position/column",
+            "baseline": 10,
+            "other": 14
+          },
+          {
+            "path": "/events/5/position/context_offset",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/5/position/token_hex",
+            "baseline": "3c002f00ea963e00",
+            "other": ""
+          },
+          {
+            "path": "/events/6/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/6/position/byte_index",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/6/position/column",
+            "baseline": 10,
+            "other": 14
+          },
+          {
+            "path": "/events/6/position/context_offset",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/6/position/token_hex",
+            "baseline": "3c002f00ea963e00",
+            "other": ""
+          },
+          {
+            "path": "/events/6/text_hex",
+            "baseline": "3c2fe99baa3e",
+            "other": ""
+          },
+          {
+            "path": "/events/7/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/7/position/byte_index",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/7/position/column",
+            "baseline": 10,
+            "other": 14
+          },
+          {
+            "path": "/events/7/position/context_offset",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/7/position/token_hex",
+            "baseline": "3c002f00ea963e00",
+            "other": ""
+          }
+        ]
+      },
+      {
+        "case": "unicode_names-utf16le-chunk66-suspend",
+        "differences": [
+          {
+            "path": "/calls/0/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/calls/0/position/byte_index",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/calls/0/position/column",
+            "baseline": 10,
+            "other": 14
+          },
+          {
+            "path": "/calls/0/position/context_offset",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/calls/0/position/token_hex",
+            "baseline": "3c002f00ea963e00",
+            "other": ""
+          },
+          {
+            "path": "/events/5/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/5/position/byte_index",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/5/position/column",
+            "baseline": 10,
+            "other": 14
+          },
+          {
+            "path": "/events/5/position/context_offset",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/5/position/token_hex",
+            "baseline": "3c002f00ea963e00",
+            "other": ""
+          },
+          {
+            "path": "/events/5/text_hex",
+            "baseline": "3c2fe99baa3e",
+            "other": ""
+          },
+          {
+            "path": "/events/6/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/6/position/byte_index",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/6/position/column",
+            "baseline": 10,
+            "other": 14
+          },
+          {
+            "path": "/events/6/position/context_offset",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/6/position/token_hex",
+            "baseline": "3c002f00ea963e00",
+            "other": ""
+          }
+        ]
+      },
+      {
+        "case": "unicode_names-utf16le-chunk66-suspend_mutate",
+        "differences": [
+          {
+            "path": "/calls/0/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/calls/0/position/byte_index",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/calls/0/position/column",
+            "baseline": 10,
+            "other": 14
+          },
+          {
+            "path": "/calls/0/position/context_offset",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/calls/0/position/token_hex",
+            "baseline": "3c002f00ea963e00",
+            "other": ""
+          },
+          {
+            "path": "/events/5/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/5/position/byte_index",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/5/position/column",
+            "baseline": 10,
+            "other": 14
+          },
+          {
+            "path": "/events/5/position/context_offset",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/5/position/token_hex",
+            "baseline": "3c002f00ea963e00",
+            "other": ""
+          },
+          {
+            "path": "/events/6/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/6/position/byte_index",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/6/position/column",
+            "baseline": 10,
+            "other": 14
+          },
+          {
+            "path": "/events/6/position/context_offset",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/6/position/token_hex",
+            "baseline": "3c002f00ea963e00",
+            "other": ""
+          },
+          {
+            "path": "/events/6/text_hex",
+            "baseline": "3c2fe99baa3e",
+            "other": ""
+          },
+          {
+            "path": "/events/7/position/byte_count",
+            "baseline": 8,
+            "other": 0
+          },
+          {
+            "path": "/events/7/position/byte_index",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/7/position/column",
+            "baseline": 10,
+            "other": 14
+          },
+          {
+            "path": "/events/7/position/context_offset",
+            "baseline": 20,
+            "other": 28
+          },
+          {
+            "path": "/events/7/position/token_hex",
+            "baseline": "3c002f00ea963e00",
+            "other": ""
+          }
+        ]
+      },
+      {
+        "case": "whitespace_fallback-utf16le-chunk1-suspend",
+        "differences": [
+          {
+            "path": "/calls/25/position/byte_count",
+            "baseline": 10,
+            "other": 0
+          },
+          {
+            "path": "/calls/25/position/byte_index",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/calls/25/position/column",
+            "baseline": 3,
+            "other": 8
+          },
+          {
+            "path": "/calls/25/position/context_offset",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/calls/25/position/token_hex",
+            "baseline": "3c002f00610020003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/5/position/byte_count",
+            "baseline": 10,
+            "other": 0
+          },
+          {
+            "path": "/events/5/position/byte_index",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/5/position/column",
+            "baseline": 3,
+            "other": 8
+          },
+          {
+            "path": "/events/5/position/context_offset",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/5/position/token_hex",
+            "baseline": "3c002f00610020003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/5/text_hex",
+            "baseline": "3c2f61203e",
+            "other": ""
+          },
+          {
+            "path": "/events/6/position/byte_count",
+            "baseline": 10,
+            "other": 0
+          },
+          {
+            "path": "/events/6/position/byte_index",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/6/position/column",
+            "baseline": 3,
+            "other": 8
+          },
+          {
+            "path": "/events/6/position/context_offset",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/6/position/token_hex",
+            "baseline": "3c002f00610020003e00",
+            "other": ""
+          }
+        ]
+      },
+      {
+        "case": "whitespace_fallback-utf16le-chunk1-suspend_mutate",
+        "differences": [
+          {
+            "path": "/calls/25/position/byte_count",
+            "baseline": 10,
+            "other": 0
+          },
+          {
+            "path": "/calls/25/position/byte_index",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/calls/25/position/column",
+            "baseline": 3,
+            "other": 8
+          },
+          {
+            "path": "/calls/25/position/context_offset",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/calls/25/position/token_hex",
+            "baseline": "3c002f00610020003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/5/position/byte_count",
+            "baseline": 10,
+            "other": 0
+          },
+          {
+            "path": "/events/5/position/byte_index",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/5/position/column",
+            "baseline": 3,
+            "other": 8
+          },
+          {
+            "path": "/events/5/position/context_offset",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/5/position/token_hex",
+            "baseline": "3c002f00610020003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/6/position/byte_count",
+            "baseline": 10,
+            "other": 0
+          },
+          {
+            "path": "/events/6/position/byte_index",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/6/position/column",
+            "baseline": 3,
+            "other": 8
+          },
+          {
+            "path": "/events/6/position/context_offset",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/6/position/token_hex",
+            "baseline": "3c002f00610020003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/6/text_hex",
+            "baseline": "3c2f61203e",
+            "other": ""
+          },
+          {
+            "path": "/events/7/position/byte_count",
+            "baseline": 10,
+            "other": 0
+          },
+          {
+            "path": "/events/7/position/byte_index",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/7/position/column",
+            "baseline": 3,
+            "other": 8
+          },
+          {
+            "path": "/events/7/position/context_offset",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/7/position/token_hex",
+            "baseline": "3c002f00610020003e00",
+            "other": ""
+          }
+        ]
+      },
+      {
+        "case": "whitespace_fallback-utf16le-chunk54-suspend",
+        "differences": [
+          {
+            "path": "/calls/0/position/byte_count",
+            "baseline": 10,
+            "other": 0
+          },
+          {
+            "path": "/calls/0/position/byte_index",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/calls/0/position/column",
+            "baseline": 3,
+            "other": 8
+          },
+          {
+            "path": "/calls/0/position/context_offset",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/calls/0/position/token_hex",
+            "baseline": "3c002f00610020003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/5/position/byte_count",
+            "baseline": 10,
+            "other": 0
+          },
+          {
+            "path": "/events/5/position/byte_index",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/5/position/column",
+            "baseline": 3,
+            "other": 8
+          },
+          {
+            "path": "/events/5/position/context_offset",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/5/position/token_hex",
+            "baseline": "3c002f00610020003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/5/text_hex",
+            "baseline": "3c2f61203e",
+            "other": ""
+          },
+          {
+            "path": "/events/6/position/byte_count",
+            "baseline": 10,
+            "other": 0
+          },
+          {
+            "path": "/events/6/position/byte_index",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/6/position/column",
+            "baseline": 3,
+            "other": 8
+          },
+          {
+            "path": "/events/6/position/context_offset",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/6/position/token_hex",
+            "baseline": "3c002f00610020003e00",
+            "other": ""
+          }
+        ]
+      },
+      {
+        "case": "whitespace_fallback-utf16le-chunk54-suspend_mutate",
+        "differences": [
+          {
+            "path": "/calls/0/position/byte_count",
+            "baseline": 10,
+            "other": 0
+          },
+          {
+            "path": "/calls/0/position/byte_index",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/calls/0/position/column",
+            "baseline": 3,
+            "other": 8
+          },
+          {
+            "path": "/calls/0/position/context_offset",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/calls/0/position/token_hex",
+            "baseline": "3c002f00610020003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/5/position/byte_count",
+            "baseline": 10,
+            "other": 0
+          },
+          {
+            "path": "/events/5/position/byte_index",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/5/position/column",
+            "baseline": 3,
+            "other": 8
+          },
+          {
+            "path": "/events/5/position/context_offset",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/5/position/token_hex",
+            "baseline": "3c002f00610020003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/6/position/byte_count",
+            "baseline": 10,
+            "other": 0
+          },
+          {
+            "path": "/events/6/position/byte_index",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/6/position/column",
+            "baseline": 3,
+            "other": 8
+          },
+          {
+            "path": "/events/6/position/context_offset",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/6/position/token_hex",
+            "baseline": "3c002f00610020003e00",
+            "other": ""
+          },
+          {
+            "path": "/events/6/text_hex",
+            "baseline": "3c2f61203e",
+            "other": ""
+          },
+          {
+            "path": "/events/7/position/byte_count",
+            "baseline": 10,
+            "other": 0
+          },
+          {
+            "path": "/events/7/position/byte_index",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/7/position/column",
+            "baseline": 3,
+            "other": 8
+          },
+          {
+            "path": "/events/7/position/context_offset",
+            "baseline": 16,
+            "other": 26
+          },
+          {
+            "path": "/events/7/position/token_hex",
+            "baseline": "3c002f00610020003e00",
+            "other": ""
+          }
+        ]
+      }
+    ],
+    "reference_classification": "Same retained behavior as prior helper execution: UTF16 namespace-end callback positions and position/DefaultCurrent after stop differ from Expat. Supplementary post-parse InputContext differs in all 38 records and is outside the handler-scoped pointer contract; do not count it as a conformance failure.",
+    "worker_timeout_seconds": 90
+  },
+  "end_oom": {
+    "status": "passed",
+    "logical_scenarios_per_engine": 6,
+    "parser_executions": 12,
+    "engines": [
+      "baseline",
+      "candidate"
+    ],
+    "rows_per_engine": 37,
+    "selected_failures_per_engine": 4,
+    "success_controls_per_engine": 2,
+    "byte_exact_candidate_control": true,
+    "raw_stream_equal_prior_corrected_helper_run": true,
+    "summaries": [
+      {
+        "scenario": 0,
+        "summary": true,
+        "mode": 0,
+        "fail_index": 0,
+        "calls_before": 33,
+        "end_calls": 2,
+        "failed": 0,
+        "status": 1,
+        "error": 0,
+        "end_count": 2,
+        "resumes": 0,
+        "live": 0
+      },
+      {
+        "scenario": 1,
+        "summary": true,
+        "mode": 0,
+        "fail_index": 1,
+        "calls_before": 33,
+        "end_calls": 1,
+        "failed": 1,
+        "status": 0,
+        "error": 1,
+        "end_count": 1,
+        "resumes": 0,
+        "live": 0
+      },
+      {
+        "scenario": 2,
+        "summary": true,
+        "mode": 0,
+        "fail_index": 2,
+        "calls_before": 33,
+        "end_calls": 2,
+        "failed": 1,
+        "status": 0,
+        "error": 1,
+        "end_count": 2,
+        "resumes": 0,
+        "live": 0
+      },
+      {
+        "scenario": 3,
+        "summary": true,
+        "mode": 1,
+        "fail_index": 0,
+        "calls_before": 33,
+        "end_calls": 2,
+        "failed": 0,
+        "status": 1,
+        "error": 0,
+        "end_count": 2,
+        "resumes": 1,
+        "live": 0
+      },
+      {
+        "scenario": 4,
+        "summary": true,
+        "mode": 1,
+        "fail_index": 1,
+        "calls_before": 33,
+        "end_calls": 1,
+        "failed": 1,
+        "status": 0,
+        "error": 1,
+        "end_count": 1,
+        "resumes": 0,
+        "live": 0
+      },
+      {
+        "scenario": 5,
+        "summary": true,
+        "mode": 1,
+        "fail_index": 2,
+        "calls_before": 33,
+        "end_calls": 2,
+        "failed": 1,
+        "status": 0,
+        "error": 1,
+        "end_count": 2,
+        "resumes": 1,
+        "live": 0
+      }
+    ],
+    "terminal_retries": [
+      {
+        "scenario": 1,
+        "retry_error": 1,
+        "retry_calls": 34,
+        "retry_events": 1
+      },
+      {
+        "scenario": 1,
+        "retry_error": 1,
+        "retry_calls": 34,
+        "retry_events": 1
+      },
+      {
+        "scenario": 2,
+        "retry_error": 1,
+        "retry_calls": 35,
+        "retry_events": 4
+      },
+      {
+        "scenario": 2,
+        "retry_error": 1,
+        "retry_calls": 35,
+        "retry_events": 4
+      },
+      {
+        "scenario": 4,
+        "retry_error": 33,
+        "retry_calls": 34,
+        "retry_events": 1
+      },
+      {
+        "scenario": 4,
+        "retry_error": 33,
+        "retry_calls": 34,
+        "retry_events": 1
+      },
+      {
+        "scenario": 5,
+        "retry_error": 1,
+        "retry_calls": 35,
+        "retry_events": 4
+      },
+      {
+        "scenario": 5,
+        "retry_error": 1,
+        "retry_calls": 35,
+        "retry_events": 4
+      }
+    ],
+    "all_zero_live": true,
+    "no_additional_retry_callbacks_or_allocations": true,
+    "compile_and_run_exits": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "scope": "Dynamic C consumer is ASan/UBSan instrumented; release Rust libraries are uninstrumented; leak checking disabled. Same-process dladdr covers XML_Parse only. This selected sweep does not replace the original 327 allocation scenarios.",
+    "command_timeout_seconds": 120,
+    "history": "Only the corrected helper is reused. The original failed helper attempt remains separate historical evidence; no test condition or expected outcome is relaxed for the combined candidate.",
+    "historical_references": {
+      "/tmp/oriole-matching-end-tags-gates/end-oom/report.json": "4c4e0a2d72a5c99a4cdd05092bf7186923e8aee7a3efe39469bc08ffbed194b4",
+      "/tmp/oriole-matching-end-tags-gates/end-oom-final/correction.json": "1b3b3b60f87ccac16e0515bec1b2a347aa6e3b194a90016290ac6c2d746c2b6e",
+      "/tmp/oriole-matching-end-tags-gates/end-lifecycle/oom-source-review-final.json": "2da441d016a9f77ba45f921f7b068d57b690327c788f65c9ca51db48b513ed3e",
+      "/tmp/oriole-matching-end-tags-gates/end-lifecycle/review.json": "bd560d5ffe7a8638122cb9a3994ad2e7dfef55605d9a11a604cfcee8a7039e51",
+      "/tmp/oriole-matching-end-tags-gates/end-oom-final/report.json": "3c04985bc506003b099080689076d135c58b90f219fea233b898cc180198eab1",
+      "/tmp/oriole-end-tag-integration-gates/end-lifecycle/review.json": "60c8ca8dfce9bd969404a49e1730c3559c251c0369d5eb7a809d2c86489b7b37",
+      "/tmp/oriole-end-tag-integration-gates/end-oom-final/report.json": "095257f983060d5771853af9d55d757bd9b6512692f317a0227c9445beb19c23"
+    },
+    "raw_stdout_sha256": "9a075cb02a28362f64726b9ef3be9523501d8f15bfac8d5a3c2cc3d710187e4c"
+  },
+  "supplemental_readback": {
+    "checks": 852,
+    "hashed_files": 149,
+    "review_sha256": "9bb441986008c3a8e1516987d5a816ae2becebfed2f3a44fe87b00eb5ee9594b"
+  },
+  "original_gate_summary_sha256": "13f2355fd00b4fd7a3a202558f1ba9e7dabde2d88d7682d41b3dc105f5346381"
+}

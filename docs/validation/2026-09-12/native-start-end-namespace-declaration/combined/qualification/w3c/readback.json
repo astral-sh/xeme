@@ -1,0 +1,4517 @@
+{
+  "status": "passed_saved_combined_w3c_matches_qualified_declaration",
+  "targets_executed_by_reader": false,
+  "runtime_commit": null,
+  "base_commit": "9c632547af2253b9672a92fac320c70af3263bb8",
+  "source_pins": {
+    "/tmp/oriole-core-owned-text-raw-correctness/w3c/oriole.json": "00495b40cef63a60b548d923abc562980206378cfbe6166d73a6ff13ca211f99",
+    "/tmp/oriole-core-owned-text-raw-correctness/w3c/reference.json": "b4abe0bd35a3bf469e512215f846fd605cedefe4f6666b7fd646c5c8f99b5a21",
+    "/tmp/oriole-core-owned-text-raw-correctness/w3c/catalog.json": "7804e0e29a1da95217f32309c9d74f4b59baeec9989725fc289cf1b6eda6c4ed",
+    "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "/home/dev-user/.cache/oriole/expat-build/libexpat.so": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "/tmp/oriole-unknown-encoding-callback-diagnostic/report.json": "ad0016e6358c407688d6d83aa63493712052d419f6e704d37fc9cd0177a8e41e",
+    "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12": "021044895e95be79dc2f110367607e684119afbc8ce75f6f0eec94844e0acec7",
+    "/tmp/oriole-api-supervisor-preparation/run.py": "6938e87321413baf02abf70451efc87ca45d8627d1f51b105e2060068ffb19aa",
+    "/tmp/oriole-final-consumer-validation/tools/w3c.py": "8dd92a55c42f3fab591ff3752bdb51ed0bf23659ce0d5541dbb1df0f84caddc7",
+    "/tmp/oriole-final-consumer-validation/w3c-source/xml-conformance-suite-3fb4516daedd0ac736249a383733883b95fcdbb2/packages/test-data/xmlconf/xmlconf.xml": "a10d3fc409fc0de5ea1758d2e4fe6efcbc51df6d1942c80f299dbbe085b2fd52",
+    "/tmp/oriole-declaration-bootstrap-grammar-diagnostics/review.json": "094f47fa3fe20f2397b8e2d554aa7c03dd308ce39e5d740468c22486757d496f",
+    "/tmp/oriole-declaration-bootstrap-grammar-diagnostics/callback-readback.json": "0e387c6d0b04f11f7c32c933278fa6273a1cc3e60eccbabfc027788b230d45f3",
+    "/tmp/oriole-declaration-bootstrap-grammar-diagnostics/callbacks/report.json": "4fb304da8a019ba3505de1f958ac277853594b4e956f7b631cba0f534223364e",
+    "/tmp/oriole-declaration-bootstrap-grammar-diagnostics/w3c/oriole.json": "cc356c9bcb24fd95873502ef441cd1d0a322c862ece94f785235ee7ae4ea9163",
+    "/tmp/oriole-declaration-bootstrap-grammar-diagnostics/w3c/reference.json": "b4abe0bd35a3bf469e512215f846fd605cedefe4f6666b7fd646c5c8f99b5a21",
+    "/tmp/oriole-declaration-bootstrap-grammar-diagnostics/w3c/catalog.json": "7804e0e29a1da95217f32309c9d74f4b59baeec9989725fc289cf1b6eda6c4ed",
+    "/tmp/oriole-native-start-end-namespace-declaration-preparation/inputs.json": "2c0b431e6602f62db5851974bec7018f2eebe1546fa3641de4d79b1fbd3d710a",
+    "/tmp/oriole-native-start-end-namespace-declaration-composition-independent-source-review.json": "6f352df37afd4eb4f4f41dd1348643fa26b693b157be7dff72b2c4439c0cf4df",
+    "/tmp/oriole-native-start-end-namespace-declaration-diagnostic-preparation/commands.json": "21134b59abeae6ca416b188f15c09b5a1f3f966d3e3c5a3bb626309e9ebb6c56",
+    "/tmp/oriole-native-start-end-namespace-declaration-diagnostic-preparation/w3c-command.json": "9fa6694c2118cf5153bf34b939c793eff6f45e2abc6aa09bae73e00b48b59703",
+    "/tmp/oriole-native-start-end-namespace-declaration-preparation/source.json": "f324ddd833aebfb0d8a8a3817445d6b9912eab4f0fb8408bb13da7244fd2897c",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/source.json": "49bf5914f1882d4a881bbea45e92a5bb9d56744df06d6a6bd26c069c680146c1",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/build.json": "f8a2e27ab9c4dbc958fc36ef6e8804eb8f63e71c564609624cdc44c0d457e48c",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/build-binding.json": "f73d8c14f5e9127761fe33da9cb627c90b87e77c858dbf4e04e6308aa2c28cd9",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/candidate.patch": "fb50f38354d99795ee1d9bd34ad21a1fa90a87cd1ec61bbfcb738b917cbdb95b",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/Cargo.lock": "7c61e01863f122b613f6df8941f78c79126991c2e350fabf7d33611c1e4f138b",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/Cargo.toml": "bc83cd58b6b099db2c14e163f47bcaaffaafb4add9ce5cf0a6da97015667fbe9",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/Cargo.toml": "184f5834d4daf1ae9c01a5ed5ecdd611097a9bdd6fe0c060a4c440d5c9b999d0",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/examples/frame_coverage.rs": "fa48a74a2451e46654f1dd47f9f84f81964261cd7223bf757adab7b96c48a46d",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/accounting.rs": "ad77fcdfc2ed0fbfbc18a330df1a263eca914377d7230ad46b2224c93756a566",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/active.rs": "de402225be109e6385f0fd7f5159285029ac532fcb1bef5b5e16389bbbf528ca",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/arena.rs": "e75d9443c5813ad540a05d47bd1078c694c137606bd589945abb16c23c7be25a",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/context_text_tests.rs": "d5782e6476a407f9b375bd8b27ce61094424fc542a861b520f357f40c2a84ca3",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/dtd.rs": "d1305787e3ae112027472ba01673b4b258cf8a879cf89394c3a64730fe847089",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/dtd/attlist.rs": "67001c8c2619010a677db807ce2fb8081214c35967b6a802fe5d4e8f63675c0f",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/dtd/composition.rs": "e83214c16960ba6813f878057d9fb42036f4de77da5a4552a933d4edae385557",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/dtd/grammar.rs": "bb92d1b1227d347a68712d48af58634bb4535414b5ae0ecbdf58c960045590ad",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/dtd/semantic.rs": "956867a7d3e3932284243f21221cd5df47e592236ec8af6e475e267f841f9381",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/dtd_tables.rs": "3ae11444bcd5fee85d740f731e6c40a0982984f641fad767e08102d111b30ab3",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/encoding.rs": "fc5d7b95f83433a80a32b038ff9b773219f6513e2e8da5afe5f92bd468033bc0",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/lexical.rs": "397ced901b220557d0384c67f4acc9b61b1b6ae1bc0dda65db3720b709ce4ff0",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/lib.rs": "339ba2b24308e4672da689f661bc78e8d3cbda590c873acf8c8b0aa69a12980d",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/names.rs": "4514e938d2556886d35599e62e3f5c1488e8adca2d705cd504692821eac506c6",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/recycling.rs": "06307e76b6673f5f70d6ed38da999942dd4dc2bc12fbfa2e18c836e2a5adb0a8",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/tag.rs": "cc60c55cda0ea06f999f35d467760fdac050acab3a2769b5a9d2cf4ef2254600",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/text.rs": "78d628274ed5fa16538b52af422a06ffaf1ac244ad4fb7d1d24553692d11f2cf",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/value.rs": "10db353fe7a2d9d134692b0a4505c7cfda542cffc2fc34b3058a93fef0dd6a1f",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/src/value_lexer.rs": "859c2d7d468aca9062dda8e0dac82c300bb4aadfadcea2e11fa5e2b3af4f5767",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/adapter_frame.rs": "d5572119681b3ddf487255ab8aa6214c0f0545eb60c4d9c7a1acd3f13dcf6946",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/allocation.rs": "2d71c4781228dd0a36f5d32de6648bb053501f4c9ef2d00e333329a04d815081",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/amplification.rs": "29075bd9ab5a2fcffd43a4f31ff0b512f434e05c907b9e5d1e5478c59f156ceb",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/attribute_entities.rs": "3c89f8b08f649e2a5b1ad46681efb4f321fe40094a513bdaeff1a74f4d17c6bb",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/conditional.rs": "ab51046976caa8eb315022b65198cbfd28c9cf220d983e177a13b5b4290eecbb",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/declaration_tokens.rs": "ba05dd5a4604ea4f776ad8e6b9c313c7336debc37e279c291283cd419b0137bd",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/diagnostics.rs": "6ea5df60e64fe16077c6e1a72a414d999f220e114617b36e5f171f1323a6f816",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/encodings.rs": "b452c223984f828c08469d67c3ffc60aa5c15631e3f221f87c8cb16b8cacd32b",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/entity_depth.rs": "724c330559ba3b73b629da8613cd188e023e2e94cf5603eb2faef70951fe24a9",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/event_output.rs": "05564387414f821ec4264f0f1b37351180b2b2c825e1fa4cd5dbbd0f459ac847",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/external_grammar.rs": "ae5f1fb93838f380fc053caf529b3caaa3be439284baca379108148f101117d2",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/external_headers.rs": "37fe9747abe3e3c871ceb7c4f298918f56e0ca2b61627a9204a6ec731acd086d",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/external_limits.rs": "22b0f7245dcc8c2896cb8626d11c8ff9c464a5199e12e62dd361b140524c815b",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/external_values.rs": "3863f74f3cb93ac1c4fd88e5325428983cd89df813ab1bcb05e265d916ae6c37",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/foreign_dtd.rs": "e8308aa2dcb36bf97aec6329d8a837acfea57f63ccee77dc6efc184cb49a7e99",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/malformed_dtd.rs": "1786635f19d97bd128dba25efcf65403f6a7b3590678496a6edef8882999247a",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/missing_parameters.rs": "3038876c244d3959c67f9a76fdb57f616d197e895fd7500c6e15ff5fd9824096",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/multibyte.rs": "71153cc3ed2aa370b41a13a225b9a2495ede07585eb22ecfe86088cb1437d3e2",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/name_rules.rs": "6c433434852a1e520f63e9484540797c47c7c57b93eab77aa3715a4532c9b018",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/parameter_values.rs": "d76f7e5b47b56fdede165a56f19f9f7a982bf75611f76ee74692bfd9cc9cb503",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/parser.rs": "52931b46bfa8fc327fb56b8df3ad7539c40525f52a4eb690b3497177ff767898",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/positions.rs": "451af1c98f7ddb86f1b7bd01f6fc91ece080c5c7bbe008e0d2942cc90e9e5dfd",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/prolog.rs": "bfd55c9767fabfbeaf26472c1514eed5f6cf9d9648082cf637e7cf2f833c2c63",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/raw_tokens.rs": "5ba9d436ed0d6ddbaf962beb1e6f2d72aa94ce0bfd23afa87db7cf488ce5f603",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/recycling.rs": "12132edd1e33b8fb0568b234bbf7d48e5de38873cc27d331436a4ca6c2b5fb15",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/reparse_deferral.rs": "9f954325d028d1775fa47291af27eddec5913c76e2ec413e0c555eb549913709",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole/tests/text_coalescing.rs": "9d53070c4bb512018af7209c9d0a82698e3cdf08d6bd4a35ed89abab63c3017f",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_cli/Cargo.toml": "f51a77480b35fef0c59a7f3b06194d1692f3984d7d87468445974c6836804c5d",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_cli/src/main.rs": "b1556990da5da6a3b91ed66e857e79d26ba4084f503be240649a10cea3ed6083",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_expat/Cargo.toml": "8ec06203f4a6ec67f6eebac4ef6e1d34de34e933c8fc057f9e23d3df3f3bd215",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_expat/README.md": "b2b9439d6455b0cb7f3a5c4f0659c69253c0800f0ee58f9da26e4e0fbd6c0474",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_expat/src/content_model.rs": "0dd9baea94af469fc3e702b6504c5a976a256f2db38e96ee3eab8d2cd6f066f2",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_expat/src/context_text_tests.rs": "5b74bfe9be84234e4e4438998685b1f91381c82fffde248b8f8822873cd9d254",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_expat/src/lib.rs": "9af4fa9388d84248f086f040d295317bf9ce2aacb533c7293f5fbc09c3fa9cb4",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_expat/src/tests.rs": "098bb0f21996ec781f0060698e1ad03de10810f0e71d8160b26e1cc3b74f8a80",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_expat/tests/memory.rs": "bcce5f45d1fbe0de5c2a702c958ed6656de544909edf9d8594f8edff66da8632",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_storage/Cargo.toml": "d009126c142efea7ad1b1017ff13c071330e885a43cc5e39b9f84a5168fd51d6",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_storage/src/allocator.rs": "910ce7ead099bd6a306a037c77fa276f746ac0eac59f14d8bda9b9b1c2deeac7",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_storage/src/hashing.rs": "f97040ee70e3a6147edf896778748aad7845c12f873b3b2688e2ad84989c4e80",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_storage/src/lib.rs": "bef77200e81d340776f2e858cf679d01aa8986c27da208bc48a9afec3e069c2c",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_storage/src/queue.rs": "944ae27c4cc1d453b77ce34c505b4b194ad37b42568d3fe24ebb0c5cece784a7",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_storage/src/shared.rs": "52def3c62ee0563c71c051cfe4c759aaddc16b378f413969592af80cf2fdf13b",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_storage/src/string.rs": "801cafba67a6c83bdd13b26a4087031adb360edcc81485540adaadea15a9fad5",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_storage/src/tests.rs": "561ab8d0ece0e6d3f4b2e075798e0d6990a48b43b065ec3dd254473c99dd445f",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_storage/src/tracking.rs": "c6f53efa24a5c31dad71d597c42612748c3209796507a2b2eafb7368a1b69cc6",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/crates/oriole_storage/src/try_lock.rs": "e08e75c6b2a1410d74d3fda3667e7f031dfade5eb26e0d5db5b98f6233ce6fde",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/include/expat.h": "c8c8fda28157a2550dd0b276a717df3414d2a91728e6d0f9d9e20ed143f8d42c",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/tests/c/UPSTREAM-NOTICES.txt": "0fecb93ea065832a4cbe43838af7a2ee98e29b2e79effa49ddbefa615a31cad7",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/tests/c/adversarial.c": "abc52bb8d44d0bb5f9914e594b6ca2e0a7d8e6c5c9c293699a73e00dfa53793d",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/tests/c/allocations.c": "1ccf833e2d8d4ec75daf1524547dd7671592c7283e5a0d45b849cacbdb662f59",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/tests/c/integration.c": "1e77767b31d4aa2c4bf16321dc545f0faa6ce6e401d5080f96993bbca978d399",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/benchmarks/inprocess/Cargo.toml": "eb3adacd93525be29f775d5a848774bc4e6b3920df6588f573651d396200090a",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/benchmarks/inprocess/Cargo.lock": "8d1479efac23e72c412975cd77df822968afa956bb1cad564ac708deeec0edca",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/fuzz/Cargo.toml": "1d7299d54cbed252075ce4c25380cab21407229106e07721bda27f430e913ef2",
+    "/home/dev-user/code/oss/oriole-native-start-end-namespace-declaration/fuzz/Cargo.lock": "700077fa6ead74c662a77cbb12663a42fbceed461e0ebdd68c24a9f6657ca574",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.a": "b64051b11ab76a6a49bac6a8c640abb4bdce32a1fc63edf6261f69697537a20c",
+    "/tmp/oriole-native-start-end-namespace-declaration-diagnostic-preparation/release.json": "811d80f680241f047b01472b297a0e22f055a139358673d68e53705f1b2a77d1",
+    "/tmp/oriole-native-start-end-namespace-declaration-diagnostic-preparation/prepared.json": "6a0a2b3ec293abb159a4a850d9800ba9250cfc5f8482842aa960968be636ab56",
+    "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py": "d8363d1fd45cbef63608eb3f358505e405242715963ac805a29e7ffcdd4bf89d",
+    "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/run.py": "942182d38a985ed7ec20417ac94ee7e449166cd49a25adfe3900fa978404f36d",
+    "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/release.json": "811d80f680241f047b01472b297a0e22f055a139358673d68e53705f1b2a77d1",
+    "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/commands.json": "21134b59abeae6ca416b188f15c09b5a1f3f966d3e3c5a3bb626309e9ebb6c56",
+    "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/w3c-command.json": "612392a326ff0d91913fd08f94945cdce7de31f20618b014c8eb84c2f26739b9",
+    "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/read_callbacks.py": "36362bbf0afbfec34cdc11595ae7f9e97734684d948b90ae8906453831e7aa2f",
+    "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/read_w3c.py": "7a3f590f0411a2c9b22f11ddc3b7e481ced5d154c53bfadd1a2813cb21ae7fe1"
+  },
+  "command_manifest_sha256": "612392a326ff0d91913fd08f94945cdce7de31f20618b014c8eb84c2f26739b9",
+  "candidate_library_sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+  "reference_library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+  "catalog_descriptors": 2585,
+  "selected_descriptors": 2001,
+  "skipped_by_reason": {
+    "Earlier XML edition only": 310,
+    "XML 1.1": 274
+  },
+  "rows_per_engine": 6003,
+  "corpus_files": 3387,
+  "engines": {
+    "reference": {
+      "mandatory_pass": 4962,
+      "mandatory_fail": 960,
+      "optional_observations": 81,
+      "inconclusive": 0,
+      "resolver_errors": 0,
+      "mismatch_types": {
+        "not-wf": 6,
+        "invalid": 36,
+        "valid": 918
+      },
+      "child_outcomes": 792
+    },
+    "oriole": {
+      "mandatory_pass": 4962,
+      "mandatory_fail": 960,
+      "optional_observations": 81,
+      "inconclusive": 0,
+      "resolver_errors": 0,
+      "mismatch_types": {
+        "not-wf": 6,
+        "invalid": 36,
+        "valid": 918
+      },
+      "child_outcomes": 792
+    }
+  },
+  "acceptance_differences": 0,
+  "inconclusive_comparisons": 0,
+  "result_field_difference_counts": {
+    "status": 0,
+    "error": 198,
+    "index": 1695,
+    "children": 0,
+    "loaded": 0,
+    "resolver_errors": 0
+  },
+  "result_field_difference_row_indices": {
+    "status": [],
+    "error": [
+      180,
+      181,
+      182,
+      189,
+      190,
+      191,
+      192,
+      193,
+      194,
+      195,
+      196,
+      197,
+      198,
+      199,
+      200,
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      390,
+      391,
+      392,
+      444,
+      445,
+      446,
+      480,
+      481,
+      482,
+      483,
+      484,
+      485,
+      486,
+      487,
+      488,
+      534,
+      535,
+      536,
+      540,
+      541,
+      542,
+      1491,
+      1492,
+      1493,
+      1497,
+      1498,
+      1499,
+      2142,
+      2143,
+      2144,
+      2310,
+      2311,
+      2312,
+      2355,
+      2356,
+      2357,
+      2361,
+      2362,
+      2363,
+      2370,
+      2371,
+      2372,
+      2400,
+      2401,
+      2402,
+      2406,
+      2407,
+      2408,
+      2415,
+      2416,
+      2417,
+      2421,
+      2422,
+      2423,
+      2469,
+      2470,
+      2471,
+      2478,
+      2479,
+      2480,
+      2487,
+      2488,
+      2489,
+      2493,
+      2494,
+      2495,
+      2556,
+      2557,
+      2558,
+      2577,
+      2578,
+      2579,
+      2613,
+      2614,
+      2615,
+      2616,
+      2617,
+      2618,
+      2619,
+      2620,
+      2621,
+      2631,
+      2632,
+      2633,
+      2793,
+      2794,
+      2795,
+      2970,
+      2971,
+      2972,
+      3000,
+      3001,
+      3002,
+      3003,
+      3004,
+      3005,
+      3015,
+      3016,
+      3017,
+      3126,
+      3127,
+      3128,
+      3165,
+      3166,
+      3167,
+      3180,
+      3181,
+      3182,
+      3186,
+      3187,
+      3188,
+      3276,
+      3277,
+      3278,
+      3420,
+      3421,
+      3422,
+      3480,
+      3481,
+      3482,
+      3495,
+      3496,
+      3497,
+      3525,
+      3526,
+      3527,
+      3531,
+      3532,
+      3533,
+      3537,
+      3538,
+      3539,
+      3603,
+      3604,
+      3605,
+      3606,
+      3607,
+      3608,
+      3618,
+      3619,
+      3620,
+      3639,
+      3640,
+      3641,
+      3798,
+      3799,
+      3800,
+      3837,
+      3838,
+      3839,
+      3861,
+      3862,
+      3863,
+      3885,
+      3886,
+      3887,
+      3891,
+      3892,
+      3893,
+      3897,
+      3898,
+      3899,
+      3918,
+      3919,
+      3920,
+      4023,
+      4024,
+      4025,
+      4035,
+      4036,
+      4037,
+      5973,
+      5974,
+      5975,
+      6000,
+      6001,
+      6002
+    ],
+    "index": [
+      0,
+      1,
+      2,
+      51,
+      52,
+      53,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      123,
+      124,
+      125,
+      132,
+      133,
+      134,
+      138,
+      139,
+      140,
+      159,
+      160,
+      161,
+      165,
+      166,
+      167,
+      168,
+      169,
+      170,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      204,
+      205,
+      206,
+      231,
+      232,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      264,
+      265,
+      266,
+      270,
+      271,
+      272,
+      288,
+      289,
+      290,
+      291,
+      292,
+      293,
+      294,
+      295,
+      296,
+      297,
+      298,
+      299,
+      300,
+      301,
+      302,
+      303,
+      304,
+      305,
+      321,
+      322,
+      323,
+      333,
+      334,
+      335,
+      336,
+      337,
+      338,
+      339,
+      340,
+      341,
+      360,
+      361,
+      362,
+      363,
+      364,
+      365,
+      366,
+      367,
+      368,
+      369,
+      370,
+      371,
+      372,
+      373,
+      374,
+      375,
+      376,
+      377,
+      378,
+      379,
+      380,
+      381,
+      382,
+      383,
+      384,
+      385,
+      386,
+      390,
+      391,
+      392,
+      393,
+      394,
+      395,
+      402,
+      403,
+      404,
+      405,
+      406,
+      407,
+      408,
+      409,
+      410,
+      414,
+      415,
+      416,
+      453,
+      454,
+      455,
+      456,
+      457,
+      458,
+      459,
+      460,
+      461,
+      462,
+      463,
+      464,
+      468,
+      469,
+      470,
+      471,
+      472,
+      473,
+      477,
+      478,
+      479,
+      483,
+      484,
+      485,
+      486,
+      487,
+      488,
+      528,
+      529,
+      530,
+      531,
+      532,
+      533,
+      540,
+      541,
+      542,
+      543,
+      544,
+      545,
+      552,
+      553,
+      554,
+      558,
+      559,
+      560,
+      561,
+      562,
+      563,
+      567,
+      568,
+      569,
+      570,
+      571,
+      572,
+      573,
+      574,
+      575,
+      576,
+      577,
+      578,
+      1467,
+      1468,
+      1469,
+      1470,
+      1471,
+      1472,
+      1485,
+      1486,
+      1487,
+      1488,
+      1489,
+      1490,
+      1491,
+      1492,
+      1493,
+      1497,
+      1498,
+      1499,
+      1500,
+      1501,
+      1502,
+      1503,
+      1504,
+      1505,
+      1518,
+      1519,
+      1520,
+      1521,
+      1522,
+      1523,
+      1524,
+      1525,
+      1526,
+      1530,
+      1531,
+      1532,
+      1533,
+      1534,
+      1535,
+      1536,
+      1537,
+      1538,
+      1542,
+      1543,
+      1544,
+      1545,
+      1546,
+      1547,
+      1548,
+      1549,
+      1550,
+      1551,
+      1552,
+      1553,
+      1554,
+      1555,
+      1556,
+      1557,
+      1558,
+      1559,
+      1572,
+      1573,
+      1574,
+      1578,
+      1579,
+      1580,
+      1581,
+      1582,
+      1583,
+      1584,
+      1585,
+      1586,
+      1590,
+      1591,
+      1592,
+      1593,
+      1594,
+      1595,
+      1596,
+      1597,
+      1598,
+      2007,
+      2008,
+      2009,
+      2115,
+      2116,
+      2117,
+      2118,
+      2119,
+      2120,
+      2121,
+      2122,
+      2123,
+      2124,
+      2125,
+      2126,
+      2127,
+      2128,
+      2129,
+      2133,
+      2134,
+      2135,
+      2139,
+      2140,
+      2141,
+      2142,
+      2143,
+      2144,
+      2145,
+      2146,
+      2147,
+      2148,
+      2149,
+      2150,
+      2151,
+      2152,
+      2153,
+      2154,
+      2155,
+      2156,
+      2157,
+      2158,
+      2159,
+      2160,
+      2161,
+      2162,
+      2163,
+      2164,
+      2165,
+      2190,
+      2191,
+      2192,
+      2193,
+      2194,
+      2195,
+      2196,
+      2197,
+      2198,
+      2208,
+      2209,
+      2210,
+      2217,
+      2218,
+      2219,
+      2223,
+      2224,
+      2225,
+      2226,
+      2227,
+      2228,
+      2232,
+      2233,
+      2234,
+      2235,
+      2236,
+      2237,
+      2247,
+      2248,
+      2249,
+      2250,
+      2251,
+      2252,
+      2253,
+      2254,
+      2255,
+      2256,
+      2257,
+      2258,
+      2265,
+      2266,
+      2267,
+      2295,
+      2296,
+      2297,
+      2298,
+      2299,
+      2300,
+      2310,
+      2311,
+      2312,
+      2313,
+      2314,
+      2315,
+      2316,
+      2317,
+      2318,
+      2319,
+      2320,
+      2321,
+      2325,
+      2326,
+      2327,
+      2340,
+      2341,
+      2342,
+      2343,
+      2344,
+      2345,
+      2346,
+      2347,
+      2348,
+      2349,
+      2350,
+      2351,
+      2355,
+      2356,
+      2357,
+      2361,
+      2362,
+      2363,
+      2364,
+      2365,
+      2366,
+      2367,
+      2368,
+      2369,
+      2370,
+      2371,
+      2372,
+      2385,
+      2386,
+      2387,
+      2388,
+      2389,
+      2390,
+      2391,
+      2392,
+      2393,
+      2394,
+      2395,
+      2396,
+      2397,
+      2398,
+      2399,
+      2400,
+      2401,
+      2402,
+      2403,
+      2404,
+      2405,
+      2406,
+      2407,
+      2408,
+      2409,
+      2410,
+      2411,
+      2415,
+      2416,
+      2417,
+      2478,
+      2479,
+      2480,
+      2487,
+      2488,
+      2489,
+      2505,
+      2506,
+      2507,
+      2508,
+      2509,
+      2510,
+      2511,
+      2512,
+      2513,
+      2514,
+      2515,
+      2516,
+      2517,
+      2518,
+      2519,
+      2520,
+      2521,
+      2522,
+      2523,
+      2524,
+      2525,
+      2556,
+      2557,
+      2558,
+      2562,
+      2563,
+      2564,
+      2565,
+      2566,
+      2567,
+      2568,
+      2569,
+      2570,
+      2577,
+      2578,
+      2579,
+      2583,
+      2584,
+      2585,
+      2586,
+      2587,
+      2588,
+      2589,
+      2590,
+      2591,
+      2592,
+      2593,
+      2594,
+      2595,
+      2596,
+      2597,
+      2598,
+      2599,
+      2600,
+      2601,
+      2602,
+      2603,
+      2604,
+      2605,
+      2606,
+      2607,
+      2608,
+      2609,
+      2610,
+      2611,
+      2612,
+      2613,
+      2614,
+      2615,
+      2616,
+      2617,
+      2618,
+      2619,
+      2620,
+      2621,
+      2622,
+      2623,
+      2624,
+      2625,
+      2626,
+      2627,
+      2628,
+      2629,
+      2630,
+      2631,
+      2632,
+      2633,
+      2634,
+      2635,
+      2636,
+      2637,
+      2638,
+      2639,
+      2640,
+      2641,
+      2642,
+      2901,
+      2902,
+      2903,
+      2904,
+      2905,
+      2906,
+      2907,
+      2908,
+      2909,
+      2910,
+      2911,
+      2912,
+      2913,
+      2914,
+      2915,
+      2916,
+      2917,
+      2918,
+      2919,
+      2920,
+      2921,
+      2922,
+      2923,
+      2924,
+      2925,
+      2926,
+      2927,
+      2928,
+      2929,
+      2930,
+      2934,
+      2935,
+      2936,
+      2937,
+      2938,
+      2939,
+      2940,
+      2941,
+      2942,
+      2943,
+      2944,
+      2945,
+      2946,
+      2947,
+      2948,
+      2949,
+      2950,
+      2951,
+      2952,
+      2953,
+      2954,
+      2955,
+      2956,
+      2957,
+      2958,
+      2959,
+      2960,
+      2961,
+      2962,
+      2963,
+      2964,
+      2965,
+      2966,
+      2967,
+      2968,
+      2969,
+      2970,
+      2971,
+      2972,
+      2973,
+      2974,
+      2975,
+      2979,
+      2980,
+      2981,
+      2982,
+      2983,
+      2984,
+      2991,
+      2992,
+      2993,
+      2994,
+      2995,
+      2996,
+      3000,
+      3001,
+      3002,
+      3003,
+      3004,
+      3005,
+      3006,
+      3007,
+      3008,
+      3009,
+      3010,
+      3011,
+      3012,
+      3013,
+      3014,
+      3015,
+      3016,
+      3017,
+      3018,
+      3019,
+      3020,
+      3021,
+      3022,
+      3023,
+      3024,
+      3025,
+      3026,
+      3027,
+      3028,
+      3029,
+      3045,
+      3046,
+      3047,
+      3051,
+      3052,
+      3053,
+      3063,
+      3064,
+      3065,
+      3066,
+      3067,
+      3068,
+      3072,
+      3073,
+      3074,
+      3120,
+      3121,
+      3122,
+      3132,
+      3133,
+      3134,
+      3135,
+      3136,
+      3137,
+      3138,
+      3139,
+      3140,
+      3141,
+      3142,
+      3143,
+      3150,
+      3151,
+      3152,
+      3153,
+      3154,
+      3155,
+      3162,
+      3163,
+      3164,
+      3168,
+      3169,
+      3170,
+      3171,
+      3172,
+      3173,
+      3174,
+      3175,
+      3176,
+      3186,
+      3187,
+      3188,
+      3192,
+      3193,
+      3194,
+      3204,
+      3205,
+      3206,
+      3216,
+      3217,
+      3218,
+      3219,
+      3220,
+      3221,
+      3225,
+      3226,
+      3227,
+      3228,
+      3229,
+      3230,
+      3231,
+      3232,
+      3233,
+      3234,
+      3235,
+      3236,
+      3237,
+      3238,
+      3239,
+      3240,
+      3241,
+      3242,
+      3243,
+      3244,
+      3245,
+      3309,
+      3310,
+      3311,
+      3315,
+      3316,
+      3317,
+      3339,
+      3340,
+      3341,
+      3342,
+      3343,
+      3344,
+      3345,
+      3346,
+      3347,
+      3348,
+      3349,
+      3350,
+      3363,
+      3364,
+      3365,
+      3366,
+      3367,
+      3368,
+      3369,
+      3370,
+      3371,
+      3372,
+      3373,
+      3374,
+      3375,
+      3376,
+      3377,
+      3378,
+      3379,
+      3380,
+      3390,
+      3391,
+      3392,
+      3393,
+      3394,
+      3395,
+      3396,
+      3397,
+      3398,
+      3399,
+      3400,
+      3401,
+      3402,
+      3403,
+      3404,
+      3420,
+      3421,
+      3422,
+      3441,
+      3442,
+      3443,
+      3444,
+      3445,
+      3446,
+      3447,
+      3448,
+      3449,
+      3450,
+      3451,
+      3452,
+      3453,
+      3454,
+      3455,
+      3456,
+      3457,
+      3458,
+      3462,
+      3463,
+      3464,
+      3465,
+      3466,
+      3467,
+      3468,
+      3469,
+      3470,
+      3471,
+      3472,
+      3473,
+      3474,
+      3475,
+      3476,
+      3477,
+      3478,
+      3479,
+      3480,
+      3481,
+      3482,
+      3483,
+      3484,
+      3485,
+      3486,
+      3487,
+      3488,
+      3489,
+      3490,
+      3491,
+      3492,
+      3493,
+      3494,
+      3495,
+      3496,
+      3497,
+      3498,
+      3499,
+      3500,
+      3606,
+      3607,
+      3608,
+      3618,
+      3619,
+      3620,
+      3651,
+      3652,
+      3653,
+      3654,
+      3655,
+      3656,
+      3657,
+      3658,
+      3659,
+      3660,
+      3661,
+      3662,
+      3663,
+      3664,
+      3665,
+      3666,
+      3667,
+      3668,
+      3669,
+      3670,
+      3671,
+      3672,
+      3673,
+      3674,
+      3675,
+      3676,
+      3677,
+      3678,
+      3679,
+      3680,
+      3681,
+      3682,
+      3683,
+      3684,
+      3685,
+      3686,
+      3687,
+      3688,
+      3689,
+      3690,
+      3691,
+      3692,
+      3693,
+      3694,
+      3695,
+      3696,
+      3697,
+      3698,
+      3699,
+      3700,
+      3701,
+      3702,
+      3703,
+      3704,
+      3705,
+      3706,
+      3707,
+      3708,
+      3709,
+      3710,
+      3711,
+      3712,
+      3713,
+      3714,
+      3715,
+      3716,
+      3717,
+      3718,
+      3719,
+      3720,
+      3721,
+      3722,
+      3723,
+      3724,
+      3725,
+      3726,
+      3727,
+      3728,
+      3729,
+      3730,
+      3731,
+      3732,
+      3733,
+      3734,
+      3735,
+      3736,
+      3737,
+      3738,
+      3739,
+      3740,
+      3741,
+      3742,
+      3743,
+      3744,
+      3745,
+      3746,
+      3747,
+      3748,
+      3749,
+      3750,
+      3751,
+      3752,
+      3753,
+      3754,
+      3755,
+      3756,
+      3757,
+      3758,
+      3762,
+      3763,
+      3764,
+      3777,
+      3778,
+      3779,
+      3798,
+      3799,
+      3800,
+      3804,
+      3805,
+      3806,
+      3807,
+      3808,
+      3809,
+      3816,
+      3817,
+      3818,
+      3819,
+      3820,
+      3821,
+      3822,
+      3823,
+      3824,
+      3825,
+      3826,
+      3827,
+      3831,
+      3832,
+      3833,
+      3837,
+      3838,
+      3839,
+      3840,
+      3841,
+      3842,
+      3843,
+      3844,
+      3845,
+      3846,
+      3847,
+      3848,
+      3849,
+      3850,
+      3851,
+      3852,
+      3853,
+      3854,
+      3861,
+      3862,
+      3863,
+      3864,
+      3865,
+      3866,
+      3867,
+      3868,
+      3869,
+      3870,
+      3871,
+      3872,
+      3873,
+      3874,
+      3875,
+      3876,
+      3877,
+      3878,
+      3879,
+      3880,
+      3881,
+      3882,
+      3883,
+      3884,
+      3885,
+      3886,
+      3887,
+      3888,
+      3889,
+      3890,
+      3891,
+      3892,
+      3893,
+      3894,
+      3895,
+      3896,
+      3897,
+      3898,
+      3899,
+      3900,
+      3901,
+      3902,
+      3903,
+      3904,
+      3905,
+      3906,
+      3907,
+      3908,
+      3909,
+      3910,
+      3911,
+      3912,
+      3913,
+      3914,
+      3915,
+      3916,
+      3917,
+      3918,
+      3919,
+      3920,
+      3921,
+      3922,
+      3923,
+      3924,
+      3925,
+      3926,
+      3927,
+      3928,
+      3929,
+      3930,
+      3931,
+      3932,
+      3966,
+      3967,
+      3968,
+      3969,
+      3970,
+      3971,
+      3972,
+      3973,
+      3974,
+      3975,
+      3976,
+      3977,
+      3978,
+      3979,
+      3980,
+      3981,
+      3982,
+      3983,
+      3984,
+      3985,
+      3986,
+      3987,
+      3988,
+      3989,
+      3990,
+      3991,
+      3992,
+      3993,
+      3994,
+      3995,
+      3996,
+      3997,
+      3998,
+      3999,
+      4000,
+      4001,
+      4005,
+      4006,
+      4007,
+      4008,
+      4009,
+      4010,
+      4011,
+      4012,
+      4013,
+      4017,
+      4018,
+      4019,
+      4023,
+      4024,
+      4025,
+      4026,
+      4027,
+      4028,
+      4032,
+      4033,
+      4034,
+      4035,
+      4036,
+      4037,
+      4038,
+      4039,
+      4040,
+      4041,
+      4042,
+      4043,
+      4050,
+      4051,
+      4052,
+      4053,
+      4054,
+      4055,
+      4056,
+      4057,
+      4058,
+      4059,
+      4060,
+      4061,
+      4644,
+      4645,
+      4646,
+      4647,
+      4648,
+      4649,
+      4650,
+      4651,
+      4652,
+      4653,
+      4654,
+      4655,
+      4731,
+      4732,
+      4733,
+      4734,
+      4735,
+      4736,
+      4737,
+      4738,
+      4739,
+      4785,
+      4786,
+      4787,
+      4839,
+      4840,
+      4841,
+      4842,
+      4843,
+      4844,
+      4845,
+      4846,
+      4847,
+      4848,
+      4849,
+      4850,
+      4851,
+      4852,
+      4853,
+      4854,
+      4855,
+      4856,
+      4857,
+      4858,
+      4859,
+      4860,
+      4861,
+      4862,
+      4863,
+      4864,
+      4865,
+      4866,
+      4867,
+      4868,
+      4869,
+      4870,
+      4871,
+      4872,
+      4873,
+      4874,
+      4875,
+      4876,
+      4877,
+      4878,
+      4879,
+      4880,
+      4881,
+      4882,
+      4883,
+      4884,
+      4885,
+      4886,
+      4887,
+      4888,
+      4889,
+      4890,
+      4891,
+      4892,
+      4893,
+      4894,
+      4895,
+      4908,
+      4909,
+      4910,
+      4911,
+      4912,
+      4913,
+      4914,
+      4915,
+      4916,
+      4920,
+      4921,
+      4922,
+      4923,
+      4924,
+      4925,
+      4926,
+      4927,
+      4928,
+      4929,
+      4930,
+      4931,
+      4932,
+      4933,
+      4934,
+      4935,
+      4936,
+      4937,
+      4938,
+      4939,
+      4940,
+      4941,
+      4942,
+      4943,
+      4944,
+      4945,
+      4946,
+      4947,
+      4948,
+      4949,
+      4950,
+      4951,
+      4952,
+      4953,
+      4954,
+      4955,
+      4956,
+      4957,
+      4958,
+      4959,
+      4960,
+      4961,
+      4962,
+      4963,
+      4964,
+      4965,
+      4966,
+      4967,
+      4968,
+      4969,
+      4970,
+      4971,
+      4972,
+      4973,
+      4974,
+      4975,
+      4976,
+      4977,
+      4978,
+      4979,
+      4992,
+      4993,
+      4994,
+      4995,
+      4996,
+      4997,
+      4998,
+      4999,
+      5000,
+      5007,
+      5008,
+      5009,
+      5010,
+      5011,
+      5012,
+      5013,
+      5014,
+      5015,
+      5016,
+      5017,
+      5018,
+      5019,
+      5020,
+      5021,
+      5022,
+      5023,
+      5024,
+      5025,
+      5026,
+      5027,
+      5028,
+      5029,
+      5030,
+      5031,
+      5032,
+      5033,
+      5040,
+      5041,
+      5042,
+      5646,
+      5647,
+      5648,
+      5649,
+      5650,
+      5651,
+      5652,
+      5653,
+      5654,
+      5655,
+      5656,
+      5657,
+      5658,
+      5659,
+      5660,
+      5661,
+      5662,
+      5663,
+      5664,
+      5665,
+      5666,
+      5667,
+      5668,
+      5669,
+      5670,
+      5671,
+      5672,
+      5673,
+      5674,
+      5675,
+      5676,
+      5677,
+      5678,
+      5679,
+      5680,
+      5681,
+      5682,
+      5683,
+      5684,
+      5685,
+      5686,
+      5687,
+      5688,
+      5689,
+      5690,
+      5691,
+      5692,
+      5693,
+      5694,
+      5695,
+      5696,
+      5697,
+      5698,
+      5699,
+      5700,
+      5701,
+      5702,
+      5703,
+      5704,
+      5705,
+      5706,
+      5707,
+      5708,
+      5709,
+      5710,
+      5711,
+      5712,
+      5713,
+      5714,
+      5715,
+      5716,
+      5717,
+      5718,
+      5719,
+      5720,
+      5721,
+      5722,
+      5723,
+      5724,
+      5725,
+      5726,
+      5727,
+      5728,
+      5729,
+      5730,
+      5731,
+      5732,
+      5733,
+      5734,
+      5735,
+      5736,
+      5737,
+      5738,
+      5739,
+      5740,
+      5741,
+      5742,
+      5743,
+      5744,
+      5745,
+      5746,
+      5747,
+      5748,
+      5749,
+      5750,
+      5751,
+      5752,
+      5753,
+      5754,
+      5755,
+      5756,
+      5757,
+      5758,
+      5759,
+      5760,
+      5761,
+      5762,
+      5763,
+      5764,
+      5765,
+      5766,
+      5767,
+      5768,
+      5769,
+      5770,
+      5771,
+      5772,
+      5773,
+      5774,
+      5775,
+      5776,
+      5777,
+      5778,
+      5779,
+      5780,
+      5781,
+      5782,
+      5783,
+      5784,
+      5785,
+      5786,
+      5787,
+      5788,
+      5789,
+      5790,
+      5791,
+      5792,
+      5793,
+      5794,
+      5795,
+      5796,
+      5797,
+      5798,
+      5799,
+      5800,
+      5801,
+      5802,
+      5803,
+      5804,
+      5805,
+      5806,
+      5807,
+      5808,
+      5809,
+      5810,
+      5811,
+      5812,
+      5813,
+      5814,
+      5815,
+      5816,
+      5817,
+      5818,
+      5819,
+      5820,
+      5821,
+      5822,
+      5823,
+      5824,
+      5825,
+      5826,
+      5827,
+      5828,
+      5829,
+      5830,
+      5831,
+      5832,
+      5833,
+      5834,
+      5835,
+      5836,
+      5837,
+      5838,
+      5839,
+      5840,
+      5841,
+      5842,
+      5843,
+      5844,
+      5845,
+      5846,
+      5847,
+      5848,
+      5849,
+      5850,
+      5851,
+      5852,
+      5853,
+      5854,
+      5855,
+      5856,
+      5857,
+      5858,
+      5859,
+      5860,
+      5861,
+      5862,
+      5863,
+      5864,
+      5865,
+      5866,
+      5867,
+      5868,
+      5869,
+      5870,
+      5871,
+      5872,
+      5873,
+      5874,
+      5875,
+      5876,
+      5877,
+      5878,
+      5879,
+      5880,
+      5881,
+      5882,
+      5883,
+      5884,
+      5885,
+      5886,
+      5887,
+      5888,
+      5889,
+      5890,
+      5891,
+      5892,
+      5893,
+      5894,
+      5895,
+      5896,
+      5897,
+      5898,
+      5899,
+      5900,
+      5901,
+      5902,
+      5903,
+      5904,
+      5905,
+      5906,
+      5907,
+      5908,
+      5909,
+      5910,
+      5911,
+      5912,
+      5913,
+      5914,
+      5915,
+      5916,
+      5917,
+      5918,
+      5919,
+      5920,
+      5921,
+      5922,
+      5923,
+      5924,
+      5925,
+      5926,
+      5927,
+      5928,
+      5929,
+      5930,
+      5931,
+      5932,
+      5933,
+      5934,
+      5935,
+      5936,
+      5937,
+      5938,
+      5939,
+      5940,
+      5941,
+      5942,
+      5943,
+      5944,
+      5945,
+      5946,
+      5947,
+      5948,
+      5949,
+      5950,
+      5951,
+      5952,
+      5953,
+      5954,
+      5955,
+      5956,
+      5957,
+      5958,
+      5959,
+      5960,
+      5961,
+      5962,
+      5963,
+      5964,
+      5965,
+      5966,
+      5997,
+      5998,
+      5999
+    ],
+    "children": [],
+    "loaded": [],
+    "resolver_errors": []
+  },
+  "evidence_sha256": {
+    "w3c/catalog.json": "7804e0e29a1da95217f32309c9d74f4b59baeec9989725fc289cf1b6eda6c4ed",
+    "w3c/oriole-progress.json": "009460bf969858c8ccb795672651addf59079067955299978cf10a4e32ad8aa3",
+    "w3c/oriole.json": "6d367359ebdcbe01042a6fee7ce4b56c08cfaf8d451f510c6762e039e637b0d6",
+    "w3c/oriole.log": "d91d7d039dc13079f8b6072002348f3a11b4658b327937117419b11a02f0ad87",
+    "w3c/reference-progress.json": "009460bf969858c8ccb795672651addf59079067955299978cf10a4e32ad8aa3",
+    "w3c/reference.json": "b4abe0bd35a3bf469e512215f846fd605cedefe4f6666b7fd646c5c8f99b5a21",
+    "w3c/reference.log": "a2dbc2038d0067e7c59dc305810bc271681e599f0d3036660ffe41f36d19c782",
+    "w3c/summary.json": "9126331b2858a1e1b448b00a092874ee6edeb35d769180426346ee285c32862a",
+    "w3c-supervision/receipt.json": "1fc94bc9177e76f51e00db3a3571137842481578dedca5a89aedef3623598b98",
+    "w3c-supervision/stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "w3c-supervision/stdout": "22278d665561381b19a1caaad60066f3d4ee2836c8c6d7c26a5ff036391dfb39"
+  },
+  "supervisor_raw_exit": 1,
+  "supervisor_elapsed_seconds": 25.656004015996587,
+  "all_processes_reaped": true,
+  "reader_sha256": "7a3f590f0411a2c9b22f11ddc3b7e481ced5d154c53bfadd1a2813cb21ae7fe1",
+  "limitations": [
+    "Acceptance-only comparison; no canonical callback output oracle.",
+    "Catalog expectation mismatches remain failures even when both engines agree.",
+    "Optional error cases and accepted invalid cases do not establish validating conformance.",
+    "Error codes, byte indices and some child error outcomes differ; acceptance equality is not exact API outcome equality.",
+    "Only this combined candidate and pinned normal Expat are executed by the held command; selected raw-view comparison reuses its pinned saved rows. All deltas require source/fixture review; no failure waiver."
+  ],
+  "selected_raw_view_comparison": {
+    "oriole": {
+      "rows": 6003,
+      "changed_rows": 48,
+      "differences": [
+        {
+          "row_index": 453,
+          "selected": {
+            "id": "not-wf-sa-154",
+            "path": "xmltest/not-wf/sa/154.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/154.xml",
+                  "sha256": "a0afa21c269a39c3abbd913f9d9962b938e9a5d8476ff5a621b51a0fc390e585"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "not-wf-sa-154",
+            "path": "xmltest/not-wf/sa/154.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/154.xml",
+                  "sha256": "a0afa21c269a39c3abbd913f9d9962b938e9a5d8476ff5a621b51a0fc390e585"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 454,
+          "selected": {
+            "id": "not-wf-sa-154",
+            "path": "xmltest/not-wf/sa/154.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/154.xml",
+                  "sha256": "a0afa21c269a39c3abbd913f9d9962b938e9a5d8476ff5a621b51a0fc390e585"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "not-wf-sa-154",
+            "path": "xmltest/not-wf/sa/154.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/154.xml",
+                  "sha256": "a0afa21c269a39c3abbd913f9d9962b938e9a5d8476ff5a621b51a0fc390e585"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 455,
+          "selected": {
+            "id": "not-wf-sa-154",
+            "path": "xmltest/not-wf/sa/154.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/154.xml",
+                  "sha256": "a0afa21c269a39c3abbd913f9d9962b938e9a5d8476ff5a621b51a0fc390e585"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "not-wf-sa-154",
+            "path": "xmltest/not-wf/sa/154.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/154.xml",
+                  "sha256": "a0afa21c269a39c3abbd913f9d9962b938e9a5d8476ff5a621b51a0fc390e585"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 456,
+          "selected": {
+            "id": "not-wf-sa-155",
+            "path": "xmltest/not-wf/sa/155.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/155.xml",
+                  "sha256": "ddc108ae93d71884a48a91021cd682a9eae37025071476c9adf8f52607c80b3c"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "not-wf-sa-155",
+            "path": "xmltest/not-wf/sa/155.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/155.xml",
+                  "sha256": "ddc108ae93d71884a48a91021cd682a9eae37025071476c9adf8f52607c80b3c"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 457,
+          "selected": {
+            "id": "not-wf-sa-155",
+            "path": "xmltest/not-wf/sa/155.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/155.xml",
+                  "sha256": "ddc108ae93d71884a48a91021cd682a9eae37025071476c9adf8f52607c80b3c"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "not-wf-sa-155",
+            "path": "xmltest/not-wf/sa/155.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/155.xml",
+                  "sha256": "ddc108ae93d71884a48a91021cd682a9eae37025071476c9adf8f52607c80b3c"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 458,
+          "selected": {
+            "id": "not-wf-sa-155",
+            "path": "xmltest/not-wf/sa/155.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/155.xml",
+                  "sha256": "ddc108ae93d71884a48a91021cd682a9eae37025071476c9adf8f52607c80b3c"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "not-wf-sa-155",
+            "path": "xmltest/not-wf/sa/155.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/155.xml",
+                  "sha256": "ddc108ae93d71884a48a91021cd682a9eae37025071476c9adf8f52607c80b3c"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 459,
+          "selected": {
+            "id": "not-wf-sa-156",
+            "path": "xmltest/not-wf/sa/156.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 7,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/156.xml",
+                  "sha256": "e79a090625f431901d2145d44ec9f1e8e3ab36c79173f7e18901507e237316f7"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "not-wf-sa-156",
+            "path": "xmltest/not-wf/sa/156.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 7,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/156.xml",
+                  "sha256": "e79a090625f431901d2145d44ec9f1e8e3ab36c79173f7e18901507e237316f7"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 460,
+          "selected": {
+            "id": "not-wf-sa-156",
+            "path": "xmltest/not-wf/sa/156.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 7,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/156.xml",
+                  "sha256": "e79a090625f431901d2145d44ec9f1e8e3ab36c79173f7e18901507e237316f7"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "not-wf-sa-156",
+            "path": "xmltest/not-wf/sa/156.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 7,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/156.xml",
+                  "sha256": "e79a090625f431901d2145d44ec9f1e8e3ab36c79173f7e18901507e237316f7"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 461,
+          "selected": {
+            "id": "not-wf-sa-156",
+            "path": "xmltest/not-wf/sa/156.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 7,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/156.xml",
+                  "sha256": "e79a090625f431901d2145d44ec9f1e8e3ab36c79173f7e18901507e237316f7"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "not-wf-sa-156",
+            "path": "xmltest/not-wf/sa/156.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 7,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/156.xml",
+                  "sha256": "e79a090625f431901d2145d44ec9f1e8e3ab36c79173f7e18901507e237316f7"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 462,
+          "selected": {
+            "id": "not-wf-sa-157",
+            "path": "xmltest/not-wf/sa/157.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 7,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/157.xml",
+                  "sha256": "ce3d7583edb8daeb64e79fdf28e883ab75c8799a363a70ab6ed2838e123c8962"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "not-wf-sa-157",
+            "path": "xmltest/not-wf/sa/157.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 7,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/157.xml",
+                  "sha256": "ce3d7583edb8daeb64e79fdf28e883ab75c8799a363a70ab6ed2838e123c8962"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 463,
+          "selected": {
+            "id": "not-wf-sa-157",
+            "path": "xmltest/not-wf/sa/157.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 7,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/157.xml",
+                  "sha256": "ce3d7583edb8daeb64e79fdf28e883ab75c8799a363a70ab6ed2838e123c8962"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "not-wf-sa-157",
+            "path": "xmltest/not-wf/sa/157.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 7,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/157.xml",
+                  "sha256": "ce3d7583edb8daeb64e79fdf28e883ab75c8799a363a70ab6ed2838e123c8962"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 464,
+          "selected": {
+            "id": "not-wf-sa-157",
+            "path": "xmltest/not-wf/sa/157.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 7,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/157.xml",
+                  "sha256": "ce3d7583edb8daeb64e79fdf28e883ab75c8799a363a70ab6ed2838e123c8962"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "not-wf-sa-157",
+            "path": "xmltest/not-wf/sa/157.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 7,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/sa/157.xml",
+                  "sha256": "ce3d7583edb8daeb64e79fdf28e883ab75c8799a363a70ab6ed2838e123c8962"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 582,
+          "selected": {
+            "id": "not-wf-ext-sa-002",
+            "path": "xmltest/not-wf/ext-sa/002.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 82,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.xml",
+                  "sha256": "a21bb4efbbb6f1020846ecf7da734576f465a32f497fbd7680dd1c147465c564"
+                },
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.ent",
+                  "sha256": "b072c32fb4e974a4f37abe54f662c39498b39a4465efe37ad298da4620c6e478"
+                }
+              ],
+              "children": [
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.ent",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "not-wf-ext-sa-002",
+            "path": "xmltest/not-wf/ext-sa/002.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 82,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.xml",
+                  "sha256": "a21bb4efbbb6f1020846ecf7da734576f465a32f497fbd7680dd1c147465c564"
+                },
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.ent",
+                  "sha256": "b072c32fb4e974a4f37abe54f662c39498b39a4465efe37ad298da4620c6e478"
+                }
+              ],
+              "children": [
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.ent",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 583,
+          "selected": {
+            "id": "not-wf-ext-sa-002",
+            "path": "xmltest/not-wf/ext-sa/002.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 82,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.xml",
+                  "sha256": "a21bb4efbbb6f1020846ecf7da734576f465a32f497fbd7680dd1c147465c564"
+                },
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.ent",
+                  "sha256": "b072c32fb4e974a4f37abe54f662c39498b39a4465efe37ad298da4620c6e478"
+                }
+              ],
+              "children": [
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.ent",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "not-wf-ext-sa-002",
+            "path": "xmltest/not-wf/ext-sa/002.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 82,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.xml",
+                  "sha256": "a21bb4efbbb6f1020846ecf7da734576f465a32f497fbd7680dd1c147465c564"
+                },
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.ent",
+                  "sha256": "b072c32fb4e974a4f37abe54f662c39498b39a4465efe37ad298da4620c6e478"
+                }
+              ],
+              "children": [
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.ent",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 584,
+          "selected": {
+            "id": "not-wf-ext-sa-002",
+            "path": "xmltest/not-wf/ext-sa/002.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 82,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.xml",
+                  "sha256": "a21bb4efbbb6f1020846ecf7da734576f465a32f497fbd7680dd1c147465c564"
+                },
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.ent",
+                  "sha256": "b072c32fb4e974a4f37abe54f662c39498b39a4465efe37ad298da4620c6e478"
+                }
+              ],
+              "children": [
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.ent",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "not-wf-ext-sa-002",
+            "path": "xmltest/not-wf/ext-sa/002.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 82,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.xml",
+                  "sha256": "a21bb4efbbb6f1020846ecf7da734576f465a32f497fbd7680dd1c147465c564"
+                },
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.ent",
+                  "sha256": "b072c32fb4e974a4f37abe54f662c39498b39a4465efe37ad298da4620c6e478"
+                }
+              ],
+              "children": [
+                {
+                  "path": "xmltest/not-wf/ext-sa/002.ent",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 1482,
+          "selected": {
+            "id": "decl01",
+            "path": "sun/not-wf/decl01.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 131,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/decl01.xml",
+                  "sha256": "434c050232d6e60e3927b1ea7d5a9c425a772591227c244b4253ff57ec4d08f3"
+                },
+                {
+                  "path": "sun/not-wf/decl01.ent",
+                  "sha256": "a0b718c952fa0a715ed82f1f53f6476d4361e06c59a2ec882f7d2c5a68d19ae9"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/decl01.ent",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "decl01",
+            "path": "sun/not-wf/decl01.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 131,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/decl01.xml",
+                  "sha256": "434c050232d6e60e3927b1ea7d5a9c425a772591227c244b4253ff57ec4d08f3"
+                },
+                {
+                  "path": "sun/not-wf/decl01.ent",
+                  "sha256": "a0b718c952fa0a715ed82f1f53f6476d4361e06c59a2ec882f7d2c5a68d19ae9"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/decl01.ent",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 1483,
+          "selected": {
+            "id": "decl01",
+            "path": "sun/not-wf/decl01.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 131,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/decl01.xml",
+                  "sha256": "434c050232d6e60e3927b1ea7d5a9c425a772591227c244b4253ff57ec4d08f3"
+                },
+                {
+                  "path": "sun/not-wf/decl01.ent",
+                  "sha256": "a0b718c952fa0a715ed82f1f53f6476d4361e06c59a2ec882f7d2c5a68d19ae9"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/decl01.ent",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "decl01",
+            "path": "sun/not-wf/decl01.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 131,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/decl01.xml",
+                  "sha256": "434c050232d6e60e3927b1ea7d5a9c425a772591227c244b4253ff57ec4d08f3"
+                },
+                {
+                  "path": "sun/not-wf/decl01.ent",
+                  "sha256": "a0b718c952fa0a715ed82f1f53f6476d4361e06c59a2ec882f7d2c5a68d19ae9"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/decl01.ent",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 1484,
+          "selected": {
+            "id": "decl01",
+            "path": "sun/not-wf/decl01.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 131,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/decl01.xml",
+                  "sha256": "434c050232d6e60e3927b1ea7d5a9c425a772591227c244b4253ff57ec4d08f3"
+                },
+                {
+                  "path": "sun/not-wf/decl01.ent",
+                  "sha256": "a0b718c952fa0a715ed82f1f53f6476d4361e06c59a2ec882f7d2c5a68d19ae9"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/decl01.ent",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "decl01",
+            "path": "sun/not-wf/decl01.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 131,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/decl01.xml",
+                  "sha256": "434c050232d6e60e3927b1ea7d5a9c425a772591227c244b4253ff57ec4d08f3"
+                },
+                {
+                  "path": "sun/not-wf/decl01.ent",
+                  "sha256": "a0b718c952fa0a715ed82f1f53f6476d4361e06c59a2ec882f7d2c5a68d19ae9"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/decl01.ent",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 1503,
+          "selected": {
+            "id": "dtd07",
+            "path": "sun/not-wf/dtd07.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 62,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/dtd07.xml",
+                  "sha256": "7e99a8680432ea9ba1297d8727744073918abc5101c4cd031d6510d603ca006a"
+                },
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "sha256": "8e0f750d1a67501dae4b1f184ca035785fabb68f1dcf685b00329ef88b6fc26c"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "dtd07",
+            "path": "sun/not-wf/dtd07.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 62,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/dtd07.xml",
+                  "sha256": "7e99a8680432ea9ba1297d8727744073918abc5101c4cd031d6510d603ca006a"
+                },
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "sha256": "8e0f750d1a67501dae4b1f184ca035785fabb68f1dcf685b00329ef88b6fc26c"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 1504,
+          "selected": {
+            "id": "dtd07",
+            "path": "sun/not-wf/dtd07.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 62,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/dtd07.xml",
+                  "sha256": "7e99a8680432ea9ba1297d8727744073918abc5101c4cd031d6510d603ca006a"
+                },
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "sha256": "8e0f750d1a67501dae4b1f184ca035785fabb68f1dcf685b00329ef88b6fc26c"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "dtd07",
+            "path": "sun/not-wf/dtd07.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 62,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/dtd07.xml",
+                  "sha256": "7e99a8680432ea9ba1297d8727744073918abc5101c4cd031d6510d603ca006a"
+                },
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "sha256": "8e0f750d1a67501dae4b1f184ca035785fabb68f1dcf685b00329ef88b6fc26c"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 1505,
+          "selected": {
+            "id": "dtd07",
+            "path": "sun/not-wf/dtd07.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 62,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/dtd07.xml",
+                  "sha256": "7e99a8680432ea9ba1297d8727744073918abc5101c4cd031d6510d603ca006a"
+                },
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "sha256": "8e0f750d1a67501dae4b1f184ca035785fabb68f1dcf685b00329ef88b6fc26c"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "dtd07",
+            "path": "sun/not-wf/dtd07.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 62,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/dtd07.xml",
+                  "sha256": "7e99a8680432ea9ba1297d8727744073918abc5101c4cd031d6510d603ca006a"
+                },
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "sha256": "8e0f750d1a67501dae4b1f184ca035785fabb68f1dcf685b00329ef88b6fc26c"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 1539,
+          "selected": {
+            "id": "encoding07",
+            "path": "sun/not-wf/encoding07.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 209,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/encoding07.xml",
+                  "sha256": "ad0beeab112de7b347cef8ddf39b89e4344d0ead58388817d81f0844f7640093"
+                },
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "sha256": "8e0f750d1a67501dae4b1f184ca035785fabb68f1dcf685b00329ef88b6fc26c"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "encoding07",
+            "path": "sun/not-wf/encoding07.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 209,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/encoding07.xml",
+                  "sha256": "ad0beeab112de7b347cef8ddf39b89e4344d0ead58388817d81f0844f7640093"
+                },
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "sha256": "8e0f750d1a67501dae4b1f184ca035785fabb68f1dcf685b00329ef88b6fc26c"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 1540,
+          "selected": {
+            "id": "encoding07",
+            "path": "sun/not-wf/encoding07.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 209,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/encoding07.xml",
+                  "sha256": "ad0beeab112de7b347cef8ddf39b89e4344d0ead58388817d81f0844f7640093"
+                },
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "sha256": "8e0f750d1a67501dae4b1f184ca035785fabb68f1dcf685b00329ef88b6fc26c"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "encoding07",
+            "path": "sun/not-wf/encoding07.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 209,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/encoding07.xml",
+                  "sha256": "ad0beeab112de7b347cef8ddf39b89e4344d0ead58388817d81f0844f7640093"
+                },
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "sha256": "8e0f750d1a67501dae4b1f184ca035785fabb68f1dcf685b00329ef88b6fc26c"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 1541,
+          "selected": {
+            "id": "encoding07",
+            "path": "sun/not-wf/encoding07.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 209,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/encoding07.xml",
+                  "sha256": "ad0beeab112de7b347cef8ddf39b89e4344d0ead58388817d81f0844f7640093"
+                },
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "sha256": "8e0f750d1a67501dae4b1f184ca035785fabb68f1dcf685b00329ef88b6fc26c"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "encoding07",
+            "path": "sun/not-wf/encoding07.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 209,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "sun/not-wf/encoding07.xml",
+                  "sha256": "ad0beeab112de7b347cef8ddf39b89e4344d0ead58388817d81f0844f7640093"
+                },
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "sha256": "8e0f750d1a67501dae4b1f184ca035785fabb68f1dcf685b00329ef88b6fc26c"
+                }
+              ],
+              "children": [
+                {
+                  "path": "sun/not-wf/dtd07.dtd",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 2208,
+          "selected": {
+            "id": "o-p23fail1",
+            "path": "oasis/p23fail1.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "oasis/p23fail1.xml",
+                  "sha256": "52662b002151cac526ad0bda0996469a5950eb166e9f0f9d77174c738009b9fa"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "o-p23fail1",
+            "path": "oasis/p23fail1.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "oasis/p23fail1.xml",
+                  "sha256": "52662b002151cac526ad0bda0996469a5950eb166e9f0f9d77174c738009b9fa"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 2209,
+          "selected": {
+            "id": "o-p23fail1",
+            "path": "oasis/p23fail1.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "oasis/p23fail1.xml",
+                  "sha256": "52662b002151cac526ad0bda0996469a5950eb166e9f0f9d77174c738009b9fa"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "o-p23fail1",
+            "path": "oasis/p23fail1.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "oasis/p23fail1.xml",
+                  "sha256": "52662b002151cac526ad0bda0996469a5950eb166e9f0f9d77174c738009b9fa"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 2210,
+          "selected": {
+            "id": "o-p23fail1",
+            "path": "oasis/p23fail1.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "oasis/p23fail1.xml",
+                  "sha256": "52662b002151cac526ad0bda0996469a5950eb166e9f0f9d77174c738009b9fa"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "o-p23fail1",
+            "path": "oasis/p23fail1.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "oasis/p23fail1.xml",
+                  "sha256": "52662b002151cac526ad0bda0996469a5950eb166e9f0f9d77174c738009b9fa"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 2247,
+          "selected": {
+            "id": "o-p30fail1",
+            "path": "oasis/p30fail1.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "oasis/p30fail1.xml",
+                  "sha256": "e615d46b84592d81663c58833f3143bb9df306ffb17dd945710a5a7aa66c8791"
+                },
+                {
+                  "path": "oasis/p30fail1.dtd",
+                  "sha256": "17bf783a9ebd1b6bcc64d6e393ad02174cf8e8903c84a4816f0e4cc061a3fddf"
+                }
+              ],
+              "children": [
+                {
+                  "path": "oasis/p30fail1.dtd",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "o-p30fail1",
+            "path": "oasis/p30fail1.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "oasis/p30fail1.xml",
+                  "sha256": "e615d46b84592d81663c58833f3143bb9df306ffb17dd945710a5a7aa66c8791"
+                },
+                {
+                  "path": "oasis/p30fail1.dtd",
+                  "sha256": "17bf783a9ebd1b6bcc64d6e393ad02174cf8e8903c84a4816f0e4cc061a3fddf"
+                }
+              ],
+              "children": [
+                {
+                  "path": "oasis/p30fail1.dtd",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 2248,
+          "selected": {
+            "id": "o-p30fail1",
+            "path": "oasis/p30fail1.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "oasis/p30fail1.xml",
+                  "sha256": "e615d46b84592d81663c58833f3143bb9df306ffb17dd945710a5a7aa66c8791"
+                },
+                {
+                  "path": "oasis/p30fail1.dtd",
+                  "sha256": "17bf783a9ebd1b6bcc64d6e393ad02174cf8e8903c84a4816f0e4cc061a3fddf"
+                }
+              ],
+              "children": [
+                {
+                  "path": "oasis/p30fail1.dtd",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "o-p30fail1",
+            "path": "oasis/p30fail1.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "oasis/p30fail1.xml",
+                  "sha256": "e615d46b84592d81663c58833f3143bb9df306ffb17dd945710a5a7aa66c8791"
+                },
+                {
+                  "path": "oasis/p30fail1.dtd",
+                  "sha256": "17bf783a9ebd1b6bcc64d6e393ad02174cf8e8903c84a4816f0e4cc061a3fddf"
+                }
+              ],
+              "children": [
+                {
+                  "path": "oasis/p30fail1.dtd",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 2249,
+          "selected": {
+            "id": "o-p30fail1",
+            "path": "oasis/p30fail1.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "oasis/p30fail1.xml",
+                  "sha256": "e615d46b84592d81663c58833f3143bb9df306ffb17dd945710a5a7aa66c8791"
+                },
+                {
+                  "path": "oasis/p30fail1.dtd",
+                  "sha256": "17bf783a9ebd1b6bcc64d6e393ad02174cf8e8903c84a4816f0e4cc061a3fddf"
+                }
+              ],
+              "children": [
+                {
+                  "path": "oasis/p30fail1.dtd",
+                  "status": 0,
+                  "error": 30
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "o-p30fail1",
+            "path": "oasis/p30fail1.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "oasis/p30fail1.xml",
+                  "sha256": "e615d46b84592d81663c58833f3143bb9df306ffb17dd945710a5a7aa66c8791"
+                },
+                {
+                  "path": "oasis/p30fail1.dtd",
+                  "sha256": "17bf783a9ebd1b6bcc64d6e393ad02174cf8e8903c84a4816f0e4cc061a3fddf"
+                }
+              ],
+              "children": [
+                {
+                  "path": "oasis/p30fail1.dtd",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 3063,
+          "selected": {
+            "id": "ibm-not-wf-P17-ibm17n01.xml",
+            "path": "ibm/not-wf/P17/ibm17n01.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 120,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n01.xml",
+                  "sha256": "96422ddfc29555a08857048fc0e85d2e0cbf347ecd08d29e9ec0ef3a184018d7"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P17-ibm17n01.xml",
+            "path": "ibm/not-wf/P17/ibm17n01.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 120,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n01.xml",
+                  "sha256": "96422ddfc29555a08857048fc0e85d2e0cbf347ecd08d29e9ec0ef3a184018d7"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 3064,
+          "selected": {
+            "id": "ibm-not-wf-P17-ibm17n01.xml",
+            "path": "ibm/not-wf/P17/ibm17n01.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 120,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n01.xml",
+                  "sha256": "96422ddfc29555a08857048fc0e85d2e0cbf347ecd08d29e9ec0ef3a184018d7"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P17-ibm17n01.xml",
+            "path": "ibm/not-wf/P17/ibm17n01.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 120,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n01.xml",
+                  "sha256": "96422ddfc29555a08857048fc0e85d2e0cbf347ecd08d29e9ec0ef3a184018d7"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 3065,
+          "selected": {
+            "id": "ibm-not-wf-P17-ibm17n01.xml",
+            "path": "ibm/not-wf/P17/ibm17n01.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 120,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n01.xml",
+                  "sha256": "96422ddfc29555a08857048fc0e85d2e0cbf347ecd08d29e9ec0ef3a184018d7"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P17-ibm17n01.xml",
+            "path": "ibm/not-wf/P17/ibm17n01.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 120,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n01.xml",
+                  "sha256": "96422ddfc29555a08857048fc0e85d2e0cbf347ecd08d29e9ec0ef3a184018d7"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 3066,
+          "selected": {
+            "id": "ibm-not-wf-P17-ibm17n02.xml",
+            "path": "ibm/not-wf/P17/ibm17n02.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 118,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n02.xml",
+                  "sha256": "4fdba9558fa84373e72df9e80b24ddf07e78cb4041079d00ac4cca07f494d473"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P17-ibm17n02.xml",
+            "path": "ibm/not-wf/P17/ibm17n02.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 118,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n02.xml",
+                  "sha256": "4fdba9558fa84373e72df9e80b24ddf07e78cb4041079d00ac4cca07f494d473"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 3067,
+          "selected": {
+            "id": "ibm-not-wf-P17-ibm17n02.xml",
+            "path": "ibm/not-wf/P17/ibm17n02.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 118,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n02.xml",
+                  "sha256": "4fdba9558fa84373e72df9e80b24ddf07e78cb4041079d00ac4cca07f494d473"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P17-ibm17n02.xml",
+            "path": "ibm/not-wf/P17/ibm17n02.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 118,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n02.xml",
+                  "sha256": "4fdba9558fa84373e72df9e80b24ddf07e78cb4041079d00ac4cca07f494d473"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 3068,
+          "selected": {
+            "id": "ibm-not-wf-P17-ibm17n02.xml",
+            "path": "ibm/not-wf/P17/ibm17n02.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 118,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n02.xml",
+                  "sha256": "4fdba9558fa84373e72df9e80b24ddf07e78cb4041079d00ac4cca07f494d473"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P17-ibm17n02.xml",
+            "path": "ibm/not-wf/P17/ibm17n02.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 118,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n02.xml",
+                  "sha256": "4fdba9558fa84373e72df9e80b24ddf07e78cb4041079d00ac4cca07f494d473"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 3072,
+          "selected": {
+            "id": "ibm-not-wf-P17-ibm17n04.xml",
+            "path": "ibm/not-wf/P17/ibm17n04.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 118,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n04.xml",
+                  "sha256": "2ee1df2f6396dbf98f63daa8e265fab65705ee971469c83b5d5d3cf1dd221597"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P17-ibm17n04.xml",
+            "path": "ibm/not-wf/P17/ibm17n04.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 118,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n04.xml",
+                  "sha256": "2ee1df2f6396dbf98f63daa8e265fab65705ee971469c83b5d5d3cf1dd221597"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 3073,
+          "selected": {
+            "id": "ibm-not-wf-P17-ibm17n04.xml",
+            "path": "ibm/not-wf/P17/ibm17n04.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 118,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n04.xml",
+                  "sha256": "2ee1df2f6396dbf98f63daa8e265fab65705ee971469c83b5d5d3cf1dd221597"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P17-ibm17n04.xml",
+            "path": "ibm/not-wf/P17/ibm17n04.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 118,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n04.xml",
+                  "sha256": "2ee1df2f6396dbf98f63daa8e265fab65705ee971469c83b5d5d3cf1dd221597"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 3074,
+          "selected": {
+            "id": "ibm-not-wf-P17-ibm17n04.xml",
+            "path": "ibm/not-wf/P17/ibm17n04.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 118,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n04.xml",
+                  "sha256": "2ee1df2f6396dbf98f63daa8e265fab65705ee971469c83b5d5d3cf1dd221597"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P17-ibm17n04.xml",
+            "path": "ibm/not-wf/P17/ibm17n04.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 118,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P17/ibm17n04.xml",
+                  "sha256": "2ee1df2f6396dbf98f63daa8e265fab65705ee971469c83b5d5d3cf1dd221597"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 3120,
+          "selected": {
+            "id": "ibm-not-wf-P23-ibm23n04.xml",
+            "path": "ibm/not-wf/P23/ibm23n04.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P23/ibm23n04.xml",
+                  "sha256": "cc3742ea4ce6ac930db82f714c6774802dcd9864ce12303ac5e88624100cf617"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P23-ibm23n04.xml",
+            "path": "ibm/not-wf/P23/ibm23n04.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P23/ibm23n04.xml",
+                  "sha256": "cc3742ea4ce6ac930db82f714c6774802dcd9864ce12303ac5e88624100cf617"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 3121,
+          "selected": {
+            "id": "ibm-not-wf-P23-ibm23n04.xml",
+            "path": "ibm/not-wf/P23/ibm23n04.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P23/ibm23n04.xml",
+                  "sha256": "cc3742ea4ce6ac930db82f714c6774802dcd9864ce12303ac5e88624100cf617"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P23-ibm23n04.xml",
+            "path": "ibm/not-wf/P23/ibm23n04.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P23/ibm23n04.xml",
+                  "sha256": "cc3742ea4ce6ac930db82f714c6774802dcd9864ce12303ac5e88624100cf617"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 3122,
+          "selected": {
+            "id": "ibm-not-wf-P23-ibm23n04.xml",
+            "path": "ibm/not-wf/P23/ibm23n04.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 17,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P23/ibm23n04.xml",
+                  "sha256": "cc3742ea4ce6ac930db82f714c6774802dcd9864ce12303ac5e88624100cf617"
+                }
+              ],
+              "children": []
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P23-ibm23n04.xml",
+            "path": "ibm/not-wf/P23/ibm23n04.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 4,
+              "index": 0,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P23/ibm23n04.xml",
+                  "sha256": "cc3742ea4ce6ac930db82f714c6774802dcd9864ce12303ac5e88624100cf617"
+                }
+              ],
+              "children": []
+            }
+          }
+        },
+        {
+          "row_index": 3933,
+          "selected": {
+            "id": "ibm-not-wf-P77-ibm77n01.xml",
+            "path": "ibm/not-wf/P77/ibm77n01.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 174,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.xml",
+                  "sha256": "80c5952efbcb09f883cea67a53865ad00ee9ca86fe3716b9b260812715443b00"
+                },
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.ent",
+                  "sha256": "1245ffbda1b0f45308c1b21acf1f0c00296d2ab3e94897add3f0ce7ae6f02ad5"
+                }
+              ],
+              "children": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.ent",
+                  "status": 0,
+                  "error": 18
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P77-ibm77n01.xml",
+            "path": "ibm/not-wf/P77/ibm77n01.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 174,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.xml",
+                  "sha256": "80c5952efbcb09f883cea67a53865ad00ee9ca86fe3716b9b260812715443b00"
+                },
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.ent",
+                  "sha256": "1245ffbda1b0f45308c1b21acf1f0c00296d2ab3e94897add3f0ce7ae6f02ad5"
+                }
+              ],
+              "children": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.ent",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 3934,
+          "selected": {
+            "id": "ibm-not-wf-P77-ibm77n01.xml",
+            "path": "ibm/not-wf/P77/ibm77n01.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 174,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.xml",
+                  "sha256": "80c5952efbcb09f883cea67a53865ad00ee9ca86fe3716b9b260812715443b00"
+                },
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.ent",
+                  "sha256": "1245ffbda1b0f45308c1b21acf1f0c00296d2ab3e94897add3f0ce7ae6f02ad5"
+                }
+              ],
+              "children": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.ent",
+                  "status": 0,
+                  "error": 18
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P77-ibm77n01.xml",
+            "path": "ibm/not-wf/P77/ibm77n01.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 174,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.xml",
+                  "sha256": "80c5952efbcb09f883cea67a53865ad00ee9ca86fe3716b9b260812715443b00"
+                },
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.ent",
+                  "sha256": "1245ffbda1b0f45308c1b21acf1f0c00296d2ab3e94897add3f0ce7ae6f02ad5"
+                }
+              ],
+              "children": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.ent",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 3935,
+          "selected": {
+            "id": "ibm-not-wf-P77-ibm77n01.xml",
+            "path": "ibm/not-wf/P77/ibm77n01.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 174,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.xml",
+                  "sha256": "80c5952efbcb09f883cea67a53865ad00ee9ca86fe3716b9b260812715443b00"
+                },
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.ent",
+                  "sha256": "1245ffbda1b0f45308c1b21acf1f0c00296d2ab3e94897add3f0ce7ae6f02ad5"
+                }
+              ],
+              "children": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.ent",
+                  "status": 0,
+                  "error": 18
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P77-ibm77n01.xml",
+            "path": "ibm/not-wf/P77/ibm77n01.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 174,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.xml",
+                  "sha256": "80c5952efbcb09f883cea67a53865ad00ee9ca86fe3716b9b260812715443b00"
+                },
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.ent",
+                  "sha256": "1245ffbda1b0f45308c1b21acf1f0c00296d2ab3e94897add3f0ce7ae6f02ad5"
+                }
+              ],
+              "children": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n01.ent",
+                  "status": 0,
+                  "error": 31
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 3936,
+          "selected": {
+            "id": "ibm-not-wf-P77-ibm77n02.xml",
+            "path": "ibm/not-wf/P77/ibm77n02.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 174,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.xml",
+                  "sha256": "ff8a134012983a9ea1b1717fec546ce60b0bd7bbccb76a92a75e6ce0618ee37b"
+                },
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.ent",
+                  "sha256": "ab2e149f099d05df62fca54b19d8508784716de66d5018392ec0b78d5dc4193e"
+                }
+              ],
+              "children": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.ent",
+                  "status": 0,
+                  "error": 17
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P77-ibm77n02.xml",
+            "path": "ibm/not-wf/P77/ibm77n02.xml",
+            "type": "not-wf",
+            "chunk": 1,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 174,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.xml",
+                  "sha256": "ff8a134012983a9ea1b1717fec546ce60b0bd7bbccb76a92a75e6ce0618ee37b"
+                },
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.ent",
+                  "sha256": "ab2e149f099d05df62fca54b19d8508784716de66d5018392ec0b78d5dc4193e"
+                }
+              ],
+              "children": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.ent",
+                  "status": 0,
+                  "error": 4
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 3937,
+          "selected": {
+            "id": "ibm-not-wf-P77-ibm77n02.xml",
+            "path": "ibm/not-wf/P77/ibm77n02.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 174,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.xml",
+                  "sha256": "ff8a134012983a9ea1b1717fec546ce60b0bd7bbccb76a92a75e6ce0618ee37b"
+                },
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.ent",
+                  "sha256": "ab2e149f099d05df62fca54b19d8508784716de66d5018392ec0b78d5dc4193e"
+                }
+              ],
+              "children": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.ent",
+                  "status": 0,
+                  "error": 17
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P77-ibm77n02.xml",
+            "path": "ibm/not-wf/P77/ibm77n02.xml",
+            "type": "not-wf",
+            "chunk": 7,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 174,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.xml",
+                  "sha256": "ff8a134012983a9ea1b1717fec546ce60b0bd7bbccb76a92a75e6ce0618ee37b"
+                },
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.ent",
+                  "sha256": "ab2e149f099d05df62fca54b19d8508784716de66d5018392ec0b78d5dc4193e"
+                }
+              ],
+              "children": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.ent",
+                  "status": 0,
+                  "error": 4
+                }
+              ]
+            }
+          }
+        },
+        {
+          "row_index": 3938,
+          "selected": {
+            "id": "ibm-not-wf-P77-ibm77n02.xml",
+            "path": "ibm/not-wf/P77/ibm77n02.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 174,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.xml",
+                  "sha256": "ff8a134012983a9ea1b1717fec546ce60b0bd7bbccb76a92a75e6ce0618ee37b"
+                },
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.ent",
+                  "sha256": "ab2e149f099d05df62fca54b19d8508784716de66d5018392ec0b78d5dc4193e"
+                }
+              ],
+              "children": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.ent",
+                  "status": 0,
+                  "error": 17
+                }
+              ]
+            }
+          },
+          "candidate": {
+            "id": "ibm-not-wf-P77-ibm77n02.xml",
+            "path": "ibm/not-wf/P77/ibm77n02.xml",
+            "type": "not-wf",
+            "chunk": 4096,
+            "result": {
+              "status": 0,
+              "error": 21,
+              "index": 174,
+              "resolver_errors": [],
+              "loaded": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.xml",
+                  "sha256": "ff8a134012983a9ea1b1717fec546ce60b0bd7bbccb76a92a75e6ce0618ee37b"
+                },
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.ent",
+                  "sha256": "ab2e149f099d05df62fca54b19d8508784716de66d5018392ec0b78d5dc4193e"
+                }
+              ],
+              "children": [
+                {
+                  "path": "ibm/not-wf/P77/ibm77n02.ent",
+                  "status": 0,
+                  "error": 4
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "reference": {
+      "rows": 6003,
+      "changed_rows": 0,
+      "differences": []
+    }
+  },
+  "bound_sha256": "ef759a477a3d0e3216b09d495b8e2cb9723c6234b9b956048f92ab8e6c7703db",
+  "acceptance_difference_rows": [],
+  "inconclusive_difference_rows": [],
+  "qualification": "conformance_failed",
+  "selected_catalog_equal": true,
+  "qualified_declaration_comparison": {
+    "oriole": {
+      "source_sha256": "cc356c9bcb24fd95873502ef441cd1d0a322c862ece94f785235ee7ae4ea9163",
+      "changed_rows": 0,
+      "differences": []
+    },
+    "reference": {
+      "source_sha256": "b4abe0bd35a3bf469e512215f846fd605cedefe4f6666b7fd646c5c8f99b5a21",
+      "changed_rows": 0,
+      "differences": []
+    }
+  },
+  "qualified_declaration_catalog_equal": true
+}

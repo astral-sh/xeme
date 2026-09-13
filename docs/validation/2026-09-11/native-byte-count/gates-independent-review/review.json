@@ -1,0 +1,119 @@
+{
+  "status": "independent_native_byte_count_saved_C_gates_audit_passed",
+  "blocking_findings": [],
+  "scope": "Saved source/hash/controller/raw-result reconstruction only. No target, parser, build, compiler or timing execution. Workspace and CPython gates are separate.",
+  "audit_cpu": 4,
+  "source_manifest_sha256": "735afb9491158c3a34fd376109edc2312727382b5fa61e5e8b084796d7294f1d",
+  "source_build_review": {
+    "path": "/tmp/oriole-native-byte-count-source-build-independent-review/review.json",
+    "sha256": "f1f801a46736344b8fae130ed3ca815c9d71c542c0dda15b098cd5e784c0d886"
+  },
+  "libraries": {
+    "baseline": {
+      "liboriole_expat.so": "02fcab59f6e3818c128da6706d67987ae7450dd8b59e97cd28ce497a547f28f5",
+      "liboriole_expat.a": "69ebed414946cbaef1a940c052a636be277c809902943d676e824deab45d22d5"
+    },
+    "candidate": {
+      "liboriole_expat.so": "ccfb22956a11c1b241ec755f46245c61f088187ef93143b77a7afec748983821",
+      "liboriole_expat.a": "f58d5bc6ed28077933fcbcb84ad876cc7208e0102c9008347223da91a328b03c"
+    }
+  },
+  "api": {
+    "rows": 4740,
+    "pass": 4347,
+    "fail": 393,
+    "exit": 1,
+    "all_rows_from_raw_log_exact": true,
+    "all_rows_byte_equal_to_baseline": true,
+    "selected_public_tests": 395,
+    "configurations_each": 12,
+    "bounds": {
+      "per_test_seconds": 3,
+      "per_test_address_space_bytes": 1073741824,
+      "per_test_rss_limit_bytes": 805306368,
+      "total_timeout_seconds": 240
+    }
+  },
+  "native": {
+    "consumers": 6,
+    "allocation_scenarios_each_linkage": 327,
+    "all_C_builds_and_runs_exit0": true,
+    "C_ASan_UBSan_only": true
+  },
+  "strict": {
+    "full_paired_traces": 3318,
+    "all_fields_exact": true
+  },
+  "aliases": {
+    "comparisons": 36456,
+    "groups": [
+      {
+        "name": "full-events",
+        "cases": 28812,
+        "raw_successful_pairs_retained": false
+      },
+      {
+        "name": "external-semantic-compare",
+        "cases": 7644,
+        "raw_successful_pairs_retained": false
+      }
+    ],
+    "verification": "Exact inherited source substitutions, fixture-loop counts, pinned libraries, command exits, script/report hashes, compressed readback and empty difference lists. Successful raw pairs are not retained and cannot be independently reread."
+  },
+  "malformed": {
+    "paired_rows": 2392,
+    "all_observations_exact": true,
+    "all_input_hash_encoding_chunk_keys_reconstructed": true
+  },
+  "publication": {
+    "cases": 1304,
+    "parser_executions": 3912,
+    "all_baseline_fields_exact": true,
+    "same_process_origins": 9,
+    "reference_non_event_and_payload_order_exact": true,
+    "retained_reference_callback_position_events": {
+      "default": 10416,
+      "external": 864
+    }
+  },
+  "end": {
+    "logical_cases": 38,
+    "parser_executions": 114,
+    "full_cases_equal_baseline_and_historical": true,
+    "same_process_symbol_origins_each_engine": 21,
+    "retained_reference_different_cases": 38,
+    "retained_reference_in_handler_different_cases": 14,
+    "OOM_scenarios_each_engine": 6,
+    "OOM_rows_each_engine": 37,
+    "OOM_failed_indices_each_engine": 4,
+    "OOM_success_controls_each_engine": 2,
+    "OOM_raw_bytes_match_baseline_and_historical": true,
+    "OOM_retry33_preserved": true
+  },
+  "retained_failures": {
+    "initial_CPU4_preparation_separate": true,
+    "other_lane_exit_pattern": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "initial_End_guard_parser_runs": 0,
+    "only_remaining_End38_and_End6_completed_after_CPU_guard_fix": true,
+    "initial_missing_classifier_summary_failure_retained": true,
+    "classifier_then_identical_final_summary": true
+  },
+  "limits": [
+    "Original393 canonical API failures and exit1 remain; this is parity with baseline.",
+    "Successful custom-alias raw pair records are absent in inherited tools. Source/count/hash/difference-summary audit is the available evidence.",
+    "C ASan/UBSan only; Rust release libraries are uninstrumented and leak checking is disabled. Origin records cover the recorded symbols and processes.",
+    "End SOURCE_REVIEW.md is historical fixture provenance. End6 namespace restoration does not establish every detached-End fast-path case.",
+    "Initial preparation contains CPU4 scripts; the CPU1 controller delta is separate. Initial End guard failed before any parser child, then only remaining End38/End6 ran; original successful probes remain.",
+    "Separate source735afb/commitbe22 integration yields the measured ccfb/f58 libraries. Historical sources retain their original identities.",
+    "No workspace, CPython, elapsed timing, adoption or blanket compatibility claim. Hash readback establishes stability during this audit, not historical immutability before the first receipt."
+  ],
+  "passed_checks": 15849,
+  "checked_file_count": 375,
+  "all_inspected_files_unchanged": true,
+  "generator_sha256": "6e442d96ddb35c01c74488a37521efe4703e60ca63a0d45fc18f960eaf2b1c39"
+}

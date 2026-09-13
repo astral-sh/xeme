@@ -1,0 +1,10 @@
+{
+  "status": "sealed_and_readback_passed",
+  "archive_sha256": "fc01522ca3bc3a23c9146c6896dadce7d7cdafb30fced205ac82cab5cdb50813",
+  "archive_members": 54,
+  "nested_source_members": 70,
+  "direct_binary_exclusions": 6,
+  "review_sha256": "7b8b055505931c115a5d315268c8b5571518fc794601281052ee865261e736c2",
+  "audit_first_attempt_passed": true,
+  "scope": "Source and saved evidence only. Both strict suites retain two failures; no target reruns."
+}

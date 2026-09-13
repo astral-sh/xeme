@@ -12,6 +12,79 @@ thread_local! {
     static CALLBACK_PARSER: Cell<XML_Parser> = const { Cell::new(ptr::null_mut()) };
     static REENTRIES: Cell<usize> = const { Cell::new(0) };
     static FAIL_NEXT: Cell<bool> = const { Cell::new(false) };
+    static END_CALLS: Cell<usize> = const { Cell::new(0) };
+}
+
+#[test]
+fn detached_end_uses_the_selected_owner_and_default_failure_stays_terminal() {
+    unsafe extern "C" fn suspend_inner(
+        parser: *mut c_void,
+        name: *const c_char,
+        _: *const *const c_char,
+    ) {
+        // SAFETY: Parser-as-handler-arg supplies the live parser and callback name.
+        unsafe {
+            if std::ffi::CStr::from_ptr(name).to_bytes() == b"n" {
+                assert_eq!(XML_StopParser(parser.cast(), 1), 1);
+            }
+        }
+    }
+    unsafe extern "C" fn count_end(_: *mut c_void, _: *const c_char) {
+        END_CALLS.set(END_CALLS.get() + 1);
+    }
+    unsafe extern "C" fn reject_default(_: *mut c_void, _: *const c_char, _: i32) {
+        panic!("the selected raw-copy allocation must fail before the callback");
+    }
+    let suite = XML_Memory_Handling_Suite {
+        malloc_fcn: Some(custom_malloc),
+        realloc_fcn: Some(custom_realloc),
+        free_fcn: Some(custom_free),
+    };
+    for default_failure in [false, true] {
+        ESCAPES.set(0);
+        END_CALLS.set(0);
+        OBSERVE.set(true);
+        // SAFETY: The complete selected suite and static input outlive the parser;
+        // callback reentry is deliberately checked by the existing allocator.
+        unsafe {
+            let parser = XML_ParserCreate_MM(ptr::null(), &suite, ptr::null());
+            assert!(!parser.is_null());
+            CALLBACK_PARSER.set(parser);
+            XML_UseParserAsHandlerArg(parser);
+            XML_SetStartElementHandler(parser, Some(suspend_inner));
+            // Warm the element/name path before the resumed End/default check.
+            // Composed matched Ends borrow raw context and need no token-owner warmup.
+            let input = c"<r><w></w><n a='v'></n></r>";
+            assert_eq!(
+                XML_Parse(parser, input.as_ptr(), input.to_bytes().len() as i32, 1),
+                2
+            );
+            if default_failure {
+                XML_SetDefaultHandler(parser, Some(reject_default));
+            } else {
+                XML_SetEndElementHandler(parser, Some(count_end));
+            }
+            FAIL_NEXT.set(true);
+            let status = XML_ResumeParser(parser);
+            if default_failure {
+                assert_eq!(status, 0);
+                assert_eq!(XML_GetErrorCode(parser), 1);
+                assert!(!FAIL_NEXT.get());
+                assert_eq!(END_CALLS.get(), 0);
+                assert_eq!(XML_Parse(parser, ptr::null(), 0, 1), 0);
+                assert_eq!(XML_GetErrorCode(parser), 1);
+            } else {
+                assert_eq!(status, 1);
+                assert_eq!(END_CALLS.get(), 2);
+                assert!(FAIL_NEXT.get(), "eligible End dispatch allocated");
+            }
+            FAIL_NEXT.set(false);
+            CALLBACK_PARSER.set(ptr::null_mut());
+            XML_ParserFree(parser);
+        }
+        OBSERVE.set(false);
+        assert_eq!(ESCAPES.get(), 0);
+    }
 }
 
 struct Global;

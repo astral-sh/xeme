@@ -1,0 +1,7 @@
+    Checking allocator-api2 v0.2.21
+    Checking hashbrown v0.16.1
+    Checking oriole_storage v0.0.1 (/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole_storage)
+    Checking memchr v2.8.3
+    Checking oriole v0.0.1 (/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole)
+    Checking oriole_expat v0.0.1 (/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole_expat)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.90s

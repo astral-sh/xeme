@@ -1,0 +1,58 @@
+{
+  "format": "sha256-file-manifest-v1",
+  "files": {
+    "verify_relocated.py": {
+      "sha256": "ec7415d65130385ed3fe99a7822623a9204318e9bd43fc1278acf732e7fa4f39",
+      "bytes": 10346
+    },
+    "review.json": {
+      "sha256": "6053e2f643552e1387c95f9da1dbfec7c312dab64809b683794cb5513ec10598",
+      "bytes": 3369
+    },
+    "execution.json": {
+      "sha256": "3aebb86eeb9a44e98f3a03863797e7adcd109e708095fb054d6d556e5d1b64e3",
+      "bytes": 874
+    },
+    "attempt01.stdout": {
+      "sha256": "16c4adacd30aff1f3d4c9b70b5dd883ca8794b0421af9374b70f7fc2d90ee635",
+      "bytes": 2612
+    },
+    "attempt01.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "attempt01/default-namespace-guard/relocated-readback.json": {
+      "sha256": "fef0f1b334debafaa2d7559a563111b4cb24a74daf350d12a7aad0bbbb6435b4",
+      "bytes": 9308
+    },
+    "attempt01/default-namespace-guard/process.json": {
+      "sha256": "7806ba5c165aa4a230716c86554f7c89c2d469b5cea816b21a0f1a0a4f3418d2",
+      "bytes": 214
+    },
+    "attempt01/default-namespace-guard/verify.stdout": {
+      "sha256": "542b217681b4ef039f0f41458ff2d2efd7a862068bde69108db9c29782da3d4f",
+      "bytes": 305
+    },
+    "attempt01/default-namespace-guard/verify.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "attempt01/cdata-prefilter/relocated-readback.json": {
+      "sha256": "7d5c9ee2cd202527db2ab9754e9ffdbd6bbaebd7a244ad12474d494d7a4093da",
+      "bytes": 10470
+    },
+    "attempt01/cdata-prefilter/process.json": {
+      "sha256": "141f83388d0c8489b27048fc66b27c7ca1e6d8df9b29b46914cfb22e716539ce",
+      "bytes": 214
+    },
+    "attempt01/cdata-prefilter/verify.stdout": {
+      "sha256": "fad65ce1d751062a991eafcc99c5f2234e3875c7edc31a3eb000f7988f8f54d3",
+      "bytes": 297
+    },
+    "attempt01/cdata-prefilter/verify.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  },
+  "relocated_package_copies": "Omitted from this review inventory: byte-identical copies already sealed by the original two package manifests."
+}

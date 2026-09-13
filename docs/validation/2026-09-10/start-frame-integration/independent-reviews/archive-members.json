@@ -1,0 +1,296 @@
+[
+  {
+    "path": "native/adaptation.patch",
+    "origin": "/tmp/oriole-start-frame-integration-native-independent-review/adaptation.patch",
+    "sha256": "614b9568ed3c4117765b88b7e602524a91e0ce8615ac27e42de5a0fe7df2d577",
+    "bytes": 15496
+  },
+  {
+    "path": "native/audit-run.json",
+    "origin": "/tmp/oriole-start-frame-integration-native-independent-review/audit-run.json",
+    "sha256": "41f66971ddfc25fd2f8fb08f59019c0e6703f8c3eb70973548a791416f5ca6d7",
+    "bytes": 1477
+  },
+  {
+    "path": "native/audit.py",
+    "origin": "/tmp/oriole-start-frame-integration-native-independent-review/audit.py",
+    "sha256": "5b0a941ce72752b54878634382d627b84238e4b012833a9c6f765f9591dd1c38",
+    "bytes": 21737
+  },
+  {
+    "path": "native/audit.stderr",
+    "origin": "/tmp/oriole-start-frame-integration-native-independent-review/audit.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "path": "native/audit.stdout",
+    "origin": "/tmp/oriole-start-frame-integration-native-independent-review/audit.stdout",
+    "sha256": "45f35ff94cd11a38d154b3801a01dc638f244754c21d1c3c6a97c1505b20a04e",
+    "bytes": 934
+  },
+  {
+    "path": "native/checked-files.json",
+    "origin": "/tmp/oriole-start-frame-integration-native-independent-review/checked-files.json",
+    "sha256": "af83822e4344635c667aa6e158d03894ad2878abfb875d022b9074878c4673ad",
+    "bytes": 129986
+  },
+  {
+    "path": "native/conditions.json",
+    "origin": "/tmp/oriole-start-frame-integration-native-independent-review/conditions.json",
+    "sha256": "5621d28b210512e844b157d48b777e3ff5c206ecf9a552b71bb8a74c2b72ab3a",
+    "bytes": 35734
+  },
+  {
+    "path": "native/groups.json",
+    "origin": "/tmp/oriole-start-frame-integration-native-independent-review/groups.json",
+    "sha256": "6fcf0dfd327b6a3580a2faaa51e5dbcafa9e03874298de11511c77402eded3d5",
+    "bytes": 1528
+  },
+  {
+    "path": "native/preparation.json",
+    "origin": "/tmp/oriole-start-frame-integration-native-independent-review/preparation.json",
+    "sha256": "c1845bd7341c4cc54f12d53042392cf9b81be0f77d822fd17edcd336a75919e4",
+    "bytes": 423
+  },
+  {
+    "path": "native/prepare-audit.py",
+    "origin": "/tmp/oriole-start-frame-integration-native-independent-review/prepare-audit.py",
+    "sha256": "9c7bdd091d69e40e35acd4ac57a49447a77115881f9c7cf70a24a295548afa2a",
+    "bytes": 4438
+  },
+  {
+    "path": "native/review.json",
+    "origin": "/tmp/oriole-start-frame-integration-native-independent-review/review.json",
+    "sha256": "fa33e7454dc856b6c280c1ec46c2c55ad28143a2ebc86f6314e50b1ac2c73ca4",
+    "bytes": 13193
+  },
+  {
+    "path": "native/run-audit.py",
+    "origin": "/tmp/oriole-start-frame-integration-native-independent-review/run-audit.py",
+    "sha256": "9f36947bdc6efc4b6292d91cc2a1caf97293db88c13e9ce6921f1f6e4b9e2777",
+    "bytes": 1455
+  },
+  {
+    "path": "native/streams.json",
+    "origin": "/tmp/oriole-start-frame-integration-native-independent-review/streams.json",
+    "sha256": "cb32abc62e9c4aba930f9c90778b1ce9e05032d51a4d9685397665508a744884",
+    "bytes": 414445
+  },
+  {
+    "path": "python/audit-run.log",
+    "origin": "/tmp/oriole-start-frame-integration-python-independent-review/audit-run.log",
+    "sha256": "0b366f60fd44f6ca242ec3e23a171125ccd23a6fef5e48cd946a9c6b9d25954f",
+    "bytes": 1043
+  },
+  {
+    "path": "python/audit.py",
+    "origin": "/tmp/oriole-start-frame-integration-python-independent-review/audit.py",
+    "sha256": "062a992e2dd6f3897665860556398d2d59a3b4923d560e48d213259c0d2d774b",
+    "bytes": 12929
+  },
+  {
+    "path": "python/audited-raw-files.json",
+    "origin": "/tmp/oriole-start-frame-integration-python-independent-review/audited-raw-files.json",
+    "sha256": "cea9bd4e635670070ef3f4c5f6dcf9d739b789cc091886980228501d63089ce5",
+    "bytes": 303483
+  },
+  {
+    "path": "python/review.json",
+    "origin": "/tmp/oriole-start-frame-integration-python-independent-review/review.json",
+    "sha256": "b5d6c0628408a9f340e5339d6a34fda9b5a97f09c31de6efd7435fbaa822a7a8",
+    "bytes": 6867
+  },
+  {
+    "path": "cpython/audit-run.log",
+    "origin": "/tmp/oriole-start-frame-integration-cpython-independent-review/audit-run.log",
+    "sha256": "fddd150b39b741f0c7dbddc12ce8289eecfb74d56a65830b7159d22f39f01f58",
+    "bytes": 65
+  },
+  {
+    "path": "cpython/audit.py",
+    "origin": "/tmp/oriole-start-frame-integration-cpython-independent-review/audit.py",
+    "sha256": "99a65d9903e87cc5daf17710885fc199bb0fc029b7c70dab7964d765b8fe2161",
+    "bytes": 6352
+  },
+  {
+    "path": "cpython/review.json",
+    "origin": "/tmp/oriole-start-frame-integration-cpython-independent-review/review.json",
+    "sha256": "6126f83058c754ca67a3a45bf173e9059002b574b53de2873c738421e7530f88",
+    "bytes": 8549
+  },
+  {
+    "path": "assembly/audit-run.log",
+    "origin": "/tmp/oriole-start-frame-integration-assembly-independent-review/audit-run.log",
+    "sha256": "1c9a28326f82226ea2cc936bb117245b4178172e74327e7fe225b57e5911524a",
+    "bytes": 65
+  },
+  {
+    "path": "assembly/audit.py",
+    "origin": "/tmp/oriole-start-frame-integration-assembly-independent-review/audit.py",
+    "sha256": "18054aabf91201d506c489b8d9d245f3806de576a1ce651de029d4b8b659a262",
+    "bytes": 3643
+  },
+  {
+    "path": "assembly/review.json",
+    "origin": "/tmp/oriole-start-frame-integration-assembly-independent-review/review.json",
+    "sha256": "a75e90213fefa854dc2626c2c0aa134c3bbdb768c5b9c70872082d7f81162c49",
+    "bytes": 4459
+  },
+  {
+    "path": "gate/audit-run.json",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/audit-run.json",
+    "sha256": "e3e459989fd631d8f0ca3839718e7a819e56175f95ec7f35fbfbe2f67cd32fa1",
+    "bytes": 1402
+  },
+  {
+    "path": "gate/audit.py",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/audit.py",
+    "sha256": "4295b8811fa3896f85a2b98db7ef0a6a290244f3b261851b1fb6c5ed94e14273",
+    "bytes": 23107
+  },
+  {
+    "path": "gate/audit.py.patch",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/audit.py.patch",
+    "sha256": "edf62f7bf4ca7f3af0a51ed6b3fcda2205a413098107e96a951de1abd77e0fae",
+    "bytes": 12800
+  },
+  {
+    "path": "gate/audit.stderr",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/audit.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "path": "gate/audit.stdout",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/audit.stdout",
+    "sha256": "5289201dd7cfe351239db190bf8ea492dd7ab89f3d9dd2a5d86e847ce474c8ce",
+    "bytes": 186
+  },
+  {
+    "path": "gate/checked-files.json",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/checked-files.json",
+    "sha256": "ca87152ef58886b0fdb9fa6c879fa5650061be62c2263a96e479a9b3966fb492",
+    "bytes": 53483
+  },
+  {
+    "path": "gate/handoff-audit-run.json",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/handoff-audit-run.json",
+    "sha256": "7143b89707e31b56a8ae4fd49b5428445b108355f80ad010ab7090de264bbe7d",
+    "bytes": 2183
+  },
+  {
+    "path": "gate/handoff-audit.py",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/handoff-audit.py",
+    "sha256": "e792d9364daff4c49f347b4b2037fa179b46423754ebb4b46e15efec4a183da2",
+    "bytes": 15830
+  },
+  {
+    "path": "gate/handoff-audit.stderr",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/handoff-audit.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "path": "gate/handoff-audit.stdout",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/handoff-audit.stdout",
+    "sha256": "0bb7f60b73320b04e35a4c6cc3e8ea06a0d52e827686cc2c500a9c037e8b2256",
+    "bytes": 175
+  },
+  {
+    "path": "gate/handoff-checked-files.json",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/handoff-checked-files.json",
+    "sha256": "d201b30a6d7402e214e5cd63e94a66ed88fb517dc444e609d9f33e36f58126ac",
+    "bytes": 57643
+  },
+  {
+    "path": "gate/handoff-review.json",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/handoff-review.json",
+    "sha256": "430e547a37515bc56376cb9e27af0b19b40fad897639d2507eb1a17349b363e5",
+    "bytes": 2695
+  },
+  {
+    "path": "gate/preparation.json",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/preparation.json",
+    "sha256": "b519eac2f434c83ca7fbe0a53caadca31db7f85dbeabe5a6a25be429fcb7cd8e",
+    "bytes": 444
+  },
+  {
+    "path": "gate/prepare-audits.py",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/prepare-audits.py",
+    "sha256": "67c75cecb999b637356c15d3252a6a6652b7780ead7d0b5a1af7ae9f82d349d4",
+    "bytes": 5694
+  },
+  {
+    "path": "gate/review.json",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/review.json",
+    "sha256": "13d63450dc91279a48ea715f893fb73ab685fc4c83739dbf5adb8f965258d7a6",
+    "bytes": 6014
+  },
+  {
+    "path": "gate/run-audit.py",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/run-audit.py",
+    "sha256": "5d0bb1dc7919ce637cb8aafc5d98be944eb1630e42ea548b2a673929bb561b86",
+    "bytes": 1445
+  },
+  {
+    "path": "gate/workspace-audit-run.json",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/workspace-audit-run.json",
+    "sha256": "b3e2ce281efb8823e6ce3d7f5de5291873f35edb0d0ea227641421f1c11c4a3d",
+    "bytes": 1706
+  },
+  {
+    "path": "gate/workspace-audit.py",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/workspace-audit.py",
+    "sha256": "35d5b998c8879de5b1ac0f42bd9ec733f32438311a78c50d4c614676a7354168",
+    "bytes": 5334
+  },
+  {
+    "path": "gate/workspace-audit.py.patch",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/workspace-audit.py.patch",
+    "sha256": "7650f2b4bac9fbd8f9c7ffd9ea4dc1ce20361dd1163e3ac2e59fbc05664a8126",
+    "bytes": 5691
+  },
+  {
+    "path": "gate/workspace-audit.stderr",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/workspace-audit.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "path": "gate/workspace-audit.stdout",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/workspace-audit.stdout",
+    "sha256": "e7eb5e99025d8ca037b11ed89bf24d4e76598ef7a4faa4e208d8c48b9e8d93a8",
+    "bytes": 197
+  },
+  {
+    "path": "gate/workspace-review.json",
+    "origin": "/tmp/oriole-start-frame-integration-gate-independent-review/workspace-review.json",
+    "sha256": "d0c302776aec101a449abd415fc6d3e27e28a69f7c5cac18ba441f6104984d3b",
+    "bytes": 14542
+  },
+  {
+    "path": "composition/audit-run.log",
+    "origin": "/tmp/oriole-start-frame-source-independent-review/audit-run.log",
+    "sha256": "1e54706219c6846237e55bdcffc306950d50246a18ffe772138ea55590d09101",
+    "bytes": 65
+  },
+  {
+    "path": "composition/audit.py",
+    "origin": "/tmp/oriole-start-frame-source-independent-review/audit.py",
+    "sha256": "28469e857157b75686f8dd7a705a7f2fd09f7a7185c11694ffa0719e5e616314",
+    "bytes": 9686
+  },
+  {
+    "path": "composition/checks.json",
+    "origin": "/tmp/oriole-start-frame-source-independent-review/checks.json",
+    "sha256": "abb7553a10f0b9d0ee23ea56bc32ec88380d81d1e12d32b40ed62185538f1b79",
+    "bytes": 33587
+  },
+  {
+    "path": "composition/review.json",
+    "origin": "/tmp/oriole-start-frame-source-independent-review/review.json",
+    "sha256": "e4cf877aa0d3683403d524da0304b8ad30e694a9e27ff333c2488f000036c395",
+    "bytes": 68721
+  }
+]

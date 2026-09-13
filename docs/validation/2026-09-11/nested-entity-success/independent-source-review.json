@@ -1,0 +1,72 @@
+{
+  "status": "passed_source_review_ready_for_authorized_execution",
+  "findings": [],
+  "scope": "Independent source and saved provenance review only; no C compilation, library load, parser, controller or benchmark execution.",
+  "fixture": "/tmp/oriole-nested-entities-success",
+  "preparation_sha256": "f8180967951655a79de2b39c77418fb6128c61b123664a6cf74cfb929cc80699",
+  "source_pins_sha256": "ee70f93101c710ec70d340a7dc5ec5bcf0ffff39b816e44b3868f7accc9e4979",
+  "source70_sha256": "e52c4fa16e71a7dcd76864b29509b157a42b6fbe4531f87b68f98395418d5fc3",
+  "source70_all_live_match": true,
+  "exact_original_body_and_callback_preserved": true,
+  "input_bytes_independently_reconstructed": {
+    "root": {
+      "bytes": 58,
+      "sha256": "23b5d53f164065ae61afca74a7890cd3ced0ffe817276ddf4fdefab55e9fa6f3",
+      "final_line": 2,
+      "final_column": 7
+    },
+    "external_dtd": {
+      "bytes": 1090,
+      "sha256": "08cb6bf73177d73cd15a72798df0374b55121009b0d3ea842fb8df60ac626ee6",
+      "final_line": 3,
+      "final_column": 23
+    }
+  },
+  "original_failures": {
+    "count": 12,
+    "all": "early external child creation failure, code100",
+    "records_exact": true,
+    "unchanged_4740_matrix": true
+  },
+  "positive_oracle": [
+    "Three inherited declaration callbacks in exact pe1/pe2/pe3 order, parameter flag1, length1024, every byte independently checked A+(i%16), nullable metadata checked.",
+    "One original system ID external request, child success/no error, child freed before sole doc start/end, empty attribute list, root success/no error.",
+    "Exact final byte/line/column from unchanged XML lengths/newlines; declaration-event positions recorded separately and explicitly excluded from pass criterion."
+  ],
+  "allocator_review": [
+    "Header union contains max_align_t; sizeof Header preserves maximum C alignment for payload pointer.",
+    "Overflow checked before Header+n and new live accounting; realloc failure preserves original pointer/counters; zero-size blocks retained and freed.",
+    "Successful root cleanup requires zero live blocks/bytes and zero allocation failures. Counts exclude headers/libc/transient realloc overlap; unexpected process exits retain failures without claiming cleanup."
+  ],
+  "origin_review": "All14 used API function pointers resolved on explicit local dlopen handle and dladdr+realpath checked against exact requested pinned library. No Expat linked or symbol interposition path.",
+  "controller_review": [
+    "24 fresh workers: chunks0..5 and deferral0/1 against8e12c1/12d33a; no retries or overwritten results; compile failure stops workers.",
+    "CPU5,3-second wall and CPU limits,1GiB address-space,768MiB RSS rlimit setting explicitly not claimed enforced; compiler60-second bound.",
+    "First stdout/stderr/command hashes and raw outcomes retained; each failure marks canonical comparison false; complete report requires all24 successful and all12 canonical pairs equal.",
+    "All fixture/external result/source70/library pins rechecked before and after workers; binary hash pinned after compile. Owned process groups killed and reaped on completion/timeout/interruption."
+  ],
+  "retained_reviewer_correction": "Initial saved-data audit assumed original matrix rows key; actual key is results. Corrected only reviewer access after KeyError; no producer edits or target execution.",
+  "input_sha256": {
+    "/tmp/oriole-nested-entities-success/README.md": "09a4ecda66f6ea980426cb65fbd1e5ee7d8860426b7d24f93b662807a834368c",
+    "/tmp/oriole-nested-entities-success/UPSTREAM-NOTICES.txt": "0b3988899bf46b378e9d18698d0c01da20fed3a8022d7974444f333156e4d17f",
+    "/tmp/oriole-nested-entities-success/current-source.json": "e52c4fa16e71a7dcd76864b29509b157a42b6fbe4531f87b68f98395418d5fc3",
+    "/tmp/oriole-nested-entities-success/expat.h": "0e912e25375e213b6e4ff90d554e0a0e037e6f0c20dfa734d366e5bdff289f20",
+    "/tmp/oriole-nested-entities-success/expat_external.h": "f24009bc2a8914caeb0480d1ce0765e98ba4845d2e3b03029b09304130715231",
+    "/tmp/oriole-nested-entities-success/input-bytes.json": "be85717a775ec3c97ba9d67b0ad43e2bf86f48d4f105bb2fa95a5eb4d587f765",
+    "/tmp/oriole-nested-entities-success/inputs.inc": "17aa30a185711c52273bb544db2a117e494f8c57f1e04bbe1a27a46fd9272034",
+    "/tmp/oriole-nested-entities-success/original-failure-observations.txt": "4a2f342a7136b670cf793102dc27fc1e74cb8f593241cb85e9a16d4165a1f3ad",
+    "/tmp/oriole-nested-entities-success/original-failure-rows.json": "52946b33f576900afc713add86490c781522ea5dd6735d25ab407e616903c9c3",
+    "/tmp/oriole-nested-entities-success/original-handler.c.inc": "411982228e5967ce9e0d2f390d63101cdc11582e63855d9b3a8bf416f8686300",
+    "/tmp/oriole-nested-entities-success/original-test.c.inc": "c202d12d423719d5f4a5494db5990dabd72be6dc7cdc645d8a25df1259802da8",
+    "/tmp/oriole-nested-entities-success/preparation.json": "f8180967951655a79de2b39c77418fb6128c61b123664a6cf74cfb929cc80699",
+    "/tmp/oriole-nested-entities-success/probe.c": "9ed19a77217f5f7f89cd737b6180e63991037800773433747d0e67ccb5c08276",
+    "/tmp/oriole-nested-entities-success/run.py": "98cd6f101be9b597ca886fb9317d03989fa5cd6aa97310706722ec3a92a92204",
+    "/tmp/oriole-streaming-work-thin-pgo-gates-cpu5/api-native/upstream-api/results.json": "543838aa8d725d1c5c1fd10b92d6b3ea1ab687eb21390e6260f931fe553f4afb",
+    "/tmp/oriole-streaming-work-thin-pgo-gates-cpu5/api-native/upstream-api/tests.log": "83d0f69bc7522946d96f02fe83c8ff71d502e0924ee6cb16fd729d131ac81a41",
+    "/tmp/oriole-streaming-work-thin-pgo-gates-cpu5/api-native/upstream-api/manifest.json": "1da09d77d92b778269010b3e7d1439251e15a384bc7c37650679a46de745ee2e",
+    "/tmp/oriole-streaming-work-thin-pgo-gates-cpu5/api-native/upstream-api/adapted/alloc_tests.c": "9ab0a92a26a12f05d3c3ab73689050d16857c2ae36f8632ec52a47bae5dac1ca",
+    "/tmp/oriole-streaming-work-thin-pgo-gates-cpu5/api-native/upstream-api/adapted/handlers.c": "82d1fc40333e27bf43208c62f03275c08982c9904b866acf8eb0e262893b26a9",
+    "/tmp/oriole-streaming-work-pgo-study-attempt02/pgo/runs/run-psjiwn9z/use/liboriole_expat.so": "8e12c1819a58a66ae5530a53433dd08de44921c94a2b39a6282358dfd33c0d1e",
+    "/tmp/oriole-pgo-study/expat-use-liboriole_expat.so": "12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0"
+  }
+}

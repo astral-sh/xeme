@@ -1,0 +1,26 @@
+   Compiling allocator-api2 v0.2.21
+   Compiling hashbrown v0.16.1
+   Compiling oriole_storage v0.0.1 (/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole_storage)
+   Compiling memchr v2.8.3
+   Compiling oriole v0.0.1 (/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.76s
+     Running unittests src/lib.rs (/home/dev-user/.cache/ohm/verified-build/3d/0d6cdab4346afb/debug/deps/oriole-3caaf1ad0de617aa)
+
+running 1 test
+test arena::tests::start_after_text_stays_within_the_reserved_frame_capacity ... FAILED
+
+failures:
+
+---- arena::tests::start_after_text_stays_within_the_reserved_frame_capacity stdout ----
+
+thread 'arena::tests::start_after_text_stays_within_the_reserved_frame_capacity' (90) panicked at crates/oriole/src/arena.rs:403:9:
+active frame retains 10096 bytes against its 8192-byte reservation
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    arena::tests::start_after_text_stays_within_the_reserved_frame_capacity
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 70 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p oriole --lib`

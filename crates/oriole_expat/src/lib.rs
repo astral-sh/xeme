@@ -12,10 +12,11 @@
 #![allow(non_snake_case, non_camel_case_types)]
 #![allow(clippy::missing_safety_doc)] // The common C ABI contract is documented above.
 
+use std::cell::Cell;
 use std::ffi::{CStr, c_char, c_int, c_long, c_ulong, c_void};
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::ptr;
-use std::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicPtr, Ordering};
 
 use oriole::{Config, ErrorKind, EventKind, NameRules, Parser, Position, RecyclingToken};
 use oriole_storage::{
@@ -30,24 +31,34 @@ const ERROR: c_int = 0;
 const SUSPENDED: c_int = 2;
 const INVALID_ARGUMENT: c_int = 41;
 const UNEXPECTED_STATE: c_int = 23;
-const MAX_FAMILY_CALLBACK_BYTES: usize = 64 * 1024 * 1024;
+const INITIAL_CALLBACK_BYTES: usize = 64 * 1024 * 1024;
 const MAX_FAMILY_CHILDREN: usize = 1024;
 const MAX_EXTERNAL_DEPTH: usize = 32;
 const INPUT_CONTEXT_BYTES: usize = 1024;
+// Keep individual input requests bounded independently of document length.
+const MAX_INPUT_BYTES: usize = 256 * 1024 * 1024;
 
 #[derive(Default)]
 struct FamilyBudget {
-    input_bytes: AtomicUsize,
-    callback_bytes: AtomicUsize,
-    children: AtomicUsize,
+    // Checked cumulative statistic only; sibling input grants no source room or
+    // work credit. The core owns each source's length and consumed-root budget.
+    input_bytes: Cell<usize>,
+    callback_bytes: Cell<usize>,
+    children: Cell<usize>,
 }
 
-fn charge(counter: &AtomicUsize, amount: usize, limit: usize) -> bool {
-    counter
-        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
-            current.checked_add(amount).filter(|&next| next <= limit)
-        })
-        .is_ok()
+fn charge(counter: &Cell<usize>, amount: usize, limit: usize) -> bool {
+    // The C contract serializes the entire parser family. No callback or
+    // allocation can run between this counter read and its successful update.
+    let Some(next) = counter
+        .get()
+        .checked_add(amount)
+        .filter(|&next| next <= limit)
+    else {
+        return false;
+    };
+    counter.set(next);
+    true
 }
 
 pub type XML_Parser = *mut XML_ParserStruct;
@@ -158,8 +169,6 @@ pub struct XML_ParserStruct {
     base: Option<CString>,
     buffer: XmlVec<u8>,
     buffer_available: bool,
-    input_context: XmlVec<u8>,
-    input_context_start: usize,
     input_context_active: bool,
     external_arg: *mut c_void,
     unknown_encoding_arg: *mut c_void,
@@ -235,6 +244,7 @@ fn error_code(kind: &ErrorKind) -> c_int {
         ErrorKind::ExternalEntityInAttribute => 16,
         ErrorKind::MisplacedXmlDeclaration => 17,
         ErrorKind::XmlDeclaration => 30,
+        ErrorKind::TextDeclaration => 31,
         ErrorKind::PublicId => 32,
         ErrorKind::UndeclaringPrefix => 28,
         ErrorKind::UnknownEncoding => 18,
@@ -291,8 +301,12 @@ unsafe fn create(
                 namespace_separator: separator,
                 name_rules: NameRules::FourthEdition,
                 // Iterative expansion supports Expat's deep-entity workloads.
-                // Shared byte, live-allocation and external-child caps still apply.
+                // Shared work, live-allocation and external-child bounds still apply.
                 limits: oriole::Limits {
+                    // The core also clamps source offsets to isize::MAX. Keep
+                    // individual requests and retained allocations independent.
+                    max_total_bytes: c_long::MAX as usize,
+                    max_work_amplification: Some(100),
                     max_entities: 100_000,
                     max_entity_depth: 100_000,
                     ..oriole::Limits::default()
@@ -301,6 +315,7 @@ unsafe fn create(
             };
             let mut core = Parser::try_new_with_encoding_in(config.clone(), encoding, allocator)
                 .map_err(|_| AllocError::OutOfMemory)?;
+            core.enable_input_context();
             core.set_notation_handler_enabled(false);
             core.set_attlist_handler_enabled(false);
             let position = core.position();
@@ -326,8 +341,6 @@ unsafe fn create(
                     base: None,
                     buffer: XmlVec::new_in(allocator),
                     buffer_available: false,
-                    input_context: XmlVec::new_in(allocator),
-                    input_context_start: 0,
                     input_context_active: false,
                     external_arg: ptr::null_mut(),
                     unknown_encoding_arg: ptr::null_mut(),
@@ -520,6 +533,7 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                     allocator,
                 )
                 .map_err(|_| AllocError::OutOfMemory)?;
+                core.enable_input_context();
                 core.set_hash_salt((*parser).core.hash_salt())
                     .map_err(|_| AllocError::OutOfMemory)?;
                 let family = Shared::try_new_in(FamilyBudget::default(), allocator)?;
@@ -556,8 +570,6 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                 (*parser).base = None;
                 (*parser).buffer.clear();
                 (*parser).buffer_available = false;
-                (*parser).input_context.clear();
-                (*parser).input_context_start = 0;
                 (*parser).external_arg = ptr::null_mut();
                 while (*parser).default_pending.pop_front().is_some() {}
                 (*parser).family = family;
@@ -669,13 +681,13 @@ unsafe fn dispatch(
         | EventKind::EndDoctype
         | EventKind::NotStandalone => 0,
     };
-    // SAFETY: The shared budget contains atomic counters and never invokes user code.
+    // SAFETY: Family access is serialized; charging never invokes user code.
     unsafe {
         let family = &(*parser).family;
         if !charge(
             &family.callback_bytes,
             callback_bytes + base_bytes,
-            MAX_FAMILY_CALLBACK_BYTES,
+            (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
         ) {
             fail_parse(parser, 43);
             return Ok(());
@@ -1027,53 +1039,65 @@ unsafe fn dispatch(
         }
     }
     if !handled {
-        // SAFETY: No callback retains parser-owned data. The raw token must be
-        // copied since a default callback can change parser configuration.
+        // SAFETY: The raw fallback uses the same guarded, owned-fragment path.
         unsafe {
-            if !(*parser).destroying && (*parser).handlers.default.is_some() {
-                let raw = (*parser)
-                    .core
-                    .current_raw()
-                    .map(|raw| XmlString::try_from_str_in(raw, (*parser).allocator))
-                    .transpose()?;
-                if let Some(raw) = raw {
-                    let single_fragment = split_default
-                        && duplicate_default.is_none()
-                        && DtdFragments(raw.as_str())
-                            .next()
-                            .is_some_and(|fragment| fragment.len() == raw.len());
-                    if split_default && !single_fragment {
-                        let mut duplicate_name = raw.starts_with("<!ENTITY");
-                        for fragment in DtdFragments(raw.as_str()) {
-                            if let Some(closing) = duplicate_default {
-                                if fragment.chars().all(char::is_whitespace)
-                                    || matches!(fragment, "<!ENTITY" | "%")
-                                {
-                                    continue;
-                                }
-                                if duplicate_name {
-                                    duplicate_name = false;
-                                } else if fragment == "NDATA" {
-                                    duplicate_name = true;
-                                    continue;
-                                } else if matches!(fragment, "SYSTEM" | "PUBLIC")
-                                    || (fragment == ">" && !closing)
-                                {
-                                    continue;
-                                }
+            dispatch_unhandled(parser, split_default, duplicate_default)?;
+        }
+    }
+    Ok(())
+}
+
+unsafe fn dispatch_unhandled(
+    parser: XML_Parser,
+    split_default: bool,
+    duplicate_default: Option<bool>,
+) -> Result<(), AllocError> {
+    // SAFETY: No callback retains parser-owned data. The raw token must be
+    // copied since a default callback can change parser configuration.
+    unsafe {
+        if !(*parser).destroying && (*parser).handlers.default.is_some() {
+            let raw = (*parser)
+                .core
+                .current_raw()
+                .map(|raw| XmlString::try_from_str_in(raw, (*parser).allocator))
+                .transpose()?;
+            if let Some(raw) = raw {
+                let single_fragment = split_default
+                    && duplicate_default.is_none()
+                    && DtdFragments(raw.as_str())
+                        .next()
+                        .is_some_and(|fragment| fragment.len() == raw.len());
+                if split_default && !single_fragment {
+                    let mut duplicate_name = raw.starts_with("<!ENTITY");
+                    for fragment in DtdFragments(raw.as_str()) {
+                        if let Some(closing) = duplicate_default {
+                            if fragment.chars().all(char::is_whitespace)
+                                || matches!(fragment, "<!ENTITY" | "%")
+                            {
+                                continue;
                             }
-                            (*parser)
-                                .default_pending
-                                .try_push_back(XmlString::try_from_str_in(
-                                    fragment,
-                                    (*parser).allocator,
-                                )?)?;
+                            if duplicate_name {
+                                duplicate_name = false;
+                            } else if fragment == "NDATA" {
+                                duplicate_name = true;
+                                continue;
+                            } else if matches!(fragment, "SYSTEM" | "PUBLIC")
+                                || (fragment == ">" && !closing)
+                            {
+                                continue;
+                            }
                         }
-                    } else {
-                        (*parser).default_pending.try_push_back(raw)?;
+                        (*parser)
+                            .default_pending
+                            .try_push_back(XmlString::try_from_str_in(
+                                fragment,
+                                (*parser).allocator,
+                            )?)?;
                     }
-                    drain_default_fragments(parser);
+                } else {
+                    (*parser).default_pending.try_push_back(raw)?;
                 }
+                drain_default_fragments(parser);
             }
         }
     }
@@ -1151,11 +1175,180 @@ unsafe fn drain_default_fragments(parser: XML_Parser) {
     }
 }
 
+unsafe fn dispatch_start_frame(
+    parser: XML_Parser,
+    frame: &oriole::AdapterFrame,
+) -> Result<(), AllocError> {
+    // SAFETY: The busy guard pins the parser. Frame bytes are independently
+    // owned by run_events, and only scalar handler/allocator copies escape.
+    let (callback, arg, allocator) = unsafe {
+        let family = &(*parser).family;
+        if !charge(
+            &family.callback_bytes,
+            frame.callback_bytes(),
+            (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
+        ) {
+            fail_parse(parser, 43);
+            return Ok(());
+        }
+        (*parser).specified_attributes = (frame.attributes().len() * 2)
+            .try_into()
+            .unwrap_or(c_int::MAX);
+        (
+            (*parser).handlers.start_element,
+            if (*parser).handler_arg_is_parser {
+                parser.cast()
+            } else {
+                (*parser).user_data
+            },
+            (*parser).allocator,
+        )
+    };
+    let Some(callback) = callback else {
+        // SAFETY: No parser borrow crosses the owned raw-fragment callbacks.
+        return unsafe { dispatch_unhandled(parser, false, None) };
+    };
+    let mut local_pointers = [ptr::null(); 17];
+    let mut pointers = XmlVec::new_in(allocator);
+    let pointer_count = frame.attributes().len() * 2 + 1;
+    let output = if pointer_count <= local_pointers.len() {
+        &mut local_pointers[..pointer_count]
+    } else {
+        pointers.try_reserve_exact(pointer_count)?;
+        pointers.resize(pointer_count, ptr::null());
+        &mut pointers
+    };
+    for (index, (name, value)) in frame.attributes().enumerate() {
+        output[index * 2] = name.as_ptr().cast();
+        output[index * 2 + 1] = value.as_ptr().cast();
+    }
+    // SAFETY: The validated native strings have one final NUL and no interior
+    // NUL. The separately owned immutable arena and pointer array remain live
+    // through the callback; no parser/source/map reference is retained.
+    unsafe {
+        callback(arg, frame.name_bytes().as_ptr().cast(), output.as_ptr());
+    }
+    Ok(())
+}
+
+unsafe fn dispatch_text_frame(parser: XML_Parser, bytes: &[u8]) -> Result<(), AllocError> {
+    // SAFETY: The busy guard pins the parser. The bytes belong to the detached
+    // frame, and only scalar callback/argument copies cross the callback.
+    let (callback, arg) = unsafe {
+        let family = &(*parser).family;
+        if !charge(
+            &family.callback_bytes,
+            bytes.len(),
+            (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
+        ) {
+            fail_parse(parser, 43);
+            return Ok(());
+        }
+        (
+            (*parser).handlers.text,
+            if (*parser).handler_arg_is_parser {
+                parser.cast()
+            } else {
+                (*parser).user_data
+            },
+        )
+    };
+    if let Some(callback) = callback {
+        // SAFETY: The independent owned frame remains live through the callback.
+        unsafe { callback(arg, bytes.as_ptr().cast(), bytes.len() as c_int) };
+        Ok(())
+    } else {
+        // SAFETY: The default path uses the core's independently owned raw token.
+        unsafe { dispatch_unhandled(parser, false, None) }
+    }
+}
+
+/// Dispatch a validated native Text range without borrowing parser bytes across C.
+unsafe fn dispatch_context_text(
+    parser: XML_Parser,
+    start: usize,
+    count: usize,
+) -> Result<(), AllocError> {
+    // SAFETY: Called under the busy guard. Borrow only the accounting fields,
+    // then capture scalars exactly as for owned Text dispatch.
+    let (callback, arg) = unsafe {
+        let family = &(*parser).family;
+        if !charge(
+            &family.callback_bytes,
+            count,
+            (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
+        ) {
+            fail_parse(parser, 43);
+            return Ok(());
+        }
+        (
+            (*parser).handlers.text,
+            if (*parser).handler_arg_is_parser {
+                parser.cast()
+            } else {
+                (*parser).user_data
+            },
+        )
+    };
+    let Some(callback) = callback else {
+        // SAFETY: Eager raw storage and the default dispatch path are unchanged.
+        return unsafe { dispatch_unhandled(parser, false, None) };
+    };
+    // SAFETY: The core's immutable context borrow ends before the callback.
+    // Checked offsets preserve the stable input allocation's provenance.
+    let span = unsafe {
+        (|| {
+            if !(*parser).busy
+                || !(*parser).input_context_active
+                || (*parser).destroying
+                || count == 0
+                || count > 4096
+            {
+                return None;
+            }
+            let (context, context_start) = (*parser).core.input_context();
+            let offset = start.checked_sub(context_start)?;
+            let remaining = context.len().checked_sub(offset)?;
+            if count > remaining {
+                return None;
+            }
+            let length = c_int::try_from(count).ok()?;
+            Some((context.as_ptr().add(offset).cast::<c_char>(), length))
+        })()
+    };
+    let Some((pointer, length)) = span else {
+        // SAFETY: An invalid host range is a protocol error, never an allocation error.
+        unsafe { fail_parse(parser, UNEXPECTED_STATE) };
+        return Ok(());
+    };
+    // SAFETY: No parser/context reference crosses this call. The busy guard
+    // prevents same-parser feed, reset or destruction even after StopParser;
+    // permitted setters borrow disjoint fields. The pointer is used only here.
+    unsafe { callback(arg, pointer, length) };
+    Ok(())
+}
+
 unsafe fn run_events(parser: XML_Parser) -> c_int {
+    // SAFETY: Called under the busy guard. The detached frame carries owned
+    // storage or scalar ranges; no core borrow crosses callback-time setters.
+    unsafe {
+        if (*parser).destroying {
+            return ERROR;
+        }
+        let mut frame = (*parser).core.adapter_frame();
+        let result = run_events_with_frame(parser, &mut frame);
+        (*parser).core.finish_adapter_frame(frame);
+        result
+    }
+}
+
+unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterFrame) -> c_int {
     loop {
         // SAFETY: Pending lexical fragments belong to a previously suspended event.
         unsafe {
-            drain_default_fragments(parser);
+            if !(*parser).default_pending.is_empty() {
+                drain_default_fragments(parser);
+            }
         }
         let mut event = None;
         // SAFETY: No references to parser fields escape this scope or cross
@@ -1172,7 +1365,10 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
                 (*parser).error = 0;
                 return SUSPENDED;
             }
-            match (*parser).core.next_event_for_recycling_into(&mut event) {
+            match (*parser)
+                .core
+                .next_event_for_c_text_context_into(&mut event, frame)
+            {
                 Ok(Some(recycling)) => recycling,
                 Ok(None) => {
                     if resolve_pending_conversion(parser) {
@@ -1208,6 +1404,60 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
                 }
             }
         };
+        if frame.is_active() {
+            // SAFETY: Both the frame and its position are owned outside CParser.
+            unsafe {
+                (*parser).position = frame.position();
+                let result = if let Some((start, count)) = frame.native_text_range_for_c() {
+                    dispatch_context_text(parser, start, count)
+                } else if let Some(mut name) = frame.take_end_name() {
+                    // The original name is local, independently of the reusable
+                    // arena and parser. Match owned End dispatch: charge before
+                    // its terminator, recycle after callbacks, then raw fallback.
+                    (|| -> Result<(), AllocError> {
+                        let callback = (*parser).handlers.end_element;
+                        let arg = if (*parser).handler_arg_is_parser {
+                            parser.cast()
+                        } else {
+                            (*parser).user_data
+                        };
+                        let charged = {
+                            let family = &(*parser).family;
+                            charge(
+                                &family.callback_bytes,
+                                name.len(),
+                                (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
+                            )
+                        };
+                        if !charged {
+                            fail_parse(parser, 43);
+                            return Ok(());
+                        }
+                        if let Some(callback) = callback {
+                            if name.as_bytes().contains(&0) {
+                                return Err(AllocError::InteriorNul);
+                            }
+                            name.try_push('\0')?;
+                            callback(arg, name.as_ptr().cast());
+                        }
+                        (*parser).core.recycle_end_element(recycling, name);
+                        if callback.is_none() {
+                            dispatch_unhandled(parser, false, None)?;
+                        }
+                        Ok(())
+                    })()
+                } else if let Some(bytes) = frame.text_bytes() {
+                    dispatch_text_frame(parser, bytes)
+                } else {
+                    dispatch_start_frame(parser, frame)
+                };
+                if result.is_err() {
+                    fail_parse(parser, 1);
+                    return ERROR;
+                }
+            }
+            continue;
+        }
         let event = event.expect("recycling token accompanies an owned event");
         // SAFETY: The event owns its data and the parser remains busy.
         unsafe {
@@ -1401,12 +1651,14 @@ pub unsafe extern "C" fn XML_Parse(
                 return ERROR;
             }
             (*parser).error = 0;
+            if len as usize > MAX_INPUT_BYTES
+                || len as usize > (*parser).core.input_bytes_remaining()
+            {
+                fail_parse(parser, 43);
+                return ERROR;
+            }
             let family = &(*parser).family;
-            if !charge(
-                &family.input_bytes,
-                len as usize,
-                (*parser).config.limits.max_total_bytes,
-            ) {
+            if !charge(&family.input_bytes, len as usize, usize::MAX) {
                 fail_parse(parser, 43);
                 return ERROR;
             }
@@ -1425,11 +1677,18 @@ pub unsafe extern "C" fn XML_Parse(
                 } else {
                     std::slice::from_raw_parts(input.cast::<u8>(), len as usize)
                 };
-                if preserve_input_context(parser, input).is_err() {
-                    fail_parse(parser, 1);
-                    return ERROR;
-                }
-                if let Err(error) = (*parser).core.feed(input, final_input != 0) {
+                let fed = match (*parser).core.feed_with_input_context(
+                    input,
+                    final_input != 0,
+                    INPUT_CONTEXT_BYTES,
+                ) {
+                    Ok(result) => result,
+                    Err(_) => {
+                        fail_parse(parser, 1);
+                        return ERROR;
+                    }
+                };
+                if let Err(error) = fed {
                     if error.kind == ErrorKind::UnknownEncoding && resolve_unknown_encoding(parser)
                     {
                         return run_events(parser);
@@ -1481,12 +1740,7 @@ pub unsafe extern "C" fn XML_GetBuffer(parser: XML_Parser, len: c_int) -> *mut c
                     return ptr::null_mut();
                 }
                 let len = len as usize;
-                let family = &(*parser).family;
-                let remaining = (*parser)
-                    .config
-                    .limits
-                    .max_total_bytes
-                    .saturating_sub(family.input_bytes.load(Ordering::Relaxed));
+                let remaining = (*parser).core.input_bytes_remaining().min(MAX_INPUT_BYTES);
                 if len > remaining {
                     (*parser).error = 43;
                     return ptr::null_mut();
@@ -2022,31 +2276,6 @@ pub unsafe extern "C" fn XML_GetParsingStatus(parser: XML_Parser, status: *mut X
     }
 }
 
-/// Retain original bytes around pending events, including split tokens and
-/// suspended input. The decoder may normalize or convert its own input, so its
-/// UTF-8 source buffer cannot implement the C API's raw-input contract.
-unsafe fn preserve_input_context(parser: XML_Parser, input: &[u8]) -> Result<(), AllocError> {
-    // SAFETY: The outer parse operation owns the busy guard. No context borrow
-    // crosses a callback, and this storage is distinct from XML_GetBuffer's data.
-    unsafe {
-        let context = &mut (*parser).input_context;
-        let discard = (*parser)
-            .core
-            .input_context_byte_index()
-            .saturating_sub((*parser).input_context_start)
-            .saturating_sub(INPUT_CONTEXT_BYTES)
-            .min(context.len());
-        context.drain(..discard);
-        (*parser).input_context_start += discard;
-        if !input.is_empty() && context.capacity() == 0 {
-            let minimum = INPUT_CONTEXT_BYTES.min((*parser).config.limits.max_total_bytes);
-            context.try_reserve(input.len().max(minimum))?;
-        }
-        oriole_storage::try_extend_from_slice(context, input)?;
-    }
-    Ok(())
-}
-
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn XML_GetInputContext(
     parser: XML_Parser,
@@ -2060,20 +2289,16 @@ pub unsafe extern "C" fn XML_GetInputContext(
     // Active parsing owns the input storage; recursive parse/reset/free cannot
     // invalidate it before the requesting callback returns.
     unsafe {
-        if !(*parser).input_context_active
-            || (*parser).destroying
-            || (*parser).input_context.is_empty()
-        {
+        if !(*parser).input_context_active || (*parser).destroying {
             return ptr::null();
         }
-        let Some(start) = (*parser)
-            .position
-            .byte_index
-            .checked_sub((*parser).input_context_start)
-        else {
+        let (context, context_start) = (*parser).core.input_context();
+        if context.is_empty() {
+            return ptr::null();
+        }
+        let Some(start) = (*parser).position.byte_index.checked_sub(context_start) else {
             return ptr::null();
         };
-        let context = &(*parser).input_context;
         if start > context.len() || (*parser).position.byte_count > context.len() - start {
             return ptr::null();
         }
@@ -2139,10 +2364,11 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                 }
                 let context = input_string(context)?;
                 let encoding = input_string(encoding)?;
-                let core = (*parser)
+                let mut core = (*parser)
                     .core
                     .external_child_with_encoding(context, encoding)
                     .map_err(|_| AllocError::OutOfMemory)?;
+                core.enable_input_context();
                 let position = core.position();
                 let allocator = (*parser).allocator;
                 let lifetime = Shared::try_new_in(AtomicPtr::new(ptr::null_mut()), allocator)?;
@@ -2170,8 +2396,6 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                             .transpose()?,
                         buffer: XmlVec::new_in(allocator),
                         buffer_available: false,
-                        input_context: XmlVec::new_in(allocator),
-                        input_context_start: 0,
                         input_context_active: false,
                         external_arg: (*parser).external_arg,
                         unknown_encoding_arg: (*parser).unknown_encoding_arg,
@@ -2561,3 +2785,6 @@ pub extern "C" fn XML_ErrorString(code: c_int) -> *const c_char {
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod context_text_tests;

@@ -1,0 +1,30 @@
+{
+  "README.md": {
+    "sha256": "1a19e3e021b5c0c3eefcaf7d786e7ef05ea20d1df941b0b51cf092e0badf7f95",
+    "bytes": 6152
+  },
+  "portable-review.json": {
+    "sha256": "1aa6b6d9ece0081145001d4dba1cb51c9d3d9b3fbe26558c1996bef4568f178e",
+    "bytes": 834
+  },
+  "records.files.json": {
+    "sha256": "9cfa2ea1482a5b3766bbb1ebb3cffc5b6943f31de78404cca567c790c07edc70",
+    "bytes": 11445
+  },
+  "records.tar.gz": {
+    "sha256": "b72c99279563c1be24180c9375d3a830db966fc8a646cc133102f1aec44aac69",
+    "bytes": 324528
+  },
+  "report.json": {
+    "sha256": "83361c478d1c96dcf595e55092489bc045bd73a68cc2e6f0a0744069933ebc03",
+    "bytes": 14424
+  },
+  "review.json": {
+    "sha256": "4746be2dc0f99eb91079dac353c67a1091771f6770ff1fa1418d09852f90c66c",
+    "bytes": 961
+  },
+  "review.py": {
+    "sha256": "bad1548fd8edcdcb3512b1b9df12360d14d722f69ab02c79ca4659e6694b3ad2",
+    "bytes": 7774
+  }
+}

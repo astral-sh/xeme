@@ -14,6 +14,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pbs_target
+import pgo_bundle
+
 ROOT = Path(__file__).resolve().parents[2]
 TARGET = "x86_64-unknown-linux-gnu"
 PBS_REVISION = "a4553880293fe9d1bb62747d34ab0e5121d3554f"
@@ -33,6 +36,10 @@ def sources() -> dict[str, str]:
             "LICENSE-MIT",
             "LICENSE-APACHE",
             "licenses/cpython.txt",
+            "integration/python-build-standalone/prepare.py",
+            "integration/python-build-standalone/pgo_bundle.py",
+            "integration/python-build-standalone/pbs_target.py",
+            "integration/python-build-standalone/check-cpu.c",
             "integration/python-build-standalone/consumer-fix/cpython-3.12.13-external-parser.patch",
             "integration/python-build-standalone/consumer-fix/provenance.json",
         )
@@ -46,31 +53,53 @@ def sources() -> dict[str, str]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--pbs-target", choices=pbs_target.TARGETS, default=TARGET)
     parser.add_argument(
         "--toolchain", help="Optional rustup toolchain, e.g. ohm for local development"
     )
+    parser.add_argument(
+        "--pgo", action="store_true", help="Train and bundle a fresh PGO library"
+    )
+    parser.add_argument(
+        "--llvm-profdata",
+        type=Path,
+        help="Installed profiler matching the PGO compiler's LLVM version",
+    )
+    parser.add_argument(
+        "--cargo-arg",
+        action="append",
+        default=[],
+        type=pgo_bundle.build.cargo_option,
+        help="Global Cargo option, e.g. --cargo-arg=-Zohm-defaults=no for local Ohm",
+    )
     args = parser.parse_args()
+    if args.pgo != (args.llvm_profdata is not None):
+        parser.error("--pgo and --llvm-profdata must be supplied together")
     if platform.system() != "Linux" or platform.machine() != "x86_64":
         parser.error("the initial recipe supports native Linux x86_64 builds only")
-    if os.environ.get("CARGO_ENCODED_RUSTFLAGS"):
-        parser.error(
-            "unset CARGO_ENCODED_RUSTFLAGS so the required PIC/unwind flags take effect"
-        )
+    pgo_bundle.reject_overrides(ROOT, dict(os.environ))
+    target_cpu = pbs_target.cpu(args.pbs_target)
+    host_check = pbs_target.check_host(args.pbs_target)
     output = args.output.resolve()
+    if args.pgo:
+        if output.is_relative_to(ROOT) or ROOT.is_relative_to(output):
+            parser.error("PGO output must be outside the Oriole source tree")
     output.mkdir(parents=True, exist_ok=False)
     before = sources()
+    config_before = pgo_bundle.build.cargo_configs(ROOT, dict(os.environ))
     cargo = ["cargo", *([f"+{args.toolchain}"] if args.toolchain else [])]
     rustc = ["rustc", *([f"+{args.toolchain}"] if args.toolchain else [])]
     env = dict(os.environ)
+    # Even an empty encoded value would override the required RUSTFLAGS below.
+    env.pop("CARGO_ENCODED_RUSTFLAGS", None)
     # CI may force ANSI colors; native-static-libs is machine-read below.
     env["CARGO_TERM_COLOR"] = "never"
     target_dir = Path(env.get("CARGO_TARGET_DIR", ROOT / "target" / "pbs")).resolve()
     env["CARGO_TARGET_DIR"] = str(target_dir)
-    env["RUSTFLAGS"] = (
-        f"{env.get('RUSTFLAGS', '')} -C relocation-model=pic -C panic=unwind".strip()
-    )
+    env["RUSTFLAGS"] = " ".join(pgo_bundle.flags(target_cpu))
     command = [
         *cargo,
+        *args.cargo_arg,
         "rustc",
         "--locked",
         "--release",
@@ -78,11 +107,33 @@ def main() -> None:
         TARGET,
         "-p",
         "oriole_expat",
+        "--lib",
+        "--crate-type",
+        "cdylib,staticlib",
+        "--verbose",
         "--",
         "--print=native-static-libs",
     ]
+    pgo_output = output / "pgo"
+    build_command = command
+    if args.pgo:
+        build_command = [
+            sys.executable,
+            "-I",
+            "-S",
+            str(ROOT / "tools/pgo/build.py"),
+            "--source",
+            str(ROOT),
+            "--output",
+            str(pgo_output),
+            "--llvm-profdata",
+            str(args.llvm_profdata.resolve()),
+            "--native-static-libs",
+            *(["--toolchain", args.toolchain] if args.toolchain else []),
+            *[f"--cargo-arg={arg}" for arg in args.cargo_arg],
+        ]
     result = subprocess.run(
-        command,
+        build_command,
         cwd=ROOT,
         env=env,
         check=False,
@@ -93,23 +144,52 @@ def main() -> None:
     (output / "build.log").write_text(result.stdout)
     sys.stdout.write(result.stdout)
     result.check_returncode()
-    matches = re.findall(r"native-static-libs:\s*([^\n]+)", result.stdout)
-    if not matches:
-        raise RuntimeError(
-            "rustc did not report native libraries; use a fresh CARGO_TARGET_DIR and retry"
+    pgo = None
+    archive = target_dir / TARGET / "release/liboriole_expat.a"
+    if args.pgo:
+        archive, libraries, pgo, command = pgo_bundle.verify(
+            pgo_output, ROOT, env, args.toolchain, args.cargo_arg, target_cpu
         )
-    libraries = matches[-1].split()
-    if not libraries or any(
-        re.fullmatch(r"-l[A-Za-z0-9_]+", library) is None for library in libraries
-    ):
-        raise RuntimeError(f"native linker arguments need review: {libraries!r}")
+        vectors = pgo["compiler_vectors"]
+    else:
+        compiler = (
+            Path(
+                subprocess.check_output(
+                    [*rustc, "--print", "sysroot"], text=True
+                ).strip()
+            )
+            / "bin/rustc"
+        )
+        vectors = {
+            "normal": pgo_bundle.verify_vectors(
+                result.stdout,
+                "normal",
+                output,
+                compiler.resolve(strict=True),
+                target_cpu,
+            )
+        }
+        matches = re.findall(r"native-static-libs:\s*([^\n]+)", result.stdout)
+        if not matches:
+            raise RuntimeError(
+                "rustc did not report native libraries; use a fresh CARGO_TARGET_DIR and retry"
+            )
+        libraries = matches[-1].split()
+        if not libraries or any(
+            re.fullmatch(r"-l[A-Za-z0-9_]+", library) is None for library in libraries
+        ):
+            raise RuntimeError(f"native linker arguments need review: {libraries!r}")
     if sources() != before:
         raise RuntimeError(
             "Oriole sources changed during the build; discard this bundle and retry"
         )
-    shutil.copyfile(
-        target_dir / TARGET / "release/liboriole_expat.a", output / "libexpat.a"
-    )
+    shutil.copyfile(archive, output / "libexpat.a")
+    if pgo is not None:
+        pgo_bundle.require(
+            digest(output / "libexpat.a")
+            == pgo["manifest"]["libraries_sha256"]["use/liboriole_expat.a"],
+            "Copied PBS PGO archive checksum mismatch",
+        )
     # Only an optional weak reference can safely select Rust's null-hook path.
     symbols = subprocess.check_output(
         ["nm", "--undefined-only", "--format=posix", str(output / "libexpat.a")],
@@ -149,6 +229,7 @@ def main() -> None:
         subprocess.check_output(
             [
                 *cargo,
+                *args.cargo_arg,
                 "metadata",
                 "--locked",
                 "--format-version=1",
@@ -210,17 +291,39 @@ def main() -> None:
         if path.is_file():
             notices.append(f"\n=== Rust / {path.name} ===\n{path.read_text()}")
     (output / "LICENSE.oriole.txt").write_text("\n".join(notices))
+    rustc_version = subprocess.check_output([*rustc, "-vV"], text=True)
+    if pgo is not None:
+        pgo_bundle.require(
+            str((sysroot / "bin/rustc").resolve()) == pgo["compiler"],
+            "PBS license and PGO compiler sysroots differ",
+        )
+        pgo_bundle.require(
+            rustc_version == pgo["manifest"]["rustc_version"],
+            "PBS and PGO compiler version mismatch",
+        )
+        pgo_bundle.verify(
+            pgo_output, ROOT, env, args.toolchain, args.cargo_arg, target_cpu
+        )
+    if pgo_bundle.build.cargo_configs(ROOT, env) != config_before:
+        raise RuntimeError("Cargo configuration changed during packaging")
+    if sources() != before:
+        raise RuntimeError("Oriole bundle inputs changed during packaging")
     manifest = {
         "format": 1,
         "pbs_revision": PBS_REVISION,
-        "target": TARGET,
+        "target": args.pbs_target,
+        "rust_target": TARGET,
+        "target_cpu": target_cpu,
+        "host_check": host_check,
+        "compiler_vectors": vectors,
+        "cargo_config_sha256": config_before,
         "api_version": api_version,
         "implementation_version": next(
             package["version"]
             for package in packages.values()
             if package["name"] == "oriole_expat"
         ),
-        "rustc": subprocess.check_output([*rustc, "-vV"], text=True),
+        "rustc": rustc_version,
         "command": command,
         "rustflags": env["RUSTFLAGS"],
         "sources": before,
@@ -238,6 +341,8 @@ def main() -> None:
         },
         "validation": "Archive built locally; PBS target-sysroot linking and complete distribution validation remain required.",
     }
+    if pgo is not None:
+        manifest["pgo"] = pgo
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     print(f"Bundle: {output}")
 

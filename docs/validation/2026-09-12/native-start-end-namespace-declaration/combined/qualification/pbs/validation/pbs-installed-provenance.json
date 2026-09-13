@@ -1,0 +1,10 @@
+{
+  "archive": "cpython-3.12.13-x86_64-unknown-linux-gnu-noopt-20260910T0100.tar.zst",
+  "pbs_target": "x86_64-unknown-linux-gnu",
+  "rust_target": "x86_64-unknown-linux-gnu",
+  "target_cpu": null,
+  "pgo": false,
+  "static_archive_sha256": "3186eabcf16a68711440b30d9ec12ea24a06646a0f7552fdc9b748757562aa6c",
+  "installed_manifest_sha256": "3757cb6cf6fe64e1b8380b3169e8edcb56fb9772d456191c009eb51c4a4f6d73",
+  "python_metadata_sha256": "b4dbd25a92ecaa02dc15d3a75de9e8e6f55ce3817aa76e9f88ba99d5db48e4a0"
+}

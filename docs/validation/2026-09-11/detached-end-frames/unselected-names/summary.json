@@ -1,0 +1,51 @@
+{
+  "status": "unselected_experiments_preserved",
+  "scope": "B1-B5 expanded namespace frame lineage and ASCII NameChar table are unselected. The passing raw preflights/reviews do not imply full compatibility gates or adoption. No source or raw result modified by packaging. All measured conditions and regressions retained. B5 uses a55 control; ASCII uses selected Cell0cfd. No composition with End or with one another was built.",
+  "decisions": {
+    "b1": "Reject allocation amplification on equal raw/expanded names.",
+    "b2": "Equality ownership fixed; real native ratio1.00637964 with20/24 regressions; no Python/full gates.",
+    "b3": "Outlined expanded helper fails to restore identity attribute inlining; no profiling/timing.",
+    "b4": "Ordinary inline hint generates byte-identical .text to B3; no profiling/timing.",
+    "b5": "Forced tiny append inlining restores targeted static criterion. Native .9851897854/a55 with15/24 regressions; Python .9825116994 with12/24 regressions. Namespace-heavy gains but common-path/generated regressions; hold without new full gates.",
+    "ascii": "Table reduces real instructions2.58%, but native only0.80% with6/24 regressions, Python0.29% with9/24 regressions. Both native entity controls slower. Hold without full gates."
+  },
+  "archive": {
+    "sha256": "88572916fc7e7ae914ae8408c9612290f8aa74269ea09005d1833cc1c2b0be28",
+    "members": 6002,
+    "direct_binary_exclusions": 22,
+    "bytes": 16531847,
+    "raw_bytes": 122807570,
+    "all_members_and_origins_read_back": true
+  },
+  "directories": {
+    "b1": "/tmp/oriole-expanded-name-frames-b1-handoff",
+    "b2": "/tmp/oriole-expanded-name-frames-equal-owner-handoff",
+    "b2-thinlto": "/tmp/oriole-expanded-name-frames-equal-owner-thinlto-study",
+    "b2-native": "/tmp/oriole-expanded-name-frames-equal-owner-thinlto-timing-study",
+    "b3": "/tmp/oriole-expanded-name-frames-outlined-handoff",
+    "b4": "/tmp/oriole-expanded-name-frames-attribute-inline-handoff",
+    "b5": "/tmp/oriole-expanded-name-frames-attribute-always-handoff",
+    "b5-native": "/tmp/oriole-expanded-name-frames-attribute-always-thinlto-timing-study",
+    "b5-python": "/tmp/oriole-expanded-name-frames-attribute-always-thinlto-python-study",
+    "b5-chain-review": "/tmp/oriole-expanded-name-frames-b5-chain-independent-review",
+    "b5-native-review": "/tmp/oriole-expanded-name-frames-b5-native-independent-review",
+    "b5-python-review": "/tmp/oriole-expanded-name-frames-b5-python-independent-review",
+    "b2-source-review": "/tmp/oriole-expanded-name-frames-equal-owner-root-review",
+    "ascii-source": "/tmp/oriole-ascii-name-table-study",
+    "ascii-build-profile": "/tmp/oriole-ascii-name-table-thinlto-study",
+    "ascii-native": "/tmp/oriole-ascii-name-table-thinlto-timing-study",
+    "ascii-python": "/tmp/oriole-ascii-name-table-thinlto-python-study",
+    "ascii-source-review": "/tmp/oriole-ascii-name-table-independent-review",
+    "ascii-build-review": "/tmp/oriole-ascii-name-table-build-independent-review",
+    "ascii-profile-review": "/tmp/oriole-ascii-name-table-profile-independent-review",
+    "ascii-static-review": "/tmp/oriole-ascii-name-table-static-independent-review",
+    "ascii-native-review": "/tmp/oriole-ascii-name-table-native-independent-review",
+    "ascii-python-review": "/tmp/oriole-ascii-name-table-python-independent-review"
+  },
+  "limitations": [
+    "Nested handoffs retain their original manifests and scoped reviews; this outer packager rechecks their bytes but does not re-audit every nested archive member.",
+    "B5 failed native preparation CPU5-versusCPU3 stopped before parser dispatch and is retained with the corrected successful run.",
+    "ASCII first worktree destination existed; refusal and corrected distinct setup preserved.",
+    "No new full API, strict802, complete PBS or sustained sanitizer campaign is claimed for these unselected candidates."
+  ]
+}

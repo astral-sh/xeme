@@ -1,0 +1,66 @@
+{
+  "status": "latest_ci_passed_pbs_separate",
+  "runs": [
+    {
+      "directory": "ci",
+      "run_id": 34712437075,
+      "head_sha": "47776625cfee5cb5f0258eec93bbb1248209113c",
+      "attempt": 1,
+      "conclusion": "failure",
+      "counts": {
+        "success": 13,
+        "failure": 2,
+        "skipped": 1
+      },
+      "completed_sha256": "cd42361f4300eb4fa96fdb58dac60abd02c5b03e53e1eda0ab806e0bc8a596fe",
+      "url": "https://github.com/astral-sh/oriole/actions/runs/34712437075"
+    },
+    {
+      "directory": "ci-fixed",
+      "run_id": 34712708782,
+      "head_sha": "de144aff865a498c8854248bdaf5be250cf29f5d",
+      "attempt": 1,
+      "conclusion": "failure",
+      "counts": {
+        "success": 14,
+        "failure": 1,
+        "skipped": 1
+      },
+      "completed_sha256": "06d413733c26400a703157fbd9016f318ee4abbc3632d454048dde838a42a7f0",
+      "url": "https://github.com/astral-sh/oriole/actions/runs/34712708782"
+    },
+    {
+      "directory": "ci-test-fixed",
+      "run_id": 34713037741,
+      "head_sha": "008d818237fe0d6f8c04a000a98ad69ab5780ceb",
+      "attempt": 1,
+      "conclusion": "success",
+      "counts": {
+        "success": 15,
+        "failure": 0,
+        "skipped": 1
+      },
+      "completed_sha256": "b525b8a0e78c323e27ad97c2e3f29fa5112566b05ce1b2a59c131bc7a207d294",
+      "url": "https://github.com/astral-sh/oriole/actions/runs/34713037741"
+    }
+  ],
+  "latest_aliasing_test_counts_per_mode": {
+    "core": 4,
+    "c": 8
+  },
+  "prior_failure_scopes": [
+    "Missing eighth C test in workflow test-inventory guard; both modes stopped before Miri test execution.",
+    "Tree Borrows rejected callback fixture state mutation after a direct shared read; stacked mode passed."
+  ],
+  "latest_correction_scope": "Root reports workflow inventory and cfg(test) userdata pointer renewals only; production runtime67c704c retained.",
+  "pbs": {
+    "run_id": 34712464503,
+    "attempt": 1,
+    "head_sha": "47776625cfee5cb5f0258eec93bbb1248209113c",
+    "status": "independently monitored under pbs/; no completion claim here"
+  },
+  "api_writes": false,
+  "agent_reruns": false,
+  "agent_repository_edits": false,
+  "all_ci_monitor_sessions_reaped": true
+}

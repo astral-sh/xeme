@@ -1,0 +1,40 @@
+{
+  "scope": "All fixed conditions and samples; geometric means of per-condition paired median time ratios. Shared host.",
+  "groups": {
+    "real": {
+      "conditions": 24,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.9066579482925923,
+          "below_one": 24
+        },
+        "candidate_over_expat": {
+          "geomean": 1.7498406464310754,
+          "below_one": 0
+        },
+        "published_over_expat": {
+          "geomean": 1.9305524888346068,
+          "below_one": 0
+        }
+      }
+    },
+    "generated": {
+      "conditions": 4,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.9613648610235029,
+          "below_one": 4
+        },
+        "candidate_over_expat": {
+          "geomean": 5.243762254961288,
+          "below_one": 0
+        },
+        "published_over_expat": {
+          "geomean": 5.425711639124151,
+          "below_one": 0
+        }
+      }
+    }
+  },
+  "regressions": []
+}

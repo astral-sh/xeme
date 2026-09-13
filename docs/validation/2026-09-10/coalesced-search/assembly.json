@@ -1,0 +1,8 @@
+{
+  "commit": "193e1278ae059bad3a7890b4e34b9a91be5296e8",
+  "parent": "acc0fc6c958aa051755a1a9d0f2f96be9e80245f",
+  "source_manifest_sha256": "efb3369e1b1b0b18e45755161b4ee5767ff1da75f8af77b405a40f6c4cbae6d0",
+  "source_files": 69,
+  "source_matches_measured_candidate": true,
+  "note": "Candidate originally frozen on5bc806e. The identical69 source files are committed above doc-onlyacc0fc6; no runtime/test file changed during commit/rebase. Measured library remains50580931 and is not relabeled as a new binary."
+}

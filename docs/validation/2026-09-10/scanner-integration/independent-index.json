@@ -1,0 +1,77 @@
+{
+  "status": "saved_evidence_audits_passed_with_existing_failures_and_regressions_retained",
+  "source_commit": "64a270e58f14a4b74e25ffcf25f7832a5216b2d1",
+  "shared_library": "3694b68326939778481e42e810f53facc2ebcb8b8ad75b599704dbfef8f37926",
+  "static_library": "39b1a6e450814a57cfe8fa724d21f0a4cadb124da3674ecb0d5d9de508f76f38",
+  "scope": "Read-only source/Git/compiler-log and saved outcome/timing audits. No parser executions, compilation, benchmark reruns or source edits by reviewers. Profile receipt independently authored by conditional_review.",
+  "correctness": {
+    "rust_all_targets": 395,
+    "rust_doc": 1,
+    "canonical_API_pass": 4347,
+    "canonical_API_fail": 393,
+    "API_original_exit": 1,
+    "strict_CPython_methods_each": 802,
+    "CPython_original_exit_each": 2,
+    "CPython_known_failures_each": 2,
+    "six_C_native_consumers": "passed",
+    "allocation_scenarios_each_linkage": 327,
+    "strict_baseline_traces": 3318,
+    "custom_alias_aggregate_comparisons": 36456,
+    "malformed_rows": 2392,
+    "publication_cases": 1304
+  },
+  "performance": {
+    "comparison": "Current5058 published control, not standalone5af control; no additive component prediction.",
+    "native": {
+      "preflights": 84,
+      "workers": 588,
+      "measured": 105420,
+      "real_ratio": 0.9818599515466786,
+      "real_better": 19,
+      "real_conditions": 24,
+      "generated_ratio": 1.0244643418942037,
+      "generated_regressions": 4,
+      "all_four_Vulkan_regressions_retained": true
+    },
+    "CPython": {
+      "preflights": 72,
+      "workers": 504,
+      "measured": 25788,
+      "ratio": 0.9778856367742648,
+      "better": 23,
+      "conditions": 24
+    },
+    "profile_reference": "Independent32-profile receipt linked below; instructions are not latency or throughput."
+  },
+  "postprocessing": "Preserved initial count-helper core/CLI name collision and incomplete first package; corrected count checks retain all original assertions/logs. All70 Git bytes match measured source.",
+  "reviews": {
+    "/tmp/oriole-scanner-integration-independent-review/gates-review.json": {
+      "sha256": "6035a2a62094b34e0a4348ef8def9f83553e3910981e7cfdeaf622d2ef5723f1",
+      "status": "passed_no_findings"
+    },
+    "/tmp/oriole-scanner-integration-independent-review/assembly-review.json": {
+      "sha256": "5304a10c98c8e35628e4c93d994553ab8ef27cfcb3682f98d468d384b4006486",
+      "status": "passed_no_findings"
+    },
+    "/tmp/oriole-scanner-integration-independent-review/matched-build-review.json": {
+      "sha256": "fab7eef255d0266f08bb82a8fd0407a8466b262785b8d070b7a955cffa5f10ca",
+      "status": "passed_no_findings"
+    },
+    "/tmp/oriole-scanner-integration-independent-review/cpython/review.json": {
+      "sha256": "d666043613d9c9baf2a3a23b90b17a594389c61cce3eecba04022e74ab424d34",
+      "status": "saved_outcomes_and_origins_verified"
+    },
+    "/tmp/oriole-scanner-integration-independent-review/python/review.json": {
+      "sha256": "f3f6db061f226c452ede5ede1a69d2cc965f3c1db9eaa0f634f6a62476451b51",
+      "status": "passed_no_findings"
+    },
+    "/tmp/oriole-scanner-integration-native-independent-review/review.json": {
+      "sha256": "090e70456a89816935d6754ce51e00b83c1b30fba0f9560b2f0cec90e38e76b0",
+      "status": "passed_no_findings"
+    },
+    "/tmp/oriole-scanner-integration-profile-independent-review/review.json": {
+      "sha256": "5f20232a8c771648f38928f0c87de093f53f31f90918231a910c5756e0cf8f12",
+      "status": "saved_profile_audit_passed"
+    }
+  }
+}

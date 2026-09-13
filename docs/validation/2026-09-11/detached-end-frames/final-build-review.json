@@ -1,0 +1,41 @@
+{
+  "status": "final_test_only_source_commit_and_identical_C_libraries_verified",
+  "findings": [],
+  "runtime_commit": "1ff7b64e4567484f42bcc974146110648c224dd3",
+  "measured_source_manifest_sha256": "e7eb4e525a8ae2e06889888aa4c855bc41ad830d08fd716296a1ccd0d4b9154f",
+  "final_source_manifest_sha256": "344730269a59a8402d3e18e5eed170982d2c44acfe6fc3d869f2acc166f149df",
+  "committed_source_files": 70,
+  "all_committed_blobs_equal_final_archive_manifest_and_live_files": true,
+  "source_change_from_measured": {
+    "path": "crates/oriole_expat/src/tests.rs",
+    "changes": [
+      "store(value, Ordering::Relaxed) to set(value)",
+      "load(Ordering::Relaxed) to get()"
+    ],
+    "cfg_test_only": true,
+    "assertions_unchanged": true,
+    "other69_files_identical": true
+  },
+  "fresh_workspace_compiler_invocations": 3,
+  "actual_compiler_vectors_equal_without_normalization": true,
+  "recorded_environment_overrides_identical": true,
+  "final_crate_types": [
+    "cdylib",
+    "staticlib"
+  ],
+  "actual_final_lto": "thin",
+  "entire_final_libraries_identical_to_measured": {
+    "liboriole_expat.so": "02fcab59f6e3818c128da6706d67987ae7450dd8b59e97cd28ce497a547f28f5",
+    "liboriole_expat.a": "69ebed414946cbaef1a940c052a636be277c809902943d676e824deab45d22d5"
+  },
+  "original_e7eb_artifacts_and_review_handoff_unchanged": true,
+  "build_review_sha256": "2cd3a53dbc8b12afadd91cdad52f88de87339b25017363c2f9088f75122da910",
+  "commit_review_sha256": "a13a1bddddd57793381ea2492c19118246c2606eff3943356fe4408ed93909f9",
+  "scope": "Distinct supplement linking corrected cfg(test) source344730/commit1ff7b64 to whole-byte-identical measured02fc/69eb libraries. Original e7eb measurements and reviews remain immutable; no reviewer compiler, parser or test execution.",
+  "limitations": [
+    "Successful final normal workspace checks are separate and not certified by this supplement.",
+    "Original workspace attempt failed test/Clippy compilation before any all-target execution; original failures and logs remain retained.",
+    "Same binary identity supports reuse of existing C-only behavior/timing evidence; their source manifests are not rewritten.",
+    "Complete compiler vectors and recorded override environment match; no full inherited-environment capture is claimed."
+  ]
+}

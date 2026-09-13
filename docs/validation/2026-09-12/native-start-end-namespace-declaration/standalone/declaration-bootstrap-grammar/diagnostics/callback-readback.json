@@ -1,0 +1,308 @@
+{
+  "status": "passed_saved_callback_order_diagnostic",
+  "targets_executed": false,
+  "bound_sha256": "357ba44c2d352dc91913898d7da55b7415243383f015576dd9a17501449451e1",
+  "report_sha256": "4fb304da8a019ba3505de1f958ac277853594b4e956f7b631cba0f534223364e",
+  "rows": 18,
+  "all_children_reaped": true,
+  "selected_differences": [
+    {
+      "key": [
+        "oriole",
+        "root",
+        "malformed_order"
+      ],
+      "fields": {
+        "byte_index": {
+          "selected": 16,
+          "candidate": 6
+        },
+        "callbacks": {
+          "selected": [
+            {
+              "name": "UTF8",
+              "name_hex": "55544638",
+              "returned": 0
+            }
+          ],
+          "candidate": []
+        },
+        "column": {
+          "selected": 16,
+          "candidate": 6
+        },
+        "error": {
+          "selected": 18,
+          "candidate": 30
+        },
+        "error_string": {
+          "selected": "unknown encoding",
+          "candidate": "XML declaration not well-formed"
+        },
+        "library": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        },
+        "library_sha256": {
+          "selected": "e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6",
+          "candidate": "e30b4f667630757d708f933d8d9fabc1df34ed25b38ed73db4605612260d5934"
+        },
+        "loaded_xml_parse_object": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        }
+      }
+    },
+    {
+      "key": [
+        "oriole",
+        "root",
+        "valid_order_unknown"
+      ],
+      "fields": {
+        "library": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        },
+        "library_sha256": {
+          "selected": "e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6",
+          "candidate": "e30b4f667630757d708f933d8d9fabc1df34ed25b38ed73db4605612260d5934"
+        },
+        "loaded_xml_parse_object": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        }
+      }
+    },
+    {
+      "key": [
+        "oriole",
+        "root",
+        "uppercase_pi"
+      ],
+      "fields": {
+        "error": {
+          "selected": 17,
+          "candidate": 4
+        },
+        "error_string": {
+          "selected": "XML or text declaration not at start of entity",
+          "candidate": "not well-formed (invalid token)"
+        },
+        "library": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        },
+        "library_sha256": {
+          "selected": "e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6",
+          "candidate": "e30b4f667630757d708f933d8d9fabc1df34ed25b38ed73db4605612260d5934"
+        },
+        "loaded_xml_parse_object": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        }
+      }
+    },
+    {
+      "key": [
+        "oriole",
+        "general_child",
+        "malformed_order"
+      ],
+      "fields": {
+        "byte_index": {
+          "selected": 16,
+          "candidate": 0
+        },
+        "callbacks": {
+          "selected": [
+            {
+              "name": "UTF8",
+              "name_hex": "55544638",
+              "returned": 0
+            }
+          ],
+          "candidate": []
+        },
+        "column": {
+          "selected": 16,
+          "candidate": 0
+        },
+        "error": {
+          "selected": 18,
+          "candidate": 31
+        },
+        "error_string": {
+          "selected": "unknown encoding",
+          "candidate": "text declaration not well-formed"
+        },
+        "library": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        },
+        "library_sha256": {
+          "selected": "e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6",
+          "candidate": "e30b4f667630757d708f933d8d9fabc1df34ed25b38ed73db4605612260d5934"
+        },
+        "loaded_xml_parse_object": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        }
+      }
+    },
+    {
+      "key": [
+        "oriole",
+        "general_child",
+        "valid_order_unknown"
+      ],
+      "fields": {
+        "library": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        },
+        "library_sha256": {
+          "selected": "e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6",
+          "candidate": "e30b4f667630757d708f933d8d9fabc1df34ed25b38ed73db4605612260d5934"
+        },
+        "loaded_xml_parse_object": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        }
+      }
+    },
+    {
+      "key": [
+        "oriole",
+        "general_child",
+        "uppercase_pi"
+      ],
+      "fields": {
+        "error": {
+          "selected": 17,
+          "candidate": 4
+        },
+        "error_string": {
+          "selected": "XML or text declaration not at start of entity",
+          "candidate": "not well-formed (invalid token)"
+        },
+        "library": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        },
+        "library_sha256": {
+          "selected": "e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6",
+          "candidate": "e30b4f667630757d708f933d8d9fabc1df34ed25b38ed73db4605612260d5934"
+        },
+        "loaded_xml_parse_object": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        }
+      }
+    },
+    {
+      "key": [
+        "oriole",
+        "subset_child",
+        "malformed_order"
+      ],
+      "fields": {
+        "byte_index": {
+          "selected": 16,
+          "candidate": 0
+        },
+        "callbacks": {
+          "selected": [
+            {
+              "name": "UTF8",
+              "name_hex": "55544638",
+              "returned": 0
+            }
+          ],
+          "candidate": []
+        },
+        "column": {
+          "selected": 16,
+          "candidate": 0
+        },
+        "error": {
+          "selected": 18,
+          "candidate": 31
+        },
+        "error_string": {
+          "selected": "unknown encoding",
+          "candidate": "text declaration not well-formed"
+        },
+        "library": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        },
+        "library_sha256": {
+          "selected": "e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6",
+          "candidate": "e30b4f667630757d708f933d8d9fabc1df34ed25b38ed73db4605612260d5934"
+        },
+        "loaded_xml_parse_object": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        }
+      }
+    },
+    {
+      "key": [
+        "oriole",
+        "subset_child",
+        "valid_order_unknown"
+      ],
+      "fields": {
+        "library": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        },
+        "library_sha256": {
+          "selected": "e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6",
+          "candidate": "e30b4f667630757d708f933d8d9fabc1df34ed25b38ed73db4605612260d5934"
+        },
+        "loaded_xml_parse_object": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        }
+      }
+    },
+    {
+      "key": [
+        "oriole",
+        "subset_child",
+        "uppercase_pi"
+      ],
+      "fields": {
+        "error": {
+          "selected": 17,
+          "candidate": 4
+        },
+        "error_string": {
+          "selected": "XML or text declaration not at start of entity",
+          "candidate": "not well-formed (invalid token)"
+        },
+        "library": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        },
+        "library_sha256": {
+          "selected": "e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6",
+          "candidate": "e30b4f667630757d708f933d8d9fabc1df34ed25b38ed73db4605612260d5934"
+        },
+        "loaded_xml_parse_object": {
+          "selected": "/tmp/oriole-core-owned-text-raw-study/normal/liboriole_expat.so",
+          "candidate": "/tmp/oriole-declaration-bootstrap-grammar-study/normal/liboriole_expat.so"
+        }
+      }
+    }
+  ],
+  "rows_preserved_in": "/tmp/oriole-declaration-bootstrap-grammar-diagnostics/callbacks/report.json",
+  "limitations": [
+    "Positions and error strings are retained, not required to equal Expat.",
+    "Rejecting unknown handler only; accepted custom maps and split feeds belong to ordinary Rust regressions.",
+    "No performance or full compatibility claim."
+  ],
+  "reader_sha256": "523b05848071de6c8cb47cd56138f7dbe742acaf6b7e6b9bd851145ed5af1264"
+}

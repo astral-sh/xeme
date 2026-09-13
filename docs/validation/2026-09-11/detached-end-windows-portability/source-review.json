@@ -1,0 +1,19 @@
+{
+  "status": "source_review_passed",
+  "scope": "Independent read-only source/lineage review of one cfg(test) expected-value cast; no build or test execution and no final CI claim.",
+  "source_manifest_sha256": "eab8c0277ca2afeba5a664a10320296367fcdeab2ea7a283fa95cef23dc24714",
+  "source_files": 70,
+  "changed_files": [
+    "crates/oriole_expat/src/tests.rs"
+  ],
+  "other_files_unchanged": 69,
+  "patch_sha256": "8f240abe4d160b205fa88c7994abcfbef76022e9b4f5fedce417571e653c86ed",
+  "exact_change": "opening.to_bytes().len() as i64 -> as c_long",
+  "reason": "XML_GetCurrentByteIndex returns the existing imported target C long type. The expectation must use that same type, including Windows where the saved diagnostic reports i32; the fixed literal byte index18 fits either target width.",
+  "assertions_inputs_numeric_expectation_unchanged": true,
+  "runtime_ABI_and_implementation_unchanged": true,
+  "prior_407_and_measured_sources_preserved": "344730 and e7eb evidence stays historical. This source supplement does not rewrite those records.",
+  "build_and_CI_scope": "Fresh C-only identity/focused checks and rerun CI are separate producer evidence, pending at this source review.",
+  "blocking_findings": [],
+  "generator_sha256": "aa53dee4e28eb9375991d8fb0aaa60bb55b8f40a5d49917446c176ed9cb99d22"
+}

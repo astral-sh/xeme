@@ -18,7 +18,13 @@ The normal comparison uses the same compiler, explicit host target and base buil
 environment as PGO, removing only the profile-use flags. It is a distinct build
 from the default-release correctness library. Expat 2.8.4's normal and trained
 libraries are reused byte-for-byte from the independently reviewed original study.
-Oriole uses Rust/LLVM 22 with ThinLTO; Expat uses GCC 13.3 with `-O3` and no LTO.
+Oriole uses Rust/LLVM 22; Expat uses GCC 13.3 with `-O3` and no LTO.
+The Oriole release profile requested ThinLTO, but the archived nonverbose build
+logs do not establish that it was effective for the combined
+`cdylib`/`staticlib`/`rlib` build. The earlier unconditional ThinLTO wording was
+unsupported. This clarification leaves the recorded binaries and measurements
+unchanged; see the [current C-library build guide](../../../../crates/oriole_expat/README.md#build-the-c-libraries)
+for the explicit Cargo target override.
 Aggregate ratios are equal-weight geometric means of the per-condition median
 paired ratios.
 

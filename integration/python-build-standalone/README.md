@@ -3,7 +3,8 @@
 This recipe overlays Oriole's static archive and public header in the CPython build
 container for [PBS revision `a4553880`](https://github.com/astral-sh/python-build-standalone/tree/a4553880293fe9d1bb62747d34ab0e5121d3554f).
 It is opt-in and initially supports CPython **3.12.13**, a Linux x86_64 host,
-the `x86_64-unknown-linux-gnu` target, and Docker builds of shared Python.
+the generic `x86_64-unknown-linux-gnu` target, an explicit
+`x86_64_v3-unknown-linux-gnu` opt-in, and Docker builds of shared Python.
 
 The ordinary Expat dependency still builds and remains in PBS's dependency cache.
 The overlay replaces it only inside the selected CPython build container. A phony
@@ -20,13 +21,61 @@ component installed:
 python3 integration/python-build-standalone/prepare.py --output /absolute/oriole-bundle
 ```
 
-For local Ohm development, add `--toolchain ohm` and set a separate
+For local Ohm development, add `--toolchain ohm --cargo-arg=-Zohm-defaults=no` and set a separate
 `CARGO_TARGET_DIR` and shared `CARGO_BUILD_BUILD_DIR` as instructed by the workspace.
 The output directory must not already exist. A failed build leaves its log there;
 use a new output directory when retrying.
 
+Both normal and PGO bundles reject inherited Rust flags, compiler wrappers,
+Cargo profile environment overrides and configured Rust flags. Both verify all
+three fresh workspace compiler vectors, including the ABI target, CPU selection,
+PIC, unwinding, ThinLTO and one codegen unit. Use a fresh `CARGO_TARGET_DIR` for a
+normal build so cached compilations cannot omit this evidence.
+
+### Explicit x86-64-v3 trial
+
+Generic remains the default. To select a distribution that requires x86-64-v3:
+
+```sh
+python3 integration/python-build-standalone/prepare.py \
+  --output /absolute/oriole-v3-bundle --pbs-target x86_64_v3-unknown-linux-gnu
+bash integration/python-build-standalone/run.sh \
+  /absolute/pbs-oriole /absolute/oriole-v3-bundle x86_64_v3-unknown-linux-gnu
+```
+
+The same `--pbs-target` option combines with `--pgo --llvm-profdata ...`. PBS uses
+its existing v3 target for the whole distribution; Rust retains the generic ABI
+triple `x86_64-unknown-linux-gnu` and adds only `-C target-cpu=x86-64-v3`. The bundle
+records `target`, `rust_target`, `target_cpu`, actual compiler vectors and host
+checks. A v3 bundle passed to the two-argument, generic `run.sh` invocation is
+rejected. Unknown targets and hidden CPU/feature overrides are rejected too.
+
+Before training or execution, the v3 path compiles and runs a small GCC CPU/OS
+guard with fixed `-march=x86-64 -mtune=generic` flags and a clean environment.
+Inherited `CC`, `CFLAGS` and compiler-search overrides do not affect that guard.
+Its GCC builtin checks the complete v3 level, including usable AVX OS state;
+checking only `avx2` would be insufficient. The generic path does not compile a
+guard. A supported CPU does not establish old-glibc compatibility: the actual
+distribution still needs the glibc 2.17 and threaded-TLS gates below.
+
+The manual workflow's `pbs_target` choice defaults to generic. Artifact names
+include the product target and normal/PGO mode. Installed provenance checks bind
+the distribution filename, `PYTHON.json.target_triple`, installed bundle manifest
+and exact static archive before running the installed parser. PBS's v3 archive
+filename expresses its CPU requirement, but does not identify Oriole by itself;
+these experimental artifacts must remain outside release pools.
+
+This wiring enables a controlled trial. Local v3 PGO Python results do not
+establish installed-distribution performance, native parity, complete
+compatibility or readiness for default deployment.
+
 The script builds with position-independent code and unwinding enabled, captures
 `rustc --print=native-static-libs`, and rejects source changes during compilation.
+It uses Cargo's `rustc --lib --crate-type cdylib,staticlib` target override so the
+release profile's ThinLTO setting applies to the C artifacts. The manifest retains
+`rlib` for Rust tests; verbose build logs record the compiler's effective options.
+The recipe CI job also builds this bundle with stable Rust and its documentation
+component, exercising native-library extraction and the weak TLS-hook check.
 The bundle contains:
 
 - `libexpat.a`: Oriole's Rust static archive under the dependency's expected name.
@@ -37,7 +86,69 @@ The bundle contains:
 - `LICENSE.oriole.txt`: Oriole, dependency, Expat-header, and Rust runtime notices.
 - `cpython-external-parser.patch`: the upstream CPython child-parser cleanup fix,
   backported to 3.12.13 with recorded source and patch hashes.
-- `manifest.json`: source and file hashes, target, toolchain, and build command.
+- `manifest.json`: source and file hashes, PBS/Rust/CPU targets, toolchain, actual
+  compiler vectors, host check and build command.
+
+### Optional fresh PGO bundle
+
+The command above uses the normal ThinLTO release build. To train and bundle a
+profile-guided build, provide an installed `llvm-profdata` matching the compiler's
+LLVM major, minor, and patch version:
+
+```sh
+python3 integration/python-build-standalone/prepare.py \
+  --output /absolute/oriole-pgo-bundle \
+  --pgo --llvm-profdata /absolute/matching/llvm-profdata
+```
+
+The output must be outside the source tree. Cargo dependencies must already be
+cached. Unset inherited `RUSTFLAGS`, `CARGO_ENCODED_RUSTFLAGS`, and `CARGO_PROFILE_*`
+overrides: this bundle verifies PIC, unwinding, ThinLTO, one codegen unit, and the
+GNU x86-64 target in the actual compiler commands. Use the normal production
+toolchain and matching Rust documentation. For local Ohm checks, add
+`--toolchain ohm --cargo-arg=-Zohm-defaults=no` and keep its experimental trust
+settings disabled.
+
+This delegates to the [existing generated-only PGO pipeline](../../tools/pgo/),
+then copies its exact optimized static archive into `libexpat.a`. It captures
+native linker libraries from that same profile-use compilation. The source,
+compiler, Cargo configuration, training inputs, profiles, library origins, and
+generated callback results must still match when packaging completes. No prior
+profile or separately rebuilt archive is accepted. The normal TLS, header,
+license, and CPython cleanup-backport checks also apply.
+
+`manifest.json` embeds the PGO manifest and its checksum. The `pgo/` subdirectory
+retains the complete build logs, generated training records, profiles, and
+instrumented and optimized libraries; retain it with the bundle when archiving
+evidence. PBS installs the same six payload files and retains the combined
+manifest in its license directory. Pass this bundle to `run.sh` exactly as below.
+
+Selecting PGO does not select PBS's CPython optimization variant, and local
+benchmark gains do not establish the installed distribution's performance.
+Repeat the full distribution, installed XML, glibc 2.17, threaded-TLS, and consumer
+benchmark gates for the resulting bundle. The ordinary CI distribution and
+default `prepare.py` invocation continue to use the normal release build.
+
+The manual **PBS distribution** workflow accepts a boolean `pgo` input, defaulting
+to `false`. Enabling it installs stable Rust's matching LLVM tools, fetches the
+locked dependencies before offline training, and passes the resulting PGO bundle
+through the same distribution gates. Its validation artifact retains the PGO
+logs, manifests, training inputs and records, and profiles. Cargo target trees and
+duplicate library binaries are excluded from that artifact. The bundle manifest
+retains the exact static archive hash; the produced PGO distribution still needs
+its packaged archive identity checked.
+
+PBS pull requests use the normal build, including branches whose names contain
+`pbs-pgo-`. The current workflow enables PGO only through its manual `pgo` input.
+Manual dispatch requires the workflow to be present on the repository's default
+branch.
+
+The [recorded local PGO bundle](../../docs/validation/2026-09-11/pbs-pgo-bundle/)
+passed its fresh Ohm build and both C consumers. The [normal stable PBS baseline](../../docs/validation/2026-09-11/pbs-independent-checks/)
+passed the archive validator and actual glibc 2.17 threaded parsing, while retaining
+the two known strict XML callback assertions. The selected reference-frame stable
+PGO distribution is recorded in [its validation packet](../../docs/validation/2026-09-11/reference-validation/pbs/).
+The explicit v3 PBS distribution trial remains pending.
 
 The archive is built for the GNU target, but target compatibility remains a PBS
 validation gate. At the pinned revision, PBS links x86_64 against a Debian Jessie
@@ -97,6 +208,41 @@ license directory, and its extension metadata references Oriole's notices.
 
 ## Validation
 
+### Current normal generic validation
+
+The [current normal installed result](../../docs/validation/2026-09-12/pbs-current-normal/)
+for selected runtime `6320d7b7` is recorded from
+[PR164 attempt 1](https://github.com/astral-sh/oriole/actions/runs/34697381695/attempts/1).
+Archive validation and custom checks pass; the installed parser identifies Oriole
+and completes 1,024 threaded parses on glibc 2.17. Both installed XML campaigns
+retain the two known text-grouping failures, including the main campaign's retries,
+so the workflow remains failed. This generic build uses normal Rust ThinLTO and
+PBS's CPython `noopt` variant, with no PGO. Installed-interpreter performance was
+not measured.
+
+To validate a newly selected runtime, open a dedicated integration pull request
+from its published commit. The [PBS distribution workflow](../../.github/workflows/pbs.yml)
+runs for changes to this integration directory or that workflow when the head
+branch starts with `charlie/codex-oriole-pbs-`, for example
+`charlie/codex-oriole-pbs-current-normal`.
+
+This PR route selects `x86_64-unknown-linux-gnu` and `pgo=false`; it adds no CPU
+requirement. Oriole uses its normal release build with ThinLTO and one codegen
+unit. PBS's CPython build variant remains `noopt`. Keep these experimental
+archives outside the release artifact pool.
+
+Retain the checked-out commit, actual compiler vectors, bundle manifest, archive
+hash and installed provenance. Check that provenance records the generic target,
+`target_cpu: null` and `pgo: false`, and that the installed static archive matches
+the bundle. Record the archive validator, custom checks, installed XML suites,
+parser identity, and glibc 2.17 threaded-parser results, including any failures.
+
+Report these installed-distribution outcomes separately from the local CPython
+module benchmarks and strict extension tests: they use separately built artifacts.
+A new runtime needs a fresh distribution run; the historical results below do not
+establish its installed behavior. Installed-interpreter performance requires its
+own measurements beyond this workflow's compatibility checks.
+
 The runtime at [`1262888`](https://github.com/astral-sh/oriole/commit/1262888)
 includes external DTD declaration grammar, internal declaration composition,
 namespace and encoding corrections, foreign-DTD read policy, and completed-parser
@@ -118,6 +264,7 @@ or its glibc 2.17 runtime check.
 Check the patch and staging logic against a clean pinned PBS source tree:
 
 ```sh
+python3 -m unittest discover -s integration/python-build-standalone -p test_pgo_bundle.py
 python3 integration/python-build-standalone/validate.py --pbs /absolute/clean-pbs \
   --cpython /absolute/cpython-3.12.13
 ```
@@ -127,7 +274,8 @@ native C integration and adversarial tests linked statically, and a shared-libra
 link of the complete archive. Commands and source hashes are retained in the
 bundle manifest. These checks passed on the development host.
 
-This checks clean patch application, Python compilation, shell syntax, the unchanged
+This checks the C-only archive command, clean patch application, Python compilation,
+shell syntax, the unchanged
 default path, native-linker propagation, target restrictions, and rejection of a
 mismatched header. Fixture checks do not compile a Python distribution.
 With `--cpython`, validation also runs the actual backport shell block against

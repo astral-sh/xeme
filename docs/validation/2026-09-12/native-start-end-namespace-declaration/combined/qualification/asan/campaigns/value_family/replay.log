@@ -1,0 +1,11 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 20260912
+INFO: Loaded 1 modules   (50506 inline 8-bit counters): 50506 [0x55c5a18150a0, 0x55c5a18215ea), 
+INFO: Loaded 1 PC tables (50506 PCs): 50506 [0x55c5a18215f0,0x55c5a18e6a90), 
+INFO:     5306 files found in /tmp/oriole-native-start-end-namespace-declaration-asan-study/campaigns/value_family/initial-corpus
+INFO: seed corpus: files: 5306 min: 1b max: 4253b total: 813914b rss: 46Mb
+#2048	pulse  cov: 7097 ft: 20597 corp: 854/34Kb exec/s: 1024 rss: 182Mb
+#4096	pulse  cov: 8106 ft: 25160 corp: 1645/97Kb exec/s: 819 rss: 308Mb
+#5307	INITED cov: 8222 ft: 28135 corp: 2082/331Kb exec/s: 589 rss: 407Mb
+#5307	DONE   cov: 8222 ft: 28135 corp: 2082/331Kb lim: 3979 exec/s: 589 rss: 407Mb
+Done 5307 runs in 9 second(s)

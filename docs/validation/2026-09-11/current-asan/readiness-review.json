@@ -1,0 +1,88 @@
+{
+  "status": "passed",
+  "scope": "Independent saved preparation/source/build/instrumentation/initial-input audit only. No live campaign status or outputs read; no producer checker executed.",
+  "role": "Independent of be22 ASan preparation/build/input author; author of earlier native/PGO studies used only as hash-pinned lineage.",
+  "checks": 317479,
+  "unchanged_files": 43396,
+  "source_files": 357,
+  "runtime_files": 70,
+  "workspace_and_fuzz_compiler_invocations": 9,
+  "binary_hashes": {
+    "parse": "d91d8833825263a4c03cefd4bc05b7f8fab27fcfc6ce0b88b14e8ed0a9ab8263",
+    "streaming": "3091c1e5f60c30e27a6e9845fd2d3a29201df9f59f396b95dc5875c4269a45c5",
+    "ffi": "30375f7a9a905798e662d2c81dcfe77b822b34bb981aeb38322f98f785579cd6",
+    "ffi_family": "d6f4ce44228ec53a9c002958b0a477f755ca282ae9e9fa2904d033cb7a3e66b6",
+    "multibyte": "f4533231466bb2edbb141dce59140a1b2f64fd3fa5446c766d81b9ced1475f59",
+    "value_family": "4c25a6356c8dc3fbf5981020f6f25496a4c53723281ea5464fc5448ce3e636c9"
+  },
+  "ASan_report_sites": {
+    "XML_Parse": 8,
+    "parse_text": 156,
+    "text_bytes": 3
+  },
+  "assembly_bytes_matched_to_ELF": 30247,
+  "retained_inputs": 42961,
+  "expected_replay_executions": 42964,
+  "corpus_counts": {
+    "parse": {
+      "initial": 250,
+      "final": 4066,
+      "union_files": 4316,
+      "empty_files": 1,
+      "max_len": 10512,
+      "expected_replay_executions": 4316
+    },
+    "streaming": {
+      "initial": 5000,
+      "final": 4000,
+      "union_files": 9000,
+      "empty_files": 0,
+      "max_len": 3199,
+      "expected_replay_executions": 9001
+    },
+    "ffi": {
+      "initial": 1001,
+      "final": 4143,
+      "union_files": 5144,
+      "empty_files": 0,
+      "max_len": 2534,
+      "expected_replay_executions": 5145
+    },
+    "ffi_family": {
+      "initial": 8189,
+      "final": 1344,
+      "union_files": 9533,
+      "empty_files": 1,
+      "max_len": 4198,
+      "expected_replay_executions": 9533
+    },
+    "multibyte": {
+      "initial": 9484,
+      "final": 1798,
+      "union_files": 11282,
+      "empty_files": 1,
+      "max_len": 10123,
+      "expected_replay_executions": 11282
+    },
+    "value_family": {
+      "initial": 2765,
+      "final": 921,
+      "union_files": 3686,
+      "empty_files": 0,
+      "max_len": 3695,
+      "expected_replay_executions": 3687
+    }
+  },
+  "ready_sha256": "420ea370c129d02cc0292b318df0d32a21d9698d66a7d8a0ab8c640a01e1484b",
+  "failures_preserved": [
+    "Ambient Python import hook before source/setup/build",
+    "Ohm worktree option rejection before worktree creation",
+    "Final redundant provenance copy after complete input materialization"
+  ],
+  "limits": [
+    "No replay or campaign outcome is certified; ready.json is an historical prelaunch receipt.",
+    "No live campaign logs, results or evolved corpus read.",
+    "Representative FFI/core/frame machine-code evidence, not whole std/libc, LSan, UBSan or PGO instrumentation.",
+    "No fresh build, parser, fuzz, profiler or producer-checker execution; Git object reads only."
+  ]
+}

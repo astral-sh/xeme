@@ -1,0 +1,128 @@
+{
+  "run_id": 34712708782,
+  "head_sha": "de144aff865a498c8854248bdaf5be250cf29f5d",
+  "attempt": 1,
+  "conclusion": "failure",
+  "run_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782",
+  "jobs": [
+    {
+      "id": 103604265099,
+      "name": "C ABI and callback safety",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265099"
+    },
+    {
+      "id": 103604265197,
+      "name": "Sanitized parser fuzz smoke",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265197"
+    },
+    {
+      "id": 103604265202,
+      "name": "CPython XML consumers (shared)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265202"
+    },
+    {
+      "id": 103604265204,
+      "name": "C callback aliasing (stacked)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265204"
+    },
+    {
+      "id": 103604265209,
+      "name": "Test (ubuntu-24.04, stable)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265209"
+    },
+    {
+      "id": 103604265213,
+      "name": "Test (macos-15, stable)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265213"
+    },
+    {
+      "id": 103604265217,
+      "name": "lint",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265217"
+    },
+    {
+      "id": 103604265229,
+      "name": "Allocator ownership (stacked)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265229"
+    },
+    {
+      "id": 103604265252,
+      "name": "PBS integration recipe",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265252"
+    },
+    {
+      "id": 103604265259,
+      "name": "Allocator ownership (tree)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265259"
+    },
+    {
+      "id": 103604265272,
+      "name": "Test (windows-latest, stable)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265272"
+    },
+    {
+      "id": 103604265276,
+      "name": "CPython XML consumers (static)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265276"
+    },
+    {
+      "id": 103604265285,
+      "name": "Test (ubuntu-24.04, 1.96.0)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265285"
+    },
+    {
+      "id": 103604265298,
+      "name": "Test (ubuntu-24.04-arm, stable)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265298"
+    },
+    {
+      "id": 103604265306,
+      "name": "C callback aliasing (tree)",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265306"
+    },
+    {
+      "id": 103604265707,
+      "name": "Profile-guided library",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/astral-sh/oriole/actions/runs/34712708782/job/103604265707"
+    }
+  ],
+  "source_files": {
+    "run-005.json": "3cb0e407352bb1152288f81aa8cbeb591deba8faf1bf23c4736238165ed2a044",
+    "jobs-005.json": "675bbffc804c0e7a6622be9cbe2591911a30a1a9cf4702aee0d63828e316ac69",
+    "checks-final.json": "5de51195414c2495d3b5b8c6fd132a8466556434d141915b608b5e1b8c5b5f53"
+  },
+  "api_writes": false,
+  "reruns": false
+}

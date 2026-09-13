@@ -1,5 +1,112 @@
 use oriole::{Config, ErrorKind, EventKind, Parser};
 
+#[test]
+fn declaration_errors_distinguish_documents_from_external_text() {
+    let cases = [
+        (
+            "<?xml?>",
+            Some(ErrorKind::XmlDeclaration),
+            Some(ErrorKind::TextDeclaration),
+        ),
+        (
+            "<?xml version='1.0'?>",
+            None,
+            Some(ErrorKind::TextDeclaration),
+        ),
+        (
+            "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>",
+            None,
+            Some(ErrorKind::TextDeclaration),
+        ),
+        (
+            "<?xml version='1.0' encoding 'UTF-8'?>",
+            Some(ErrorKind::XmlDeclaration),
+            Some(ErrorKind::TextDeclaration),
+        ),
+        (
+            "<?xml encoding='UTF-8'?>",
+            Some(ErrorKind::XmlDeclaration),
+            None,
+        ),
+        (
+            "<?xml encoding='UTF8' version='1.0'?>",
+            Some(ErrorKind::XmlDeclaration),
+            Some(ErrorKind::TextDeclaration),
+        ),
+        (
+            "<?xml version='1.0' encoding='UTF8' extra='x'?>",
+            Some(ErrorKind::XmlDeclaration),
+            Some(ErrorKind::TextDeclaration),
+        ),
+        (
+            "<?xml version='1.0' encoding='UTF8'?>",
+            Some(ErrorKind::UnknownEncoding),
+            Some(ErrorKind::UnknownEncoding),
+        ),
+        (
+            "<?XML encoding='UTF8'?>",
+            Some(ErrorKind::InvalidToken),
+            Some(ErrorKind::InvalidToken),
+        ),
+        (
+            "<?XmL?>",
+            Some(ErrorKind::InvalidToken),
+            Some(ErrorKind::InvalidToken),
+        ),
+        ("<?xml-stylesheet?>", None, None),
+    ];
+    for (token, document_error, text_error) in cases {
+        // None is a document; Some holds the general or parameter/subset context.
+        for context in [None, Some(Some("")), Some(None)] {
+            let expected = if context.is_none() {
+                document_error
+            } else {
+                text_error
+            };
+            let input = if context.is_none() {
+                format!("{token}<r/>")
+            } else {
+                token.to_owned()
+            };
+            let mut first_error = None;
+            for width in 1..=input.len() {
+                let parent = Parser::new(Config::default());
+                let mut parser = match context {
+                    None => Parser::new(Config::default()),
+                    Some(context) => parent.external_child(context, None).unwrap(),
+                };
+                let mut actual = None;
+                'feed: for (index, bytes) in input.as_bytes().chunks(width).enumerate() {
+                    parser
+                        .feed(bytes, (index + 1) * width >= input.len())
+                        .unwrap();
+                    loop {
+                        match parser.next_event() {
+                            Ok(Some(_)) => {}
+                            Ok(None) => break,
+                            Err(error) => {
+                                assert_eq!(parser.next_event().unwrap_err(), error);
+                                assert_eq!(parser.feed(&[], true).unwrap_err(), error);
+                                actual = Some(error);
+                                break 'feed;
+                            }
+                        }
+                    }
+                }
+                assert_eq!(
+                    actual.map(|error| error.kind),
+                    expected,
+                    "{token}, {context:?}, {width}"
+                );
+                if let Some(error) = actual {
+                    // Classification does not make coordinates depend on feed boundaries.
+                    assert_eq!(*first_error.get_or_insert(error), error);
+                }
+            }
+        }
+    }
+}
+
 #[derive(Clone, Copy)]
 enum Read {
     Skip,

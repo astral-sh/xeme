@@ -1,0 +1,14 @@
+{
+  "status": "rejected",
+  "native_review_sha256": "8874b63433c2f34d512e20afe0e267f87a53ae031e08dd7b6ef79c6b082c51b0",
+  "python_review_sha256": "8ffbba879c8432da008371a84809473c608784bb0bca37c9b9e35c9053361f9e",
+  "native_real_over_control": 0.9865560347179663,
+  "native_generated_over_control": 1.0440190935396032,
+  "python_all_over_control": 0.9973298760619367,
+  "python_elementtree_over_control": 0.9982718980273593,
+  "python_pyexpat_over_control": 0.996388743038079,
+  "all_conditions_retained": true,
+  "all_targets_monitors_readers_completed_and_reaped": true,
+  "reason": "The0.27% Python aggregate gain is too small to justify generated-entity native regressions of7.5\u20138.5%. Leave unselected; no composition or further qualification. This is a selection judgment on the observed tradeoff, not statistical significance.",
+  "selected_runtime_unchanged": true
+}

@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "scope": "Root independent saved source/profile/log/training/static-archive and API ZIP digest review. Raw XML/glibc logs manually reviewed separately; no target/compiler execution.",
+  "bundle_source_files": 71,
+  "pgo_source_files": 67,
+  "pipeline_files": 6,
+  "successful_commands": 10,
+  "generated_records_per_phase": 288,
+  "manifest_sha256": "f336727bb7ad4de1baea5ed80f21bcebf5b0f4730a8de578d8578f9ae28029e5",
+  "bundle_sha256": "85e295ef8b150980d63ab3b8ee9b501bc64b0ebe893d373e5c9af62299068083",
+  "shipped_static_sha256": "37c412bf52ba1891cb0268cba74bb57394698cc846fdc9954e7407e5c0faffb9",
+  "controller_sha256": "80f6d1961d2383ca863223b579d491e34e01ee35dbe8a00ce85426af5f3e6b17",
+  "reviewer_correction": "Initial inline reader failed before completion at script README.md because script keys are relative to tools/pgo, not repository root. This retained reader resolves each manifest map using its own documented root. No producer rerun or artifact mutation.",
+  "limitations": "Remote tools and non-shipped generated/shared library binaries are absent; their producer hashes remain scoped to the remote build. API digests are not a separately checked attestation."
+}

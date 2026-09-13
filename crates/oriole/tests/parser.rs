@@ -385,8 +385,11 @@ fn repeated_external_entity_identifiers_consume_the_shared_expansion_budget() {
             }
             let mut references = 0;
             let mut failure = None;
-            'input: for bytes in xml.as_bytes().chunks(chunk) {
-                parser.feed(bytes, false).unwrap();
+            'input: for (index, bytes) in xml.as_bytes().chunks(chunk).enumerate() {
+                // Finalize so deferral cannot postpone the required budget error.
+                parser
+                    .feed(bytes, (index + 1) * chunk >= xml.len())
+                    .unwrap();
                 loop {
                     match parser.next_event() {
                         Ok(Some(event)) => {

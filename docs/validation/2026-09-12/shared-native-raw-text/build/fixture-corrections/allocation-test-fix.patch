@@ -1,0 +1,24 @@
+--- attempt02/crates/oriole/tests/allocation.rs
++++ candidate/crates/oriole/tests/allocation.rs
+@@ -994,6 +994,21 @@
+                     assert_eq!(CALLS.get(), calls);
+                     return Err(error);
+                 }
++                // Decoder allocation errors are delivered by next_event even
++                // when feed succeeds. Drain before accepting this workload.
++                let invalid = loop {
++                    match next_event(&mut parser) {
++                        Ok(Some(_)) => {}
++                        Ok(None) => break false,
++                        Err(error)
++                            if suffix == b"\xff" && error.kind == ErrorKind::InvalidToken =>
++                        {
++                            break true;
++                        }
++                        Err(error) => return Err(error),
++                    }
++                };
++                assert_eq!(invalid, suffix == b"\xff");
+                 Ok(())
+             })();
+             parser.finish_adapter_frame(frame);

@@ -1,0 +1,127 @@
+{
+  "status": "complete_native_screen_candidate_not_selected",
+  "source_manifest_sha256": "1120c74e96c7f562cecfa25db227a830e8a1667a67dba30732ca039fb5e7dbec",
+  "runtime_source_scope": "70 source files, only tag.rs changed from be22. Implementation/focused tests authored by root; build/native controllers and summary by multibyte_fuzz. Independent source and build review passed.",
+  "build": {
+    "workspace_compiler_invocations": 9,
+    "effective_c_only_thinlto": true,
+    "generated_records_per_phase": 288,
+    "normal_libraries": {
+      "liboriole_expat.so": "8ad88e13e07c7c321fe13b36528b63e392cfd48db22722bf955a14de7241889f",
+      "liboriole_expat.a": "cbd6e2ec48d24a926e8a15aa4774cc3c7be2a647f9e9b90e2ff64b320345e602"
+    },
+    "pgo_libraries": {
+      "use/liboriole_expat.a": "a294cbd13adbb0af5eaa3722178690374df1b96eda5613c89461f575aa6fa643",
+      "use/liboriole_expat.so": "8cc1c414442727b3649acea7222e7b5827b309f818f302264840d89952f73a4a"
+    }
+  },
+  "normal": {
+    "real": {
+      "candidate_over_control": {
+        "geomean": 1.002102987038012,
+        "lower": 12,
+        "higher": 12,
+        "count": 24
+      },
+      "candidate_over_expat": {
+        "geomean": 1.6190466322292334,
+        "lower": 1,
+        "higher": 23,
+        "count": 24
+      },
+      "control_over_expat": {
+        "geomean": 1.6136337146002762,
+        "lower": 1,
+        "higher": 23,
+        "count": 24
+      }
+    },
+    "generated": {
+      "candidate_over_control": {
+        "geomean": 1.021218811320024,
+        "lower": 1,
+        "higher": 3,
+        "count": 4
+      },
+      "candidate_over_expat": {
+        "geomean": 4.977804355399384,
+        "lower": 0,
+        "higher": 4,
+        "count": 4
+      },
+      "control_over_expat": {
+        "geomean": 4.845419457827934,
+        "lower": 0,
+        "higher": 4,
+        "count": 4
+      }
+    }
+  },
+  "pgo": {
+    "real": {
+      "candidate_over_control": {
+        "geomean": 0.9786338733080541,
+        "lower": 23,
+        "higher": 1,
+        "count": 24
+      },
+      "candidate_over_expat": {
+        "geomean": 1.375370450159329,
+        "lower": 7,
+        "higher": 17,
+        "count": 24
+      },
+      "control_over_expat": {
+        "geomean": 1.4059009226296728,
+        "lower": 3,
+        "higher": 21,
+        "count": 24
+      }
+    },
+    "generated": {
+      "candidate_over_control": {
+        "geomean": 0.9817869569080734,
+        "lower": 4,
+        "higher": 0,
+        "count": 4
+      },
+      "candidate_over_expat": {
+        "geomean": 5.0111762239501605,
+        "lower": 0,
+        "higher": 4,
+        "count": 4
+      },
+      "control_over_expat": {
+        "geomean": 5.088686495991228,
+        "lower": 0,
+        "higher": 4,
+        "count": 4
+      }
+    }
+  },
+  "counts_per_cohort": {
+    "preflights": 84,
+    "timed_workers": 588,
+    "seeded_cohorts": 196,
+    "conditions": 28,
+    "pairs": 7,
+    "measured_parses": 105420,
+    "warmups": 588
+  },
+  "archive": {
+    "path": "details.tar.gz",
+    "sha256": "0b124014d2424b980b617bdcba58dbc151c883ad3a46c6e7a99928c6b0aa9799",
+    "bytes": 4357581,
+    "members": 1453,
+    "binary_exclusions": 6
+  },
+  "source_review_sha256": "0600b8974dec93d761f644f53d18e8b4dedc6a50bddbff6babd49e520da4d97c",
+  "build_review_sha256": "51b5001bfcfab7c08efc2b52d33d16d1eaf96a88e541d66fe781327075e947e8",
+  "native_independent_audit": "Pending separate receipt; this core archive is immutable.",
+  "limitations": [
+    "Native C lifecycle study only; no full candidate compatibility or actual CPython result.",
+    "Two separate cohorts; no cross-cohort ratio or additive speedup claim.",
+    "Normal flat/adverse result and all PGO adverse conditions retained.",
+    "All other target jobs held during native measurements; ASan campaigns started afterward."
+  ]
+}

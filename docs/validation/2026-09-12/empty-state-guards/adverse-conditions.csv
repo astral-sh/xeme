@@ -1,0 +1,17 @@
+campaign,consumer,project,chunk_bytes,namespace_or_mode,candidate_over_control,candidate_over_expat,control_over_expat,adverse
+empty-guards-initial-native,native,vulkan,4096,false,1.0007595676469394,1.5085424620293566,1.5073532970327395,True
+empty-guards-initial-native,native,wayland,4096,false,1.0085032664648164,0.9381640787393807,0.9290438957250463,True
+empty-guards-initial-native,native,wayland,4096,true,1.0162729059420015,0.9780282648648548,0.9655111812425099,True
+empty-guards-initial-native,native,batik,4096,true,1.001503565013879,1.0608302638836988,1.0556082687448693,True
+empty-guards-initial-native,native,wayland,65536,true,1.0122364832735211,0.9626128635424646,0.9520521221232133,True
+empty-guards-initial-python,python,vulkan,4096,pyexpat-events,1.0072430008388253,1.1505101709882855,1.1296974711149903,True
+empty-guards-initial-python,python,vulkan,65536,pyexpat-events,1.0000847758743612,1.1190680122052548,1.1231632858518694,True
+empty-guards-initial-python,python,wayland,4096,pyexpat-events,1.0037871956312212,0.713963897839499,0.7087184385201768,True
+empty-guards-initial-python,python,wayland,65536,elementtree,1.0042542335044806,0.854872316740427,0.854745167518732,True
+empty-guards-confirmation-native,native,wayland,4096,true,1.0090585106280758,0.974337283031687,0.965140347428046,True
+empty-guards-confirmation-native,native,wayland,65536,true,1.0069383764148712,0.9739128111848032,0.9690611089119491,True
+empty-guards-confirmation-python,python,wayland,4096,pyexpat-events,1.0056445988958096,0.7141591308052752,0.7094268516647526,True
+empty-guards-confirmation-python,python,wayland,65536,pyexpat-events,1.0013249926150052,0.7082783362594857,0.698421278544956,True
+empty-guards-confirmation-python,python,batik,4096,elementtree,1.0037477610777974,1.2028705145297074,1.199577207424741,True
+empty-guards-confirmation-python,python,batik,65536,pyexpat-events,1.0085285421878551,1.1777477801249967,1.1862196821612334,True
+empty-guards-confirmation-python,python,docbook,65536,elementtree,1.002135496960387,1.3973544411664909,1.3992330674509732,True

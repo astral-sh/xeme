@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "scope": "Independent saved-log/source readback only; no target or producer executions.",
+  "source_manifest_sha256": "1120c74e96c7f562cecfa25db227a830e8a1667a67dba30732ca039fb5e7dbec",
+  "source_files_unchanged": 70,
+  "workspace_tests": 408,
+  "workspace_test_binaries": 33,
+  "zero_test_binaries": 2,
+  "doctests": 1,
+  "doctest_crates": 3,
+  "clippy": "workspace/all-targets -D warnings passed",
+  "fmt": "Earlier same-source cargo fmt --all --check passed; no Rust source changed afterward.",
+  "profile": "Normal debug test profile; measured C-only ThinPGO artifact compatibility is separately established by C/strict suites.",
+  "per_command_timeout_seconds": 900,
+  "commands_all_exit_zero": true,
+  "report_sha256": "d513568cca19894a66c56c6d207c825214b5dd03f600c23f4e24326594f2a3cb",
+  "controller_sha256": "468cd00d0de49cc34f4cdb114ad071d5be202357002e2743d3716a3dd00a428a",
+  "unchanged_inputs": 80,
+  "timing_receipt_hashes": {
+    "normal": "5fef5c45a2f5f57e2bc0a86ce56339cf02285707adbdc85e7ba07e64a20d430e",
+    "pgo": "0c0da986a29cf3b6987ede60e791064fb14563af96452edcec11e05792e68d91"
+  },
+  "workspace_after_both_python_cohorts": true,
+  "generator_sha256": "a95dc32226e2332b4187433d5c0af7aa160f4b1d8be2393c083c23e15e30b6a1",
+  "details_sha256": "99fb6190ccb5ede1d870cbf6f7ec195f030029e4c50e0a2ecafcd60d6de6b1d9"
+}

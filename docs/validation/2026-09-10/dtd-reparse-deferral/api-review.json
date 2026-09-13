@@ -1,0 +1,54 @@
+{
+  "status": "passed",
+  "scope": "Saved originalAPI and strict baseline evidence audit only; no parser reruns. Final combined source/test/check freeze is separately reviewed when available.",
+  "candidate_library_sha256": "85066b10a1c5b4613c9d98012c8c9c2f8285e90b9dc01fa395297097c78193c5",
+  "baseline_library_sha256": "3a80baddfd3189123378c63d08c85dd756d22b16b3d715abf2e8c2eedbf2e5ea",
+  "api": {
+    "configurations": 4740,
+    "baseline_passed": 4335,
+    "baseline_failed": 405,
+    "candidate_passed": 4347,
+    "candidate_failed": 393,
+    "fixed": 12,
+    "new_failures": 0,
+    "other_row_changes": 0,
+    "exact_test": "test_reparse_deferral_is_inherited",
+    "all_manifest_fields_except_library_binary_paths_identical": true,
+    "adapted_sources_rehashed": 34,
+    "upstream_include_files_rehashed": 38,
+    "unchanged_bounds": {
+      "chunks": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "deferral": [
+        0,
+        1
+      ],
+      "per_test_seconds": 3,
+      "per_test_address_space_bytes": 1073741824,
+      "per_test_rss_limit_bytes": 805306368,
+      "total_timeout_seconds": 240
+    }
+  },
+  "strict_baseline": {
+    "all3318raw_records_identical": true,
+    "control": "AsyncEntity-only Oriole3a80; not Expat",
+    "library_hashes_stable": true
+  },
+  "artifacts": {
+    "/tmp/oriole-dtd-reparse-integrated/api-comparison.json": "28424ec29f5f7d6ce5c67b4c4c7b9d4594b88d1676706ae31e419962687130ac",
+    "/tmp/oriole-dtd-reparse-integrated/upstream-api/results.json": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+    "/tmp/oriole-dtd-reparse-integrated/upstream-api/manifest.json": "2a88931702c1026ae0df9126002babda64c8779d801f729a5a90f0a2d17cd455",
+    "/tmp/oriole-dtd-reparse-integrated/upstream-api/tests.log": "e2eb26552970db3ace26f70482b808b88ce20c2027e5283a06768cfb6aa0aca7",
+    "/tmp/oriole-async-entity-study/upstream-api/results.json": "a78a3fc8167206a97787d1570696d92332ca2e5cbb47ae18f5e0c2ba54001cc0",
+    "/tmp/oriole-dtd-reparse-integrated/differential-baseline/summary.json": "cea48da88c452975bbeced347f8ca3513cddfcbffb8d4364a869238e6af25e59",
+    "/tmp/oriole-dtd-reparse-integrated/differential-baseline/reference.json": "921b739ec307b4e223895f58870b0c08e41f095ffd587fda9ce94b43b041d471",
+    "/tmp/oriole-dtd-reparse-integrated/differential-baseline/oriole.json": "921b739ec307b4e223895f58870b0c08e41f095ffd587fda9ce94b43b041d471"
+  },
+  "script_sha256": "91d363c7df0f7eb2dbdd4d7d4f43fdd67e5d20cfefa58ab8b292fe0978cfe7b1"
+}

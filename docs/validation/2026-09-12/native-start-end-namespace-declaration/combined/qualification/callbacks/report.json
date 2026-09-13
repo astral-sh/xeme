@@ -1,0 +1,1149 @@
+{
+  "status": "completed",
+  "scope": "18 first-outcome isolated ctypes parses; literal input, one final XML_Parse, rejecting unknown-encoding handler; no Rust/compiler build, file/network entities or benchmark.",
+  "controller_command": [
+    "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+    "-I",
+    "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/run.py"
+  ],
+  "worker_pins_sha256": {
+    "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py": "d8363d1fd45cbef63608eb3f358505e405242715963ac805a29e7ffcdd4bf89d",
+    "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/run.py": "942182d38a985ed7ec20417ac94ee7e449166cd49a25adfe3900fa978404f36d",
+    "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12": "021044895e95be79dc2f110367607e684119afbc8ce75f6f0eec94844e0acec7"
+  },
+  "processes": [
+    {
+      "case": "oriole-root-malformed_order",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "oriole",
+        "root",
+        "malformed_order"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 6,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-root-malformed_order.stdout",
+        "sha256": "f7b38025c8761a327ce9bb23c6f180db20699a50eb1bae50573f35d319c5766a"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-root-malformed_order.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "oriole-root-valid_order_unknown",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "oriole",
+        "root",
+        "valid_order_unknown"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 7,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-root-valid_order_unknown.stdout",
+        "sha256": "01a3a2413c83c30bd69095862c3cb199fa8820736b25fce9e193e6cad52ba26f"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-root-valid_order_unknown.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "oriole-root-uppercase_pi",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "oriole",
+        "root",
+        "uppercase_pi"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 8,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-root-uppercase_pi.stdout",
+        "sha256": "7e983c9673499132b630e69541d6c56087ffaeccd42d86f9cc0921c4c9501816"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-root-uppercase_pi.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "oriole-general_child-malformed_order",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "oriole",
+        "general_child",
+        "malformed_order"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 9,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-general_child-malformed_order.stdout",
+        "sha256": "f34c32a00d6fca4323a0ad9be4a69b5263378054acc24ba267676214074e20c9"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-general_child-malformed_order.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "oriole-general_child-valid_order_unknown",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "oriole",
+        "general_child",
+        "valid_order_unknown"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 10,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-general_child-valid_order_unknown.stdout",
+        "sha256": "19d0bc9707ba9570ac31985b24963e09547dad46d9775f8eed39d29d4e3172a0"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-general_child-valid_order_unknown.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "oriole-general_child-uppercase_pi",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "oriole",
+        "general_child",
+        "uppercase_pi"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 11,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-general_child-uppercase_pi.stdout",
+        "sha256": "50a77b3e8c82e65e6471182a3a67d4b093919007783efad75dee71bfa3e11903"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-general_child-uppercase_pi.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "oriole-subset_child-malformed_order",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "oriole",
+        "subset_child",
+        "malformed_order"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 12,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-subset_child-malformed_order.stdout",
+        "sha256": "4bae2a1151ad592e8a3b2aa32cb48ce136ab62d0e70ee858e95941058db4611a"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-subset_child-malformed_order.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "oriole-subset_child-valid_order_unknown",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "oriole",
+        "subset_child",
+        "valid_order_unknown"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 13,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-subset_child-valid_order_unknown.stdout",
+        "sha256": "3c1e2c8daf90bbd58e22b7afda34b46637f5009647fc295ba5e27144dcdcd673"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-subset_child-valid_order_unknown.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "oriole-subset_child-uppercase_pi",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "oriole",
+        "subset_child",
+        "uppercase_pi"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 14,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-subset_child-uppercase_pi.stdout",
+        "sha256": "787ef9fdd1c40bba5ebef48a982f0dc295d7feb691a8cf07abbe54d506121c15"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/oriole-subset_child-uppercase_pi.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "expat-root-malformed_order",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "expat",
+        "root",
+        "malformed_order"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 15,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-root-malformed_order.stdout",
+        "sha256": "7dc72c9a47491c27a6053f4f3c3417eaed08360c3078dc04ae3c54b698c60303"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-root-malformed_order.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "expat-root-valid_order_unknown",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "expat",
+        "root",
+        "valid_order_unknown"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 16,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-root-valid_order_unknown.stdout",
+        "sha256": "ce5a2a9f581c73f5471173f385f1ea18d6aa967980505a618c7a4ff025000e30"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-root-valid_order_unknown.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "expat-root-uppercase_pi",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "expat",
+        "root",
+        "uppercase_pi"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 17,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-root-uppercase_pi.stdout",
+        "sha256": "cb2df7fb43116988a1b62890f65f7806e4ef7328b64d800f26067c4f0a9caa40"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-root-uppercase_pi.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "expat-general_child-malformed_order",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "expat",
+        "general_child",
+        "malformed_order"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 18,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-general_child-malformed_order.stdout",
+        "sha256": "9e185c82975c749925dcfd6b74845e9e9ad259f80b191869d06afc7e186f2ee4"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-general_child-malformed_order.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "expat-general_child-valid_order_unknown",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "expat",
+        "general_child",
+        "valid_order_unknown"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 19,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-general_child-valid_order_unknown.stdout",
+        "sha256": "9beb5a86e3bfc068492cb1fc06d8f79ac3d0814e63face4f5ca83a3fae14402d"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-general_child-valid_order_unknown.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "expat-general_child-uppercase_pi",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "expat",
+        "general_child",
+        "uppercase_pi"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 20,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-general_child-uppercase_pi.stdout",
+        "sha256": "6c26c03d020691d2bfe4fc6f58a3233f4cff9c99a28ad2dc6acc49383756816e"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-general_child-uppercase_pi.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "expat-subset_child-malformed_order",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "expat",
+        "subset_child",
+        "malformed_order"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 21,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-subset_child-malformed_order.stdout",
+        "sha256": "0a1bbb8c6f9adb9f88ccd3ab8eeb9a4c9eed8b753eff042067b076371180a2fe"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-subset_child-malformed_order.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "expat-subset_child-valid_order_unknown",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "expat",
+        "subset_child",
+        "valid_order_unknown"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 22,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-subset_child-valid_order_unknown.stdout",
+        "sha256": "937776266e55ee09d963496c90e8222814161f761cb0599e99ad653a335d6544"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-subset_child-valid_order_unknown.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    },
+    {
+      "case": "expat-subset_child-uppercase_pi",
+      "command": [
+        "/usr/bin/taskset",
+        "-c",
+        "3",
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+        "-I",
+        "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/worker.py",
+        "expat",
+        "subset_child",
+        "uppercase_pi"
+      ],
+      "environment": {
+        "PATH": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin:/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "pid": 23,
+      "timeout_seconds": 10,
+      "timed_out": false,
+      "stdout": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-subset_child-uppercase_pi.stdout",
+        "sha256": "94ec83fb3fe74557e57a67a32c1329305f1820654fc1cfcbb6bbff353cf0c22d"
+      },
+      "stderr": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-diagnostics/callbacks/expat-subset_child-uppercase_pi.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "returncode": 0,
+      "reaped": true
+    }
+  ],
+  "rows": [
+    {
+      "byte_index": 6,
+      "callbacks": [],
+      "case": "malformed_order",
+      "column": 6,
+      "context": "root",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "oriole",
+      "error": 30,
+      "error_string": "XML declaration not well-formed",
+      "final_input": true,
+      "freed_in_order": [
+        "parent"
+      ],
+      "input": "<?xml encoding=\"UTF8\" version=\"1.0\" ?>",
+      "input_hex": "3c3f786d6c20656e636f64696e673d2255544638222076657273696f6e3d22312e3022203f3e",
+      "input_sha256": "8736add6afde395c5fddc8eadcda55abaab2066814bc9cf6696e1fdc2667575b",
+      "library": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "library_sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "oriole_compat_2.8.4"
+    },
+    {
+      "byte_index": 30,
+      "callbacks": [
+        {
+          "name": "UTF8",
+          "name_hex": "55544638",
+          "returned": 0
+        }
+      ],
+      "case": "valid_order_unknown",
+      "column": 30,
+      "context": "root",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "oriole",
+      "error": 18,
+      "error_string": "unknown encoding",
+      "final_input": true,
+      "freed_in_order": [
+        "parent"
+      ],
+      "input": "<?xml version=\"1.0\" encoding=\"UTF8\" ?>",
+      "input_hex": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554463822203f3e",
+      "input_sha256": "7778e466f6dc25a5936ca8c8c94723161ea5dd3d05c546ea7df8cb4629896198",
+      "library": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "library_sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "oriole_compat_2.8.4"
+    },
+    {
+      "byte_index": 0,
+      "callbacks": [],
+      "case": "uppercase_pi",
+      "column": 0,
+      "context": "root",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "oriole",
+      "error": 4,
+      "error_string": "not well-formed (invalid token)",
+      "final_input": true,
+      "freed_in_order": [
+        "parent"
+      ],
+      "input": "<?XML encoding=\"UTF8\"?>",
+      "input_hex": "3c3f584d4c20656e636f64696e673d2255544638223f3e",
+      "input_sha256": "c430eed78b155b3485d56ffe5ed703ddc3af7dd348c873a80c3cb83622697114",
+      "library": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "library_sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "oriole_compat_2.8.4"
+    },
+    {
+      "byte_index": 0,
+      "callbacks": [],
+      "case": "malformed_order",
+      "column": 0,
+      "context": "general_child",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "oriole",
+      "error": 31,
+      "error_string": "text declaration not well-formed",
+      "final_input": true,
+      "freed_in_order": [
+        "child",
+        "parent"
+      ],
+      "input": "<?xml encoding=\"UTF8\" version=\"1.0\" ?>",
+      "input_hex": "3c3f786d6c20656e636f64696e673d2255544638222076657273696f6e3d22312e3022203f3e",
+      "input_sha256": "8736add6afde395c5fddc8eadcda55abaab2066814bc9cf6696e1fdc2667575b",
+      "library": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "library_sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "oriole_compat_2.8.4"
+    },
+    {
+      "byte_index": 30,
+      "callbacks": [
+        {
+          "name": "UTF8",
+          "name_hex": "55544638",
+          "returned": 0
+        }
+      ],
+      "case": "valid_order_unknown",
+      "column": 30,
+      "context": "general_child",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "oriole",
+      "error": 18,
+      "error_string": "unknown encoding",
+      "final_input": true,
+      "freed_in_order": [
+        "child",
+        "parent"
+      ],
+      "input": "<?xml version=\"1.0\" encoding=\"UTF8\" ?>",
+      "input_hex": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554463822203f3e",
+      "input_sha256": "7778e466f6dc25a5936ca8c8c94723161ea5dd3d05c546ea7df8cb4629896198",
+      "library": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "library_sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "oriole_compat_2.8.4"
+    },
+    {
+      "byte_index": 0,
+      "callbacks": [],
+      "case": "uppercase_pi",
+      "column": 0,
+      "context": "general_child",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "oriole",
+      "error": 4,
+      "error_string": "not well-formed (invalid token)",
+      "final_input": true,
+      "freed_in_order": [
+        "child",
+        "parent"
+      ],
+      "input": "<?XML encoding=\"UTF8\"?>",
+      "input_hex": "3c3f584d4c20656e636f64696e673d2255544638223f3e",
+      "input_sha256": "c430eed78b155b3485d56ffe5ed703ddc3af7dd348c873a80c3cb83622697114",
+      "library": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "library_sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "oriole_compat_2.8.4"
+    },
+    {
+      "byte_index": 0,
+      "callbacks": [],
+      "case": "malformed_order",
+      "column": 0,
+      "context": "subset_child",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "oriole",
+      "error": 31,
+      "error_string": "text declaration not well-formed",
+      "final_input": true,
+      "freed_in_order": [
+        "child",
+        "parent"
+      ],
+      "input": "<?xml encoding=\"UTF8\" version=\"1.0\" ?>",
+      "input_hex": "3c3f786d6c20656e636f64696e673d2255544638222076657273696f6e3d22312e3022203f3e",
+      "input_sha256": "8736add6afde395c5fddc8eadcda55abaab2066814bc9cf6696e1fdc2667575b",
+      "library": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "library_sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "oriole_compat_2.8.4"
+    },
+    {
+      "byte_index": 30,
+      "callbacks": [
+        {
+          "name": "UTF8",
+          "name_hex": "55544638",
+          "returned": 0
+        }
+      ],
+      "case": "valid_order_unknown",
+      "column": 30,
+      "context": "subset_child",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "oriole",
+      "error": 18,
+      "error_string": "unknown encoding",
+      "final_input": true,
+      "freed_in_order": [
+        "child",
+        "parent"
+      ],
+      "input": "<?xml version=\"1.0\" encoding=\"UTF8\" ?>",
+      "input_hex": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554463822203f3e",
+      "input_sha256": "7778e466f6dc25a5936ca8c8c94723161ea5dd3d05c546ea7df8cb4629896198",
+      "library": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "library_sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "oriole_compat_2.8.4"
+    },
+    {
+      "byte_index": 0,
+      "callbacks": [],
+      "case": "uppercase_pi",
+      "column": 0,
+      "context": "subset_child",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "oriole",
+      "error": 4,
+      "error_string": "not well-formed (invalid token)",
+      "final_input": true,
+      "freed_in_order": [
+        "child",
+        "parent"
+      ],
+      "input": "<?XML encoding=\"UTF8\"?>",
+      "input_hex": "3c3f584d4c20656e636f64696e673d2255544638223f3e",
+      "input_sha256": "c430eed78b155b3485d56ffe5ed703ddc3af7dd348c873a80c3cb83622697114",
+      "library": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "library_sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "oriole_compat_2.8.4"
+    },
+    {
+      "byte_index": 6,
+      "callbacks": [],
+      "case": "malformed_order",
+      "column": 6,
+      "context": "root",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "expat",
+      "error": 30,
+      "error_string": "XML declaration not well-formed",
+      "final_input": true,
+      "freed_in_order": [
+        "parent"
+      ],
+      "input": "<?xml encoding=\"UTF8\" version=\"1.0\" ?>",
+      "input_hex": "3c3f786d6c20656e636f64696e673d2255544638222076657273696f6e3d22312e3022203f3e",
+      "input_sha256": "8736add6afde395c5fddc8eadcda55abaab2066814bc9cf6696e1fdc2667575b",
+      "library": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "expat_2.8.4"
+    },
+    {
+      "byte_index": 30,
+      "callbacks": [
+        {
+          "name": "UTF8",
+          "name_hex": "55544638",
+          "returned": 0
+        }
+      ],
+      "case": "valid_order_unknown",
+      "column": 30,
+      "context": "root",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "expat",
+      "error": 18,
+      "error_string": "unknown encoding",
+      "final_input": true,
+      "freed_in_order": [
+        "parent"
+      ],
+      "input": "<?xml version=\"1.0\" encoding=\"UTF8\" ?>",
+      "input_hex": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554463822203f3e",
+      "input_sha256": "7778e466f6dc25a5936ca8c8c94723161ea5dd3d05c546ea7df8cb4629896198",
+      "library": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "expat_2.8.4"
+    },
+    {
+      "byte_index": 5,
+      "callbacks": [],
+      "case": "uppercase_pi",
+      "column": 5,
+      "context": "root",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "expat",
+      "error": 4,
+      "error_string": "not well-formed (invalid token)",
+      "final_input": true,
+      "freed_in_order": [
+        "parent"
+      ],
+      "input": "<?XML encoding=\"UTF8\"?>",
+      "input_hex": "3c3f584d4c20656e636f64696e673d2255544638223f3e",
+      "input_sha256": "c430eed78b155b3485d56ffe5ed703ddc3af7dd348c873a80c3cb83622697114",
+      "library": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "expat_2.8.4"
+    },
+    {
+      "byte_index": 22,
+      "callbacks": [],
+      "case": "malformed_order",
+      "column": 22,
+      "context": "general_child",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "expat",
+      "error": 31,
+      "error_string": "text declaration not well-formed",
+      "final_input": true,
+      "freed_in_order": [
+        "child",
+        "parent"
+      ],
+      "input": "<?xml encoding=\"UTF8\" version=\"1.0\" ?>",
+      "input_hex": "3c3f786d6c20656e636f64696e673d2255544638222076657273696f6e3d22312e3022203f3e",
+      "input_sha256": "8736add6afde395c5fddc8eadcda55abaab2066814bc9cf6696e1fdc2667575b",
+      "library": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "expat_2.8.4"
+    },
+    {
+      "byte_index": 30,
+      "callbacks": [
+        {
+          "name": "UTF8",
+          "name_hex": "55544638",
+          "returned": 0
+        }
+      ],
+      "case": "valid_order_unknown",
+      "column": 30,
+      "context": "general_child",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "expat",
+      "error": 18,
+      "error_string": "unknown encoding",
+      "final_input": true,
+      "freed_in_order": [
+        "child",
+        "parent"
+      ],
+      "input": "<?xml version=\"1.0\" encoding=\"UTF8\" ?>",
+      "input_hex": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554463822203f3e",
+      "input_sha256": "7778e466f6dc25a5936ca8c8c94723161ea5dd3d05c546ea7df8cb4629896198",
+      "library": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "expat_2.8.4"
+    },
+    {
+      "byte_index": 5,
+      "callbacks": [],
+      "case": "uppercase_pi",
+      "column": 5,
+      "context": "general_child",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "expat",
+      "error": 4,
+      "error_string": "not well-formed (invalid token)",
+      "final_input": true,
+      "freed_in_order": [
+        "child",
+        "parent"
+      ],
+      "input": "<?XML encoding=\"UTF8\"?>",
+      "input_hex": "3c3f584d4c20656e636f64696e673d2255544638223f3e",
+      "input_sha256": "c430eed78b155b3485d56ffe5ed703ddc3af7dd348c873a80c3cb83622697114",
+      "library": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "expat_2.8.4"
+    },
+    {
+      "byte_index": 22,
+      "callbacks": [],
+      "case": "malformed_order",
+      "column": 22,
+      "context": "subset_child",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "expat",
+      "error": 31,
+      "error_string": "text declaration not well-formed",
+      "final_input": true,
+      "freed_in_order": [
+        "child",
+        "parent"
+      ],
+      "input": "<?xml encoding=\"UTF8\" version=\"1.0\" ?>",
+      "input_hex": "3c3f786d6c20656e636f64696e673d2255544638222076657273696f6e3d22312e3022203f3e",
+      "input_sha256": "8736add6afde395c5fddc8eadcda55abaab2066814bc9cf6696e1fdc2667575b",
+      "library": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "expat_2.8.4"
+    },
+    {
+      "byte_index": 30,
+      "callbacks": [
+        {
+          "name": "UTF8",
+          "name_hex": "55544638",
+          "returned": 0
+        }
+      ],
+      "case": "valid_order_unknown",
+      "column": 30,
+      "context": "subset_child",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "expat",
+      "error": 18,
+      "error_string": "unknown encoding",
+      "final_input": true,
+      "freed_in_order": [
+        "child",
+        "parent"
+      ],
+      "input": "<?xml version=\"1.0\" encoding=\"UTF8\" ?>",
+      "input_hex": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554463822203f3e",
+      "input_sha256": "7778e466f6dc25a5936ca8c8c94723161ea5dd3d05c546ea7df8cb4629896198",
+      "library": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "expat_2.8.4"
+    },
+    {
+      "byte_index": -1,
+      "callbacks": [],
+      "case": "uppercase_pi",
+      "column": 0,
+      "context": "subset_child",
+      "cpu_affinity": [
+        3
+      ],
+      "engine": "expat",
+      "error": 4,
+      "error_string": "not well-formed (invalid token)",
+      "final_input": true,
+      "freed_in_order": [
+        "child",
+        "parent"
+      ],
+      "input": "<?XML encoding=\"UTF8\"?>",
+      "input_hex": "3c3f584d4c20656e636f64696e673d2255544638223f3e",
+      "input_sha256": "c430eed78b155b3485d56ffe5ed703ddc3af7dd348c873a80c3cb83622697114",
+      "library": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+      "line": 1,
+      "loaded_xml_parse_object": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "parse_calls": 1,
+      "status": 0,
+      "version": "expat_2.8.4"
+    }
+  ],
+  "all_children_reaped": true,
+  "elapsed_wall_seconds_for_cleanup_record_only": 0.7427480220794678,
+  "error": null
+}

@@ -1,0 +1,101 @@
+{
+  "status": "completed_independent_saved_audit_passed",
+  "source_manifest_sha256": "e52c4fa16e71a7dcd76864b29509b157a42b6fbe4531f87b68f98395418d5fc3",
+  "rows": [
+    {
+      "consumer": "native C",
+      "fixtures": "real",
+      "profile": "normal",
+      "candidate_over_control": 0.9861850669122444,
+      "candidate_over_expat": 1.6039131883715148,
+      "candidate_faster_than_control": 21,
+      "conditions": 24
+    },
+    {
+      "consumer": "native C",
+      "fixtures": "real",
+      "profile": "pgo",
+      "candidate_over_control": 0.9973536239556312,
+      "candidate_over_expat": 1.3753967308270416,
+      "candidate_faster_than_control": 15,
+      "conditions": 24
+    },
+    {
+      "consumer": "native C",
+      "fixtures": "generated",
+      "profile": "normal",
+      "candidate_over_control": 1.0118261509561532,
+      "candidate_over_expat": 5.054043729948087,
+      "candidate_faster_than_control": 0,
+      "conditions": 4
+    },
+    {
+      "consumer": "native C",
+      "fixtures": "generated",
+      "profile": "pgo",
+      "candidate_over_control": 1.0058804007815714,
+      "candidate_over_expat": 5.060236866416315,
+      "candidate_faster_than_control": 1,
+      "conditions": 4
+    },
+    {
+      "consumer": "CPython",
+      "fixtures": "real",
+      "profile": "normal",
+      "candidate_over_control": 0.9994976488554649,
+      "candidate_over_expat": 1.2654631852760903,
+      "candidate_faster_than_control": 13,
+      "conditions": 24
+    },
+    {
+      "consumer": "CPython",
+      "fixtures": "real",
+      "profile": "pgo",
+      "candidate_over_control": 0.9970746912699364,
+      "candidate_over_expat": 1.1377475633861376,
+      "candidate_faster_than_control": 15,
+      "conditions": 24
+    }
+  ],
+  "method": "Geometric mean across condition medians of seven paired candidate/control or candidate/Expat worker-median elapsed ratios. Smaller is better. Native/Python and normal/PGO are separate campaigns.",
+  "counts": {
+    "native_preflights": 168,
+    "native_timed_workers": 1176,
+    "python_preflights": 144,
+    "python_timed_workers": 1008,
+    "total_workers": 2496,
+    "total_samples_including_preflights_and_warmups": 265080
+  },
+  "review": {
+    "path": "benchmark-review.json",
+    "sha256": "d654674c5a625c46b1dab707907be7decdb67125a74889c69e2554aa5ada22b8"
+  },
+  "archive": {
+    "status": "passed",
+    "scope": "Deterministic producer packaging and complete streaming readback; independent benchmark audits are separate. No executable target or historical nested archive included.",
+    "archive": "benchmark-evidence.tar.gz",
+    "archive_sha256": "fad419a9df117c69949b64521e402dbbf7c0bc5cadb4110045b67a759f3c07c8",
+    "compressed_bytes": 6963956,
+    "member_index": "benchmark-evidence-members.json.gz",
+    "member_index_sha256": "288158d6933f6683c2b185d66af96bfa63421ed3e037165beb8512dd0a20af3b",
+    "members": 4043,
+    "uncompressed_bytes": 81767350,
+    "duplicate_source_aliases": 915,
+    "source_selection_count": 4958,
+    "package_generator_sha256": "a912e6d227e2ef2157670c31058811b78641a450334f69f6aaf4ed50b5998caa",
+    "excluded": [
+      "Parser libraries, static archives, native driver binary, Python interpreter and all compiled consumer extensions; these remain identified by recorded path/hash and origin receipts.",
+      "Target/build caches, profile data, nested historical archives, full CPython trees and unrelated study outputs.",
+      "Strict cleanup-patched consumer timings: benchmark consumer source is unmodified CPython3.12.13."
+    ]
+  },
+  "python_consumer_scope": "Unmodified CPython3.12.13 pyexpat.c fd679a16 and _elementtree.c de4c3c87; the cleanup-patched strict CPython gate is separate.",
+  "preparation_failure": "Original normal preparation compiled consumers successfully then CPU3 preflight failed the old CPU4 guard before parser execution. Original failure retained. Attempt02 changed preparation guard to CPU3 and retained all fixture/assertion/timing bounds. OriginalPGO sibling was prepared but not executed.",
+  "interpretation": "The policy removes arbitrary lifetime-stream rejection while native and actualPython real-project timings remain close to the preceding accepted control. The fixed PGO aggregate remains slower than Expat:1.37540x native and1.13775x actualPython. This does not meet the faster-than-Expat objective. Generated controls and every per-condition regression remain recorded.",
+  "source_origins": {
+    "path": "benchmark-source-origins.json",
+    "sha256": "7f7db2fc8ae578359944b6e267ed8869a82d7848b86aa8dcda853e54e5cab1db",
+    "count": 68,
+    "scope": "All original benchmark input paths map to archived identical bytes or explicit excluded ELF binaries; includes alternate corpus checkout paths."
+  }
+}

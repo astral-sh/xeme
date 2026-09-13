@@ -1,0 +1,407 @@
+{
+  "status": "passed_saved_aggregate_and_outlier_read",
+  "source_readback_sha256": "f43a0c124edce9cde8ac5eedbd6fb38dd232494118ce8afc3d6647805f1df923",
+  "scope": "Independently recomputed medians/geomeans/counts from all 28 saved readback paired-ratio arrays. This is not a second reconstruction of raw worker stdout or new runtime execution. Root primary reader already reconstructed all raw rows.",
+  "counts": {
+    "preflight_workers": 84,
+    "timed_workers": 588,
+    "preflight_samples": 168,
+    "timed_warmups": 588,
+    "measured_samples": 105420,
+    "all_workers": 672,
+    "all_samples": 106176,
+    "cohorts": 196,
+    "conditions": 28
+  },
+  "groups": {
+    "real": {
+      "candidate_over_control": 0.9314102142450214,
+      "candidate_over_expat": 1.1822148150666272,
+      "control_over_expat": 1.2666663403237395
+    },
+    "generated": {
+      "candidate_over_control": 1.0378078347168662,
+      "candidate_over_expat": 3.532443753325699,
+      "control_over_expat": 3.393286758571164
+    },
+    "real_namespaces_off": {
+      "candidate_over_control": 0.9346137388124268,
+      "candidate_over_expat": 1.1337491627676648,
+      "control_over_expat": 1.2095828020148998
+    },
+    "real_namespaces_on": {
+      "candidate_over_control": 0.9282176702241538,
+      "candidate_over_expat": 1.232752283186851,
+      "control_over_expat": 1.3264438077628784
+    }
+  },
+  "real_conditions_above_20_percent": [
+    {
+      "condition": {
+        "name": "vulkan",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 7
+      },
+      "ratio": 1.2688740869907218
+    },
+    {
+      "condition": {
+        "name": "vulkan",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 7
+      },
+      "ratio": 1.2904863012053998
+    },
+    {
+      "condition": {
+        "name": "maven",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 128
+      },
+      "ratio": 1.3489260724770533
+    },
+    {
+      "condition": {
+        "name": "maven",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 128
+      },
+      "ratio": 1.5473923673982493
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 256
+      },
+      "ratio": 1.2064152579107066
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "ratio": 1.5043744450156562
+    },
+    {
+      "condition": {
+        "name": "vulkan",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 7
+      },
+      "ratio": 1.2355223851699515
+    },
+    {
+      "condition": {
+        "name": "vulkan",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 7
+      },
+      "ratio": 1.261392213397635
+    },
+    {
+      "condition": {
+        "name": "maven",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 128
+      },
+      "ratio": 1.4385067964080545
+    },
+    {
+      "condition": {
+        "name": "maven",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 128
+      },
+      "ratio": 1.6641750104297035
+    },
+    {
+      "condition": {
+        "name": "gtk",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 256
+      },
+      "ratio": 1.2346018701738082
+    },
+    {
+      "condition": {
+        "name": "gtk",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "ratio": 1.2665591774984688
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 256
+      },
+      "ratio": 1.298592096030099
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "ratio": 1.6072239745205275
+    }
+  ],
+  "real_wins_smaller_than_2_percent": [
+    {
+      "condition": {
+        "name": "batik",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 512
+      },
+      "ratio": 0.9927815360127338
+    },
+    {
+      "condition": {
+        "name": "batik",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 512
+      },
+      "ratio": 0.9852109855279428
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 256
+      },
+      "ratio": 0.9832080117482085
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "ratio": 0.9903500473036897
+    },
+    {
+      "condition": {
+        "name": "batik",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 512
+      },
+      "ratio": 0.9983625079827737
+    },
+    {
+      "condition": {
+        "name": "batik",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 512
+      },
+      "ratio": 0.9827886764606274
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "ratio": 0.9957171807432701
+    }
+  ],
+  "generated_adverse": [
+    {
+      "condition": {
+        "name": "generated-entities",
+        "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0882529483411587,
+          1.07173422858405,
+          1.0738442729426148,
+          1.0817495807058801,
+          1.0813231042108082,
+          1.0870049195791636,
+          1.0689947394834254
+        ],
+        "candidate_over_expat": [
+          2.6910438429957204,
+          2.6928549547938143,
+          2.717892150312741,
+          2.6998752703236724,
+          2.698079975329961,
+          2.737237454579473,
+          2.6638870153964618
+        ],
+        "control_over_expat": [
+          2.472810983051065,
+          2.512614492448889,
+          2.530992825305111,
+          2.495841291255142,
+          2.4951653810256142,
+          2.518146335197085,
+          2.4919552145633035
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0813231042108082,
+        "candidate_over_expat": 2.698079975329961,
+        "control_over_expat": 2.495841291255142
+      }
+    },
+    {
+      "condition": {
+        "name": "generated-rare-declarations",
+        "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9867558213077758,
+          1.0641017092623637,
+          1.0280554697158832,
+          0.9734346112278268,
+          1.0010792907843544,
+          1.0128843972656068,
+          1.1762862128268083
+        ],
+        "candidate_over_expat": [
+          4.466668577903196,
+          4.557200537772137,
+          4.707905879628452,
+          4.649123086477143,
+          4.679915301150969,
+          4.743694849208161,
+          4.6423310954735815
+        ],
+        "control_over_expat": [
+          4.526619941277257,
+          4.282673825353775,
+          4.579427879440732,
+          4.77599936642179,
+          4.674869757303854,
+          4.683352672836396,
+          3.9465999387320023
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0128843972656068,
+        "candidate_over_expat": 4.649123086477143,
+        "control_over_expat": 4.579427879440732
+      }
+    },
+    {
+      "condition": {
+        "name": "generated-entities",
+        "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0195771065270303,
+          1.0895528517261464,
+          1.0897278041466392,
+          1.0863850702573825,
+          1.0752184228029857,
+          1.0744005958420788,
+          1.0659007630583177
+        ],
+        "candidate_over_expat": [
+          2.674107635379809,
+          2.6201849592319757,
+          2.756939676819279,
+          2.7115086639770123,
+          2.7209775664974427,
+          2.6837895440620376,
+          2.671723943992032
+        ],
+        "control_over_expat": [
+          2.622761553060543,
+          2.4048259385314754,
+          2.529934233419166,
+          2.4959001538327574,
+          2.530627739249602,
+          2.4979412282981603,
+          2.5065409807252914
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0752184228029857,
+        "candidate_over_expat": 2.6837895440620376,
+        "control_over_expat": 2.5065409807252914
+      }
+    }
+  ],
+  "caveats": [
+    "Real-project equal-weight aggregate is within20%, but14/24 real conditions exceed1.20 individually and the namespace-on aggregate is1.232752. No per-condition target waiver is inferred.",
+    "Generated aggregate is3.532444 versus Expat and1.037808 versus selected; generated-entities regress7.52\u20138.13%, retained.",
+    "All24 real medians beat selected, but 7 gains are below2%; a single shared-host epoch is insufficient to quantify stability or significance.",
+    "Same six real projects/chunk/namespace variants recur; the24 conditions are not24 independent workloads.",
+    "Ratios use independent medians of paired process ratios; their quotients need not exactly equal the reported third ratio.",
+    "Callback hashes coalesce text; equal hashes do not prove callback grouping or full compatibility. Composition qualification and confirmation remain separate.",
+    "The retained monitor starts1.23 seconds after elapsed begins (about1.4% of the86.64-second epoch); it covers the rest and completion. The pre-observation ends24.43 seconds before elapsed. These counters do not prove absence of interference."
+  ],
+  "targets_executed": false,
+  "host": {
+    "inputs": {
+      "/tmp/oriole-native-start-end-namespace-declaration-study/host-before-native.json": "71e5c6e4287b8d5a3a962f58974175ba47e663978d77109a2c92e9045395d9d5",
+      "/tmp/oriole-native-start-end-namespace-declaration-study/host-during-native.json": "ea52a2d5952a11fb98c60caf0c3891c353432011c42945c08560e6071de1530c",
+      "/tmp/oriole-native-start-end-namespace-declaration-study/native/controller.json": "43ee3d36fe9efb5b30b20823ca2240402dec27cf928ad7bf8b217927a2504ee5"
+    },
+    "before_cpu0_idle_plus_iowait_fraction": 0.9949799196787149,
+    "before_window_ended_seconds_before_elapsed": 24.429224252700806,
+    "elapsed_seconds": 86.63741445541382,
+    "monitor_samples": 19,
+    "initial_elapsed_seconds_before_first_monitor_sample": 1.2309730052947998,
+    "last_monitor_sample_seconds_after_elapsed": 4.643912315368652,
+    "scope": "Counters are not process attribution or CPU isolation. The first monitor sample follows elapsed start by about1.23seconds; no full-epoch monitoring claim."
+  }
+}

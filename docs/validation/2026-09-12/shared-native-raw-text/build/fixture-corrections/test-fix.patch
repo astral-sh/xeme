@@ -1,0 +1,23 @@
+--- attempt01/crates/oriole/src/lib.rs
++++ candidate/crates/oriole/src/lib.rs
+@@ -5278,14 +5278,18 @@
+         parser.finish_adapter_frame(frame);
+ 
+         let (mut parser, frame) = text_parser(b"<r>text", false);
+-        parser.set_param_entity_parsing(2);
++        // Model the delivered writer state without popping its empty-raw
++        // event: popping would itself replace the retained raw view.
++        parser.parameter_mode = 2;
+         parser.start_foreign_dtd(Position::default()).unwrap();
+-        parser.pop_event().unwrap();
++        parser.foreign_dtd_pending.as_mut().unwrap().delivered = true;
+         parser
+             .shared_parameter_state()
+             .unwrap()
+             .read
+             .store(true, Ordering::Relaxed);
++        assert!(parser.native_raw.is_some());
++        assert_eq!(parser.current_raw(), Some("text"));
+         assert!(matches!(
+             parser.finish_foreign_dtd().unwrap().kind,
+             EventKind::NotStandalone

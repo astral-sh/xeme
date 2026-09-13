@@ -1,0 +1,126 @@
+{
+  "status": "passed_no_findings",
+  "scope": "Independent saved-data/source identity/arithmetic audit only; no parser/build/timing rerun.",
+  "counts": {
+    "preflight_processes": 84,
+    "preflight_samples_including_warmups": 168,
+    "timed_processes": 588,
+    "timed_warmups": 588,
+    "measured_samples": 105420,
+    "cohorts": 196,
+    "conditions": 28,
+    "ratios_per_condition": 3
+  },
+  "sources": {
+    "published": {
+      "source_files": 64,
+      "source_sha256": "243bfd6f6fa309304636bc6d5825a6ad8483c71ca94a1993ce591fec859fb362",
+      "archive_sha256": "cda60ae2a4dd711644d1adb93a6c6044f5fc2f05a3ccdcd3bdf59a02dbca514e",
+      "library_sha256": "6c64573061d9f4c8a0cc409f414f2314aa781b0baf30147388e06745872aaadc"
+    },
+    "candidate": {
+      "source_files": 69,
+      "source_sha256": "e05d0c4f8de7978968e4b4dafc1ca747029f284fd4ac238064050b1ee5eec38c",
+      "archive_sha256": "0d1174ca5e32a717ac457205482f4c4809f919c3ded232a66c5dec42084eb6d6",
+      "library_sha256": "9277b71c85f3c0345697010eb282a3be18a0144f25bc2f78e2a0cee20c175dcd"
+    }
+  },
+  "groups": {
+    "real": {
+      "candidate_over_published": {
+        "geomean": 0.8168500621958965,
+        "below_one": 24,
+        "conditions": 24
+      },
+      "candidate_over_expat": {
+        "geomean": 2.1321801173244714,
+        "below_one": 0,
+        "conditions": 24
+      },
+      "published_over_expat": {
+        "geomean": 2.611812292215266,
+        "below_one": 0,
+        "conditions": 24
+      }
+    },
+    "generated": {
+      "candidate_over_published": {
+        "geomean": 0.9102877085480686,
+        "below_one": 2,
+        "conditions": 4
+      },
+      "candidate_over_expat": {
+        "geomean": 5.467714568442824,
+        "below_one": 0,
+        "conditions": 4
+      },
+      "published_over_expat": {
+        "geomean": 5.989308286400965,
+        "below_one": 0,
+        "conditions": 4
+      }
+    },
+    "namespaces-off": {
+      "candidate_over_published": {
+        "geomean": 0.781073499621435,
+        "below_one": 12,
+        "conditions": 12
+      },
+      "candidate_over_expat": {
+        "geomean": 1.9977468421290647,
+        "below_one": 0,
+        "conditions": 12
+      },
+      "published_over_expat": {
+        "geomean": 2.5613763725688545,
+        "below_one": 0,
+        "conditions": 12
+      }
+    },
+    "namespaces-on": {
+      "candidate_over_published": {
+        "geomean": 0.8542653469012006,
+        "below_one": 12,
+        "conditions": 12
+      },
+      "candidate_over_expat": {
+        "geomean": 2.275659736680535,
+        "below_one": 0,
+        "conditions": 12
+      },
+      "published_over_expat": {
+        "geomean": 2.6632413427493593,
+        "below_one": 0,
+        "conditions": 12
+      }
+    }
+  },
+  "checks": [
+    "All frozen advertised hashes and both Oriole source archive member maps rehashed.",
+    "All672 stdout/stderr records, exit status, exact CPU/arguments, warmups, every per-sample callback metadata and process median verified.",
+    "All196 seeded condition/pair and three-engine execution orders reconstructed.",
+    "All588 process medians,588 paired ratios,84 condition medians and12 group geomeans reproduced."
+  ],
+  "limitations": [
+    "Fresh no-default Oriole builds are matched; original mode-confounded measurements are not combined.",
+    "Native timer includes construction/parsing/native callbacks/destruction, not process startup or real application work.",
+    "Callback hashes/counts are selected normalized metadata, not complete raw event/fragmentation transcripts or conformance evidence.",
+    "One warmup per timed process excluded; every measured sample retained. Affinity records do not exclude unrelated shared-host activity.",
+    "Candidate remains slower than Expat in all24 real and4 generated conditions while beating published Oriole in all24 real conditions; two of four generated conditions regress.",
+    "Batik external DTD is not loaded by this driver."
+  ],
+  "hashes": {
+    "/tmp/oriole-integrated-native-independent-audit.py": "37a68385b6d0d510d3c7502319970c8c075901793a6f572b7a2be1d98779bf6a",
+    "/tmp/oriole-integrated-native-study/native_screen.py": "68bb331e3aafa9e876913670e5b63cf74dde97242e7e50e8e5134911cb4ea753",
+    "/tmp/oriole-integrated-native-study/summary.json": "4c08d9fe30983f65d7bf700851d13b40c071dfdf091b5a0c95d50ec452e90bfd",
+    "/tmp/oriole-integrated-native-study/native-screen/protocol.json": "dbb3520b2dd4d3bf1a4a5ebd679243114c4e99629e5ef2b9b65a3f4369525c02",
+    "/tmp/oriole-integrated-native-study/native-screen/preflight.json": "aa5927613f477788a3fcae5eaed00a7f0c1d942c589ac97eedf6ba312ed7348d",
+    "/tmp/oriole-integrated-native-study/native-screen/results.json": "f62859cab8c1a0e2745d2424fd555d0d641890160d22dfeba9a61251824babb3",
+    "/tmp/oriole-integrated-native-independent-review/streams.json": "6f90d7db5089ab2fca2f7ad4e6fa7bb38c8edf61570691dc15c5e8e0ecd4991e",
+    "/tmp/oriole-verified-builds/report.json": "48409bb48059f3e3afc69bb66761a2626dd1f73095ee28b80840ee5b2caf7dcb",
+    "/tmp/oriole-frame-integrated-final/report.json": "e69435ce3eb4c87b52a7c2d4a1744fd2b3844319110df1a1c7f577e1525b873e",
+    "/tmp/oriole-frame-integrated-final/source.json": "e05d0c4f8de7978968e4b4dafc1ca747029f284fd4ac238064050b1ee5eec38c",
+    "/tmp/oriole-frame-integrated-final/workspace-compiler-invocations.json": "83ffd190a4fb0824bcc48e3a060e33d8e8f649a081e2c808a1e15852c961d5c7",
+    "/tmp/oriole-integrated-timing-controller.json": "6c6de2f59a0889808a3dd3fd1ffcee82fd9a8b1cf84b19cad3aa143f4088b2f1"
+  }
+}

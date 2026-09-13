@@ -1,0 +1,78 @@
+{
+  "scope": "All fixed conditions and samples; geometric means of per-condition paired median time ratios. Shared host.",
+  "groups": {
+    "all": {
+      "conditions": 24,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.9790356449237602,
+          "below_one": 22
+        },
+        "candidate_over_expat": {
+          "geomean": 1.2885190467903072,
+          "below_one": 3
+        },
+        "published_over_expat": {
+          "geomean": 1.3153689406899476,
+          "below_one": 2
+        }
+      }
+    },
+    "elementtree": {
+      "conditions": 12,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.9757462747460706,
+          "below_one": 11
+        },
+        "candidate_over_expat": {
+          "geomean": 1.371775825701789,
+          "below_one": 1
+        },
+        "published_over_expat": {
+          "geomean": 1.4052373269436849,
+          "below_one": 0
+        }
+      }
+    },
+    "pyexpat-events": {
+      "conditions": 12,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.9823361040048315,
+          "below_one": 11
+        },
+        "candidate_over_expat": {
+          "geomean": 1.2103153465997376,
+          "below_one": 2
+        },
+        "published_over_expat": {
+          "geomean": 1.2312478589612166,
+          "below_one": 2
+        }
+      }
+    }
+  },
+  "regressions": [
+    {
+      "condition": {
+        "name": "vulkan",
+        "chunk": 65536,
+        "mode": "pyexpat-events",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "iterations": 3
+      },
+      "ratio": 1.0044449833296059
+    },
+    {
+      "condition": {
+        "name": "batik",
+        "chunk": 4096,
+        "mode": "elementtree",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "iterations": 128
+      },
+      "ratio": 1.0014563255432993
+    }
+  ]
+}

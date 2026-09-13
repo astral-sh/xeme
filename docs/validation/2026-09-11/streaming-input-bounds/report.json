@@ -1,0 +1,512 @@
+{
+  "status": "streaming_compatibility_benchmarks_and_current_asan_completed_cpython_failures_retained",
+  "platform": "64-bit Linux",
+  "source_manifest_sha256": "e52c4fa16e71a7dcd76864b29509b157a42b6fbe4531f87b68f98395418d5fc3",
+  "base_commit": "1058868a7067671a1cb3b5f0de571e47cfcafe17",
+  "libraries": {
+    "reference": {
+      "path": "/tmp/oriole-pgo-study/expat-use-liboriole_expat.so",
+      "sha256": "12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0"
+    },
+    "normal": {
+      "path": "/tmp/oriole-streaming-work-pgo-study-attempt02/normal/liboriole_expat.so",
+      "sha256": "1a7e89cdf0edd481aa264b018e7ec923ec0e3f37abfa22a82f27920bc2e9e11d"
+    },
+    "pgo": {
+      "path": "/tmp/oriole-streaming-work-pgo-study-attempt02/pgo/runs/run-psjiwn9z/use/liboriole_expat.so",
+      "sha256": "8e12c1819a58a66ae5530a53433dd08de44921c94a2b39a6282358dfd33c0d1e"
+    }
+  },
+  "streams": {
+    "executions": 45,
+    "oriole_executions": 30,
+    "reference_executions": 15,
+    "sizes_mib": [
+      1,
+      65,
+      257
+    ],
+    "peak_requested_bytes_by_mode": {
+      "text": {
+        "oriole": 92483,
+        "expat": 15084
+      },
+      "tags": {
+        "oriole": 155826,
+        "expat": 18968
+      },
+      "namespaces": {
+        "oriole": 157760,
+        "expat": 17496
+      },
+      "defaults": {
+        "oriole": 156081,
+        "expat": 16484
+      },
+      "input": {
+        "oriole": 87322,
+        "expat": 15084
+      }
+    },
+    "all_post_free_counts_zero": true,
+    "scope": "Correctness and application allocator requested-byte high water; no elapsed comparison, total process-memory or system allocator overhead claim. Absent-handler default/input modes check parsing and positions, not delivered callback/default values. Attempted input includes a failing request, not necessarily consumed bytes."
+  },
+  "position_stream": {
+    "executions": 3,
+    "body_mib": 2049,
+    "text_bytes": 2148532224,
+    "final_byte_index": 2148532231,
+    "final_column": 2148532231,
+    "line": 1,
+    "suspensions": 128,
+    "resumes": 128,
+    "oriole_peak_requested_bytes": 92483,
+    "separate_from_upstream_test_misc_input_2gb": true
+  },
+  "checks": {
+    "workspace_tests": 420,
+    "doc_tests": 1,
+    "fmt": "passed",
+    "strict_clippy": "passed",
+    "upstream_api": {
+      "passed": 4347,
+      "assertion_failures": 391,
+      "timeouts": 2,
+      "passed_regressions": 0
+    },
+    "c_sanitizer_scope": "C ASan/UBSan only; optimized Rust uninstrumented; leak detection disabled"
+  },
+  "evidence": [
+    {
+      "path": "/tmp/oriole-streaming-input-bounds-study/policy-retry2/results.json",
+      "sha256": "30d99cb3418d3ff5192c63e66282cc67fd7457a6a0b0120ed12f994fc06b022d",
+      "bytes": 2387
+    },
+    {
+      "path": "/tmp/oriole-large-stream-policy-probe/candidate/results.json",
+      "sha256": "9b07c8e4822fd30158628ba2bdba7dbbdd29d460cc9f5122471e6199381980fe",
+      "bytes": 85990
+    },
+    {
+      "path": "/tmp/oriole-large-stream-position-probe/results/results.json",
+      "sha256": "ec66575942f28c825bb4bc72852bc0e806b797dfad6738c565c80f39d9d5ebbc",
+      "bytes": 8415
+    },
+    {
+      "path": "/tmp/oriole-streaming-work-thin-pgo-gates-cpu5/summary.json",
+      "sha256": "8f1e6790ad6d4fcfcba49590745457a988c9a3c740ab3a02450ce576465d20bd",
+      "bytes": 4848
+    },
+    {
+      "path": "/tmp/oriole-streaming-work-thin-pgo-gates-cpu5/api-native/api-outcome-assessment.json",
+      "sha256": "c4d637530faf71e1952a77790def03f63797cdd148dadd6f6f4d4a636ff51815",
+      "bytes": 2112
+    },
+    {
+      "path": "/tmp/oriole-large-stream-policy-probe/controls-small/results.json",
+      "sha256": "f9bbd368e232f778c53d3adb0aa2880610b7bcf09f6c0697de6351c62a99effb",
+      "bytes": 20632
+    },
+    {
+      "path": "/tmp/oriole-large-stream-policy-probe/controls-large/results.json",
+      "sha256": "0b170e819dd34ad4cc8b55cb7eb37c1ffcc0a8fbe3f5d95f1a29e9aafcf1bb98",
+      "bytes": 39462
+    },
+    {
+      "path": "/tmp/oriole-streaming-work-pgo-study-attempt02/source.json",
+      "sha256": "e52c4fa16e71a7dcd76864b29509b157a42b6fbe4531f87b68f98395418d5fc3",
+      "bytes": 7760
+    },
+    {
+      "path": "/tmp/oriole-streaming-work-pgo-study-attempt02/pair-report.json",
+      "sha256": "2a5dfd8ef1ba5fb09b87c290a58d27b3c59ad5e2b07e4cdb91d527b2257059d4",
+      "bytes": 41023
+    },
+    {
+      "path": "/tmp/oriole-streaming-work-pgo-study-attempt02/pair-freeze.json",
+      "sha256": "c3de58fb747d0d97594c6011ea3f59972167cb29f0770b65d351d8bd594d6058",
+      "bytes": 10199
+    },
+    {
+      "path": "/tmp/oriole-streaming-input-bounds-source-independent-review.json",
+      "sha256": "7d736d578481b949bcfacec2697eb9255f1a19949cf9d92107fa66d2c26c5184",
+      "bytes": 4916
+    },
+    {
+      "path": "/tmp/oriole-large-stream-policy-probe-independent-review.json",
+      "sha256": "f8c57f19364b067fd69f64efae2be0c1456996450ed3dd08bc5741d0b64d82f4",
+      "bytes": 5958
+    },
+    {
+      "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-outcome-review/review.json",
+      "sha256": "d28e336d6b7079a29e5433ecaea44ae1af8acceecbe83144521f6709658ac5fa",
+      "bytes": 22128
+    },
+    {
+      "path": "/tmp/oriole-streaming-large-input-independent-review.json",
+      "sha256": "33541575de699dc25f1e9c7682ca102d6561f1bc2289441ccece2a7a9add6687",
+      "bytes": 6446
+    },
+    {
+      "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-gates/shared/summary.json",
+      "sha256": "d1e6bca96314f4d932b7e1cd5318f84430d4c868c4c0055e786b7a173ef2fc17",
+      "bytes": 3945
+    },
+    {
+      "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-gates/shared/origin.log",
+      "sha256": "9587730a6ff46d92ea791906bd51183fe4c319ec8fbbe9f5717b95457022a160",
+      "bytes": 1082
+    },
+    {
+      "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-gates/shared/tests.log",
+      "sha256": "b7f931ec196696493ac5159fdfbff21f6b2b8563a081cd4a081dcd4bf47be9df",
+      "bytes": 77539
+    },
+    {
+      "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-gates/static/summary.json",
+      "sha256": "d9b370f89a32d65fa6b5d8b1e15d40c85b540c273c2efae49245705f292a5fbf",
+      "bytes": 4155
+    },
+    {
+      "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-gates/static/origin.log",
+      "sha256": "fd03dee8ee810a9b8234de29cd49ec3296d3e8c59160a1a5d17971fe8faaec6d",
+      "bytes": 1082
+    },
+    {
+      "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-gates/static/tests.log",
+      "sha256": "063ef408b6ddf9388266617ce02a2b931d6fc02f7d825b73c5241c952e8ae1ac",
+      "bytes": 77539
+    }
+  ],
+  "pending": [
+    "distribution validation"
+  ],
+  "archive_status": "Separate deterministic core and benchmark archives have complete streaming member readback; both exclude binaries and nested historical archives. Current sanitizer collection is separate.",
+  "strict_cpython": {
+    "scope": "Strict CPython 3.12.13, shared/static streaming-policy PGO8e12/b552; no test relaxation, system-allocator override, rerun, full PBS or timing claim.",
+    "collector_role": "This agent prepared and collected the two runs, then reconstructed their saved outcomes; not an independent collector audit.",
+    "consumer_scope": "New runs apply the explicitly approved upstream allocation-failure cleanup backport. Prior accepted8cc strict baseline used unmodified consumer C source. Tests/802 method outcomes are equal; consumer source identity is not claimed.",
+    "consumer_fix": {
+      "cpython_revision": "3bb231a6a5dc02b95658877318bf61501a7209e9",
+      "cpython_version": "3.12.13",
+      "upstream_issue": "https://github.com/python/cpython/issues/144984",
+      "upstream_pull_request": "https://github.com/python/cpython/pull/144992",
+      "upstream_commit": "e6b9a1406980fbb1d4032eca9cc0b4f8f252b716",
+      "source_sha256": "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0",
+      "patched_source_sha256": "1c3cf2ee6dfa568cf833742ad786880f4816042705689a116a4f308b7a9d95f2",
+      "patch_sha256": "10999b7171ce016e249c47c7f12d562f05a28aadf17791d61664090928f736a2",
+      "scope": "Backports only Modules/pyexpat.c from the upstream fix; no CPython tests or other files are changed."
+    },
+    "linkages": {
+      "shared": {
+        "methods": 802,
+        "method_map_sha256": "d4745eb066332af45cd77dad094c334e4ee9ff12e8c94377a0dbf85a6cc28a60",
+        "all_method_outcomes_equal_accepted_unmodified_consumer_baseline": true,
+        "raw_exit": 2,
+        "failure_identities": [
+          "test.test_pyexpat.BufferTextTest.test1",
+          "test.test_sax.CDATAHandlerTest.test_handlers"
+        ],
+        "expected_failures": 3,
+        "skips": {
+          "reported": 14,
+          "methods": 5,
+          "subtests": 8,
+          "class_setup": 1
+        },
+        "method_entry_counts": {
+          "ok": 790,
+          "subtest_parent_entries": 2,
+          "failures": 2,
+          "expected_failures": 3,
+          "method_skips": 5
+        }
+      },
+      "static": {
+        "methods": 802,
+        "method_map_sha256": "d4745eb066332af45cd77dad094c334e4ee9ff12e8c94377a0dbf85a6cc28a60",
+        "all_method_outcomes_equal_accepted_unmodified_consumer_baseline": true,
+        "raw_exit": 2,
+        "failure_identities": [
+          "test.test_pyexpat.BufferTextTest.test1",
+          "test.test_sax.CDATAHandlerTest.test_handlers"
+        ],
+        "expected_failures": 3,
+        "skips": {
+          "reported": 14,
+          "methods": 5,
+          "subtests": 8,
+          "class_setup": 1
+        },
+        "method_entry_counts": {
+          "ok": 790,
+          "subtest_parent_entries": 2,
+          "failures": 2,
+          "expected_failures": 3,
+          "method_skips": 5
+        }
+      }
+    },
+    "origin_checks": {
+      "shared": {
+        "status": "passed",
+        "origins": {
+          "initial:pyexpat": {
+            "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-gates/shared/pyexpat.cpython-312-x86_64-linux-gnu.so",
+            "sha256": "6e309659026fde92683a59d0ab4acf5d30db2210d345ec38c948640061fe50a4"
+          },
+          "fresh:pyexpat": {
+            "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-gates/shared/pyexpat.cpython-312-x86_64-linux-gnu.so",
+            "sha256": "6e309659026fde92683a59d0ab4acf5d30db2210d345ec38c948640061fe50a4"
+          },
+          "initial:_elementtree": {
+            "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-gates/shared/_elementtree.cpython-312-x86_64-linux-gnu.so",
+            "sha256": "8ad0847c8850679ce5c765d03c3b1f6880f92f6a9522b17b9d29920ca7c7b87e"
+          },
+          "fresh:_elementtree": {
+            "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-gates/shared/_elementtree.cpython-312-x86_64-linux-gnu.so",
+            "sha256": "8ad0847c8850679ce5c765d03c3b1f6880f92f6a9522b17b9d29920ca7c7b87e"
+          }
+        },
+        "accelerator_imports": [
+          "cET",
+          "cET_alias"
+        ],
+        "pure_python_and_blocked_imports": "passed"
+      },
+      "static": {
+        "status": "passed",
+        "origins": {
+          "initial:pyexpat": {
+            "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-gates/static/pyexpat.cpython-312-x86_64-linux-gnu.so",
+            "sha256": "1f38afa08a03a145be3f99b64418935e9d5639b82979d3742e8993cba34d1878"
+          },
+          "fresh:pyexpat": {
+            "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-gates/static/pyexpat.cpython-312-x86_64-linux-gnu.so",
+            "sha256": "1f38afa08a03a145be3f99b64418935e9d5639b82979d3742e8993cba34d1878"
+          },
+          "initial:_elementtree": {
+            "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-gates/static/_elementtree.cpython-312-x86_64-linux-gnu.so",
+            "sha256": "21bf16639a9ff472a4d1bb72d7447a12d00052a6eef8262a1a0454914d6e8350"
+          },
+          "fresh:_elementtree": {
+            "path": "/tmp/oriole-streaming-work-thin-pgo-cpython-gates/static/_elementtree.cpython-312-x86_64-linux-gnu.so",
+            "sha256": "21bf16639a9ff472a4d1bb72d7447a12d00052a6eef8262a1a0454914d6e8350"
+          }
+        },
+        "accelerator_imports": [
+          "cET",
+          "cET_alias"
+        ],
+        "pure_python_and_blocked_imports": "passed"
+      }
+    },
+    "source_manifest_sha256": "e52c4fa16e71a7dcd76864b29509b157a42b6fbe4531f87b68f98395418d5fc3",
+    "libraries": {
+      "/tmp/oriole-streaming-work-pgo-study-attempt02/pgo/runs/run-psjiwn9z/use/liboriole_expat.so": "8e12c1819a58a66ae5530a53433dd08de44921c94a2b39a6282358dfd33c0d1e",
+      "/tmp/oriole-streaming-work-pgo-study-attempt02/pgo/runs/run-psjiwn9z/use/liboriole_expat.a": "b5529316fb6a3bcac246267b665b70e8b8fa487e4824e5c8b2e0736dedd4371e"
+    },
+    "limitations": [
+      "Both suites retain the two callback-boundary failures and raw exit2; this is exact outcome parity, not a green test suite.",
+      "Four persistent-loader origin records per linkage and all six unchanged upstream modules were checked. No full distribution build or allocation-fault campaign is implied."
+    ]
+  },
+  "large_input_independent_audit": {
+    "path": "/tmp/oriole-streaming-large-input-independent-review.json",
+    "sha256": "33541575de699dc25f1e9c7682ca102d6561f1bc2289441ccece2a7a9add6687",
+    "status": "passed_saved_48_worker_validation",
+    "role": "Independent saved-data and bounded derivative-source review; root collected all probe runs. No compiler/parser/replay execution in this audit.",
+    "workers": 48,
+    "findings": [],
+    "limitations": [
+      "This correctness probe is not an elapsed benchmark or the upstream miscellaneous2GiB fixture. No fuzz/fullPBS/general large-document conformance claim.",
+      "Defaults and padded-input modes deliberately have no event handlers; they assert successful parse/positions but not delivered default attribute values.",
+      "Memory counts successful custom-MM requested bytes. They exclude its external header, libc/system overhead, RSS and temporary allocator-internal realloc copying. No forced allocation-failure cleanup coverage is implied.",
+      "Canonical rolling digests were checked against saved successful Expat workers; streams were not regenerated/replayed by this audit. Counters and final positions were independently recomputed from exact unit/prefix sizes.",
+      "2049MiB result is on the actual ELF64 host with wide C coordinates; it does not assert support beyond c_long::MAX on Windows/32-bit."
+    ]
+  },
+  "benchmarks": {
+    "status": "completed_independent_saved_audit_passed",
+    "source_manifest_sha256": "e52c4fa16e71a7dcd76864b29509b157a42b6fbe4531f87b68f98395418d5fc3",
+    "rows": [
+      {
+        "consumer": "native C",
+        "fixtures": "real",
+        "profile": "normal",
+        "candidate_over_control": 0.9861850669122444,
+        "candidate_over_expat": 1.6039131883715148,
+        "candidate_faster_than_control": 21,
+        "conditions": 24
+      },
+      {
+        "consumer": "native C",
+        "fixtures": "real",
+        "profile": "pgo",
+        "candidate_over_control": 0.9973536239556312,
+        "candidate_over_expat": 1.3753967308270416,
+        "candidate_faster_than_control": 15,
+        "conditions": 24
+      },
+      {
+        "consumer": "native C",
+        "fixtures": "generated",
+        "profile": "normal",
+        "candidate_over_control": 1.0118261509561532,
+        "candidate_over_expat": 5.054043729948087,
+        "candidate_faster_than_control": 0,
+        "conditions": 4
+      },
+      {
+        "consumer": "native C",
+        "fixtures": "generated",
+        "profile": "pgo",
+        "candidate_over_control": 1.0058804007815714,
+        "candidate_over_expat": 5.060236866416315,
+        "candidate_faster_than_control": 1,
+        "conditions": 4
+      },
+      {
+        "consumer": "CPython",
+        "fixtures": "real",
+        "profile": "normal",
+        "candidate_over_control": 0.9994976488554649,
+        "candidate_over_expat": 1.2654631852760903,
+        "candidate_faster_than_control": 13,
+        "conditions": 24
+      },
+      {
+        "consumer": "CPython",
+        "fixtures": "real",
+        "profile": "pgo",
+        "candidate_over_control": 0.9970746912699364,
+        "candidate_over_expat": 1.1377475633861376,
+        "candidate_faster_than_control": 15,
+        "conditions": 24
+      }
+    ],
+    "method": "Geometric mean across condition medians of seven paired candidate/control or candidate/Expat worker-median elapsed ratios. Smaller is better. Native/Python and normal/PGO are separate campaigns.",
+    "counts": {
+      "native_preflights": 168,
+      "native_timed_workers": 1176,
+      "python_preflights": 144,
+      "python_timed_workers": 1008,
+      "total_workers": 2496,
+      "total_samples_including_preflights_and_warmups": 265080
+    },
+    "review": {
+      "path": "benchmark-review.json",
+      "sha256": "d654674c5a625c46b1dab707907be7decdb67125a74889c69e2554aa5ada22b8"
+    },
+    "archive": {
+      "status": "passed",
+      "scope": "Deterministic producer packaging and complete streaming readback; independent benchmark audits are separate. No executable target or historical nested archive included.",
+      "archive": "benchmark-evidence.tar.gz",
+      "archive_sha256": "fad419a9df117c69949b64521e402dbbf7c0bc5cadb4110045b67a759f3c07c8",
+      "compressed_bytes": 6963956,
+      "member_index": "benchmark-evidence-members.json.gz",
+      "member_index_sha256": "288158d6933f6683c2b185d66af96bfa63421ed3e037165beb8512dd0a20af3b",
+      "members": 4043,
+      "uncompressed_bytes": 81767350,
+      "duplicate_source_aliases": 915,
+      "source_selection_count": 4958,
+      "package_generator_sha256": "a912e6d227e2ef2157670c31058811b78641a450334f69f6aaf4ed50b5998caa",
+      "excluded": [
+        "Parser libraries, static archives, native driver binary, Python interpreter and all compiled consumer extensions; these remain identified by recorded path/hash and origin receipts.",
+        "Target/build caches, profile data, nested historical archives, full CPython trees and unrelated study outputs.",
+        "Strict cleanup-patched consumer timings: benchmark consumer source is unmodified CPython3.12.13."
+      ]
+    },
+    "python_consumer_scope": "Unmodified CPython3.12.13 pyexpat.c fd679a16 and _elementtree.c de4c3c87; the cleanup-patched strict CPython gate is separate.",
+    "preparation_failure": "Original normal preparation compiled consumers successfully then CPU3 preflight failed the old CPU4 guard before parser execution. Original failure retained. Attempt02 changed preparation guard to CPU3 and retained all fixture/assertion/timing bounds. OriginalPGO sibling was prepared but not executed.",
+    "interpretation": "The policy removes arbitrary lifetime-stream rejection while native and actualPython real-project timings remain close to the preceding accepted control. The fixed PGO aggregate remains slower than Expat:1.37540x native and1.13775x actualPython. This does not meet the faster-than-Expat objective. Generated controls and every per-condition regression remain recorded.",
+    "source_origins": {
+      "path": "benchmark-source-origins.json",
+      "sha256": "7f7db2fc8ae578359944b6e267ed8869a82d7848b86aa8dcda853e54e5cab1db",
+      "count": 68,
+      "scope": "All original benchmark input paths map to archived identical bytes or explicit excluded ELF binaries; includes alternate corpus checkout paths."
+    }
+  },
+  "archives": {
+    "core": {
+      "status": "passed",
+      "scope": "Deterministic producer packaging and complete streaming readback; independent benchmark audits are separate. No executable target or historical nested archive included.",
+      "archive": "evidence.tar.gz",
+      "archive_sha256": "585e842a01a9576142e2fa783f1e181b6af3dfff4de7a8bbaebaf058df0368b0",
+      "compressed_bytes": 1070066,
+      "member_index": "evidence-members.json.gz",
+      "member_index_sha256": "b1f5d029568b80df4cfa8c00a81eb4f352adb65309243eb0ed01f4de3b325ec1",
+      "members": 203,
+      "uncompressed_bytes": 24227954,
+      "duplicate_source_aliases": 77,
+      "source_selection_count": 271,
+      "package_generator_sha256": "a912e6d227e2ef2157670c31058811b78641a450334f69f6aaf4ed50b5998caa",
+      "excluded": [
+        "All parser libraries, executables, target directories, object files and profile data.",
+        "All nested historical source/evidence archives; manifests and narrow raw originals retain provenance.",
+        "Duplicated expanded upstream source trees; exact source/adaptation hashes and fixture tools remain.",
+        "Old successful custom-encoding raw pairs absent from the original helper remain absent; no invented provenance.",
+        "Parent-owned elapsed benchmarks and distribution artifacts remain outside this selection.",
+        "Duplicate new CPython source/log bytes are listed as aliases rather than copied again; no historical consumer bundles or binaries are included."
+      ]
+    },
+    "benchmark": {
+      "status": "passed",
+      "scope": "Deterministic producer packaging and complete streaming readback; independent benchmark audits are separate. No executable target or historical nested archive included.",
+      "archive": "benchmark-evidence.tar.gz",
+      "archive_sha256": "fad419a9df117c69949b64521e402dbbf7c0bc5cadb4110045b67a759f3c07c8",
+      "compressed_bytes": 6963956,
+      "member_index": "benchmark-evidence-members.json.gz",
+      "member_index_sha256": "288158d6933f6683c2b185d66af96bfa63421ed3e037165beb8512dd0a20af3b",
+      "members": 4043,
+      "uncompressed_bytes": 81767350,
+      "duplicate_source_aliases": 915,
+      "source_selection_count": 4958,
+      "package_generator_sha256": "a912e6d227e2ef2157670c31058811b78641a450334f69f6aaf4ed50b5998caa",
+      "excluded": [
+        "Parser libraries, static archives, native driver binary, Python interpreter and all compiled consumer extensions; these remain identified by recorded path/hash and origin receipts.",
+        "Target/build caches, profile data, nested historical archives, full CPython trees and unrelated study outputs.",
+        "Strict cleanup-patched consumer timings: benchmark consumer source is unmodified CPython3.12.13."
+      ]
+    }
+  },
+  "benchmark_independent_review": {
+    "path": "benchmark-review.json",
+    "sha256": "d654674c5a625c46b1dab707907be7decdb67125a74889c69e2554aa5ada22b8",
+    "role": "Independent saved numerical review of root-collected four campaigns; reviewer authored current parser policy/tests but did not collect timings. Current protocol adaptations and raw data were reviewed without executing producers or targets."
+  },
+  "strict_cpython_root_review": {
+    "path": "/tmp/oriole-streaming-cpython-root-review.json",
+    "sha256": "e55b5ded43e6646f6226c4916ea3f527a63b43e30367035e98f198659d2e574c",
+    "scope": "Independent root reconstruction of802method maps perlinkage,119pins,consumer source difference and origins; no rerun"
+  },
+  "package_root_review": {
+    "file": "package-root-review.json",
+    "sha256": "f5eb038937a80708a7b10fa43b92c42842b15d31cf5b825786a37b5f09dd7ae1",
+    "verifier": "verify-packages.py",
+    "verifier_sha256": "e7b3f0310079c5e4162a697bf09136b52223c61e8d253d183d1777d8241b2493",
+    "scope": "Root independently read all4246 archive members and992 aliases, including current original-path hashes; no parser targets or new numerical claim."
+  },
+  "asan": {
+    "summary": "asan.json",
+    "summary_sha256": "f11a5156736f4d985d32764aa146afcf9ca67db20ed66e849eec0c3db34c3fc2",
+    "report": "ASAN.md",
+    "source_manifest_sha256": "e52c4fa16e71a7dcd76864b29509b157a42b6fbe4531f87b68f98395418d5fc3",
+    "policy_regressions_passed": 13,
+    "campaign_seconds_per_target": 120,
+    "totals": {
+      "targets": 7,
+      "initial_seed_files_per_target_sum": 68893,
+      "replay_executions": 68897,
+      "campaign_executed_units": 2170731,
+      "final_disk_corpus_files_per_target_sum": 2931,
+      "failure_artifacts": 0
+    },
+    "scope": "Fresh instrumented binaries for the same canonical70 source; independent of PGO benchmark binaries. Leak detection disabled. Seven120s campaigns do not transfer historicalsix600s outcomes.",
+    "independent_review": {
+      "path": "asan-independent-review/independent-audit.json",
+      "sha256": "3898e73127a6246cd0274f9d40e9286726576dc5e0cbe2f2bc3dd581998ec982",
+      "scope": "Independent source/instrumentation/regression/raw-command/corpus/count and complete archive readback; no target execution."
+    }
+  }
+}

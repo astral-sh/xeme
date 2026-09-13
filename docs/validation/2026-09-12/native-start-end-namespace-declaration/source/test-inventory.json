@@ -1,0 +1,268 @@
+{
+  "status": "source_only_union_verified",
+  "selected_tests": 475,
+  "pr168_head_tests": 476,
+  "expected_tests": 483,
+  "expected_groups": 35,
+  "test_body_union_exact": true,
+  "files": [
+    {
+      "path": "crates/oriole/src/arena.rs",
+      "selected_test_functions": 5,
+      "head_test_functions": 5,
+      "composed_test_functions": 6,
+      "added": {
+        "start-end": [
+          "direct_start_keeps_the_warmed_text_arena_owner"
+        ],
+        "namespace": [],
+        "declaration": []
+      },
+      "changed_or_added": {
+        "start-end": [
+          "direct_start_keeps_the_warmed_text_arena_owner"
+        ],
+        "namespace": [],
+        "declaration": []
+      },
+      "all_test_bodies_exact": true
+    },
+    {
+      "path": "crates/oriole/src/encoding.rs",
+      "selected_test_functions": 10,
+      "head_test_functions": 10,
+      "composed_test_functions": 10,
+      "added": {
+        "start-end": [],
+        "namespace": [],
+        "declaration": []
+      },
+      "changed_or_added": {
+        "start-end": [],
+        "namespace": [],
+        "declaration": [
+          "warmed_utf8_feeds_match_buffered_splits_and_errors",
+          "warmed_utf8_source_failure_retains_pending_without_growth"
+        ]
+      },
+      "all_test_bodies_exact": true
+    },
+    {
+      "path": "crates/oriole/src/lib.rs",
+      "selected_test_functions": 22,
+      "head_test_functions": 23,
+      "composed_test_functions": 24,
+      "added": {
+        "start-end": [
+          "direct_start_raw_views_keep_copied_fallbacks_and_owner_handoffs",
+          "matched_native_end_raw_keeps_owned_names_and_mode_boundaries"
+        ],
+        "namespace": [],
+        "declaration": []
+      },
+      "changed_or_added": {
+        "start-end": [
+          "direct_start_raw_views_keep_copied_fallbacks_and_owner_handoffs",
+          "matched_native_end_raw_keeps_owned_names_and_mode_boundaries",
+          "native_raw_retention_survives_compaction_and_invalid_context_suffixes"
+        ],
+        "namespace": [
+          "nonnamespace_parsers_keep_salted_empty_bindings",
+          "salt_rebuilds_every_table_and_owned_children"
+        ],
+        "declaration": []
+      },
+      "all_test_bodies_exact": true
+    },
+    {
+      "path": "crates/oriole/tests/adapter_frame.rs",
+      "selected_test_functions": 16,
+      "head_test_functions": 16,
+      "composed_test_functions": 16,
+      "added": {
+        "start-end": [],
+        "namespace": [],
+        "declaration": []
+      },
+      "changed_or_added": {
+        "start-end": [
+          "literal_frames_keep_duplicate_checks_and_selected_name_rules",
+          "owned_frames_preserve_events_positions_raw_and_error_order_at_every_chunk_size"
+        ],
+        "namespace": [
+          "sparse_namespace_scopes_preserve_shadowing_and_event_order"
+        ],
+        "declaration": []
+      },
+      "all_test_bodies_exact": true
+    },
+    {
+      "path": "crates/oriole/tests/allocation.rs",
+      "selected_test_functions": 12,
+      "head_test_functions": 12,
+      "composed_test_functions": 14,
+      "added": {
+        "start-end": [
+          "direct_start_lowering_preserves_raw_and_every_selected_allocation_failure"
+        ],
+        "namespace": [],
+        "declaration": [
+          "malformed_declarations_preserve_every_selected_allocation_failure"
+        ]
+      },
+      "changed_or_added": {
+        "start-end": [
+          "direct_start_lowering_preserves_raw_and_every_selected_allocation_failure",
+          "native_raw_context_views_survive_every_feed_allocation_failure"
+        ],
+        "namespace": [
+          "hash_salt_reconfiguration_is_transactional_at_every_allocation"
+        ],
+        "declaration": [
+          "malformed_declarations_preserve_every_selected_allocation_failure"
+        ]
+      },
+      "all_test_bodies_exact": true
+    },
+    {
+      "path": "crates/oriole/tests/external_grammar.rs",
+      "selected_test_functions": 9,
+      "head_test_functions": 9,
+      "composed_test_functions": 10,
+      "added": {
+        "start-end": [],
+        "namespace": [],
+        "declaration": [
+          "declaration_errors_distinguish_documents_from_external_text"
+        ]
+      },
+      "changed_or_added": {
+        "start-end": [],
+        "namespace": [],
+        "declaration": [
+          "declaration_errors_distinguish_documents_from_external_text"
+        ]
+      },
+      "all_test_bodies_exact": true
+    },
+    {
+      "path": "crates/oriole/tests/external_limits.rs",
+      "selected_test_functions": 6,
+      "head_test_functions": 6,
+      "composed_test_functions": 6,
+      "added": {
+        "start-end": [],
+        "namespace": [],
+        "declaration": []
+      },
+      "changed_or_added": {
+        "start-end": [],
+        "namespace": [
+          "structural_and_index_work_counts_even_for_empty_values"
+        ],
+        "declaration": []
+      },
+      "all_test_bodies_exact": true
+    },
+    {
+      "path": "crates/oriole/tests/multibyte.rs",
+      "selected_test_functions": 12,
+      "head_test_functions": 12,
+      "composed_test_functions": 12,
+      "added": {
+        "start-end": [],
+        "namespace": [],
+        "declaration": []
+      },
+      "changed_or_added": {
+        "start-end": [],
+        "namespace": [
+          "raw_qnames_are_checked_before_decoded_namespace_expansion"
+        ],
+        "declaration": []
+      },
+      "all_test_bodies_exact": true
+    },
+    {
+      "path": "crates/oriole/tests/raw_tokens.rs",
+      "selected_test_functions": 1,
+      "head_test_functions": 1,
+      "composed_test_functions": 1,
+      "added": {
+        "start-end": [],
+        "namespace": [],
+        "declaration": []
+      },
+      "changed_or_added": {
+        "start-end": [],
+        "namespace": [],
+        "declaration": [
+          "terminal_errors_retain_complete_raw_markup_in_every_feed_boundary"
+        ]
+      },
+      "all_test_bodies_exact": true
+    },
+    {
+      "path": "crates/oriole_expat/src/lib.rs",
+      "selected_test_functions": 0,
+      "head_test_functions": 0,
+      "composed_test_functions": 0,
+      "added": {
+        "start-end": [],
+        "namespace": [],
+        "declaration": []
+      },
+      "changed_or_added": {
+        "start-end": [],
+        "namespace": [],
+        "declaration": []
+      },
+      "all_test_bodies_exact": true
+    },
+    {
+      "path": "crates/oriole_expat/src/tests.rs",
+      "selected_test_functions": 94,
+      "head_test_functions": 94,
+      "composed_test_functions": 96,
+      "added": {
+        "start-end": [],
+        "namespace": [],
+        "declaration": [
+          "external_declaration_errors_keep_their_codes_in_each_child_context",
+          "unknown_encoding_callbacks_follow_complete_declaration_grammar"
+        ]
+      },
+      "changed_or_added": {
+        "start-end": [
+          "arena_start_preserves_raw_context_live_pointers_and_callback_switches",
+          "detached_end_owner_survives_default_current_children_stop_and_reset_rejection"
+        ],
+        "namespace": [],
+        "declaration": [
+          "external_declaration_errors_keep_their_codes_in_each_child_context",
+          "unknown_encoding_callbacks_follow_complete_declaration_grammar"
+        ]
+      },
+      "all_test_bodies_exact": true
+    },
+    {
+      "path": "crates/oriole_expat/tests/memory.rs",
+      "selected_test_functions": 3,
+      "head_test_functions": 3,
+      "composed_test_functions": 3,
+      "added": {
+        "start-end": [],
+        "namespace": [],
+        "declaration": []
+      },
+      "changed_or_added": {
+        "start-end": [
+          "detached_end_uses_the_selected_owner_and_default_failure_stays_terminal"
+        ],
+        "namespace": [],
+        "declaration": []
+      },
+      "all_test_bodies_exact": true
+    }
+  ]
+}

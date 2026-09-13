@@ -1,0 +1,82 @@
+diff --git a/crates/oriole/src/tag.rs b/crates/oriole/src/tag.rs
+index e11eddd..7070f93 100644
+--- a/crates/oriole/src/tag.rs
++++ b/crates/oriole/src/tag.rs
+@@ -238,10 +238,25 @@ impl AttributeScanner {
+ 
+ /// Find a name's next boundary; callers validate the first character separately.
+ pub(crate) fn name_end(text: &str, offset: usize, rules: NameRules) -> usize {
+-    text[offset..]
+-        .char_indices()
+-        .find(|(_, c)| !rules.is_name_char(*c))
+-        .map_or(text.len(), |(index, _)| offset + index)
++    let suffix = &text[offset..];
++    let mut index = 0;
++    while let Some(&byte) = suffix.as_bytes().get(index) {
++        if byte.is_ascii() {
++            if !byte.is_ascii_alphanumeric() && !matches!(byte, b':' | b'_' | b'-' | b'.') {
++                break;
++            }
++            index += 1;
++        } else {
++            // Only complete characters advance the cursor, so this suffix is
++            // valid UTF-8. XML editions differ only on the non-ASCII path.
++            let character = suffix[index..].chars().next().unwrap();
++            if !rules.is_name_char(character) {
++                break;
++            }
++            index += character.len_utf8();
++        }
++    }
++    offset + index
+ }
+ 
+ /// Scalar progress plus offset records supplied by the parser's existing cache.
+@@ -366,6 +381,47 @@ mod tests {
+     use crate::{Error, Position, parse_raw_attributes, take_name, try_push, whitespace};
+     use oriole_storage::Allocator;
+ 
++    #[test]
++    fn ascii_name_scan_matches_both_editions_at_unicode_boundaries() {
++        fn check(text: &str, offset: usize) {
++            for rules in [NameRules::FourthEdition, NameRules::FifthEdition] {
++                let expected = text[offset..]
++                    .char_indices()
++                    .find(|(_, character)| !rules.is_name_char(*character))
++                    .map_or(text.len(), |(index, _)| offset + index);
++                assert_eq!(
++                    name_end(text, offset, rules),
++                    expected,
++                    "{text:?} {rules:?}"
++                );
++            }
++        }
++        for character in (0..=0x10ffff).filter_map(char::from_u32) {
++            let text = format!("α:name{character}._:9-end ");
++            check(&text, "α:".len());
++        }
++        for length in [0, 1, 7, 8, 15, 16, 31, 32, 63, 64, 127, 128, 1024] {
++            let text = "n".repeat(length);
++            check(&text, 0);
++            check(&text, text.len());
++            for delimiter in [" ", ">", "/>", "=", "\0", "é", "雪", "😀"] {
++                let text = format!("{text}{delimiter}after");
++                for offset in [0, length / 2, length] {
++                    check(&text, offset);
++                }
++            }
++        }
++        for first in 0..=127 {
++            for second in 0..=127 {
++                let text = [b'a', first, second, b'_', b'9', b' '];
++                let text = std::str::from_utf8(&text).unwrap();
++                for offset in 0..=text.len() {
++                    check(text, offset);
++                }
++            }
++        }
++    }
++
+     type Outcome = (
+         std::vec::Vec<[usize; 4]>,
+         Option<(ErrorKind, &'static str, usize)>,

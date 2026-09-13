@@ -14,34 +14,18 @@ A streaming XML parser and Expat C interface, written in Rust.
 - Embed the safe Rust parser or use the Expat-compatible C interface.
 - Try an opt-in python-build-standalone integration for CPython's XML consumers.
 
-| Project XML | Oriole | Expat | Oriole / Expat |
+| Project XML | Oriole (normal) | Expat (normal) | Oriole / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 89.795 ms | 30.275 ms | 2.97× |
-| Wayland protocol | 2.011 ms | 1.094 ms | 1.84× |
-| Maven POM | 1.599 ms | 0.462 ms | 3.46× |
-| Batik SVG | 0.155 ms | 0.135 ms | 1.14× |
-| GTK UI | 0.684 ms | 0.217 ms | 3.12× |
-| DocBook XSL | 0.459 ms | 0.189 ms | 2.43× |
+| Vulkan registry | 36.366 ms | 28.906 ms | 1.266× |
+| Wayland protocol | 0.887 ms | 1.069 ms | 0.840× |
+| Maven POM | 0.589 ms | 0.440 ms | 1.332× |
+| Batik SVG | 0.124 ms | 0.134 ms | 0.931× |
+| GTK UI | 0.248 ms | 0.212 ms | 1.165× |
+| DocBook XSL | 0.225 ms | 0.189 ms | 1.192× |
 
-Oriole remains slower than Expat. These [native measurements](benchmarks/results/2026-09-10/version-consistent-pgo/)
-use original XML from six pinned projects, Expat 2.8.4, 4 KiB chunks, and namespaces
-disabled on a shared Linux AMD EPYC-Milan host. Times are medians of process medians;
-ratios are medians of paired ratios. See the [benchmark guide](benchmarks/README.md)
-for methodology, complete results, and separately identified actual-consumer timings.
+The [normal-build measurements](docs/validation/2026-09-12/native-start-end-namespace-declaration/) use six pinned XML projects, 4 KiB chunks and namespaces disabled on a shared Linux host. Times are medians of seven process medians; ratios are medians of paired ratios. Across the 24 real-project conditions in confirmation, the selected runtime takes **1.1841× Expat’s native time and 1.0558× its CPython time**. Both aggregates meet the current 20% target in two epochs; individual outliers and generated-workload regressions remain in the report.
 
-Optional [profile-guided builds](tools/pgo/) reduce Oriole’s native project time by
-22.7%. With both libraries trained, Oriole still takes 2.23× Expat’s time through the
-native C interface and 1.42× across the measured CPython consumers. The [full report](benchmarks/results/2026-09-10/version-consistent-pgo/)
-retains every project, build identity, raw sample, and limitation.
-
-The [latest compatibility report](docs/validation/2026-09-10/entity-error-origins/)
-records 369 workspace tests and **4,335 passing / 405 failing upstream API
-configurations**. Remaining allocation, resource, diagnostic, and callback differences
-are explicit in the [compatibility guide](docs/compatibility.md). Six [sustained ASan
-campaigns](docs/validation/2026-09-10/version-consistent-fuzz/) completed 14.50 million
-executions on the preceding `4b11ace` runtime without findings. The [PBS distribution report](docs/validation/2026-09-10/version-consistent-pbs/)
-records a successful build and two failing upstream XML assertions, and explains
-a fresh-import coverage gap in the earlier local CPython harness.
+The exact tested source `5d983f7e` passes 483 Rust tests and preserves **4,349 API passes, 391 failures and no timeouts**, six passing C consumers, and two strict CPython grouping failures. Separate semantic and allocation diagnostics, six Rust ASan/fuzz harnesses and current-source CI pass. W3C acceptance matches Expat, with 960 shared catalog failures retained. The installed PBS trial retains the same two grouping failures. This runtime is selected for a **controlled, opt-in Linux CPython 3.12.13 trial**; the [compatibility guide](docs/compatibility.md) records its experimental status and known differences.
 
 ## Installation
 

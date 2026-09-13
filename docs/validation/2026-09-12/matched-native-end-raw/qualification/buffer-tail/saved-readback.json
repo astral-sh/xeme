@@ -1,0 +1,122 @@
+{
+  "status": "passed_saved_raw_readback",
+  "targets_executed": false,
+  "runtime_commit": null,
+  "base_commit": "008d818237fe0d6f8c04a000a98ad69ab5780ceb",
+  "candidate_patch_sha256": "1df8e708c774f958c32ded7b484849f41a86ed8c299476bc36a91f54fc124455",
+  "candidate_library_sha256": "5ca9644b5d782a6beaae7a8b1ddd16045480d4566b7eb77e317c7ac25a2258fe",
+  "original_api_unchanged": true,
+  "original_tail_assertions_unchanged": true,
+  "allocation_result_assertions_observed": 2,
+  "empty_buffer_observations": [
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_nsalloc_parse_buffer",
+      "status": 1,
+      "error": 0,
+      "allocation_count": 0
+    }
+  ],
+  "observation_selection_complete": true,
+  "expected_configurations": 12,
+  "observed_results": 12,
+  "complete": true,
+  "all_diagnostic_contexts_passed": true,
+  "outcomes": {
+    "pass": 12
+  },
+  "nonpasses": [],
+  "controller_report_sha256": "defce0c7da7978c3d01ee517de61f7a6da45e55ad492733114cef897d43c8685",
+  "preparation_sha256": "49875a548576fb09c60da9bb971ce27d7492005784b66d898ff675a2fcb5af6a",
+  "reader_sha256": "9527c803df2f341aa10de174e9af539f748bd399d33c5a27a213eaf38b8ee7ae",
+  "limits": {
+    "test_seconds": 3,
+    "address_space_mib": 1024,
+    "rss_mib": 768,
+    "total_test_seconds": 240,
+    "compile_seconds": 120
+  },
+  "limitations": [
+    "Two empty-call allocation-result assertions are observed, not required; original failure is not reclassified.",
+    "All remaining tail assertions preserved; callback text bytes/count are not an oracle in this fixture.",
+    "C consumer and linked normal Rust library uninstrumented, as prior diagnostic.",
+    "No claim of allocation-schedule equivalence or exhaustive OOM."
+  ]
+}

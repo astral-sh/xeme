@@ -1,0 +1,2030 @@
+diff --git a/crates/oriole/src/arena.rs b/crates/oriole/src/arena.rs
+index fbecf51..3036184 100644
+--- a/crates/oriole/src/arena.rs
++++ b/crates/oriole/src/arena.rs
+@@ -31,7 +31,7 @@ enum Payload {
+ ///
+ /// Start-tag slices include a trailing NUL; text is length-delimited. No
+ /// parser borrow escapes. The explicit C host may instead receive a scalar
+-/// original-input Text range. The raw token remains owned by the parser.
++/// original-input Text range. The parser retains the corresponding raw token.
+ #[doc(hidden)]
+ #[derive(Debug)]
+ pub struct AdapterFrame {
+@@ -239,9 +239,16 @@ impl AdapterFrame {
+     #[doc(hidden)]
+     #[must_use]
+     pub fn native_text_range_for_c(&self) -> Option<(usize, usize)> {
+-        if self.active
+-            && let Payload::NativeText { start } = self.payload
+-        {
++        if self.active {
++            self.prepared_native_text_range()
++        } else {
++            None
++        }
++    }
++
++    /// Copy the prepared native range for raw publication before frame publication.
++    pub(crate) fn prepared_native_text_range(&self) -> Option<(usize, usize)> {
++        if let Payload::NativeText { start } = self.payload {
+             Some((start, self.callback_bytes))
+         } else {
+             None
+diff --git a/crates/oriole/src/dtd.rs b/crates/oriole/src/dtd.rs
+index aed6808..2408cf1 100644
+--- a/crates/oriole/src/dtd.rs
++++ b/crates/oriole/src/dtd.rs
+@@ -356,6 +356,7 @@ impl Parser {
+         {
+             if !self.standalone {
+                 self.current_raw.clear();
++                self.native_raw = None;
+                 return Some(crate::Event {
+                     kind: EventKind::NotStandalone,
+                     position: foreign.position,
+diff --git a/crates/oriole/src/dtd/attlist.rs b/crates/oriole/src/dtd/attlist.rs
+index ba22900..5ac7924 100644
+--- a/crates/oriole/src/dtd/attlist.rs
++++ b/crates/oriole/src/dtd/attlist.rs
+@@ -178,6 +178,7 @@ impl Parser {
+         self.current_raw
+             .try_reserve(raw.len().saturating_sub(self.current_raw.len()))?;
+         self.current_raw.clear();
++        self.native_raw = None;
+         self.current_raw.try_push_str(&raw)?;
+         self.emit(
+             if unconditional {
+@@ -556,3 +557,34 @@ mod tests {
+         assert_eq!(names, ["a", "b"]);
+     }
+ }
++
++#[cfg(test)]
++mod native_raw_tests {
++    use super::*;
++
++    #[test]
++    fn attlist_fragment_replaces_a_retained_context_raw_view() {
++        let input = b"<!DOCTYPE r [<!ATTLIST r a CDATA 'x'>]><r/>";
++        let mut parser = Parser::new(crate::Config::default());
++        parser.enable_input_context();
++        parser.set_default_events(true);
++        parser.feed(input, true).unwrap();
++        while parser.conditional.attlist.is_none() {
++            parser.next_event().unwrap().unwrap();
++        }
++        let mut state = parser.conditional.attlist.take().unwrap();
++        let end = state.token.len();
++        let expected = state.token[state.fragment_start..end].to_owned();
++        // Exercise the writer contract with an earlier retained root range.
++        parser.native_raw = Some(crate::NativeRawRange {
++            start: 0,
++            count: std::num::NonZeroUsize::new(3).unwrap(),
++        });
++        assert_eq!(parser.current_raw(), Some("<!D"));
++        parser.attlist_raw(&mut state, end, false).unwrap();
++        assert!(parser.native_raw.is_none());
++        assert_eq!(parser.current_raw(), Some(expected.as_str()));
++        parser.pop_event().unwrap();
++        assert_eq!(parser.current_raw(), Some(expected.as_str()));
++    }
++}
+diff --git a/crates/oriole/src/encoding.rs b/crates/oriole/src/encoding.rs
+index 59aa133..1b108e4 100644
+--- a/crates/oriole/src/encoding.rs
++++ b/crates/oriole/src/encoding.rs
+@@ -37,16 +37,183 @@ impl Encoding {
+     }
+ }
+ 
++#[derive(Debug)]
++struct Detection {
++    requested: Option<String>,
++    declaration_checked: usize,
++    unknown_name: Option<String>,
++    encoding_error_position: Option<Position>,
++}
++
++impl Detection {
++    fn detect(
++        &mut self,
++        bytes: &[u8],
++        allocator: Allocator,
++        final_input: bool,
++        max_token: usize,
++        external_content: bool,
++    ) -> Result<Option<(Encoding, usize)>, Error> {
++        // An explicitly labelled external text entity can begin with ordinary
++        // Latin-1 bytes that happen to spell a Unicode byte-order mark.
++        if external_content
++            && self.requested.as_deref().and_then(Encoding::named) == Some(Encoding::Latin1)
++        {
++            return Ok(Some((Encoding::Latin1, 0)));
++        }
++        if bytes.len() < 4
++            && !final_input
++            && !(bytes.len() >= 2
++                && bytes[0].is_ascii()
++                && bytes[0] != 0
++                && bytes[1].is_ascii()
++                && bytes[1] != 0)
++        {
++            return Ok(None);
++        }
++        let (sniffed, skip) = if bytes.starts_with(&[0xef, 0xbb, 0xbf]) {
++            (Encoding::Utf8, 3)
++        } else if bytes.starts_with(&[0xff, 0xfe]) {
++            (Encoding::Utf16Le, 2)
++        } else if bytes.starts_with(&[0xfe, 0xff]) {
++            (Encoding::Utf16Be, 2)
++        } else if bytes.first() == Some(&0) && bytes.len() >= 2 {
++            (Encoding::Utf16Be, 0)
++        } else if bytes.get(1) == Some(&0)
++            && (!external_content || self.requested.is_some() || bytes[0] == b'<')
++        {
++            // In external content, a plain ASCII character can be complete
++            // before the next byte arrives. Only a markup opener selects
++            // unlabelled little-endian UTF-16; document/DTD detection differs.
++            (Encoding::Utf16Le, 0)
++        } else {
++            (Encoding::Utf8, 0)
++        };
++        if let Some(requested) = &self.requested {
++            let requested = if requested.eq_ignore_ascii_case("UTF-16") {
++                match sniffed {
++                    Encoding::Utf16Le | Encoding::Utf16Be => sniffed,
++                    _ => {
++                        return Err(Error::bare(
++                            ErrorKind::IncorrectEncoding,
++                            "UTF-16 input requires a byte order mark or declaration",
++                        ));
++                    }
++                }
++            } else {
++                let Some(encoding) = Encoding::named(requested) else {
++                    self.unknown_name = Some(requested.try_clone()?);
++                    return Err(Error::bare(
++                        ErrorKind::UnknownEncoding,
++                        "unsupported input encoding",
++                    ));
++                };
++                encoding
++            };
++            if skip > 0 && sniffed != requested {
++                return Err(Error::bare(
++                    ErrorKind::IncorrectEncoding,
++                    "byte order mark conflicts with the requested encoding",
++                ));
++            }
++            return Ok(Some((requested, skip)));
++        }
++        if sniffed != Encoding::Utf8 {
++            return Ok(Some((sniffed, skip)));
++        }
++        let content = &bytes[skip..];
++        if b"<?xml".starts_with(content) && !final_input {
++            return Ok(None);
++        }
++        if content.starts_with(b"<?xml") && content.get(5).is_some_and(u8::is_ascii_whitespace) {
++            let start = self.declaration_checked.min(content.len());
++            let end = content[start..]
++                .windows(2)
++                .position(|window| window == b"?>")
++                .map(|end| end + start);
++            self.declaration_checked = content.len().saturating_sub(1);
++            let Some(end) = end else {
++                if content.len() > max_token {
++                    return Err(Error::bare(
++                        ErrorKind::LimitExceeded,
++                        "XML declaration byte limit exceeded",
++                    ));
++                }
++                if !final_input {
++                    return Ok(None);
++                }
++                return Ok(Some((Encoding::Utf8, skip)));
++            };
++            // The declaration is ASCII in every supported ASCII-compatible encoding.
++            if let Ok(declaration) = std::str::from_utf8(&content[..end])
++                && let Some(start) = declaration.find("encoding")
++            {
++                let rest = declaration[start + 8..].trim_start_matches(crate::whitespace);
++                if let Some(rest) = rest.strip_prefix('=') {
++                    let rest = rest.trim_start_matches(crate::whitespace);
++                    if let Some(quote @ ('\'' | '"')) = rest.chars().next()
++                        && let Some(end) = rest[1..].find(quote)
++                    {
++                        let name = &rest[1..end + 1];
++                        if !crate::valid_encoding_name(name) {
++                            return Ok(Some((Encoding::Utf8, skip)));
++                        }
++                        let encoding = Encoding::named(name);
++                        let mismatch = name.eq_ignore_ascii_case("UTF-16")
++                            || matches!(encoding, Some(Encoding::Utf16Le | Encoding::Utf16Be));
++                        if encoding.is_none() || mismatch {
++                            let offset = declaration.len() - rest.len() + 1;
++                            let mut position = Position {
++                                byte_index: skip + offset,
++                                line: 1,
++                                column: usize::from(skip != 0),
++                                byte_count: 0,
++                            };
++                            let mut previous_cr = false;
++                            for character in declaration[..offset].chars() {
++                                match character {
++                                    '\r' => {
++                                        position.line += 1;
++                                        position.column = 0;
++                                    }
++                                    '\n' if !previous_cr => {
++                                        position.line += 1;
++                                        position.column = 0;
++                                    }
++                                    '\n' => {}
++                                    _ => position.column += 1,
++                                }
++                                previous_cr = character == '\r';
++                            }
++                            self.encoding_error_position = Some(position);
++                            if mismatch {
++                                return Err(Error::bare(
++                                    ErrorKind::IncorrectEncoding,
++                                    "declared encoding conflicts with input bytes",
++                                ));
++                            }
++                            self.unknown_name = Some(String::try_from_str_in(name, allocator)?);
++                            return Err(Error::bare(
++                                ErrorKind::UnknownEncoding,
++                                "unsupported declared encoding",
++                            ));
++                        }
++                        return Ok(encoding.map(|encoding| (encoding, skip)));
++                    }
++                }
++            }
++        }
++        Ok(Some((Encoding::Utf8, skip)))
++    }
++}
++
+ #[derive(Debug)]
+ pub(crate) struct Decoder {
+     allocator: Allocator,
+     encoding: Option<Encoding>,
+-    requested: Option<String>,
++    detection: Detection,
+     pending: Vec<u8>,
+     pending_cursor: usize,
+-    declaration_checked: usize,
+-    unknown_name: Option<String>,
+-    encoding_error_position: Option<Position>,
+     custom_map: Option<Box<[i32; 256]>>,
+     conversion: Option<([u8; 4], u8)>,
+ }
+@@ -55,14 +222,16 @@ impl Decoder {
+         Ok(Self {
+             allocator,
+             encoding: None,
+-            requested: requested
+-                .map(|name| String::try_from_str_in(name, allocator))
+-                .transpose()?,
++            detection: Detection {
++                requested: requested
++                    .map(|name| String::try_from_str_in(name, allocator))
++                    .transpose()?,
++                declaration_checked: 0,
++                unknown_name: None,
++                encoding_error_position: None,
++            },
+             pending: Vec::new_in(allocator),
+             pending_cursor: 0,
+-            declaration_checked: 0,
+-            unknown_name: None,
+-            encoding_error_position: None,
+             custom_map: None,
+             conversion: None,
+         })
+@@ -72,28 +241,31 @@ impl Decoder {
+         let requested = requested
+             .map(|name| String::try_from_str_in(name, self.allocator))
+             .transpose()?;
+-        self.requested = requested;
++        self.detection.requested = requested;
+         Ok(())
+     }
+ 
+     /// A complete BOM can precede enough input to choose the declaration's
+     /// encoding. Report only that recognized prefix for consumed-byte accounting.
+     pub(crate) fn pending_bom_len(&self, external_content: bool) -> usize {
++        self.bom_len(&self.pending, external_content)
++    }
++
++    fn bom_len(&self, bytes: &[u8], external_content: bool) -> usize {
+         if self.encoding.is_some()
+             // An explicit unknown protocol encoding must first be resolved by
+             // its handler; these bytes have not yet been recognized as a BOM.
+-            || self.requested.as_deref().is_some_and(|name| {
++            || self.detection.requested.as_deref().is_some_and(|name| {
+                 Encoding::named(name).is_none() && !name.eq_ignore_ascii_case("UTF-16")
+             })
+             || (external_content
+-                && self.requested.as_deref().and_then(Encoding::named) == Some(Encoding::Latin1))
++                && self.detection.requested.as_deref().and_then(Encoding::named) == Some(Encoding::Latin1))
+         {
+             return 0;
+         }
+-        if self.pending.starts_with(&[0xef, 0xbb, 0xbf]) {
++        if bytes.starts_with(&[0xef, 0xbb, 0xbf]) {
+             3
+-        } else if self.pending.starts_with(&[0xff, 0xfe]) || self.pending.starts_with(&[0xfe, 0xff])
+-        {
++        } else if bytes.starts_with(&[0xff, 0xfe]) || bytes.starts_with(&[0xfe, 0xff]) {
+             2
+         } else {
+             0
+@@ -133,7 +305,13 @@ impl Decoder {
+             return Ok(());
+         }
+         if self.encoding.is_none() {
+-            let Some((encoding, skip)) = self.detect(final_input, max_token, external_content)?
++            let Some((encoding, skip)) = self.detection.detect(
++                &self.pending,
++                self.allocator,
++                final_input,
++                max_token,
++                external_content,
++            )?
+             else {
+                 return Ok(());
+             };
+@@ -280,180 +458,20 @@ impl Decoder {
+         Ok(())
+     }
+ 
+-    fn detect(
+-        &mut self,
+-        final_input: bool,
+-        max_token: usize,
+-        external_content: bool,
+-    ) -> Result<Option<(Encoding, usize)>, Error> {
+-        // An explicitly labelled external text entity can begin with ordinary
+-        // Latin-1 bytes that happen to spell a Unicode byte-order mark.
+-        if external_content
+-            && self.requested.as_deref().and_then(Encoding::named) == Some(Encoding::Latin1)
+-        {
+-            return Ok(Some((Encoding::Latin1, 0)));
+-        }
+-        let bytes = &self.pending;
+-        if bytes.len() < 4
+-            && !final_input
+-            && !(bytes.len() >= 2
+-                && bytes[0].is_ascii()
+-                && bytes[0] != 0
+-                && bytes[1].is_ascii()
+-                && bytes[1] != 0)
+-        {
+-            return Ok(None);
+-        }
+-        let (sniffed, skip) = if bytes.starts_with(&[0xef, 0xbb, 0xbf]) {
+-            (Encoding::Utf8, 3)
+-        } else if bytes.starts_with(&[0xff, 0xfe]) {
+-            (Encoding::Utf16Le, 2)
+-        } else if bytes.starts_with(&[0xfe, 0xff]) {
+-            (Encoding::Utf16Be, 2)
+-        } else if bytes.first() == Some(&0) && bytes.len() >= 2 {
+-            (Encoding::Utf16Be, 0)
+-        } else if bytes.get(1) == Some(&0)
+-            && (!external_content || self.requested.is_some() || bytes[0] == b'<')
+-        {
+-            // In external content, a plain ASCII character can be complete
+-            // before the next byte arrives. Only a markup opener selects
+-            // unlabelled little-endian UTF-16; document/DTD detection differs.
+-            (Encoding::Utf16Le, 0)
+-        } else {
+-            (Encoding::Utf8, 0)
+-        };
+-        if let Some(requested) = &self.requested {
+-            let requested = if requested.eq_ignore_ascii_case("UTF-16") {
+-                match sniffed {
+-                    Encoding::Utf16Le | Encoding::Utf16Be => sniffed,
+-                    _ => {
+-                        return Err(Error::bare(
+-                            ErrorKind::IncorrectEncoding,
+-                            "UTF-16 input requires a byte order mark or declaration",
+-                        ));
+-                    }
+-                }
+-            } else {
+-                let Some(encoding) = Encoding::named(requested) else {
+-                    self.unknown_name = Some(requested.try_clone()?);
+-                    return Err(Error::bare(
+-                        ErrorKind::UnknownEncoding,
+-                        "unsupported input encoding",
+-                    ));
+-                };
+-                encoding
+-            };
+-            if skip > 0 && sniffed != requested {
+-                return Err(Error::bare(
+-                    ErrorKind::IncorrectEncoding,
+-                    "byte order mark conflicts with the requested encoding",
+-                ));
+-            }
+-            return Ok(Some((requested, skip)));
+-        }
+-        if sniffed != Encoding::Utf8 {
+-            return Ok(Some((sniffed, skip)));
+-        }
+-        let content = &bytes[skip..];
+-        if b"<?xml".starts_with(content) && !final_input {
+-            return Ok(None);
+-        }
+-        if content.starts_with(b"<?xml") && content.get(5).is_some_and(u8::is_ascii_whitespace) {
+-            let start = self.declaration_checked.min(content.len());
+-            let end = content[start..]
+-                .windows(2)
+-                .position(|window| window == b"?>")
+-                .map(|end| end + start);
+-            self.declaration_checked = content.len().saturating_sub(1);
+-            let Some(end) = end else {
+-                if content.len() > max_token {
+-                    return Err(Error::bare(
+-                        ErrorKind::LimitExceeded,
+-                        "XML declaration byte limit exceeded",
+-                    ));
+-                }
+-                if !final_input {
+-                    return Ok(None);
+-                }
+-                return Ok(Some((Encoding::Utf8, skip)));
+-            };
+-            // The declaration is ASCII in every supported ASCII-compatible encoding.
+-            if let Ok(declaration) = std::str::from_utf8(&content[..end])
+-                && let Some(start) = declaration.find("encoding")
+-            {
+-                let rest = declaration[start + 8..].trim_start_matches(crate::whitespace);
+-                if let Some(rest) = rest.strip_prefix('=') {
+-                    let rest = rest.trim_start_matches(crate::whitespace);
+-                    if let Some(quote @ ('\'' | '"')) = rest.chars().next()
+-                        && let Some(end) = rest[1..].find(quote)
+-                    {
+-                        let name = &rest[1..end + 1];
+-                        if !crate::valid_encoding_name(name) {
+-                            return Ok(Some((Encoding::Utf8, skip)));
+-                        }
+-                        let encoding = Encoding::named(name);
+-                        let mismatch = name.eq_ignore_ascii_case("UTF-16")
+-                            || matches!(encoding, Some(Encoding::Utf16Le | Encoding::Utf16Be));
+-                        if encoding.is_none() || mismatch {
+-                            let offset = declaration.len() - rest.len() + 1;
+-                            let mut position = Position {
+-                                byte_index: skip + offset,
+-                                line: 1,
+-                                column: usize::from(skip != 0),
+-                                byte_count: 0,
+-                            };
+-                            let mut previous_cr = false;
+-                            for character in declaration[..offset].chars() {
+-                                match character {
+-                                    '\r' => {
+-                                        position.line += 1;
+-                                        position.column = 0;
+-                                    }
+-                                    '\n' if !previous_cr => {
+-                                        position.line += 1;
+-                                        position.column = 0;
+-                                    }
+-                                    '\n' => {}
+-                                    _ => position.column += 1,
+-                                }
+-                                previous_cr = character == '\r';
+-                            }
+-                            self.encoding_error_position = Some(position);
+-                            if mismatch {
+-                                return Err(Error::bare(
+-                                    ErrorKind::IncorrectEncoding,
+-                                    "declared encoding conflicts with input bytes",
+-                                ));
+-                            }
+-                            self.unknown_name =
+-                                Some(String::try_from_str_in(name, self.allocator)?);
+-                            return Err(Error::bare(
+-                                ErrorKind::UnknownEncoding,
+-                                "unsupported declared encoding",
+-                            ));
+-                        }
+-                        return Ok(encoding.map(|encoding| (encoding, skip)));
+-                    }
+-                }
+-            }
+-        }
+-        Ok(Some((Encoding::Utf8, skip)))
+-    }
+-
+     /// A parameter child is read once its protocol encoding is known, even for
+     /// empty non-final input that does not complete byte-order detection.
+     pub(crate) fn protocol_encoding_ready(&self) -> bool {
+         self.encoding.is_some()
+-            || self.requested.as_deref().is_none_or(|name| {
++            || self.detection.requested.as_deref().is_none_or(|name| {
+                 Encoding::named(name).is_some() || name.eq_ignore_ascii_case("UTF-16")
+             })
+     }
+ 
+     pub(crate) fn unknown_encoding(&self) -> Option<&str> {
+-        self.unknown_name.as_deref()
++        self.detection.unknown_name.as_deref()
+     }
+     pub(crate) fn encoding_error_position(&self) -> Option<Position> {
+-        self.encoding_error_position
++        self.detection.encoding_error_position
+     }
+     pub(crate) fn append_pending(&mut self, bytes: &[u8]) -> Result<(), Error> {
+         try_extend_from_slice(&mut self.pending, bytes)?;
+@@ -467,6 +485,7 @@ impl Decoder {
+         source: &mut Source,
+     ) -> Result<(), Error> {
+         if self
++            .detection
+             .unknown_name
+             .as_deref()
+             .is_none_or(|unknown| !unknown.eq_ignore_ascii_case(name))
+@@ -493,7 +512,7 @@ impl Decoder {
+                 ));
+             }
+         }
+-        if self.requested.is_some() && self.pending.starts_with(&[0xef, 0xbb, 0xbf]) {
++        if self.detection.requested.is_some() && self.pending.starts_with(&[0xef, 0xbb, 0xbf]) {
+             return Err(Error::bare(
+                 ErrorKind::IncorrectEncoding,
+                 "custom encoding conflicts with byte order mark",
+@@ -554,11 +573,14 @@ impl Decoder {
+             return (0, 0);
+         }
+         if requested
+-            .zip(self.unknown_name.as_deref())
++            .zip(self.detection.unknown_name.as_deref())
+             .is_some_and(|(requested, name)| requested.eq_ignore_ascii_case(name))
+         {
+             (
+-                self.unknown_name.as_ref().map_or(0, |name| name.len()),
++                self.detection
++                    .unknown_name
++                    .as_ref()
++                    .map_or(0, |name| name.len()),
+                 self.custom_map
+                     .as_ref()
+                     .map_or(0, |_| size_of::<[i32; 256]>()),
+@@ -575,9 +597,10 @@ impl Decoder {
+             return Ok(());
+         }
+         if self
++            .detection
+             .requested
+             .as_deref()
+-            .zip(parent.unknown_name.as_deref())
++            .zip(parent.detection.unknown_name.as_deref())
+             .is_some_and(|(name, parent)| name.eq_ignore_ascii_case(parent))
+         {
+             self.custom_map = parent
+@@ -585,7 +608,8 @@ impl Decoder {
+                 .as_ref()
+                 .map(|map| try_box(**map, self.allocator))
+                 .transpose()?;
+-            self.unknown_name = parent
++            self.detection.unknown_name = parent
++                .detection
+                 .unknown_name
+                 .as_ref()
+                 .map(|name| String::try_from_str_in(name, self.allocator))
+@@ -602,6 +626,7 @@ impl Decoder {
+             self.encoding,
+             Some(Encoding::SingleByte | Encoding::MultiByte)
+         ) && self
++            .detection
+             .unknown_name
+             .as_deref()
+             .is_some_and(|custom| custom.eq_ignore_ascii_case(name))
+@@ -609,7 +634,7 @@ impl Decoder {
+             return Ok(());
+         }
+         // An explicitly supplied encoding takes precedence over the declaration.
+-        if self.requested.is_some() {
++        if self.detection.requested.is_some() {
+             return Ok(());
+         }
+         let actual = self.encoding.unwrap_or(Encoding::Utf8);
+@@ -667,6 +692,176 @@ struct Scan {
+     pi: bool,
+ }
+ 
++/// Adapter raw context uses the native Source allocation until conversion or a
++/// non-UTF-8 feed requires the ordinary separate representation.
++#[derive(Debug)]
++pub(crate) struct InputContext {
++    raw: Vec<u8>,
++    start: usize,
++    physical_start: usize,
++    native: bool,
++}
++
++impl InputContext {
++    pub(crate) fn new(allocator: Allocator, decoder: &Decoder, source: &mut Source) -> Self {
++        let native = decoder
++            .encoding
++            .is_none_or(|encoding| encoding == Encoding::Utf8)
++            && decoder.pending.is_empty()
++            && decoder.pending_cursor == 0
++            && decoder.conversion.is_none();
++        source.retain_native_input = native;
++        Self {
++            raw: Vec::new_in(allocator),
++            start: 0,
++            physical_start: 0,
++            native,
++        }
++    }
++
++    pub(crate) fn view<'a>(&'a self, source: &'a Source) -> (&'a [u8], usize) {
++        let bytes = if self.native {
++            &source.text.as_bytes()[self.start - self.physical_start..]
++        } else {
++            &self.raw
++        };
++        (bytes, self.start)
++    }
++
++    /// Publish raw input before decoder errors or callbacks. Native appends also
++    /// supply decoded storage, but detection keeps those bytes hidden by cursor.
++    pub(crate) fn preserve(
++        &mut self,
++        decoder: &mut Decoder,
++        source: &mut Source,
++        input: &[u8],
++        retain_from: usize,
++        minimum: usize,
++    ) -> Result<bool, oriole_storage::AllocError> {
++        let discard = retain_from
++            .saturating_sub(self.start)
++            .min(self.view(source).0.len());
++        self.start += discard;
++        if self.native {
++            let physical = source
++                .text
++                .floor_char_boundary(self.start - self.physical_start);
++            debug_assert!(physical <= source.cursor);
++            source.text.discard_prefix(physical);
++            source.cursor -= physical;
++            self.physical_start += physical;
++            if let Ok(text) = std::str::from_utf8(input) {
++                source.text.try_push_str_with_minimum(text, minimum)?;
++                if decoder.encoding.is_none() {
++                    source.cursor = source.text.len();
++                }
++                return Ok(true);
++            }
++            self.separate(decoder, source, input, minimum)?;
++        } else {
++            self.raw.drain(..discard);
++            if !input.is_empty() && self.raw.capacity() == 0 {
++                self.raw.try_reserve(input.len().max(minimum))?;
++            }
++            try_extend_from_slice(&mut self.raw, input)?;
++        }
++        Ok(false)
++    }
++
++    /// Commit a one-way fallback only after its raw owner and any undecoded
++    /// staging bytes have been allocated. Known UTF-8 Source bytes stay intact.
++    fn separate(
++        &mut self,
++        decoder: &mut Decoder,
++        source: &mut Source,
++        input: &[u8],
++        minimum: usize,
++    ) -> Result<(), oriole_storage::AllocError> {
++        let history = self.view(source).0;
++        let length = history
++            .len()
++            .checked_add(input.len())
++            .ok_or(oriole_storage::AllocError::CapacityOverflow)?;
++        let mut raw = Vec::new_in(decoder.allocator);
++        if length != 0 {
++            raw.try_reserve(length.max(minimum))?;
++        }
++        try_extend_from_slice(&mut raw, history)?;
++        try_extend_from_slice(&mut raw, input)?;
++        if decoder.encoding.is_none() {
++            // Source contains only detection staging: pending must own every
++            // earlier byte before that hidden view is cleared.
++            try_extend_from_slice(&mut decoder.pending, source.text.as_bytes())?;
++            source.text.clear();
++            source.cursor = 0;
++        }
++        self.raw = raw;
++        self.native = false;
++        source.retain_native_input = false;
++        Ok(())
++    }
++
++    pub(crate) fn decode(
++        &mut self,
++        decoder: &mut Decoder,
++        source: &mut Source,
++        final_input: bool,
++        max_token: usize,
++        external_content: bool,
++    ) -> Result<(), Error> {
++        debug_assert!(self.native);
++        if decoder.encoding == Some(Encoding::Utf8) {
++            debug_assert!(decoder.pending.is_empty() && decoder.conversion.is_none());
++            return Ok(());
++        }
++        let detected = decoder.detection.detect(
++            source.text.as_bytes(),
++            decoder.allocator,
++            final_input,
++            max_token,
++            external_content,
++        );
++        match detected {
++            Ok(None) => Ok(()),
++            Ok(Some((Encoding::Utf8, skip))) => {
++                decoder.encoding = Some(Encoding::Utf8);
++                source.encoding = Encoding::Utf8;
++                source.raw_index = skip;
++                source.column = usize::from(skip != 0);
++                source.cursor = skip;
++                Ok(())
++            }
++            result => {
++                self.separate(decoder, source, &[], max_token.min(1024))?;
++                let Some((encoding, skip)) = result? else {
++                    unreachable!()
++                };
++                // Reuse the completed detection result. In particular, do not
++                // rescan a declaration after its progress cursor advanced.
++                decoder.encoding = Some(encoding);
++                source.encoding = encoding;
++                source.raw_index = skip;
++                source.column = usize::from(skip != 0);
++                decoder.pending.drain(..skip);
++                decoder.feed(&[], final_input, source, max_token, external_content)
++            }
++        }
++    }
++
++    pub(crate) fn pending_bom_len(
++        &self,
++        decoder: &Decoder,
++        source: &Source,
++        external_content: bool,
++    ) -> usize {
++        if self.native {
++            decoder.bom_len(source.text.as_bytes(), external_content)
++        } else {
++            decoder.pending_bom_len(external_content)
++        }
++    }
++}
++
+ /// Original-input coordinates are bounded by `Parser::input_bytes_remaining`.
+ /// Internal entities own a finite UTF-8 buffer and return the referring source's
+ /// anchor without adding replacement offsets. Compaction changes buffer offsets,
+@@ -675,6 +870,7 @@ struct Scan {
+ pub(crate) struct Source {
+     pub(crate) text: crate::lexical::Buffer,
+     cursor: usize,
++    retain_native_input: bool,
+     encoding: Encoding,
+     raw_index: usize,
+     accounted_raw: usize,
+@@ -706,6 +902,7 @@ impl Source {
+         Self {
+             text: crate::lexical::Buffer::new_in(allocator),
+             cursor: 0,
++            retain_native_input: false,
+             encoding: Encoding::Utf8,
+             raw_index: 0,
+             accounted_raw: 0,
+@@ -1045,7 +1242,10 @@ impl Source {
+         self.cursor += count;
+         self.scan = Scan::default();
+         self.deferred_size = 0;
+-        if self.cursor >= 64 * 1024 && self.cursor >= self.text.len() / 2 {
++        if !self.retain_native_input
++            && self.cursor >= 64 * 1024
++            && self.cursor >= self.text.len() / 2
++        {
+             self.text.discard_prefix(self.cursor);
+             if self.encoding == Encoding::MultiByte {
+                 self.raw_widths.drain(..self.cursor);
+diff --git a/crates/oriole/src/lib.rs b/crates/oriole/src/lib.rs
+index b354c64..bbdaeb5 100644
+--- a/crates/oriole/src/lib.rs
++++ b/crates/oriole/src/lib.rs
+@@ -36,7 +36,7 @@ pub use recycling::RecyclingToken;
+ 
+ use recycling::{EventRecycling, copy_attribute_string};
+ 
+-use encoding::{Decoder, Source};
++use encoding::{Decoder, InputContext, Source};
+ pub use names::NameRules;
+ use names::{invalid_xml_char, is_uri_char, is_xml_char, whitespace};
+ 
+@@ -527,6 +527,12 @@ impl TryClone for DefaultAttribute {
+     }
+ }
+ 
++#[derive(Clone, Copy, Debug)]
++struct NativeRawRange {
++    start: usize,
++    count: NonZeroUsize,
++}
++
+ /// An incremental, non-validating XML 1.0 parser.
+ ///
+ /// External entity references produce events for application-controlled resolution;
+@@ -549,6 +555,7 @@ pub struct Parser {
+     config: Config,
+     allocator: Allocator,
+     decoder: Decoder,
++    input_context: Option<InputContext>,
+     sources: Vec<Source>,
+     pending: Queue<PendingEvent>,
+     stack: Vec<Element>,
+@@ -591,6 +598,7 @@ pub struct Parser {
+     reparse_deferral: bool,
+     last_position: Position,
+     current_raw: String,
++    native_raw: Option<NativeRawRange>,
+     token_scratch: lexical::Buffer,
+     raw_attributes: Vec<RawAttribute>,
+     tag_scanner: tag::TagScanner,
+@@ -639,6 +647,7 @@ impl Parser {
+             config,
+             allocator,
+             decoder,
++            input_context: None,
+             sources,
+             namespaces,
+             pending: Queue::new_in(allocator),
+@@ -682,6 +691,7 @@ impl Parser {
+                 ..Position::default()
+             },
+             current_raw: String::new_in(allocator),
++            native_raw: None,
+             token_scratch: lexical::Buffer::new_in(allocator),
+             raw_attributes: Vec::new_in(allocator),
+             tag_scanner: tag::TagScanner::default(),
+@@ -1208,6 +1218,66 @@ impl Parser {
+ 
+     /// Append input without calling user code. Drain events before feeding more data.
+     pub fn feed(&mut self, bytes: &[u8], is_final: bool) -> Result<(), Error> {
++        if self.input_context.is_some() {
++            return match self.feed_with_input_context(bytes, is_final, 1024) {
++                Ok(result) => result,
++                Err(_) => self.fail(ErrorKind::NoMemory, "out of memory"),
++            };
++        }
++        self.feed_inner(bytes, is_final, false)
++    }
++
++    /// Use the root native input owner for C context. Enable before the first feed.
++    #[doc(hidden)]
++    pub fn enable_input_context(&mut self) {
++        assert_eq!(self.received, 0);
++        assert!(self.input_context.is_none());
++        self.input_context = Some(InputContext::new(
++            self.allocator,
++            &self.decoder,
++            &mut self.sources[0],
++        ));
++    }
++
++    /// Retain original input before decoding. The outer allocation error is a
++    /// context-publication failure; the inner result retains ordinary feed errors.
++    #[doc(hidden)]
++    pub fn feed_with_input_context(
++        &mut self,
++        bytes: &[u8],
++        is_final: bool,
++        history: usize,
++    ) -> Result<Result<(), Error>, AllocError> {
++        if self.error.is_some() || self.final_input || bytes.len() > self.input_bytes_remaining() {
++            return Ok(self.feed_inner(bytes, is_final, false));
++        }
++        let retain_from = self.input_context_byte_index().saturating_sub(history);
++        let minimum = history.min(self.config.limits.max_total_bytes);
++        let native = self
++            .input_context
++            .as_mut()
++            .expect("context input enabled")
++            .preserve(
++                &mut self.decoder,
++                &mut self.sources[0],
++                bytes,
++                retain_from,
++                minimum,
++            )?;
++        Ok(self.feed_inner(bytes, is_final, native))
++    }
++
++    /// Original input bytes and their absolute starting offset. Any pointer
++    /// derived by the C adapter is valid only until the next feed or destruction.
++    #[doc(hidden)]
++    #[must_use]
++    pub fn input_context(&self) -> (&[u8], usize) {
++        self.input_context
++            .as_ref()
++            .map_or((&[], 0), |context| context.view(&self.sources[0]))
++    }
++
++    fn feed_inner(&mut self, bytes: &[u8], is_final: bool, native: bool) -> Result<(), Error> {
+         if let Some(error) = &self.error {
+             return Err(*error);
+         }
+@@ -1236,20 +1306,41 @@ impl Parser {
+             }
+             return Ok(());
+         }
+-        if let Err(error) = self.decoder.feed(
+-            bytes,
+-            is_final,
+-            &mut self.sources[0],
+-            self.config.limits.max_token_bytes,
+-            self.fragment && !self.external_subset,
+-        ) {
++        let decoded = if native {
++            self.input_context
++                .as_mut()
++                .expect("context input enabled")
++                .decode(
++                    &mut self.decoder,
++                    &mut self.sources[0],
++                    is_final,
++                    self.config.limits.max_token_bytes,
++                    self.fragment && !self.external_subset,
++                )
++        } else {
++            self.decoder.feed(
++                bytes,
++                is_final,
++                &mut self.sources[0],
++                self.config.limits.max_token_bytes,
++                self.fragment && !self.external_subset,
++            )
++        };
++        if let Err(error) = decoded {
+             self.decoding_error = Some((error.kind, error.message));
+         }
+         // Encoding detection may retain a complete BOM while awaiting a text
+         // declaration. These bytes already form a token, even on a nonfinal feed.
+-        let prefix = self
+-            .decoder
+-            .pending_bom_len(self.fragment && !self.external_subset);
++        let prefix = if let Some(context) = &self.input_context {
++            context.pending_bom_len(
++                &self.decoder,
++                &self.sources[0],
++                self.fragment && !self.external_subset,
++            )
++        } else {
++            self.decoder
++                .pending_bom_len(self.fragment && !self.external_subset)
++        };
+         let bytes = self.sources[0].unaccounted_prefix(prefix);
+         if !self.expanded.account(bytes, self.fragment, true) {
+             return self.fail(
+@@ -1714,6 +1805,7 @@ impl Parser {
+                     .map(|(_, position)| position.byte_index),
+             )
+             .chain(self.value_context_byte_index())
++            .chain(self.native_raw.map(|raw| raw.start))
+             .min()
+             .expect("a parser always has its original input source")
+     }
+@@ -1782,6 +1874,18 @@ impl Parser {
+     /// Raw XML for the token responsible for the most recently returned event.
+     #[must_use]
+     pub fn current_raw(&self) -> Option<&str> {
++        if let Some(raw) = self.native_raw {
++            let (context, start) = self.input_context();
++            let offset = raw
++                .start
++                .checked_sub(start)
++                .expect("retained native raw start");
++            let end = offset.checked_add(raw.count.get()).expect("native raw end");
++            let bytes = context.get(offset..end).expect("retained native raw range");
++            // Only this validated Text span is UTF-8. A later feed may have
++            // moved the context to separate storage with an invalid suffix.
++            return Some(std::str::from_utf8(bytes).expect("native raw UTF-8"));
++        }
+         (!self.current_raw.is_empty()).then_some(self.current_raw.as_str())
+     }
+     /// Replace limits before parsing begins.
+@@ -1865,6 +1969,7 @@ impl Parser {
+                 .store(false, Ordering::Relaxed);
+         }
+         if let Some(raw) = pending.raw {
++            self.native_raw = None;
+             if raw.is_empty() {
+                 self.current_raw.clear();
+             } else {
+@@ -1880,6 +1985,7 @@ impl Parser {
+         self.current_raw
+             .try_reserve(count.saturating_sub(self.current_raw.len()))?;
+         self.current_raw.clear();
++        self.native_raw = None;
+         let source = self
+             .sources
+             .last()
+@@ -2333,6 +2439,7 @@ impl Parser {
+             // Parsing only writes queued raw overrides. Publish the owned token
+             // before returning either its events or its terminal error.
+             token.swap_decoded(&mut self.current_raw)?;
++            self.native_raw = None;
+             parsed?;
+             self.token_scratch = token;
+             if matches!(
+@@ -2608,7 +2715,22 @@ impl Parser {
+         } else {
+             None
+         };
+-        self.save_current_raw(end)?;
++        if self.input_context.is_some()
++            && let Some((start, count)) = output
++                .frame
++                .as_ref()
++                .and_then(|frame| frame.prepared_native_text_range())
++        {
++            debug_assert_eq!(count, end);
++            // The core owns the context and retains this absolute range across
++            // feeds. The stale String stays available for the next owned token.
++            self.native_raw = Some(NativeRawRange {
++                start,
++                count: NonZeroUsize::new(count).expect("nonempty native Text"),
++            });
++        } else {
++            self.save_current_raw(end)?;
++        }
+         self.declaration_allowed = false;
+         if let Some(value) = value {
+             self.emit(EventKind::Text(value), position)?;
+@@ -4313,6 +4435,144 @@ mod input_bound_tests {
+         assert!(parser.final_input);
+     }
+ 
++    #[test]
++    fn adapter_input_owner_matches_decoded_events_and_positions() {
++        let utf16 = "<r>é</r>"
++            .encode_utf16()
++            .flat_map(u16::to_le_bytes)
++            .collect::<std::vec::Vec<_>>();
++        for input in [
++            b"<r a='v'>abc<n/>tail</r>".as_slice(),
++            "\u{feff}<?xml version='1.0'?><r>é\r\n&amp;z</r>".as_bytes(),
++            b"<?xml version='1.0' encoding='ISO-8859-1'?><r>\xe9</r>",
++            b"<r>abc\xfftail</r>",
++            b"<r>abc\xc3",
++            &utf16,
++        ] {
++            for width in [1, 2, 3, 4, 7, input.len()] {
++                let mut ordinary = Parser::new(Config::default());
++                let mut context = Parser::new(Config::default());
++                context.enable_input_context();
++                let mut fed = 0;
++                for chunk in input.chunks(width) {
++                    fed += chunk.len();
++                    let final_input = fed == input.len();
++                    assert_eq!(
++                        context.feed(chunk, final_input),
++                        ordinary.feed(chunk, final_input)
++                    );
++                    let (raw, start) = context.input_context();
++                    assert_eq!(raw, &input[start..fed]);
++                    loop {
++                        let expected = ordinary.next_event();
++                        let actual = context.next_event();
++                        assert_eq!(actual, expected, "width={width}, fed={fed}");
++                        assert_eq!(context.current_raw(), ordinary.current_raw());
++                        if !matches!(actual, Ok(Some(_))) {
++                            break;
++                        }
++                    }
++                    if context.error.is_some() {
++                        break;
++                    }
++                }
++            }
++        }
++    }
++
++    #[test]
++    fn adapter_input_owner_covers_first_feed_detection_and_fallback() {
++        for input in ["<r>é</r>", "\u{feff}<r>é</r>"] {
++            let mut parser = Parser::new(Config::default());
++            parser.enable_input_context();
++            parser.feed(input.as_bytes(), true).unwrap();
++            assert_eq!(
++                parser.input_context().0.as_ptr(),
++                parser.sources[0].text.as_bytes().as_ptr()
++            );
++            assert_eq!(parser.input_context().0, input.as_bytes());
++            assert_eq!(
++                parser.sources[0].remaining(),
++                input.trim_start_matches('\u{feff}')
++            );
++            while parser.next_event().unwrap().is_some() {}
++        }
++        let mut unaligned = false;
++        for padding in 0..4 {
++            let input = format!("<r>{}{}<n/>", "€".repeat(23_000), "x".repeat(padding));
++            let mut parser = Parser::new(Config::default());
++            parser.enable_input_context();
++            parser.feed(input.as_bytes(), false).unwrap();
++            while parser.next_event().unwrap().is_some() {}
++            parser.feed(b"</r>", true).unwrap();
++            let (context, start) = parser.input_context();
++            assert_eq!(start, input.len() - 1024);
++            assert_eq!(context, [&input.as_bytes()[start..], b"</r>"].concat());
++            let text = parser.sources[0].text.as_bytes();
++            let offset = text.len() - context.len();
++            assert!(offset <= 3);
++            assert_eq!(context.as_ptr(), text.as_ptr().wrapping_add(offset));
++            unaligned |= offset != 0;
++            while parser.next_event().unwrap().is_some() {}
++        }
++        assert!(unaligned);
++        let mut parser = Parser::new(Config::default());
++        parser.enable_input_context();
++        parser.feed(b"<?xml version='1.0'", false).unwrap();
++        assert_eq!(
++            parser.input_context().0.as_ptr(),
++            parser.sources[0].text.as_bytes().as_ptr()
++        );
++        assert!(parser.sources[0].remaining().is_empty());
++        assert_eq!(parser.next_event().unwrap(), None);
++        parser.feed(b"?><r>abc", false).unwrap();
++        assert_eq!(
++            parser.input_context().0.as_ptr(),
++            parser.sources[0].text.as_bytes().as_ptr()
++        );
++        while parser.next_event().unwrap().is_some() {}
++        parser.feed(b"\xc3", false).unwrap();
++        assert_ne!(
++            parser.input_context().0.as_ptr(),
++            parser.sources[0].text.as_bytes().as_ptr()
++        );
++        parser.feed(b"\xa9</r>", true).unwrap();
++        assert_ne!(
++            parser.input_context().0.as_ptr(),
++            parser.sources[0].text.as_bytes().as_ptr()
++        );
++        while parser.next_event().unwrap().is_some() {}
++
++        // A child may already inherit a custom map before its first feed.
++        let mut parent = Parser::new(Config {
++            encoding: Some("test-map".to_owned()),
++            ..Config::default()
++        });
++        parent.feed(b"<r>", false).unwrap();
++        assert_eq!(
++            parent.next_event().unwrap_err().kind,
++            ErrorKind::UnknownEncoding
++        );
++        parent
++            .set_encoding_map("test-map", std::array::from_fn(|byte| byte as i32))
++            .unwrap();
++        while parent.next_event().unwrap().is_some() {}
++        let mut child = parent
++            .external_child_with_encoding(Some(""), Some("test-map"))
++            .unwrap();
++        child.enable_input_context();
++        child.feed(b"abc", true).unwrap();
++        assert_ne!(
++            child.input_context().0.as_ptr(),
++            child.sources[0].text.as_bytes().as_ptr()
++        );
++        assert!(matches!(
++            child.next_event().unwrap().unwrap().kind,
++            EventKind::Text(_)
++        ));
++        assert_eq!(child.next_event().unwrap(), None);
++    }
++
+     #[test]
+     fn external_input_allowance_belongs_to_each_source() {
+         let mut config = Config::default();
+@@ -4851,3 +5111,231 @@ mod coalesced_text_search_tests {
+         assert_eq!(coalesced_text_end(&cutoff), Some(65_536));
+     }
+ }
++
++#[cfg(test)]
++mod native_raw_context_tests {
++    use super::*;
++
++    fn text_parser(input: &[u8], final_input: bool) -> (Parser, AdapterFrame) {
++        let mut parser = Parser::new(Config::default());
++        parser.enable_input_context();
++        parser.feed(input, final_input).unwrap();
++        parser.next_event().unwrap().unwrap();
++        let mut frame = parser.adapter_frame();
++        let mut event = None;
++        parser
++            .next_event_for_c_text_context_into(&mut event, &mut frame)
++            .unwrap()
++            .unwrap();
++        assert!(parser.native_raw.is_some());
++        (parser, frame)
++    }
++
++    #[test]
++    fn native_raw_getters_share_context_and_allow_ordinary_handoffs() {
++        for count in [1, 23, 24, 4096, 4097] {
++            let text = format!("{}{}", "é".repeat(count / 2), "x".repeat(count % 2));
++            let input = format!("\u{feff}<r>{text}");
++            for enabled in [false, true] {
++                let mut parser = Parser::new(Config::default());
++                if enabled {
++                    parser.enable_input_context();
++                }
++                parser.feed(input.as_bytes(), false).unwrap();
++                parser.next_event().unwrap().unwrap();
++                let capacity = parser.current_raw.capacity();
++                let mut frame = parser.adapter_frame();
++                let mut event = None;
++                parser
++                    .next_event_for_c_text_context_into(&mut event, &mut frame)
++                    .unwrap()
++                    .unwrap();
++                assert_eq!(parser.current_raw(), Some(text.as_str()));
++                assert_eq!(parser.native_raw.is_some(), enabled && count <= 4096);
++                if let Some(raw) = parser.native_raw {
++                    // These assertions distinguish a real raw view from eager
++                    // copying even when the owned String already had capacity.
++                    assert_eq!(parser.current_raw.as_str(), "<r>");
++                    assert_eq!(parser.current_raw.capacity(), capacity);
++                    let (context, start) = parser.input_context();
++                    assert_eq!(
++                        parser.current_raw().unwrap().as_ptr(),
++                        context[raw.start - start..].as_ptr()
++                    );
++                    assert_eq!(frame.native_text_range_for_c(), Some((6, count)));
++                }
++                parser.finish_adapter_frame(frame);
++                parser.feed(b"", false).unwrap();
++                assert_eq!(parser.current_raw(), Some(text.as_str()));
++                parser.feed(b"<n/>tail</r>", true).unwrap();
++                assert_eq!(parser.current_raw(), Some(text.as_str()));
++                while parser.next_event().unwrap().is_some() {
++                    assert!(parser.native_raw.is_none());
++                }
++            }
++        }
++    }
++
++    #[test]
++    fn native_raw_retention_survives_compaction_and_invalid_context_suffixes() {
++        let text = format!("{}x", "€".repeat(1333));
++        let mut unaligned = false;
++        for padding in 0..3 {
++            let input = format!("<r>{}{}<n/>{text}", "€".repeat(23_000), "x".repeat(padding));
++            for suffix in [b"\xff".as_slice(), b"\xc3"] {
++                let mut parser = Parser::new(Config::default());
++                parser.enable_input_context();
++                parser.feed(input.as_bytes(), false).unwrap();
++                let mut frame = parser.adapter_frame();
++                let mut event = None;
++                while parser
++                    .next_event_for_c_text_context_into(&mut event, &mut frame)
++                    .unwrap()
++                    .is_some()
++                {}
++                let raw = parser.native_raw.unwrap();
++                assert_eq!(parser.current_raw(), Some(text.as_str()));
++                // A completed frame can be cleared without discarding raw.
++                assert!(!frame.is_active());
++                parser.feed(b"", false).unwrap();
++                let (context, start) = parser.input_context();
++                assert_eq!(start, raw.start - 1024);
++                assert_eq!(context, &input.as_bytes()[start..]);
++                let physical_extra = parser.sources[0].text.len() - context.len();
++                assert!(physical_extra <= 3);
++                unaligned |= physical_extra != 0;
++                parser.feed(suffix, false).unwrap();
++                assert!(std::str::from_utf8(parser.input_context().0).is_err());
++                assert_eq!(parser.current_raw(), Some(text.as_str()));
++                assert_ne!(
++                    parser.input_context().0.as_ptr(),
++                    parser.sources[0].text.as_bytes().as_ptr()
++                );
++                if suffix == b"\xc3" {
++                    parser.feed(b"\xa9</r>", true).unwrap();
++                    assert_eq!(parser.current_raw(), Some(text.as_str()));
++                    parser
++                        .next_event_for_c_text_context_into(&mut event, &mut frame)
++                        .unwrap()
++                        .unwrap();
++                    assert_eq!(parser.current_raw(), Some("é"));
++                    assert!(parser.native_raw.is_some());
++                    while parser.next_event().unwrap().is_some() {}
++                } else {
++                    assert!(parser.next_event().is_err());
++                    assert_eq!(parser.current_raw(), Some(text.as_str()));
++                }
++                parser.finish_adapter_frame(frame);
++            }
++        }
++        assert!(unaligned);
++    }
++
++    #[test]
++    fn native_raw_overrides_keep_owned_empty_and_failure_publication_order() {
++        for replacement in [None, Some(""), Some("owned")] {
++            let (mut parser, frame) = text_parser(b"<r>text", false);
++            let error = parser.save_current_raw(usize::MAX).unwrap_err();
++            assert_eq!(error.kind, ErrorKind::NoMemory);
++            assert_eq!(parser.current_raw(), Some("text"));
++            parser.emit(EventKind::Default, parser.position()).unwrap();
++            if let Some(raw) = replacement {
++                parser.event_raw(raw).unwrap();
++            }
++            assert_eq!(parser.current_raw(), Some("text"));
++            parser.pop_event().unwrap();
++            assert_eq!(
++                parser.current_raw(),
++                match replacement {
++                    None => Some("text"),
++                    Some("") => None,
++                    Some(raw) => Some(raw),
++                }
++            );
++            assert_eq!(parser.native_raw.is_some(), replacement.is_none());
++            parser.finish_adapter_frame(frame);
++        }
++        let (mut parser, mut frame) = text_parser(b"<r>text&amp;after</wrong>", true);
++        let mut event = None;
++        parser
++            .next_event_for_c_text_context_into(&mut event, &mut frame)
++            .unwrap()
++            .unwrap();
++        assert_eq!(parser.current_raw(), Some("&amp;"));
++        assert!(parser.native_raw.is_none());
++        parser
++            .next_event_for_c_text_context_into(&mut event, &mut frame)
++            .unwrap()
++            .unwrap();
++        assert_eq!(parser.current_raw(), Some("after"));
++        assert!(parser.native_raw.is_some());
++        assert_eq!(
++            parser.next_event().unwrap_err().kind,
++            ErrorKind::TagMismatch
++        );
++        assert_eq!(parser.current_raw(), Some("</wrong>"));
++        assert!(parser.native_raw.is_none());
++        parser.finish_adapter_frame(frame);
++
++        let (mut parser, frame) = text_parser(b"<r>text", false);
++        // Model the delivered writer state without popping its empty-raw
++        // event: popping would itself replace the retained raw view.
++        parser.parameter_mode = 2;
++        parser.start_foreign_dtd(Position::default()).unwrap();
++        parser.foreign_dtd_pending.as_mut().unwrap().delivered = true;
++        parser
++            .shared_parameter_state()
++            .unwrap()
++            .read
++            .store(true, Ordering::Relaxed);
++        assert!(parser.native_raw.is_some());
++        assert_eq!(parser.current_raw(), Some("text"));
++        assert!(matches!(
++            parser.finish_foreign_dtd().unwrap().kind,
++            EventKind::NotStandalone
++        ));
++        assert!(parser.native_raw.is_none());
++        assert_eq!(parser.current_raw(), None);
++        parser.finish_adapter_frame(frame);
++    }
++
++    #[test]
++    fn native_raw_prefix_and_early_feed_errors_remain_readable() {
++        let mut parser = Parser::new(Config::default());
++        parser.enable_input_context();
++        parser.feed(b"<r>abc</r>", true).unwrap();
++        parser.next_event().unwrap().unwrap();
++        assert!(parser.expanded.account(100, true, false));
++        assert!(parser.set_entity_maximum_amplification(1.0));
++        parser.set_entity_activation_threshold(0);
++        let mut frame = parser.adapter_frame();
++        let mut event = None;
++        parser
++            .next_event_for_c_text_context_into(&mut event, &mut frame)
++            .unwrap()
++            .unwrap();
++        assert!(parser.native_raw.is_some() && frame.is_text());
++        assert_eq!(parser.current_raw(), Some("abc"));
++        let error = parser
++            .next_event_for_c_text_context_into(&mut event, &mut frame)
++            .unwrap_err();
++        assert_eq!(error.kind, ErrorKind::LimitExceeded);
++        assert!(!frame.is_active());
++        assert_eq!(parser.feed(b"ignored", false).unwrap_err(), error);
++        assert_eq!(parser.current_raw(), Some("abc"));
++        parser.finish_adapter_frame(frame);
++
++        for final_input in [false, true] {
++            let (mut parser, frame) = text_parser(b"<r>text", final_input);
++            parser.config.limits.max_total_bytes = parser.received;
++            let expected = if final_input {
++                ErrorKind::Finished
++            } else {
++                ErrorKind::LimitExceeded
++            };
++            assert_eq!(parser.feed(b"x", false).unwrap_err().kind, expected);
++            assert_eq!(parser.current_raw(), Some("text"));
++            parser.finish_adapter_frame(frame);
++        }
++    }
++}
+diff --git a/crates/oriole/tests/allocation.rs b/crates/oriole/tests/allocation.rs
+index 24481b0..dec571b 100644
+--- a/crates/oriole/tests/allocation.rs
++++ b/crates/oriole/tests/allocation.rs
+@@ -952,3 +952,69 @@ fn warmed_utf8_source_growth_preserves_selected_allocator_failures() {
+     }
+     check_allocations(workload);
+ }
++
++#[test]
++fn native_raw_context_views_survive_every_feed_allocation_failure() {
++    fn workload(allocator: Allocator) -> Result<(), Error> {
++        // The first suffix forces native growth; the second forces Separate.
++        let large = [b'x'; 65_536];
++        for suffix in [large.as_slice(), b"\xff"] {
++            let mut parser = Parser::try_new_in(Config::default(), allocator)?;
++            parser.enable_input_context();
++            parser.feed(b"<r>twelve-bytes", false)?;
++            assert!(next_event(&mut parser)?.is_some());
++            let mut frame = parser.adapter_frame();
++            let result = (|| -> Result<(), Error> {
++                let mut event = None;
++                let before = CALLS.get();
++                assert!(
++                    parser
++                        .next_event_for_c_text_context_into(&mut event, &mut frame)?
++                        .is_some()
++                );
++                assert_eq!(frame.native_text_range_for_c(), Some((3, 12)));
++                assert_eq!(parser.current_raw(), Some("twelve-bytes"));
++                assert_eq!(
++                    CALLS.get(),
++                    before,
++                    "short native Text needs no raw allocation"
++                );
++                let (context, start) = parser.input_context();
++                assert_eq!(
++                    parser.current_raw().unwrap().as_ptr(),
++                    context[3 - start..].as_ptr()
++                );
++                let fed = parser.feed(suffix, false);
++                assert_eq!(parser.current_raw(), Some("twelve-bytes"));
++                if let Err(error) = fed {
++                    assert_eq!(error.kind, ErrorKind::NoMemory);
++                    let calls = CALLS.get();
++                    assert_eq!(parser.next_event().unwrap_err(), error);
++                    assert_eq!(parser.feed(b"ignored", true).unwrap_err(), error);
++                    assert_eq!(CALLS.get(), calls);
++                    return Err(error);
++                }
++                // Decoder allocation errors are delivered by next_event even
++                // when feed succeeds. Drain before accepting this workload.
++                let invalid = loop {
++                    match next_event(&mut parser) {
++                        Ok(Some(_)) => {}
++                        Ok(None) => break false,
++                        Err(error)
++                            if suffix == b"\xff" && error.kind == ErrorKind::InvalidToken =>
++                        {
++                            break true;
++                        }
++                        Err(error) => return Err(error),
++                    }
++                };
++                assert_eq!(invalid, suffix == b"\xff");
++                Ok(())
++            })();
++            parser.finish_adapter_frame(frame);
++            result?;
++        }
++        Ok(())
++    }
++    check_allocations(workload);
++}
+diff --git a/crates/oriole_expat/src/context_text_tests.rs b/crates/oriole_expat/src/context_text_tests.rs
+index 6ab7aff..68e3854 100644
+--- a/crates/oriole_expat/src/context_text_tests.rs
++++ b/crates/oriole_expat/src/context_text_tests.rs
+@@ -163,6 +163,9 @@ unsafe extern "C" fn text(data: *mut c_void, bytes: *const c_char, len: c_int) {
+             assert!(!context.is_null());
+             assert!(offset >= 0 && len > 0 && offset <= size && len <= size - offset);
+             assert_eq!(bytes, context.cast::<c_char>().add(offset as usize));
++            let raw = (*parser).core.current_raw().unwrap();
++            assert_eq!(raw.as_bytes(), original);
++            assert_eq!(raw.as_ptr(), bytes.cast::<u8>());
+         }
+         if (*state).mutate {
+             XML_SetDefaultHandlerExpand(parser, Some(default_text));
+@@ -205,6 +208,9 @@ unsafe extern "C" fn text(data: *mut c_void, bytes: *const c_char, len: c_int) {
+             }
+             _ => {}
+         }
++        if (*state).expect_native {
++            assert_eq!((*parser).core.current_raw().unwrap().as_bytes(), original);
++        }
+         // This read is the alias/lifetime assertion, after every nested operation.
+         assert_eq!(
+             std::slice::from_raw_parts(bytes.cast::<u8>(), len as usize),
+@@ -238,45 +244,48 @@ fn context_text_pointer_survives_reentry_suspend_and_abort() {
+     // SAFETY: All allocations, callbacks and raw state pointers are test-owned.
+     unsafe {
+         for buffered in [false, true] {
+-            for action in [0, 1, 2] {
+-                let parser = make_parser();
+-                let mut state = State {
+-                    parser,
+-                    action,
+-                    mutate: true,
+-                    expect_native: true,
+-                    ..State::default()
+-                };
+-                XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+-                XML_SetCharacterDataHandler(parser, Some(text));
+-                REENTRY.set(parser);
+-                let status = parse(parser, b"<r>abcdefghijklmnopqrstuvwxyz</r>", true, buffered);
+-                REENTRY.set(ptr::null_mut());
+-                assert_eq!(state.text, b"abcdefghijklmnopqrstuvwxyz");
+-                assert!(state.raw.starts_with(b"abcdefghijklmnopqrstuvwxyz"));
+-                assert_eq!(state.calls, 1);
+-                match action {
+-                    1 => {
+-                        assert_eq!(status, SUSPENDED);
+-                        assert_eq!(
+-                            (*parser).core.current_raw(),
+-                            Some("abcdefghijklmnopqrstuvwxyz")
+-                        );
+-                        let raw_len = state.raw.len();
+-                        XML_DefaultCurrent(parser); // Outside a callback is a no-op.
+-                        assert_eq!(state.raw.len(), raw_len);
+-                        // Direct state reads ended the previous mutable reborrow.
+-                        XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+-                        assert_eq!(XML_ResumeParser(parser), OK);
+-                    }
+-                    2 => {
+-                        assert_eq!(status, ERROR);
+-                        assert_eq!(XML_GetErrorCode(parser), 35);
++            for (prefix, value) in [
++                ("", "abcdefghijklmnopqrstuvwxyz"),
++                ("\u{feff}", "abcédefghijklmnopqrstuvwxyz"),
++            ] {
++                for action in [0, 1, 2] {
++                    let parser = make_parser();
++                    let mut state = State {
++                        parser,
++                        action,
++                        mutate: true,
++                        expect_native: true,
++                        ..State::default()
++                    };
++                    XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
++                    XML_SetCharacterDataHandler(parser, Some(text));
++                    REENTRY.set(parser);
++                    let input = format!("{prefix}<r>{value}</r>");
++                    let status = parse(parser, input.as_bytes(), true, buffered);
++                    REENTRY.set(ptr::null_mut());
++                    assert_eq!(state.text, value.as_bytes());
++                    assert!(state.raw.starts_with(value.as_bytes()));
++                    assert_eq!(state.calls, 1);
++                    match action {
++                        1 => {
++                            assert_eq!(status, SUSPENDED);
++                            assert_eq!((*parser).core.current_raw(), Some(value));
++                            let raw_len = state.raw.len();
++                            XML_DefaultCurrent(parser); // Outside a callback is a no-op.
++                            assert_eq!(state.raw.len(), raw_len);
++                            // Direct state reads ended the previous mutable reborrow.
++                            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
++                            assert_eq!(XML_ResumeParser(parser), OK);
++                        }
++                        2 => {
++                            assert_eq!(status, ERROR);
++                            assert_eq!(XML_GetErrorCode(parser), 35);
++                        }
++                        _ => assert_eq!(status, OK),
+                     }
+-                    _ => assert_eq!(status, OK),
++                    XML_ParserFree(parser);
++                    assert_eq!(LIVE.get(), 0);
+                 }
+-                XML_ParserFree(parser);
+-                assert_eq!(LIVE.get(), 0);
+             }
+         }
+     }
+@@ -313,11 +322,58 @@ fn context_text_offsets_compaction_split_utf8_and_sizes() {
+             let first = format!("<r>{}<n/>", "x".repeat(2048));
+             assert_eq!(parse(parser, first.as_bytes(), false, buffered), OK);
+             assert_eq!(parse(parser, b"\xc3", false, buffered), OK);
+-            assert!((*parser).input_context_start > 0);
++            assert!((*parser).core.input_context().1 > 0);
+             assert_eq!(parse(parser, b"\xa9tail</r>", true, buffered), OK);
+             assert_eq!(state.text, format!("{}étail", "x".repeat(2048)).as_bytes());
+             XML_ParserFree(parser);
+             assert_eq!(LIVE.get(), 0);
++            for (chunks, expected, error) in [
++                (
++                    vec![b"\xef".as_slice(), b"\xbb", b"\xbf<r>ok</r>"],
++                    b"ok".as_slice(),
++                    0,
++                ),
++                (
++                    vec![b"<r>abc".as_slice(), b"tail\xff</r>"],
++                    b"abctail".as_slice(),
++                    4,
++                ),
++                (
++                    vec![b"<r>abc".as_slice(), b"tail\xc3"],
++                    b"abctail".as_slice(),
++                    6,
++                ),
++            ] {
++                let parser = make_parser();
++                let mut state = State {
++                    parser,
++                    expect_native: true,
++                    ..State::default()
++                };
++                XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
++                XML_SetCharacterDataHandler(parser, Some(text));
++                let input = chunks.concat();
++                let mut result = OK;
++                for (index, chunk) in chunks.iter().enumerate() {
++                    result = parse(parser, chunk, index + 1 == chunks.len(), buffered);
++                    if result != OK {
++                        break;
++                    }
++                }
++                assert_eq!(result, if error == 0 { OK } else { ERROR });
++                assert_eq!(XML_GetErrorCode(parser), error);
++                assert_eq!(state.text, expected);
++                let (context, start) = (*parser).core.input_context();
++                assert_eq!(context, &input[start..]);
++                if error != 0 {
++                    assert_eq!(
++                        XML_GetCurrentByteIndex(parser),
++                        3 + expected.len() as c_long
++                    );
++                }
++                XML_ParserFree(parser);
++                assert_eq!(LIVE.get(), 0);
++            }
+         }
+     }
+ }
+@@ -435,25 +491,27 @@ fn context_text_frame_and_raw_oom_match_owned_mode() {
+ fn context_text_invalid_host_range_fails_closed() {
+     // SAFETY: Deliberately invalid scalar ranges are rejected before pointer use.
+     unsafe {
+-        for (context_start, start, count) in [
+-            (None, 0, 0),
+-            (None, usize::MAX, 1),
+-            (None, 0, 4097),
+-            (Some(10), 9, 1),  // Before the retained, compacted context.
+-            (Some(10), 12, 2), // Starts inside but extends beyond its end.
+-        ] {
++        for case in 0..5 {
+             let parser = make_parser();
++            if case >= 3 {
++                let input = format!("<r>{}<n/>", "x".repeat(2048));
++                assert_eq!(parse(parser, input.as_bytes(), false, false), OK);
++                assert_eq!(parse(parser, b"abc", false, false), OK);
++            }
++            let (context, context_start) = (*parser).core.input_context();
++            let (start, count) = match case {
++                0 => (0, 0),
++                1 => (usize::MAX, 1),
++                2 => (0, 4097),
++                3 => (context_start.checked_sub(1).unwrap(), 1),
++                _ => (context_start + context.len() - 1, 2),
++            };
+             let mut state = State {
+                 parser,
+                 ..State::default()
+             };
+             XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+             XML_SetCharacterDataHandler(parser, Some(text));
+-            if let Some(context_start) = context_start {
+-                oriole_storage::try_extend_from_slice(&mut (*parser).input_context, b"abc")
+-                    .unwrap();
+-                (*parser).input_context_start = context_start;
+-            }
+             (*parser).busy = true;
+             (*parser).input_context_active = true;
+             dispatch_context_text(parser, start, count).unwrap();
+@@ -576,3 +634,75 @@ fn context_text_late_handler_after_suspension_uses_eager_raw() {
+         assert_eq!(LIVE.get(), 0);
+     }
+ }
++
++#[test]
++fn context_input_allocation_failures_preserve_sticky_errors_and_owners() {
++    // SAFETY: Parser and callback state are test-owned; failed allocations never
++    // invalidate earlier owners, and every successful suite allocation is freed.
++    unsafe {
++        for (prefix, input, expected) in [
++            (
++                b"".as_slice(),
++                b"<r>hello</r>".as_slice(),
++                b"hello".as_slice(),
++            ),
++            (
++                b"<r>seed<n/>".as_slice(),
++                b"tail\xc3".as_slice(),
++                b"tail".as_slice(),
++            ),
++            (
++                b"<?xml version='1.0' ".as_slice(),
++                b"encoding='ISO-8859-1'?><r>\xe9</r>".as_slice(),
++                "é".as_bytes(),
++            ),
++        ] {
++            let mut successful_requests = 0;
++            for fail_at in 0..=64 {
++                if fail_at != 0 && fail_at > successful_requests {
++                    break;
++                }
++                let parser = make_parser();
++                if !prefix.is_empty() {
++                    assert_eq!(parse(parser, prefix, false, false), OK);
++                }
++                let mut state = State {
++                    parser,
++                    ..State::default()
++                };
++                XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
++                XML_SetCharacterDataHandler(parser, Some(text));
++                clear_requests(fail_at);
++                let partial = input.ends_with(b"\xc3");
++                let result = parse(parser, input, !partial, false);
++                if fail_at == 0 {
++                    successful_requests = REQUESTS.with(|calls| calls.borrow().len());
++                    assert!(successful_requests > 0 && successful_requests <= 64);
++                    assert_eq!(result, OK);
++                    if partial {
++                        assert!(expected.starts_with(&state.text));
++                        clear_requests(0);
++                        assert_eq!(parse(parser, b"\xa9</r>", true, false), OK);
++                        assert_eq!(state.text, "tailé".as_bytes());
++                    } else {
++                        assert_eq!(state.text, expected);
++                    }
++                } else {
++                    assert_eq!(result, ERROR, "failure={fail_at}");
++                    assert_eq!(XML_GetErrorCode(parser), 1);
++                    assert!(expected.starts_with(&state.text));
++                    let calls = state.calls;
++                    assert_eq!(XML_Parse(parser, ptr::null(), 0, 1), ERROR);
++                    assert_eq!(XML_GetErrorCode(parser), 1);
++                    assert_eq!(state.calls, calls);
++                    if fail_at == 1 {
++                        assert_eq!(calls, 0);
++                    }
++                }
++                clear_requests(0);
++                XML_ParserFree(parser);
++                assert_eq!(LIVE.get(), 0, "failure={fail_at}");
++            }
++        }
++    }
++}
+diff --git a/crates/oriole_expat/src/lib.rs b/crates/oriole_expat/src/lib.rs
+index 993cae7..3d01724 100644
+--- a/crates/oriole_expat/src/lib.rs
++++ b/crates/oriole_expat/src/lib.rs
+@@ -169,8 +169,6 @@ pub struct XML_ParserStruct {
+     base: Option<CString>,
+     buffer: XmlVec<u8>,
+     buffer_available: bool,
+-    input_context: XmlVec<u8>,
+-    input_context_start: usize,
+     input_context_active: bool,
+     external_arg: *mut c_void,
+     unknown_encoding_arg: *mut c_void,
+@@ -316,6 +314,7 @@ unsafe fn create(
+             };
+             let mut core = Parser::try_new_with_encoding_in(config.clone(), encoding, allocator)
+                 .map_err(|_| AllocError::OutOfMemory)?;
++            core.enable_input_context();
+             core.set_notation_handler_enabled(false);
+             core.set_attlist_handler_enabled(false);
+             let position = core.position();
+@@ -341,8 +340,6 @@ unsafe fn create(
+                     base: None,
+                     buffer: XmlVec::new_in(allocator),
+                     buffer_available: false,
+-                    input_context: XmlVec::new_in(allocator),
+-                    input_context_start: 0,
+                     input_context_active: false,
+                     external_arg: ptr::null_mut(),
+                     unknown_encoding_arg: ptr::null_mut(),
+@@ -535,6 +532,7 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
+                     allocator,
+                 )
+                 .map_err(|_| AllocError::OutOfMemory)?;
++                core.enable_input_context();
+                 core.set_hash_salt((*parser).core.hash_salt())
+                     .map_err(|_| AllocError::OutOfMemory)?;
+                 let family = Shared::try_new_in(FamilyBudget::default(), allocator)?;
+@@ -571,8 +569,6 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
+                 (*parser).base = None;
+                 (*parser).buffer.clear();
+                 (*parser).buffer_available = false;
+-                (*parser).input_context.clear();
+-                (*parser).input_context_start = 0;
+                 (*parser).external_arg = ptr::null_mut();
+                 while (*parser).default_pending.pop_front().is_some() {}
+                 (*parser).family = family;
+@@ -1297,8 +1293,8 @@ unsafe fn dispatch_context_text(
+         // SAFETY: Eager raw storage and the default dispatch path are unchanged.
+         return unsafe { dispatch_unhandled(parser, false, None) };
+     };
+-    // SAFETY: Field-only borrows end before the callback. Vec::as_ptr does not
+-    // create a slice reference. Checked offsets preserve its allocation provenance.
++    // SAFETY: The core's immutable context borrow ends before the callback.
++    // Checked offsets preserve the stable input allocation's provenance.
+     let span = unsafe {
+         (|| {
+             if !(*parser).busy
+@@ -1309,8 +1305,8 @@ unsafe fn dispatch_context_text(
+             {
+                 return None;
+             }
+-            let offset = start.checked_sub((*parser).input_context_start)?;
+-            let context = &(*parser).input_context;
++            let (context, context_start) = (*parser).core.input_context();
++            let offset = start.checked_sub(context_start)?;
+             let remaining = context.len().checked_sub(offset)?;
+             if count > remaining {
+                 return None;
+@@ -1680,11 +1676,18 @@ pub unsafe extern "C" fn XML_Parse(
+                 } else {
+                     std::slice::from_raw_parts(input.cast::<u8>(), len as usize)
+                 };
+-                if preserve_input_context(parser, input).is_err() {
+-                    fail_parse(parser, 1);
+-                    return ERROR;
+-                }
+-                if let Err(error) = (*parser).core.feed(input, final_input != 0) {
++                let fed = match (*parser).core.feed_with_input_context(
++                    input,
++                    final_input != 0,
++                    INPUT_CONTEXT_BYTES,
++                ) {
++                    Ok(result) => result,
++                    Err(_) => {
++                        fail_parse(parser, 1);
++                        return ERROR;
++                    }
++                };
++                if let Err(error) = fed {
+                     if error.kind == ErrorKind::UnknownEncoding && resolve_unknown_encoding(parser)
+                     {
+                         return run_events(parser);
+@@ -2272,31 +2275,6 @@ pub unsafe extern "C" fn XML_GetParsingStatus(parser: XML_Parser, status: *mut X
+     }
+ }
+ 
+-/// Retain original bytes around pending events, including split tokens and
+-/// suspended input. The decoder may normalize or convert its own input, so its
+-/// UTF-8 source buffer cannot implement the C API's raw-input contract.
+-unsafe fn preserve_input_context(parser: XML_Parser, input: &[u8]) -> Result<(), AllocError> {
+-    // SAFETY: The outer parse operation owns the busy guard. No context borrow
+-    // crosses a callback, and this storage is distinct from XML_GetBuffer's data.
+-    unsafe {
+-        let context = &mut (*parser).input_context;
+-        let discard = (*parser)
+-            .core
+-            .input_context_byte_index()
+-            .saturating_sub((*parser).input_context_start)
+-            .saturating_sub(INPUT_CONTEXT_BYTES)
+-            .min(context.len());
+-        context.drain(..discard);
+-        (*parser).input_context_start += discard;
+-        if !input.is_empty() && context.capacity() == 0 {
+-            let minimum = INPUT_CONTEXT_BYTES.min((*parser).config.limits.max_total_bytes);
+-            context.try_reserve(input.len().max(minimum))?;
+-        }
+-        oriole_storage::try_extend_from_slice(context, input)?;
+-    }
+-    Ok(())
+-}
+-
+ #[unsafe(no_mangle)]
+ pub unsafe extern "C" fn XML_GetInputContext(
+     parser: XML_Parser,
+@@ -2310,20 +2288,16 @@ pub unsafe extern "C" fn XML_GetInputContext(
+     // Active parsing owns the input storage; recursive parse/reset/free cannot
+     // invalidate it before the requesting callback returns.
+     unsafe {
+-        if !(*parser).input_context_active
+-            || (*parser).destroying
+-            || (*parser).input_context.is_empty()
+-        {
++        if !(*parser).input_context_active || (*parser).destroying {
+             return ptr::null();
+         }
+-        let Some(start) = (*parser)
+-            .position
+-            .byte_index
+-            .checked_sub((*parser).input_context_start)
+-        else {
++        let (context, context_start) = (*parser).core.input_context();
++        if context.is_empty() {
++            return ptr::null();
++        }
++        let Some(start) = (*parser).position.byte_index.checked_sub(context_start) else {
+             return ptr::null();
+         };
+-        let context = &(*parser).input_context;
+         if start > context.len() || (*parser).position.byte_count > context.len() - start {
+             return ptr::null();
+         }
+@@ -2389,10 +2363,11 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
+                 }
+                 let context = input_string(context)?;
+                 let encoding = input_string(encoding)?;
+-                let core = (*parser)
++                let mut core = (*parser)
+                     .core
+                     .external_child_with_encoding(context, encoding)
+                     .map_err(|_| AllocError::OutOfMemory)?;
++                core.enable_input_context();
+                 let position = core.position();
+                 let allocator = (*parser).allocator;
+                 let lifetime = Shared::try_new_in(AtomicPtr::new(ptr::null_mut()), allocator)?;
+@@ -2420,8 +2395,6 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
+                             .transpose()?,
+                         buffer: XmlVec::new_in(allocator),
+                         buffer_available: false,
+-                        input_context: XmlVec::new_in(allocator),
+-                        input_context_start: 0,
+                         input_context_active: false,
+                         external_arg: (*parser).external_arg,
+                         unknown_encoding_arg: (*parser).unknown_encoding_arg,
+diff --git a/crates/oriole_expat/src/tests.rs b/crates/oriole_expat/src/tests.rs
+index 9bfc9f2..02e8d8c 100644
+--- a/crates/oriole_expat/src/tests.rs
++++ b/crates/oriole_expat/src/tests.rs
+@@ -521,8 +521,8 @@ fn source_bound_preflight_preserves_family_and_input_storage() {
+                 let family = &(*parser).family;
+                 family.input_bytes.get()
+             };
+-            let context = (*parser).input_context.clone();
+-            let context_start = (*parser).input_context_start;
++            let context = (*parser).core.input_context().0.to_vec();
++            let context_start = (*parser).core.input_context().1;
+             let buffer_capacity = (*parser).buffer.capacity();
+             assert_eq!((*parser).core.input_bytes_remaining(), 0);
+             assert!(XML_GetBuffer(parser, 1).is_null());
+@@ -534,8 +534,8 @@ fn source_bound_preflight_preserves_family_and_input_storage() {
+                 let family = &(*parser).family;
+                 assert_eq!(family.input_bytes.get(), input);
+             }
+-            assert_eq!((*parser).input_context, context);
+-            assert_eq!((*parser).input_context_start, context_start);
++            assert_eq!((*parser).core.input_context().0, context);
++            assert_eq!((*parser).core.input_context().1, context_start);
+             assert_eq!((*parser).buffer.capacity(), buffer_capacity);
+             assert!(!(*parser).final_buffer);
+             XML_ParserFree(parser);
+@@ -658,7 +658,7 @@ fn family_input_statistic_cannot_overflow_or_grant_work_credit() {
+         }
+         assert_eq!((*parser).tracker.direct_bytes(), 0);
+         assert_eq!((*parser).core.work_bytes_limit(0), 0);
+-        assert!((*parser).input_context.is_empty());
++        assert!((*parser).core.input_context().0.is_empty());
+         XML_ParserFree(parser);
+     }
+ }
+@@ -3479,7 +3479,8 @@ fn input_context_discards_consumed_eventless_whitespace() {
+                     OK
+                 );
+                 assert!(
+-                    (*parser).input_context.len() <= INPUT_CONTEXT_BYTES + whitespace.len() + 16
++                    (*parser).core.input_context().0.len()
++                        <= INPUT_CONTEXT_BYTES + whitespace.len() + 16
+                 );
+             }
+             let suffix = if dtd {

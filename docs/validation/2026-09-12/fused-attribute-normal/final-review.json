@@ -1,0 +1,408 @@
+{
+  "status": "passed_final_publication_review_no_actionable_findings",
+  "role": "Independent final publication reviewer; earlier source/API-controller review authorship disclosed. No targets or repository edits.",
+  "archive_sha256": "4f27eb60b048c86d960da608227f8ce46e2d2e6ecae1e831c55020aa18b63833",
+  "archive_bytes": 6980176,
+  "members": 3380,
+  "uncompressed_member_bytes": 63668286,
+  "original_byte_comparisons": 3379,
+  "excluded_identities_checked": 46,
+  "source_commit": "09da8b14f06720f23c526eb091e3f34efeb09630",
+  "source_files": 73,
+  "all_condition_rows": 52,
+  "adverse_rows": 2,
+  "workers": 1248,
+  "samples": 132540,
+  "native_timed_processes_recomputed": 588,
+  "python_timed_processes_recomputed": 504,
+  "readme_table_rows": 6,
+  "warning_and_license_exact": true,
+  "scope_review": "Normal candidate versus current4815/a240 and normal Expat; all API391 failures/2timeouts and two strict failures per linkage preserved. C-only sanitizers/uninstrumented Rust and strict-only consumer fix explicit. Prior control diagnostics/profiles and4064 sanitizer/PBS scope kept separate. 10% target remains unmet.",
+  "findings": [],
+  "publication_path_followup": "Resolved: outer report names fused-attribute-normal; all ten copied files equal the final staging packet; historical fused-attribute-scan directory remains byte-identical to4815.",
+  "pins": {
+    "/tmp/oriole-fused-normal-publication-draft/docs/validation/2026-09-12/fused-attribute-scan/index.json": "e15c0a55d97ec30a7d78ad49cb7300ac2b956f556e647d8b4cf52e25f240faa5",
+    "/tmp/oriole-fused-normal-publication-draft/docs/validation/2026-09-12/fused-attribute-scan/report.json": "6052cf26a3e0211ed44ecaee151d5f7aaad10b5302db2d9b456416d69649b76f",
+    "/tmp/oriole-fused-normal-publication-draft/docs/validation/2026-09-12/fused-attribute-scan/README.md": "9dfe416cb2b0ab2d403968e624f9193d85c31ad2cb705595c49e19488d24d878",
+    "/tmp/oriole-fused-normal-publication-draft/docs/validation/2026-09-12/fused-attribute-scan/conditions.csv": "ff5b0ef6299bc43c8cb1fa3eda111879b4619f83a036ded4e94bf512b1e2f63f",
+    "/tmp/oriole-fused-normal-publication-draft/docs/validation/2026-09-12/fused-attribute-scan/adverse-conditions.csv": "ed6d0594ddf4d84ab7202bdc6c7eec20bbb6957ecec837defec1bcbc9ce4e17a",
+    "/tmp/oriole-fused-normal-publication-draft/docs/validation/2026-09-12/fused-attribute-scan/README-table.json": "c96dc21d801a1f068045f1c523ae73b7a53441c4810f622bff8b93fd33e79d57",
+    "/tmp/oriole-fused-normal-publication-draft/docs/validation/2026-09-12/fused-attribute-scan/committed-source.json": "b09fd546d6e099b6c0d988071dffb6b0d458d347c34ba1fe0afa94c7115c5dac"
+  },
+  "publication_path": "/home/dev-user/code/oss/oriole-fused-normal-current/docs/validation/2026-09-12/fused-attribute-normal",
+  "copied_packet_files": 10,
+  "local_markdown_links_checked": 86,
+  "historical_packet_files_unchanged": 6,
+  "final_document_sha256": {
+    "/home/dev-user/code/oss/oriole-fused-normal-current/README.md": "c6bb90a18a66df67ae44f3cfacb0c014bb9dc5f4e122c82888a8423eab882e50",
+    "/home/dev-user/code/oss/oriole-fused-normal-current/docs/compatibility.md": "158ac8876d8da3eb4e75329702f97d915caba8091285168d3eb8a79332bfe3cb",
+    "/home/dev-user/code/oss/oriole-fused-normal-current/docs/review.md": "22418445e8bc7f049144e81f770508b89de360f55a9f456451f0761df4e36ae5",
+    "/home/dev-user/code/oss/oriole-fused-normal-current/docs/validation/2026-09-12/fused-attribute-normal/README.md": "9dfe416cb2b0ab2d403968e624f9193d85c31ad2cb705595c49e19488d24d878"
+  },
+  "stable_sha256": "9b37cf3342a84c00ff9206e7c73399016ddb8ecc8e6b82375fcb836520f5a5ab",
+  "reader_corrections": [
+    {
+      "attempt": 1,
+      "detail": "Generated source-map original_path is a description rather than a filesystem path; checked its member/hash plus both73-source maps independently."
+    },
+    {
+      "attempt": 2,
+      "detail": "Generated map additionally carries candidate/control SHA maps; retained and checked source identities."
+    },
+    {
+      "attempt": 3,
+      "detail": "Outer report adds within10% counts beyond native-reader group fields; original group fields exact and additions agree with condition CSVs."
+    },
+    {
+      "attempt": 4,
+      "detail": "Native arrays retain seeded execution order while Python pair arrays use numeric pair order; reconstruction now uses each saved protocol order. All pair ratios and medians exact."
+    }
+  ],
+  "reader_sha256": "755681547a19aaa85a0e99de44c426d234e6f5e97acda21a9080676c2db19c89",
+  "links": [
+    {
+      "file": "README.md",
+      "target": "docs/validation/2026-09-12/fused-attribute-normal/"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/validation/2026-09-12/fused-attribute-normal/"
+    },
+    {
+      "file": "README.md",
+      "target": "benchmarks/results/2026-09-11/c-allocators/"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/compatibility.md"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/review.md"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/validation/2026-09-11/reference-frames/"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/validation/2026-09-11/reference-v3/"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/validation/2026-09-11/reference-validation/"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/validation/2026-09-12/v3-distribution/"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/usage.md"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/usage.md"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/library.md"
+    },
+    {
+      "file": "README.md",
+      "target": "crates/oriole_expat/"
+    },
+    {
+      "file": "README.md",
+      "target": "CONTRIBUTING.md"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/review.md"
+    },
+    {
+      "file": "README.md",
+      "target": "LICENSE-APACHE"
+    },
+    {
+      "file": "README.md",
+      "target": "LICENSE-MIT"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-12/fused-attribute-normal/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-11/reference-frames/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-11/reference-validation/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-12/v3-distribution/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-11/streaming-input-bounds/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-10/start-frame-integration/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-10/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-11/api-failure-census/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-11/allocation-semantic-coverage/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-11/buffer-state/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-12/fused-attribute-normal/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-11/reference-frames/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-11/reference-v3/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-12/v3-distribution/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-10/custom-encoding-provenance/"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-11/streaming-input-bounds/POLICY.md"
+    },
+    {
+      "file": "docs/compatibility.md",
+      "target": "validation/2026-09-11/streaming-input-bounds/#cpython-consumer-checks"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-12/fused-attribute-normal/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-12/expanded-start/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/reference-frames/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/reference-v3/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/reference-validation/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-12/v3-distribution/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/retained-c-frame/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/serialized-accounting/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/long-inherited-default/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/start-tag-cache/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/markup-classification/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-12/fused-attribute-scan/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/api-failure-census/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/allocation-semantic-coverage/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/reference-validation/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/compact-coordinates/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/buffer-state/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/reference-v3/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-12/v3-distribution/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-10/version-consistent-fuzz/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-10/final-runtime/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "../benchmarks/results/2026-09-10/final-runtime/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-10/version-consistent-runtime/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-10/entity-error-origins/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-10/buffer-reservations/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-10/version-consistent-fuzz/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-10/dtd-reparse-deferral/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-10/detached-frames/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "../crates/oriole_expat/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "../CONTRIBUTING.md#acceptance"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-10/version-consistent-pbs/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-10/coalesced-search/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-10/detached-frames-fuzz/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-10/scanner-integration/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-10/end-tag-integration/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-10/start-frame-integration/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/pgo-lto/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "../benchmarks/results/2026-09-11/pgo-lto/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/c-allocators/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/current-asan/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/current-pbs/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/literal-attribute-check/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/streaming-input-bounds/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/allocator-provenance/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/context-text-frame/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/arena-capacity-bound/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/capacity-cpython/"
+    },
+    {
+      "file": "docs/review.md",
+      "target": "validation/2026-09-11/lazy-coordinate-experiments/"
+    },
+    {
+      "file": "docs/validation/2026-09-12/fused-attribute-normal/README.md",
+      "target": "committed-source.json"
+    },
+    {
+      "file": "docs/validation/2026-09-12/fused-attribute-normal/README.md",
+      "target": "evidence.tar.gz"
+    },
+    {
+      "file": "docs/validation/2026-09-12/fused-attribute-normal/README.md",
+      "target": "index.json"
+    },
+    {
+      "file": "docs/validation/2026-09-12/fused-attribute-normal/README.md",
+      "target": "report.json"
+    }
+  ]
+}

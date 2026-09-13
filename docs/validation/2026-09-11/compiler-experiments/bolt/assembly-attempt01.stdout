@@ -1,0 +1,10 @@
+{
+  "status": "assembled_origins_read_back_portable_verifier_pending",
+  "archive_sha256": "86007d0ffd7cc7ca8fd47b3b9bbc4b640b536c5154a11c414e0b334fa9b86769",
+  "archive_bytes": 4432145,
+  "stored_members": 1205,
+  "origins": 1273,
+  "aliases": 68,
+  "omitted": 27,
+  "members_sha256": "0f08ef4ba9faa4e21fb7b3c8c762e45832179b71a9e75fc1c7b6ec25cf6b64c0"
+}

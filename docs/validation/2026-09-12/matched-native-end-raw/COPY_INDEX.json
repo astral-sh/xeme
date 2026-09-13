@@ -1,0 +1,515 @@
+{
+  "scope": "Exact finite copies plus generated draft prose/local-reference index; no targets or repository changes.",
+  "files": [
+    {
+      "path": "source/source.json",
+      "bytes": 8121,
+      "sha256": "c428d62aa77d92493e7d4654bd0a1b3be128ca1228976929e0d93985c31bf6df",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/source.json"
+    },
+    {
+      "path": "source/build.json",
+      "bytes": 14787,
+      "sha256": "1f709c889c0190386482fe257976985a65833fd35ce1f70b7cb2476976561cbb",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/build.json"
+    },
+    {
+      "path": "source/build-binding.json",
+      "bytes": 15503,
+      "sha256": "7d78bc923c9da5b21c51b0887d40be9a41032e40f05a1775f800b81cc095aab8",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/build-binding.json"
+    },
+    {
+      "path": "source/prepared-source.json",
+      "bytes": 17641,
+      "sha256": "85386eb19a1a2efe47e24f072416fb64d9c538d468f6c12624407954ec10247e",
+      "local_source": "/tmp/oriole-matched-native-end-raw-preparation/source.json"
+    },
+    {
+      "path": "source/candidate.patch",
+      "bytes": 17364,
+      "sha256": "1df8e708c774f958c32ded7b484849f41a86ed8c299476bc36a91f54fc124455",
+      "local_source": "/tmp/oriole-matched-native-end-raw-preparation/candidate.patch"
+    },
+    {
+      "path": "source/independent-source-review.json",
+      "bytes": 6823,
+      "sha256": "4a8bf1e6d3faa9521cbc5ff3f917b0dba901fdd3ad627ed13ffe90a0e07b8d84",
+      "local_source": "/tmp/oriole-matched-native-end-raw-independent-source-review.json"
+    },
+    {
+      "path": "source/control-source.json",
+      "bytes": 8118,
+      "sha256": "05550226c63ecefdb8607f04a23efedaadcf77e449207f18e7be7c31b2426b38",
+      "local_source": "/tmp/oriole-core-owned-text-raw-study/source.json"
+    },
+    {
+      "path": "source/control-build-binding.json",
+      "bytes": 15200,
+      "sha256": "b2027cd81bd1dc5830d338d757e8d2e7d77ee3758029e7443967f3da0ff23975",
+      "local_source": "/tmp/oriole-core-owned-text-raw-study/build-binding.json"
+    },
+    {
+      "path": "source/control-fixture-difference.patch",
+      "bytes": 1372,
+      "sha256": "3a0726c2c12fd6acbbb87acb4e692fc0f6707e6511fa8b2e38994209f4569568",
+      "local_source": "/tmp/oriole-start-token-owner-transfer-source-proposal-revision02/baseline-fixture-fix.patch"
+    },
+    {
+      "path": "source/build.py",
+      "bytes": 8419,
+      "sha256": "b529d31a0470aec7dab91215a9b6d70a90e33755650126447730f5a490a85f62",
+      "local_source": "/tmp/oriole-matched-native-end-raw-preparation/build.py"
+    },
+    {
+      "path": "source/bind_build.py",
+      "bytes": 14318,
+      "sha256": "74dc3834bde6013a8d9622fca7e8a71b70d8771eacb1462ba281c6ea69236836",
+      "local_source": "/tmp/oriole-matched-native-end-raw-preparation/bind_build.py"
+    },
+    {
+      "path": "qualification-decision-historical.json",
+      "bytes": 20603,
+      "sha256": "7e439c4635d0a00883a8140d7b4d5f5cf8549e034b1f248a421d5bd687664ac4",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/qualification-decision.json"
+    },
+    {
+      "path": "initial/host-before-native.json",
+      "bytes": 783,
+      "sha256": "e45bad48e75243e9c41e1c1e1cb5067b738ea92deef2951c8a79f0bb8364c6aa",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/host-before-native.json"
+    },
+    {
+      "path": "initial/host-during-native.json",
+      "bytes": 5244,
+      "sha256": "65f6949c1ff36c67339ee8f8015e8cab4a8dd74ad0f2566b7a81a23713de48cd",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/host-during-native.json"
+    },
+    {
+      "path": "initial/host-before-python.json",
+      "bytes": 782,
+      "sha256": "9ef919acf65d028680311893227a791f37745dbe341cfcf254a408b631482cfe",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/host-before-python.json"
+    },
+    {
+      "path": "initial/host-during-python.json",
+      "bytes": 10807,
+      "sha256": "adcd20e844647449b1c9aaa6bf31ae7ef33ef9e8aecfe50d45eae929c259c7e0",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/host-during-python.json"
+    },
+    {
+      "path": "initial/native/readback.json",
+      "bytes": 57172,
+      "sha256": "af8be5d73198f591966967e9bb395969add2c42502fbb3165f571a4cec59093d",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/native/review.json"
+    },
+    {
+      "path": "initial/native/conditions.csv",
+      "bytes": 2251,
+      "sha256": "ac4f85edf497b5ce39b5a13aeeeb428c30292f29e92293ba20948bcfb1ed575f",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/native/conditions.csv"
+    },
+    {
+      "path": "initial/native/run.py",
+      "bytes": 1554,
+      "sha256": "5f41a419e800e95954424e2a85d2ee988609d830db18dc85c469af801cd8aef5",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/native/run.py"
+    },
+    {
+      "path": "initial/native/native_screen.py",
+      "bytes": 7363,
+      "sha256": "81fc0a020eb0261653eccc895dbbd0153d26b98d71e1e8dc9ab98c2757550ccf",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/native/native_screen.py"
+    },
+    {
+      "path": "initial/native/read_results.py",
+      "bytes": 12332,
+      "sha256": "07d38c9b55c880d1f962cf0b14213dd41e5c51f214fd9d37cc96c26f0829a20b",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/native/read_results.py"
+    },
+    {
+      "path": "initial/native/controller.json",
+      "bytes": 1290,
+      "sha256": "5285c35b149df1eed6206fbb82ac431250772d9e6d8e765d270f305eb6b6c824",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/native/controller.json"
+    },
+    {
+      "path": "initial/native/protocol.json",
+      "bytes": 8886,
+      "sha256": "b4f8c121c23901a2dcaf498debb3ee2be9f747dff4493060ea861f87457af063",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/native/native-screen/protocol.json"
+    },
+    {
+      "path": "initial/python/readback.json",
+      "bytes": 397407,
+      "sha256": "a1bcac00831bd780f4cfbe10a6a37c45d68c6a555a9c31f3a901f27ee72131ac",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/python/normal-review.json"
+    },
+    {
+      "path": "initial/python/conditions.csv",
+      "bytes": 2163,
+      "sha256": "9bc602cf50d4f397ed4ebc080c405a9bf6a7bc4eee31e6508a91d6101f085f0a",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/python/normal-conditions.csv"
+    },
+    {
+      "path": "initial/python/run.py",
+      "bytes": 3629,
+      "sha256": "03089c11873a549b427f17a3433cae7c7bed468a8be7b06ea446e7115ae5f002",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/python/run.py"
+    },
+    {
+      "path": "initial/python/consumer_screen.py",
+      "bytes": 16070,
+      "sha256": "7f7225d0cf62fe651763a8e5f79059cffbd2680e8c1c321bc58b5eb15eef0f9b",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/python/consumer_screen.py"
+    },
+    {
+      "path": "initial/python/python_worker.py",
+      "bytes": 15312,
+      "sha256": "4bc0ccffedb5048412b9cfc3638d28dcb30f711891c3784f3fbd3c0eb536ab68",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/python/python_worker.py"
+    },
+    {
+      "path": "initial/python/elapsed_review.py",
+      "bytes": 10319,
+      "sha256": "2978b2eb42ddfd390a5d6f89ffade0aef3004d6763272bdf03898dd2910e3a01",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/python/elapsed_review.py"
+    },
+    {
+      "path": "initial/python/time-controller.json",
+      "bytes": 1265,
+      "sha256": "4761ec3a43558f607ccbc8ca0a080afb62e37a085bb3cd1b42ed1b95594e47f2",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/python/time-controller.json"
+    },
+    {
+      "path": "confirmation/host-before-native.json",
+      "bytes": 783,
+      "sha256": "b4d82d45a726c8e241b95adc95e2a74d257577b064cceab6c000b0e0a7258e40",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/host-before-native.json"
+    },
+    {
+      "path": "confirmation/host-during-native.json",
+      "bytes": 5249,
+      "sha256": "d333273d5267d8d5966563c0dc7f11791c15d7e248216d8a2edd257d0e7e5f3a",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/host-during-native.json"
+    },
+    {
+      "path": "confirmation/host-before-python.json",
+      "bytes": 783,
+      "sha256": "c015d59e6b54b8381e024f76b02c52d14d247a2807c0a2bfaa1b0b2550704a72",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/host-before-python.json"
+    },
+    {
+      "path": "confirmation/host-during-python.json",
+      "bytes": 10808,
+      "sha256": "d506921cdcb1be50dc4a55338c3d0d59bda5fd0107326745c53322eb89b33ac2",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/host-during-python.json"
+    },
+    {
+      "path": "confirmation/native/readback.json",
+      "bytes": 64310,
+      "sha256": "b5ac23d55129c5c90a34092b45b4edc86566a5760e33c5f9c267a1db2f446711",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/native/review.json"
+    },
+    {
+      "path": "confirmation/native/conditions.csv",
+      "bytes": 2251,
+      "sha256": "99efbc7d45289a3761b8486f230a040211994febac918774a01f8298130ef70c",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/native/conditions.csv"
+    },
+    {
+      "path": "confirmation/native/run.py",
+      "bytes": 1560,
+      "sha256": "a7b6b92a6e35f4ce6722146d239c41d9568c44bb0cce1bb3dd7c636906d7bde1",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/native/run.py"
+    },
+    {
+      "path": "confirmation/native/native_screen.py",
+      "bytes": 7370,
+      "sha256": "101b660f69c84f7b4f334ef227d1c525b678740fa1a23ddac0f177822422c500",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/native/native_screen.py"
+    },
+    {
+      "path": "confirmation/native/read_results.py",
+      "bytes": 12940,
+      "sha256": "e855f5193bbadc3e956dd8234305dfac1189c00d32c0c8b76d2893a83e41d38d",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/native/read_results.py"
+    },
+    {
+      "path": "confirmation/native/controller.json",
+      "bytes": 1310,
+      "sha256": "7b63a57ad026e1a279db713995eaae3775080acd925e825dcf74b0b9b252ca84",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/native/controller.json"
+    },
+    {
+      "path": "confirmation/native/protocol.json",
+      "bytes": 8893,
+      "sha256": "9ca10cd626186a821225c9d979a3b1401da5860d9f2f9d42371a4121ea847f9a",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/native/native-screen/protocol.json"
+    },
+    {
+      "path": "confirmation/python/readback.json",
+      "bytes": 414107,
+      "sha256": "f8557bbfd435b4853a9544b3570217f50c085d4381661b623d6135a0865d63d2",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/python/normal-review.json"
+    },
+    {
+      "path": "confirmation/python/conditions.csv",
+      "bytes": 2152,
+      "sha256": "03d49d560505dcbfdbd80054527af2b6d99aa465d63f17103348186ffbb15431",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/python/normal-conditions.csv"
+    },
+    {
+      "path": "confirmation/python/run.py",
+      "bytes": 3322,
+      "sha256": "3c639f063f3e4070847f21d06252d9b619f6d0b59af23ab658e5872a6c3b7c18",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/python/run.py"
+    },
+    {
+      "path": "confirmation/python/consumer_screen.py",
+      "bytes": 16070,
+      "sha256": "7f7225d0cf62fe651763a8e5f79059cffbd2680e8c1c321bc58b5eb15eef0f9b",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/python/consumer_screen.py"
+    },
+    {
+      "path": "confirmation/python/python_worker.py",
+      "bytes": 15312,
+      "sha256": "4bc0ccffedb5048412b9cfc3638d28dcb30f711891c3784f3fbd3c0eb536ab68",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/python/python_worker.py"
+    },
+    {
+      "path": "confirmation/python/elapsed_review.py",
+      "bytes": 10422,
+      "sha256": "536b6054cd7e63324021ff47f3055edca28a1da1e6bbc6be0392007d69691f47",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/python/elapsed_review.py"
+    },
+    {
+      "path": "confirmation/python/time-controller.json",
+      "bytes": 1365,
+      "sha256": "54df4db4a1632acf12897a0981be8b84f8e132e761f1ca3b34f2ed9ea1ab4dc9",
+      "local_source": "/tmp/oriole-matched-native-end-raw-confirmation/python/time-controller.json"
+    },
+    {
+      "path": "source/python-consumer-binding.json",
+      "bytes": 35517,
+      "sha256": "bacfe738bbadeeac0905f4197fb2ae95fadcc2eedafd327f193ad6b2f41f85a9",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/python/consumer-binding.json"
+    },
+    {
+      "path": "source/python-control-reuse.json",
+      "bytes": 4945,
+      "sha256": "3c9a1247620b70121d0902fe4a71fda3a18e54fff6b8e95fd3df401234aad6bb",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/python/reuse.json"
+    },
+    {
+      "path": "source/build_python_consumers.py",
+      "bytes": 7987,
+      "sha256": "4e7c91024b658618547c27023955e34a18fdc7a062764aaf1e26bc6910d3a099",
+      "local_source": "/tmp/oriole-matched-native-end-raw-study/python/build_consumers.py"
+    },
+    {
+      "path": "qualification/api-c-readback.json",
+      "bytes": 64064,
+      "sha256": "4a24ed1135c231879163b7b53b03c7ee916cd67581e69915c367531fb48dd55c",
+      "local_source": "/tmp/oriole-matched-native-end-raw-correctness/api-c-readback.json"
+    },
+    {
+      "path": "qualification/strict-semantic-readback.json",
+      "bytes": 191142,
+      "sha256": "0aa6a040cdb88707df37f9c5037ee90137ea5a8f8b327cead1c0bf7bd26c7128",
+      "local_source": "/tmp/oriole-matched-native-end-raw-correctness/strict-semantic-readback.json"
+    },
+    {
+      "path": "qualification/w3c-saved-readback.json",
+      "bytes": 28311,
+      "sha256": "697accf088f4c03eccbf9da9e5c685c92e3a359c7742104d95f74a646c74f4a1",
+      "local_source": "/tmp/oriole-matched-native-end-raw-correctness/w3c-saved-readback.json"
+    },
+    {
+      "path": "qualification/strict-preparation.json",
+      "bytes": 2131,
+      "sha256": "f9835ab799cfcf0d465f146b7229cca79d59b25427c0ef5d7a69ebdb4561516e",
+      "local_source": "/tmp/oriole-matched-native-end-raw-correctness/strict-preparation.json"
+    },
+    {
+      "path": "qualification/bound.json",
+      "bytes": 826,
+      "sha256": "60b4d97deb631134842307913b9412605ce898489fa9010a01c29c5c649dc9e8",
+      "local_source": "/tmp/oriole-matched-native-end-raw-correctness/bound.json"
+    },
+    {
+      "path": "qualification/semantic-commands.json",
+      "bytes": 8387,
+      "sha256": "fe8bdb4b7363ed6726e21f8aa635e524a73d28c77a77aa8ab94d305d571ebc82",
+      "local_source": "/tmp/oriole-matched-native-end-raw-correctness/semantic-commands.json"
+    },
+    {
+      "path": "qualification/read_api_c.py",
+      "bytes": 10753,
+      "sha256": "da5b5f78b5cf2f93f6896268139f03804f73503939964e8053c2e699b0a199ab",
+      "local_source": "/tmp/oriole-matched-native-end-raw-correctness/read_api_c.py"
+    },
+    {
+      "path": "qualification/read_strict_semantics.py",
+      "bytes": 10827,
+      "sha256": "b7792a9e80d7cf4a534aed524c290187e128c2de200cba2011b2bf2f543e44ac",
+      "local_source": "/tmp/oriole-matched-native-end-raw-correctness/read_strict_semantics.py"
+    },
+    {
+      "path": "qualification/read_w3c_saved.py",
+      "bytes": 10197,
+      "sha256": "346b29c67c472d5300fa4bf5d7ada1e2f59c41cea7affdb36801e3a821e50af7",
+      "local_source": "/tmp/oriole-matched-native-end-raw-correctness/read_w3c_saved.py"
+    },
+    {
+      "path": "qualification/api_native.py",
+      "bytes": 5337,
+      "sha256": "90a023cf936a69c3b0759601b3902bbec30d443fb0deb54fc5d6acc1b3952fa8",
+      "local_source": "/tmp/oriole-matched-native-end-raw-correctness/api_native.py"
+    },
+    {
+      "path": "qualification/strict_cpython.py",
+      "bytes": 7329,
+      "sha256": "8043754a25c4e1760bb6e48c763cf6812787b15afcc92113d359eff05efd3d08",
+      "local_source": "/tmp/oriole-matched-native-end-raw-correctness/strict_cpython.py"
+    },
+    {
+      "path": "qualification/semantic-shared-receipt.json",
+      "bytes": 2817,
+      "sha256": "2bcc9be8f5eeb3dae2011ecb13a813bb493d648e0ce93e1067184b639f08559b",
+      "local_source": "/tmp/oriole-matched-native-end-raw-correctness/semantic-shared-receipt.json"
+    },
+    {
+      "path": "qualification/semantic-static-receipt.json",
+      "bytes": 2817,
+      "sha256": "e896a3a13489dd361ca68c51bd3aeb86bf52e454a03fda1f82840454e8bad212",
+      "local_source": "/tmp/oriole-matched-native-end-raw-correctness/semantic-static-receipt.json"
+    },
+    {
+      "path": "qualification/commands.json",
+      "bytes": 4793,
+      "sha256": "6bd81beebf5cfba9be29824232be6557f602a854d31d64ea32f96b3fcb202986",
+      "local_source": "/tmp/oriole-matched-native-end-raw-correctness-preparation/commands.json"
+    },
+    {
+      "path": "qualification/supplemental-review.json",
+      "bytes": 7698,
+      "sha256": "0afc310dcdf00f28e88641ee1e4f0d971ff3f04bc03dd34a81a3eb1d5639412e",
+      "local_source": "/tmp/oriole-matched-native-end-raw-supplemental-review.json"
+    },
+    {
+      "path": "qualification/allocation-retry/report.json",
+      "bytes": 70257,
+      "sha256": "2f0b900ffb352a6ff90f65d7136c437330502b0cbbf4eb43e165e27b198ebced",
+      "local_source": "/tmp/oriole-matched-native-end-raw-allocation-retry/run01/report.json"
+    },
+    {
+      "path": "qualification/allocation-retry/saved-readback.json",
+      "bytes": 1379,
+      "sha256": "9fcc4baa512c76b818f5c8a41b385326a72c931eb0ce811a4fe964f541007692",
+      "local_source": "/tmp/oriole-matched-native-end-raw-allocation-retry/run01/saved-readback.json"
+    },
+    {
+      "path": "qualification/allocation-retry/tests.log",
+      "bytes": 41502,
+      "sha256": "8e11e9a097567b01266dfb0949db3773a964fa987fdc205ba2fbf51fae989f4b",
+      "local_source": "/tmp/oriole-matched-native-end-raw-allocation-retry/run01/tests.log"
+    },
+    {
+      "path": "qualification/allocation-retry/build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "local_source": "/tmp/oriole-matched-native-end-raw-allocation-retry/run01/build.log"
+    },
+    {
+      "path": "qualification/allocation-retry/retry-ceilings.patch",
+      "bytes": 6712,
+      "sha256": "703c57622db66df7b0d793272bd67c33c8a6502492771c8657226e13f60ec9b6",
+      "local_source": "/tmp/oriole-matched-native-end-raw-allocation-retry-preparation/retry-ceilings.patch"
+    },
+    {
+      "path": "qualification/allocation-retry/commands.json",
+      "bytes": 3154,
+      "sha256": "b210487774dc5fdb9282210462db40b3d5320678502b8b72c3076a8352409d8c",
+      "local_source": "/tmp/oriole-matched-native-end-raw-allocation-retry-preparation/commands.json"
+    },
+    {
+      "path": "qualification/allocation-retry/run.py",
+      "bytes": 8262,
+      "sha256": "e57d8c3f2e09da1cdbd7c75fc34cdf05dec16e5260ce0e75b4304dc20730d41b",
+      "local_source": "/tmp/oriole-matched-native-end-raw-allocation-retry-preparation/run.py"
+    },
+    {
+      "path": "qualification/allocation-retry/read.py",
+      "bytes": 5825,
+      "sha256": "c5c146837ef60749085886af80bf3716c98bbcbfcd642c9767963a1b0b5f5bb4",
+      "local_source": "/tmp/oriole-matched-native-end-raw-allocation-retry-preparation/read.py"
+    },
+    {
+      "path": "qualification/buffer-tail/report.json",
+      "bytes": 30416,
+      "sha256": "defce0c7da7978c3d01ee517de61f7a6da45e55ad492733114cef897d43c8685",
+      "local_source": "/tmp/oriole-matched-native-end-raw-buffer-tail/run01/report.json"
+    },
+    {
+      "path": "qualification/buffer-tail/saved-readback.json",
+      "bytes": 3536,
+      "sha256": "903443e7d0b175e833338aaf4655b749336cc9f6dfe76fa2698113b42c1cf8fc",
+      "local_source": "/tmp/oriole-matched-native-end-raw-buffer-tail/run01/saved-readback.json"
+    },
+    {
+      "path": "qualification/buffer-tail/tests.log",
+      "bytes": 2544,
+      "sha256": "9427771e8f80effbc085cccdd396a0422279c02d233e9b912b0d4d6ecf84347f",
+      "local_source": "/tmp/oriole-matched-native-end-raw-buffer-tail/run01/tests.log"
+    },
+    {
+      "path": "qualification/buffer-tail/build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "local_source": "/tmp/oriole-matched-native-end-raw-buffer-tail/run01/build.log"
+    },
+    {
+      "path": "qualification/buffer-tail/diagnostic.patch",
+      "bytes": 937,
+      "sha256": "9e1a204cee148112a27112813986dc0922437c65842ca96db54901f14d028158",
+      "local_source": "/tmp/oriole-matched-native-end-raw-buffer-tail-preparation/diagnostic.patch"
+    },
+    {
+      "path": "qualification/buffer-tail/commands.json",
+      "bytes": 2349,
+      "sha256": "deb963e0db8d1c884603956843277b446a3fdab1b62bfe7061dbe47a141132ac",
+      "local_source": "/tmp/oriole-matched-native-end-raw-buffer-tail-preparation/commands.json"
+    },
+    {
+      "path": "qualification/buffer-tail/run.py",
+      "bytes": 9031,
+      "sha256": "f1f5a2eb275e1c93fe195ec816796f8b1d9f5d0b8086475d5e9f81df74429a22",
+      "local_source": "/tmp/oriole-matched-native-end-raw-buffer-tail-preparation/run.py"
+    },
+    {
+      "path": "qualification/buffer-tail/read.py",
+      "bytes": 6319,
+      "sha256": "9527c803df2f341aa10de174e9af539f748bd399d33c5a27a213eaf38b8ee7ae",
+      "local_source": "/tmp/oriole-matched-native-end-raw-buffer-tail-preparation/read.py"
+    },
+    {
+      "path": "LOCAL_RAW_INDEX.json",
+      "bytes": 3021,
+      "sha256": "06ca646b3142d0e76fad562b1f59398a10bcf5e9e456d20eb5acff1d46edf4b1",
+      "local_source": null
+    },
+    {
+      "path": "README.md",
+      "bytes": 10404,
+      "sha256": "8b71241ea3b3c8f4c3665cd4555702621dc933651dc714960a2980c3a9b5b347",
+      "local_source": null
+    },
+    {
+      "path": "source/publication-source.json",
+      "bytes": 462,
+      "sha256": "a06b6fbf7ba186a59094e04efc525508264048cd06ddc41be6334dc470fb43c0",
+      "local_source": "/tmp/oriole-matched-native-end-raw-source-commit.json"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "status": "passed_independent_source_review",
+  "reviewer": "api_remaining_audit",
+  "proposal": {
+    "path": "/tmp/oriole-matched-native-end-raw-source-proposal/proposal.json",
+    "sha256": "c2536fc5a2020870fab245c60736e0a8c2dcabd1b5ba71704f58010e37331ddb"
+  },
+  "patch_sha256": "ea46fd50a7282e9ef0b01e2ab9f7a0970b2a1dac5af3ff5a2ff8f599bbebd613",
+  "transforms_sha256": "8db6e12da62271233117f6f676e79b6445e0a31c11b86bd4f8c3ef91f724b0a2",
+  "readme_sha256": "0aa88c7b648028a14aa2fbbef8631f730b9e88f6978ae035fde24bedabcc2a96",
+  "base": "008d818237fe0d6f8c04a000a98ad69ab5780ceb",
+  "measured_control": {
+    "study": "/tmp/oriole-core-owned-text-raw-study",
+    "runtime_commit": "67c704c123b8661a3ad1f91bd48c2f0be4996096",
+    "source_sha256": "05550226c63ecefdb8607f04a23efedaadcf77e449207f18e7be7c31b2426b38",
+    "build_binding_sha256": "b2027cd81bd1dc5830d338d757e8d2e7d77ee3758029e7443967f3da0ff23975",
+    "libraries": {
+      "liboriole_expat.so": "e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6",
+      "liboriole_expat.a": "4e0e5f21d37797429654a15a79e1b44960614b93b1548635be6247c79b6c4105"
+    }
+  },
+  "changed_files": {
+    "crates/oriole/src/lib.rs": {
+      "original_sha256": "f2c1e99ec4e59b894b9cc3825d258babff6cfff1ba5659f209f7af0ccfdfd80e",
+      "candidate_sha256": "8d3090e0792bae8c5a61b5766d20d10c2ca5d2bd07532fc5a874f2025ee9ded4"
+    },
+    "crates/oriole/tests/allocation.rs": {
+      "original_sha256": "bb2d867c8b95dc11eba2260f3b421cb89a88610b3cb59d839891b41e7467193f",
+      "candidate_sha256": "9355f8cc7319481c6e95ea4bca81fff20448820c859290958e8de1a06c619538"
+    },
+    "crates/oriole_expat/src/tests.rs": {
+      "original_sha256": "704ce215e54cf427b891c5c4fe934b5495c3b360d9526369c0a70ab8333e6af1",
+      "candidate_sha256": "47c1a63ae73b27f224f8bfd01f43acdc9ae756c304c866f7240f4acd03298afb"
+    }
+  },
+  "verification": {
+    "baseline_source_files": 74,
+    "auxiliary_files": 4,
+    "complete_changed_files": 3,
+    "exact_forward_and_reverse_transformations": 11,
+    "canonical_patch_equal": true,
+    "three_original_files_equal_base_git_blobs": true,
+    "unchanged_dynamic_allocation_checker": true,
+    "added_tests": 1
+  },
+  "findings": [],
+  "source_conclusions": [
+    {
+      "topic": "Absolute native raw offsets and bounds",
+      "evidence": "candidate core lib.rs:2062-2085,2359-2384; selected encoding.rs:948-954,1041-1050; core lib.rs:1200-1205,1287-1293",
+      "conclusion": "The existing matcher excludes fragments, multiple sources, anchors, non-UTF-8, conversions and raw-encoded names, then verifies the complete exact spelling and token limit. Both native_utf8_byte_index and position(end).byte_index return raw_index in that state; byte_count equals end. BOM offsets remain included. Accepted input is bounded by min(max_total_bytes,isize::MAX), so the retained range fits the accepted source. No arena capacity threshold is needed for a scalar range."
+    },
+    {
+      "topic": "Fallibility and ownership after stack pop",
+      "evidence": "candidate core lib.rs:2016-2052,2359-2384,3850-3861; selected arena.rs:206-215",
+      "conclusion": "account_source(end) completes before name detachment and updates accounted_raw. prepare_end_frame moves the existing tracked String, performs no allocation or callback, and only changes stack/frame/closed_root. Source state is unchanged until consume; its identical accounting query returns zero before ordinary Unicode coordinate advancement and scan retirement. Frame publication and last_position follow the existing delivery path. Failed accounting leaves stack/raw untouched; removed token allocation intentionally changes allocation scheduling."
+    },
+    {
+      "topic": "Raw retention and fallback",
+      "evidence": "candidate core lib.rs:1622-1631,1792-1810,1876-1888,1956-1988,2359-2486; selected encoding.rs:733-801,1241-1254",
+      "conclusion": "Generation rejection precedes C mode. C mode, enabled input context and the original no-DTD/no-shared-tables/no-namespace-undo guards additionally restrict the shortcut. The entire old token-copy/parse/raw-publication tail is unchanged for every fallback. native_raw.start participates in retention before subsequent feeds; native storage is not compacted by consume, while Separate retains original raw bytes independently. Only the validated range is decoded by current_raw, preserving readable raw across malformed later suffixes and failed growth."
+    },
+    {
+      "topic": "C callbacks, suspension and allocators",
+      "evidence": "selected C lib.rs:1330-1445,2279-2310; candidate C tests.rs:1871-1965",
+      "conclusion": "C End dispatch still owns the detached String outside parser borrows, charges callback work before its fallible terminator, and preserves selected allocator/recycling/default-copy behavior. Busy guards continue to reject recursive parse/reset/free. The new raw-context helper ends its borrowed slice before nested operations; callback copies are owned. The fixture renews userdata after external State inspection before Resume, and verifies raw/index/count/line/column before and after child/default/stop operations."
+    },
+    {
+      "topic": "Meaningful focused test paths",
+      "evidence": "candidate core lib.rs:5205-5346; allocation.rs:957-1032; C tests.rs:1871-1965",
+      "conclusion": "The new matrix proves actual native_raw selection versus generic/context-disabled/foreign-frame/whitespace/namespace-scope fallback, unchanged raw and scratch owners on the selected path, moved End name identity, BOM/Unicode/CR coordinates and ordinary handoff. Existing retention tests preserve original Text cases and add a 4103-byte Unicode End across compaction and malformed/incomplete suffixes. The allocation sweep adds End range retention for native growth and Separate while preserving injected-failure, sticky-error, selected-routing and zero-leak checks. The C fixture covers n, Unicode and 4097-byte names with DefaultCurrent, child parse, Stop/Resume and rejected reset/free."
+    }
+  ],
+  "qualification_note": "If selected, explicitly run tests::detached_end_owner_survives_default_current_children_stop_and_reset_rejection under both Miri aliasing models; context_text_ selection does not include this existing extended test. This is a later execution recommendation, not a source blocker.",
+  "expected_tests_unexecuted": {
+    "passed": 476,
+    "groups": 35,
+    "failures": 0,
+    "ignored": 0
+  },
+  "limitations": [
+    "Source-only review; formatting, compiler, parser, ordinary tests, Miri and performance have not been run by this reviewer.",
+    "Removing the token copy changes token/raw buffer reuse and allocation schedules; elapsed benefit remains unmeasured."
+  ],
+  "targets_executed": false,
+  "formatter_executed": false,
+  "source_or_worktree_edits": false
+}

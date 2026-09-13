@@ -1,0 +1,1064 @@
+{
+  "status": "saved_original_matrix_census",
+  "targets_executed": false,
+  "measured_source_commit": "0f66d54ac8418f0a6e628ad18570677a19c9ed45",
+  "source_equivalent_restacked_commit": "8b00d4cbb3f540647e1d7d795d0a04df00ed92f4",
+  "library_sha256": "d3c43850247b83aa3089b7f08deb31a084ee2aecb47b52d27e9d05e97b0e1bd4",
+  "upstream_revision": "12cf0b1f25f026a022fe728ad8f7e3d017285b80",
+  "totals": {
+    "configurations": 4740,
+    "passed": 4347,
+    "assertion_failures": 391,
+    "timeouts": 2,
+    "nonpassing_test_names": 38,
+    "allocation_related_names": 34,
+    "allocation_related_configurations": 366
+  },
+  "categories": {
+    "empty_buffer_allocation_expectation": 12,
+    "allocation_retry_ceiling": 298,
+    "reallocation_schedule": 44,
+    "fixed_budget_child_creation": 12,
+    "literal_version_identity": 12,
+    "bounded_timeout": 2,
+    "single_buffer_policy": 12,
+    "deferral_allocation_growth": 1
+  },
+  "names": [
+    {
+      "test": "test_nsalloc_parse_buffer",
+      "configurations": 12,
+      "category": "empty_buffer_allocation_expectation",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/nsalloc_tests.c:129",
+      "source_line": "fail(\"Pre-init XML_ParseBuffer not faulted\");",
+      "raw_diagnostic": [
+        "ERROR: Pre-init XML_ParseBuffer not faulted",
+        "ASSERTION: test_nsalloc_parse_buffer at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/nsalloc_tests.c:129"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_nsalloc_long_element",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/nsalloc_tests.c:502",
+      "source_line": "fail(\"Parsing failed at max reallocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parsing failed at max reallocation count",
+        "ASSERTION: test_nsalloc_long_element at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/nsalloc_tests.c:502"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_nsalloc_realloc_binding_uri",
+      "configurations": 12,
+      "category": "reallocation_schedule",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/nsalloc_tests.c:541",
+      "source_line": "fail(\"Parsing worked despite failing reallocation\");",
+      "raw_diagnostic": [
+        "ERROR: Parsing worked despite failing reallocation",
+        "ASSERTION: test_nsalloc_realloc_binding_uri at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/nsalloc_tests.c:541"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_nsalloc_realloc_long_prefix",
+      "configurations": 2,
+      "category": "reallocation_schedule",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/nsalloc_tests.c:617",
+      "source_line": "fail(\"Parsing worked despite failing reallocations\");",
+      "raw_diagnostic": [
+        "ERROR: Parsing worked despite failing reallocations",
+        "ASSERTION: test_nsalloc_realloc_long_prefix at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/nsalloc_tests.c:617"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_nsalloc_realloc_longer_prefix",
+      "configurations": 2,
+      "category": "reallocation_schedule",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/nsalloc_tests.c:693",
+      "source_line": "fail(\"Parsing worked despite failing reallocations\");",
+      "raw_diagnostic": [
+        "ERROR: Parsing worked despite failing reallocations",
+        "ASSERTION: test_nsalloc_realloc_longer_prefix at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/nsalloc_tests.c:693"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_nsalloc_long_context",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/nsalloc_tests.c:934",
+      "source_line": "fail(\"Parsing failed even at max allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parsing failed even at max allocation count",
+        "ASSERTION: test_nsalloc_long_context at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/nsalloc_tests.c:934"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_nsalloc_long_default_in_ext",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/nsalloc_tests.c:1403",
+      "source_line": "fail(\"Parsing failed even at max allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parsing failed even at max allocation count",
+        "ASSERTION: test_nsalloc_long_default_in_ext at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/nsalloc_tests.c:1403"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_nsalloc_long_systemid_in_ext",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/nsalloc_tests.c:1472",
+      "source_line": "fail(\"Parsing failed even at max allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parsing failed even at max allocation count",
+        "ASSERTION: test_nsalloc_long_systemid_in_ext at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/nsalloc_tests.c:1472"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_nsalloc_prefixed_element",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/nsalloc_tests.c:1508",
+      "source_line": "fail(\"Failed even at full allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Failed even at full allocation count",
+        "ASSERTION: test_nsalloc_prefixed_element at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/nsalloc_tests.c:1508"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_run_external_parser",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:347",
+      "source_line": "fail(\"Parsing failed with allocation count 10\");",
+      "raw_diagnostic": [
+        "ERROR: Parsing failed with allocation count 10",
+        "ASSERTION: test_alloc_run_external_parser at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:347"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_external_entity",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:404",
+      "source_line": "fail(\"External entity not parsed at max allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: External entity not parsed at max allocation count",
+        "ASSERTION: test_alloc_external_entity at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:404"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_ext_entity_set_encoding",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:432",
+      "source_line": "fail(\"Encoding failed at max allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Encoding failed at max allocation count",
+        "ASSERTION: test_alloc_ext_entity_set_encoding at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:432"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_internal_entity",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:460",
+      "source_line": "fail(\"Internal entity failed at max allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Internal entity failed at max allocation count",
+        "ASSERTION: test_alloc_internal_entity at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:460"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_parameter_entity",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:485",
+      "source_line": "fail(\"Parameter entity not processed at max allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parameter entity not processed at max allocation count",
+        "ASSERTION: test_alloc_parameter_entity at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:485"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_dtd_default_handling",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:537",
+      "source_line": "fail(\"Default DTD not parsed with maximum alloc count\");",
+      "raw_diagnostic": [
+        "ERROR: Default DTD not parsed with maximum alloc count",
+        "ASSERTION: test_alloc_dtd_default_handling at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:537"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_realloc_buffer",
+      "configurations": 12,
+      "category": "reallocation_schedule",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:609",
+      "source_line": "fail(\"Parse succeeded with no reallocation\");",
+      "raw_diagnostic": [
+        "ERROR: Parse succeeded with no reallocation",
+        "ASSERTION: test_alloc_realloc_buffer at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:609"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_ext_entity_realloc_buffer",
+      "configurations": 12,
+      "category": "reallocation_schedule",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:635",
+      "source_line": "fail(\"Succeeded with no reallocations\");",
+      "raw_diagnostic": [
+        "ERROR: Succeeded with no reallocations",
+        "ASSERTION: test_alloc_ext_entity_realloc_buffer at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:635"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_public_entity_value",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:734",
+      "source_line": "fail(\"Parsing failed at max allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parsing failed at max allocation count",
+        "ASSERTION: test_alloc_public_entity_value at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:734"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_set_foreign_dtd",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:920",
+      "source_line": "fail(\"Parse failed at maximum allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parse failed at maximum allocation count",
+        "ASSERTION: test_alloc_set_foreign_dtd at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:920"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_attribute_enum_value",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:952",
+      "source_line": "fail(\"Parse failed at maximum allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parse failed at maximum allocation count",
+        "ASSERTION: test_alloc_attribute_enum_value at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:952"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_notation",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:1173",
+      "source_line": "fail(\"Parse failed at maximum allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parse failed at maximum allocation count",
+        "ASSERTION: test_alloc_notation at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:1173"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_public_notation",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:1223",
+      "source_line": "fail(\"Parse failed at maximum allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parse failed at maximum allocation count",
+        "ASSERTION: test_alloc_public_notation at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:1223"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_system_notation",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:1272",
+      "source_line": "fail(\"Parse failed at maximum allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parse failed at maximum allocation count",
+        "ASSERTION: test_alloc_system_notation at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:1272"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_nested_groups",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:1311",
+      "source_line": "fail(\"Parse failed at maximum reallocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parse failed at maximum reallocation count",
+        "ASSERTION: test_alloc_nested_groups at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:1311"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_long_attr_default_with_char_ref",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:1608",
+      "source_line": "fail(\"Parse failed at maximum allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parse failed at maximum allocation count",
+        "ASSERTION: test_alloc_long_attr_default_with_char_ref at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:1608"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_long_attr_value",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:1652",
+      "source_line": "fail(\"Parse failed at maximum allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parse failed at maximum allocation count",
+        "ASSERTION: test_alloc_long_attr_value at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:1652"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_nested_entities",
+      "configurations": 12,
+      "category": "fixed_budget_child_creation",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/handlers.c:496",
+      "source_line": "fail(\"Could not create external entity parser\");",
+      "raw_diagnostic": [
+        "ERROR: Could not create external entity parser",
+        "ASSERTION: test_alloc_nested_entities at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/handlers.c:496"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_realloc_param_entity_newline",
+      "configurations": 2,
+      "category": "reallocation_schedule",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:1738",
+      "source_line": "fail(\"Parse succeeded despite failing reallocator\");",
+      "raw_diagnostic": [
+        "ERROR: Parse succeeded despite failing reallocator",
+        "ASSERTION: test_alloc_realloc_param_entity_newline at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:1738"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_realloc_ce_extends_pe",
+      "configurations": 2,
+      "category": "reallocation_schedule",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:1784",
+      "source_line": "fail(\"Parse succeeded despite failing reallocator\");",
+      "raw_diagnostic": [
+        "ERROR: Parse succeeded despite failing reallocator",
+        "ASSERTION: test_alloc_realloc_ce_extends_pe at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:1784"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_long_base",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:1912",
+      "source_line": "fail(\"Parsing failed even at max allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parsing failed even at max allocation count",
+        "ASSERTION: test_alloc_long_base at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:1912"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_long_public_id",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:1959",
+      "source_line": "fail(\"Parsing failed even at max allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parsing failed even at max allocation count",
+        "ASSERTION: test_alloc_long_public_id at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:1959"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_long_entity_value",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:2007",
+      "source_line": "fail(\"Parsing failed even at max allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parsing failed even at max allocation count",
+        "ASSERTION: test_alloc_long_entity_value at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:2007"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_alloc_long_notation",
+      "configurations": 12,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/alloc_tests.c:2076",
+      "source_line": "fail(\"Parsing failed even at max allocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parsing failed even at max allocation count",
+        "ASSERTION: test_alloc_long_notation at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c:2076"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_misc_version",
+      "configurations": 12,
+      "category": "literal_version_identity",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/misc_tests.c:224",
+      "source_line": "fail(\"XML_*_VERSION in expat.h out of sync?\\n\");",
+      "raw_diagnostic": [
+        "ERROR: XML_*_VERSION in expat.h out of sync?",
+        "ASSERTION: test_misc_version at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/misc_tests.c:224"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_misc_input_2gb",
+      "configurations": 2,
+      "category": "bounded_timeout",
+      "outcome": "timeout",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/misc_tests.c:932",
+      "source_line": "START_TEST(test_misc_input_2gb) {",
+      "raw_diagnostic": [],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_buffer_can_grow_to_max",
+      "configurations": 12,
+      "category": "single_buffer_policy",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=0",
+        "chunksize=0 deferral=1",
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/basic_tests.c:3456",
+      "source_line": "assert_true(XML_GetBuffer(parser, maxbuf - prefix_len) != NULL);",
+      "raw_diagnostic": [
+        "ERROR: check failed: XML_GetBuffer(parser, maxbuf - prefix_len) != NULL",
+        "ASSERTION: test_buffer_can_grow_to_max at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/basic_tests.c:3456"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_bypass_heuristic_when_close_to_bufsize",
+      "configurations": 1,
+      "category": "deferral_allocation_growth",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=0 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/basic_tests.c:6398",
+      "source_line": "assert_true(g_totalAlloc - alloc_before < 4096);",
+      "raw_diagnostic": [
+        "ERROR: check failed: g_totalAlloc - alloc_before < 4096",
+        "ASSERTION: test_bypass_heuristic_when_close_to_bufsize at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/basic_tests.c:6398"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    },
+    {
+      "test": "test_nsalloc_realloc_long_ge_name",
+      "configurations": 10,
+      "category": "allocation_retry_ceiling",
+      "outcome": "fail",
+      "contexts": [
+        "chunksize=1 deferral=0",
+        "chunksize=1 deferral=1",
+        "chunksize=2 deferral=0",
+        "chunksize=2 deferral=1",
+        "chunksize=3 deferral=0",
+        "chunksize=3 deferral=1",
+        "chunksize=4 deferral=0",
+        "chunksize=4 deferral=1",
+        "chunksize=5 deferral=0",
+        "chunksize=5 deferral=1"
+      ],
+      "assertion_or_timeout_body": "adapted/nsalloc_tests.c:1246",
+      "source_line": "fail(\"Parsing failed even at max reallocation count\");",
+      "raw_diagnostic": [
+        "ERROR: Parsing failed even at max reallocation count",
+        "ASSERTION: test_nsalloc_realloc_long_ge_name at /tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/nsalloc_tests.c:1246"
+      ],
+      "demonstrated": "Observed first assertion or bounded timeout only; later test behavior is not established by this original failing record."
+    }
+  ],
+  "unchanged_original_limits": {
+    "chunks": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "deferral": [
+      0,
+      1
+    ],
+    "per_test_seconds": 3,
+    "per_test_address_space_bytes": 1073741824,
+    "per_test_rss_limit_bytes": 805306368,
+    "total_timeout_seconds": 240,
+    "excluded_internal_tests": {
+      "test_siphash_self": "Expat's private SipHash implementation",
+      "test_siphash_spec": "Expat's private SipHash implementation",
+      "test_utf8_auto_align": "private _INTERNAL_trim_to_complete_utf8_characters",
+      "test_big_tokens_scale_linearly": "private g_bytesScanned counter",
+      "test_varying_buffer_fills": "private g_bytesScanned counter",
+      "test_accounting_precision": "private direct/indirect accounting getters",
+      "test_helper_unsigned_char_to_printable": "private diagnostic formatting helper",
+      "test_alloc_tracker_size_recorded": "private expat_malloc/realloc/free",
+      "test_alloc_tracker_pointer_alignment": "private expat_malloc/free",
+      "test_alloc_tracker_maximum_amplification": "private expat_malloc/free",
+      "test_alloc_tracker_threshold": "private expat_malloc/free",
+      "test_alloc_tracker_getbuffer_unlimited": "private expat_malloc"
+    }
+  },
+  "source_explanations": {
+    "literal_version_identity": {
+      "path": "crates/oriole_expat/src/lib.rs:2673",
+      "observed": "Returns oriole_compat_2.8.4; original assertion requires literal expat_2.8.4. Prior numeric/version parsing checks were reached and passed."
+    },
+    "single_buffer_policy": {
+      "path": "crates/oriole_expat/src/lib.rs:1737",
+      "observed": "XML_GetBuffer rejects requests above min(source room, 256MiB); upstream asks for approximately 1 GiB. The original 1 GiB process address-space bound is separate. The fixed 512 MiB family allocation ceiling also remains independent."
+    },
+    "allocation_related": {
+      "observed": "First assertions demonstrate original retry budgets exhausted, requested allocation/reallocation schedules differ, or child construction failed under injection. They do not prove an unsupported XML construct. No exact allocator implementation cause for every larger schedule is inferred."
+    },
+    "deferral_allocation_growth": {
+      "observed": "Only chunksize=0 / deferral=1 is active and fails g_totalAlloc - alloc_before < 4096 after the large token has been fully supplied. This is a growth assertion before later element-count assertions; reservation-pressure candidates were already investigated and rejected."
+    },
+    "bounded_timeout": {
+      "observed": "Only chunksize=0 contexts are active; both end with SIGALRM timeout code 14 under original 3-second wall bound. No final parser status or semantic success is inferred."
+    }
+  },
+  "conclusion": "No new substantive XML/callback defect is established by the remaining original failures. Preserve them as nonpassing rather than inventing a parser fix or changing their assertions/bounds.",
+  "coverage_limits": [
+    "Classification identifies the reached assertion; an early allocation assertion can hide later content/error/cleanup assertions.",
+    "Separate current 72 raised-ceiling diagnostic cases cover six unchanged later flag/text oracles; their altered budgets do not change this original matrix.",
+    "Long inherited default value, nested successful declarations and phase-aware nested OOM already have permanent regressions; no repeat experiment proposed.",
+    "The original narrow-character API selection excludes 12 private-only tests; no full Expat equivalence or all allocation-failure ordinals claim."
+  ],
+  "readiness_actions": [
+    "Carry exact original failures and separate successful semantic diagnostics into compatibility documentation.",
+    "Before default CPython/PBS substitution, validate selected source on supported distribution/platform/architecture combinations and current sustained adversarial/sanitizer/fuzz campaigns; historical source-specific evidence is not automatically current.",
+    "Document or resolve the two strict CPython callback-grouping differences for the intended opt-in integration; they remain failing suites.",
+    "Continue real-corpus performance work: matched PGO native 1.326116x and combined CPython 1.117937x Expat still miss roughly 1.10x. Avoid repeating rejected reservation-pressure experiments.",
+    "If a substantive defect appears in independent malformed-input/differential review, add the smallest reproducer and fix that established cause; this census supplies no such cause."
+  ],
+  "input_sha256": {
+    "/tmp/oriole-reference-frame-api-gates/api-native/upstream-api/results.json": "543838aa8d725d1c5c1fd10b92d6b3ea1ab687eb21390e6260f931fe553f4afb",
+    "/tmp/oriole-reference-frame-api-gates/api-native/upstream-api/tests.log": "a15bfd49cbb982538d727e28115c20722845b5e70fa021201a5fe311aa3fef4a",
+    "/tmp/oriole-reference-frame-api-gates/api-native/upstream-api/manifest.json": "51bfe30c4966067bfdc9c829d94d66395ed857c5c6ac7659a787901d47d0bd25",
+    "/tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/alloc_tests.c": "9ab0a92a26a12f05d3c3ab73689050d16857c2ae36f8632ec52a47bae5dac1ca",
+    "/tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/basic_tests.c": "7b296d5d7efdb0cace491a8abc77a6ad669b07a3474dfcb94e393b5575d01ea3",
+    "/tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/handlers.c": "82d1fc40333e27bf43208c62f03275c08982c9904b866acf8eb0e262893b26a9",
+    "/tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/misc_tests.c": "ee1cf0c22e2b3ef36603d897ba25a64c818f94ab7b12f33d5c7c43f979b12f75",
+    "/tmp/oriole-reference-frame-api-gates/api-native/upstream-api/adapted/nsalloc_tests.c": "9d407db0402cc0668a651b0cf5c7340a2e9d3c22d546c3ecfee64e4d0eaae16a"
+  }
+}

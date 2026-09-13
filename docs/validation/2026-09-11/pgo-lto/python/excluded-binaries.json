@@ -1,0 +1,227 @@
+[
+  {
+    "path": "studies/five-engine/consumers/expat/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/expat/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "size": 106128,
+    "sha256": "d5dad2c5ef8b46a5b04e99ca88cff5b40a56a144e20d149731096b4265cef0f1"
+  },
+  {
+    "path": "studies/five-engine/consumers/expat/expat-control-liboriole_expat.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/expat/expat-control-liboriole_expat.so",
+    "size": 216232,
+    "sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+  },
+  {
+    "path": "studies/five-engine/consumers/expat/libexpat.so.1",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/expat/libexpat.so.1",
+    "size": 216232,
+    "sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "symlink_target": "expat-control-liboriole_expat.so"
+  },
+  {
+    "path": "studies/five-engine/consumers/expat/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/expat/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "size": 93016,
+    "sha256": "fc2b7bdcf10e289e071dafea2df02c59dff5395e1d980c035506b006cd3257a2"
+  },
+  {
+    "path": "studies/five-engine/consumers/expat_pgo/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/expat_pgo/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "size": 106128,
+    "sha256": "5ee973993163545c9d5da3893bd755c73e5ddfa10696c92f88ce425486d1f307"
+  },
+  {
+    "path": "studies/five-engine/consumers/expat_pgo/expat-use-liboriole_expat.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/expat_pgo/expat-use-liboriole_expat.so",
+    "size": 218656,
+    "sha256": "12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0"
+  },
+  {
+    "path": "studies/five-engine/consumers/expat_pgo/libexpat.so.1",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/expat_pgo/libexpat.so.1",
+    "size": 218656,
+    "sha256": "12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0",
+    "symlink_target": "expat-use-liboriole_expat.so"
+  },
+  {
+    "path": "studies/five-engine/consumers/expat_pgo/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/expat_pgo/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "size": 93016,
+    "sha256": "b1a9514b490f38055ec09e42fa9a815b55f46b25e5bf3a776bf15805ca4b30ff"
+  },
+  {
+    "path": "studies/five-engine/consumers/fat/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/fat/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "size": 106128,
+    "sha256": "87cff0effcc2a3e6b744818aa01022f240166c9322d4fde1baf7b59793d774aa"
+  },
+  {
+    "path": "studies/five-engine/consumers/fat/liboriole_expat.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/fat/liboriole_expat.so",
+    "size": 1075776,
+    "sha256": "b86bb49a27b4072cbe37a4af622580359876138de38719c0227f1044db3a14d5"
+  },
+  {
+    "path": "studies/five-engine/consumers/fat/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/fat/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "size": 93016,
+    "sha256": "8a7025ef2617b25256bc5ecc0accfbc4664332a2948a371296980a9a61427f5c"
+  },
+  {
+    "path": "studies/five-engine/consumers/normal/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/normal/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "size": 106128,
+    "sha256": "63a142ee6a0450f6e68fa1ef9a098e00c6c4540cd3d00bcdc4b210bcb91bd22c"
+  },
+  {
+    "path": "studies/five-engine/consumers/normal/liboriole_expat.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/normal/liboriole_expat.so",
+    "size": 1151176,
+    "sha256": "0c8c58750c029174bfb522cee85949c11360696978e13b92d96e21f84461e96d"
+  },
+  {
+    "path": "studies/five-engine/consumers/normal/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/normal/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "size": 93016,
+    "sha256": "162d5f3f325cb66d9917c6caf1547ce6517f9095dd72a9a1ab3897a0c71a6060"
+  },
+  {
+    "path": "studies/five-engine/consumers/pgo/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/pgo/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "size": 106128,
+    "sha256": "4a9ee09bf07fc04e1048be0e196a725ed78842b82b5b1841b5e0a3da065730d0"
+  },
+  {
+    "path": "studies/five-engine/consumers/pgo/liboriole_expat.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/pgo/liboriole_expat.so",
+    "size": 1279992,
+    "sha256": "4f1518fc819bf4e8c92da914adea92acf2492cbf681de6324eeece8360186c02"
+  },
+  {
+    "path": "studies/five-engine/consumers/pgo/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-current-pgo-python-root-study/consumers/pgo/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "size": 93016,
+    "sha256": "fee003d6c053555bccfbffe088846013e691c97ec6ce0dd481e3717fad3f2128"
+  },
+  {
+    "path": "compile-inputs/0c8c58750c029174bfb522cee85949c11360696978e13b92d96e21f84461e96d/liboriole_expat.so",
+    "origin": "/tmp/oriole-native-byte-count-pgo-study/normal/liboriole_expat.so",
+    "size": 1151176,
+    "sha256": "0c8c58750c029174bfb522cee85949c11360696978e13b92d96e21f84461e96d"
+  },
+  {
+    "path": "compile-inputs/7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478/expat-control-liboriole_expat.so",
+    "origin": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+    "size": 216232,
+    "sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+  },
+  {
+    "path": "compile-inputs/4f1518fc819bf4e8c92da914adea92acf2492cbf681de6324eeece8360186c02/liboriole_expat.so",
+    "origin": "/tmp/oriole-native-byte-count-pgo-study/pgo/runs/run-7_l2jvbd/use/liboriole_expat.so",
+    "size": 1279992,
+    "sha256": "4f1518fc819bf4e8c92da914adea92acf2492cbf681de6324eeece8360186c02"
+  },
+  {
+    "path": "compile-inputs/b86bb49a27b4072cbe37a4af622580359876138de38719c0227f1044db3a14d5/liboriole_expat.so",
+    "origin": "/tmp/oriole-native-byte-count-fat-lto-study/liboriole_expat.so",
+    "size": 1075776,
+    "sha256": "b86bb49a27b4072cbe37a4af622580359876138de38719c0227f1044db3a14d5"
+  },
+  {
+    "path": "compile-inputs/12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0/expat-use-liboriole_expat.so",
+    "origin": "/tmp/oriole-pgo-study/expat-use-liboriole_expat.so",
+    "size": 218656,
+    "sha256": "12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0"
+  },
+  {
+    "path": "compile-inputs/021044895e95be79dc2f110367607e684119afbc8ce75f6f0eec94844e0acec7/python3.12",
+    "origin": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+    "size": 30905176,
+    "sha256": "021044895e95be79dc2f110367607e684119afbc8ce75f6f0eec94844e0acec7"
+  },
+  {
+    "path": "studies/fat-versus-thin-pgo/consumers/expat_pgo/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-fat-pgo-python-root-study/consumers/expat_pgo/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "size": 106128,
+    "sha256": "01e9a2a539877c6f17338ce30e9951e6ff09939c6572a274edd1f629a1c9fb2a"
+  },
+  {
+    "path": "studies/fat-versus-thin-pgo/consumers/expat_pgo/expat-use-liboriole_expat.so",
+    "origin": "/tmp/oriole-fat-pgo-python-root-study/consumers/expat_pgo/expat-use-liboriole_expat.so",
+    "size": 218656,
+    "sha256": "12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0"
+  },
+  {
+    "path": "studies/fat-versus-thin-pgo/consumers/expat_pgo/libexpat.so.1",
+    "origin": "/tmp/oriole-fat-pgo-python-root-study/consumers/expat_pgo/libexpat.so.1",
+    "size": 218656,
+    "sha256": "12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0",
+    "symlink_target": "expat-use-liboriole_expat.so"
+  },
+  {
+    "path": "studies/fat-versus-thin-pgo/consumers/expat_pgo/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-fat-pgo-python-root-study/consumers/expat_pgo/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "size": 93016,
+    "sha256": "1555cb64ef975e48d373d25989e41cd82b16714de80cbfb82e067979838648ac"
+  },
+  {
+    "path": "studies/fat-versus-thin-pgo/consumers/fat_pgo/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-fat-pgo-python-root-study/consumers/fat_pgo/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "size": 106128,
+    "sha256": "c62598a6c783509b4d9fc322b2aa1e77ed6b8931994d721866b3bc1565dfdd18"
+  },
+  {
+    "path": "studies/fat-versus-thin-pgo/consumers/fat_pgo/liboriole_expat.so",
+    "origin": "/tmp/oriole-fat-pgo-python-root-study/consumers/fat_pgo/liboriole_expat.so",
+    "size": 1224464,
+    "sha256": "d4e911d2a9148e898fe2c7e51056fd7dcf77dc85f91d6a8b1827fb200ed753a6"
+  },
+  {
+    "path": "studies/fat-versus-thin-pgo/consumers/fat_pgo/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-fat-pgo-python-root-study/consumers/fat_pgo/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "size": 93016,
+    "sha256": "f41931b289205f3fbefbaa287f0303290d4f7f2f0be0c41c22f3e91c9fef4473"
+  },
+  {
+    "path": "studies/fat-versus-thin-pgo/consumers/thin_pgo/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-fat-pgo-python-root-study/consumers/thin_pgo/_elementtree.cpython-312-x86_64-linux-gnu.so",
+    "size": 106128,
+    "sha256": "ab5576a7dae2f4258decd1bad18f4848def5704ec8102535ae58e09686c1268d"
+  },
+  {
+    "path": "studies/fat-versus-thin-pgo/consumers/thin_pgo/liboriole_expat.so",
+    "origin": "/tmp/oriole-fat-pgo-python-root-study/consumers/thin_pgo/liboriole_expat.so",
+    "size": 1279992,
+    "sha256": "4f1518fc819bf4e8c92da914adea92acf2492cbf681de6324eeece8360186c02"
+  },
+  {
+    "path": "studies/fat-versus-thin-pgo/consumers/thin_pgo/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "origin": "/tmp/oriole-fat-pgo-python-root-study/consumers/thin_pgo/pyexpat.cpython-312-x86_64-linux-gnu.so",
+    "size": 93016,
+    "sha256": "ee9fde59db1240cff56aa87b2d70f35d09bd2bc986303af1577a1bcaa6a2d611"
+  },
+  {
+    "path": "compile-inputs/4f1518fc819bf4e8c92da914adea92acf2492cbf681de6324eeece8360186c02/liboriole_expat.so",
+    "origin": "/tmp/oriole-native-byte-count-pgo-study/pgo/runs/run-7_l2jvbd/use/liboriole_expat.so",
+    "size": 1279992,
+    "sha256": "4f1518fc819bf4e8c92da914adea92acf2492cbf681de6324eeece8360186c02"
+  },
+  {
+    "path": "compile-inputs/12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0/expat-use-liboriole_expat.so",
+    "origin": "/tmp/oriole-pgo-study/expat-use-liboriole_expat.so",
+    "size": 218656,
+    "sha256": "12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0"
+  },
+  {
+    "path": "compile-inputs/d4e911d2a9148e898fe2c7e51056fd7dcf77dc85f91d6a8b1827fb200ed753a6/liboriole_expat.so",
+    "origin": "/tmp/oriole-native-byte-count-fat-pgo-study/pgo/runs/run-xe8qfw8c/use/liboriole_expat.so",
+    "size": 1224464,
+    "sha256": "d4e911d2a9148e898fe2c7e51056fd7dcf77dc85f91d6a8b1827fb200ed753a6"
+  },
+  {
+    "path": "compile-inputs/021044895e95be79dc2f110367607e684119afbc8ce75f6f0eec94844e0acec7/python3.12",
+    "origin": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+    "size": 30905176,
+    "sha256": "021044895e95be79dc2f110367607e684119afbc8ce75f6f0eec94844e0acec7"
+  }
+]

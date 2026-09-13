@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "scope": "Independent root archive/member/alias readback; no target execution or new numerical claim.",
+  "archives": [
+    {
+      "archive": "evidence.tar.gz",
+      "archive_sha256": "585e842a01a9576142e2fa783f1e181b6af3dfff4de7a8bbaebaf058df0368b0",
+      "index_sha256": "b1f5d029568b80df4cfa8c00a81eb4f352adb65309243eb0ed01f4de3b325ec1",
+      "members": 203,
+      "aliases": 77,
+      "uncompressed_bytes": 24227954,
+      "original_paths_checked": true
+    },
+    {
+      "archive": "benchmark-evidence.tar.gz",
+      "archive_sha256": "fad419a9df117c69949b64521e402dbbf7c0bc5cadb4110045b67a759f3c07c8",
+      "index_sha256": "288158d6933f6683c2b185d66af96bfa63421ed3e037165beb8512dd0a20af3b",
+      "members": 4043,
+      "aliases": 915,
+      "uncompressed_bytes": 81767350,
+      "original_paths_checked": true
+    }
+  ]
+}

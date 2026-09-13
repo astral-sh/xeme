@@ -1,0 +1,89 @@
+{
+  "status": "saved_outcomes_and_origins_verified",
+  "scope": "Independent saved strict CPython outcome/source/origin audit only; no builds, parser executions or test reruns. Canonical API and timing have separate receipts.",
+  "cpython": {
+    "shared": {
+      "methods": 802,
+      "failures": [
+        "test.test_pyexpat.BufferTextTest.test1",
+        "test.test_sax.CDATAHandlerTest.test_handlers"
+      ],
+      "expected_failures": 3,
+      "reported_skips": 14,
+      "whole_method_skips": 5,
+      "subtest_skips": 8,
+      "class_setup_skips": 1,
+      "all_method_statuses_equal_corrected_baseline": true
+    },
+    "static": {
+      "methods": 802,
+      "failures": [
+        "test.test_pyexpat.BufferTextTest.test1",
+        "test.test_sax.CDATAHandlerTest.test_handlers"
+      ],
+      "expected_failures": 3,
+      "reported_skips": 14,
+      "whole_method_skips": 5,
+      "subtest_skips": 8,
+      "class_setup_skips": 1,
+      "all_method_statuses_equal_corrected_baseline": true
+    }
+  },
+  "libraries": {
+    "/tmp/oriole-scanner-integration-study/liboriole_expat.so": "3694b68326939778481e42e810f53facc2ebcb8b8ad75b599704dbfef8f37926",
+    "/tmp/oriole-scanner-integration-study/liboriole_expat.a": "39b1a6e450814a57cfe8fa724d21f0a4cadb124da3674ecb0d5d9de508f76f38"
+  },
+  "limitations": [
+    "Both strict runs retain original exit2 and exactly two known text-grouping failures. Unchanged compatibility does not mean a green suite.",
+    "802 method maps are exact against both prior linkage records.14 skips comprise5 whole-method,8 subtest,1 class-setup.",
+    "Four persistent-loader origin records per linkage and three accelerator tests confirm fresh pyexpat/_elementtree imports; unmodified original tests and no waivers.",
+    "No sanitizer, fuzz, PBS or timing assertion made by this receipt."
+  ],
+  "evidence_sha256": {
+    "/tmp/oriole-scanner-integration-cpython-gates/controller.json": "2180f859cc775278df3b0ccee5582a0e872d3cfd34ae7cb427857993e5c7e8db",
+    "/tmp/oriole-scanner-integration-study/liboriole_expat.so": "3694b68326939778481e42e810f53facc2ebcb8b8ad75b599704dbfef8f37926",
+    "/tmp/oriole-scanner-integration-study/liboriole_expat.a": "39b1a6e450814a57cfe8fa724d21f0a4cadb124da3674ecb0d5d9de508f76f38",
+    "/tmp/oriole-scanner-integration-cpython-gates/shared.log": "666495e2c50a380308ffc4b845f6ab03a9c42df171a0a0bb1eaf36a7924fbd35",
+    "/tmp/oriole-scanner-integration-cpython-gates/static.log": "c2b7840049bb056b738fa95ef9711023f30ede7faaf823134f2e44fa259c65a0",
+    "/tmp/oriole-frame-integrated-gates/cpython-shared/tests.log": "13101e381d6911fd1f606f66a8563c846b5464418fd7161b2758b9603214f110",
+    "/tmp/oriole-scanner-integration-cpython-gates/shared/summary.json": "666495e2c50a380308ffc4b845f6ab03a9c42df171a0a0bb1eaf36a7924fbd35",
+    "/tmp/oriole-scanner-integration-cpython-gates/shared/origin.log": "1a83d6abb1154f8a1686c728cacda904f60a14fcff3171ac9e0cedfbca41813b",
+    "/tmp/oriole-scanner-integration-cpython-gates/shared/pyexpat.c": "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Modules/pyexpat.c": "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0",
+    "/tmp/oriole-scanner-integration-cpython-gates/shared/liboriole_expat.so": "3694b68326939778481e42e810f53facc2ebcb8b8ad75b599704dbfef8f37926",
+    "/tmp/oriole-scanner-integration-cpython-gates/shared/sitecustomize.py": "2116f8972094890d54dbe5fd915ed7eb8619f716ce0dd4e7ff63acf15ef4c5f3",
+    "/home/dev-user/code/oss/oriole-scanner-integration/tools/cpython/extension_loader.py": "2116f8972094890d54dbe5fd915ed7eb8619f716ce0dd4e7ff63acf15ef4c5f3",
+    "/home/dev-user/code/oss/oriole-scanner-integration/tools/cpython/check_extension_imports.py": "473e00f55f8bc92a69645df109438da1cf8cdb3f7e1ce08c8fdf7d055b14c3d5",
+    "/tmp/oriole-scanner-integration-cpython-gates/shared/pyexpat.cpython-312-x86_64-linux-gnu.so": "54328b85968ed576318dba9f0c3bfe98f7c5231d61caead96dab05d554b5ed57",
+    "/tmp/oriole-scanner-integration-cpython-gates/shared/_elementtree.cpython-312-x86_64-linux-gnu.so": "82f123f02f028706fb61d85602c17ac510ab43c34e6047c32bd8dae4ec47f551",
+    "/tmp/oriole-scanner-integration-cpython-gates/shared/tests.log": "a531413e0a60d0ba37c85491e11f595574f35f14411ed9b306c9a6f492b1e579",
+    "/tmp/oriole-scanner-integration-cpython-gates/shared/probe.log": "c947d32de8f08b594f4c1e10bfbbd843bcb32d0d8579fcba63fadab06baa54bb",
+    "/tmp/oriole-scanner-integration-cpython-gates/shared/pyexpat-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-scanner-integration-cpython-gates/shared/_elementtree-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-scanner-integration-cpython-gates/static/summary.json": "c2b7840049bb056b738fa95ef9711023f30ede7faaf823134f2e44fa259c65a0",
+    "/tmp/oriole-scanner-integration-cpython-gates/static/origin.log": "a2dea3669db03b89b6e79eb2eee3afc75dffa360d0d1331a88f7be759d9c8a29",
+    "/tmp/oriole-scanner-integration-cpython-gates/static/pyexpat.c": "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0",
+    "/tmp/oriole-scanner-integration-cpython-gates/static/liboriole_expat.a": "39b1a6e450814a57cfe8fa724d21f0a4cadb124da3674ecb0d5d9de508f76f38",
+    "/tmp/oriole-scanner-integration-cpython-gates/static/sitecustomize.py": "2116f8972094890d54dbe5fd915ed7eb8619f716ce0dd4e7ff63acf15ef4c5f3",
+    "/tmp/oriole-scanner-integration-cpython-gates/static/pyexpat.cpython-312-x86_64-linux-gnu.so": "d4ce4d33126466dc14713a8ecf11b0bfb554725080e7c4580de5a2649aacef34",
+    "/tmp/oriole-scanner-integration-cpython-gates/static/_elementtree.cpython-312-x86_64-linux-gnu.so": "38ade3dc3a6aa31a1dc12c94fb85d3cf3054220add0c6dc994ed1e294270d75e",
+    "/tmp/oriole-scanner-integration-cpython-gates/static/tests.log": "eaa88e5c02946807786cb897641ec98484ae58b9e48f4c424c5a55f46cfe3b55",
+    "/tmp/oriole-scanner-integration-cpython-gates/static/probe.log": "c31def36ef2521aceec4bacc96c9fda22e841ba238519af87e7a58de10086f83",
+    "/tmp/oriole-scanner-integration-cpython-gates/static/pyexpat-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-scanner-integration-cpython-gates/static/_elementtree-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-pbs-version-followup/report.json": "b9b5f710e5595d50f35cf0eda49749dc503e87f590f14c18ca55cf6a42cf2c74",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Lib/test/test_pyexpat.py": "44129616745434f065948aa9cee6a9be4546aa7cea93b952259e140cbc3fe844",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Lib/test/test_xml_etree.py": "2b5af95189ddba78b3d64f4529aa4393ba1a48a07b06dc9c0ea737ee105946eb",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Lib/test/test_xml_etree_c.py": "6e77d3dc478c0357ef9910f3fea602e1b8ed48c7a0b74496801e98936dba7be5",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Lib/test/test_minidom.py": "ce1abf7b06c4c98c535cea962908ddc4362ad2e626c23e9b726bffa5e60bf843",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Lib/test/test_sax.py": "b061db0792bb838bf2568ff145b770db0b89cbf7bfa995664f4d392d5e41ec34",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Lib/test/test_pulldom.py": "4c323df7e8eaf8e5f49f337bda9e23cb69a26e63eab8533a347a9cab2f1c2a1e",
+    "/home/dev-user/code/oss/oriole-scanner-integration/tools/cpython/run.py": "c682b96574c4cf34873899514873bf13947449a7adb35de404c8b73e96ec7fda",
+    "/home/dev-user/code/oss/oriole-scanner-integration/tools/cpython/text_fragmentation.py": "97b76ae05228951f85fab5887ed9727cb2d218016cd049a898080d2e0d6fc4b4",
+    "/tmp/oriole-frame-integrated-gates/cpython-static/tests.log": "0fb6d8b2ab844ccb6a20111c0ba6ccdd0060ad943eb00c00f03e4054ea680a74",
+    "/tmp/oriole-scanner-integration-cpython-gates/oriole-integration-cpython-gates.py": "bc7cf1bdf7a5a67f8c8964dbd236925f248cc73959c95b0c5acf8a7a67f961c7",
+    "/home/dev-user/code/oss/oriole-frame-integration/tools/cpython/run.py": "c682b96574c4cf34873899514873bf13947449a7adb35de404c8b73e96ec7fda",
+    "/home/dev-user/code/oss/oriole-frame-integration/tools/cpython/extension_loader.py": "2116f8972094890d54dbe5fd915ed7eb8619f716ce0dd4e7ff63acf15ef4c5f3",
+    "/home/dev-user/code/oss/oriole-frame-integration/tools/cpython/check_extension_imports.py": "473e00f55f8bc92a69645df109438da1cf8cdb3f7e1ce08c8fdf7d055b14c3d5"
+  }
+}

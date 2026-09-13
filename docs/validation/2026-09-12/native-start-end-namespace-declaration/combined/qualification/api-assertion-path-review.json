@@ -1,0 +1,10 @@
+{
+  "status": "path_only_assertion_relocation",
+  "rows": 391,
+  "semantic_differences": [],
+  "pins_sha256": {
+    "/tmp/oriole-core-owned-text-raw-correctness/api-native/upstream-api/tests.log": "100ad29b7878627793b63201a87c9a0db3fa0b4982bf73488144cd44f4e29777",
+    "/tmp/oriole-native-start-end-namespace-declaration-correctness/api-native/upstream-api/tests.log": "033deff16dd1fa493e1dd9a2503d7b9663e20a1c918585090c126c39dd999e41"
+  },
+  "targets_executed": false
+}

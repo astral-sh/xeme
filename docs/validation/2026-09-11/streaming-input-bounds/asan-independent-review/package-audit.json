@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "role": "Independent saved-data package audit by next_hotspot; no collector import or target execution.",
+  "raw_audit_sha256": "a85ec7b77304da7f000d3a3bb546841cc7d7014e9310f8999fa87fb543cd5ec5",
+  "source_manifest_sha256": "e52c4fa16e71a7dcd76864b29509b157a42b6fbe4531f87b68f98395418d5fc3",
+  "files_in_report_match_package": {
+    "ASAN.md": {
+      "sha256": "7524d7e2eae9be36ef1e3712cb6e35e6dfa5ff7dff113152c2dcb2c855fe477c",
+      "bytes": 4248
+    },
+    "asan.json": {
+      "sha256": "f11a5156736f4d985d32764aa146afcf9ca67db20ed66e849eec0c3db34c3fc2",
+      "bytes": 6544
+    },
+    "asan-evidence.tar.gz": {
+      "sha256": "3bf0bbb5d9baf7f6cb7f7c60d959edb1bf47fe82862fae18ffce1ea9acc1dfca",
+      "bytes": 24905903
+    },
+    "asan-evidence-members.json.gz": {
+      "sha256": "d118ae0e44f84d6c217be562d20178acec3d8aa0dfe4a3194dee19b7cbdeb9f0",
+      "bytes": 3089814
+    },
+    "package-streaming-policy-asan.py": {
+      "sha256": "c5dddcf4ac8e8e66329c0261de37ab85fbc30d3cb2f15d7122e246f8c2ad6091",
+      "bytes": 14515
+    }
+  },
+  "archive_members_verified": 60226,
+  "unique_corpus_blobs_verified": 60015,
+  "unique_corpus_bytes_verified": 14829774,
+  "corpus_placements_reconstructed": 128942,
+  "all_original_filenames_preserved": true,
+  "all_blob_origins_rehashed": true,
+  "raw_study_and_preparation_files_match": true,
+  "canonical_source_files_verified": 70,
+  "compiled_binaries_excluded_with_verified_hashes": 7,
+  "caption_and_limits_review": "Public ASAN.md accurately says 7 targets, 13 selected tests and 120 seconds each; retains per-target counting, historical seed-only reuse, disabled leak detection and collector ownership. Inherited raw six-target caption is preserved and explicitly explained.",
+  "publication_finding": "No blocking mismatch found in this ASan follow-up or its five-file package. Scope is the current e52c streaming policy only."
+}

@@ -1,0 +1,136 @@
+...sCould not find platform dependent libraries <exec_prefix>
+.s............s.ss
+----------------------------------------------------------------------
+Ran 22 tests in 0.157s
+
+OK (skipped=5)
+Using random seed: 486339892
+0:00:00 load avg: 1.08 Run 6 tests in parallel using 6 worker processes
+0:00:00 load avg: 1.08 [1/6/1] test_pyexpat failed (1 failure)
+test test_pyexpat failed -- Traceback (most recent call last):
+  File "/tmp/tmpzbi21poz/python/install/lib/python3.12/test/test_pyexpat.py", line 401, in test1
+    self.assertEqual(self.stuff,
+AssertionError: Lists differ: ['<a>', '1', '<b>', '2\n3', '<c>', '4\n5'] != ['<a>', '1', '<b>', '2', '\n', '3', '<c>', '4\n5']
+
+First differing element 3:
+'2\n3'
+'2'
+
+Second list contains 2 additional elements.
+First extra element 6:
+'<c>'
+
+- ['<a>', '1', '<b>', '2\n3', '<c>', '4\n5']
++ ['<a>', '1', '<b>', '2', '\n', '3', '<c>', '4\n5']
+?                       ++++  ++++
+ : buffering control not reacting as expected
+0:00:00 load avg: 1.08 [2/6/1] test_pulldom passed
+0:00:00 load avg: 1.08 [3/6/1] test_minidom passed
+0:00:00 load avg: 1.08 [4/6/2] test_sax failed (1 failure)
+test test_sax failed -- Traceback (most recent call last):
+  File "/tmp/tmpzbi21poz/python/install/lib/python3.12/test/test_sax.py", line 1554, in test_handlers
+    self.parser.parse(source)
+  File "/tmp/tmpzbi21poz/python/install/lib/python3.12/xml/sax/expatreader.py", line 105, in parse
+    xmlreader.IncrementalParser.parse(self, source)
+  File "/tmp/tmpzbi21poz/python/install/lib/python3.12/xml/sax/xmlreader.py", line 124, in parse
+    self.feed(buffer)
+  File "/tmp/tmpzbi21poz/python/install/lib/python3.12/xml/sax/expatreader.py", line 211, in feed
+    self._parser.Parse(data, isFinal)
+  File "./Modules/pyexpat.c", line 342, in CharacterData
+  File "/tmp/tmpzbi21poz/python/install/lib/python3.12/test/test_sax.py", line 1543, in characters
+    h.assertEqual(t[0], content)
+AssertionError: 'Parseable character data' != '\nParseable character data\n'
++ 
+  Parseable character data
++
+0:00:00 load avg: 1.08 [5/6/2] test_xml_etree passed
+0:00:00 load avg: 1.08 [6/6/2] test_xml_etree_c passed
+
+== Tests result: FAILURE ==
+
+2 tests failed:
+    test_pyexpat test_sax
+
+4 tests OK.
+
+0:00:00 load avg: 1.08 Re-running 2 failed tests in verbose mode in subprocesses
+0:00:00 load avg: 1.08 Run 2 tests in parallel using 2 worker processes
+0:00:01 load avg: 1.08 [1/2/1] test_pyexpat failed (1 failure)
+Re-running test_pyexpat in verbose mode (matching: test1)
+test1 (test.test_pyexpat.BufferTextTest.test1) ... FAIL
+test1 (test.test_pyexpat.MalformedInputTest.test1) ... ok
+
+======================================================================
+FAIL: test1 (test.test_pyexpat.BufferTextTest.test1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/tmpzbi21poz/python/install/lib/python3.12/test/test_pyexpat.py", line 401, in test1
+    self.assertEqual(self.stuff,
+AssertionError: Lists differ: ['<a>', '1', '<b>', '2\n3', '<c>', '4\n5'] != ['<a>', '1', '<b>', '2', '\n', '3', '<c>', '4\n5']
+
+First differing element 3:
+'2\n3'
+'2'
+
+Second list contains 2 additional elements.
+First extra element 6:
+'<c>'
+
+- ['<a>', '1', '<b>', '2\n3', '<c>', '4\n5']
++ ['<a>', '1', '<b>', '2', '\n', '3', '<c>', '4\n5']
+?                       ++++  ++++
+ : buffering control not reacting as expected
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.002s
+
+FAILED (failures=1)
+test test_pyexpat failed
+0:00:01 load avg: 1.08 [2/2/2] test_sax failed (1 failure)
+Re-running test_sax in verbose mode (matching: test_handlers)
+test_handlers (test.test_sax.CDATAHandlerTest.test_handlers) ... FAIL
+test_handlers (test.test_sax.LexicalHandlerTest.test_handlers) ... ok
+
+======================================================================
+FAIL: test_handlers (test.test_sax.CDATAHandlerTest.test_handlers)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/tmpzbi21poz/python/install/lib/python3.12/test/test_sax.py", line 1554, in test_handlers
+    self.parser.parse(source)
+  File "/tmp/tmpzbi21poz/python/install/lib/python3.12/xml/sax/expatreader.py", line 105, in parse
+    xmlreader.IncrementalParser.parse(self, source)
+  File "/tmp/tmpzbi21poz/python/install/lib/python3.12/xml/sax/xmlreader.py", line 124, in parse
+    self.feed(buffer)
+  File "/tmp/tmpzbi21poz/python/install/lib/python3.12/xml/sax/expatreader.py", line 211, in feed
+    self._parser.Parse(data, isFinal)
+  File "./Modules/pyexpat.c", line 342, in CharacterData
+  File "/tmp/tmpzbi21poz/python/install/lib/python3.12/test/test_sax.py", line 1543, in characters
+    h.assertEqual(t[0], content)
+AssertionError: 'Parseable character data' != '\nParseable character data\n'
++ 
+  Parseable character data
++ 
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.002s
+
+FAILED (failures=1)
+test test_sax failed
+2 tests failed again:
+    test_pyexpat test_sax
+
+== Tests result: FAILURE then FAILURE ==
+
+2 re-run tests:
+    test_pyexpat test_sax
+
+2 tests failed:
+    test_pyexpat test_sax
+
+4 tests OK.
+
+Total duration: 1.1 sec
+Total tests: run=806 failures=4 skipped=12
+Total test files: run=8/6 failed=2 rerun=2
+Result: FAILURE then FAILURE

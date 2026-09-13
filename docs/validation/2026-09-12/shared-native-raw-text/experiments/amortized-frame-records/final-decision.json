@@ -1,0 +1,1947 @@
+{
+  "status": "rejected",
+  "candidate": "bounded amortized frame attribute records",
+  "base": "2c4d21647efdefe0b7da977ca206b8552c32f0f3",
+  "review_sha256": "3dee0df32d1b251175330099c4ad6739b1fcc7a009fb35684641fc677a30d124",
+  "groups": {
+    "real": {
+      "conditions": 24,
+      "geomean_ratios": {
+        "candidate_over_control": 1.0157201875657738,
+        "candidate_over_expat": 1.314902319342885,
+        "control_over_expat": 1.2950222997161598
+      },
+      "candidate_faster_than_control": 4,
+      "adverse": [
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 7
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0133478933679596,
+              1.0148420058346903,
+              1.0105585061311555,
+              1.0432725610271474,
+              1.0270039864017935,
+              0.726041410008625,
+              1.0252865548179004
+            ],
+            "candidate_over_expat": [
+              1.3936635858095479,
+              1.4307217708877678,
+              1.4366579316274777,
+              1.4845678411135494,
+              1.4607447068953872,
+              1.426991729879476,
+              1.4255625526349582
+            ],
+            "control_over_expat": [
+              1.3753061460241183,
+              1.4097975474625957,
+              1.421647458223483,
+              1.4229913606200162,
+              1.4223359658157178,
+              1.965441240965201,
+              1.390404025036835
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0148420058346903,
+            "candidate_over_expat": 1.4307217708877678,
+            "control_over_expat": 1.421647458223483
+          }
+        },
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 7
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.017661298523486,
+              1.0266787974122258,
+              1.0039352591655528,
+              1.0362385238677072,
+              1.0204726023311699,
+              1.0322015563813967,
+              1.0081717903473515
+            ],
+            "candidate_over_expat": [
+              1.5244889428520625,
+              1.5027174174251874,
+              1.5304944898992625,
+              1.5334509944075128,
+              1.5110972354373793,
+              1.5270422198092983,
+              1.520396140376825
+            ],
+            "control_over_expat": [
+              1.4980317567975976,
+              1.4636685019821496,
+              1.5244952061663548,
+              1.4798243445765609,
+              1.4807817789379407,
+              1.4794031363047655,
+              1.5080724881748515
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0204726023311699,
+            "candidate_over_expat": 1.5244889428520625,
+            "control_over_expat": 1.4807817789379407
+          }
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 64
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.002044565992338,
+              0.9876391380412227,
+              1.0051271087302038,
+              1.022238463564548,
+              1.030698258273922,
+              0.9951213873295188,
+              1.015145601420472
+            ],
+            "candidate_over_expat": [
+              0.9202057515608706,
+              0.9390157842382839,
+              0.9309513034519447,
+              0.9552914804946883,
+              0.9559490251627081,
+              0.9302257589032817,
+              0.8939876954257223
+            ],
+            "control_over_expat": [
+              0.9183281690166929,
+              0.9507680974456185,
+              0.9262025622093042,
+              0.9345094266592009,
+              0.9274770937942651,
+              0.9347862187944836,
+              0.8806497256893827
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0051271087302038,
+            "candidate_over_expat": 0.9309513034519447,
+            "control_over_expat": 0.9274770937942651
+          }
+        },
+        {
+          "condition": {
+            "name": "maven",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 128
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0631980997172055,
+              1.0492666653625593,
+              1.035613051757019,
+              1.0456688067363236,
+              1.0470166663919651,
+              1.0459612974871129,
+              1.0743572383956144
+            ],
+            "candidate_over_expat": [
+              1.5948024917846808,
+              1.6006923322368347,
+              1.5396075927760895,
+              1.616185039499989,
+              1.6053222845826738,
+              1.5954201531117345,
+              1.6330879190212635
+            ],
+            "control_over_expat": [
+              1.5000050246599141,
+              1.5255343422958527,
+              1.486662986879119,
+              1.5455993609911012,
+              1.5332347001835587,
+              1.525314709965539,
+              1.5200604237190478
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0470166663919651,
+            "candidate_over_expat": 1.6006923322368347,
+            "control_over_expat": 1.525314709965539
+          }
+        },
+        {
+          "condition": {
+            "name": "maven",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 128
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0144231084923314,
+              0.9996107007004653,
+              1.0023361038440701,
+              1.0285646174556877,
+              1.0162608260934185,
+              1.0193157991458006,
+              1.0126680829854087
+            ],
+            "candidate_over_expat": [
+              1.7610404513359494,
+              1.7540923207999564,
+              1.7642928234926107,
+              1.7028886585836973,
+              1.8066957860207884,
+              1.7398953322807982,
+              1.6688233644666002
+            ],
+            "control_over_expat": [
+              1.7360019074814501,
+              1.754775453654905,
+              1.7601808582234564,
+              1.6555971590740246,
+              1.7777874927698043,
+              1.7069247172847242,
+              1.6479470346757694
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0144231084923314,
+            "candidate_over_expat": 1.7540923207999564,
+            "control_over_expat": 1.7360019074814501
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0167916826943626,
+              1.0151061450118455,
+              1.0230197727621084,
+              1.026046065737939,
+              1.0261009941713644,
+              1.0134193107841982,
+              1.0262352674524025
+            ],
+            "candidate_over_expat": [
+              1.335072253659449,
+              1.3780615586116567,
+              1.3508455216085498,
+              1.3807221866540058,
+              1.3842366656364775,
+              1.349231937167868,
+              1.3963594309050826
+            ],
+            "control_over_expat": [
+              1.3130243651498852,
+              1.3575541487787721,
+              1.3204490837565401,
+              1.3456727068691416,
+              1.3490257523376912,
+              1.331365924065344,
+              1.3606620968810612
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0230197727621084,
+            "candidate_over_expat": 1.3780615586116567,
+            "control_over_expat": 1.3456727068691416
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0275594508211552,
+              1.034623349288794,
+              1.0189403384393512,
+              1.01825986748296,
+              1.00504641225873,
+              1.0119953914118156,
+              1.026096457579135
+            ],
+            "candidate_over_expat": [
+              1.4112515270521164,
+              1.388659042238119,
+              1.3992416022136518,
+              1.4089535017883927,
+              1.3820883632152257,
+              1.3944090636393003,
+              1.3820476832863222
+            ],
+            "control_over_expat": [
+              1.373401340354897,
+              1.3421879983596847,
+              1.3732321210845226,
+              1.383687550478828,
+              1.375148795476157,
+              1.3778808436014582,
+              1.3468984061663964
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0189403384393512,
+            "candidate_over_expat": 1.3944090636393003,
+            "control_over_expat": 1.373401340354897
+          }
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0049405781087897,
+              1.0204925645596916,
+              1.0178279303537687,
+              1.022679336041356,
+              1.0024738251971033,
+              1.0202308953977735,
+              1.0129468292940493
+            ],
+            "candidate_over_expat": [
+              1.2912620570066111,
+              1.2900102830955085,
+              1.3051039461880978,
+              1.2971750715748616,
+              1.2741168952518016,
+              1.2672078204085502,
+              1.2926870684125127
+            ],
+            "control_over_expat": [
+              1.2849138398179256,
+              1.2641055191343846,
+              1.2822441861410503,
+              1.2684084109844627,
+              1.2709727308853063,
+              1.2420794411587428,
+              1.2761647808438494
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0178279303537687,
+            "candidate_over_expat": 1.2912620570066111,
+            "control_over_expat": 1.2709727308853063
+          }
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0157550080506605,
+              1.0095950705550896,
+              0.9897857997269692,
+              1.0139233382030126,
+              1.0317873183203066,
+              1.0053243762340158,
+              1.0147430689587549
+            ],
+            "candidate_over_expat": [
+              1.5935138516826872,
+              1.5196178647114154,
+              1.572512504592082,
+              1.567387246257176,
+              1.6865348937446127,
+              1.5354559535024832,
+              1.568765828050668
+            ],
+            "control_over_expat": [
+              1.5687974354572032,
+              1.505175598644621,
+              1.5887402153333146,
+              1.545863663652396,
+              1.6345761028447212,
+              1.5273239063936368,
+              1.5459734350887513
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0139233382030126,
+            "candidate_over_expat": 1.568765828050668,
+            "control_over_expat": 1.5459734350887513
+          }
+        },
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 7
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.017525649330084,
+              1.039348149399889,
+              1.0242101382914899,
+              1.0239953707300875,
+              1.014126737700717,
+              1.0221415369185105,
+              1.0419349264156987
+            ],
+            "candidate_over_expat": [
+              1.4720420619835228,
+              1.453056098153179,
+              1.4290906137405137,
+              1.412078642656242,
+              1.416028833954228,
+              1.4198517315022199,
+              1.449957413186075
+            ],
+            "control_over_expat": [
+              1.4466879168625206,
+              1.3980455913566225,
+              1.3953099664922424,
+              1.3789892835642987,
+              1.3963036189783586,
+              1.3890950325555713,
+              1.3916007386123348
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0239953707300875,
+            "candidate_over_expat": 1.4290906137405137,
+            "control_over_expat": 1.3953099664922424
+          }
+        },
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 7
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0393558098207638,
+              1.0313690054704414,
+              1.0362132932732178,
+              1.0337659010225462,
+              1.0298736247374,
+              1.0283133871210735,
+              1.0140504381880324
+            ],
+            "candidate_over_expat": [
+              1.511741425194288,
+              1.4970955285990806,
+              1.509151966414423,
+              1.5046176544579704,
+              1.5380451730079507,
+              1.4595563789284884,
+              1.514076702513507
+            ],
+            "control_over_expat": [
+              1.4544984604021087,
+              1.4515614883309451,
+              1.456410544249316,
+              1.4554723201545752,
+              1.4934309764463825,
+              1.4193692284943873,
+              1.4930980210599307
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0313690054704414,
+            "candidate_over_expat": 1.509151966414423,
+            "control_over_expat": 1.4554723201545752
+          }
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 64
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.002752878272457,
+              1.0006001388233212,
+              0.9868232715256706,
+              0.9855830652913791,
+              1.01302802363329,
+              1.0061976374883745,
+              1.0144993366190171
+            ],
+            "candidate_over_expat": [
+              0.870199838053268,
+              0.8960153821622824,
+              0.8523827152469473,
+              0.8794423874019779,
+              0.8795694477794307,
+              0.9104381494724407,
+              0.8996633933808702
+            ],
+            "control_over_expat": [
+              0.867810860391095,
+              0.8954779710664166,
+              0.8637643029325074,
+              0.8923067150529603,
+              0.8682577650959727,
+              0.9048303390425719,
+              0.8868053047517447
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.002752878272457,
+            "candidate_over_expat": 0.8795694477794307,
+            "control_over_expat": 0.8868053047517447
+          }
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 64
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              0.994989092489924,
+              1.0170602839817307,
+              1.0181861163848547,
+              1.0211356554819535,
+              1.0018096321569585,
+              1.006198030277545,
+              1.0114640822122059
+            ],
+            "candidate_over_expat": [
+              0.9039125316543635,
+              0.9479989178896457,
+              0.9258409796864625,
+              0.93706300587021,
+              0.9152279803779751,
+              0.918352699832341,
+              0.9595665047874011
+            ],
+            "control_over_expat": [
+              0.9084647645657655,
+              0.9320970770565203,
+              0.9093042664672442,
+              0.9176675017071428,
+              0.9135747461395758,
+              0.912695783730591,
+              0.9486906373271329
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0114640822122059,
+            "candidate_over_expat": 0.9258409796864625,
+            "control_over_expat": 0.9135747461395758
+          }
+        },
+        {
+          "condition": {
+            "name": "maven",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 128
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0461988860855906,
+              1.0522161957967218,
+              1.0541346628728252,
+              1.0543014543784213,
+              1.03278674784811,
+              1.0548600327812283,
+              1.0344862504206571
+            ],
+            "candidate_over_expat": [
+              1.7616687826610848,
+              1.8128386458399472,
+              1.8071148458643784,
+              1.725624720265126,
+              1.6710517718561804,
+              1.67254375145024,
+              1.665902815582072
+            ],
+            "control_over_expat": [
+              1.683875605385572,
+              1.722876584756704,
+              1.7143111876612251,
+              1.6367469788633586,
+              1.618002724510112,
+              1.585559884225053,
+              1.6103672860849136
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0522161957967218,
+            "candidate_over_expat": 1.725624720265126,
+            "control_over_expat": 1.6367469788633586
+          }
+        },
+        {
+          "condition": {
+            "name": "maven",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 128
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0332233289879524,
+              0.9856771375021812,
+              1.0040694956431107,
+              1.0178426194951626,
+              1.0135620630028237,
+              1.0048299204884166,
+              1.0211514087830398
+            ],
+            "candidate_over_expat": [
+              1.9001375039361814,
+              1.8365237682028939,
+              1.9310680276047945,
+              1.8879873541191634,
+              1.921375661822807,
+              1.9072574036485583,
+              1.8740681856143324
+            ],
+            "control_over_expat": [
+              1.8390385220950982,
+              1.8632102727439284,
+              1.9232414050861466,
+              1.8548912355974851,
+              1.8956665131392694,
+              1.8980897809268058,
+              1.835250061347669
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0135620630028237,
+            "candidate_over_expat": 1.9001375039361814,
+            "control_over_expat": 1.8632102727439284
+          }
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 512
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0072408682099505,
+              1.020700783445035,
+              0.9861640908447566,
+              0.9905004152823922,
+              1.0148375866812656,
+              1.0019603397457142,
+              1.0014030017221847
+            ],
+            "candidate_over_expat": [
+              1.1833797566953637,
+              1.170217168172469,
+              1.1672128066419336,
+              1.1746249974350031,
+              1.1750030474178212,
+              1.1612414194581222,
+              1.1763423758982134
+            ],
+            "control_over_expat": [
+              1.174872658610888,
+              1.146484050127591,
+              1.1835888342294933,
+              1.1858904643670614,
+              1.1578237373532159,
+              1.158969445589864,
+              1.1746942778034148
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0019603397457142,
+            "candidate_over_expat": 1.1746249974350031,
+            "control_over_expat": 1.1746942778034148
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0352877317297875,
+              1.0422532597784075,
+              1.006791325707475,
+              1.0223783712418493,
+              1.0324846875860831,
+              1.043112753736039,
+              1.0234292232217674
+            ],
+            "candidate_over_expat": [
+              1.4538020792823625,
+              1.4537116118245677,
+              1.4193222856850138,
+              1.4568334138980703,
+              1.4524629388816646,
+              1.4982600744735828,
+              1.4540648551693756
+            ],
+            "control_over_expat": [
+              1.4042493064737758,
+              1.394777707036042,
+              1.4097482263145764,
+              1.4249454554956038,
+              1.4067646293888167,
+              1.4363356876880058,
+              1.4207771501696638
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0324846875860831,
+            "candidate_over_expat": 1.4538020792823625,
+            "control_over_expat": 1.4097482263145764
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0412584682029815,
+              1.0565671329415116,
+              1.0105994544373396,
+              1.0191550054099947,
+              1.0347365820709622,
+              1.0387999014292753,
+              1.0228408898004153
+            ],
+            "candidate_over_expat": [
+              1.5541889688048842,
+              1.5862671113801143,
+              1.5320110651069445,
+              1.5080858300711677,
+              1.5276530193245954,
+              1.5273685790596079,
+              1.5757122919563114
+            ],
+            "control_over_expat": [
+              1.4926063184745335,
+              1.501340579243558,
+              1.5159428974359634,
+              1.4797413760083349,
+              1.476369006174587,
+              1.47032029648647,
+              1.540525322822963
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0347365820709622,
+            "candidate_over_expat": 1.5320110651069445,
+            "control_over_expat": 1.4926063184745335
+          }
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.009225396055049,
+              1.0363316884987086,
+              1.0291083368728953,
+              1.0179776257195612,
+              1.014860849586263,
+              1.0132007836813952,
+              1.0165952343119096
+            ],
+            "candidate_over_expat": [
+              1.3813278611228903,
+              1.3820829515822115,
+              1.3866502641803329,
+              1.3581669531043956,
+              1.4118838115437418,
+              1.3856867627008123,
+              1.3887474799136479
+            ],
+            "control_over_expat": [
+              1.368701051838716,
+              1.3336299245894707,
+              1.34742885126544,
+              1.3341815367939647,
+              1.3912092599880432,
+              1.3676329361550776,
+              1.3660771101820408
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0165952343119096,
+            "candidate_over_expat": 1.3856867627008123,
+            "control_over_expat": 1.3660771101820408
+          }
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.009488018876032,
+              1.006261200091771,
+              0.9990266933218802,
+              1.0062847440063174,
+              1.0088818669990225,
+              1.0067984087054267,
+              0.9972445861078288
+            ],
+            "candidate_over_expat": [
+              1.6472383565276365,
+              1.5989511488590236,
+              1.6580802978476812,
+              1.626228590308481,
+              1.622122951084271,
+              1.6697934189471957,
+              1.6603820101920217
+            ],
+            "control_over_expat": [
+              1.6317562226857119,
+              1.589002088834588,
+              1.659695690747132,
+              1.6160719915458357,
+              1.607842309535575,
+              1.6585181348213187,
+              1.6649696908081184
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0062847440063174,
+            "candidate_over_expat": 1.6472383565276365,
+            "control_over_expat": 1.6317562226857119
+          }
+        }
+      ]
+    },
+    "generated": {
+      "conditions": 4,
+      "geomean_ratios": {
+        "candidate_over_control": 1.0501913513105354,
+        "candidate_over_expat": 3.6076964890769445,
+        "control_over_expat": 3.444307944118671
+      },
+      "candidate_faster_than_control": 0,
+      "adverse": [
+        {
+          "condition": {
+            "name": "generated-rare-declarations",
+            "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 32
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0126672806156616,
+              1.0158520944980094,
+              0.998216583525489,
+              0.9836062488802068,
+              1.012523706436286,
+              1.0161816764998437,
+              1.0057153771950325
+            ],
+            "candidate_over_expat": [
+              4.698041451870211,
+              4.736168136121159,
+              4.609773438699226,
+              4.5043647632707735,
+              4.766656362119683,
+              4.458536016901366,
+              4.65155529463796
+            ],
+            "control_over_expat": [
+              4.639274460426912,
+              4.662261525839123,
+              4.618009272515274,
+              4.579438945613449,
+              4.707698527767389,
+              4.387538291635445,
+              4.625120983643776
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.012523706436286,
+            "candidate_over_expat": 4.65155529463796,
+            "control_over_expat": 4.625120983643776
+          }
+        },
+        {
+          "condition": {
+            "name": "generated-entities",
+            "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 32
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.054435477369003,
+              1.0993902965058762,
+              1.0956805267342422,
+              1.0949915034074773,
+              1.0759193949306516,
+              1.0753874513515116,
+              1.102890815937489
+            ],
+            "candidate_over_expat": [
+              2.736403535260658,
+              2.7639430624141776,
+              2.8089900548977123,
+              2.7756432928554844,
+              2.7506073348579645,
+              2.523551714224489,
+              2.746957929955669
+            ],
+            "control_over_expat": [
+              2.595136064739071,
+              2.514068999152208,
+              2.563694422196329,
+              2.534853726460916,
+              2.556518032687063,
+              2.346644189545798,
+              2.4906889152220164
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0949915034074773,
+            "candidate_over_expat": 2.7506073348579645,
+            "control_over_expat": 2.534853726460916
+          }
+        },
+        {
+          "condition": {
+            "name": "generated-rare-declarations",
+            "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 32
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0453542864516094,
+              0.9937405666662316,
+              1.028953055119153,
+              0.9932786331516524,
+              1.0182990230626523,
+              1.0469466305770516,
+              1.0081148601172198
+            ],
+            "candidate_over_expat": [
+              4.861698945208802,
+              4.657305929567617,
+              4.8310414479834565,
+              4.644734367342614,
+              4.746512501890183,
+              4.869259147071388,
+              4.800698149951749
+            ],
+            "control_over_expat": [
+              4.650766738338577,
+              4.686641650538425,
+              4.695103847496736,
+              4.67616458496139,
+              4.661216788379602,
+              4.650914387477012,
+              4.762054741851085
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0182990230626523,
+            "candidate_over_expat": 4.800698149951749,
+            "control_over_expat": 4.67616458496139
+          }
+        },
+        {
+          "condition": {
+            "name": "generated-entities",
+            "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 32
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0599125026970155,
+              1.0743522219326027,
+              1.107599607452458,
+              1.0774136488874961,
+              1.0919804904937445,
+              1.051024039486531,
+              1.2104412727238956
+            ],
+            "candidate_over_expat": [
+              2.7260218873775366,
+              2.7579652534083676,
+              2.7889802370727867,
+              2.7432222088068285,
+              2.7922354964819194,
+              2.74664317848366,
+              3.111038638710887
+            ],
+            "control_over_expat": [
+              2.5719310607630335,
+              2.5670959645312514,
+              2.518040109717626,
+              2.546117929394522,
+              2.5570378965464817,
+              2.6133019562763855,
+              2.5701690026728974
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0774136488874961,
+            "candidate_over_expat": 2.7579652534083676,
+            "control_over_expat": 2.5670959645312514
+          }
+        }
+      ]
+    },
+    "real_namespaces_off": {
+      "conditions": 12,
+      "geomean_ratios": {
+        "candidate_over_control": 1.0174392257202043,
+        "candidate_over_expat": 1.2606209491447953,
+        "control_over_expat": 1.24049987738122
+      },
+      "candidate_faster_than_control": 3,
+      "adverse": [
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 7
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0133478933679596,
+              1.0148420058346903,
+              1.0105585061311555,
+              1.0432725610271474,
+              1.0270039864017935,
+              0.726041410008625,
+              1.0252865548179004
+            ],
+            "candidate_over_expat": [
+              1.3936635858095479,
+              1.4307217708877678,
+              1.4366579316274777,
+              1.4845678411135494,
+              1.4607447068953872,
+              1.426991729879476,
+              1.4255625526349582
+            ],
+            "control_over_expat": [
+              1.3753061460241183,
+              1.4097975474625957,
+              1.421647458223483,
+              1.4229913606200162,
+              1.4223359658157178,
+              1.965441240965201,
+              1.390404025036835
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0148420058346903,
+            "candidate_over_expat": 1.4307217708877678,
+            "control_over_expat": 1.421647458223483
+          }
+        },
+        {
+          "condition": {
+            "name": "maven",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 128
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0631980997172055,
+              1.0492666653625593,
+              1.035613051757019,
+              1.0456688067363236,
+              1.0470166663919651,
+              1.0459612974871129,
+              1.0743572383956144
+            ],
+            "candidate_over_expat": [
+              1.5948024917846808,
+              1.6006923322368347,
+              1.5396075927760895,
+              1.616185039499989,
+              1.6053222845826738,
+              1.5954201531117345,
+              1.6330879190212635
+            ],
+            "control_over_expat": [
+              1.5000050246599141,
+              1.5255343422958527,
+              1.486662986879119,
+              1.5455993609911012,
+              1.5332347001835587,
+              1.525314709965539,
+              1.5200604237190478
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0470166663919651,
+            "candidate_over_expat": 1.6006923322368347,
+            "control_over_expat": 1.525314709965539
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0167916826943626,
+              1.0151061450118455,
+              1.0230197727621084,
+              1.026046065737939,
+              1.0261009941713644,
+              1.0134193107841982,
+              1.0262352674524025
+            ],
+            "candidate_over_expat": [
+              1.335072253659449,
+              1.3780615586116567,
+              1.3508455216085498,
+              1.3807221866540058,
+              1.3842366656364775,
+              1.349231937167868,
+              1.3963594309050826
+            ],
+            "control_over_expat": [
+              1.3130243651498852,
+              1.3575541487787721,
+              1.3204490837565401,
+              1.3456727068691416,
+              1.3490257523376912,
+              1.331365924065344,
+              1.3606620968810612
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0230197727621084,
+            "candidate_over_expat": 1.3780615586116567,
+            "control_over_expat": 1.3456727068691416
+          }
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0049405781087897,
+              1.0204925645596916,
+              1.0178279303537687,
+              1.022679336041356,
+              1.0024738251971033,
+              1.0202308953977735,
+              1.0129468292940493
+            ],
+            "candidate_over_expat": [
+              1.2912620570066111,
+              1.2900102830955085,
+              1.3051039461880978,
+              1.2971750715748616,
+              1.2741168952518016,
+              1.2672078204085502,
+              1.2926870684125127
+            ],
+            "control_over_expat": [
+              1.2849138398179256,
+              1.2641055191343846,
+              1.2822441861410503,
+              1.2684084109844627,
+              1.2709727308853063,
+              1.2420794411587428,
+              1.2761647808438494
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0178279303537687,
+            "candidate_over_expat": 1.2912620570066111,
+            "control_over_expat": 1.2709727308853063
+          }
+        },
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 7
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.017525649330084,
+              1.039348149399889,
+              1.0242101382914899,
+              1.0239953707300875,
+              1.014126737700717,
+              1.0221415369185105,
+              1.0419349264156987
+            ],
+            "candidate_over_expat": [
+              1.4720420619835228,
+              1.453056098153179,
+              1.4290906137405137,
+              1.412078642656242,
+              1.416028833954228,
+              1.4198517315022199,
+              1.449957413186075
+            ],
+            "control_over_expat": [
+              1.4466879168625206,
+              1.3980455913566225,
+              1.3953099664922424,
+              1.3789892835642987,
+              1.3963036189783586,
+              1.3890950325555713,
+              1.3916007386123348
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0239953707300875,
+            "candidate_over_expat": 1.4290906137405137,
+            "control_over_expat": 1.3953099664922424
+          }
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 64
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.002752878272457,
+              1.0006001388233212,
+              0.9868232715256706,
+              0.9855830652913791,
+              1.01302802363329,
+              1.0061976374883745,
+              1.0144993366190171
+            ],
+            "candidate_over_expat": [
+              0.870199838053268,
+              0.8960153821622824,
+              0.8523827152469473,
+              0.8794423874019779,
+              0.8795694477794307,
+              0.9104381494724407,
+              0.8996633933808702
+            ],
+            "control_over_expat": [
+              0.867810860391095,
+              0.8954779710664166,
+              0.8637643029325074,
+              0.8923067150529603,
+              0.8682577650959727,
+              0.9048303390425719,
+              0.8868053047517447
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.002752878272457,
+            "candidate_over_expat": 0.8795694477794307,
+            "control_over_expat": 0.8868053047517447
+          }
+        },
+        {
+          "condition": {
+            "name": "maven",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 128
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0461988860855906,
+              1.0522161957967218,
+              1.0541346628728252,
+              1.0543014543784213,
+              1.03278674784811,
+              1.0548600327812283,
+              1.0344862504206571
+            ],
+            "candidate_over_expat": [
+              1.7616687826610848,
+              1.8128386458399472,
+              1.8071148458643784,
+              1.725624720265126,
+              1.6710517718561804,
+              1.67254375145024,
+              1.665902815582072
+            ],
+            "control_over_expat": [
+              1.683875605385572,
+              1.722876584756704,
+              1.7143111876612251,
+              1.6367469788633586,
+              1.618002724510112,
+              1.585559884225053,
+              1.6103672860849136
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0522161957967218,
+            "candidate_over_expat": 1.725624720265126,
+            "control_over_expat": 1.6367469788633586
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0352877317297875,
+              1.0422532597784075,
+              1.006791325707475,
+              1.0223783712418493,
+              1.0324846875860831,
+              1.043112753736039,
+              1.0234292232217674
+            ],
+            "candidate_over_expat": [
+              1.4538020792823625,
+              1.4537116118245677,
+              1.4193222856850138,
+              1.4568334138980703,
+              1.4524629388816646,
+              1.4982600744735828,
+              1.4540648551693756
+            ],
+            "control_over_expat": [
+              1.4042493064737758,
+              1.394777707036042,
+              1.4097482263145764,
+              1.4249454554956038,
+              1.4067646293888167,
+              1.4363356876880058,
+              1.4207771501696638
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0324846875860831,
+            "candidate_over_expat": 1.4538020792823625,
+            "control_over_expat": 1.4097482263145764
+          }
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.009225396055049,
+              1.0363316884987086,
+              1.0291083368728953,
+              1.0179776257195612,
+              1.014860849586263,
+              1.0132007836813952,
+              1.0165952343119096
+            ],
+            "candidate_over_expat": [
+              1.3813278611228903,
+              1.3820829515822115,
+              1.3866502641803329,
+              1.3581669531043956,
+              1.4118838115437418,
+              1.3856867627008123,
+              1.3887474799136479
+            ],
+            "control_over_expat": [
+              1.368701051838716,
+              1.3336299245894707,
+              1.34742885126544,
+              1.3341815367939647,
+              1.3912092599880432,
+              1.3676329361550776,
+              1.3660771101820408
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0165952343119096,
+            "candidate_over_expat": 1.3856867627008123,
+            "control_over_expat": 1.3660771101820408
+          }
+        }
+      ]
+    },
+    "real_namespaces_on": {
+      "conditions": 12,
+      "geomean_ratios": {
+        "candidate_over_control": 1.014004053852318,
+        "candidate_over_expat": 1.3715210036658756,
+        "control_over_expat": 1.3519410903147908
+      },
+      "candidate_faster_than_control": 1,
+      "adverse": [
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 7
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.017661298523486,
+              1.0266787974122258,
+              1.0039352591655528,
+              1.0362385238677072,
+              1.0204726023311699,
+              1.0322015563813967,
+              1.0081717903473515
+            ],
+            "candidate_over_expat": [
+              1.5244889428520625,
+              1.5027174174251874,
+              1.5304944898992625,
+              1.5334509944075128,
+              1.5110972354373793,
+              1.5270422198092983,
+              1.520396140376825
+            ],
+            "control_over_expat": [
+              1.4980317567975976,
+              1.4636685019821496,
+              1.5244952061663548,
+              1.4798243445765609,
+              1.4807817789379407,
+              1.4794031363047655,
+              1.5080724881748515
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0204726023311699,
+            "candidate_over_expat": 1.5244889428520625,
+            "control_over_expat": 1.4807817789379407
+          }
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 64
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.002044565992338,
+              0.9876391380412227,
+              1.0051271087302038,
+              1.022238463564548,
+              1.030698258273922,
+              0.9951213873295188,
+              1.015145601420472
+            ],
+            "candidate_over_expat": [
+              0.9202057515608706,
+              0.9390157842382839,
+              0.9309513034519447,
+              0.9552914804946883,
+              0.9559490251627081,
+              0.9302257589032817,
+              0.8939876954257223
+            ],
+            "control_over_expat": [
+              0.9183281690166929,
+              0.9507680974456185,
+              0.9262025622093042,
+              0.9345094266592009,
+              0.9274770937942651,
+              0.9347862187944836,
+              0.8806497256893827
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0051271087302038,
+            "candidate_over_expat": 0.9309513034519447,
+            "control_over_expat": 0.9274770937942651
+          }
+        },
+        {
+          "condition": {
+            "name": "maven",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 128
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0144231084923314,
+              0.9996107007004653,
+              1.0023361038440701,
+              1.0285646174556877,
+              1.0162608260934185,
+              1.0193157991458006,
+              1.0126680829854087
+            ],
+            "candidate_over_expat": [
+              1.7610404513359494,
+              1.7540923207999564,
+              1.7642928234926107,
+              1.7028886585836973,
+              1.8066957860207884,
+              1.7398953322807982,
+              1.6688233644666002
+            ],
+            "control_over_expat": [
+              1.7360019074814501,
+              1.754775453654905,
+              1.7601808582234564,
+              1.6555971590740246,
+              1.7777874927698043,
+              1.7069247172847242,
+              1.6479470346757694
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0144231084923314,
+            "candidate_over_expat": 1.7540923207999564,
+            "control_over_expat": 1.7360019074814501
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0275594508211552,
+              1.034623349288794,
+              1.0189403384393512,
+              1.01825986748296,
+              1.00504641225873,
+              1.0119953914118156,
+              1.026096457579135
+            ],
+            "candidate_over_expat": [
+              1.4112515270521164,
+              1.388659042238119,
+              1.3992416022136518,
+              1.4089535017883927,
+              1.3820883632152257,
+              1.3944090636393003,
+              1.3820476832863222
+            ],
+            "control_over_expat": [
+              1.373401340354897,
+              1.3421879983596847,
+              1.3732321210845226,
+              1.383687550478828,
+              1.375148795476157,
+              1.3778808436014582,
+              1.3468984061663964
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0189403384393512,
+            "candidate_over_expat": 1.3944090636393003,
+            "control_over_expat": 1.373401340354897
+          }
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0157550080506605,
+              1.0095950705550896,
+              0.9897857997269692,
+              1.0139233382030126,
+              1.0317873183203066,
+              1.0053243762340158,
+              1.0147430689587549
+            ],
+            "candidate_over_expat": [
+              1.5935138516826872,
+              1.5196178647114154,
+              1.572512504592082,
+              1.567387246257176,
+              1.6865348937446127,
+              1.5354559535024832,
+              1.568765828050668
+            ],
+            "control_over_expat": [
+              1.5687974354572032,
+              1.505175598644621,
+              1.5887402153333146,
+              1.545863663652396,
+              1.6345761028447212,
+              1.5273239063936368,
+              1.5459734350887513
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0139233382030126,
+            "candidate_over_expat": 1.568765828050668,
+            "control_over_expat": 1.5459734350887513
+          }
+        },
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 7
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0393558098207638,
+              1.0313690054704414,
+              1.0362132932732178,
+              1.0337659010225462,
+              1.0298736247374,
+              1.0283133871210735,
+              1.0140504381880324
+            ],
+            "candidate_over_expat": [
+              1.511741425194288,
+              1.4970955285990806,
+              1.509151966414423,
+              1.5046176544579704,
+              1.5380451730079507,
+              1.4595563789284884,
+              1.514076702513507
+            ],
+            "control_over_expat": [
+              1.4544984604021087,
+              1.4515614883309451,
+              1.456410544249316,
+              1.4554723201545752,
+              1.4934309764463825,
+              1.4193692284943873,
+              1.4930980210599307
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0313690054704414,
+            "candidate_over_expat": 1.509151966414423,
+            "control_over_expat": 1.4554723201545752
+          }
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 64
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              0.994989092489924,
+              1.0170602839817307,
+              1.0181861163848547,
+              1.0211356554819535,
+              1.0018096321569585,
+              1.006198030277545,
+              1.0114640822122059
+            ],
+            "candidate_over_expat": [
+              0.9039125316543635,
+              0.9479989178896457,
+              0.9258409796864625,
+              0.93706300587021,
+              0.9152279803779751,
+              0.918352699832341,
+              0.9595665047874011
+            ],
+            "control_over_expat": [
+              0.9084647645657655,
+              0.9320970770565203,
+              0.9093042664672442,
+              0.9176675017071428,
+              0.9135747461395758,
+              0.912695783730591,
+              0.9486906373271329
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0114640822122059,
+            "candidate_over_expat": 0.9258409796864625,
+            "control_over_expat": 0.9135747461395758
+          }
+        },
+        {
+          "condition": {
+            "name": "maven",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 128
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0332233289879524,
+              0.9856771375021812,
+              1.0040694956431107,
+              1.0178426194951626,
+              1.0135620630028237,
+              1.0048299204884166,
+              1.0211514087830398
+            ],
+            "candidate_over_expat": [
+              1.9001375039361814,
+              1.8365237682028939,
+              1.9310680276047945,
+              1.8879873541191634,
+              1.921375661822807,
+              1.9072574036485583,
+              1.8740681856143324
+            ],
+            "control_over_expat": [
+              1.8390385220950982,
+              1.8632102727439284,
+              1.9232414050861466,
+              1.8548912355974851,
+              1.8956665131392694,
+              1.8980897809268058,
+              1.835250061347669
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0135620630028237,
+            "candidate_over_expat": 1.9001375039361814,
+            "control_over_expat": 1.8632102727439284
+          }
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 512
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0072408682099505,
+              1.020700783445035,
+              0.9861640908447566,
+              0.9905004152823922,
+              1.0148375866812656,
+              1.0019603397457142,
+              1.0014030017221847
+            ],
+            "candidate_over_expat": [
+              1.1833797566953637,
+              1.170217168172469,
+              1.1672128066419336,
+              1.1746249974350031,
+              1.1750030474178212,
+              1.1612414194581222,
+              1.1763423758982134
+            ],
+            "control_over_expat": [
+              1.174872658610888,
+              1.146484050127591,
+              1.1835888342294933,
+              1.1858904643670614,
+              1.1578237373532159,
+              1.158969445589864,
+              1.1746942778034148
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0019603397457142,
+            "candidate_over_expat": 1.1746249974350031,
+            "control_over_expat": 1.1746942778034148
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0412584682029815,
+              1.0565671329415116,
+              1.0105994544373396,
+              1.0191550054099947,
+              1.0347365820709622,
+              1.0387999014292753,
+              1.0228408898004153
+            ],
+            "candidate_over_expat": [
+              1.5541889688048842,
+              1.5862671113801143,
+              1.5320110651069445,
+              1.5080858300711677,
+              1.5276530193245954,
+              1.5273685790596079,
+              1.5757122919563114
+            ],
+            "control_over_expat": [
+              1.4926063184745335,
+              1.501340579243558,
+              1.5159428974359634,
+              1.4797413760083349,
+              1.476369006174587,
+              1.47032029648647,
+              1.540525322822963
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0347365820709622,
+            "candidate_over_expat": 1.5320110651069445,
+            "control_over_expat": 1.4926063184745335
+          }
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.009488018876032,
+              1.006261200091771,
+              0.9990266933218802,
+              1.0062847440063174,
+              1.0088818669990225,
+              1.0067984087054267,
+              0.9972445861078288
+            ],
+            "candidate_over_expat": [
+              1.6472383565276365,
+              1.5989511488590236,
+              1.6580802978476812,
+              1.626228590308481,
+              1.622122951084271,
+              1.6697934189471957,
+              1.6603820101920217
+            ],
+            "control_over_expat": [
+              1.6317562226857119,
+              1.589002088834588,
+              1.659695690747132,
+              1.6160719915458357,
+              1.607842309535575,
+              1.6585181348213187,
+              1.6649696908081184
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0062847440063174,
+            "candidate_over_expat": 1.6472383565276365,
+            "control_over_expat": 1.6317562226857119
+          }
+        }
+      ]
+    }
+  },
+  "reason": "The native real-file aggregate regresses 1.57%, with 20/24 conditions slower. All four generated conditions regress, 5.02% in aggregate. No Python or further qualification released. This establishes an unfavorable measured tradeoff, not a causal attribution to any particular allocation count or branch.",
+  "selected_runtime_unchanged": true,
+  "sources_builds_failed_attempt_and_raw_results_retained": true
+}

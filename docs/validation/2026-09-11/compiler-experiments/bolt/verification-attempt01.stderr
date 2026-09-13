@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/tmp/oriole-allocator-bolt-publication/verify.py", line 166, in <module>
+    print(json.dumps(verify(arguments.package), indent=2))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/oriole-allocator-bolt-publication/verify.py", line 120, in verify
+    exec(compile(code, original, 'exec'),
+  File "/tmp/oriole-allocator-bolt-native-independent-audit/audit.py", line 36, in <module>
+    assert (S/'run.py').read_bytes()==(base/'run.py').read_bytes()
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/oriole-allocator-bolt-publication/verify.py", line 76, in read_bytes
+    return payloads[entries[self.path]['member']]
+                    ~~~~~~~^^^^^^^^^^^
+KeyError: '/tmp/oriole-context-text-frame-fixed-native-study/pgo/run.py'

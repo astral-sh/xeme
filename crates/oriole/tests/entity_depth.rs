@@ -170,6 +170,11 @@ fn deep_cycles_and_unbalanced_replacements_remain_terminal() {
                     break;
                 }
             }
+            if result.is_ok() {
+                // A complete declaration may still await a deferred reparse.
+                parser.feed(b"", true).unwrap();
+                result = drain(&mut parser, &mut String::new(), &mut Vec::new());
+            }
             assert_eq!(result, Err(error));
             assert_eq!(parser.next_event().unwrap_err().kind, error);
         }

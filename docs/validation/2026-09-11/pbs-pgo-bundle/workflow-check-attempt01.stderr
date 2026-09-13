@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/tmp/oriole-pbs-pgo-bundle-study/check_workflow.py", line 55, in <module>
+    subprocess.run(['bash', '-e', '-o', 'pipefail', '-c', steps['Prepare optional PGO tools']['run']], env=environment, check=True, capture_output=True)
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['bash', '-e', '-o', 'pipefail', '-c', 'rustup component add llvm-tools-preview\ncargo fetch --locked --target x86_64-unknown-linux-gnu\noriole_profdata="$(rustc --print sysroot)/lib/rustlib/x86_64-unknown-linux-gnu/bin/llvm-profdata"\ntest -x "$oriole_profdata"\nprintf \'ORIOLE_PGO_PROFDATA=%s\\n\' "$oriole_profdata" >> "$GITHUB_ENV"\n']' returned non-zero exit status 1.

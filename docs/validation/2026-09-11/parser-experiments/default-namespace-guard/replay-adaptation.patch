@@ -1,0 +1,11 @@
+--- /tmp/oriole-allocator-provenance-publication/replay_native.py
++++ /tmp/oriole-default-namespace-guard-publication/replay_native.py
+@@ -24,7 +24,7 @@
+ sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+ review=read(args.review)
+ assert review['status']=='passed'
+-logical_root=Path('/tmp/oriole-allocator-provenance-native-study')
++logical_root=Path('/tmp/oriole-default-namespace-guard-native-study')
+ result={'status':'passed_records_only','modes':{},'input_sha256':{},
+         'scope':'Portable replay from hash-bound full JSON records only. No current compiler, library, XML, source or original worker-file bytes are verified in this mode; those checks belong to the original local audit.',
+         'review_sha256':sha(args.review),'replay_sha256':sha(Path(__file__))}

@@ -1,0 +1,20 @@
+{
+  "reviews": {
+    "package": {
+      "source": "/tmp/oriole-detached-end-frames-package-independent-review/review.json",
+      "sha256": "8567e5a2d2379c65fc210995f3504b25c80d24039baf43eac5b0960ea4905b55",
+      "status": "saved_archives_origins_copies_and_source_assembly_verified"
+    },
+    "human": {
+      "source": "/tmp/oriole-detached-end-frames-human-independent-review/review.json",
+      "sha256": "f53a375fd185d81a5a4f315984808b95528be36cb71d1b20a4bb84690823c924",
+      "status": "passed"
+    }
+  },
+  "archive": {
+    "sha256": "cef72b34d171f3f427eb5a2cb2a1a73c6d75b8d7acce146994b266e3c5885b68",
+    "members": 21,
+    "all_members_and_origins_readback": true
+  },
+  "scope": "Final detached End benchmark package, corrected-source/runtime/binary lineage and human claims independently reviewed. Subsequent changes only attach these receipts and refresh the outer hash index; no raw measurement or implementation changes."
+}

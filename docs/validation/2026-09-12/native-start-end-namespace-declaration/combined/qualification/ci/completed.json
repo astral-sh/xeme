@@ -1,0 +1,115 @@
+{
+  "run_id": 34722470510,
+  "head_sha": "5d983f7e09a095fc6c9a94c6ce05ef5a8ec95c8d",
+  "attempt": 1,
+  "event": "pull_request",
+  "workflow": ".github/workflows/ci.yml",
+  "html_url": "https://github.com/astral-sh/oriole/actions/runs/34722470510",
+  "conclusion": "success",
+  "final_poll": 15,
+  "counts": {
+    "success": 15,
+    "skipped": 1
+  },
+  "jobs": [
+    [
+      103630740240,
+      "PBS integration recipe",
+      "completed",
+      "success"
+    ],
+    [
+      103630740332,
+      "C callback aliasing (tree)",
+      "completed",
+      "success"
+    ],
+    [
+      103630740338,
+      "Sanitized parser fuzz smoke",
+      "completed",
+      "success"
+    ],
+    [
+      103630740342,
+      "CPython XML consumers (shared)",
+      "completed",
+      "success"
+    ],
+    [
+      103630740360,
+      "C ABI and callback safety",
+      "completed",
+      "success"
+    ],
+    [
+      103630740366,
+      "Test (ubuntu-24.04, stable)",
+      "completed",
+      "success"
+    ],
+    [
+      103630740373,
+      "CPython XML consumers (static)",
+      "completed",
+      "success"
+    ],
+    [
+      103630740384,
+      "C callback aliasing (stacked)",
+      "completed",
+      "success"
+    ],
+    [
+      103630740391,
+      "Allocator ownership (stacked)",
+      "completed",
+      "success"
+    ],
+    [
+      103630740393,
+      "Test (windows-latest, stable)",
+      "completed",
+      "success"
+    ],
+    [
+      103630740395,
+      "lint",
+      "completed",
+      "success"
+    ],
+    [
+      103630740399,
+      "Allocator ownership (tree)",
+      "completed",
+      "success"
+    ],
+    [
+      103630740406,
+      "Test (ubuntu-24.04-arm, stable)",
+      "completed",
+      "success"
+    ],
+    [
+      103630740428,
+      "Test (macos-15, stable)",
+      "completed",
+      "success"
+    ],
+    [
+      103630740436,
+      "Test (ubuntu-24.04, 1.96.0)",
+      "completed",
+      "success"
+    ],
+    [
+      103630740702,
+      "Profile-guided library",
+      "completed",
+      "skipped"
+    ]
+  ],
+  "artifacts": [],
+  "run_or_workflow_mutations": false,
+  "distribution_downloaded_or_executed": false
+}

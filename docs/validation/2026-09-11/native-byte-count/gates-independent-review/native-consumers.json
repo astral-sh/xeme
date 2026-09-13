@@ -1,0 +1,44 @@
+[
+  {
+    "binary_sha256": "68bcaab2586d8859004a14d98b4f7a86e1823d1b10023fd32d9281a8b8b54902",
+    "consumer": "integration",
+    "exit": 0,
+    "linkage": "dynamic",
+    "stdout": "C ABI full integration passed (oriole_compat_2.8.4)"
+  },
+  {
+    "binary_sha256": "3a87ac03e5f4cbfca9c106b0e066cda9c4038cab4bbffcca60542e5a31960be1",
+    "consumer": "adversarial",
+    "exit": 0,
+    "linkage": "dynamic",
+    "stdout": "Oriole native adversarial lifecycle probes passed"
+  },
+  {
+    "binary_sha256": "889bf8eba872d06f85cbbdc5367b0db780a60585ba473a68889655ef41381548",
+    "consumer": "allocations",
+    "exit": 0,
+    "linkage": "dynamic",
+    "stdout": "allocation failure sweep passed: 327 scenarios (oriole_compat_2.8.4)"
+  },
+  {
+    "binary_sha256": "62d2d43e4aba652f81699012aa65b94b5bd6200b30ea0f8614df964f62c0eb3a",
+    "consumer": "integration",
+    "exit": 0,
+    "linkage": "static",
+    "stdout": "C ABI full integration passed (oriole_compat_2.8.4)"
+  },
+  {
+    "binary_sha256": "8048e62c053ac2b642eeaa2069e0c91349db163c252e6eaeb99f48ab48c18e17",
+    "consumer": "adversarial",
+    "exit": 0,
+    "linkage": "static",
+    "stdout": "Oriole native adversarial lifecycle probes passed"
+  },
+  {
+    "binary_sha256": "7db68ca51609ee46847de7a00127fad35e32e22b13f5a59c37256df9a7af8018",
+    "consumer": "allocations",
+    "exit": 0,
+    "linkage": "static",
+    "stdout": "allocation failure sweep passed: 327 scenarios (oriole_compat_2.8.4)"
+  }
+]

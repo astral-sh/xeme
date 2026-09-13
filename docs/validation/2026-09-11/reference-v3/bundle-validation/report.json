@@ -1,0 +1,237 @@
+{
+  "status": "passed_saved_bundle_readback",
+  "scope": "Local Ohm builds with defaults disabled and saved-only verification; no distribution build or elapsed measurement.",
+  "bundles": [
+    {
+      "mode": "normal-generic",
+      "pbs_target": "x86_64-unknown-linux-gnu",
+      "rust_target": "x86_64-unknown-linux-gnu",
+      "target_cpu": null,
+      "manifest_sha256": "c35c1808d9d7e684a706cbbed41ff7ab680dafa00532533acbfdc185367e91f7",
+      "static_archive_sha256": "267729865bb512d594d0338c7ed772289d86ca8af0e5d60a91fec6bcc2b68ac3",
+      "compiler_vectors": {
+        "normal": 3
+      },
+      "training_observations": {},
+      "bundle_source_files": 75,
+      "host_check": {
+        "pbs_target": "x86_64-unknown-linux-gnu",
+        "target_cpu": null,
+        "check": "generic native host"
+      },
+      "status": "passed"
+    },
+    {
+      "mode": "normal-v3",
+      "pbs_target": "x86_64_v3-unknown-linux-gnu",
+      "rust_target": "x86_64-unknown-linux-gnu",
+      "target_cpu": "x86-64-v3",
+      "manifest_sha256": "f868d988b8f0a98bda9da55a3d3054ba7d7fc6b0b2603c6d36f07a88003552ab",
+      "static_archive_sha256": "5a77670d12b978e17ea757175a000468fde8bdb342a9afee21002ef591acf1ed",
+      "compiler_vectors": {
+        "normal": 3
+      },
+      "training_observations": {},
+      "bundle_source_files": 75,
+      "host_check": {
+        "pbs_target": "x86_64_v3-unknown-linux-gnu",
+        "target_cpu": "x86-64-v3",
+        "check": "GCC CPU/OS builtin",
+        "command": [
+          "/usr/bin/x86_64-linux-gnu-gcc-13",
+          "-std=c11",
+          "-O2",
+          "-march=x86-64",
+          "-mtune=generic",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "/home/dev-user/code/oss/oriole-v3-trial/integration/python-build-standalone/check-cpu.c",
+          "-o",
+          "/tmp/oriole-pbs-cpu-x6qnv7ke/check-cpu"
+        ],
+        "compiler_sha256": "1b99826121ae6682a634e5efe09bd3e3df58ce58e0b28f849114ab5b89139c26",
+        "source_sha256": "be90548b38019fc374f04fe89e46ce6886afa11d4bbb75a0d7a949be6afb85c3",
+        "binary_sha256": "0ec195290c988ce5a13a3c929836da89fc90dee484204387248f1a933654aa3c",
+        "compile_stdout": "",
+        "compile_stderr": "",
+        "stdout": "x86-64-v3 CPU and OS support verified\n",
+        "stderr": ""
+      },
+      "status": "passed"
+    },
+    {
+      "mode": "pgo-v3",
+      "pbs_target": "x86_64_v3-unknown-linux-gnu",
+      "rust_target": "x86_64-unknown-linux-gnu",
+      "target_cpu": "x86-64-v3",
+      "manifest_sha256": "c1d114e2affc30fb692680b4bdcc1fb58860342168ab9d24a139ad19cb35b4d2",
+      "static_archive_sha256": "5b30e3d6414deaf3ee6671acebe77914c9ead6bbd2656a7e80bd4cac8f7a8f1a",
+      "compiler_vectors": {
+        "generate": 3,
+        "use": 3
+      },
+      "training_observations": {
+        "generate": 288,
+        "use": 288
+      },
+      "bundle_source_files": 75,
+      "host_check": {
+        "pbs_target": "x86_64_v3-unknown-linux-gnu",
+        "target_cpu": "x86-64-v3",
+        "check": "GCC CPU/OS builtin",
+        "command": [
+          "/usr/bin/x86_64-linux-gnu-gcc-13",
+          "-std=c11",
+          "-O2",
+          "-march=x86-64",
+          "-mtune=generic",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "/home/dev-user/code/oss/oriole-v3-trial/integration/python-build-standalone/check-cpu.c",
+          "-o",
+          "/tmp/oriole-pbs-cpu-yqmbnbp4/check-cpu"
+        ],
+        "compiler_sha256": "1b99826121ae6682a634e5efe09bd3e3df58ce58e0b28f849114ab5b89139c26",
+        "source_sha256": "be90548b38019fc374f04fe89e46ce6886afa11d4bbb75a0d7a949be6afb85c3",
+        "binary_sha256": "0ec195290c988ce5a13a3c929836da89fc90dee484204387248f1a933654aa3c",
+        "compile_stdout": "",
+        "compile_stderr": "",
+        "stdout": "x86-64-v3 CPU and OS support verified\n",
+        "stderr": ""
+      },
+      "status": "passed"
+    }
+  ],
+  "source_files_in_each_bundle": 75,
+  "focused_tests": 12,
+  "compiler_vectors": 12,
+  "training_observations": 576,
+  "historical_failures": [
+    "Initial root normal-generic invocation failed on sibling import before any compiler execution; corrected invocation clears PYTHONSAFEPATH.",
+    "Focused overlay invocation had the same import setup issue; Ruff/ty tool-directory setup and initial import-order findings are preserved."
+  ],
+  "limitations": [
+    "These local bundle builds use Ohm with automatic experimental defaults disabled. Production CI uses plain stable Cargo.",
+    "The explicit v3 PBS distribution, installed archive checks, complete XML tests and glibc 2.17 gate have not been run for this integration change.",
+    "Training observations are generated correctness/training cases, not a real-project benchmark.",
+    "The prior strict CPython callback failures and API ceilings remain; this is not a complete compatibility or production-readiness claim."
+  ],
+  "excluded": [
+    {
+      "path": "/tmp/oriole-pbs-v3-bundle-checks/normal-generic/libexpat.a",
+      "size": 3661346,
+      "sha256": "267729865bb512d594d0338c7ed772289d86ca8af0e5d60a91fec6bcc2b68ac3",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/.cargo/config.toml",
+      "size": 646,
+      "sha256": "24095bd6315880162c8f660917100ac36638cb73778dd9ec6f1c9026ea87b178",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/home/dev-user/.local/share/ohm/toolchains/ohm-1.98.1-1/bin/rustc",
+      "size": 171720,
+      "sha256": "e173035a5dd384e17ca6a178e1987a0a746260c3669459cfab3af580880927ba",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/tmp/oriole-pbs-v3-bundle-checks/normal-v3/libexpat.a",
+      "size": 3650082,
+      "sha256": "5a77670d12b978e17ea757175a000468fde8bdb342a9afee21002ef591acf1ed",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/tmp/oriole-pbs-v3-bundle-checks/pgo-v3/libexpat.a",
+      "size": 3806530,
+      "sha256": "5b30e3d6414deaf3ee6671acebe77914c9ead6bbd2656a7e80bd4cac8f7a8f1a",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/tmp/oriole-pbs-v3-bundle-checks/pgo-v3/pgo/runs/run-5_7_u03w/merged.profdata",
+      "size": 263576,
+      "sha256": "d3349329186c069112b59f6fae888892db59986760a11be0dddec745a3399061",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/tmp/oriole-pbs-v3-bundle-checks/pgo-v3/pgo/runs/run-5_7_u03w/raw-profiles/oriole-12131285139930550684_0-178.profraw",
+      "size": 196896,
+      "sha256": "11c07906cf6c6238c88299b01d8bacf1046e5414c2378996ae366b168b99e555",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/tmp/oriole-pbs-v3-bundle-checks/pgo-v3/pgo/runs/run-5_7_u03w/generate/liboriole_expat.a",
+      "size": 4995872,
+      "sha256": "214e0e7f911406d5ba082a3b47441d1ea8a370d157e06c330f00d89029b71225",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/tmp/oriole-pbs-v3-bundle-checks/pgo-v3/pgo/runs/run-5_7_u03w/generate/liboriole_expat.so",
+      "size": 1686648,
+      "sha256": "c05fb48df4ed572dfce2942fc543a73c1011d1a9ccc1743bd5ade52ec1ac206a",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/tmp/oriole-pbs-v3-bundle-checks/pgo-v3/pgo/runs/run-5_7_u03w/use/liboriole_expat.a",
+      "size": 3806530,
+      "sha256": "5b30e3d6414deaf3ee6671acebe77914c9ead6bbd2656a7e80bd4cac8f7a8f1a",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/tmp/oriole-pbs-v3-bundle-checks/pgo-v3/pgo/runs/run-5_7_u03w/use/liboriole_expat.so",
+      "size": 1291080,
+      "sha256": "7f00e33731d140ef47e001202d38f0277c6c2380b547b4803ecbbdc7cfe199ca",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/home/dev-user/.cargo/bin/rustup",
+      "size": 21113232,
+      "sha256": "dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/home/dev-user/.local/share/ohm/toolchains/ohm-1.98.1-1/bin/cargo",
+      "size": 37027376,
+      "sha256": "576c30863ca9f6d6d0b889ef8abc4d3612a723bf79238a68a8e7a71db6e0b62e",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/home/dev-user/.local/share/ohm/toolchains/ohm-1.98.1-1/lib/libLLVM-22-rust-1.98.1-stable.so",
+      "size": 42,
+      "sha256": "24d5732dea500078b4e235a69833ccb20d03bf71659a49d58828af8f13f6726c",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/home/dev-user/.local/share/ohm/toolchains/ohm-1.98.1-1/lib/libLLVM.so.22.1-rust-1.98.1-stable",
+      "size": 199557488,
+      "sha256": "0fdf31a62575a5e3e9ac3f3bae29a8ba3cc965158ec78005d3c49fe0da3c253e",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12",
+      "size": 30905176,
+      "sha256": "021044895e95be79dc2f110367607e684119afbc8ce75f6f0eec94844e0acec7",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/tmp/oriole-pgo-study/llvm-tools-1.98.0/bin/llvm-profdata",
+      "size": 666968,
+      "sha256": "de5e49ed868f4127fe8910d696f7a29dab71fdb9b84e8eed3dc2c28e2049b995",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/tmp/oriole-pgo-study/llvm-tools-1.98.0/lib/libLLVM-22-rust-1.98.0-stable.so",
+      "size": 42,
+      "sha256": "9816014358f5ca85706c55cbdb44e4da930f33b842782f576b695ba66a48091b",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    },
+    {
+      "path": "/tmp/oriole-pgo-study/llvm-tools-1.98.0/lib/libLLVM.so.22.1-rust-1.98.0-stable",
+      "size": 199596928,
+      "sha256": "b2cc5bb9aafd2c8d1fd8ad0e99fd7de09e6831ff319ac99130d737261316596e",
+      "reason": "Library, compiler, profile or machine Cargo configuration; original identity retained."
+    }
+  ]
+}

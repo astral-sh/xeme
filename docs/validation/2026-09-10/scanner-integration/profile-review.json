@@ -1,0 +1,192 @@
+{
+  "status": "saved_profile_audit_passed",
+  "scope": "Saved data only. No compiler/parser/profiler/reruns or wall-time inference. 32 preflights plus32 Callgrind processes, each one warmup and one measured parse; both collected in profiled processes. Constructor/free/file IO excluded.",
+  "source_files": 70,
+  "source_manifest_sha256": "38c59dfaa7c94c7a01a9c8af803b35a54bbbf84d8296860e64eca24e522a727b",
+  "source_commit": "64a270e",
+  "library_hashes": {
+    "control": "5058093123b486f7b6163ca055eb8726a5441f120bb4e74fcf7b892398ceab79",
+    "candidate": "3694b68326939778481e42e810f53facc2ebcb8b8ad75b599704dbfef8f37926"
+  },
+  "preflights": 32,
+  "profiles": 32,
+  "total_parser_samples": 128,
+  "profiled_parser_samples": 64,
+  "function_rows": 5252,
+  "conditions": 16,
+  "comparisons": [
+    {
+      "workload": "vulkan",
+      "input": "/home/dev-user/code/oss/oriole-scanner-integration/benchmarks/projects/corpus/vulkan/vk.xml",
+      "namespaces": false,
+      "chunk": 4096,
+      "kind": "project",
+      "control": 1103817907,
+      "candidate": 1024646603,
+      "candidate_over_control": 0.9282750320520031
+    },
+    {
+      "workload": "vulkan",
+      "input": "/home/dev-user/code/oss/oriole-scanner-integration/benchmarks/projects/corpus/vulkan/vk.xml",
+      "namespaces": true,
+      "chunk": 4096,
+      "kind": "project",
+      "control": 1205655236,
+      "candidate": 1126368620,
+      "candidate_over_control": 0.9342377375948293
+    },
+    {
+      "workload": "wayland",
+      "input": "/home/dev-user/code/oss/oriole-scanner-integration/benchmarks/projects/corpus/wayland/wayland.xml",
+      "namespaces": false,
+      "chunk": 4096,
+      "kind": "project",
+      "control": 22679275,
+      "candidate": 20528984,
+      "candidate_over_control": 0.9051869603415453
+    },
+    {
+      "workload": "wayland",
+      "input": "/home/dev-user/code/oss/oriole-scanner-integration/benchmarks/projects/corpus/wayland/wayland.xml",
+      "namespaces": true,
+      "chunk": 4096,
+      "kind": "project",
+      "control": 24795845,
+      "candidate": 22643058,
+      "candidate_over_control": 0.9131795266505336
+    },
+    {
+      "workload": "maven",
+      "input": "/home/dev-user/code/oss/oriole-scanner-integration/benchmarks/projects/corpus/maven/pom.xml",
+      "namespaces": false,
+      "chunk": 4096,
+      "kind": "project",
+      "control": 19033705,
+      "candidate": 18264721,
+      "candidate_over_control": 0.9595988274484658
+    },
+    {
+      "workload": "maven",
+      "input": "/home/dev-user/code/oss/oriole-scanner-integration/benchmarks/projects/corpus/maven/pom.xml",
+      "namespaces": true,
+      "chunk": 4096,
+      "kind": "project",
+      "control": 24810475,
+      "candidate": 24072855,
+      "candidate_over_control": 0.9702698154710863
+    },
+    {
+      "workload": "batik",
+      "input": "/home/dev-user/code/oss/oriole-scanner-integration/benchmarks/projects/corpus/batik/batikLogo.svg",
+      "namespaces": false,
+      "chunk": 4096,
+      "kind": "project",
+      "control": 2617656,
+      "candidate": 2517448,
+      "candidate_over_control": 0.9617184228943757
+    },
+    {
+      "workload": "batik",
+      "input": "/home/dev-user/code/oss/oriole-scanner-integration/benchmarks/projects/corpus/batik/batikLogo.svg",
+      "namespaces": true,
+      "chunk": 4096,
+      "kind": "project",
+      "control": 2939436,
+      "candidate": 2836823,
+      "candidate_over_control": 0.9650909222041235
+    },
+    {
+      "workload": "gtk",
+      "input": "/home/dev-user/code/oss/oriole-scanner-integration/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+      "namespaces": false,
+      "chunk": 4096,
+      "kind": "project",
+      "control": 7991977,
+      "candidate": 7519228,
+      "candidate_over_control": 0.9408470519872617
+    },
+    {
+      "workload": "gtk",
+      "input": "/home/dev-user/code/oss/oriole-scanner-integration/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+      "namespaces": true,
+      "chunk": 4096,
+      "kind": "project",
+      "control": 8609044,
+      "candidate": 8134593,
+      "candidate_over_control": 0.9448892350881236
+    },
+    {
+      "workload": "docbook",
+      "input": "/home/dev-user/code/oss/oriole-scanner-integration/benchmarks/projects/corpus/docbook/docbook.xsl",
+      "namespaces": false,
+      "chunk": 4096,
+      "kind": "project",
+      "control": 5701520,
+      "candidate": 5290512,
+      "candidate_over_control": 0.9279125566515596
+    },
+    {
+      "workload": "docbook",
+      "input": "/home/dev-user/code/oss/oriole-scanner-integration/benchmarks/projects/corpus/docbook/docbook.xsl",
+      "namespaces": true,
+      "chunk": 4096,
+      "kind": "project",
+      "control": 7560676,
+      "candidate": 7174028,
+      "candidate_over_control": 0.9488606574332771
+    },
+    {
+      "workload": "rare-declarations",
+      "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+      "namespaces": false,
+      "chunk": 4096,
+      "kind": "generated",
+      "control": 148104198,
+      "candidate": 143900735,
+      "candidate_over_control": 0.9716182049073315
+    },
+    {
+      "workload": "rare-declarations",
+      "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+      "namespaces": false,
+      "chunk": 65536,
+      "kind": "generated",
+      "control": 148956648,
+      "candidate": 144742884,
+      "candidate_over_control": 0.971711474065931
+    },
+    {
+      "workload": "entities",
+      "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+      "namespaces": false,
+      "chunk": 4096,
+      "kind": "generated",
+      "control": 213129976,
+      "candidate": 210166296,
+      "candidate_over_control": 0.9860944947509401
+    },
+    {
+      "workload": "entities",
+      "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+      "namespaces": false,
+      "chunk": 65536,
+      "kind": "generated",
+      "control": 214768569,
+      "candidate": 211808553,
+      "candidate_over_control": 0.9862176480768002
+    }
+  ],
+  "real_geomean": 0.9414625063750898,
+  "generated_geomean": 0.9788836385738255,
+  "real_lower": 12,
+  "regressions": [],
+  "checked_files": 248,
+  "checked_files_sha256": "283d97d855d1aaef5949ee23b98430aeef9422112375127409cba92c28f3e972",
+  "limitations": [
+    "Fresh source/archive/live/Git hashes checked; detailed compiler invocation audit remains separately preserved in peer gates-review.",
+    "Numeric subprocess exit codes were asserted by the collector before accepting reports but not individually retained; this audit verifies successful complete records and raw outputs, not missing numeric receipts.",
+    "Origin receipt verifies XML_Parse in collector process, not every profiled binding; command paths/library hashes and driver-controlled callbacks are retained.",
+    "Comparison is combined position/String on published5058 versus5058; isolated studies on5af cannot be added to infer this result."
+  ],
+  "findings": []
+}

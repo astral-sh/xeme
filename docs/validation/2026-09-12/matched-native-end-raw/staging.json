@@ -1,0 +1,27 @@
+{
+  "status": "draft_qualification_in_progress_unselected",
+  "candidate_runtime_commit": "410f7608405f9ffd46697fa380b120b86496f771",
+  "base": "008d818237fe0d6f8c04a000a98ad69ab5780ceb",
+  "candidate_library_sha256": "5ca9644b5d782a6beaae7a8b1ddd16045480d4566b7eb77e317c7ac25a2258fe",
+  "performance_target_ratio": 1.2,
+  "pending": [
+    "both Miri models",
+    "current-source Rust ASan/fuzz",
+    "final release review and selection"
+  ],
+  "counts": {
+    "conditions": 104,
+    "workers": 2496,
+    "samples": 265080
+  },
+  "copied_or_generated_files_before_manifest": 86,
+  "bytes_before_manifest": 1916043,
+  "relative_links_checked": 38,
+  "copy_index_sha256": "ee89a6467ff91b6de02db1f3dd39b75d22500b914c5c3eb3625d6cb885d23491",
+  "readme_sha256": "8b71241ea3b3c8f4c3665cd4555702621dc933651dc714960a2980c3a9b5b347",
+  "writer_sha256": "3b151054bc84dd1f677227efe49542447c0189517f60904df60ca7040b6292e9",
+  "publication_source_sha256": "a06b6fbf7ba186a59094e04efc525508264048cd06ddc41be6334dc470fb43c0",
+  "measured_source_base": "008d818237fe0d6f8c04a000a98ad69ab5780ceb",
+  "tests_preceded_source_commit": true,
+  "prior_manifest_sha256": "7c349134545961285ffc9f953b7f9f31e97ef6f5cfea02c0cefd5b8d1c4b549a"
+}

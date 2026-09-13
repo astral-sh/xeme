@@ -6,6 +6,20 @@ on:
       - '.github/workflows/pbs.yml'
       - 'integration/python-build-standalone/**'
   workflow_dispatch:
+    inputs:
+      pbs_target:
+        description: Explicit CPU requirement for the experimental distribution
+        type: choice
+        required: true
+        default: x86_64-unknown-linux-gnu
+        options:
+          - x86_64-unknown-linux-gnu
+          - x86_64_v3-unknown-linux-gnu
+      pgo:
+        description: Train and bundle a fresh Oriole PGO library
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -20,6 +34,9 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || startsWith(github.head_ref, 'charlie/codex-oriole-pbs-')
     runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
     timeout-minutes: 180
+    env:
+      ORIOLE_PBS_TARGET: ${{ inputs.pbs_target || 'x86_64-unknown-linux-gnu' }}
+      ORIOLE_PGO: ${{ github.event_name == 'workflow_dispatch' && inputs.pgo }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -34,29 +51,88 @@ jobs:
         with:
           toolchain: stable
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+      - name: Verify the explicit CPU requirement
+        run: |
+          python3 integration/python-build-standalone/pbs_target.py \
+            --pbs-target "$ORIOLE_PBS_TARGET" --check-host > "$RUNNER_TEMP/pbs-host-cpu.json"
       - name: Build the distribution validator
         working-directory: .cache/pbs
         run: |
           set -o pipefail
           cargo build --release --locked 2>&1 | tee "$RUNNER_TEMP/pbs-validator-build.log"
+      - name: Prepare optional PGO tools
+        if: ${{ env.ORIOLE_PGO == 'true' }}
+        run: |
+          rustup component add llvm-tools-preview
+          cargo fetch --locked --target x86_64-unknown-linux-gnu
+          oriole_profdata="$(rustc --print sysroot)/lib/rustlib/x86_64-unknown-linux-gnu/bin/llvm-profdata"
+          test -x "$oriole_profdata"
+          printf 'ORIOLE_PGO_PROFDATA=%s\n' "$oriole_profdata" >> "$GITHUB_ENV"
       - name: Build the frozen Oriole bundle
         run: |
           rustup component add rust-docs
           python3 integration/python-build-standalone/validate-tls.py --output "$RUNNER_TEMP/pbs-tls-probe"
-          python3 integration/python-build-standalone/prepare.py --output "$RUNNER_TEMP/oriole-bundle"
+          if [[ "$ORIOLE_PGO" == 'true' ]]; then
+            python3 integration/python-build-standalone/prepare.py --output "$RUNNER_TEMP/oriole-bundle" \
+              --pbs-target "$ORIOLE_PBS_TARGET" \
+              --pgo --llvm-profdata "$ORIOLE_PGO_PROFDATA"
+          else
+            python3 integration/python-build-standalone/prepare.py --output "$RUNNER_TEMP/oriole-bundle" \
+              --pbs-target "$ORIOLE_PBS_TARGET"
+          fi
           git -C .cache/pbs apply --check "$GITHUB_WORKSPACE/integration/python-build-standalone/pbs-a455388.patch"
           git -C .cache/pbs apply "$GITHUB_WORKSPACE/integration/python-build-standalone/pbs-a455388.patch"
       - name: Build CPython 3.12.13 with Oriole
+        id: build_distribution
         run: |
           set -o pipefail
-          bash integration/python-build-standalone/run.sh "$GITHUB_WORKSPACE/.cache/pbs" "$RUNNER_TEMP/oriole-bundle" 2>&1 | tee "$RUNNER_TEMP/pbs-build.log"
+          bash integration/python-build-standalone/run.sh "$GITHUB_WORKSPACE/.cache/pbs" "$RUNNER_TEMP/oriole-bundle" "$ORIOLE_PBS_TARGET" 2>&1 | tee "$RUNNER_TEMP/pbs-build.log"
       - name: Preserve the experimental distribution
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: oriole-pbs-experimental-distribution
+          name: oriole-pbs-experimental-${{ env.ORIOLE_PBS_TARGET }}-${{ env.ORIOLE_PGO == 'true' && 'pgo' || 'normal' }}
           path: .cache/pbs/dist/*.tar.zst
           if-no-files-found: error
           retention-days: 7
+      - name: Verify the installed parser identity
+        id: installed_identity
+        if: ${{ !cancelled() && steps.build_distribution.outcome == 'success' }}
+        working-directory: .cache/pbs
+        run: |
+          uv run --no-dev python - <<'PY'
+          import hashlib, json, os, pathlib, subprocess, sys
+          from pythonbuild.utils import extract_python_archive
+          sys.path.insert(0, str(pathlib.Path(os.environ['GITHUB_WORKSPACE']) / 'integration/python-build-standalone'))
+          import pbs_target
+          archive, = pathlib.Path('dist').glob('*.tar.zst')
+          target = os.environ['ORIOLE_PBS_TARGET']
+          assert archive.name.startswith(f'cpython-3.12.13-{target}-noopt-') and archive.name.endswith('.tar.zst'), archive
+          destination = pathlib.Path(os.environ['RUNNER_TEMP']) / 'pbs-extracted'
+          destination.mkdir()
+          root = extract_python_archive(archive, destination)
+          metadata = json.loads((root / 'PYTHON.json').read_text())
+          assert metadata['target_triple'] == target, metadata['target_triple']
+          installed = root / 'licenses/LICENSE.oriole-build.txt'
+          bundle = pathlib.Path(os.environ['RUNNER_TEMP']) / 'oriole-bundle'
+          assert installed.read_bytes() == (bundle / 'manifest.json').read_bytes()
+          manifest = json.loads(installed.read_text())
+          pbs_target.validate(manifest, target)
+          archive_hash = hashlib.sha256((root / 'build/lib/libexpat.a').read_bytes()).hexdigest()
+          assert archive_hash == manifest['files']['libexpat.a']
+          assert archive_hash == hashlib.sha256((bundle / 'libexpat.a').read_bytes()).hexdigest()
+          if os.environ['ORIOLE_PGO'] == 'true':
+              assert archive_hash == manifest['pgo']['manifest']['libraries_sha256']['use/liboriole_expat.a']
+          else:
+              assert 'pgo' not in manifest
+          provenance = {'archive': archive.name, 'pbs_target': target, 'rust_target': manifest['rust_target'],
+                        'target_cpu': manifest['target_cpu'], 'pgo': os.environ['ORIOLE_PGO'] == 'true',
+                        'static_archive_sha256': archive_hash, 'installed_manifest_sha256': hashlib.sha256(installed.read_bytes()).hexdigest(),
+                        'python_metadata_sha256': hashlib.sha256((root / 'PYTHON.json').read_bytes()).hexdigest()}
+          (pathlib.Path(os.environ['RUNNER_TEMP']) / 'pbs-installed-provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
+          executable = root / metadata['python_exe']
+          subprocess.run([str(executable), '-I', '-c', "import pyexpat; print(pyexpat.EXPAT_VERSION); assert pyexpat.EXPAT_VERSION.startswith('oriole_')"], check=True)
+          PY
+          sha256sum dist/*.tar.zst > "$RUNNER_TEMP/pbs-archive-sha256.txt"
       - name: Validate the complete distribution
         working-directory: .cache/pbs
         run: |
@@ -66,22 +142,8 @@ jobs:
           uv run --no-dev test-distribution.py --stdlib dist/*.tar.zst \
             test_pyexpat test_xml_etree test_xml_etree_c test_minidom test_sax test_pulldom \
             2>&1 | tee "$RUNNER_TEMP/pbs-xml-tests.log"
-      - name: Verify the installed parser identity
-        working-directory: .cache/pbs
-        run: |
-          uv run --no-dev python - <<'PY'
-          import json, os, pathlib, subprocess
-          from pythonbuild.utils import extract_python_archive
-          archive, = pathlib.Path('dist').glob('*.tar.zst')
-          destination = pathlib.Path(os.environ['RUNNER_TEMP']) / 'pbs-extracted'
-          destination.mkdir()
-          root = extract_python_archive(archive, destination)
-          metadata = json.loads((root / 'PYTHON.json').read_text())
-          executable = root / metadata['python_exe']
-          subprocess.run([str(executable), '-I', '-c', "import pyexpat; print(pyexpat.EXPAT_VERSION); assert pyexpat.EXPAT_VERSION.startswith('oriole_')"], check=True)
-          PY
-          sha256sum dist/*.tar.zst > "$RUNNER_TEMP/pbs-archive-sha256.txt"
       - name: Run the installed interpreter on glibc 2.17
+        if: ${{ !cancelled() && steps.installed_identity.outcome == 'success' }}
         run: |
           set -o pipefail
           docker run --rm --network=none \
@@ -94,12 +156,19 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: oriole-pbs-validation
+          name: oriole-pbs-validation-${{ env.ORIOLE_PBS_TARGET }}-${{ env.ORIOLE_PGO == 'true' && 'pgo' || 'normal' }}
           path: |
             ${{ runner.temp }}/pbs-*.log
             ${{ runner.temp }}/pbs-archive-sha256.txt
+            ${{ runner.temp }}/pbs-host-cpu.json
+            ${{ runner.temp }}/pbs-installed-provenance.json
             ${{ runner.temp }}/oriole-bundle/manifest.json
             ${{ runner.temp }}/oriole-bundle/build.log
+            ${{ runner.temp }}/oriole-bundle/pgo/latest.json
+            ${{ runner.temp }}/oriole-bundle/pgo/runs/
+            !${{ runner.temp }}/oriole-bundle/pgo/runs/**/*.a
+            !${{ runner.temp }}/oriole-bundle/pgo/runs/**/*.so
+            !${{ runner.temp }}/oriole-bundle/pgo/runs/**/*.dylib
             ${{ runner.temp }}/pbs-tls-probe/manifest.json
             ${{ runner.temp }}/pbs-tls-probe/*-symbols.txt
           retention-days: 14

@@ -1,0 +1,70 @@
+{
+  "archive_root_review": {
+    "path": "docs/validation/2026-09-11/pbs-pgo-bundle/archive-root-review.json",
+    "sha256": "81ef6683880ee98bc38879e6eab5c9bc46f56fc6f9348f0610b97c9efa737dea"
+  },
+  "local_build_base": "4d603c7487ca93cc73dbd4acfe6fa5714ffc2151",
+  "local_c_consumers": 2,
+  "local_pgo": {
+    "path": "docs/validation/2026-09-11/pbs-pgo-bundle/local-ohm/summary.json",
+    "sha256": "5bd3554f42895050d028227caaec03373381a12b2d6ed9ad4dcfe8051a3ccb77"
+  },
+  "normal_pbs_baseline": {
+    "path": "docs/validation/2026-09-11/pbs-independent-checks/report.json",
+    "sha256": "347b38d2378a7923ffdb0cbabdd14db5cf5a1b472c3f4ca7d717a6ba46b632e0"
+  },
+  "pending": [
+    "Installed consumer performance for this produced PGO distribution"
+  ],
+  "pgo_static_archive_sha256": "2d1d5a592ec2debeadef526a45dc95d1adcc3e2b67c0e4b7ddad1c6878ede6e8",
+  "publication_base": "144e69e08c5462217d54791374e579e3ef390a87",
+  "python_tests": {
+    "bundle": 6,
+    "pgo": 14,
+    "ruff": "0.16.6",
+    "ty": "0.0.80"
+  },
+  "runtime_change": false,
+  "runtime_scope": "Selected streaming Rust runtime unchanged; PR125 adds a C integration fixture and notice/docs after the local build.",
+  "stable_pgo_distribution": {
+    "head": "c61b63476ce83b69814fd704b6c6710811e52a9c",
+    "path": "docs/validation/2026-09-11/pgo-trial-results/report.json",
+    "result": "Build/validator/installed identity/1024 threaded glibc 2.17 parses passed; workflow remains failed on the same two strict XML assertions as the normal baseline.",
+    "run": "https://github.com/astral-sh/oriole/actions/runs/34586223169",
+    "sha256": "d084a9e4f7da27444931adb47c4c98d2c427048e6689731b8cccc6defa600425"
+  },
+  "status": "Bridge, local validation and stable PGO distribution build passed; both strict XML gates retain the same two assertions.",
+  "workflow": {
+    "path": ".github/workflows/pbs.yml",
+    "sha256": "74d9c24b6a31a79d0e51a401f90f0ebc2829509c35739ce798977247e25e8b51"
+  },
+  "workflow_check": {
+    "path": "docs/validation/2026-09-11/pbs-pgo-bundle/workflow-check.json",
+    "sha256": "05188ce55c7b7e74572449ee1efdc8aa3f873b2298383d1e0f0d166148cbed8e"
+  },
+  "workflow_independent_review": {
+    "path": "workflow-independent-review.json",
+    "sha256": "eb967feb03a625a0444e68b8b553caccc9489298e642ce50ceb1ef1aedb00246"
+  },
+  "workflow_selection": {
+    "default_manual_pgo": false,
+    "explicit_pgo_pr_head_prefix": "charlie/codex-oriole-pbs-pgo-",
+    "manual_dispatch_limit": "Requires workflow on repository default branch",
+    "other_pbs_prs": "normal"
+  },
+  "workflow_test_attempts": [
+    {
+      "attempt": 1,
+      "source": "workflow-check-attempt01.py",
+      "status": "failed in inherited environment during inert tool-preparation probe; original output and source retained",
+      "stderr": "workflow-check-attempt01.stderr",
+      "stdout": "workflow-check-attempt01.stdout"
+    },
+    {
+      "attempt": 2,
+      "record": "workflow-check.json",
+      "source": "workflow-check.py",
+      "status": "passed using minimal fixture environment"
+    }
+  ]
+}

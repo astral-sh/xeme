@@ -20,6 +20,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import tomllib
 from collections.abc import Iterator
 from contextlib import contextmanager, suppress
 from pathlib import Path
@@ -54,6 +55,30 @@ BUILD_ENVIRONMENT = (
     "RUSTFLAGS",
     "CARGO_ENCODED_RUSTFLAGS",
 )
+
+
+def cargo_option(value: str) -> str:
+    """Accept one global option without allowing a replacement subcommand."""
+    if not value.startswith("-") or value in ("-", "--", "-Z"):
+        raise argparse.ArgumentTypeError(
+            "expected a global Cargo option; attach its value, e.g. -Zohm-defaults=no"
+        )
+    if value.startswith("-C") or (
+        value.startswith("-") and not value.startswith(("--", "-Z")) and "C" in value
+    ):
+        raise argparse.ArgumentTypeError("Cargo directory changes are not supported")
+    if value.startswith("--config"):
+        try:
+            if not value.startswith("--config="):
+                raise ValueError("missing inline configuration")
+            config = tomllib.loads(value.removeprefix("--config="))
+            if not config or "include" in config:
+                raise ValueError("additional configuration files are unsupported")
+        except (ValueError, tomllib.TOMLDecodeError) as error:
+            raise argparse.ArgumentTypeError(
+                "Cargo configuration must be inline --config=KEY=VALUE, without includes"
+            ) from error
+    return value
 
 
 class BuildError(Exception):
@@ -257,6 +282,17 @@ def check_profile_output(text: str) -> None:
         )
 
 
+def native_static_libraries(text: str) -> list[str]:
+    """Read the exact use build's native dependencies for the Linux PBS bundle."""
+    matches = re.findall(r"native-static-libs:\s*([^\n]+)", text)
+    libraries = matches[-1].split() if matches else []
+    if not libraries or any(
+        re.fullmatch(r"-l[A-Za-z0-9_]+", library) is None for library in libraries
+    ):
+        raise BuildError("Missing or unsupported native-static-libs in the use build")
+    return libraries
+
+
 def require_unchanged(
     before: dict[str, str], after: dict[str, str], label: str
 ) -> None:
@@ -329,6 +365,7 @@ def execute(args: argparse.Namespace, run: Run) -> None:
     if cargo is None or rustc is None:
         raise BuildError("cargo and rustc must already be installed on PATH")
     selection = [f"+{args.toolchain}"] if args.toolchain else []
+    cargo_selection = [*selection, *args.cargo_arg]
     source_before = source_files(run.source)
     configs_before = cargo_configs(run.source, env)
     scripts_before = files_below(SCRIPT_DIRECTORY)
@@ -339,13 +376,14 @@ def execute(args: argparse.Namespace, run: Run) -> None:
         base_rustflags=flags,
         environment_scope="Child commands inherit the environment with the recorded overrides. Only an allowlist is recorded to avoid storing credentials. Training additionally uses Python -I -S and verifies XML_Parse origin.",
         toolchain=args.toolchain,
+        cargo_args=args.cargo_arg,
         environment={
             key: os.environ[key] for key in BUILD_ENVIRONMENT if key in os.environ
         },
     )
     run.save()
     rust_version = run.command("rustc-version", [rustc, *selection, "-vV"], env)
-    cargo_version = run.command("cargo-version", [cargo, *selection, "-Vv"], env)
+    cargo_version = run.command("cargo-version", [cargo, *cargo_selection, "-Vv"], env)
     sysroot = Path(
         run.command(
             "rustc-sysroot", [rustc, *selection, "--print", "sysroot"], env
@@ -423,8 +461,8 @@ def execute(args: argparse.Namespace, run: Run) -> None:
             f"build-{phase}",
             [
                 cargo,
-                *selection,
-                "build",
+                *cargo_selection,
+                "rustc",
                 "--release",
                 "--locked",
                 "--offline",
@@ -432,11 +470,22 @@ def execute(args: argparse.Namespace, run: Run) -> None:
                 host,
                 "-p",
                 "oriole_expat",
+                "--lib",
+                "--crate-type",
+                "cdylib,staticlib",
+                "--verbose",
+                *(
+                    ["--", "--print=native-static-libs"]
+                    if phase == "use" and getattr(args, "native_static_libs", False)
+                    else []
+                ),
             ],
             phase_env,
         )
         if phase == "use":
             check_profile_output(log)
+            if getattr(args, "native_static_libs", False):
+                run.manifest["native_static_libraries"] = native_static_libraries(log)
         artifact_directory = run.directory / phase
         artifact_directory.mkdir()
         shared = (
@@ -548,6 +597,18 @@ def main() -> int:
     )
     parser.add_argument(
         "--toolchain", help="Installed rustup toolchain; e.g. stable or ohm"
+    )
+    parser.add_argument(
+        "--cargo-arg",
+        action="append",
+        default=[],
+        type=cargo_option,
+        help="Repeatable global Cargo option, e.g. --cargo-arg=-Zohm-defaults=no",
+    )
+    parser.add_argument(
+        "--native-static-libs",
+        action="store_true",
+        help="Capture the use build's native linker libraries for a Linux PBS bundle",
     )
     parser.add_argument(
         "--command-timeout",

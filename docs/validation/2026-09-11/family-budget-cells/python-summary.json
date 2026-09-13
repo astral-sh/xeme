@@ -1,0 +1,168 @@
+{
+  "scope": "All fixed conditions and samples; geometric means of per-condition paired median time ratios. Shared host.",
+  "groups": {
+    "all": {
+      "conditions": 24,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.999199356883713,
+          "below_one": 13
+        },
+        "candidate_over_expat": {
+          "geomean": 1.3070289905436836,
+          "below_one": 3
+        },
+        "published_over_expat": {
+          "geomean": 1.309406572117598,
+          "below_one": 3
+        }
+      }
+    },
+    "elementtree": {
+      "conditions": 12,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 0.9981713872644055,
+          "below_one": 8
+        },
+        "candidate_over_expat": {
+          "geomean": 1.396887451835582,
+          "below_one": 1
+        },
+        "published_over_expat": {
+          "geomean": 1.403154677031098,
+          "below_one": 1
+        }
+      }
+    },
+    "pyexpat-events": {
+      "conditions": 12,
+      "ratios": {
+        "candidate_over_published": {
+          "geomean": 1.0002283851604332,
+          "below_one": 5
+        },
+        "candidate_over_expat": {
+          "geomean": 1.222950911239709,
+          "below_one": 2
+        },
+        "published_over_expat": {
+          "geomean": 1.2219220013095957,
+          "below_one": 2
+        }
+      }
+    }
+  },
+  "regressions": [
+    {
+      "condition": {
+        "name": "vulkan",
+        "chunk": 4096,
+        "mode": "elementtree",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "iterations": 3
+      },
+      "ratio": 1.0073439118905916
+    },
+    {
+      "condition": {
+        "name": "vulkan",
+        "chunk": 65536,
+        "mode": "pyexpat-events",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "iterations": 3
+      },
+      "ratio": 1.0015657227220087
+    },
+    {
+      "condition": {
+        "name": "wayland",
+        "chunk": 65536,
+        "mode": "pyexpat-events",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+        "iterations": 16
+      },
+      "ratio": 1.003665593383919
+    },
+    {
+      "condition": {
+        "name": "maven",
+        "chunk": 4096,
+        "mode": "pyexpat-events",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+        "iterations": 32
+      },
+      "ratio": 1.015016793618425
+    },
+    {
+      "condition": {
+        "name": "maven",
+        "chunk": 65536,
+        "mode": "pyexpat-events",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+        "iterations": 32
+      },
+      "ratio": 1.0007081409832508
+    },
+    {
+      "condition": {
+        "name": "batik",
+        "chunk": 4096,
+        "mode": "pyexpat-events",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "iterations": 128
+      },
+      "ratio": 1.0075342598412858
+    },
+    {
+      "condition": {
+        "name": "batik",
+        "chunk": 65536,
+        "mode": "pyexpat-events",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "iterations": 128
+      },
+      "ratio": 1.0056581039000632
+    },
+    {
+      "condition": {
+        "name": "gtk",
+        "chunk": 4096,
+        "mode": "elementtree",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+        "iterations": 64
+      },
+      "ratio": 1.0011880454070345
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "chunk": 4096,
+        "mode": "elementtree",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "iterations": 64
+      },
+      "ratio": 1.0018090765503629
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "chunk": 4096,
+        "mode": "pyexpat-events",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "iterations": 64
+      },
+      "ratio": 1.0050509216855412
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "chunk": 65536,
+        "mode": "elementtree",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "iterations": 64
+      },
+      "ratio": 1.006173245707411
+    }
+  ]
+}

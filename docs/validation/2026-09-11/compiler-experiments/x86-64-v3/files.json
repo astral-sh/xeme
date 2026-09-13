@@ -1,0 +1,86 @@
+{
+  "status": "sealed",
+  "files": {
+    "README.md": {
+      "sha256": "888903e7ee82bb1c958b11745623c4991c970b88dbc7a944d9f783cd3b44f429",
+      "bytes": 5418
+    },
+    "amend-verifier.py": {
+      "sha256": "76d5ecb7207ea69649a70d928af4e719bbeb34152c17670f8062140d448d74ff",
+      "bytes": 2508
+    },
+    "assemble-attempt01.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "assemble-attempt01.stdout": {
+      "sha256": "e1a2a1d3115faf63eeda7ae69897beda5b0ecedbd37644ee8b495faba9f930a3",
+      "bytes": 338
+    },
+    "assemble.py": {
+      "sha256": "1025efc6829a8a9e6d5e44743d36bb2dd57ac5f4385713f316bd8a2d37b58e20",
+      "bytes": 7293
+    },
+    "evidence.tar.gz": {
+      "sha256": "ed993fc983470d8d4f9cb2202b934f518767b6532d91b7819462af492f74d3fa",
+      "bytes": 7066442
+    },
+    "finalize.py": {
+      "sha256": "262143ecb9a4669b3e44fd0e337b2f0291246f75f5edb0c1e13bd95e97123810",
+      "bytes": 6603
+    },
+    "members-attempt01.json.gz": {
+      "sha256": "281dc49353c66293c19d5836d09f15b92e838cdc0be18dcdd6ff76ebe8a2a672",
+      "bytes": 134326
+    },
+    "members.json.gz": {
+      "sha256": "c9406be9696aa98596a00cd28e2894d410a3c73f5c0c3c967d23f865efe0f7c9",
+      "bytes": 134495
+    },
+    "overview-review.json": {
+      "sha256": "920f67d7b38ff3863a0165c36f9fc0d22a6a0229002e2ece22c0f5892800a70d",
+      "bytes": 1578
+    },
+    "package-plan.json": {
+      "sha256": "7af22dfeaf626368d063822529d2f75d24dc5ad0bba40a169dfc15666a8893e4",
+      "bytes": 1120
+    },
+    "report.json": {
+      "sha256": "b23d922e9c19ae4a53d9847ec21b12485fc7b2e85af4ec011ff0d4b77dd462f3",
+      "bytes": 249373
+    },
+    "review-overview.py": {
+      "sha256": "8deec00a006de975a8dc538738d9ab120ee6a9ac9f79f2517203c124fb1294e1",
+      "bytes": 3177
+    },
+    "verifier-amendment.json": {
+      "sha256": "a0fba96829fb600820f11a3321972950efb881fb85a95504082afc7eb79b4113",
+      "bytes": 886
+    },
+    "verify-attempt01.py": {
+      "sha256": "4ba18317cca0864fa8433e0333d124e487af1bcf50db4ae24f4c51a16afcd4e4",
+      "bytes": 12908
+    },
+    "verify-attempt01.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "verify-attempt01.stdout": {
+      "sha256": "81201ba51e0a4ae2c989f1b7710b9c374f73585d033373c95976a9248008b7b8",
+      "bytes": 5911
+    },
+    "verify-attempt02.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "verify-attempt02.stdout": {
+      "sha256": "81201ba51e0a4ae2c989f1b7710b9c374f73585d033373c95976a9248008b7b8",
+      "bytes": 5911
+    },
+    "verify.py": {
+      "sha256": "4dbb68df552f1f9f03826aaaea21066c6dde0eb366b01cb8cccf9be92c077fc7",
+      "bytes": 13199
+    }
+  },
+  "scope": "Top-level producer/report/verifier/retained first outputs. Archive members and all logical origins are in members.json.gz."
+}

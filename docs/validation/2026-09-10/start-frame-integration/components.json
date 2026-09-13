@@ -1,0 +1,11 @@
+{
+  "base": "503a55957f7cdebcc0b3fb3ada2751ffdb8cb9c9",
+  "patch_from": "/home/dev-user/code/oss/oriole-start-frame-lowering",
+  "patch_sha256": "7e4681e5c068543f02a4d7eff961718d4e216cb57cc189348b75dcffa15808fb",
+  "changed_files": [
+    "crates/oriole/src/lib.rs",
+    "crates/oriole/tests/adapter_frame.rs",
+    "crates/oriole/tests/allocation.rs"
+  ],
+  "matching_end_tag_helper_retained": true
+}

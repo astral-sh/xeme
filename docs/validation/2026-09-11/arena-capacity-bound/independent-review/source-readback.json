@@ -1,0 +1,70 @@
+{
+  "status": "passed",
+  "role": "Independent frozen source and retained focused red/green review; not collector validation",
+  "base_head": "ba0d5297432f2e3ee2c00bcfca81a8e7e9692340",
+  "source_manifest_sha256": "857cca1585ce8168ffe3f20c9c8b1ba90f6b8bea0e09b69c5352a677207ca203",
+  "source_files_checked": 72,
+  "patch_sha256": "3778d7c148adf38c14081fdc493cc1ba899fa17a53114ee28662443460f410a4",
+  "only_live_delta": "crates/oriole/src/arena.rs",
+  "selected_source_delta": {
+    "crates/oriole/src/arena.rs": {
+      "selected": "9f37f65782c710d7265861a4890a5868bf112d1eb97bf73be55b26c39e1c8b33",
+      "current": "732da2c1bac637f3d136b2644ff59ca094eef83c2437f98f2123662be5bfa7a1"
+    },
+    "tests/c/integration.c": {
+      "selected": "72162a4d080d2fd018023aed63181663090fc291772a45e121b51187b1fe28d7",
+      "current": "88eae7992ed72f9bb039bbfb9a94b126b2dc0959bd2c7fb4234e55622b3264ca"
+    }
+  },
+  "red_green": [
+    {
+      "stage": "red",
+      "status": "failed",
+      "exit": 101,
+      "reaped": true,
+      "report_sha256": "f72f2340ae0d5f107df27bf45389587a5248a2b5b8553c94f6a71a03acd7fc11",
+      "log_sha256": "ad0c8301a4e12aafe08b5e2b86f70a36df8e47af8264c64e61e7f20847c631e4",
+      "arena_sha256": "4aeecabe842e6904b3b91d460a398667e76923209e2c97856e1994b05606a75f"
+    },
+    {
+      "stage": "green",
+      "status": "passed",
+      "exit": 0,
+      "reaped": true,
+      "report_sha256": "cebeaf2180f386c908c820adfdfb869f837e2c17fe260196346517181f7a9668",
+      "log_sha256": "cf8fdde90363f4eec9285dbc15199b185a3a3338cce2cd424ccbf43ea605c122",
+      "arena_sha256": "6a39650f9ba93908b87dd05bc0d45b7d6fb70b5923e0422316bf2a275b30b4c6"
+    }
+  ],
+  "witness_arithmetic": {
+    "raw_tag_bytes": 3734,
+    "packed_arena_length": 3476,
+    "old_byte_capacity": 6000,
+    "record_capacity_bytes_x86_64": 4096,
+    "old_total": 10096,
+    "fixed_total_ceiling": 8192
+  },
+  "full_checks": "Owned by author; not claimed by this source receipt.",
+  "scope": [
+    "No full64KiB aggregate excess or global allocation-limit bypass is demonstrated.",
+    "Growth request sizes and exact custom-allocator fail-at-N identity may differ.",
+    "No compiler/parser/profiler executed by reviewer."
+  ],
+  "pins": {
+    "/tmp/oriole-arena-capacity-bound-study/source.json": "857cca1585ce8168ffe3f20c9c8b1ba90f6b8bea0e09b69c5352a677207ca203",
+    "/tmp/oriole-arena-capacity-bound-study/fix.patch": "3778d7c148adf38c14081fdc493cc1ba899fa17a53114ee28662443460f410a4",
+    "/tmp/oriole-arena-capacity-bound-study/arena-red.rs": "4aeecabe842e6904b3b91d460a398667e76923209e2c97856e1994b05606a75f",
+    "/tmp/oriole-arena-capacity-bound-study/red/report.json": "f72f2340ae0d5f107df27bf45389587a5248a2b5b8553c94f6a71a03acd7fc11",
+    "/tmp/oriole-arena-capacity-bound-study/red/red.log": "ad0c8301a4e12aafe08b5e2b86f70a36df8e47af8264c64e61e7f20847c631e4",
+    "/tmp/oriole-arena-capacity-bound-study/green/report.json": "cebeaf2180f386c908c820adfdfb869f837e2c17fe260196346517181f7a9668",
+    "/tmp/oriole-arena-capacity-bound-study/green/green.log": "cf8fdde90363f4eec9285dbc15199b185a3a3338cce2cd424ccbf43ea605c122",
+    "/tmp/oriole-arena-capacity-bound-study/format/report.json": "2c6068178b37c400cd961985e964e486b6e644310f8c105cc9e165265605b4e4",
+    "/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole/src/arena.rs": "732da2c1bac637f3d136b2644ff59ca094eef83c2437f98f2123662be5bfa7a1",
+    "/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole/src/lib.rs": "f677c9da7579513d40d6b5c319c0a1ea6f0e87c63cab77f293441138f1879426",
+    "/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole/src/recycling.rs": "06307e76b6673f5f70d6ed38da999942dd4dc2bc12fbfa2e18c836e2a5adb0a8",
+    "/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole_storage/src/string.rs": "801cafba67a6c83bdd13b26a4087031adb360edcc81485540adaadea15a9fad5",
+    "/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole_storage/src/lib.rs": "bef77200e81d340776f2e858cf679d01aa8986c27da208bc48a9afec3e069c2c",
+    "/home/dev-user/code/oss/oriole-arena-capacity-bound/crates/oriole_storage/src/allocator.rs": "910ce7ead099bd6a306a037c77fa276f746ac0eac59f14d8bda9b9b1c2deeac7",
+    "/home/dev-user/.cache/toucan/cargo/registry/src/socket-firewall-registry.gateway.admin-0.internal.api.openai.org-42b3aaa0d2956984/allocator-api2-0.2.21/src/stable/raw_vec.rs": "9a56ce1bab4562000285e80837da7b7bd2bbbc63850c83ab5d8df9888b65f5db"
+  }
+}

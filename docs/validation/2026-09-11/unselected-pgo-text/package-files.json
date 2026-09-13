@@ -1,0 +1,58 @@
+{
+  "status": "sealed_local_package",
+  "files": {
+    "README.md": {
+      "bytes": 7802,
+      "sha256": "c1df641cb2c2da1eeb0e68e4515b81493e7b58799956167be329c89da72391f4"
+    },
+    "audit-real-corpus.py": {
+      "bytes": 13366,
+      "sha256": "412133ae9a30e8df8a67726b6860bdfc0e6ef651ee94e39f2fde403fd3f026a6"
+    },
+    "audit-text-build.py": {
+      "bytes": 14419,
+      "sha256": "552f18a306a9493ae52bb3b1037b97d6b1eac654ca0d4a11b7c89e0bbb9df12c"
+    },
+    "conditions.csv": {
+      "bytes": 34840,
+      "sha256": "87d528a7a187c271ccae18bc4f51ef8591bdd2f89fea28b4069b99e9877d1ed2"
+    },
+    "corpus-publication-boundary.json": {
+      "bytes": 14895,
+      "sha256": "42fc74abbf02abffc0a9c7e4ce03692320f6baaabccd992d0c8b4b7436248218"
+    },
+    "evidence.tar.gz": {
+      "bytes": 10767790,
+      "sha256": "9d2498b5acd09ba73a5eaa07af7cc800fd14ea8534711d78d2279156bfae60e2"
+    },
+    "inventory.json": {
+      "bytes": 3305115,
+      "sha256": "46f93b34665330a800fc6b2cde0f66f1806eb12baf3503adb2fb693a494940b8"
+    },
+    "package.py": {
+      "bytes": 16941,
+      "sha256": "061aee0ea492e2d56260cfbff93f955d89470926568480bec46b585eab2674b6"
+    },
+    "readback.json": {
+      "bytes": 968,
+      "sha256": "87ae4bf564486936e7302d47ff4a0ee916f81e49f2d9d7b9014f65c5b3b26745"
+    },
+    "seal.py": {
+      "bytes": 2978,
+      "sha256": "dbfc7f11fb6fc288d0369df844d54418b8dfa44d75b7040b35cdbe1c4c7c3fc4"
+    },
+    "summary.json": {
+      "bytes": 87942,
+      "sha256": "89dbc6e4df290b400243d8102b375d28d6d75243a20ed83b7cb09feb963a7f18"
+    },
+    "supplemental-readers.json": {
+      "bytes": 372,
+      "sha256": "b09b03bdb7d22f0a863155627602645373e07a067d78e10c13f0c768493b6806"
+    },
+    "verify.py": {
+      "bytes": 9063,
+      "sha256": "1edf7eae1614133f9ce1d8b05baa817a39fc823a7cfaca8cc0f00ab9ffec972a"
+    }
+  },
+  "scope": "Original evidence unchanged; portable verifier never executes targets. supplemental-readers.json binds two additional standalone source/build readers outside the archive."
+}

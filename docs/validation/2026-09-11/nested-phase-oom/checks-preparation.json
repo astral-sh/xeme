@@ -1,0 +1,89 @@
+{
+  "status": "prepared_not_executed",
+  "worktree": "/home/dev-user/code/oss/oriole-nested-phase-oom",
+  "source_pins": {
+    "/home/dev-user/code/oss/oriole-nested-phase-oom/tests/c/integration.c": "88eae7992ed72f9bb039bbfb9a94b126b2dc0959bd2c7fb4234e55622b3264ca",
+    "/home/dev-user/code/oss/oriole-nested-phase-oom/tests/c/UPSTREAM-NOTICES.txt": "64293606655ef7918c7dac2d5de1ad1790b1935a6d06d5bdad4eceb71ebb8257",
+    "/home/dev-user/code/oss/oriole-nested-phase-oom/include/expat.h": "c8c8fda28157a2550dd0b276a717df3414d2a91728e6d0f9d9e20ed143f8d42c",
+    "/home/dev-user/code/oss/oriole-nested-phase-oom/CONTRIBUTING.md": "a7c6eaa4a7f0ef9d9ff82bc3468c1f299ae19abe348bf404d29889f16b90dbc7",
+    "/tmp/oriole-nested-phase-oom/consumer.c": "c2dfb14a08044ae5b163740653d3b4f95015f7ccebb2bc3b3cdaa36369e985a6"
+  },
+  "arms": [
+    {
+      "name": "expat-pgo-shared",
+      "path": "/tmp/oriole-pgo-study/expat-use-liboriole_expat.so",
+      "sha256": "12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0",
+      "linkage": "shared",
+      "soname": "libexpat.so.1"
+    },
+    {
+      "name": "context-normal-shared",
+      "path": "/tmp/oriole-context-text-frame-fixed-pgo-study/normal/liboriole_expat.so",
+      "sha256": "eed1ee24479d9d3c79c9b1b0294d69bc38c420728998a0a67c1daffe34ad703d",
+      "linkage": "shared",
+      "soname": "liboriole_expat.so"
+    },
+    {
+      "name": "context-normal-static",
+      "path": "/tmp/oriole-context-text-frame-fixed-pgo-study/normal/liboriole_expat.a",
+      "sha256": "33a63f421a1f46472c9d64c54046781eccc12bf6efbd4d114dcd3a1c32a1026e",
+      "linkage": "static",
+      "soname": null
+    },
+    {
+      "name": "context-pgo-shared",
+      "path": "/tmp/oriole-context-text-frame-fixed-pgo-study/pgo/runs/run-n5eot_2d/use/liboriole_expat.so",
+      "sha256": "7cd7c5a8ef99d06097e3be388ff36c62d4f14da04d9a8e48988c5f0217373e83",
+      "linkage": "shared",
+      "soname": "liboriole_expat.so"
+    },
+    {
+      "name": "context-pgo-static",
+      "path": "/tmp/oriole-context-text-frame-fixed-pgo-study/pgo/runs/run-n5eot_2d/use/liboriole_expat.a",
+      "sha256": "dedfc6d766a11432467d7b129ee2525222c5bd1159b8cf589f34ac177808896c",
+      "linkage": "static",
+      "soname": null
+    }
+  ],
+  "source_symbols": [
+    "XML_ExpatVersion",
+    "XML_ExpatVersionInfo",
+    "XML_ExternalEntityParserCreate",
+    "XML_GetBuffer",
+    "XML_GetCurrentByteIndex",
+    "XML_GetCurrentColumnNumber",
+    "XML_GetCurrentLineNumber",
+    "XML_GetErrorCode",
+    "XML_GetParsingStatus",
+    "XML_MemFree",
+    "XML_MemMalloc",
+    "XML_MemRealloc",
+    "XML_Parse",
+    "XML_ParseBuffer",
+    "XML_ParserCreate",
+    "XML_ParserCreate_MM",
+    "XML_ParserFree",
+    "XML_ParserReset",
+    "XML_ResumeParser",
+    "XML_SetBillionLaughsAttackProtectionActivationThreshold",
+    "XML_SetBillionLaughsAttackProtectionMaximumAmplification",
+    "XML_SetCharacterDataHandler",
+    "XML_SetElementHandler",
+    "XML_SetEncoding",
+    "XML_SetEntityDeclHandler",
+    "XML_SetExternalEntityRefHandler",
+    "XML_SetParamEntityParsing",
+    "XML_SetReparseDeferralEnabled",
+    "XML_SetReturnNSTriplet",
+    "XML_SetStartElementHandler",
+    "XML_SetUnknownEncodingHandler",
+    "XML_SetUserData",
+    "XML_StopParser",
+    "XML_UseParserAsHandlerArg"
+  ],
+  "scope": "One new phase-relative OOM case in the existing complete direct-link integration consumer. C ASan/UBSan; frozen Rust and Expat artifacts uninstrumented, LSan disabled; explicit custom-allocation balance remains asserted.",
+  "cpu": 3,
+  "compile_wall_seconds": 120,
+  "worker_wall_seconds": 120,
+  "control_source": "8a7da2759b67ca85f82fb29bd775392e532b3ff355340eb10f92ea7764bbe642"
+}

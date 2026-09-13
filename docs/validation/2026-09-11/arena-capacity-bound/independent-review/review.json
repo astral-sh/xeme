@@ -1,0 +1,17 @@
+{
+  "status": "passed_no_source_blocker",
+  "role": "Independent source and retained red/green audit",
+  "patch_sha256": "3778d7c148adf38c14081fdc493cc1ba899fa17a53114ee28662443460f410a4",
+  "source_manifest_sha256": "857cca1585ce8168ffe3f20c9c8b1ba90f6b8bea0e09b69c5352a677207ca203",
+  "source_readback_sha256": "77c7201d960f7213b32fc70c2728a84de6c57286aab2a201c758d2b5d70697ea",
+  "note_sha256": "721d75f8aec5a1d5533297f5c57abc712e7ae424e87bdcd92ec9ff986ed3a342",
+  "reader_sha256": "ed6056fcd2efe9c2c5b7f63f0301fc92a33e1f7fd75b30e74d30d7b791f98dee",
+  "reader_session": {
+    "id": 76403,
+    "exit": 0,
+    "reaped": true,
+    "recorded": "after reaping"
+  },
+  "target_execution": false,
+  "full_checks_scope": "Not included; author runs full checks separately."
+}

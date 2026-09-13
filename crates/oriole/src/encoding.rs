@@ -1,4 +1,4 @@
-use crate::{Error, ErrorKind, Position, ScanMode};
+use crate::{DeclarationContext, Error, ErrorKind, Position, ScanMode};
 use oriole_storage::{Allocator, Box, String, Vec, try_box, try_extend_from_slice};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -38,15 +38,200 @@ impl Encoding {
 }
 
 #[derive(Debug)]
-pub(crate) struct Decoder {
-    allocator: Allocator,
-    encoding: Option<Encoding>,
+struct Detection {
     requested: Option<String>,
-    pending: Vec<u8>,
-    pending_cursor: usize,
     declaration_checked: usize,
     unknown_name: Option<String>,
     encoding_error_position: Option<Position>,
+}
+
+impl Detection {
+    fn detect(
+        &mut self,
+        bytes: &[u8],
+        allocator: Allocator,
+        final_input: bool,
+        max_token: usize,
+        external_content: bool,
+        declaration_context: DeclarationContext,
+    ) -> Result<Option<(Encoding, usize)>, Error> {
+        // An explicitly labelled external text entity can begin with ordinary
+        // Latin-1 bytes that happen to spell a Unicode byte-order mark.
+        if external_content
+            && self.requested.as_deref().and_then(Encoding::named) == Some(Encoding::Latin1)
+        {
+            return Ok(Some((Encoding::Latin1, 0)));
+        }
+        if bytes.len() < 4
+            && !final_input
+            && !(bytes.len() >= 2
+                && bytes[0].is_ascii()
+                && bytes[0] != 0
+                && bytes[1].is_ascii()
+                && bytes[1] != 0)
+        {
+            return Ok(None);
+        }
+        let (sniffed, skip) = if bytes.starts_with(&[0xef, 0xbb, 0xbf]) {
+            (Encoding::Utf8, 3)
+        } else if bytes.starts_with(&[0xff, 0xfe]) {
+            (Encoding::Utf16Le, 2)
+        } else if bytes.starts_with(&[0xfe, 0xff]) {
+            (Encoding::Utf16Be, 2)
+        } else if bytes.first() == Some(&0) && bytes.len() >= 2 {
+            (Encoding::Utf16Be, 0)
+        } else if bytes.get(1) == Some(&0)
+            && (!external_content || self.requested.is_some() || bytes[0] == b'<')
+        {
+            // In external content, a plain ASCII character can be complete
+            // before the next byte arrives. Only a markup opener selects
+            // unlabelled little-endian UTF-16; document/DTD detection differs.
+            (Encoding::Utf16Le, 0)
+        } else {
+            (Encoding::Utf8, 0)
+        };
+        if let Some(requested) = &self.requested {
+            let requested = if requested.eq_ignore_ascii_case("UTF-16") {
+                match sniffed {
+                    Encoding::Utf16Le | Encoding::Utf16Be => sniffed,
+                    _ => {
+                        return Err(Error::bare(
+                            ErrorKind::IncorrectEncoding,
+                            "UTF-16 input requires a byte order mark or declaration",
+                        ));
+                    }
+                }
+            } else {
+                let Some(encoding) = Encoding::named(requested) else {
+                    self.unknown_name = Some(requested.try_clone()?);
+                    return Err(Error::bare(
+                        ErrorKind::UnknownEncoding,
+                        "unsupported input encoding",
+                    ));
+                };
+                encoding
+            };
+            if skip > 0 && sniffed != requested {
+                return Err(Error::bare(
+                    ErrorKind::IncorrectEncoding,
+                    "byte order mark conflicts with the requested encoding",
+                ));
+            }
+            return Ok(Some((requested, skip)));
+        }
+        if sniffed != Encoding::Utf8 {
+            return Ok(Some((sniffed, skip)));
+        }
+        let content = &bytes[skip..];
+        if b"<?xml".starts_with(content) && !final_input {
+            return Ok(None);
+        }
+        if content.starts_with(b"<?xml") && content.get(5).is_some_and(u8::is_ascii_whitespace) {
+            let start = self.declaration_checked.min(content.len());
+            let end = content[start..]
+                .windows(2)
+                .position(|window| window == b"?>")
+                .map(|end| end + start);
+            self.declaration_checked = content.len().saturating_sub(1);
+            let Some(end) = end else {
+                if content.len() > max_token {
+                    return Err(Error::bare(
+                        ErrorKind::LimitExceeded,
+                        "XML declaration byte limit exceeded",
+                    ));
+                }
+                if !final_input {
+                    return Ok(None);
+                }
+                return Ok(Some((Encoding::Utf8, skip)));
+            };
+            // The declaration is ASCII in every supported ASCII-compatible encoding.
+            if let Ok(declaration) = std::str::from_utf8(&content[..end])
+                && let Some(start) = declaration.find("encoding")
+            {
+                let rest = declaration[start + 8..].trim_start_matches(crate::whitespace);
+                if let Some(rest) = rest.strip_prefix('=') {
+                    let rest = rest.trim_start_matches(crate::whitespace);
+                    if let Some(quote @ ('\'' | '"')) = rest.chars().next()
+                        && let Some(end) = rest[1..].find(quote)
+                    {
+                        let name = &rest[1..end + 1];
+                        if !crate::valid_encoding_name(name) {
+                            return Ok(Some((Encoding::Utf8, skip)));
+                        }
+                        let encoding = Encoding::named(name);
+                        let mismatch = name.eq_ignore_ascii_case("UTF-16")
+                            || matches!(encoding, Some(Encoding::Utf16Le | Encoding::Utf16Be));
+                        if encoding.is_none()
+                            && !mismatch
+                            && declaration.len() + 2 <= max_token
+                            && declaration
+                                .bytes()
+                                .all(|byte| required_ascii(i32::from(byte)))
+                            && crate::malformed_ascii_declaration(
+                                &declaration[5..],
+                                declaration_context,
+                            )
+                        {
+                            // These bytes are invariant under every custom map.
+                            // Let ordinary token parsing publish the grammar error before any
+                            // unknown-encoding callback; never decode a valid
+                            // unknown encoding by assuming UTF-8.
+                            return Ok(Some((Encoding::Utf8, skip)));
+                        }
+                        if encoding.is_none() || mismatch {
+                            let offset = declaration.len() - rest.len() + 1;
+                            let mut position = Position {
+                                byte_index: skip + offset,
+                                line: 1,
+                                column: usize::from(skip != 0),
+                                byte_count: 0,
+                            };
+                            let mut previous_cr = false;
+                            for character in declaration[..offset].chars() {
+                                match character {
+                                    '\r' => {
+                                        position.line += 1;
+                                        position.column = 0;
+                                    }
+                                    '\n' if !previous_cr => {
+                                        position.line += 1;
+                                        position.column = 0;
+                                    }
+                                    '\n' => {}
+                                    _ => position.column += 1,
+                                }
+                                previous_cr = character == '\r';
+                            }
+                            self.encoding_error_position = Some(position);
+                            if mismatch {
+                                return Err(Error::bare(
+                                    ErrorKind::IncorrectEncoding,
+                                    "declared encoding conflicts with input bytes",
+                                ));
+                            }
+                            self.unknown_name = Some(String::try_from_str_in(name, allocator)?);
+                            return Err(Error::bare(
+                                ErrorKind::UnknownEncoding,
+                                "unsupported declared encoding",
+                            ));
+                        }
+                        return Ok(encoding.map(|encoding| (encoding, skip)));
+                    }
+                }
+            }
+        }
+        Ok(Some((Encoding::Utf8, skip)))
+    }
+}
+
+#[derive(Debug)]
+pub(crate) struct Decoder {
+    allocator: Allocator,
+    encoding: Option<Encoding>,
+    detection: Detection,
+    pending: Vec<u8>,
+    pending_cursor: usize,
     custom_map: Option<Box<[i32; 256]>>,
     conversion: Option<([u8; 4], u8)>,
 }
@@ -55,14 +240,16 @@ impl Decoder {
         Ok(Self {
             allocator,
             encoding: None,
-            requested: requested
-                .map(|name| String::try_from_str_in(name, allocator))
-                .transpose()?,
+            detection: Detection {
+                requested: requested
+                    .map(|name| String::try_from_str_in(name, allocator))
+                    .transpose()?,
+                declaration_checked: 0,
+                unknown_name: None,
+                encoding_error_position: None,
+            },
             pending: Vec::new_in(allocator),
             pending_cursor: 0,
-            declaration_checked: 0,
-            unknown_name: None,
-            encoding_error_position: None,
             custom_map: None,
             conversion: None,
         })
@@ -72,28 +259,31 @@ impl Decoder {
         let requested = requested
             .map(|name| String::try_from_str_in(name, self.allocator))
             .transpose()?;
-        self.requested = requested;
+        self.detection.requested = requested;
         Ok(())
     }
 
     /// A complete BOM can precede enough input to choose the declaration's
     /// encoding. Report only that recognized prefix for consumed-byte accounting.
     pub(crate) fn pending_bom_len(&self, external_content: bool) -> usize {
+        self.bom_len(&self.pending, external_content)
+    }
+
+    fn bom_len(&self, bytes: &[u8], external_content: bool) -> usize {
         if self.encoding.is_some()
             // An explicit unknown protocol encoding must first be resolved by
             // its handler; these bytes have not yet been recognized as a BOM.
-            || self.requested.as_deref().is_some_and(|name| {
+            || self.detection.requested.as_deref().is_some_and(|name| {
                 Encoding::named(name).is_none() && !name.eq_ignore_ascii_case("UTF-16")
             })
             || (external_content
-                && self.requested.as_deref().and_then(Encoding::named) == Some(Encoding::Latin1))
+                && self.detection.requested.as_deref().and_then(Encoding::named) == Some(Encoding::Latin1))
         {
             return 0;
         }
-        if self.pending.starts_with(&[0xef, 0xbb, 0xbf]) {
+        if bytes.starts_with(&[0xef, 0xbb, 0xbf]) {
             3
-        } else if self.pending.starts_with(&[0xff, 0xfe]) || self.pending.starts_with(&[0xfe, 0xff])
-        {
+        } else if bytes.starts_with(&[0xff, 0xfe]) || bytes.starts_with(&[0xfe, 0xff]) {
             2
         } else {
             0
@@ -107,13 +297,41 @@ impl Decoder {
         source: &mut Source,
         max_token: usize,
         external_content: bool,
+        declaration_context: DeclarationContext,
     ) -> Result<(), Error> {
+        if self.encoding == Some(Encoding::Utf8)
+            && self.conversion.is_none()
+            && self.pending.is_empty()
+            && self.pending_cursor == 0
+            && self.pending.capacity() >= bytes.len()
+            && let Ok(text) = std::str::from_utf8(bytes)
+        {
+            // The ordinary pending append cannot allocate in this state. Copy
+            // directly into the source, retaining its existing growth policy.
+            if let Err(error) = source
+                .text
+                .try_push_str_with_minimum(text, max_token.min(1024))
+            {
+                // Preserve the ordinary failure state. Empty length and the
+                // checked capacity make this restoration allocation-free.
+                try_extend_from_slice(&mut self.pending, bytes)?;
+                return Err(error.into());
+            }
+            return Ok(());
+        }
         try_extend_from_slice(&mut self.pending, bytes)?;
         if self.conversion.is_some() {
             return Ok(());
         }
         if self.encoding.is_none() {
-            let Some((encoding, skip)) = self.detect(final_input, max_token, external_content)?
+            let Some((encoding, skip)) = self.detection.detect(
+                &self.pending,
+                self.allocator,
+                final_input,
+                max_token,
+                external_content,
+                declaration_context,
+            )?
             else {
                 return Ok(());
             };
@@ -260,180 +478,20 @@ impl Decoder {
         Ok(())
     }
 
-    fn detect(
-        &mut self,
-        final_input: bool,
-        max_token: usize,
-        external_content: bool,
-    ) -> Result<Option<(Encoding, usize)>, Error> {
-        // An explicitly labelled external text entity can begin with ordinary
-        // Latin-1 bytes that happen to spell a Unicode byte-order mark.
-        if external_content
-            && self.requested.as_deref().and_then(Encoding::named) == Some(Encoding::Latin1)
-        {
-            return Ok(Some((Encoding::Latin1, 0)));
-        }
-        let bytes = &self.pending;
-        if bytes.len() < 4
-            && !final_input
-            && !(bytes.len() >= 2
-                && bytes[0].is_ascii()
-                && bytes[0] != 0
-                && bytes[1].is_ascii()
-                && bytes[1] != 0)
-        {
-            return Ok(None);
-        }
-        let (sniffed, skip) = if bytes.starts_with(&[0xef, 0xbb, 0xbf]) {
-            (Encoding::Utf8, 3)
-        } else if bytes.starts_with(&[0xff, 0xfe]) {
-            (Encoding::Utf16Le, 2)
-        } else if bytes.starts_with(&[0xfe, 0xff]) {
-            (Encoding::Utf16Be, 2)
-        } else if bytes.first() == Some(&0) && bytes.len() >= 2 {
-            (Encoding::Utf16Be, 0)
-        } else if bytes.get(1) == Some(&0)
-            && (!external_content || self.requested.is_some() || bytes[0] == b'<')
-        {
-            // In external content, a plain ASCII character can be complete
-            // before the next byte arrives. Only a markup opener selects
-            // unlabelled little-endian UTF-16; document/DTD detection differs.
-            (Encoding::Utf16Le, 0)
-        } else {
-            (Encoding::Utf8, 0)
-        };
-        if let Some(requested) = &self.requested {
-            let requested = if requested.eq_ignore_ascii_case("UTF-16") {
-                match sniffed {
-                    Encoding::Utf16Le | Encoding::Utf16Be => sniffed,
-                    _ => {
-                        return Err(Error::bare(
-                            ErrorKind::IncorrectEncoding,
-                            "UTF-16 input requires a byte order mark or declaration",
-                        ));
-                    }
-                }
-            } else {
-                let Some(encoding) = Encoding::named(requested) else {
-                    self.unknown_name = Some(requested.try_clone()?);
-                    return Err(Error::bare(
-                        ErrorKind::UnknownEncoding,
-                        "unsupported input encoding",
-                    ));
-                };
-                encoding
-            };
-            if skip > 0 && sniffed != requested {
-                return Err(Error::bare(
-                    ErrorKind::IncorrectEncoding,
-                    "byte order mark conflicts with the requested encoding",
-                ));
-            }
-            return Ok(Some((requested, skip)));
-        }
-        if sniffed != Encoding::Utf8 {
-            return Ok(Some((sniffed, skip)));
-        }
-        let content = &bytes[skip..];
-        if b"<?xml".starts_with(content) && !final_input {
-            return Ok(None);
-        }
-        if content.starts_with(b"<?xml") && content.get(5).is_some_and(u8::is_ascii_whitespace) {
-            let start = self.declaration_checked.min(content.len());
-            let end = content[start..]
-                .windows(2)
-                .position(|window| window == b"?>")
-                .map(|end| end + start);
-            self.declaration_checked = content.len().saturating_sub(1);
-            let Some(end) = end else {
-                if content.len() > max_token {
-                    return Err(Error::bare(
-                        ErrorKind::LimitExceeded,
-                        "XML declaration byte limit exceeded",
-                    ));
-                }
-                if !final_input {
-                    return Ok(None);
-                }
-                return Ok(Some((Encoding::Utf8, skip)));
-            };
-            // The declaration is ASCII in every supported ASCII-compatible encoding.
-            if let Ok(declaration) = std::str::from_utf8(&content[..end])
-                && let Some(start) = declaration.find("encoding")
-            {
-                let rest = declaration[start + 8..].trim_start_matches(crate::whitespace);
-                if let Some(rest) = rest.strip_prefix('=') {
-                    let rest = rest.trim_start_matches(crate::whitespace);
-                    if let Some(quote @ ('\'' | '"')) = rest.chars().next()
-                        && let Some(end) = rest[1..].find(quote)
-                    {
-                        let name = &rest[1..end + 1];
-                        if !crate::valid_encoding_name(name) {
-                            return Ok(Some((Encoding::Utf8, skip)));
-                        }
-                        let encoding = Encoding::named(name);
-                        let mismatch = name.eq_ignore_ascii_case("UTF-16")
-                            || matches!(encoding, Some(Encoding::Utf16Le | Encoding::Utf16Be));
-                        if encoding.is_none() || mismatch {
-                            let offset = declaration.len() - rest.len() + 1;
-                            let mut position = Position {
-                                byte_index: skip + offset,
-                                line: 1,
-                                column: usize::from(skip != 0),
-                                byte_count: 0,
-                            };
-                            let mut previous_cr = false;
-                            for character in declaration[..offset].chars() {
-                                match character {
-                                    '\r' => {
-                                        position.line += 1;
-                                        position.column = 0;
-                                    }
-                                    '\n' if !previous_cr => {
-                                        position.line += 1;
-                                        position.column = 0;
-                                    }
-                                    '\n' => {}
-                                    _ => position.column += 1,
-                                }
-                                previous_cr = character == '\r';
-                            }
-                            self.encoding_error_position = Some(position);
-                            if mismatch {
-                                return Err(Error::bare(
-                                    ErrorKind::IncorrectEncoding,
-                                    "declared encoding conflicts with input bytes",
-                                ));
-                            }
-                            self.unknown_name =
-                                Some(String::try_from_str_in(name, self.allocator)?);
-                            return Err(Error::bare(
-                                ErrorKind::UnknownEncoding,
-                                "unsupported declared encoding",
-                            ));
-                        }
-                        return Ok(encoding.map(|encoding| (encoding, skip)));
-                    }
-                }
-            }
-        }
-        Ok(Some((Encoding::Utf8, skip)))
-    }
-
     /// A parameter child is read once its protocol encoding is known, even for
     /// empty non-final input that does not complete byte-order detection.
     pub(crate) fn protocol_encoding_ready(&self) -> bool {
         self.encoding.is_some()
-            || self.requested.as_deref().is_none_or(|name| {
+            || self.detection.requested.as_deref().is_none_or(|name| {
                 Encoding::named(name).is_some() || name.eq_ignore_ascii_case("UTF-16")
             })
     }
 
     pub(crate) fn unknown_encoding(&self) -> Option<&str> {
-        self.unknown_name.as_deref()
+        self.detection.unknown_name.as_deref()
     }
     pub(crate) fn encoding_error_position(&self) -> Option<Position> {
-        self.encoding_error_position
+        self.detection.encoding_error_position
     }
     pub(crate) fn append_pending(&mut self, bytes: &[u8]) -> Result<(), Error> {
         try_extend_from_slice(&mut self.pending, bytes)?;
@@ -447,6 +505,7 @@ impl Decoder {
         source: &mut Source,
     ) -> Result<(), Error> {
         if self
+            .detection
             .unknown_name
             .as_deref()
             .is_none_or(|unknown| !unknown.eq_ignore_ascii_case(name))
@@ -473,7 +532,7 @@ impl Decoder {
                 ));
             }
         }
-        if self.requested.is_some() && self.pending.starts_with(&[0xef, 0xbb, 0xbf]) {
+        if self.detection.requested.is_some() && self.pending.starts_with(&[0xef, 0xbb, 0xbf]) {
             return Err(Error::bare(
                 ErrorKind::IncorrectEncoding,
                 "custom encoding conflicts with byte order mark",
@@ -534,11 +593,14 @@ impl Decoder {
             return (0, 0);
         }
         if requested
-            .zip(self.unknown_name.as_deref())
+            .zip(self.detection.unknown_name.as_deref())
             .is_some_and(|(requested, name)| requested.eq_ignore_ascii_case(name))
         {
             (
-                self.unknown_name.as_ref().map_or(0, |name| name.len()),
+                self.detection
+                    .unknown_name
+                    .as_ref()
+                    .map_or(0, |name| name.len()),
                 self.custom_map
                     .as_ref()
                     .map_or(0, |_| size_of::<[i32; 256]>()),
@@ -555,9 +617,10 @@ impl Decoder {
             return Ok(());
         }
         if self
+            .detection
             .requested
             .as_deref()
-            .zip(parent.unknown_name.as_deref())
+            .zip(parent.detection.unknown_name.as_deref())
             .is_some_and(|(name, parent)| name.eq_ignore_ascii_case(parent))
         {
             self.custom_map = parent
@@ -565,7 +628,8 @@ impl Decoder {
                 .as_ref()
                 .map(|map| try_box(**map, self.allocator))
                 .transpose()?;
-            self.unknown_name = parent
+            self.detection.unknown_name = parent
+                .detection
                 .unknown_name
                 .as_ref()
                 .map(|name| String::try_from_str_in(name, self.allocator))
@@ -582,6 +646,7 @@ impl Decoder {
             self.encoding,
             Some(Encoding::SingleByte | Encoding::MultiByte)
         ) && self
+            .detection
             .unknown_name
             .as_deref()
             .is_some_and(|custom| custom.eq_ignore_ascii_case(name))
@@ -589,7 +654,7 @@ impl Decoder {
             return Ok(());
         }
         // An explicitly supplied encoding takes precedence over the declaration.
-        if self.requested.is_some() {
+        if self.detection.requested.is_some() {
             return Ok(());
         }
         let actual = self.encoding.unwrap_or(Encoding::Utf8);
@@ -647,10 +712,194 @@ struct Scan {
     pi: bool,
 }
 
+/// Adapter raw context uses the native Source allocation until conversion or a
+/// non-UTF-8 feed requires the ordinary separate representation.
+#[derive(Debug)]
+pub(crate) struct InputContext {
+    raw: Vec<u8>,
+    start: usize,
+    physical_start: usize,
+    native: bool,
+}
+
+impl InputContext {
+    pub(crate) fn new(allocator: Allocator, decoder: &Decoder, source: &mut Source) -> Self {
+        let native = decoder
+            .encoding
+            .is_none_or(|encoding| encoding == Encoding::Utf8)
+            && decoder.pending.is_empty()
+            && decoder.pending_cursor == 0
+            && decoder.conversion.is_none();
+        source.retain_native_input = native;
+        Self {
+            raw: Vec::new_in(allocator),
+            start: 0,
+            physical_start: 0,
+            native,
+        }
+    }
+
+    pub(crate) fn view<'a>(&'a self, source: &'a Source) -> (&'a [u8], usize) {
+        let bytes = if self.native {
+            &source.text.as_bytes()[self.start - self.physical_start..]
+        } else {
+            &self.raw
+        };
+        (bytes, self.start)
+    }
+
+    /// Publish raw input before decoder errors or callbacks. Native appends also
+    /// supply decoded storage, but detection keeps those bytes hidden by cursor.
+    pub(crate) fn preserve(
+        &mut self,
+        decoder: &mut Decoder,
+        source: &mut Source,
+        input: &[u8],
+        retain_from: usize,
+        minimum: usize,
+    ) -> Result<bool, oriole_storage::AllocError> {
+        let discard = retain_from
+            .saturating_sub(self.start)
+            .min(self.view(source).0.len());
+        self.start += discard;
+        if self.native {
+            let physical = source
+                .text
+                .floor_char_boundary(self.start - self.physical_start);
+            debug_assert!(physical <= source.cursor);
+            source.text.discard_prefix(physical);
+            source.cursor -= physical;
+            self.physical_start += physical;
+            if let Ok(text) = std::str::from_utf8(input) {
+                source.text.try_push_str_with_minimum(text, minimum)?;
+                if decoder.encoding.is_none() {
+                    source.cursor = source.text.len();
+                }
+                return Ok(true);
+            }
+            self.separate(decoder, source, input, minimum)?;
+        } else {
+            self.raw.drain(..discard);
+            if !input.is_empty() && self.raw.capacity() == 0 {
+                self.raw.try_reserve(input.len().max(minimum))?;
+            }
+            try_extend_from_slice(&mut self.raw, input)?;
+        }
+        Ok(false)
+    }
+
+    /// Commit a one-way fallback only after its raw owner and any undecoded
+    /// staging bytes have been allocated. Known UTF-8 Source bytes stay intact.
+    fn separate(
+        &mut self,
+        decoder: &mut Decoder,
+        source: &mut Source,
+        input: &[u8],
+        minimum: usize,
+    ) -> Result<(), oriole_storage::AllocError> {
+        let history = self.view(source).0;
+        let length = history
+            .len()
+            .checked_add(input.len())
+            .ok_or(oriole_storage::AllocError::CapacityOverflow)?;
+        let mut raw = Vec::new_in(decoder.allocator);
+        if length != 0 {
+            raw.try_reserve(length.max(minimum))?;
+        }
+        try_extend_from_slice(&mut raw, history)?;
+        try_extend_from_slice(&mut raw, input)?;
+        if decoder.encoding.is_none() {
+            // Source contains only detection staging: pending must own every
+            // earlier byte before that hidden view is cleared.
+            try_extend_from_slice(&mut decoder.pending, source.text.as_bytes())?;
+            source.text.clear();
+            source.cursor = 0;
+        }
+        self.raw = raw;
+        self.native = false;
+        source.retain_native_input = false;
+        Ok(())
+    }
+
+    pub(crate) fn decode(
+        &mut self,
+        decoder: &mut Decoder,
+        source: &mut Source,
+        final_input: bool,
+        max_token: usize,
+        external_content: bool,
+        declaration_context: DeclarationContext,
+    ) -> Result<(), Error> {
+        debug_assert!(self.native);
+        if decoder.encoding == Some(Encoding::Utf8) {
+            debug_assert!(decoder.pending.is_empty() && decoder.conversion.is_none());
+            return Ok(());
+        }
+        let detected = decoder.detection.detect(
+            source.text.as_bytes(),
+            decoder.allocator,
+            final_input,
+            max_token,
+            external_content,
+            declaration_context,
+        );
+        match detected {
+            Ok(None) => Ok(()),
+            Ok(Some((Encoding::Utf8, skip))) => {
+                decoder.encoding = Some(Encoding::Utf8);
+                source.encoding = Encoding::Utf8;
+                source.raw_index = skip;
+                source.column = usize::from(skip != 0);
+                source.cursor = skip;
+                Ok(())
+            }
+            result => {
+                self.separate(decoder, source, &[], max_token.min(1024))?;
+                let Some((encoding, skip)) = result? else {
+                    unreachable!()
+                };
+                // Reuse the completed detection result. In particular, do not
+                // rescan a declaration after its progress cursor advanced.
+                decoder.encoding = Some(encoding);
+                source.encoding = encoding;
+                source.raw_index = skip;
+                source.column = usize::from(skip != 0);
+                decoder.pending.drain(..skip);
+                decoder.feed(
+                    &[],
+                    final_input,
+                    source,
+                    max_token,
+                    external_content,
+                    declaration_context,
+                )
+            }
+        }
+    }
+
+    pub(crate) fn pending_bom_len(
+        &self,
+        decoder: &Decoder,
+        source: &Source,
+        external_content: bool,
+    ) -> usize {
+        if self.native {
+            decoder.bom_len(source.text.as_bytes(), external_content)
+        } else {
+            decoder.pending_bom_len(external_content)
+        }
+    }
+}
+
+/// Original-input coordinates are bounded by `Parser::input_bytes_remaining`.
+/// Internal entities own a finite UTF-8 buffer and return the referring source's
+/// anchor without adding replacement offsets. Compaction changes buffer offsets,
+/// never the cumulative original-byte index or one-based line number.
 #[derive(Debug)]
 pub(crate) struct Source {
     pub(crate) text: crate::lexical::Buffer,
     cursor: usize,
+    retain_native_input: bool,
     encoding: Encoding,
     raw_index: usize,
     accounted_raw: usize,
@@ -682,6 +931,7 @@ impl Source {
         Self {
             text: crate::lexical::Buffer::new_in(allocator),
             cursor: 0,
+            retain_native_input: false,
             encoding: Encoding::Utf8,
             raw_index: 0,
             accounted_raw: 0,
@@ -721,6 +971,11 @@ impl Source {
     }
     pub(crate) fn remaining(&self) -> &str {
         &self.text[self.cursor..]
+    }
+
+    /// Identify an unanchored UTF-8 token without projecting custom raw widths.
+    pub(crate) fn native_utf8_byte_index(&self) -> Option<usize> {
+        (self.encoding == Encoding::Utf8 && self.anchor.is_none()).then_some(self.raw_index)
     }
 
     #[inline]
@@ -780,12 +1035,18 @@ impl Source {
         Ok(())
     }
 
+    #[inline]
     fn raw_len(&self, offset: usize, count: usize) -> usize {
         if matches!(self.encoding, Encoding::Utf8 | Encoding::Ascii) {
             // Native UTF-8 and ASCII keep one source byte per stored byte.
             debug_assert!(self.remaining().get(offset..offset + count).is_some());
             return count;
         }
+        self.converted_raw_len(offset, count)
+    }
+
+    /// Count original encoded bytes in a converted source range.
+    fn converted_raw_len(&self, offset: usize, count: usize) -> usize {
         if self.encoding == Encoding::MultiByte {
             self.raw_widths[self.cursor + offset..self.cursor + offset + count]
                 .iter()
@@ -978,10 +1239,42 @@ impl Source {
             &mut self.column,
             &mut self.previous_cr,
         );
+        self.finish_consume(count);
+    }
+
+    /// Consume a nonempty native ASCII tag proven to contain no line breaks.
+    /// The caller must complete semantic work and accounting before this mutation.
+    pub(crate) fn consume_ascii_tag(&mut self, count: usize) {
+        debug_assert!(self.native_utf8_byte_index().is_some() && !self.has_conversions());
+        debug_assert!(
+            count > 0
+                && self.remaining()[..count]
+                    .bytes()
+                    .all(|byte| byte.is_ascii() && !matches!(byte, b'\r' | b'\n'))
+        );
+        self.raw_index += self.raw_len(0, count);
+        self.column += count;
+        self.previous_cr = false;
+        self.finish_consume(count);
+    }
+
+    /// Commit native text whose scanner already computed the eager position delta.
+    pub(crate) fn consume_text(&mut self, plan: crate::text::TextPlan) {
+        debug_assert!(self.native_utf8_byte_index().is_some() && !self.has_conversions());
+        self.raw_index += self.raw_len(0, plan.end);
+        plan.advance_position(&mut self.line, &mut self.column, &mut self.previous_cr);
+        self.finish_consume(plan.end);
+    }
+
+    /// Retire consumed input and scanning state after coordinates are committed.
+    fn finish_consume(&mut self, count: usize) {
         self.cursor += count;
         self.scan = Scan::default();
         self.deferred_size = 0;
-        if self.cursor >= 64 * 1024 && self.cursor >= self.text.len() / 2 {
+        if !self.retain_native_input
+            && self.cursor >= 64 * 1024
+            && self.cursor >= self.text.len() / 2
+        {
             self.text.discard_prefix(self.cursor);
             if self.encoding == Encoding::MultiByte {
                 self.raw_widths.drain(..self.cursor);
@@ -1224,10 +1517,27 @@ fn scan_element_tag(
 /// consumption boundaries so a split CRLF remains one line break.
 #[inline(always)]
 fn advance_position(text: &str, line: &mut usize, column: &mut usize, previous_cr: &mut bool) {
-    // Short tokens use one scalar pass instead of searching for line breaks and
-    // separately counting characters in a second pass.
+    // Short tokens count ordinary ASCII words directly, then scan the suffix
+    // once instead of separately searching for breaks and counting characters.
     if text.len() <= 128 {
-        for character in text.chars() {
+        let mut rest = text;
+        while let Some(chunk) = rest.as_bytes().first_chunk::<8>() {
+            let word = u64::from_le_bytes(*chunk);
+            let high = 0x8080_8080_8080_8080;
+            let low = 0x0101_0101_0101_0101;
+            let cr = word ^ 0x0d0d_0d0d_0d0d_0d0d;
+            let lf = word ^ 0x0a0a_0a0a_0a0a_0a0a;
+            // An ASCII word without CR/LF advances exactly eight columns.
+            // A possible special byte leaves the complete suffix to the scalar
+            // path, so word-borrow false positives only stop this shortcut.
+            if (word | (cr.wrapping_sub(low) & !cr) | (lf.wrapping_sub(low) & !lf)) & high != 0 {
+                break;
+            }
+            *column += 8;
+            *previous_cr = false;
+            rest = &rest[8..];
+        }
+        for character in rest.chars() {
             match character {
                 '\r' => {
                     *line += 1;
@@ -1268,6 +1578,407 @@ fn advance_long_position(text: &str, line: &mut usize, column: &mut usize, previ
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn warmed_utf8_feeds_match_buffered_splits_and_errors() {
+        for bytes in [
+            b"".as_slice(),
+            b"plain ASCII\r\n<r/>",
+            b"raw\0\x01\x7f<&",
+            "\n\u{feff}é雪😀<r/>".as_bytes(),
+            b"prefix\xfftail",
+            b"prefix\xf0\x9f",
+        ] {
+            for split in 0..=bytes.len() {
+                for warm in [false, true] {
+                    let make = || {
+                        let mut decoder = Decoder::new(None, Allocator::System).unwrap();
+                        decoder.encoding = Some(Encoding::Utf8);
+                        if warm {
+                            decoder.append_pending(&[0; 64]).unwrap();
+                            decoder.pending.clear();
+                        }
+                        let mut source =
+                            Source::new(Allocator::System, crate::NameRules::default());
+                        source.text.try_push_str("head\r").unwrap();
+                        source.consume(5);
+                        (decoder, source)
+                    };
+                    let (mut direct, mut direct_source) = make();
+                    let (mut buffered, mut buffered_source) = make();
+                    for (part, final_input) in [(&bytes[..split], false), (&bytes[split..], true)] {
+                        // A nonempty pending buffer selects the unchanged path.
+                        buffered.append_pending(part).unwrap();
+                        let expected = buffered.feed(
+                            &[],
+                            final_input,
+                            &mut buffered_source,
+                            64,
+                            false,
+                            DeclarationContext::Document,
+                        );
+                        let actual = direct.feed(
+                            part,
+                            final_input,
+                            &mut direct_source,
+                            64,
+                            false,
+                            DeclarationContext::Document,
+                        );
+                        assert_eq!(actual, expected, "{bytes:?}, split {split}, warm {warm}");
+                        assert_eq!(direct.pending, buffered.pending);
+                        assert_eq!(direct.pending_cursor, buffered.pending_cursor);
+                        assert_eq!(direct.encoding, buffered.encoding);
+                        assert_eq!(direct_source.text.as_str(), buffered_source.text.as_str());
+                        assert_eq!(direct_source.position(0), buffered_source.position(0));
+                        assert_eq!(direct_source.end_position(), buffered_source.end_position());
+                        assert_eq!(direct_source.accounted_raw, buffered_source.accounted_raw);
+                        if actual.is_err() {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn warmed_utf8_source_failure_retains_pending_without_growth() {
+        use oriole_storage::{AllocationTracker, with_tracking};
+
+        for prefix in ["", "old"] {
+            let tracker = AllocationTracker::try_new_in(Allocator::System).unwrap();
+            with_tracking(&tracker, || {
+                let allocator = Allocator::TrackedSystem;
+                let mut decoder = Decoder::new(None, allocator).unwrap();
+                decoder.encoding = Some(Encoding::Utf8);
+                let bytes = [b'x'; 2048];
+                decoder.append_pending(&bytes).unwrap();
+                decoder.pending.clear();
+                let pending_pointer = decoder.pending.as_ptr();
+                let pending_capacity = decoder.pending.capacity();
+                let mut source = Source::new(allocator, crate::NameRules::default());
+                source.text.try_push_str(prefix).unwrap();
+                let position = source.position(0);
+                let live = tracker.live_bytes();
+                // Reject the next backing allocation, including Source's first
+                // block or growth. Restoring pending must not request one.
+                tracker.set_activation_threshold(0);
+                let error = decoder
+                    .feed(
+                        &bytes,
+                        true,
+                        &mut source,
+                        1024,
+                        false,
+                        DeclarationContext::Document,
+                    )
+                    .unwrap_err();
+                assert_eq!(error, Error::bare(ErrorKind::NoMemory, "out of memory"));
+                assert_eq!(decoder.pending.as_slice(), bytes.as_slice());
+                assert_eq!(decoder.pending_cursor, 0);
+                assert_eq!(decoder.pending.as_ptr(), pending_pointer);
+                assert_eq!(decoder.pending.capacity(), pending_capacity);
+                assert_eq!(source.text.as_str(), prefix);
+                assert_eq!(source.position(0), position);
+                assert_eq!(tracker.live_bytes(), live);
+                tracker.set_activation_threshold(u64::MAX);
+                // The retained bytes are available to the ordinary decoder path.
+                decoder
+                    .feed(
+                        &[],
+                        true,
+                        &mut source,
+                        1024,
+                        false,
+                        DeclarationContext::Document,
+                    )
+                    .unwrap();
+                assert!(decoder.pending.is_empty());
+                assert_eq!(source.text.len(), prefix.len() + bytes.len());
+                assert_eq!(
+                    &source.text.as_str()[prefix.len()..],
+                    std::str::from_utf8(&bytes).unwrap()
+                );
+            });
+            assert_eq!(tracker.live_bytes(), 0);
+        }
+    }
+
+    #[test]
+    fn proven_ascii_tag_matches_eager_coordinates_and_compaction() {
+        for tag in ["<r>", "<r/>", "<abcdefgh>", "<p:r/>"] {
+            for prefix in [0, 65_530, 65_533] {
+                for previous_cr in [false, true] {
+                    let make_source = || {
+                        let mut source =
+                            Source::new(Allocator::System, crate::NameRules::default());
+                        source.text.try_push_str(&"x".repeat(prefix)).unwrap();
+                        source.text.try_push_str(tag).unwrap();
+                        source.text.try_push_str("\nTAIL").unwrap();
+                        source.cursor = prefix;
+                        source.raw_index = prefix;
+                        source.line = 7;
+                        source.column = 11;
+                        source.previous_cr = previous_cr;
+                        source.scan.mode = Some(ScanMode::Tag);
+                        source.deferred_size = 12;
+                        source
+                    };
+                    let mut eager = make_source();
+                    let mut proven = make_source();
+                    eager.consume(tag.len());
+                    proven.consume_ascii_tag(tag.len());
+                    assert_eq!(proven.position(0), eager.position(0));
+                    assert_eq!(proven.previous_cr, eager.previous_cr);
+                    assert_eq!(proven.remaining(), eager.remaining());
+                    assert_eq!(proven.cursor, eager.cursor);
+                    assert_eq!(proven.cursor == 0, prefix + tag.len() >= 65_536);
+                    assert!(proven.scan.mode.is_none());
+                    assert_eq!(proven.deferred_size, 0);
+                    // A prior CR must not absorb the LF after an intervening tag.
+                    eager.consume(1);
+                    proven.consume(1);
+                    assert_eq!(proven.position(0), eager.position(0));
+                    assert_eq!(
+                        (proven.line, proven.column, proven.previous_cr),
+                        (8, 0, false)
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn planned_text_matches_eager_consumption_and_compaction() {
+        for text in [
+            "".to_string(),
+            "\n".to_string(),
+            "\nabc\t\n\nend\u{7f}".to_string(),
+            "\nxxxxxx\nxxxxxxxx<tail>\n\n".to_string(),
+            "xxxxxxx\nxxxxxxx\n\nxxxxxx\nxxxxxxxx<tail>".to_string(),
+            format!("a\n{}<tail>", "x".repeat(65_534)),
+            format!("{}<tail>", "\nxxxxxx\nxxxxxxxx".repeat(4096)),
+        ] {
+            for previous_cr in [false, true] {
+                let make_source = || {
+                    let mut source = Source::new(Allocator::System, crate::NameRules::default());
+                    source.text.try_push_str(&text).unwrap();
+                    source.line = 7;
+                    source.column = 11;
+                    source.previous_cr = previous_cr;
+                    source.scan.mode = Some(ScanMode::Tag);
+                    source.deferred_size = 12;
+                    source
+                };
+                let mut original = make_source();
+                let mut planned = make_source();
+                let plan = crate::text::TextPlan::scan(&text).unwrap();
+                original.consume(plan.end);
+                planned.consume_text(plan);
+                assert_eq!(planned.position(0), original.position(0));
+                assert_eq!(planned.previous_cr, original.previous_cr);
+                assert_eq!(planned.remaining(), original.remaining());
+                assert_eq!(planned.cursor, original.cursor);
+                assert!(planned.scan.mode.is_none());
+                assert_eq!(planned.deferred_size, 0);
+                if plan.end == 65_536 {
+                    assert_eq!(planned.cursor, 0);
+                    assert_eq!(planned.remaining(), "<tail>");
+                    let expected = if text.starts_with("a\n") {
+                        (8, 65_534)
+                    } else {
+                        (8199 - usize::from(previous_cr), 8)
+                    };
+                    assert_eq!((planned.line, planned.column), expected);
+                }
+            }
+        }
+
+        // Outer plans keep long noncoalesced lines intact and preserve an
+        // incoming CR, following LF, and the ordinary compaction boundary.
+        for length in [1, 15, 16, 17, 65_535, 65_536, 65_537] {
+            let whitespace: std::string::String = " \t".chars().cycle().take(length).collect();
+            let text = format!("{whitespace}\n<tail>");
+            for previous_cr in [false, true] {
+                let make_source = || {
+                    let mut source = Source::new(Allocator::System, crate::NameRules::default());
+                    source.text.try_push_str(&text).unwrap();
+                    source.line = 7;
+                    source.column = 11;
+                    source.previous_cr = previous_cr;
+                    source.scan.mode = Some(ScanMode::Tag);
+                    source.deferred_size = 12;
+                    source
+                };
+                let mut original = make_source();
+                let mut planned = make_source();
+                let plan = crate::text::TextPlan::scan_outer_whitespace(&text).unwrap();
+                assert_eq!(plan.end, length);
+                original.consume(length);
+                planned.consume_text(plan);
+                assert_eq!(planned.position(0), original.position(0));
+                assert_eq!(planned.previous_cr, original.previous_cr);
+                assert_eq!(planned.remaining(), original.remaining());
+                assert_eq!(planned.cursor, original.cursor);
+                assert!(planned.scan.mode.is_none());
+                assert_eq!(planned.deferred_size, 0);
+                assert_eq!((planned.line, planned.column), (7, 11 + length));
+                original.consume(1);
+                planned.consume(1);
+                assert_eq!(planned.position(0), original.position(0));
+                assert_eq!(
+                    (planned.line, planned.column, planned.previous_cr),
+                    (8, 0, false)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn converted_positions_fit_at_the_source_bound() {
+        let bound = isize::MAX as usize;
+        let text = "é\r\n雪";
+        for (encoding, widths) in [
+            (Encoding::Utf8, [2_u8, 1, 1, 3]),
+            (Encoding::Utf16Le, [2, 2, 2, 2]),
+            (Encoding::Utf16Be, [2, 2, 2, 2]),
+            (Encoding::SingleByte, [1, 1, 1, 1]),
+            (Encoding::MultiByte, [3, 1, 1, 4]),
+        ] {
+            let raw_bytes = widths
+                .iter()
+                .map(|width| usize::from(*width))
+                .sum::<usize>();
+            let mut source = Source::new(Allocator::System, crate::NameRules::default());
+            source.encoding = encoding;
+            source.raw_index = bound - raw_bytes;
+            source.accounted_raw = source.raw_index;
+            source.line = source.raw_index + 1;
+            source.decoded_end = source.position(0);
+            if encoding == Encoding::MultiByte {
+                for (character, width) in text.chars().zip(widths) {
+                    source.push_custom(character, width, None).unwrap();
+                }
+            } else {
+                source.text.try_push_str(text).unwrap();
+            }
+            let mut cursor = source.position_cursor();
+            let mut raw_offset = bound - raw_bytes;
+            for ((offset, character), width) in text.char_indices().zip(widths) {
+                let position =
+                    source.position_from_cursor(&mut cursor, offset, character.len_utf8());
+                assert_eq!(position, source.position_at(offset, character.len_utf8()));
+                assert_eq!(position.byte_index, raw_offset);
+                assert_eq!(position.byte_count, usize::from(width));
+                raw_offset += usize::from(width);
+            }
+            let end = source.position_from_cursor(&mut cursor, text.len(), 0);
+            assert_eq!(end.byte_index, bound);
+            assert_eq!(end.line, bound - raw_bytes + 2);
+            assert_eq!(end.column, 1);
+            if encoding == Encoding::MultiByte {
+                assert_eq!(source.decoded_end, end);
+            }
+            assert_eq!(source.accounting_bytes(text.len()), raw_bytes);
+            source.mark_accounted(raw_bytes);
+            assert_eq!(source.accounted_raw, bound);
+            source.consume(text.len());
+            assert_eq!(source.position(0), end);
+        }
+    }
+
+    #[test]
+    fn compaction_and_entity_anchors_keep_bounded_coordinates() {
+        let bound = isize::MAX as usize;
+        let mut source = Source::new(Allocator::System, crate::NameRules::default());
+        source.text.try_push_str(&"\n".repeat(65_537)).unwrap();
+        source.raw_index = bound - source.text.len();
+        source.accounted_raw = source.raw_index;
+        source.line = source.raw_index + 1;
+        source.consume(65_536);
+        assert_eq!(source.cursor, 0);
+        assert_eq!(source.text.as_str(), "\n");
+        assert_eq!(source.raw_index, bound - 1);
+        source.consume(1);
+        assert_eq!(source.raw_index, bound);
+        assert_eq!(source.line, bound + 1);
+
+        let anchor = source.position(0);
+        let mut entity = Source::entity(
+            String::try_from_str_in("é\nx", Allocator::System).unwrap(),
+            String::try_from_str_in("e", Allocator::System).unwrap(),
+            anchor,
+            0,
+            crate::NameRules::default(),
+        );
+        let mut cursor = entity.position_cursor();
+        assert_eq!(entity.position_at(2, 1), anchor);
+        assert_eq!(entity.position_from_cursor(&mut cursor, 4, 0), anchor);
+        entity.consume(4);
+        assert_eq!(entity.raw_index, 4);
+        assert_eq!(entity.position(0), anchor);
+    }
+
+    #[test]
+    fn short_position_words_match_scalar_characters_and_cr_state() {
+        fn check(text: &str) {
+            for initial_cr in [false, true] {
+                let mut expected = (17, 29, initial_cr);
+                for character in text.chars() {
+                    match character {
+                        '\r' => {
+                            expected.0 += 1;
+                            expected.1 = 0;
+                        }
+                        '\n' => {
+                            if !expected.2 {
+                                expected.0 += 1;
+                            }
+                            expected.1 = 0;
+                        }
+                        _ => expected.1 += 1,
+                    }
+                    expected.2 = character == '\r';
+                }
+                let mut actual = (17, 29, initial_cr);
+                advance_position(text, &mut actual.0, &mut actual.1, &mut actual.2);
+                assert_eq!(actual, expected, "{text:?}, previous CR={initial_cr}");
+            }
+        }
+        for length in [0, 1, 7, 8, 9, 15, 16, 17, 63, 64, 65, 127, 128, 129] {
+            check(&"x".repeat(length));
+            for offset in 0..length {
+                for byte in 0..=127 {
+                    let mut text = vec![b'x'; length];
+                    text[offset] = byte;
+                    check(std::str::from_utf8(&text).unwrap());
+                }
+                for special in ["\r\n", "\n\r", "\r\r", "\n\n", "é", "雪", "😀"] {
+                    check(&format!(
+                        "{}{special}{}",
+                        "x".repeat(offset),
+                        "y".repeat(length - offset)
+                    ));
+                }
+            }
+        }
+        // Every valid Unicode scalar can occur on either side of a word boundary.
+        for character in (0..=0x10ffff).filter_map(char::from_u32) {
+            check(&format!("xxxxxxx{character}xxxxxxxx\r\ntail"));
+        }
+        // Adjacent bytes can carry a subtraction borrow between lanes.
+        for first in 0..=127 {
+            for second in 0..=127 {
+                for offset in 0..8 {
+                    let mut text = *b"abcdefghijklmnop";
+                    text[offset] = first;
+                    text[offset + 1] = second;
+                    check(std::str::from_utf8(&text).unwrap());
+                }
+            }
+        }
+    }
 
     #[test]
     fn monotonic_positions_match_source_coordinates_and_anchors() {

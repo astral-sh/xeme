@@ -208,13 +208,7 @@ impl Allocator {
             return unsafe { self.tracked_malloc(size) };
         }
         // SAFETY: Tracked C blocks always retain their original layout in the header.
-        let old = unsafe {
-            (*pointer
-                .cast::<u8>()
-                .sub(size_of::<Header>())
-                .cast::<Header>())
-            .layout
-        };
+        let old = unsafe { (*Self::header_for(pointer.cast())).layout };
         let Ok(new) = Layout::from_size_align(size, old.align()) else {
             return ptr::null_mut();
         };
@@ -236,13 +230,7 @@ impl Allocator {
             return;
         }
         // SAFETY: The caller supplies a live pointer with the adapter's header.
-        let layout = unsafe {
-            (*pointer
-                .cast::<u8>()
-                .sub(size_of::<Header>())
-                .cast::<Header>())
-            .layout
-        };
+        let layout = unsafe { (*Self::header_for(pointer.cast())).layout };
         // SAFETY: The recorded layout and original allocator match this pointer.
         unsafe {
             self.trackable()
@@ -288,6 +276,23 @@ impl Allocator {
             first.add(first.align_offset(layout.align().max(align_of::<Header>())))
         }
     }
+
+    /// Expose only initialized metadata, after its final write. Payload pointers
+    /// may be reborrowed by containers without retaining access to this prefix.
+    unsafe fn expose_header(header: *mut Header) {
+        // SAFETY: The caller owns this initialized, aligned Header. The temporary
+        // reference narrows the exposed permission to metadata, excluding payload.
+        let _ = unsafe { ptr::from_mut(&mut *header) }.expose_provenance();
+    }
+
+    /// Recover live metadata independently of the caller's payload provenance.
+    unsafe fn header_for(pointer: *mut u8) -> *mut Header {
+        // The live tracked block guarantees an initialized, exposed Header at
+        // this address. Header.original separately retains the backing pointer;
+        // deriving it from the caller's possibly narrowed pointer is insufficient.
+        ptr::with_exposed_provenance_mut(pointer.addr() - size_of::<Header>())
+    }
+
     fn allocate_tracked(self, layout: Layout) -> Result<NonNull<[u8]>, ApiError> {
         let size = Self::total_size(layout)?;
         let tracker = current_tracker();
@@ -298,15 +303,14 @@ impl Allocator {
         // SAFETY: This allocation has exactly the checked header/padding/payload size.
         unsafe {
             let pointer = Self::aligned_pointer(original.as_ptr(), layout);
-            pointer
-                .sub(size_of::<Header>())
-                .cast::<Header>()
-                .write(Header {
-                    original: original.as_ptr(),
-                    offset: pointer.offset_from(original.as_ptr()) as usize,
-                    layout,
-                    tracker,
-                });
+            let header = pointer.sub(size_of::<Header>()).cast::<Header>();
+            header.write(Header {
+                original: original.as_ptr(),
+                offset: pointer.offset_from(original.as_ptr()) as usize,
+                layout,
+                tracker,
+            });
+            Self::expose_header(header);
             Ok(NonNull::slice_from_raw_parts(
                 NonNull::new_unchecked(pointer),
                 layout.size(),
@@ -324,7 +328,7 @@ impl Allocator {
         // SAFETY: All trackable allocations have a live aligned Header. Copy scalar
         // metadata and clone its shared owner before a foreign realloc can move it.
         let (original, old_offset, layout, tracker) = unsafe {
-            let header = &*pointer.as_ptr().sub(size_of::<Header>()).cast::<Header>();
+            let header = &*Self::header_for(pointer.as_ptr());
             (
                 header.original,
                 header.offset,
@@ -337,40 +341,50 @@ impl Allocator {
         let fresh = new_layout.align() < old_layout.align();
         let next = if fresh {
             self.raw_allocate(new_size)?
-        } else if matches!(self, Self::TrackedSystem) {
-            let _guard = CallbackGuard::enter();
-            // SAFETY: The global backing allocation uses recorded raw layouts.
-            let block = unsafe {
-                if new_size >= old_size {
-                    Global.grow(
-                        NonNull::new_unchecked(original),
-                        Self::raw_layout(old_size),
-                        Self::raw_layout(new_size),
-                    )
-                } else {
-                    Global.shrink(
-                        NonNull::new_unchecked(original),
-                        Self::raw_layout(old_size),
-                        Self::raw_layout(new_size),
-                    )
-                }
-            }?;
-            block.cast()
         } else {
-            // SAFETY: Realloc receives the exact original pointer and preserves it on failure.
-            NonNull::new(unsafe { self.realloc(original.cast(), new_size) }.cast::<u8>())
-                .ok_or(ApiError)?
+            let resized = if matches!(self, Self::TrackedSystem) {
+                let _guard = CallbackGuard::enter();
+                // SAFETY: The global backing allocation uses recorded raw layouts.
+                unsafe {
+                    if new_size >= old_size {
+                        Global.grow(
+                            NonNull::new_unchecked(original),
+                            Self::raw_layout(old_size),
+                            Self::raw_layout(new_size),
+                        )
+                    } else {
+                        Global.shrink(
+                            NonNull::new_unchecked(original),
+                            Self::raw_layout(old_size),
+                            Self::raw_layout(new_size),
+                        )
+                    }
+                }
+                .map(|block| block.cast())
+            } else {
+                // SAFETY: Realloc receives the exact original pointer and preserves it on failure.
+                NonNull::new(unsafe { self.realloc(original.cast(), new_size) }.cast::<u8>())
+                    .ok_or(ApiError)
+            };
+            match resized {
+                Ok(next) => next,
+                Err(error) => {
+                    // SAFETY: Failure keeps the old backing block and Header live,
+                    // but a backend reborrow may invalidate the previous exposure.
+                    // Renew it from the cached original pointer, not the payload.
+                    unsafe {
+                        Self::expose_header(original.add(old_offset - size_of::<Header>()).cast());
+                    }
+                    return Err(error);
+                }
+            }
         };
         // SAFETY: A successful realloc retained the entire old header (new alignment
         // is at least the old alignment), or a fresh allocation left the old block
         // untouched. Move the original owning header before overlapping payload copy.
         unsafe {
             let old_header = if fresh {
-                pointer
-                    .as_ptr()
-                    .sub(size_of::<Header>())
-                    .cast::<Header>()
-                    .read()
+                Self::header_for(pointer.as_ptr()).read()
             } else {
                 next.as_ptr()
                     .add(old_offset - size_of::<Header>())
@@ -388,15 +402,14 @@ impl Allocator {
                 destination,
                 old_layout.size().min(new_layout.size()),
             );
-            destination
-                .sub(size_of::<Header>())
-                .cast::<Header>()
-                .write(Header {
-                    original: next.as_ptr(),
-                    offset: destination.offset_from(next.as_ptr()) as usize,
-                    layout: new_layout,
-                    tracker: old_header.tracker,
-                });
+            let header = destination.sub(size_of::<Header>()).cast::<Header>();
+            header.write(Header {
+                original: next.as_ptr(),
+                offset: destination.offset_from(next.as_ptr()) as usize,
+                layout: new_layout,
+                tracker: old_header.tracker,
+            });
+            Self::expose_header(header);
             if fresh {
                 self.raw_deallocate(NonNull::new_unchecked(original), old_size);
             }
@@ -432,13 +445,7 @@ unsafe impl ApiAllocator for Allocator {
             return;
         }
         // SAFETY: Move the sole header owner before releasing its backing memory.
-        let header = unsafe {
-            pointer
-                .as_ptr()
-                .sub(size_of::<Header>())
-                .cast::<Header>()
-                .read()
-        };
+        let header = unsafe { Self::header_for(pointer.as_ptr()).read() };
         let size = Self::total_size(header.layout).expect("previously checked allocation size");
         if let Some(tracker) = &header.tracker {
             tracker.release(size);
@@ -502,6 +509,267 @@ unsafe impl ApiAllocator for Allocator {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::with_tracking;
+
+    // A Rust-backed suite for the failed-realloc regression. Its own allocation
+    // prefix retains Layout; returned pointers keep their original provenance.
+    #[repr(C, align(16))]
+    struct TestBackingHeader {
+        layout: Layout,
+    }
+
+    thread_local! {
+        static TEST_LIVE: Cell<usize> = const { Cell::new(0) };
+        static FAIL_RESIZE: Cell<bool> = const { Cell::new(false) };
+        static PREFIX_WRITES: Cell<usize> = const { Cell::new(0) };
+    }
+
+    fn test_backing_layout(size: usize) -> Option<Layout> {
+        Layout::from_size_align(size.checked_add(size_of::<TestBackingHeader>())?, 16).ok()
+    }
+
+    unsafe extern "C" fn test_malloc(size: usize) -> *mut c_void {
+        assert!(in_allocator_callback());
+        let Some(layout) = test_backing_layout(size) else {
+            return ptr::null_mut();
+        };
+        // SAFETY: The nonzero layout includes this fixture's aligned prefix and
+        // every requested byte. The returned pointer is derived without a borrow.
+        unsafe {
+            let original = std::alloc::alloc(layout);
+            if original.is_null() {
+                return ptr::null_mut();
+            }
+            original
+                .cast::<TestBackingHeader>()
+                .write(TestBackingHeader { layout });
+            TEST_LIVE.set(TEST_LIVE.get() + 1);
+            original.add(size_of::<TestBackingHeader>()).cast()
+        }
+    }
+
+    unsafe extern "C" fn test_realloc(pointer: *mut c_void, size: usize) -> *mut c_void {
+        assert!(in_allocator_callback());
+        if pointer.is_null() {
+            // SAFETY: This preserves realloc(NULL, size).
+            return unsafe { test_malloc(size) };
+        }
+        let Some(new) = test_backing_layout(size) else {
+            return ptr::null_mut();
+        };
+        // SAFETY: This suite receives its original live allocation pointer. The
+        // fixture uses 16-aligned payload layouts, locating only their metadata.
+        unsafe {
+            let original = pointer.cast::<u8>().sub(size_of::<TestBackingHeader>());
+            let old = (*original.cast::<TestBackingHeader>()).layout;
+            if FAIL_RESIZE.replace(false) {
+                let payload = Allocator::aligned_pointer(
+                    pointer.cast(),
+                    Layout::from_size_align(1, 16).unwrap(),
+                );
+                let header = payload.sub(size_of::<Header>()).cast::<Header>();
+                let offset = ptr::addr_of_mut!((*header).offset);
+                // Preserve all bytes but invalidate a child permission for this
+                // metadata field. Never rewrite pointer bytes or touch payload:
+                // the caller's old payload pointer must remain valid on failure.
+                offset.write(offset.read());
+                PREFIX_WRITES.set(PREFIX_WRITES.get() + 1);
+                return ptr::null_mut();
+            }
+            let next = std::alloc::realloc(original, old, new.size());
+            if next.is_null() {
+                return ptr::null_mut();
+            }
+            next.cast::<TestBackingHeader>()
+                .write(TestBackingHeader { layout: new });
+            next.add(size_of::<TestBackingHeader>()).cast()
+        }
+    }
+
+    unsafe extern "C" fn test_free(pointer: *mut c_void) {
+        assert!(in_allocator_callback());
+        if pointer.is_null() {
+            return;
+        }
+        // SAFETY: Free the suite's exact original allocation with its saved layout.
+        unsafe {
+            let original = pointer.cast::<u8>().sub(size_of::<TestBackingHeader>());
+            let layout = (*original.cast::<TestBackingHeader>()).layout;
+            std::alloc::dealloc(original, layout);
+        }
+        TEST_LIVE.set(TEST_LIVE.get() - 1);
+    }
+
+    unsafe fn reborrow_payload(pointer: NonNull<u8>, count: usize) -> NonNull<u8> {
+        // SAFETY: Callers initialize all count bytes of this exclusively owned
+        // payload. The new raw pointer deliberately has only the slice's extent.
+        let bytes = unsafe { std::slice::from_raw_parts_mut(pointer.as_ptr(), count) };
+        NonNull::new(bytes.as_mut_ptr()).unwrap()
+    }
+
+    #[test]
+    fn tracked_box_raw_roundtrip_retains_header() {
+        let allocator = Allocator::TrackedSystem;
+        let owner = allocator_api2::boxed::Box::try_new_in([7_u8; 32], allocator).unwrap();
+        let pointer = allocator_api2::boxed::Box::into_raw(owner);
+        // SAFETY: Reconstruct exactly the owner consumed by into_raw, using its allocator.
+        let owner = unsafe { allocator_api2::boxed::Box::from_raw_in(pointer, allocator) };
+        assert_eq!(*owner, [7_u8; 32]);
+        drop(owner);
+    }
+
+    #[test]
+    fn tracked_box_direct_drop_retains_header_and_tracker() {
+        struct CountDrop<'a>(&'a Cell<usize>, [u8; 32]);
+        impl Drop for CountDrop<'_> {
+            fn drop(&mut self) {
+                self.0.set(self.0.get() + 1);
+            }
+        }
+        let allocator = Allocator::TrackedSystem;
+        let tracker = AllocationTracker::try_new_in(Allocator::System).unwrap();
+        let drops = Cell::new(0);
+        let mut owner = with_tracking(&tracker, || {
+            crate::Box::try_new_in(CountDrop(&drops, [7; 32]), allocator)
+        })
+        .unwrap();
+        owner.1[0] = 9;
+        assert!(tracker.live_bytes() > 0);
+        assert_eq!(tracker.strong_count(), 2);
+        drop(owner);
+        assert_eq!(drops.get(), 1);
+        assert_eq!(tracker.live_bytes(), 0);
+        assert_eq!(tracker.strong_count(), 1);
+    }
+
+    #[test]
+    fn tracked_reborrowed_payload_resizes() {
+        let allocator = Allocator::TrackedSystem;
+        let tracker = AllocationTracker::try_new_in(Allocator::System).unwrap();
+        let initial = Layout::from_size_align(31, 256).unwrap();
+        let grown = Layout::from_size_align(97, 256).unwrap();
+        let shrunk = Layout::from_size_align(13, 256).unwrap();
+        let unaligned = Layout::from_size_align(7, 1).unwrap();
+        let block = with_tracking(&tracker, || allocator.allocate(initial)).unwrap();
+        // SAFETY: Each operation owns the current block, initializes bytes before
+        // borrowing them, and supplies the exact preceding layout. Old pointers
+        // are discarded after successful resize, including same-address results.
+        unsafe {
+            block
+                .cast::<u8>()
+                .as_ptr()
+                .write_bytes(0xA5, initial.size());
+            let pointer = reborrow_payload(block.cast(), initial.size());
+            let block = allocator.grow_zeroed(pointer, initial, grown).unwrap();
+            assert_eq!(block.cast::<u8>().as_ptr().addr() % grown.align(), 0);
+            let bytes = std::slice::from_raw_parts(block.cast::<u8>().as_ptr(), grown.size());
+            assert_eq!(&bytes[..initial.size()], &[0xA5; 31]);
+            assert!(bytes[initial.size()..].iter().all(|byte| *byte == 0));
+            let pointer = reborrow_payload(block.cast(), grown.size());
+            let block = allocator.shrink(pointer, grown, shrunk).unwrap();
+            let pointer = reborrow_payload(block.cast(), shrunk.size());
+            // Decreasing alignment forces the separate-allocation resize path.
+            let block = allocator.shrink(pointer, shrunk, unaligned).unwrap();
+            let pointer = reborrow_payload(block.cast(), unaligned.size());
+            assert_eq!(std::slice::from_raw_parts(pointer.as_ptr(), 7), &[0xA5; 7]);
+            allocator.deallocate(pointer, unaligned);
+
+            let zero = Layout::from_size_align(0, 256).unwrap();
+            let block = with_tracking(&tracker, || allocator.allocate(zero)).unwrap();
+            let pointer = reborrow_payload(block.cast(), 0);
+            assert_eq!(pointer.as_ptr().addr() % zero.align(), 0);
+            allocator.deallocate(pointer, zero);
+        }
+        assert_eq!(tracker.live_bytes(), 0);
+        assert_eq!(tracker.strong_count(), 1);
+    }
+
+    #[test]
+    fn tracked_reborrowed_failed_resize_preserves_owner() {
+        assert_eq!(TEST_LIVE.get(), 0);
+        FAIL_RESIZE.set(false);
+        PREFIX_WRITES.set(0);
+        // SAFETY: The Rust-backed suite preserves allocation layouts and contents
+        // on failure, and returns each original allocation exactly once on free.
+        let allocator = unsafe {
+            Allocator::from_callbacks(MemorySuite {
+                malloc: Some(test_malloc),
+                realloc: Some(test_realloc),
+                free: Some(test_free),
+            })
+            .unwrap()
+        };
+        let tracker = AllocationTracker::try_new_in(Allocator::System).unwrap();
+        let initial = Layout::from_size_align(32, 16).unwrap();
+        let grown = Layout::from_size_align(96, 16).unwrap();
+        let shrunk = Layout::from_size_align(16, 16).unwrap();
+        let block = with_tracking(&tracker, || allocator.allocate(initial)).unwrap();
+        let live = tracker.live_bytes();
+        // SAFETY: Failed resizes preserve the initialized payload and ownership;
+        // the final successful resize replaces its pointer and exact layout.
+        unsafe {
+            block
+                .cast::<u8>()
+                .as_ptr()
+                .write_bytes(0x6B, initial.size());
+            let pointer = reborrow_payload(block.cast(), initial.size());
+            FAIL_RESIZE.set(true);
+            assert!(allocator.grow(pointer, initial, grown).is_err());
+            assert_eq!(
+                std::slice::from_raw_parts(pointer.as_ptr(), 32),
+                &[0x6B; 32]
+            );
+            assert_eq!(tracker.live_bytes(), live);
+            assert_eq!(tracker.strong_count(), 2);
+            FAIL_RESIZE.set(true);
+            assert!(allocator.shrink(pointer, initial, shrunk).is_err());
+            assert_eq!(
+                std::slice::from_raw_parts(pointer.as_ptr(), 32),
+                &[0x6B; 32]
+            );
+            assert_eq!(tracker.live_bytes(), live);
+            assert_eq!(tracker.strong_count(), 2);
+            assert_eq!(PREFIX_WRITES.get(), 2);
+            assert_eq!(TEST_LIVE.get(), 1);
+            let block = allocator.shrink(pointer, initial, shrunk).unwrap();
+            let pointer = reborrow_payload(block.cast(), shrunk.size());
+            assert_eq!(
+                std::slice::from_raw_parts(pointer.as_ptr(), 16),
+                &[0x6B; 16]
+            );
+            allocator.deallocate(pointer, shrunk);
+        }
+        assert_eq!(TEST_LIVE.get(), 0);
+        assert_eq!(tracker.live_bytes(), 0);
+        assert_eq!(tracker.strong_count(), 1);
+    }
+
+    #[test]
+    fn tracked_c_reborrowed_payload_retains_layout() {
+        let allocator = Allocator::TrackedSystem;
+        let tracker = AllocationTracker::try_new_in(Allocator::System).unwrap();
+        // SAFETY: Each live C block is used with the same allocator, all borrowed
+        // bytes are initialized, and successful realloc replaces the old pointer.
+        unsafe {
+            let raw = with_tracking(&tracker, || allocator.tracked_malloc(32)).cast::<u8>();
+            let pointer = NonNull::new(raw).unwrap();
+            pointer.as_ptr().write_bytes(0x9D, 32);
+            let pointer = reborrow_payload(pointer, 32);
+            let raw = allocator
+                .tracked_realloc(pointer.as_ptr().cast(), 64)
+                .cast::<u8>();
+            let pointer = NonNull::new(raw).unwrap();
+            assert_eq!(
+                std::slice::from_raw_parts(pointer.as_ptr(), 32),
+                &[0x9D; 32]
+            );
+            pointer.as_ptr().add(32).write_bytes(0, 32);
+            let pointer = reborrow_payload(pointer, 64);
+            allocator.tracked_free(pointer.as_ptr().cast());
+        }
+        assert_eq!(tracker.live_bytes(), 0);
+        assert_eq!(tracker.strong_count(), 1);
+    }
 
     #[test]
     fn huge_tracked_layouts_fail_without_panicking_or_allocating() {

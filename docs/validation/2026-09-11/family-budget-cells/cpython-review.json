@@ -1,0 +1,90 @@
+{
+  "status": "strict_cpython_saved_outcomes_and_origins_verified",
+  "scope": "Saved-data only for C-only ThinLTO Cell0cfd/c86a artifacts, separate from baselinea55 and normalCell99ec. No builds/parser calls/test reruns.",
+  "cpython": {
+    "shared": {
+      "methods": 802,
+      "failures": [
+        "test.test_pyexpat.BufferTextTest.test1",
+        "test.test_sax.CDATAHandlerTest.test_handlers"
+      ],
+      "expected_failures": 3,
+      "reported_skips": 14,
+      "whole_method_skips": 5,
+      "subtest_skips": 8,
+      "class_setup_skips": 1,
+      "all_method_statuses_equal_corrected_baseline": true
+    },
+    "static": {
+      "methods": 802,
+      "failures": [
+        "test.test_pyexpat.BufferTextTest.test1",
+        "test.test_sax.CDATAHandlerTest.test_handlers"
+      ],
+      "expected_failures": 3,
+      "reported_skips": 14,
+      "whole_method_skips": 5,
+      "subtest_skips": 8,
+      "class_setup_skips": 1,
+      "all_method_statuses_equal_corrected_baseline": true
+    }
+  },
+  "libraries": {
+    "/tmp/oriole-ffi-family-cell-thinlto-study/liboriole_expat.so": "0cfd610876f1bfd26a4d37a7f86adc9961896dfe24177c180ec7d15e0bae04e9",
+    "/tmp/oriole-ffi-family-cell-thinlto-study/liboriole_expat.a": "c86ad85e232afe4f7947053e522dbc8517cdca3694740994c3d1da64540f0610"
+  },
+  "findings": [],
+  "limitations": [
+    "Both unchanged strict suites exit2 with802 methods and exactly the known BufferTextTest.test1 and CDATAHandlerTest.test_handlers failures; this is parity, not a green-suite claim.",
+    "Each linkage verifies four persistent-loader origin records for fresh pyexpat/_elementtree and cET/cET_alias; original tests are unmodified.",
+    "Reported14 skips are5whole-method,8subtest,1class-setup;3expected failures separately retained.",
+    "No new full PBS/sanitizer/fuzz or timing claim."
+  ],
+  "evidence_sha256": {
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/controller.json": "5842bfc309e853e2fb44a1c9bdd578ece54ceab9cb7d60f3642739fe64d1b3bd",
+    "/tmp/oriole-ffi-family-cell-thinlto-study/liboriole_expat.so": "0cfd610876f1bfd26a4d37a7f86adc9961896dfe24177c180ec7d15e0bae04e9",
+    "/tmp/oriole-ffi-family-cell-thinlto-study/liboriole_expat.a": "c86ad85e232afe4f7947053e522dbc8517cdca3694740994c3d1da64540f0610",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/shared.log": "e391000e5325ab80e0c1000dab80b8fe1eef331c89765f0ad31e7711d1c07c38",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/static.log": "766971e774f68370f068ae81efa3fcff767c88bc77dd29c333a4ba017d8b152e",
+    "/tmp/oriole-frame-integrated-gates/cpython-shared/tests.log": "13101e381d6911fd1f606f66a8563c846b5464418fd7161b2758b9603214f110",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/shared/summary.json": "e391000e5325ab80e0c1000dab80b8fe1eef331c89765f0ad31e7711d1c07c38",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/shared/origin.log": "82840a569773384d77aa63512d3ccb315e9eca6489f04acd7ceb1e429a6b8eb0",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/shared/pyexpat.c": "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Modules/pyexpat.c": "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/shared/liboriole_expat.so": "0cfd610876f1bfd26a4d37a7f86adc9961896dfe24177c180ec7d15e0bae04e9",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/shared/sitecustomize.py": "2116f8972094890d54dbe5fd915ed7eb8619f716ce0dd4e7ff63acf15ef4c5f3",
+    "/home/dev-user/code/oss/oriole-ffi-family-cell/tools/cpython/extension_loader.py": "2116f8972094890d54dbe5fd915ed7eb8619f716ce0dd4e7ff63acf15ef4c5f3",
+    "/home/dev-user/code/oss/oriole-ffi-family-cell/tools/cpython/check_extension_imports.py": "473e00f55f8bc92a69645df109438da1cf8cdb3f7e1ce08c8fdf7d055b14c3d5",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/shared/pyexpat.cpython-312-x86_64-linux-gnu.so": "523c4a1a77f6c9e3d80ff795623cd80159f7045b4eafa057d513b940570cd2d5",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/shared/_elementtree.cpython-312-x86_64-linux-gnu.so": "89934f00ee2b4d1cbe9d2cd65bfbd55916001c93ece4040e418b27e75576d3f8",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/shared/tests.log": "d9c1676f07eea52d11e89dbf8946a0f946267c4c87d0a4ad3bd9a89338591357",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/shared/probe.log": "6f9a753360c76511ab383e54c33f56f4be44a0d96088aadeda02c2becd91cd2f",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/shared/pyexpat-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/shared/_elementtree-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/static/summary.json": "766971e774f68370f068ae81efa3fcff767c88bc77dd29c333a4ba017d8b152e",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/static/origin.log": "0c0a24e48dc006359d14a3b2c8788f08719ea0f2a282d57183d810b9b4824be6",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/static/pyexpat.c": "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/static/liboriole_expat.a": "c86ad85e232afe4f7947053e522dbc8517cdca3694740994c3d1da64540f0610",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/static/sitecustomize.py": "2116f8972094890d54dbe5fd915ed7eb8619f716ce0dd4e7ff63acf15ef4c5f3",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/static/pyexpat.cpython-312-x86_64-linux-gnu.so": "93ec97ac3b67a24f78a7d63129102a8311244dd3cabd94b1b93977233227beb6",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/static/_elementtree.cpython-312-x86_64-linux-gnu.so": "53242677cbd694cb9743ecc634a4395ccc65aeaa1873273d0d44ddc6f288a003",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/static/tests.log": "b052eafb0ffcd492a79460bd3a248e36683cb7472521d22360e39430a54b8fbb",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/static/probe.log": "1d3be07062affc6429d999494708fabe51caa020c11d9c948585fcfe97e9b12a",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/static/pyexpat-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/static/_elementtree-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-pbs-version-followup/report.json": "b9b5f710e5595d50f35cf0eda49749dc503e87f590f14c18ca55cf6a42cf2c74",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Lib/test/test_pyexpat.py": "44129616745434f065948aa9cee6a9be4546aa7cea93b952259e140cbc3fe844",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Lib/test/test_xml_etree.py": "2b5af95189ddba78b3d64f4529aa4393ba1a48a07b06dc9c0ea737ee105946eb",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Lib/test/test_xml_etree_c.py": "6e77d3dc478c0357ef9910f3fea602e1b8ed48c7a0b74496801e98936dba7be5",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Lib/test/test_minidom.py": "ce1abf7b06c4c98c535cea962908ddc4362ad2e626c23e9b726bffa5e60bf843",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Lib/test/test_sax.py": "b061db0792bb838bf2568ff145b770db0b89cbf7bfa995664f4d392d5e41ec34",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Lib/test/test_pulldom.py": "4c323df7e8eaf8e5f49f337bda9e23cb69a26e63eab8533a347a9cab2f1c2a1e",
+    "/home/dev-user/code/oss/oriole-ffi-family-cell/tools/cpython/run.py": "c682b96574c4cf34873899514873bf13947449a7adb35de404c8b73e96ec7fda",
+    "/home/dev-user/code/oss/oriole-ffi-family-cell/tools/cpython/text_fragmentation.py": "97b76ae05228951f85fab5887ed9727cb2d218016cd049a898080d2e0d6fc4b4",
+    "/tmp/oriole-frame-integrated-gates/cpython-static/tests.log": "0fb6d8b2ab844ccb6a20111c0ba6ccdd0060ad943eb00c00f03e4054ea680a74",
+    "/tmp/oriole-ffi-family-cell-thinlto-cpython-gates/oriole-ffi-family-cell-thinlto-cpython-gates.py": "0dec41b63d1a93c619242596f44d95c04ba3798ab3714d187b5040ce6111c8c9",
+    "/home/dev-user/code/oss/oriole-frame-integration/tools/cpython/run.py": "c682b96574c4cf34873899514873bf13947449a7adb35de404c8b73e96ec7fda",
+    "/home/dev-user/code/oss/oriole-frame-integration/tools/cpython/extension_loader.py": "2116f8972094890d54dbe5fd915ed7eb8619f716ce0dd4e7ff63acf15ef4c5f3",
+    "/home/dev-user/code/oss/oriole-frame-integration/tools/cpython/check_extension_imports.py": "473e00f55f8bc92a69645df109438da1cf8cdb3f7e1ce08c8fdf7d055b14c3d5"
+  }
+}

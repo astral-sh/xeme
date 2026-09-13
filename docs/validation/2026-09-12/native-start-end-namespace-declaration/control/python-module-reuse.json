@@ -1,0 +1,116 @@
+{
+  "status": "held_saved_module_reuse_plan",
+  "build_record": "/tmp/oriole-core-owned-text-raw-study/python/consumers/build.json",
+  "build_record_sha256": "0b285acd00bc1605e3b4ba726e494dcd165bd446bc02f53a11977ebafe7cb529",
+  "preflight_record": "/tmp/oriole-core-owned-text-raw-study/python/preflight-review.json",
+  "preflight_record_sha256": "f73e9d2f033ba6093a0b371cc0cb8f07da68e0a83774ad1b80c2f77808db4872",
+  "engines": {
+    "control": {
+      "prior_engine": "candidate",
+      "directory": "/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate",
+      "library": "/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate/liboriole_expat.so",
+      "files": {
+        "/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate/liboriole_expat.so": "e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6",
+        "/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate/pyexpat.cpython-312-x86_64-linux-gnu.so": "3a0acbbd7f86d0842d7f02eb0b1c3c5423175f8b13a28ae94a57cb22fb0ae907",
+        "/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate/_elementtree.cpython-312-x86_64-linux-gnu.so": "3e735d36381729cbc4ee3b25575b71b252a5e1ab2c196f153987e9ad33f6db15"
+      },
+      "commands": [
+        {
+          "command": [
+            "cc",
+            "-shared",
+            "-fPIC",
+            "-O2",
+            "-I/home/dev-user/code/oss/oriole-reference-frame/include",
+            "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12",
+            "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/internal",
+            "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/expat",
+            "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules",
+            "/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/pyexpat.c",
+            "/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate/liboriole_expat.so",
+            "-Wl,-rpath,/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate",
+            "-o",
+            "/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate/pyexpat.cpython-312-x86_64-linux-gnu.so"
+          ],
+          "returncode": 0,
+          "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "command": [
+            "cc",
+            "-shared",
+            "-fPIC",
+            "-O2",
+            "-I/home/dev-user/code/oss/oriole-reference-frame/include",
+            "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12",
+            "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/internal",
+            "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/expat",
+            "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules",
+            "/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/_elementtree.c",
+            "/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate/liboriole_expat.so",
+            "-Wl,-rpath,/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate",
+            "-o",
+            "/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate/_elementtree.cpython-312-x86_64-linux-gnu.so"
+          ],
+          "returncode": 0,
+          "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    "expat": {
+      "prior_engine": "expat",
+      "directory": "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat",
+      "library": "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/expat-control-liboriole_expat.so",
+      "files": {
+        "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/expat-control-liboriole_expat.so": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+        "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/pyexpat.cpython-312-x86_64-linux-gnu.so": "2b7b01f5ccf3974bf8465d8c31a1785bbb286baf13ba59b30d33aaa2a20745fa",
+        "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/_elementtree.cpython-312-x86_64-linux-gnu.so": "01d16b511ba56646713c1498b83e9797f4a32acc5ad715ee90e1f07d9193ee2b"
+      },
+      "commands": [
+        {
+          "command": [
+            "cc",
+            "-shared",
+            "-fPIC",
+            "-O2",
+            "-I/home/dev-user/code/oss/oriole-reference-frame/include",
+            "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12",
+            "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/internal",
+            "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/expat",
+            "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules",
+            "/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/pyexpat.c",
+            "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/expat-control-liboriole_expat.so",
+            "-Wl,-rpath,/tmp/oriole-expanded-start-capacity-study/python/consumers/expat",
+            "-o",
+            "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/pyexpat.cpython-312-x86_64-linux-gnu.so"
+          ],
+          "returncode": 0,
+          "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "command": [
+            "cc",
+            "-shared",
+            "-fPIC",
+            "-O2",
+            "-I/home/dev-user/code/oss/oriole-reference-frame/include",
+            "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12",
+            "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/internal",
+            "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/expat",
+            "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules",
+            "/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/_elementtree.c",
+            "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/expat-control-liboriole_expat.so",
+            "-Wl,-rpath,/tmp/oriole-expanded-start-capacity-study/python/consumers/expat",
+            "-o",
+            "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/_elementtree.cpython-312-x86_64-linux-gnu.so"
+          ],
+          "returncode": 0,
+          "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    }
+  },
+  "fresh_candidate_compiles": 2,
+  "reused_modules": 4,
+  "scope": "Saved O2 unmodified CPython3.12.13 modules; no module loaded or copied by preparation."
+}

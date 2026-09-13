@@ -4,6 +4,8 @@ Profile-guided optimization (PGO) lets the compiler use execution counts from a 
 
 This is an opt-in build workflow. It does not replace the default release or python-build-standalone build. Evaluate the resulting library with your application's tests and benchmarks before deployment; the generated replay is a build check, not a compatibility or security certification.
 
+For a PBS consumer, use the [optional PGO bundle command](../../integration/python-build-standalone/#optional-fresh-pgo-bundle). It runs this pipeline with the required PIC/unwind flags, verifies the effective ThinLTO configuration, and packages the exact optimized archive with its provenance and native linker dependencies. The `--native-static-libs` option is used by that Linux bridge to capture native dependencies from the same profile-use compilation; ordinary PGO invocations remain unchanged.
+
 ## Requirements
 
 - Linux or macOS, Python 3.11 or later, and an installed native Rust toolchain.
@@ -21,6 +23,30 @@ uv run --offline tools/pgo/build.py \
 ```
 
 For an already installed alternate toolchain, add `--toolchain stable` or, for local development, `--toolchain ohm`. Production builds should use the project's normal toolchain. The script explicitly builds for that compiler's host target and rejects nonempty compiler-wrapper environment settings. It also explicitly disables wrappers supplied through Cargo configuration, so the recorded compiler is invoked directly. Existing Rust flags are retained using Cargo's encoded flag format, including arguments containing spaces; inherited PGO flags are rejected. Each command has a 30-minute timeout, configurable with `--command-timeout`.
+
+Both phases select `--lib --crate-type cdylib,staticlib` through Cargo's `rustc`
+command. This enables the release profile's ThinLTO step for the C artifacts while
+keeping `rlib` available in the manifest for Rust tests and consumers. Verbose build
+logs retain the actual compiler commands. A matching normal C build uses:
+
+```sh
+cargo rustc --release --locked --target YOUR_HOST_TARGET -p oriole_expat --lib --crate-type cdylib,staticlib
+```
+
+Global Cargo options can be repeated with `--cargo-arg=OPTION`, attaching any option
+value in the same argument. For local Ohm validation with its experimental defaults
+disabled, use `--toolchain ohm --cargo-arg=-Zohm-defaults=no`. These options are
+recorded and passed before Cargo's operation, separately from Rust compiler flags.
+Directory-changing options are rejected. Configuration overrides must use inline
+`--config=KEY=VALUE` syntax; additional configuration files are not accepted.
+Build logging uses one `--verbose`, retaining compiler commands and Cargo's normal
+dependency lint policy. The profile-warning rejection remains enabled.
+
+## Measured configuration
+
+Keep the release profile's ThinLTO and one codegen unit when evaluating PGO. In the [current Linux study](../../benchmarks/results/2026-09-11/pgo-lto/), a fresh profile reduced native parsing time by 24.8% and CPython consumer time by 15.5% on held-out project XML. Fat LTO without PGO helped less; combining fat LTO with its own fresh profile increased native time by 6.8% and CPython consumer time by 2.6% relative to ThinLTO PGO. These results support ThinLTO for these inputs and compiler.
+
+The study's Oriole builds used local Ohm with experimental defaults disabled, an explicit host target, and verified final `cdylib,staticlib` compiler invocations. Deployment builds should use the project's normal toolchain and fresh profiles, then repeat application tests and benchmarks. Changing LTO settings also requires retraining; a ThinLTO profile is not the fat-LTO control.
 
 ## Outputs and provenance
 

@@ -42,8 +42,22 @@ fn parser() -> Parser {
 
 #[test]
 fn custom_names_match_original_byte_sequences() {
-    fn parse_names(document: &[u8], width: usize) -> Result<(), ErrorKind> {
-        let mut parser = parser();
+    fn parse_names(
+        document: &[u8],
+        width: usize,
+        namespace_separator: Option<char>,
+    ) -> Result<(), ErrorKind> {
+        let mut parser = Parser::new(Config {
+            encoding: Some("custom".into()),
+            namespace_separator,
+            ..Config::default()
+        });
+        let expected_name = if namespace_separator.is_some() {
+            "urn|é"
+        } else {
+            "é"
+        };
+        let (mut starts, mut ends) = (0, 0);
         let mut encoding = map();
         encoding[0x84] = 'é' as i32;
         for (index, bytes) in document.chunks(width).enumerate() {
@@ -52,7 +66,17 @@ fn custom_names_match_original_byte_sequences() {
                 .unwrap();
             loop {
                 match parser.next_event() {
-                    Ok(Some(_)) => {}
+                    Ok(Some(event)) => match event.kind {
+                        EventKind::StartElement { name, .. } => {
+                            assert_eq!(name.as_str(), expected_name);
+                            starts += 1;
+                        }
+                        EventKind::EndElement { name } => {
+                            assert_eq!(name.as_str(), expected_name);
+                            ends += 1;
+                        }
+                        _ => {}
+                    },
                     Ok(None) if parser.encoding_conversion().is_some() => {
                         parser.resolve_encoding_conversion('é' as i32).unwrap();
                     }
@@ -62,28 +86,39 @@ fn custom_names_match_original_byte_sequences() {
                             .set_multibyte_encoding_map("custom", encoding)
                             .unwrap();
                     }
-                    Err(error) => return Err(error.kind),
+                    Err(error) => {
+                        assert_eq!((starts, ends), (1, 0));
+                        return Err(error.kind);
+                    }
                 }
             }
         }
+        assert_eq!((starts, ends), (1, 1));
         Ok(())
     }
     for name in [b"\x80\0".as_slice(), b"\x81\0\0", b"\x84", b"\xe9"] {
         for end in [b"\x80\0".as_slice(), b"\x81\0\0", b"\x84", b"\xe9"] {
-            let mut document = b"<".to_vec();
-            document.extend_from_slice(name);
-            document.extend_from_slice(b"></");
-            document.extend_from_slice(end);
-            document.push(b'>');
-            for width in [1, document.len()] {
-                assert_eq!(
-                    parse_names(&document, width),
-                    if name == end {
-                        Ok(())
-                    } else {
-                        Err(ErrorKind::TagMismatch)
-                    }
-                );
+            for (namespace_separator, start, middle) in [
+                (None, b"<".as_slice(), b"></".as_slice()),
+                (Some('|'), b"<p:", b" xmlns:p='urn'></p:"),
+                (Some('|'), b"<", b" xmlns='urn'></"),
+            ] {
+                let mut document = start.to_vec();
+                document.extend_from_slice(name);
+                document.extend_from_slice(middle);
+                document.extend_from_slice(end);
+                document.push(b'>');
+                for width in [1, document.len()] {
+                    assert_eq!(
+                        parse_names(&document, width, namespace_separator),
+                        if name == end {
+                            Ok(())
+                        } else {
+                            Err(ErrorKind::TagMismatch)
+                        },
+                        "{document:?}, width={width}, namespace_separator={namespace_separator:?}"
+                    );
+                }
             }
         }
     }
@@ -348,10 +383,45 @@ fn raw_qnames_are_checked_before_decoded_namespace_expansion() {
         (b"<a\x80: xmlns:a='u'/>", "u|"),
         (b"<a\x80:b:c xmlns:a='u'/>", "u|b:c"),
         (b"<a\x80:b\x80:c xmlns:a='u'/>", "u|b:c"),
+        (b"<\x80:r xmlns='u'/>", "u|r"),
+        (b"<\x80: xmlns='u'/>", "u|"),
+        (b"<root xmlns='u'><\x80:r/></root>", "u|r"),
     ] {
         for width in [1, document.len()] {
             let events = parse_ascii_aliases_with_map(document, width, map(), Some('|')).unwrap();
             assert!(events.iter().any(|event| matches!(&event.kind, EventKind::StartElement { name: actual, .. } if actual == name)));
+        }
+    }
+    // A decoded leading colon has an explicit empty prefix, including on an
+    // attribute. It differs from an ordinary unprefixed attribute.
+    let document = b"<r xmlns='u' \x80:a='v' plain='w'/>";
+    for width in [1, document.len()] {
+        let events = parse_ascii_aliases_with_map(document, width, map(), Some('|')).unwrap();
+        let attributes = events
+            .iter()
+            .find_map(|event| match &event.kind {
+                EventKind::StartElement { attributes, .. } => Some(attributes),
+                _ => None,
+            })
+            .unwrap();
+        assert_eq!(attributes.len(), 2);
+        assert_eq!(attributes[0].name, "u|a");
+        assert_eq!(attributes[0].value, "v");
+        assert_eq!(attributes[1].name, "plain");
+        assert_eq!(attributes[1].value, "w");
+    }
+    for document in [
+        b"<\x80:r/>".as_slice(),
+        b"<r \x80:a='v'/>",
+        b"<r xmlns='u'><\x80:n xmlns=''/></r>",
+    ] {
+        for width in [1, document.len()] {
+            assert_eq!(
+                parse_ascii_aliases_with_map(document, width, map(), Some('|'))
+                    .unwrap_err()
+                    .kind,
+                ErrorKind::UndefinedPrefix
+            );
         }
     }
     for document in [b"<a: xmlns:a='u'/>".as_slice(), b"<a:b:c xmlns:a='u'/>"] {

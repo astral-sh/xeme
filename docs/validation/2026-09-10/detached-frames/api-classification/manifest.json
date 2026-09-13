@@ -1,0 +1,38 @@
+{
+  "ALLOCATION_PROPOSALS.md": {
+    "bytes": 7737,
+    "sha256": "064917db1d15996bb5c6ec1e231b19c404d45f5469f53d964418c31054a799f4"
+  },
+  "POST_DOCTYPE_PLAN.md": {
+    "bytes": 9145,
+    "sha256": "19246ace9056ce891a1e90cd71587306f691a9fd01766d898539ed0e358aea80"
+  },
+  "assess.py": {
+    "bytes": 5378,
+    "sha256": "d6094d9348c9d04b9dd6387740c4f21429f0a7b4c0c285c9834ae828fca95912"
+  },
+  "batik-static-tags.json": {
+    "bytes": 8308,
+    "sha256": "678e4dc6ddbf369f109ef66572e76bd306c7fb387a8ae2da60d31002023be491"
+  },
+  "classification.json": {
+    "bytes": 164696,
+    "sha256": "ad91368992f90e07eae4c6b31d912a267c8ae7c9c346f44cebe88fce54fba20e"
+  },
+  "corpus-coverage.json": {
+    "bytes": 2456,
+    "sha256": "4f9cf927de84cfcab6e01dad327ff92a213ce8c4991b3fafaf25d18474f49275"
+  },
+  "historical-profile-attribution.json": {
+    "bytes": 114106,
+    "sha256": "59bd519cda3e284842b7a4228244d37ff03b9b874f1d4cf146f0fc5601369161"
+  },
+  "identity.json": {
+    "bytes": 8155,
+    "sha256": "adc0728bc38bdb668196e80a086e54334d38f671771755578619f965465545c0"
+  },
+  "original-test-bodies.json": {
+    "bytes": 94396,
+    "sha256": "e7893c326bb57ff023bb45f86d58e9c160208f118b1abc387f4d4e44fcb3c4dd"
+  }
+}

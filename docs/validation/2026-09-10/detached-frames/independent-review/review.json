@@ -1,0 +1,287 @@
+{
+  "status": "passed",
+  "findings": [],
+  "scope": "Independent source/documentation and saved-data package audit only; no parser runs, builds, timings, repository edits or live GitHub query. Saved CI snapshot checked against exact heads.",
+  "base_commit": "5bc806e5fc2a545f22c75f2a1bcbef45cfa3632b",
+  "readme_invariants": {
+    "headings": [
+      "# Oriole",
+      "## Highlights",
+      "## Installation",
+      "## Getting started",
+      "## License"
+    ],
+    "warning_and_intro_exact": true,
+    "installation_through_license_exact": true,
+    "license_verbatim": true
+  },
+  "relative_links_checked": 58,
+  "outer_index_entries_checked": 30,
+  "ci_snapshot_successes": 36,
+  "main_archive": {
+    "sha256": "9da01c97f4d273e3f571687a03859707419e797bc2752b6727fb652e8d9e4f5e",
+    "members": 2357,
+    "bytes": 10786733,
+    "uncompressed_bytes": 88773781,
+    "excluded_binary_hashes_verified": 50,
+    "all_member_and_live_origin_hashes_verified": true,
+    "nested_archives_checked": 16
+  },
+  "atomic_archive_members_verified": 1967,
+  "api_classification": {
+    "total": 4740,
+    "passed": 4347,
+    "failed": 393,
+    "categories": {
+      "expects_allocation_during_empty_preinit_parsebuffer": 12,
+      "allocation_retry_ceiling": 298,
+      "expects_at_least_one_reallocation": 44,
+      "fixed_injection_budget_fails_during_child_creation": 12,
+      "distinctive_implementation_version_string": 12,
+      "absolute_input_cap": 2,
+      "absolute_buffer_cap": 12,
+      "buffer_growth_cost": 1
+    }
+  },
+  "workspace": {
+    "tests": 392,
+    "executables": 33,
+    "fmt_clippy": "passed",
+    "earlier_grammar_tests": 377,
+    "earlier_start_tests": 386
+  },
+  "native_display_table": [
+    {
+      "project": "vulkan",
+      "candidate_ms": 70.56884500000001,
+      "expat_ms": 29.019099999999998,
+      "paired_median_ratio": 2.432904018387889
+    },
+    {
+      "project": "wayland",
+      "candidate_ms": 1.648234,
+      "expat_ms": 1.0810644999999999,
+      "paired_median_ratio": 1.52059798467159
+    },
+    {
+      "project": "maven",
+      "candidate_ms": 1.2115725,
+      "expat_ms": 0.43889,
+      "paired_median_ratio": 2.7470445024455508
+    },
+    {
+      "project": "batik",
+      "candidate_ms": 0.146649,
+      "expat_ms": 0.134702,
+      "paired_median_ratio": 1.0935954922718296
+    },
+    {
+      "project": "gtk",
+      "candidate_ms": 0.5236435,
+      "expat_ms": 0.212807,
+      "paired_median_ratio": 2.461010258592162
+    },
+    {
+      "project": "docbook",
+      "candidate_ms": 0.352583,
+      "expat_ms": 0.18659399999999998,
+      "paired_median_ratio": 1.8960991922789934
+    }
+  ],
+  "native_aggregates": {
+    "real": {
+      "candidate_over_published": {
+        "geomean": 0.8168500621958965,
+        "below_one": 24,
+        "conditions": 24
+      },
+      "candidate_over_expat": {
+        "geomean": 2.1321801173244714,
+        "below_one": 0,
+        "conditions": 24
+      },
+      "published_over_expat": {
+        "geomean": 2.611812292215266,
+        "below_one": 0,
+        "conditions": 24
+      }
+    },
+    "namespaces-off": {
+      "candidate_over_published": {
+        "geomean": 0.781073499621435,
+        "below_one": 12,
+        "conditions": 12
+      },
+      "candidate_over_expat": {
+        "geomean": 1.9977468421290647,
+        "below_one": 0,
+        "conditions": 12
+      },
+      "published_over_expat": {
+        "geomean": 2.5613763725688545,
+        "below_one": 0,
+        "conditions": 12
+      }
+    },
+    "namespaces-on": {
+      "candidate_over_published": {
+        "geomean": 0.8542653469012006,
+        "below_one": 12,
+        "conditions": 12
+      },
+      "candidate_over_expat": {
+        "geomean": 2.275659736680535,
+        "below_one": 0,
+        "conditions": 12
+      },
+      "published_over_expat": {
+        "geomean": 2.6632413427493593,
+        "below_one": 0,
+        "conditions": 12
+      }
+    },
+    "generated": {
+      "candidate_over_published": {
+        "geomean": 0.9102877085480686,
+        "below_one": 2,
+        "conditions": 4
+      },
+      "candidate_over_expat": {
+        "geomean": 5.467714568442824,
+        "below_one": 0,
+        "conditions": 4
+      },
+      "published_over_expat": {
+        "geomean": 5.989308286400965,
+        "below_one": 0,
+        "conditions": 4
+      }
+    }
+  },
+  "python_aggregates": {
+    "all": {
+      "candidate_over_published": {
+        "geomean": 0.9176098761260817,
+        "below_one": 24,
+        "conditions": 24
+      },
+      "candidate_over_expat": {
+        "geomean": 1.4777749091593189,
+        "below_one": 2,
+        "conditions": 24
+      },
+      "published_over_expat": {
+        "geomean": 1.6087669060034806,
+        "below_one": 0,
+        "conditions": 24
+      }
+    },
+    "elementtree": {
+      "candidate_over_published": {
+        "geomean": 0.9040332687845595,
+        "below_one": 12,
+        "conditions": 12
+      },
+      "candidate_over_expat": {
+        "geomean": 1.6157677375065165,
+        "below_one": 0,
+        "conditions": 12
+      },
+      "published_over_expat": {
+        "geomean": 1.7811433769771206,
+        "below_one": 0,
+        "conditions": 12
+      }
+    },
+    "pyexpat-events": {
+      "candidate_over_published": {
+        "geomean": 0.9313903744893952,
+        "below_one": 12,
+        "conditions": 12
+      },
+      "candidate_over_expat": {
+        "geomean": 1.3515672032856303,
+        "below_one": 2,
+        "conditions": 12
+      },
+      "published_over_expat": {
+        "geomean": 1.4530727797132623,
+        "below_one": 0,
+        "conditions": 12
+      }
+    }
+  },
+  "reviewed_interpretation": [
+    "18.3% native and8.2% Python reductions are geometric aggregates of paired condition medians versus fresh4b, not elapsed totals or attribution to one frame layer. Every real condition improves, both generated rare-declaration regressions remain explicit.",
+    "No broad faster-than-Expat claim: native0/24 wins, Python2/24 Wayland pyexpat wins; overall2.132/1.478 slower. Normal builds remain separate from prior PGO and full applications.",
+    "Measured/behavior-tested shared9277 and static773d identities remain explicit. Assembled5af shared code/data is metadata-equivalent except build ID and18 panic lines. Static303988 has build provenance only; shared section comparison is not claimed for static archive.",
+    "Original393 API failures and both CPython grouping failures remain failures. Exact resource bounds/ceilings, separate semantic checks, fresh-import coverage and C-only sanitizer scope are retained.",
+    "Saved earlier Rust fuzz/PBS results apply to4b, not the new runtime. Initial author-test/lint/controller/LSan failures and stale-build/objcopy incidents are disclosed without relabeling old binaries.",
+    "The archived Python method label remains stale but exact hashes and independent audit identify9277; final documentation explicitly resolves it. Compiler-equality wording is now correctly limited to the Oriole baseline/candidate."
+  ],
+  "limits": [
+    "This audit reuses prior full raw benchmark/behavior/source reviews, rehashes their packaged copies, and independently reconstructs displayed tables and aggregates. It does not rerun their parser workloads.",
+    "14 CPython reported skips comprise5 whole methods,8 subtests and1 class setup, as retained behavior review details; they are not14 skipped test methods.",
+    "Saved malformed matching streams and callback-time return values have the retention limits stated in behavior-review.json. No exact full Expat conformance claim follows from the comparison with the preceding Oriole source.",
+    "Shared-host variability, parser/callback consumer scope, normalized text and unloaded Batik external DTD remain material benchmark limits.",
+    "files.json covers the30 files present at this review. Parent may add this review/generator and regenerate that outer index; archive hash is unchanged."
+  ],
+  "artifacts_sha256": {
+    "/home/dev-user/code/oss/oriole-frame-evidence/README.md": "45dc4a990a938619825d0bc8f440bad02ce788332bbee1a29a65f4d5cb60c324",
+    "/home/dev-user/code/oss/oriole-frame-evidence/benchmarks/README.md": "834974cb6ed66627adb60f85194e08034abff22e225c8c0c38b9131c01dda8e3",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/review.md": "f976ee216a3875e7de833387b790a39b1f7ba819aa6c66e21b9a80d9f6b25dbf",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/compatibility.md": "47d45efe6fc7013b85239b03bdb204a3113eac22a4e9e1c9e467b015477a2a49",
+    "/home/dev-user/code/oss/oriole-frame-evidence/benchmarks/results/2026-09-10/detached-frames/README.md": "4ab241ce08c01a825fc3f96dfc38e09b5fd3e1bc3791460ee5d3f094a2942fa6",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/README.md": "6cf4b8aee3f61c6f6f2b5ac78e3748cca959c9661d82551e5c9b531a8250b013",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/files.json": "6243abd2c88cc9cd8cc1f8a9e6404ebf214163cfc7f46d385f2bcf2ec9953175",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/api-classification/ALLOCATION_PROPOSALS.md": "064917db1d15996bb5c6ec1e231b19c404d45f5469f53d964418c31054a799f4",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/api-classification/POST_DOCTYPE_PLAN.md": "19246ace9056ce891a1e90cd71587306f691a9fd01766d898539ed0e358aea80",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/api-classification/assess.py": "d6094d9348c9d04b9dd6387740c4f21429f0a7b4c0c285c9834ae828fca95912",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/api-classification/batik-static-tags.json": "678e4dc6ddbf369f109ef66572e76bd306c7fb387a8ae2da60d31002023be491",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/api-classification/classification.json": "ad91368992f90e07eae4c6b31d912a267c8ae7c9c346f44cebe88fce54fba20e",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/api-classification/corpus-coverage.json": "4f9cf927de84cfcab6e01dad327ff92a213ce8c4991b3fafaf25d18474f49275",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/api-classification/historical-profile-attribution.json": "59bd519cda3e284842b7a4228244d37ff03b9b874f1d4cf146f0fc5601369161",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/api-classification/identity.json": "adc0728bc38bdb668196e80a086e54334d38f671771755578619f965465545c0",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/api-classification/manifest.json": "5df8c5ff57c4132258272527ccc4036f5eec05481613ad7290a9daa43bc396cb",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/api-classification/original-test-bodies.json": "e7893c326bb57ff023bb45f86d58e9c160208f118b1abc387f4d4e44fcb3c4dd",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/archive-members.json": "09d2c9563efb96434a2aff1a9d3ba525d58a2793b70435e20104abed35ed99d2",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/behavior-review.json": "e6777f520cdf2bbca2fcf547ded6813fbe44253f7d38b5150c0c0460ff4dff85",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/build-equivalence-review.json": "05fd213cced1ccdba66400aaf0488eec9a156356347c50444ff62bb12dec68bd",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/ci.json": "e4adefc624cd3acb297fd38e183a85e0730dbda82b2829b9cf5b85ecdd786c32",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/cleanup-review.json": "3e3483426c3af74a8318f53dcc3cc121e54a01dfc573caabf8ba230a74cbe84b",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/evidence.tar.gz": "9da01c97f4d273e3f571687a03859707419e797bc2752b6727fb652e8d9e4f5e",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/measured-source.json": "e05d0c4f8de7978968e4b4dafc1ca747029f284fd4ac238064050b1ee5eec38c",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/native-review.json": "863e4f00049fbccbfde1858d3ea114af4a332df8bc9243bc346f34461560a087",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/python-review.json": "8fc9d02096d64e50d909d475fac818ca8c98ffcf7848009c4c340df1bb2808ad",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/source.json": "6f6bfb5c076cbf34a18b742783591612fafa8f660efbfb9b8e989461fdeb4805",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/summary.json": "f32f06c7eefe58687616992f8399e1eb72e8275665caffdccc05cd406044d81c",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/unselected-accounting/README.md": "b07a91cdb504590b0459d99d589862702e589fdd75cb84f242c0875eeb4809ba",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/unselected-accounting/evidence.tar.gz": "079fe9c2591a198100392f47643bf38becc67d067222a5406af679427f36a396",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/unselected-accounting/excluded-binaries-and-cache.json": "140eab04158771db500ca4c2e09517d9dbfd11f734915aff130f9a79cabc5641",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/unselected-accounting/manifest.json": "10937f09a5f980e350a5f181fc7ef2bb6125f6416ce257662085ed8b0748dc06",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/unselected-accounting/members.json": "2f77d72e76a292cca96715295fc660b20ef13342c94cbf22ab0605d492d6e64c",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/unselected-accounting/readback.json": "e56b7cf6cb7b31bedfd328b99aa6755445ab5e8bd301d1d7479e41256820a30e",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/unselected-accounting/readback.py": "6559d78f5bb6d65889baf0df4b8176c254e834b9a992f68425096c92939496d2",
+    "/home/dev-user/code/oss/oriole-frame-evidence/docs/validation/2026-09-10/detached-frames/unselected-accounting/summary.json": "4e214103905cd52c1e82308c01eda40a086a5ae3380b0eb931c92f2c1eb1d5ed",
+    "/tmp/oriole-text-frames-pr/checks.json": "3d3d7f611002a481fd28ecd0398b1eb6ac2538c7af5cdaf594f3b259399bd1a3",
+    "/tmp/oriole-text-frames-pr/test.log": "c66adc4110055d72ac8d0a8ce2d1af49fae35c9e204a0c3327f3ab81b0bb1f1c",
+    "/tmp/oriole-frame-integrated-gates/upstream-api/results.json": "dcda1affc7cfa69d1e77dd60b7c76360e572e2a7767d6d4ded084ab1575647d5",
+    "/tmp/oriole-final-allocation-assessment/historical-profile-attribution.json": "59bd519cda3e284842b7a4228244d37ff03b9b874f1d4cf146f0fc5601369161",
+    "/tmp/oriole-final-allocation-assessment/assess.py": "d6094d9348c9d04b9dd6387740c4f21429f0a7b4c0c285c9834ae828fca95912",
+    "/tmp/oriole-final-allocation-assessment/POST_DOCTYPE_PLAN.md": "19246ace9056ce891a1e90cd71587306f691a9fd01766d898539ed0e358aea80",
+    "/tmp/oriole-final-allocation-assessment/manifest.json": "5df8c5ff57c4132258272527ccc4036f5eec05481613ad7290a9daa43bc396cb",
+    "/tmp/oriole-final-allocation-assessment/batik-static-tags.json": "678e4dc6ddbf369f109ef66572e76bd306c7fb387a8ae2da60d31002023be491",
+    "/tmp/oriole-final-allocation-assessment/identity.json": "adc0728bc38bdb668196e80a086e54334d38f671771755578619f965465545c0",
+    "/tmp/oriole-final-allocation-assessment/original-test-bodies.json": "e7893c326bb57ff023bb45f86d58e9c160208f118b1abc387f4d4e44fcb3c4dd",
+    "/tmp/oriole-final-allocation-assessment/ALLOCATION_PROPOSALS.md": "064917db1d15996bb5c6ec1e231b19c404d45f5469f53d964418c31054a799f4",
+    "/tmp/oriole-final-allocation-assessment/classification.json": "ad91368992f90e07eae4c6b31d912a267c8ae7c9c346f44cebe88fce54fba20e",
+    "/tmp/oriole-final-allocation-assessment/corpus-coverage.json": "4f9cf927de84cfcab6e01dad327ff92a213ce8c4991b3fafaf25d18474f49275",
+    "/tmp/oriole-integrated-native-study/native-screen/results.json": "f62859cab8c1a0e2745d2424fd555d0d641890160d22dfeba9a61251824babb3",
+    "/tmp/oriole-integrated-consumer-study/screen/results.json": "45829a2aa69eeb162afcc133a5e17538f398a91dcdf9b049c7d97124819d8a3e",
+    "/home/dev-user/code/oss/oriole-frame-evidence/benchmarks/results/2026-09-10/detached-frames/native-summary.json": "4c08d9fe30983f65d7bf700851d13b40c071dfdf091b5a0c95d50ec452e90bfd",
+    "/home/dev-user/code/oss/oriole-frame-evidence/benchmarks/results/2026-09-10/detached-frames/python-summary.json": "d37074c138849a63718a64d1792f68d1c2056b458d433d824a2d4acd6640b2a8",
+    "/tmp/oriole-integrated-native-study/summary.json": "4c08d9fe30983f65d7bf700851d13b40c071dfdf091b5a0c95d50ec452e90bfd",
+    "/tmp/oriole-integrated-consumer-study/summary.json": "d37074c138849a63718a64d1792f68d1c2056b458d433d824a2d4acd6640b2a8",
+    "/tmp/oriole-frame-docs-independent-review/readback.json": "8b0caab67843d3b338297e647468a8dc97cbd4e6784b1def79dc39a4dc15b82a"
+  }
+}

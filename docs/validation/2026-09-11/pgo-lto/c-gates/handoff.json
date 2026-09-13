@@ -1,0 +1,13 @@
+{
+  "status": "sealed",
+  "archive": {
+    "file": "evidence.tar.gz",
+    "sha256": "a67f40ec001486921627ae7142ba342448990d72509ccf9c62a6e8bd4af85168",
+    "bytes": 1602319,
+    "members": 233
+  },
+  "report_sha256": "58f18790f976d1a8e2c79148791ff6e01a0ab155adf5cb319cc8194bb11a33c1",
+  "readback_sha256": "010e6f2793a7a91d2ba6822ef864ca874da54e8e6a45c7d9865d87e2b268f856",
+  "readme_sha256": "15ce4c071079073ea11a12478cb8af32e3f469b031f068409bea4555fd05e966",
+  "raw_inventory": "evidence.tar.gz:packaging/manifest.json"
+}

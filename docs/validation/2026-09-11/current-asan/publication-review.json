@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "role": "Independent agent review of final publication text and compact archive packaging; no parser, compiler, benchmark or producer execution.",
+  "source_commit": "c1776c922b023a3558badfefa697cd11b0d37d8e",
+  "reviewed_text_sha256": {
+    "README.md": "00971875315dd85623bf0446eec7baca46bb87a611e86c35eaed41c0d280ebb0",
+    "docs/review.md": "55564d350c445cdfb4e8d4d6556e00b22a5e4fcd373f5e818886a1a1bc5621de",
+    "docs/validation/2026-09-11/current-asan/README.md": "326522e3331dfcae2c243fb9932f0acf063189648045f88e17bf04e717e23d1c"
+  },
+  "prior_draft_prose_review_sha256": "453058b3b728f2e94261b6545adaa4be239590b03955f46afe2938ff889ad6b5",
+  "structure_review_sha256": "3e7f96d572afda9325c2003811495fd9a64f9c09ea9f6d03dc94f61ff3164e5c",
+  "final_campaign_review_sha256": "2c8ee226e4aa494c25a751ed9e184de281600eed8bc3d506601bd4fb5e3e7899",
+  "outer_archive_review_sha256": "4ec9eb2c7d573bf7bb8676f05d72376f8a3261fb57c3ce54dd20ca4f87f8d6df",
+  "archive_counts": {
+    "producer-handoff.tar.gz": 12,
+    "independent-review.tar.gz": 7,
+    "draft-prose-review.tar.gz": 10,
+    "draft-structure-review.tar.gz": 12
+  },
+  "conclusions": [
+    "Final numerical/build/protocol/source/limitation paragraphs are byte-exact to the independently reviewed draft; new final-review claims match the sealed 2c8ee226 report.",
+    "All 12 producer files, seven final-review files and earlier draft review snapshots are retained unchanged in the four outer archives. Compact report/readiness/final-review copies match sealed originals; the independent outer review verifies member hashes, origins and original preservation.",
+    "Packaging corrections are explicitly recorded as generated-copy filesystem/permission failures, separate from the three earlier preparation failures. No original evidence or target results were changed or rerun.",
+    "Top README and docs/review are unchanged since the draft review; heading/warning/license and docs-only/no-runtime-or-CI change checks remain valid. All final local links resolve except the intentionally pending files.json."
+  ],
+  "pending_final_index": "Root must create files.json after review artifacts are attached. This review does not certify that future index or subsequent edits. The publication-review.json link is satisfied by this receipt itself.",
+  "limitations": [
+    "Full raw campaign/corpus/source-build verification is reused from the sealed independent final review; this final pass checks compact publication packaging and wording.",
+    "No PBS outcome, new compatibility, speed, LSan/UBSan or exhaustive safety claim is added."
+  ],
+  "details_sha256": "8d20669739c526358fc95b79b2c7ddbd394e30c24676ee3fbca757d5405ce4e3"
+}

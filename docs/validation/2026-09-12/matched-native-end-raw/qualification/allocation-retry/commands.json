@@ -1,0 +1,59 @@
+{
+  "steps": [
+    {
+      "label": "compile",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-gcc-13",
+        "-O1",
+        "-DXML_TESTING",
+        "-D_GNU_SOURCE",
+        "-I/tmp/oriole-matched-native-end-raw-allocation-retry/adapted",
+        "-I/tmp/oriole-matched-native-end-raw-allocation-retry/lib",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/acc_tests.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/alloc_tests.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/basic_tests.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/bridge.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/chardata.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/common.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/dummy.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/handlers.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/memcheck.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/minicheck.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/misc_tests.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/ns_tests.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/nsalloc_tests.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/runtests.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/adapted/structdata.c",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/liboriole_expat.so",
+        "-Wl,-rpath,/tmp/oriole-matched-native-end-raw-allocation-retry",
+        "-lm",
+        "-ldl",
+        "-o",
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/run01/runtests"
+      ],
+      "timeout_seconds": 120,
+      "log": "build.log"
+    },
+    {
+      "label": "diagnostic",
+      "argv": [
+        "/tmp/oriole-matched-native-end-raw-allocation-retry/run01/runtests",
+        "--verbose"
+      ],
+      "timeout_seconds": 1200,
+      "log": "tests.log"
+    }
+  ],
+  "environment": {
+    "PATH": "/usr/bin:/bin",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "TMPDIR": "/tmp",
+    "ORIOLE_CHUNK_MASK": "63",
+    "ORIOLE_DEFERRAL_MASK": "3",
+    "ORIOLE_TEST_TIMEOUT": "15",
+    "ORIOLE_MEMORY_MIB": "4096",
+    "ORIOLE_RSS_MIB": "3072",
+    "ORIOLE_SELECTED_TESTS": "test_alloc_attribute_enum_value,test_alloc_dtd_default_handling,test_alloc_ext_entity_set_encoding,test_alloc_external_entity,test_alloc_internal_entity,test_alloc_long_attr_default_with_char_ref,test_alloc_long_attr_value,test_alloc_long_base,test_alloc_long_entity_value,test_alloc_long_notation,test_alloc_long_public_id,test_alloc_nested_groups,test_alloc_notation,test_alloc_parameter_entity,test_alloc_public_entity_value,test_alloc_public_notation,test_alloc_run_external_parser,test_alloc_set_foreign_dtd,test_alloc_system_notation,test_nsalloc_long_context,test_nsalloc_long_default_in_ext,test_nsalloc_long_element,test_nsalloc_long_systemid_in_ext,test_nsalloc_prefixed_element,test_nsalloc_realloc_long_ge_name"
+  }
+}

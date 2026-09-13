@@ -72,6 +72,7 @@ class PgoTests(unittest.TestCase):
             run = build.Run(root / "run", source, 1)
             args = argparse.Namespace(
                 toolchain="installed",
+                cargo_arg=["-Zohm-defaults=no", "--config=net.offline=true"],
                 llvm_profdata=Path(sys.executable),
                 output=root / "output",
             )
@@ -92,6 +93,19 @@ class PgoTests(unittest.TestCase):
                 with self.assertRaisesRegex(build.BuildError, "same LLVM"):
                     build.execute(args, run)
                 self.assertEqual(commands.call_count, 4)
+                # Cargo options belong after toolchain selection and before
+                # Cargo's operation; they must never reach rustc or profdata.
+                self.assertEqual(
+                    commands.call_args_list[1].args[1][1:],
+                    ["+installed", *args.cargo_arg, "-Vv"],
+                )
+                for index in (0, 2, 3):
+                    self.assertFalse(
+                        any(
+                            value in commands.call_args_list[index].args[1]
+                            for value in args.cargo_arg
+                        )
+                    )
                 for call in commands.call_args_list:
                     self.assertEqual(call.args[2]["RUSTC_WRAPPER"], "")
                     self.assertEqual(call.args[2]["RUSTC_WORKSPACE_WRAPPER"], "")
@@ -100,6 +114,29 @@ class PgoTests(unittest.TestCase):
                     build.digest(config),
                 )
                 self.assertFalse((root / "output").exists())
+
+    def test_cargo_options_reject_subcommands_and_argument_terminators(self):
+        for value in (
+            "build",
+            "rustc",
+            "--",
+            "-",
+            "-Z",
+            "-C",
+            "-C/other/workspace",
+            "-vC/other/workspace",
+            "--config",
+            "--config=/untracked/config.toml",
+            "--config=/untracked/name=value.toml",
+            "--config=include='/untracked/config.toml'",
+        ):
+            with self.subTest(value=value):
+                with self.assertRaises(argparse.ArgumentTypeError):
+                    build.cargo_option(value)
+        self.assertEqual(
+            build.cargo_option("--config=build.build-dir='/path with spaces'"),
+            "--config=build.build-dir='/path with spaces'",
+        )
 
     def test_encoded_flags_preserve_spaces_and_reject_stale_profiles(self):
         self.assertEqual(
@@ -136,6 +173,22 @@ class PgoTests(unittest.TestCase):
         ):
             with self.assertRaises(build.BuildError):
                 build.check_profile_output(text)
+
+    def test_native_static_libraries_require_linux_linker_names(self):
+        self.assertEqual(
+            build.native_static_libraries(
+                "note: native-static-libs: -lgcc_s -lutil -lrt -lpthread -lm -ldl -lc\n"
+            ),
+            ["-lgcc_s", "-lutil", "-lrt", "-lpthread", "-lm", "-ldl", "-lc"],
+        )
+        for text in (
+            "no linker metadata",
+            "native-static-libs:\n",
+            "native-static-libs: -lc -Wl,custom",
+            "native-static-libs: /untracked/lib.a",
+        ):
+            with self.subTest(text=text), self.assertRaises(build.BuildError):
+                build.native_static_libraries(text)
 
     def test_output_lock_is_exclusive_and_preserves_existing_owner(self):
         with tempfile.TemporaryDirectory() as directory:

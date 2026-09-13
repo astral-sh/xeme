@@ -1,0 +1,14 @@
+{
+  "status": "rejected",
+  "native_review_sha256": "e26336b4bf7f52136335a4eb5541569b007cac9b4c051746e77ff09728960aed",
+  "python_review_sha256": "80b4af475a7907284bf69f220d3bc8fe122adad23b93a86fba8ac9121f243850",
+  "native_real_over_control": 0.9779783207135778,
+  "native_generated_over_control": 1.0234063972867435,
+  "python_all_over_control": 1.004266010906116,
+  "python_elementtree_over_control": 0.9990431216101138,
+  "python_pyexpat_over_control": 1.0095162049019935,
+  "all_conditions_retained": true,
+  "all_targets_monitors_readers_completed_and_reaped": true,
+  "reason": "Native gains did not carry through to the first-deployment CPython consumers; 15 of24 Python conditions are adverse, with pyexpat approximately1% slower, alongside generated native regressions. Leave unselected; no composition or full qualification. This is a selection judgment on the observed tradeoff, not statistical significance.",
+  "selected_runtime_unchanged": true
+}

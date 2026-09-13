@@ -1,0 +1,106 @@
+{
+  "status": "copied_and_read_back",
+  "source_manifest_sha256": "1120c74e96c7f562cecfa25db227a830e8a1667a67dba30732ca039fb5e7dbec",
+  "artifacts": {
+    "native-evidence.tar.gz": {
+      "sha256": "0b124014d2424b980b617bdcba58dbc151c883ad3a46c6e7a99928c6b0aa9799",
+      "bytes": 4357581,
+      "origin": "/tmp/oriole-literal-attribute-native-handoff/details.tar.gz",
+      "members": 1453
+    },
+    "correctness-evidence.tar.gz": {
+      "sha256": "ceb93ac3a75878424162d54e55ad0ab0c0a126d21b49c7fdf29c60a35e8b7a78",
+      "bytes": 2169881,
+      "origin": "/tmp/oriole-literal-attribute-correctness-handoff/evidence.tar.gz",
+      "members": 368
+    },
+    "python-evidence.tar.gz": {
+      "sha256": "ea88fe3aafe25a3c8269a7059dccc394274665989e4c4289f8808ab8eeaf0c93",
+      "bytes": 4071000,
+      "origin": "/tmp/oriole-literal-attribute-python-final-handoff/details.tar.gz",
+      "members": 3572
+    },
+    "python-members.json.gz": {
+      "sha256": "104b0f754b859d26a9588917bd875daf8a7a18a28cfcad699ff3ecd797cc2af0",
+      "bytes": 265471,
+      "origin": "/tmp/oriole-literal-attribute-python-final-handoff/members.json.gz"
+    },
+    "candidate.patch": {
+      "sha256": "eb1618533a5a75983845ec4a8135d21f20f27dc8da992f99ffc1d6720c8fe04f",
+      "bytes": 4930,
+      "origin": "/tmp/oriole-literal-attribute-check-pgo-study/candidate.patch"
+    },
+    "native-report.json": {
+      "sha256": "9ede43604bd81f55013212d4e34de65794b27bbe38898a1de00d547e13f6248b",
+      "bytes": 3822,
+      "origin": "/tmp/oriole-literal-attribute-native-handoff/report.json"
+    },
+    "python-report.json": {
+      "sha256": "4f2bcba6b81589f5f308f2b44844eb3bf2152015716afcd53cc81cfced755739",
+      "bytes": 11900,
+      "origin": "/tmp/oriole-literal-attribute-python-final-handoff/report.json"
+    },
+    "correctness-summary.json": {
+      "sha256": "50e4f3dcb2e2a9d32b61770f8a4de258139f82fd9efe60ae7612a8b35d7ec537",
+      "bytes": 4659,
+      "origin": "/tmp/oriole-literal-attribute-correctness-handoff/summary.json"
+    },
+    "supplementary-reviews.tar.gz": {
+      "bytes": 275296,
+      "sha256": "9ef4fcea8082104dcb09bfa9cee1f4cb9ec7ce14093950d3757786ca12bae888",
+      "members": 39,
+      "origin": "Exact members from sealed numerical review and handoff indexes; see compressed origin map."
+    },
+    "supplementary-members.json.gz": {
+      "bytes": 2258,
+      "sha256": "b6657e3eebde29eb80ba77e4908a6d4167c043d4927fd780887649f529b3a5f3",
+      "origin": "Generated member/origin readback map for supplementary-reviews.tar.gz"
+    },
+    "workspace-evidence.tar.gz": {
+      "sha256": "600f31e5ed413a0505e9fbe39186addc708921a601b4dea4ecd44860977850ba",
+      "bytes": 30701,
+      "origin": "Saved workspace records plus independent review; workspace-members.json records exact origins.",
+      "members": 13
+    },
+    "workspace-review.json": {
+      "sha256": "4988667dfb632a8503c75b35b43152862bda63192c375cadf077a17b2dd697e9",
+      "bytes": 1356,
+      "origin": "/tmp/oriole-literal-attribute-workspace-independent-review/review.json"
+    },
+    "workspace-members.json": {
+      "sha256": "f292d38d49995397ed4da61682d4e978670c9b497c3c6c9e2b427424b5bf6bd4",
+      "bytes": 2938,
+      "origin": "Saved workspace records plus independent review; workspace-members.json records exact origins."
+    },
+    "python-package-review.tar.gz": {
+      "sha256": "d6a02f1beb4fc9c5ce63565837e9b360ac6e29c5d6de75d009b7772dfdab649d",
+      "bytes": 286640,
+      "origin": "Exact independent package review members; compressed origin map retained.",
+      "members": 11
+    },
+    "python-package-review.json": {
+      "sha256": "6a3f2dfa18cfc313edd437b84d0bc02b5f36d0e94870349c93426bdeba2d2784",
+      "bytes": 3300,
+      "origin": "/tmp/oriole-literal-attribute-python-package-independent-review/review.json"
+    },
+    "python-package-review-members.json.gz": {
+      "sha256": "eeaacebd580c6760a30a76f90132f847b00cb8a573023e142739ec5f724c9e4d",
+      "bytes": 757,
+      "origin": "Exact independent package review members; compressed origin map retained."
+    }
+  },
+  "scope": "Three existing sealed evidence archives are copied byte-for-byte. Later native numerical review and compact original indexes are compressed separately. Original seal-time scopes/pending labels remain unchanged; this documentation supplements them.",
+  "workspace_checks": {
+    "status": "passed",
+    "tests": 408,
+    "test_binaries": 33,
+    "doctests": 1,
+    "strict_workspace_clippy": "passed",
+    "review_sha256": "4988667dfb632a8503c75b35b43152862bda63192c375cadf077a17b2dd697e9"
+  },
+  "python_package_independent_review": {
+    "status": "passed",
+    "review_sha256": "6a3f2dfa18cfc313edd437b84d0bc02b5f36d0e94870349c93426bdeba2d2784",
+    "source": "/tmp/oriole-literal-attribute-python-package-independent-review"
+  }
+}

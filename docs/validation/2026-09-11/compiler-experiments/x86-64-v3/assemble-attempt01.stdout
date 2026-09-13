@@ -1,0 +1,10 @@
+{
+  "status": "assembled_original_origins_read_back",
+  "archive_sha256": "ed993fc983470d8d4f9cb2202b934f518767b6532d91b7819462af492f74d3fa",
+  "archive_bytes": 7066442,
+  "stored_members": 2254,
+  "origins": 2320,
+  "aliases": 66,
+  "omitted": 33,
+  "members_sha256": "281dc49353c66293c19d5836d09f15b92e838cdc0be18dcdd6ff76ebe8a2a672"
+}

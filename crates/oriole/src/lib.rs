@@ -6,12 +6,15 @@
 
 mod accounting;
 mod active;
+mod arena;
 mod dtd;
 mod dtd_tables;
 mod encoding;
 mod lexical;
 mod names;
 mod recycling;
+mod tag;
+mod text;
 mod value;
 mod value_lexer;
 
@@ -20,18 +23,20 @@ use oriole_storage::{
     try_insert, try_push, try_set_insert,
 };
 use std::fmt;
+use std::num::NonZeroUsize;
 use std::sync::OnceLock;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use accounting::EntityBudget;
 use dtd_tables::DtdTables;
 
+pub use arena::AdapterFrame;
 pub use oriole_storage::Text;
 pub use recycling::RecyclingToken;
 
 use recycling::{EventRecycling, copy_attribute_string};
 
-use encoding::{Decoder, Source};
+use encoding::{Decoder, InputContext, Source};
 pub use names::NameRules;
 use names::{invalid_xml_char, is_uri_char, is_xml_char, whitespace};
 
@@ -41,13 +46,19 @@ pub struct Limits {
     pub max_depth: usize,
     pub max_token_bytes: usize,
     pub max_total_bytes: usize,
-    /// Total indirect bytes from entities, reused defaults, namespace URI expansion,
+    /// Allowance for indirect bytes from entities, reused defaults, namespace URI expansion,
     /// repeated declaration callback names, skipped conditional-reference callback
     /// storage, and external reference identifiers and namespace contexts. Child construction also charges inherited declaration,
     /// namespace, encoding, and context storage, including per-entry structural
     /// work. Parameter children share definitions without copying them. Shared
-    /// with external entity children.
+    /// with external entity children. This is an absolute limit when
+    /// `max_work_amplification` is `None`; otherwise the limit is the greater of
+    /// this allowance and that factor times consumed original root-input bytes.
     pub max_entity_expansion_bytes: usize,
+    /// Optional input-relative allowance for cumulative indirect and adapter work.
+    /// `None` preserves absolute work limits. Children share consumed root credit;
+    /// buffered but unconsumed bytes and external input do not increase it.
+    pub max_work_amplification: Option<usize>,
     pub max_entity_depth: usize,
     pub max_attributes: usize,
     pub max_entities: usize,
@@ -60,6 +71,7 @@ impl Default for Limits {
             max_token_bytes: 16 * 1024 * 1024,
             max_total_bytes: 256 * 1024 * 1024,
             max_entity_expansion_bytes: 8 * 1024 * 1024,
+            max_work_amplification: None,
             max_entity_depth: 32,
             max_attributes: 10_000,
             max_entities: 10_000,
@@ -85,6 +97,24 @@ pub struct Position {
     pub line: usize,
     pub column: usize,
     pub byte_count: usize,
+}
+
+struct EventOutput<'a> {
+    event: &'a mut Option<Event>,
+    frame: Option<&'a mut AdapterFrame>,
+    c_text_context: bool,
+}
+
+impl EventOutput<'_> {
+    fn has_frame(&self) -> bool {
+        self.frame.as_ref().is_some_and(|frame| frame.active)
+    }
+
+    fn clear_frame(&mut self) {
+        if let Some(frame) = self.frame.as_deref_mut() {
+            frame.clear();
+        }
+    }
 }
 
 /// One complete application-defined encoded character, owned across callbacks.
@@ -138,6 +168,8 @@ pub enum ErrorKind {
     ReservedNamespaceUri,
     LimitExceeded,
     Finished,
+    /// Malformed declaration at the start of an external text entity.
+    TextDeclaration,
 }
 
 impl fmt::Display for Error {
@@ -302,12 +334,35 @@ pub enum EventKind {
     },
 }
 
+/// Owned namespace undo records, freed when their declaring element closes.
+type NamespaceBindings = Vec<(String, Option<String>)>;
+
 #[derive(Debug)]
 struct Element {
-    raw_name: String,
+    name: ElementName,
     raw_encoding: Option<oriole_storage::Box<Vec<lexical::NameEncoding>>>,
-    expanded_name: Option<String>,
-    bindings: Vec<(String, Option<String>)>,
+    namespace_scope: Option<NonZeroUsize>,
+}
+
+/// Keep raw matching and a different expanded spelling in one stack owner.
+#[derive(Debug)]
+struct ElementName {
+    value: String,
+    raw_start: usize,
+    expanded_end: usize,
+}
+
+impl ElementName {
+    /// Compare end tags against their decoded raw spelling, before expansion.
+    fn raw_name(&self) -> &str {
+        &self.value[self.raw_start..]
+    }
+
+    /// Return an owned event name without allocating or moving its bytes.
+    fn into_event_name(mut self) -> String {
+        self.value.truncate(self.expanded_end);
+        self.value
+    }
 }
 
 #[derive(Debug)]
@@ -474,6 +529,12 @@ impl TryClone for DefaultAttribute {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
+struct NativeRawRange {
+    start: usize,
+    count: NonZeroUsize,
+}
+
 /// An incremental, non-validating XML 1.0 parser.
 ///
 /// External entity references produce events for application-controlled resolution;
@@ -496,10 +557,17 @@ pub struct Parser {
     config: Config,
     allocator: Allocator,
     decoder: Decoder,
+    input_context: Option<InputContext>,
     sources: Vec<Source>,
     pending: Queue<PendingEvent>,
     stack: Vec<Element>,
+    // Nonempty undo blocks correspond in order to the declaring elements in
+    // `stack`. Elements without declarations leave their ancestors' blocks alone.
+    namespace_scopes: Vec<NamespaceBindings>,
+    // Only nonempty prefixes live in the salted map. This slot owns the sole
+    // current default URI; scope undo records keep the displaced owners.
     namespaces: HashMap<String, String>,
+    default_namespace: Option<String>,
     tables: DtdTables,
     shared_tables: OnceLock<Shared<oriole_storage::TryLock<DtdTables>>>,
     parameter_mode: u8,
@@ -535,8 +603,10 @@ pub struct Parser {
     reparse_deferral: bool,
     last_position: Position,
     current_raw: String,
+    native_raw: Option<NativeRawRange>,
     token_scratch: lexical::Buffer,
     raw_attributes: Vec<RawAttribute>,
+    tag_scanner: tag::TagScanner,
     event_recycling: EventRecycling,
     expand_internal_entities: bool,
     default_events: bool,
@@ -544,6 +614,96 @@ pub struct Parser {
     attlist_handler_enabled: bool,
     decoding_error: Option<(ErrorKind, &'static str)>,
     id_attribute_index: Option<usize>,
+}
+
+/// Borrow only the fields changed by a nonempty identity Start.
+/// Source stays in the parser, and every borrow ends before event delivery.
+struct IdentityStartState<'a> {
+    source: &'a Source,
+    allocator: Allocator,
+    limits: &'a Limits,
+    namespaces: &'a HashMap<String, String>,
+    raw_attributes: &'a mut Vec<RawAttribute>,
+    event_recycling: &'a mut EventRecycling,
+    stack: &'a mut Vec<Element>,
+    id_attribute_index: &'a mut Option<usize>,
+    seen_root: &'a mut bool,
+    declaration_allowed: &'a mut bool,
+}
+
+impl IdentityStartState<'_> {
+    /// Keep the selected copy/error order for both borrowed and copied tokens.
+    fn lower(
+        self,
+        name: &str,
+        rest: &str,
+        position: Position,
+        frame: &mut AdapterFrame,
+    ) -> Result<(), Error> {
+        let mut raw_attrs = std::mem::replace(self.raw_attributes, Vec::new_in(self.allocator));
+        if raw_attrs.len() > self.limits.max_attributes {
+            return Err(Error {
+                kind: ErrorKind::LimitExceeded,
+                message: "attribute count limit exceeded",
+                position: self.source.position(0),
+            });
+        }
+        self.event_recycling
+            .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
+        frame.prepare(raw_attrs.len())?;
+        let literal_span = !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);
+        let mut names = (raw_attrs.len() > 8)
+            .then(|| HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator));
+        for (index, attribute) in raw_attrs.iter().enumerate() {
+            let (attr_name, value, attribute_offset, _) = attribute.parts(rest);
+            let duplicate = if let Some(names) = &mut names {
+                !try_set_insert(names, attr_name)?
+            } else {
+                raw_attrs[..index]
+                    .iter()
+                    .any(|attribute| attribute.name(rest) == attr_name)
+            };
+            if duplicate {
+                return Err(Error {
+                    kind: ErrorKind::DuplicateAttribute,
+                    message: "duplicate attribute",
+                    position: self
+                        .source
+                        .position_at(1 + name.len() + attribute_offset, 0),
+                });
+            }
+            if !literal_span {
+                frame.push_attribute(attr_name, value)?;
+            }
+        }
+        if literal_span {
+            frame.push_literal_attributes(rest, &raw_attrs)?;
+        }
+        *self.id_attribute_index = None;
+        frame.set_name(name)?;
+        *self.seen_root = true;
+        *self.declaration_allowed = false;
+        let reusable = self.event_recycling.take_name();
+        let value = recycling::copy_name(name, reusable, self.allocator)?;
+        try_push(
+            self.stack,
+            Element {
+                name: ElementName {
+                    raw_start: 0,
+                    expanded_end: value.len(),
+                    value,
+                },
+                raw_encoding: None,
+                namespace_scope: None,
+            },
+        )?;
+        if raw_attrs.capacity() <= 128 {
+            raw_attrs.clear();
+            *self.raw_attributes = raw_attrs;
+        }
+        frame.publish(position);
+        Ok(())
+    }
 }
 
 impl Parser {
@@ -582,10 +742,13 @@ impl Parser {
             config,
             allocator,
             decoder,
+            input_context: None,
             sources,
             namespaces,
+            default_namespace: None,
             pending: Queue::new_in(allocator),
             stack: Vec::new_in(allocator),
+            namespace_scopes: Vec::new_in(allocator),
             tables,
             shared_tables: OnceLock::new(),
             parameter_mode: 0,
@@ -624,8 +787,10 @@ impl Parser {
                 ..Position::default()
             },
             current_raw: String::new_in(allocator),
+            native_raw: None,
             token_scratch: lexical::Buffer::new_in(allocator),
             raw_attributes: Vec::new_in(allocator),
+            tag_scanner: tag::TagScanner::default(),
             event_recycling: EventRecycling::new(allocator)?,
             expand_internal_entities: true,
             default_events: false,
@@ -639,6 +804,37 @@ impl Parser {
     #[must_use]
     pub fn allocator(&self) -> Allocator {
         self.allocator
+    }
+
+    /// Iterate both owners; None denotes the default prefix without inventing
+    /// an empty String owner or widening the temporary two-reference records.
+    fn namespace_bindings(&self) -> impl Iterator<Item = (Option<&String>, &String)> {
+        self.namespaces
+            .iter()
+            .map(|(prefix, uri)| (Some(prefix), uri))
+            .chain(self.default_namespace.as_ref().map(|uri| (None, uri)))
+    }
+
+    /// Install one authoritative owner, retaining fallible prefixed-map growth.
+    fn insert_namespace(
+        &mut self,
+        prefix: String,
+        uri: String,
+    ) -> Result<Option<String>, AllocError> {
+        if prefix.is_empty() {
+            Ok(self.default_namespace.replace(uri))
+        } else {
+            try_insert(&mut self.namespaces, prefix, uri)
+        }
+    }
+
+    /// Remove the active binding so its owner can become an undo record.
+    fn remove_namespace(&mut self, prefix: &str) -> Option<String> {
+        if prefix.is_empty() {
+            self.default_namespace.take()
+        } else {
+            self.namespaces.remove(prefix)
+        }
     }
 
     /// Return this parser's local caller salt, without exposing secret randomized keys.
@@ -846,6 +1042,7 @@ impl Parser {
             child.shared_tables = OnceLock::from(owner.expect("parameter DTD owner"));
         }
         child.namespaces.clear();
+        child.default_namespace = self.default_namespace.try_clone()?;
         for (prefix, uri) in &self.namespaces {
             try_insert(&mut child.namespaces, prefix.try_clone()?, uri.try_clone()?)?;
         }
@@ -876,10 +1073,9 @@ impl Parser {
             for part in context.split('\u{c}').filter(|part| !part.is_empty()) {
                 if let Some((prefix, uri)) = part.split_once('=') {
                     if uri.is_empty() {
-                        child.namespaces.remove(prefix);
+                        child.remove_namespace(prefix);
                     } else {
-                        try_insert(
-                            &mut child.namespaces,
+                        child.insert_namespace(
                             string(prefix, self.allocator)?,
                             string(uri, self.allocator)?,
                         )?;
@@ -960,9 +1156,10 @@ impl Parser {
         context: Option<&str>,
         encoding: Option<&str>,
     ) -> Result<(), Error> {
-        for (prefix, uri) in &self.namespaces {
+        for (prefix, uri) in self.namespace_bindings() {
+            // Preserve the logical key/URI charge even for the dedicated slot.
             self.charge_expansion(size_of::<(String, String)>())?;
-            self.charge_expansion(prefix.len())?;
+            self.charge_expansion(prefix.map_or(0, |prefix| prefix.len()))?;
             self.charge_expansion(uri.len())?;
         }
         for name in &self.entity_chain {
@@ -1121,19 +1318,115 @@ impl Parser {
         Ok(())
     }
 
+    /// Bytes that can still be supplied to this parser's original input source.
+    ///
+    /// The representable source bound leaves room for one-based line numbers,
+    /// even when an explicit input limit is larger than a signed pointer offset.
+    /// External children have their own source offsets and input allowance.
+    #[doc(hidden)]
+    #[must_use]
+    pub fn input_bytes_remaining(&self) -> usize {
+        self.config
+            .limits
+            .max_total_bytes
+            .min(isize::MAX as usize)
+            .saturating_sub(self.received)
+    }
+
+    /// Cumulative work allowance based on consumed original root-input bytes.
+    ///
+    /// Adapters use this policy for their own work counters. The threshold may
+    /// saturate, but callers must still reject overflow of the charged counter.
+    #[doc(hidden)]
+    #[must_use]
+    pub fn work_bytes_limit(&self, initial: usize) -> usize {
+        self.expanded
+            .work_limit(initial, self.config.limits.max_work_amplification)
+    }
+
     /// Append input without calling user code. Drain events before feeding more data.
     pub fn feed(&mut self, bytes: &[u8], is_final: bool) -> Result<(), Error> {
+        if self.input_context.is_some() {
+            return match self.feed_with_input_context(bytes, is_final, 1024) {
+                Ok(result) => result,
+                Err(_) => self.fail(ErrorKind::NoMemory, "out of memory"),
+            };
+        }
+        self.feed_inner(bytes, is_final, false)
+    }
+
+    /// Use the root native input owner for C context. Enable before the first feed.
+    #[doc(hidden)]
+    pub fn enable_input_context(&mut self) {
+        assert_eq!(self.received, 0);
+        assert!(self.input_context.is_none());
+        self.input_context = Some(InputContext::new(
+            self.allocator,
+            &self.decoder,
+            &mut self.sources[0],
+        ));
+    }
+
+    /// Retain original input before decoding. The outer allocation error is a
+    /// context-publication failure; the inner result retains ordinary feed errors.
+    #[doc(hidden)]
+    pub fn feed_with_input_context(
+        &mut self,
+        bytes: &[u8],
+        is_final: bool,
+        history: usize,
+    ) -> Result<Result<(), Error>, AllocError> {
+        if self.error.is_some() || self.final_input || bytes.len() > self.input_bytes_remaining() {
+            return Ok(self.feed_inner(bytes, is_final, false));
+        }
+        let retain_from = self.input_context_byte_index().saturating_sub(history);
+        let minimum = history.min(self.config.limits.max_total_bytes);
+        let native = self
+            .input_context
+            .as_mut()
+            .expect("context input enabled")
+            .preserve(
+                &mut self.decoder,
+                &mut self.sources[0],
+                bytes,
+                retain_from,
+                minimum,
+            )?;
+        Ok(self.feed_inner(bytes, is_final, native))
+    }
+
+    /// Original input bytes and their absolute starting offset. Any pointer
+    /// derived by the C adapter is valid only until the next feed or destruction.
+    #[doc(hidden)]
+    #[must_use]
+    pub fn input_context(&self) -> (&[u8], usize) {
+        self.input_context
+            .as_ref()
+            .map_or((&[], 0), |context| context.view(&self.sources[0]))
+    }
+
+    fn declaration_context(&self) -> DeclarationContext {
+        if self.fragment && !self.is_external_value() {
+            DeclarationContext::Text
+        } else {
+            DeclarationContext::Document
+        }
+    }
+
+    fn feed_inner(&mut self, bytes: &[u8], is_final: bool, native: bool) -> Result<(), Error> {
         if let Some(error) = &self.error {
             return Err(*error);
         }
         if self.final_input {
             return self.fail(ErrorKind::Finished, "input has already been finalized");
         }
+        if bytes.len() > self.input_bytes_remaining() {
+            return self.fail(ErrorKind::LimitExceeded, "input byte limit exceeded");
+        }
         self.feed_start_byte = self.sources[0].position(0).byte_index;
-        self.received = match self.received.checked_add(bytes.len()) {
-            Some(size) if size <= self.config.limits.max_total_bytes => size,
-            _ => return self.fail(ErrorKind::LimitExceeded, "input byte limit exceeded"),
-        };
+        // The remaining-input check proves this addition and every original
+        // source coordinate fit, before decoder or input state is changed.
+        self.received += bytes.len();
         if self.fragment
             && let Err(error) = self.charge_expansion(bytes.len())
         {
@@ -1149,20 +1442,44 @@ impl Parser {
             }
             return Ok(());
         }
-        if let Err(error) = self.decoder.feed(
-            bytes,
-            is_final,
-            &mut self.sources[0],
-            self.config.limits.max_token_bytes,
-            self.fragment && !self.external_subset,
-        ) {
+        let declaration_context = self.declaration_context();
+        let decoded = if native {
+            self.input_context
+                .as_mut()
+                .expect("context input enabled")
+                .decode(
+                    &mut self.decoder,
+                    &mut self.sources[0],
+                    is_final,
+                    self.config.limits.max_token_bytes,
+                    self.fragment && !self.external_subset,
+                    declaration_context,
+                )
+        } else {
+            self.decoder.feed(
+                bytes,
+                is_final,
+                &mut self.sources[0],
+                self.config.limits.max_token_bytes,
+                self.fragment && !self.external_subset,
+                declaration_context,
+            )
+        };
+        if let Err(error) = decoded {
             self.decoding_error = Some((error.kind, error.message));
         }
         // Encoding detection may retain a complete BOM while awaiting a text
         // declaration. These bytes already form a token, even on a nonfinal feed.
-        let prefix = self
-            .decoder
-            .pending_bom_len(self.fragment && !self.external_subset);
+        let prefix = if let Some(context) = &self.input_context {
+            context.pending_bom_len(
+                &self.decoder,
+                &self.sources[0],
+                self.fragment && !self.external_subset,
+            )
+        } else {
+            self.decoder
+                .pending_bom_len(self.fragment && !self.external_subset)
+        };
         let bytes = self.sources[0].unaccounted_prefix(prefix);
         if !self.expanded.account(bytes, self.fragment, true) {
             return self.fail(
@@ -1274,12 +1591,14 @@ impl Parser {
         self.mark_parameter_read();
         self.error = None;
         self.decoding_error = None;
+        let declaration_context = self.declaration_context();
         if let Err(error) = self.decoder.feed(
             &[],
             self.final_input,
             &mut self.sources[0],
             self.config.limits.max_token_bytes,
             self.fragment && !self.external_subset,
+            declaration_context,
         ) {
             self.decoding_error = Some((error.kind, error.message));
         }
@@ -1315,12 +1634,14 @@ impl Parser {
             self.error = Some(error);
             return Err(error);
         }
+        let declaration_context = self.declaration_context();
         if let Err(error) = self.decoder.feed(
             &[],
             self.final_input,
             &mut self.sources[0],
             self.config.limits.max_token_bytes,
             self.fragment && !self.external_subset,
+            declaration_context,
         ) {
             self.decoding_error = Some((error.kind, error.message));
         }
@@ -1399,6 +1720,69 @@ impl Parser {
     }
 
     fn next_event_into(&mut self, output: &mut Option<Event>) -> Result<(), Error> {
+        self.next_delivery_into(&mut EventOutput {
+            event: output,
+            frame: None,
+            c_text_context: false,
+        })
+    }
+
+    /// Create allocation-free detached adapter storage for this parser generation.
+    #[doc(hidden)]
+    pub fn adapter_frame(&self) -> AdapterFrame {
+        AdapterFrame::new(self.allocator, self.event_recycling.token())
+    }
+
+    /// Fill caller-owned event/frame slots without retaining a parser reference.
+    /// The frame must come from this parser; foreign generations use owned events.
+    #[doc(hidden)]
+    pub fn next_event_for_adapter_into(
+        &mut self,
+        event: &mut Option<Event>,
+        frame: &mut AdapterFrame,
+    ) -> Result<Option<RecyclingToken>, Error> {
+        self.next_event_for_adapter_mode_into(event, frame, false)
+    }
+
+    /// Fill detached slots for a C host retaining the original input context.
+    /// Native Text frames contain scalar ranges; the host must validate them
+    /// against its stable context and never call the ordinary byte projection.
+    #[doc(hidden)]
+    pub fn next_event_for_c_text_context_into(
+        &mut self,
+        event: &mut Option<Event>,
+        frame: &mut AdapterFrame,
+    ) -> Result<Option<RecyclingToken>, Error> {
+        self.next_event_for_adapter_mode_into(event, frame, true)
+    }
+
+    fn next_event_for_adapter_mode_into(
+        &mut self,
+        event: &mut Option<Event>,
+        frame: &mut AdapterFrame,
+        c_text_context: bool,
+    ) -> Result<Option<RecyclingToken>, Error> {
+        *event = None;
+        frame.clear();
+        if !self.event_recycling.accepts(&frame.generation) {
+            return self.next_event_for_recycling_into(event);
+        }
+        self.next_delivery_into(&mut EventOutput {
+            event,
+            frame: Some(frame),
+            c_text_context,
+        })?;
+        Ok((event.is_some() || frame.active).then(|| self.event_recycling.token()))
+    }
+
+    /// Drop the detached cache before releasing its share of retained-memory space.
+    #[doc(hidden)]
+    pub fn finish_adapter_frame(&mut self, frame: AdapterFrame) {
+        let token = frame.finish();
+        self.event_recycling.release_adapter(&token);
+    }
+
+    fn next_delivery_into(&mut self, output: &mut EventOutput<'_>) -> Result<(), Error> {
         // Keep ordinary documents outside the owned-table publication frame.
         if self.shared_tables.get().is_none() && !self.in_doctype {
             return self.next_event_scoped(output);
@@ -1406,7 +1790,7 @@ impl Parser {
         self.next_event_with_tables(output)
     }
 
-    fn next_event_with_tables(&mut self, output: &mut Option<Event>) -> Result<(), Error> {
+    fn next_event_with_tables(&mut self, output: &mut EventOutput<'_>) -> Result<(), Error> {
         // DOCTYPE always yields its start event before parsing any declarations.
         // A child created by that callback may have initialized this owner first.
         if self.error.is_none()
@@ -1421,21 +1805,39 @@ impl Parser {
         self.with_dtd_tables(|parser| parser.next_event_scoped(output))
     }
 
-    fn next_event_scoped(&mut self, output: &mut Option<Event>) -> Result<(), Error> {
+    fn next_event_scoped(&mut self, output: &mut EventOutput<'_>) -> Result<(), Error> {
         if let Some(event) = self.finish_foreign_dtd() {
             self.last_position = event.position;
-            *output = Some(event);
+            *output.event = Some(event);
             return Ok(());
         }
         if let Some(event) = self.pop_event() {
             self.last_position = event.position;
-            *output = Some(event);
+            *output.event = Some(event);
             return Ok(());
         }
         if let Some(error) = &self.error {
             return Err(*error);
         }
-        let mut result = self.next_event_inner(output);
+        if let Err(error) = self.next_event_inner(output) {
+            self.finish_event_error(error, output)?;
+        }
+        if let Some(event) = output.event {
+            self.last_position = event.position;
+        }
+        if output.has_frame() {
+            self.last_position = output.frame.as_ref().unwrap().position();
+        }
+        Ok(())
+    }
+
+    /// Apply decoder precedence and preserve queued or published error prefixes.
+    fn finish_event_error(
+        &mut self,
+        error: Error,
+        output: &mut EventOutput<'_>,
+    ) -> Result<(), Error> {
+        let mut result = Err(error);
         if let (Err(error), Some((kind, message))) = (&result, self.decoding_error)
             && matches!(
                 error.kind,
@@ -1467,6 +1869,14 @@ impl Parser {
             });
         }
         if let Err(error) = &result {
+            // Ordinary character data publishes before consume. Preserve that
+            // prefix on a subsequent accounting error, as the pending queue did.
+            // CDATA and start frames publish only after their fallible work.
+            let text_prefix = error.kind != ErrorKind::NoMemory
+                && output.frame.as_ref().is_some_and(|frame| frame.is_text());
+            if !text_prefix {
+                output.clear_frame();
+            }
             self.error = Some(*error);
             // Unknown encodings can be installed after an error and resume
             // parsing. Other terminal failures no longer need copied names;
@@ -1495,19 +1905,18 @@ impl Parser {
                 Ok(())
             })();
             if let Err(error) = cleanup {
+                output.clear_frame();
                 self.error = Some(error);
                 self.pending.clear();
                 return Err(error);
             }
-            if let Some(event) = self.pop_event() {
-                *output = Some(event);
+            if text_prefix {
+                debug_assert!(self.pending.is_empty());
+                result = Ok(());
+            } else if let Some(event) = self.pop_event() {
+                *output.event = Some(event);
                 result = Ok(());
             }
-        }
-        if result.is_ok()
-            && let Some(event) = output
-        {
-            self.last_position = event.position;
         }
         result
     }
@@ -1539,6 +1948,7 @@ impl Parser {
                     .map(|(_, position)| position.byte_index),
             )
             .chain(self.value_context_byte_index())
+            .chain(self.native_raw.map(|raw| raw.start))
             .min()
             .expect("a parser always has its original input source")
     }
@@ -1554,7 +1964,7 @@ impl Parser {
     }
 
     /// Set the combined direct/indirect byte threshold for relative amplification.
-    /// Absolute input, expansion-work and nesting limits remain independent.
+    /// Input, expansion-work and nesting policies remain independent.
     pub fn set_entity_activation_threshold(&self, bytes: u64) -> bool {
         if self.fragment {
             return false;
@@ -1607,6 +2017,18 @@ impl Parser {
     /// Raw XML for the token responsible for the most recently returned event.
     #[must_use]
     pub fn current_raw(&self) -> Option<&str> {
+        if let Some(raw) = self.native_raw {
+            let (context, start) = self.input_context();
+            let offset = raw
+                .start
+                .checked_sub(start)
+                .expect("retained native raw start");
+            let end = offset.checked_add(raw.count.get()).expect("native raw end");
+            let bytes = context.get(offset..end).expect("retained native raw range");
+            // Only this validated native span is UTF-8. A later feed may have
+            // moved the context to separate storage with an invalid suffix.
+            return Some(std::str::from_utf8(bytes).expect("native raw UTF-8"));
+        }
         (!self.current_raw.is_empty()).then_some(self.current_raw.as_str())
     }
     /// Replace limits before parsing begins.
@@ -1690,6 +2112,7 @@ impl Parser {
                 .store(false, Ordering::Relaxed);
         }
         if let Some(raw) = pending.raw {
+            self.native_raw = None;
             if raw.is_empty() {
                 self.current_raw.clear();
             } else {
@@ -1705,6 +2128,7 @@ impl Parser {
         self.current_raw
             .try_reserve(count.saturating_sub(self.current_raw.len()))?;
         self.current_raw.clear();
+        self.native_raw = None;
         let source = self
             .sources
             .last()
@@ -1731,8 +2155,17 @@ impl Parser {
         }
         Ok(())
     }
+    #[inline]
     fn account_source(&mut self, count: usize) -> Result<(), Error> {
         let bytes = self.source().accounting_bytes(count);
+        if bytes == 0 {
+            return Ok(());
+        }
+        self.account_source_bytes(bytes)
+    }
+
+    /// Charge a nonempty source delta before advancing its accounting cursor.
+    fn account_source_bytes(&mut self, bytes: usize) -> Result<(), Error> {
         if !self
             .expanded
             .account(bytes, self.fragment || self.sources.len() > 1, true)
@@ -1767,11 +2200,41 @@ impl Parser {
             || self.decoding_error.is_some()
     }
 
-    fn next_event_inner(&mut self, output: &mut Option<Event>) -> Result<(), Error> {
+    /// Recognize a complete native root end tag using its validated opening name.
+    /// Incomplete and ineligible tags keep the resumable lexical scanner.
+    fn matching_root_end_tag(&self, limit: usize) -> Option<usize> {
+        if self.fragment || self.sources.len() != 1 {
+            return None;
+        }
+        let source = self.source();
+        source.native_utf8_byte_index()?;
+        if source.has_conversions() {
+            return None;
+        }
+        let element = self.stack.last()?;
+        if element.raw_encoding.is_some() {
+            return None;
+        }
+        let end = element.name.raw_name().len().checked_add(3)?;
+        let bytes = source.remaining().as_bytes();
+        // Check the closing delimiter before comparing a potentially long name.
+        // Otherwise, one-byte feeds without deferral could repeat a long prefix
+        // comparison while the resumable scanner has no new complete token.
+        if end > limit || bytes.get(end - 1) != Some(&b'>') {
+            return None;
+        }
+        (bytes.starts_with(b"</")
+            && bytes.get(2..end - 1) == Some(element.name.raw_name().as_bytes()))
+        .then_some(end)
+    }
+
+    fn next_event_inner(&mut self, output: &mut EventOutput<'_>) -> Result<(), Error> {
         // Encoding detection consumes a BOM without producing a text token.
         // Charge that prefix even for empty input or an incomplete next token.
         self.account_source(0)?;
-        if let Some((_, position)) = self.active_parameter_reference.take() {
+        if self.active_parameter_reference.is_some()
+            && let Some((_, position)) = self.active_parameter_reference.take()
+        {
             if self
                 .parameter_state
                 .get()
@@ -1786,8 +2249,11 @@ impl Parser {
             }
         }
         loop {
+            if output.has_frame() {
+                return Ok(());
+            }
             if let Some(event) = self.pop_event() {
-                *output = Some(event);
+                *output.event = Some(event);
                 return Ok(());
             }
             if self.finished {
@@ -1875,7 +2341,7 @@ impl Parser {
                 continue;
             }
             if self.in_cdata {
-                if !self.parse_cdata()? {
+                if !self.parse_cdata(output)? {
                     return Ok(());
                 }
                 continue;
@@ -1888,13 +2354,13 @@ impl Parser {
                         "entity reference outside the document element",
                     ));
                 }
-                if !self.parse_reference()? {
+                if !self.parse_reference(output)? {
                     return Ok(());
                 }
                 continue;
             }
             if first != b'<' {
-                if !self.parse_text()? {
+                if !self.parse_text(output)? {
                     return Ok(());
                 }
                 continue;
@@ -1976,12 +2442,45 @@ impl Parser {
             if deferral && self.source().should_defer(max_token) {
                 return Ok(());
             }
-            let end = self
-                .source_mut()
-                .scan_token(mode, max_token)
-                .map_err(|(kind, offset)| {
-                    self.err_at(kind, "invalid or oversized XML token", offset)
-                })?;
+            let matched_end = if mode == ScanMode::Tag && remaining.starts_with("</") {
+                self.matching_root_end_tag(max_token)
+            } else {
+                None
+            };
+            let planned = if mode == ScanMode::Tag
+                && !self.source().remaining().starts_with("</")
+                && !self.seen_doctype
+                && !self.foreign_dtd
+                && self.shared_tables.get().is_none()
+                && !self.fragment
+                && self.sources.len() == 1
+                && let Some(source_index) = self.source().native_utf8_byte_index()
+            {
+                self.tag_scanner.scan(
+                    self.sources[0].remaining(),
+                    source_index,
+                    max_token,
+                    self.config.limits.max_attributes,
+                    self.config.name_rules,
+                    &mut self.raw_attributes,
+                )
+            } else {
+                tag::Planned::Fallback
+            };
+            let end = if matched_end.is_some() {
+                matched_end
+            } else {
+                match planned {
+                    tag::Planned::Complete { end, .. } => Some(end),
+                    tag::Planned::Incomplete => None,
+                    tag::Planned::Fallback => self
+                        .source_mut()
+                        .scan_token(mode, max_token)
+                        .map_err(|(kind, offset)| {
+                            self.err_at(kind, "invalid or oversized XML token", offset)
+                        })?,
+                }
+            };
             let Some(end) = end else {
                 if self.sources.len() == 1
                     && self.source().position(0).byte_index == self.feed_start_byte
@@ -2002,65 +2501,171 @@ impl Parser {
             }
             self.account_source(end)?;
             let position = self.source().position(end);
-            let mut token = std::mem::replace(
-                &mut self.token_scratch,
-                lexical::Buffer::new_in(self.allocator),
-            );
-            token.clear();
-            token.append(
-                self.source()
-                    .lexical_remaining()
-                    .for_slice(&self.source().remaining()[..end]),
-            )?;
-            let parsed = (|| {
-                if let Some(offset) = invalid_xml_char(&token) {
-                    return Err(self.err_at(
-                        ErrorKind::InvalidToken,
-                        "invalid XML character",
-                        offset,
-                    ));
-                }
-                match mode {
-                    ScanMode::Comment => {
-                        let text = &token[4..token.len() - 3];
-                        if let Some(offset) = text.find("--") {
-                            return Err(self.err_at(
-                                ErrorKind::InvalidToken,
-                                "double hyphen in comment",
-                                4 + offset + 2,
-                            ));
+            if matched_end.is_some()
+                && output.c_text_context
+                && self.input_context.is_some()
+                && !self.seen_doctype
+                && !self.foreign_dtd
+                && self.shared_tables.get().is_none()
+                && self
+                    .stack
+                    .last()
+                    .is_some_and(|element| element.namespace_scope.is_none())
+                && let Some(frame) = output.frame.as_deref_mut()
+            {
+                // Matching proves native UTF-8 spelling and a nonempty range.
+                // Keep the existing detached name; raw markup stays in context.
+                self.prepare_end_frame(frame);
+                self.native_raw = Some(NativeRawRange {
+                    start: position.byte_index,
+                    count: NonZeroUsize::new(end).expect("nonempty matched End"),
+                });
+                // Accounting above is complete and name detachment allocates
+                // nothing. Commit ordinary Unicode coordinates before delivery.
+                self.consume(end)?;
+                frame.publish(position);
+                continue;
+            }
+            let direct_start_name = if let tag::Planned::Complete { name_end, .. } = planned
+                && output.c_text_context
+                && self.input_context.is_some()
+                && !self.closed_root
+                && self.stack.len() < self.config.limits.max_depth
+                && end <= arena::MAX_ARENA_BYTES
+                && self.raw_attributes.len() <= arena::MAX_ARENA_ATTRIBUTES
+            {
+                let token = &self.source().remaining()[..end];
+                (!token.ends_with("/>")
+                    && self.identity_frame_names(&token[1..name_end], &token[name_end..end - 1]))
+                .then_some(name_end)
+            } else {
+                None
+            };
+            let mut framed_end = false;
+            if let Some(name_end) = direct_start_name
+                && let Some(frame) = output.frame.as_deref_mut()
+            {
+                let state = self.identity_start_state();
+                let source = state.source;
+                let token = &source.remaining()[..end];
+                let parsed = state.lower(
+                    &token[1..name_end],
+                    &token[name_end..end - 1],
+                    position,
+                    frame,
+                );
+                // Lowering has released every source/field borrow. Publish the
+                // complete token before either its frame or terminal error.
+                self.native_raw = Some(NativeRawRange {
+                    start: position.byte_index,
+                    count: NonZeroUsize::new(end).expect("nonempty planned Start"),
+                });
+                parsed?;
+            } else {
+                let mut token = std::mem::replace(
+                    &mut self.token_scratch,
+                    lexical::Buffer::new_in(self.allocator),
+                );
+                token.clear();
+                token.append(
+                    self.source()
+                        .lexical_remaining()
+                        .for_slice(&self.source().remaining()[..end]),
+                )?;
+                let parsed = (|| {
+                    if matched_end.is_none()
+                        && !matches!(planned, tag::Planned::Complete { .. })
+                        && let Some(offset) = invalid_xml_char(&token)
+                    {
+                        return Err(self.err_at(
+                            ErrorKind::InvalidToken,
+                            "invalid XML character",
+                            offset,
+                        ));
+                    }
+                    match mode {
+                        ScanMode::Comment => {
+                            let text = &token[4..token.len() - 3];
+                            if let Some(offset) = text.find("--") {
+                                return Err(self.err_at(
+                                    ErrorKind::InvalidToken,
+                                    "double hyphen in comment",
+                                    4 + offset + 2,
+                                ));
+                            }
+                            if text.ends_with('-') {
+                                return Err(self.err_at(
+                                    ErrorKind::InvalidToken,
+                                    "double hyphen in comment",
+                                    5 + text.len(),
+                                ));
+                            }
+                            self.declaration_allowed = false;
+                            self.emit(
+                                EventKind::Comment(self.markup_text(token.view().for_slice(text))?),
+                                position,
+                            )?;
                         }
-                        if text.ends_with('-') {
-                            return Err(self.err_at(
-                                ErrorKind::InvalidToken,
-                                "double hyphen in comment",
-                                5 + text.len(),
-                            ));
+                        ScanMode::Pi => self.parse_pi(token.view(), position)?,
+                        ScanMode::Doctype => self.parse_doctype(token.view(), position)?,
+                        ScanMode::Tag if matched_end.is_some() => {
+                            if !self.seen_doctype
+                                && !self.foreign_dtd
+                                && self.shared_tables.get().is_none()
+                                && self
+                                    .stack
+                                    .last()
+                                    .is_some_and(|element| element.namespace_scope.is_none())
+                                && let Some(frame) = output.frame.as_deref_mut()
+                            {
+                                self.prepare_end_frame(frame);
+                                framed_end = true;
+                            } else {
+                                self.end_element(position)?;
+                            }
                         }
-                        self.declaration_allowed = false;
-                        self.emit(
-                            EventKind::Comment(self.markup_text(token.view().for_slice(text))?),
+                        ScanMode::Tag if token.starts_with("</") => {
+                            self.parse_end(token.view(), position)?
+                        }
+                        ScanMode::Tag => self.parse_start(
+                            token.view(),
                             position,
-                        )?;
+                            planned,
+                            output.frame.as_deref_mut(),
+                        )?,
+                        ScanMode::DtdDeclaration => {
+                            unreachable!("DTD scanner only runs in DTD context")
+                        }
                     }
-                    ScanMode::Pi => self.parse_pi(token.view(), position)?,
-                    ScanMode::Doctype => self.parse_doctype(token.view(), position)?,
-                    ScanMode::Tag if token.starts_with("</") => {
-                        self.parse_end(token.view(), position)?
-                    }
-                    ScanMode::Tag => self.parse_start(token.view(), position)?,
-                    ScanMode::DtdDeclaration => {
-                        unreachable!("DTD scanner only runs in DTD context")
-                    }
+                    Ok(())
+                })();
+                // Parsing only writes queued raw overrides. Publish the owned token
+                // before returning either its events or its terminal error.
+                token.swap_decoded(&mut self.current_raw)?;
+                self.native_raw = None;
+                parsed?;
+                self.token_scratch = token;
+            }
+            if matches!(
+                planned,
+                tag::Planned::Complete {
+                    ascii_bare: true,
+                    ..
                 }
-                Ok(())
-            })();
-            // Parsing only writes queued raw overrides. Publish the owned token
-            // before returning either its events or its terminal error.
-            token.swap_decoded(&mut self.current_raw)?;
-            parsed?;
-            self.token_scratch = token;
-            self.consume(end)?;
+            ) && self.source().native_utf8_byte_index().is_some()
+                && !self.source().has_conversions()
+            {
+                self.account_source(end)?;
+                self.source_mut().consume_ascii_tag(end);
+            } else {
+                self.consume(end)?;
+            }
+            if framed_end {
+                // Native token publication only swaps owners. Consume sees the
+                // bytes already charged above, so neither can fail after the
+                // matched name is detached. Keep raw/position updates first.
+                output.frame.as_deref_mut().unwrap().publish(position);
+            }
         }
     }
 
@@ -2100,7 +2705,7 @@ impl Parser {
         Ok(false)
     }
 
-    fn parse_text(&mut self) -> Result<bool, Error> {
+    fn parse_text(&mut self, output: &mut EventOutput<'_>) -> Result<bool, Error> {
         let internal = self.sources.len() > 1;
         if !self.seen_root
             && !self.fragment
@@ -2135,36 +2740,57 @@ impl Parser {
         let text = &self.source().remaining()[..limit];
         let final_text = self.is_source_final() && limit == self.source().remaining().len();
         let coalesce = !self.stack.is_empty() || self.fragment;
-        let mut boundary = 0;
-        let mut end = text
-            .bytes()
-            .enumerate()
-            .find_map(|(index, byte)| {
-                if matches!(byte, b'<' | b'&') {
-                    return Some(index);
-                }
-                if byte == b'\n' || (!internal && byte == b'\r') {
-                    if !coalesce || index >= 65_536 {
-                        return Some(if boundary > 0 { boundary } else { index });
+        let text_plan = (coalesce
+            && !self.fragment
+            && !internal
+            && !self.source().has_conversions()
+            && self.source().native_utf8_byte_index().is_some())
+        .then(|| text::TextPlan::scan(text))
+        .flatten();
+        let text_plan = if !coalesce {
+            (!self.fragment
+                && !internal
+                && !self.source().has_conversions()
+                && self.source().native_utf8_byte_index().is_some())
+            .then(|| text::TextPlan::scan_outer_whitespace(text))
+            .flatten()
+        } else {
+            text_plan
+        };
+        let fast_end = text_plan
+            .map(|plan| plan.end)
+            .or_else(|| coalesce.then(|| coalesced_text_end(text)).flatten());
+        let mut end = fast_end.unwrap_or_else(|| {
+            let mut boundary = 0;
+            text.bytes()
+                .enumerate()
+                .find_map(|(index, byte)| {
+                    if matches!(byte, b'<' | b'&') {
+                        return Some(index);
                     }
-                    boundary = index
-                        + if byte == b'\r' && text.as_bytes().get(index + 1) == Some(&b'\n') {
-                            2
-                        } else {
-                            1
-                        };
-                }
-                // Bound merging across lines, preserving the existing span of
-                // an individual long line and its malformed-input prefix.
-                (index >= 65_536 && boundary > 0).then_some(boundary)
-            })
-            .map_or(text.len(), |index| {
-                if index == 0 && matches!(text.as_bytes()[0], b'\r' | b'\n') {
-                    if text.starts_with("\r\n") { 2 } else { 1 }
-                } else {
-                    index
-                }
-            });
+                    if byte == b'\n' || (!internal && byte == b'\r') {
+                        if !coalesce || index >= 65_536 {
+                            return Some(if boundary > 0 { boundary } else { index });
+                        }
+                        boundary = index
+                            + if byte == b'\r' && text.as_bytes().get(index + 1) == Some(&b'\n') {
+                                2
+                            } else {
+                                1
+                            };
+                    }
+                    // Bound merging across lines, preserving the existing span of
+                    // an individual long line and its malformed-input prefix.
+                    (index >= 65_536 && boundary > 0).then_some(boundary)
+                })
+                .map_or(text.len(), |index| {
+                    if index == 0 && matches!(text.as_bytes()[0], b'\r' | b'\n') {
+                        if text.starts_with("\r\n") { 2 } else { 1 }
+                    } else {
+                        index
+                    }
+                })
+        });
         if coalesce && end == text.len() && limit < self.source().remaining().len() {
             // Keep a converted buffer boundary at the last complete line when
             // possible. Otherwise merging earlier lines could shift the next
@@ -2189,8 +2815,17 @@ impl Parser {
         if end == 0 {
             return Ok(false);
         }
-        let invalid = invalid_xml_char(&text[..end]);
-        let forbidden = memchr::memmem::find(&text.as_bytes()[..end], b"]]>");
+        let (invalid, forbidden) = if text_plan.is_some() {
+            (None, None)
+        } else {
+            let invalid = invalid_xml_char(&text[..end]);
+            // Borrow the fixed needle once; each search keeps its own local state.
+            static CDATA_END: OnceLock<memchr::memmem::Finder<'static>> = OnceLock::new();
+            let forbidden = CDATA_END
+                .get_or_init(|| memchr::memmem::Finder::new(b"]]>"))
+                .find(&text.as_bytes()[..end]);
+            (invalid, forbidden)
+        };
         if let Some(forbidden) =
             forbidden.filter(|forbidden| invalid.is_none_or(|invalid| invalid > *forbidden))
         {
@@ -2230,7 +2865,11 @@ impl Parser {
             end = stop;
         }
         let text = &text[..end];
-        if self.stack.is_empty() && !self.fragment && !text.chars().all(whitespace) {
+        if self.stack.is_empty()
+            && !self.fragment
+            && text_plan.is_none()
+            && !text.chars().all(whitespace)
+        {
             if !self.seen_root
                 && self.config.name_rules.is_name(text)
                 && end == self.source().remaining().len()
@@ -2269,23 +2908,53 @@ impl Parser {
             ));
         }
         let position = self.source().position(end);
-        let value = if !self.stack.is_empty() || self.fragment {
-            Some(self.character_data(text)?)
+        let character_data = !self.stack.is_empty() || self.fragment;
+        let value = if character_data {
+            self.prepare_character_data(
+                end,
+                output.frame.as_deref_mut(),
+                output.c_text_context,
+                text_plan.is_some(),
+            )?
         } else {
             None
         };
-        self.save_current_raw(end)?;
+        if self.input_context.is_some()
+            && let Some((start, count)) = output
+                .frame
+                .as_ref()
+                .and_then(|frame| frame.prepared_native_text_range())
+        {
+            debug_assert_eq!(count, end);
+            // The core owns the context and retains this absolute range across
+            // feeds. The stale String stays available for the next owned token.
+            self.native_raw = Some(NativeRawRange {
+                start,
+                count: NonZeroUsize::new(count).expect("nonempty native Text"),
+            });
+        } else {
+            self.save_current_raw(end)?;
+        }
         self.declaration_allowed = false;
         if let Some(value) = value {
             self.emit(EventKind::Text(value), position)?;
+        } else if character_data {
+            debug_assert!(self.pending.is_empty());
+            output.frame.as_deref_mut().unwrap().publish(position);
         } else if self.default_events {
             self.emit(EventKind::Default, position)?;
         }
-        self.consume(end)?;
+        if let Some(plan) = text_plan {
+            debug_assert_eq!(end, plan.end);
+            self.account_source(end)?;
+            self.source_mut().consume_text(plan);
+        } else {
+            self.consume(end)?;
+        }
         Ok(true)
     }
 
-    fn parse_cdata(&mut self) -> Result<bool, Error> {
+    fn parse_cdata(&mut self, output: &mut EventOutput<'_>) -> Result<bool, Error> {
         let internal = self.sources.len() > 1;
         let limit = self.source().converted_text_limit();
         let text = &self.source().remaining()[..limit];
@@ -2334,16 +3003,20 @@ impl Parser {
             }
             end = invalid;
         }
-        let text = &text[..end];
         let position = self.source().position(end);
-        let value = self.character_data(text)?;
+        let value = self.prepare_character_data(end, output.frame.as_deref_mut(), false, false)?;
         self.save_current_raw(end)?;
         self.consume(end)?;
-        self.emit(EventKind::Text(value), position)?;
+        if let Some(value) = value {
+            self.emit(EventKind::Text(value), position)?;
+        } else {
+            debug_assert!(self.pending.is_empty());
+            output.frame.as_deref_mut().unwrap().publish(position);
+        }
         Ok(true)
     }
 
-    fn parse_reference(&mut self) -> Result<bool, Error> {
+    fn parse_reference(&mut self, output: &mut EventOutput<'_>) -> Result<bool, Error> {
         let limit = self.config.limits.max_token_bytes;
         if self.reparse_deferral && !self.is_source_final() && self.source().should_defer(limit) {
             return Ok(false);
@@ -2397,13 +3070,19 @@ impl Parser {
                 self.account_entity_bytes(1, false)?;
             }
             self.consume(end + 1)?;
-            self.emit(
-                EventKind::Text(Text::try_from_str_in(
-                    character.encode_utf8(&mut [0; 4]),
-                    self.allocator,
-                )?),
-                position,
-            )?;
+            let mut bytes = [0; 4];
+            let text = character.encode_utf8(&mut bytes);
+            if let Some(frame) = output.frame.as_deref_mut() {
+                // A decoded scalar fits in detached inline storage. Publish
+                // only after the same source and entity accounting as owned Text.
+                frame.prepare_text(text)?;
+                frame.publish(position);
+            } else {
+                self.emit(
+                    EventKind::Text(Text::try_from_str_in(text, self.allocator)?),
+                    position,
+                )?;
+            }
             return Ok(true);
         }
         let name = name.expect("general entity references have an owned name");
@@ -2464,11 +3143,12 @@ impl Parser {
             let mut context = String::new_in(self.allocator);
             if self.config.namespace_separator.is_some() {
                 let mut bindings = Vec::new_in(self.allocator);
-                for binding in &self.namespaces {
+                for binding in self.namespace_bindings() {
                     try_push(&mut bindings, binding)?;
                 }
-                bindings.sort_unstable_by_key(|(prefix, _)| *prefix);
+                bindings.sort_unstable_by_key(|(prefix, _)| prefix.map_or("", String::as_str));
                 for (prefix, uri) in bindings {
+                    let prefix = prefix.map_or("", String::as_str);
                     self.charge_expansion(prefix.len())?;
                     self.charge_expansion(uri.len())?;
                     self.charge_expansion(2)?;
@@ -2554,12 +3234,20 @@ impl Parser {
             ));
         }
         if target.eq_ignore_ascii_case("xml") {
-            if target != "xml" || !self.declaration_allowed || self.sources.len() > 1 {
+            if target != "xml" {
+                return Err(self.err(
+                    ErrorKind::InvalidToken,
+                    "reserved processing instruction target",
+                ));
+            }
+            if !self.declaration_allowed || self.sources.len() > 1 {
                 return Err(self.err(
                     ErrorKind::MisplacedXmlDeclaration,
                     "XML declaration is not at the beginning",
                 ));
             }
+            let context = self.declaration_context();
+            let declaration_error = context.error_kind();
             let mut attrs = Vec::new_in(self.allocator);
             parse_raw_attributes(rest, false, &mut attrs, 3, self.config.name_rules).map_err(
                 |error| {
@@ -2567,112 +3255,57 @@ impl Parser {
                         if error.kind == ErrorKind::NoMemory {
                             ErrorKind::NoMemory
                         } else {
-                            ErrorKind::XmlDeclaration
+                            declaration_error
                         },
                         error.message,
                         2 + target.len() + error.position.byte_index,
                     )
                 },
             )?;
-            if self.fragment && !self.is_external_value() {
-                let mut attrs = attrs.into_iter().map(|attribute| attribute.parts(rest));
-                let first = attrs
-                    .next()
-                    .ok_or_else(|| self.err(ErrorKind::XmlDeclaration, "empty text declaration"))?;
-                let (version, encoding_attr) = if first.0 == "version" {
-                    (
-                        Some(token.for_slice(first.1).decode(self.allocator)?),
-                        attrs.next(),
-                    )
-                } else {
-                    (None, Some(first))
-                };
-                let (name, encoding, _, _) = encoding_attr.ok_or_else(|| {
-                    self.err(
-                        ErrorKind::XmlDeclaration,
-                        "text declaration requires an encoding",
-                    )
-                })?;
-                let encoding = token.for_slice(encoding).decoded(self.allocator)?;
-                if name != "encoding" || !valid_encoding_name(&encoding) || attrs.next().is_some() {
-                    return Err(self.err(ErrorKind::XmlDeclaration, "invalid text declaration"));
-                }
+            let allocator = self.allocator;
+            let Declaration {
+                version,
+                encoding,
+                standalone,
+            } = declaration_fields(rest, &attrs, context, |value| {
+                token.for_slice(value).decoded(allocator)
+            })
+            .map_err(|failure| match failure {
+                DeclarationFailure::Allocation(error) => Error::from(error),
+                DeclarationFailure::Syntax {
+                    message,
+                    offset: Some(offset),
+                } => self.err_at(declaration_error, message, 2 + target.len() + offset),
+                DeclarationFailure::Syntax {
+                    message,
+                    offset: None,
+                } => self.err(declaration_error, message),
+            })?;
+            let version = version
+                .map(|version| version.into_owned(allocator))
+                .transpose()?;
+            // Grammar is complete before an encoding error can invoke an adapter callback.
+            if let Some(encoding) = &encoding {
                 self.decoder
-                    .check_declaration(&encoding)
+                    .check_declaration(encoding)
                     .map_err(|error| self.err(error.kind, error.message))?;
+            }
+            if context == DeclarationContext::Text {
                 self.declaration_allowed = false;
                 self.emit(
                     EventKind::TextDeclaration {
                         version,
-                        encoding: string(&encoding, self.allocator)?,
+                        encoding: string(&encoding.expect("validated text encoding"), allocator)?,
                     },
                     position,
                 )?;
                 return Ok(());
             }
-            let version = attrs
-                .first()
-                .map(|attribute| {
-                    token
-                        .for_slice(attribute.value(rest))
-                        .decoded(self.allocator)
-                })
+            let version = version.expect("validated document version");
+            let encoding = encoding
+                .map(|encoding| encoding.into_owned(allocator))
                 .transpose()?;
-            if attrs.is_empty()
-                || attrs[0].name(rest) != "version"
-                || !version.as_ref().is_some_and(|version| {
-                    !version.is_empty()
-                        && version.bytes().all(|byte| {
-                            byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_')
-                        })
-                })
-            {
-                return Err(self.err_at(
-                    ErrorKind::XmlDeclaration,
-                    "XML declaration must begin with a version",
-                    2 + target.len() + attrs.first().map_or(0, |attribute| attribute.name_start),
-                ));
-            }
-            let version = version
-                .expect("validated declaration version")
-                .into_owned(self.allocator)?;
-            let mut encoding = None;
-            let mut standalone = None;
-            for attribute in attrs.into_iter().skip(1) {
-                let (name, value, _, _) = attribute.parts(rest);
-                match name {
-                    "encoding" if encoding.is_none() && standalone.is_none() => {
-                        let value = token.for_slice(value).decoded(self.allocator)?;
-                        if !valid_encoding_name(&value) {
-                            return Err(
-                                self.err(ErrorKind::XmlDeclaration, "invalid encoding name")
-                            );
-                        }
-                        self.decoder
-                            .check_declaration(&value)
-                            .map_err(|error| self.err(error.kind, error.message))?;
-                        encoding = Some(value.into_owned(self.allocator)?);
-                    }
-                    "standalone" if standalone.is_none() => {
-                        standalone = Some(match value {
-                            "yes" => true,
-                            "no" => false,
-                            _ => {
-                                return Err(self.err(
-                                    ErrorKind::XmlDeclaration,
-                                    "invalid standalone declaration",
-                                ));
-                            }
-                        });
-                    }
-                    _ => {
-                        return Err(self.err(
-                            ErrorKind::XmlDeclaration,
-                            "invalid XML declaration attribute",
-                        ));
-                    }
-                }
-            }
+            drop(attrs);
             self.standalone =
                 standalone == Some(true) || (self.is_external_value() && self.standalone);
             if standalone == Some(true) && self.parameter_mode == 1 {
@@ -2707,7 +3340,13 @@ impl Parser {
         Ok(())
     }
 
-    fn parse_start(&mut self, token: lexical::Slice<'_>, position: Position) -> Result<(), Error> {
+    fn parse_start(
+        &mut self,
+        token: lexical::Slice<'_>,
+        position: Position,
+        planned: tag::Planned,
+        mut frame: Option<&mut AdapterFrame>,
+    ) -> Result<(), Error> {
         if self.closed_root {
             return Err(self.err(
                 ErrorKind::JunkAfterDocumentElement,
@@ -2719,8 +3358,34 @@ impl Parser {
         }
         let empty = token.ends_with("/>");
         let body = &token[1..token.len() - if empty { 2 } else { 1 }];
-        let (raw_name, rest) = take_name(body, self.config.name_rules)
-            .ok_or_else(|| self.err_at(ErrorKind::InvalidToken, "invalid element name", 1))?;
+        let (raw_name, rest) = if let tag::Planned::Complete { name_end, .. } = planned {
+            body.split_at(name_end - 1)
+        } else {
+            take_name(body, self.config.name_rules)
+                .ok_or_else(|| self.err_at(ErrorKind::InvalidToken, "invalid element name", 1))?
+        };
+        if let Some(frame) = frame.as_deref_mut().filter(|_| {
+            matches!(planned, tag::Planned::Complete { .. })
+                && token.len() <= arena::MAX_ARENA_BYTES
+                && self.raw_attributes.len() <= arena::MAX_ARENA_ATTRIBUTES
+                // A frame contains final callback spellings. Namespace-aware
+                // tags can share this storage only when expansion is identity.
+                && self.identity_frame_names(raw_name, rest)
+        }) {
+            return self.parse_start_frame::<false>(token, position, raw_name, rest, frame);
+        }
+        if let Some(frame) = frame.filter(|_| {
+            matches!(planned, tag::Planned::Complete { .. })
+                && !self.source().has_conversions()
+                && self.raw_attributes.len() <= arena::MAX_ARENA_ATTRIBUTES
+                && self.raw_attributes.iter().all(|attribute| {
+                    let name = attribute.name(rest);
+                    name != "xmlns" && !name.contains(':')
+                })
+                && self.expanded_name_fits_frame(raw_name, token.len())
+        }) {
+            return self.parse_start_frame::<true>(token, position, raw_name, rest, frame);
+        }
         if self.config.namespace_separator.is_some() && !self.config.name_rules.is_qname(raw_name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid qualified element name"));
         }
@@ -2730,20 +3395,22 @@ impl Parser {
         // Validate the complete tag before expanding values or emitting callbacks.
         let mut raw_attrs =
             std::mem::replace(&mut self.raw_attributes, Vec::new_in(self.allocator));
-        parse_raw_attributes(
-            rest,
-            true,
-            &mut raw_attrs,
-            self.config.limits.max_attributes,
-            self.config.name_rules,
-        )
-        .map_err(|error| {
-            self.err_at(
-                error.kind,
-                error.message,
-                1 + raw_name.len() + error.position.byte_index,
+        if !matches!(planned, tag::Planned::Complete { .. }) {
+            parse_raw_attributes(
+                rest,
+                true,
+                &mut raw_attrs,
+                self.config.limits.max_attributes,
+                self.config.name_rules,
             )
-        })?;
+            .map_err(|error| {
+                self.err_at(
+                    error.kind,
+                    error.message,
+                    1 + raw_name.len() + error.position.byte_index,
+                )
+            })?;
+        }
         if raw_attrs.len() > self.config.limits.max_attributes {
             return Err(self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded"));
         }
@@ -2915,13 +3582,9 @@ impl Parser {
                         ));
                     }
                     let previous = if uri.is_empty() {
-                        self.namespaces.remove(prefix)
+                        self.remove_namespace(prefix)
                     } else {
-                        try_insert(
-                            &mut self.namespaces,
-                            string(prefix, self.allocator)?,
-                            uri.try_clone()?,
-                        )?
+                        self.insert_namespace(string(prefix, self.allocator)?, uri.try_clone()?)?
                     };
                     try_push(&mut bindings, (string(prefix, self.allocator)?, previous))?;
                     self.emit(
@@ -2979,27 +3642,62 @@ impl Parser {
         };
         self.seen_root = true;
         self.declaration_allowed = false;
-        let stack_name = if expanded_name == name {
+        let expanded_end = expanded_name.len();
+        let (stack_name, raw_start) = if expanded_name.as_str() != name {
+            // A raw name often already occupies the expanded spelling's suffix.
+            // Otherwise append it after the event name, which can be truncated
+            // without moving bytes when the end event takes ownership.
+            let shared_suffix = expanded_name.ends_with(name);
+            let capacity = expanded_end
+                .checked_add(if shared_suffix { 0 } else { name.len() })
+                .and_then(|length| length.checked_add(1))
+                .ok_or(AllocError::CapacityOverflow)?;
+            let mut value = self
+                .event_recycling
+                .take_name()
+                .unwrap_or_else(|| String::new_in(self.allocator));
+            value.clear();
+            value.try_reserve(capacity)?;
+            value.try_push_str(&expanded_name)?;
+            let raw_start = if shared_suffix {
+                expanded_end - name.len()
+            } else {
+                value.try_push_str(name)?;
+                expanded_end
+            };
+            (value, raw_start)
+        } else {
+            let value = match name_value {
+                lexical::Decoded::Borrowed(name) => {
+                    let reusable = self.event_recycling.take_name();
+                    recycling::copy_name(name, reusable, self.allocator)?
+                }
+                lexical::Decoded::Owned(name) => name,
+            };
+            (value, 0)
+        };
+        // Reserve both slots before moving either owner. An error still drops
+        // the local undo block without restoring the already updated map.
+        self.stack.try_reserve(1).map_err(AllocError::from)?;
+        let namespace_scope = if bindings.is_empty() {
             None
         } else {
-            Some(expanded_name.try_clone()?)
+            self.namespace_scopes
+                .try_reserve(1)
+                .map_err(AllocError::from)?;
+            self.namespace_scopes.push(bindings);
+            // The successful reserve bounds the length; after push it is nonzero.
+            NonZeroUsize::new(self.namespace_scopes.len())
         };
-        let raw_name = match name_value {
-            lexical::Decoded::Borrowed(name) => {
-                let reusable = self.event_recycling.take_name();
-                recycling::copy_name(name, reusable, self.allocator)?
-            }
-            lexical::Decoded::Owned(name) => name,
-        };
-        try_push(
-            &mut self.stack,
-            Element {
-                expanded_name: stack_name,
-                raw_name,
-                raw_encoding,
-                bindings,
+        self.stack.push(Element {
+            name: ElementName {
+                value: stack_name,
+                raw_start,
+                expanded_end,
             },
-        )?;
+            raw_encoding,
+            namespace_scope,
+        });
         self.emit(
             EventKind::StartElement {
                 name: expanded_name,
@@ -3027,6 +3725,200 @@ impl Parser {
         Ok(())
     }
 
+    /// Apply the same namespace identity test before either token representation.
+    fn identity_frame_names(&self, name: &str, rest: &str) -> bool {
+        self.config.namespace_separator.is_none()
+            || (!name.contains(':')
+                && self.default_namespace.is_none()
+                && self.raw_attributes.iter().all(|attribute| {
+                    let name = attribute.name(rest);
+                    name != "xmlns" && !name.contains(':')
+                }))
+    }
+
+    /// Split mutation fields from the live root source without moving its owner.
+    fn identity_start_state(&mut self) -> IdentityStartState<'_> {
+        debug_assert!(self.tables.defaults.is_empty());
+        debug_assert!(!self.fragment && self.sources.len() == 1);
+        IdentityStartState {
+            source: self
+                .sources
+                .last()
+                .expect("document source is always present"),
+            allocator: self.allocator,
+            limits: &self.config.limits,
+            namespaces: &self.namespaces,
+            raw_attributes: &mut self.raw_attributes,
+            event_recycling: &mut self.event_recycling,
+            stack: &mut self.stack,
+            id_attribute_index: &mut self.id_attribute_index,
+            seen_root: &mut self.seen_root,
+            declaration_allowed: &mut self.declaration_allowed,
+        }
+    }
+
+    /// Check storage eligibility without charging URI work or changing error order.
+    fn expanded_name_fits_frame(&self, name: &str, token_bytes: usize) -> bool {
+        let Some(separator) = self.config.namespace_separator else {
+            return false;
+        };
+        if !self.config.name_rules.is_qname(name) {
+            return false;
+        }
+        let uri = match name.split_once(':') {
+            Some(("xmlns", _)) => return false,
+            Some(("", _)) => self.default_namespace.as_ref(),
+            Some((prefix, _)) => self.namespaces.get(prefix),
+            None => self.default_namespace.as_ref(),
+        };
+        let Some(uri) = uri else {
+            return false;
+        };
+        // Literal fields and their NULs fit within the token. Its raw QName
+        // also covers a triplet's prefix; add the URI and both possible separators.
+        let separators = if separator == '\0' {
+            0
+        } else {
+            2 * separator.len_utf8()
+        };
+        token_bytes
+            .checked_add(uri.len())
+            .and_then(|bytes| bytes.checked_add(separators))
+            .is_some_and(|bytes| bytes <= arena::MAX_ARENA_BYTES)
+    }
+
+    /// Lower a literal tag, optionally expanding only its element name.
+    /// Keep fallible copies in semantic order and publish after any end event.
+    fn parse_start_frame<const EXPAND_ELEMENT: bool>(
+        &mut self,
+        token: lexical::Slice<'_>,
+        position: Position,
+        name: &str,
+        rest: &str,
+        frame: &mut AdapterFrame,
+    ) -> Result<(), Error> {
+        debug_assert!(self.tables.defaults.is_empty());
+        debug_assert!(!self.source().has_conversions());
+        debug_assert!(!self.fragment && self.sources.len() == 1);
+        if !EXPAND_ELEMENT && !token.ends_with("/>") {
+            return self
+                .identity_start_state()
+                .lower(name, rest, position, frame);
+        }
+        let mut raw_attrs =
+            std::mem::replace(&mut self.raw_attributes, Vec::new_in(self.allocator));
+        if raw_attrs.len() > self.config.limits.max_attributes {
+            return Err(self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded"));
+        }
+        self.event_recycling
+            .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
+        frame.prepare(raw_attrs.len())?;
+        let literal_span =
+            !EXPAND_ELEMENT && !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);
+        let mut names = (raw_attrs.len() > 8)
+            .then(|| HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator));
+        for (index, attribute) in raw_attrs.iter().enumerate() {
+            let (attr_name, value, attribute_offset, _) = attribute.parts(rest);
+            let duplicate = if let Some(names) = &mut names {
+                !try_set_insert(names, attr_name)?
+            } else {
+                raw_attrs[..index]
+                    .iter()
+                    .any(|attribute| attribute.name(rest) == attr_name)
+            };
+            if duplicate {
+                return Err(self.err_at(
+                    ErrorKind::DuplicateAttribute,
+                    "duplicate attribute",
+                    1 + name.len() + attribute_offset,
+                ));
+            }
+            if !literal_span {
+                frame.push_attribute(attr_name, value)?;
+            }
+        }
+        if literal_span {
+            frame.push_literal_attributes(rest, &raw_attrs)?;
+        }
+        self.id_attribute_index = None;
+        let expanded_name = if EXPAND_ELEMENT {
+            let reusable = self.event_recycling.take_name();
+            Some(self.expand_name(name, false, self.config.namespace_triplets, reusable)?)
+        } else {
+            frame.set_name(name)?;
+            None
+        };
+        self.seen_root = true;
+        self.declaration_allowed = false;
+        let stack_name = if let Some(mut value) = expanded_name {
+            // Detach callback bytes before extending the stack's packed owner.
+            // Matching and End delivery keep the same raw/expanded slices.
+            frame.set_name(&value)?;
+            let expanded_end = value.len();
+            let shared_suffix = value.ends_with(name);
+            let additional = if shared_suffix { 0 } else { name.len() };
+            let capacity = expanded_end
+                .checked_add(additional)
+                .and_then(|length| length.checked_add(1))
+                .ok_or(AllocError::CapacityOverflow)?;
+            if value.capacity() < capacity {
+                // Keep the expansion scratch reusable when a nested name needs
+                // a larger packed owner. Suffixes with spare capacity still move.
+                let mut packed = self
+                    .event_recycling
+                    .take_name()
+                    .unwrap_or_else(|| String::new_in(self.allocator));
+                packed.clear();
+                packed.try_reserve(capacity)?;
+                packed.try_push_str(&value)?;
+                self.event_recycling
+                    .recycle_end(self.event_recycling.token(), value);
+                value = packed;
+            }
+            let raw_start = if shared_suffix {
+                expanded_end - name.len()
+            } else {
+                value.try_push_str(name)?;
+                expanded_end
+            };
+            ElementName {
+                value,
+                raw_start,
+                expanded_end,
+            }
+        } else {
+            let reusable = self.event_recycling.take_name();
+            let value = recycling::copy_name(name, reusable, self.allocator)?;
+            ElementName {
+                raw_start: 0,
+                expanded_end: value.len(),
+                value,
+            }
+        };
+        try_push(
+            &mut self.stack,
+            Element {
+                name: stack_name,
+                raw_encoding: None,
+                namespace_scope: None,
+            },
+        )?;
+        if token.ends_with("/>") {
+            let first_end = self.pending.len();
+            let end_position = self.source().position_at(token.len(), 0);
+            self.end_element(end_position)?;
+            if let Some(pending) = self.pending.get_mut(first_end) {
+                pending.raw = Some(String::new_in(self.allocator));
+            }
+        }
+        if raw_attrs.capacity() <= 128 {
+            raw_attrs.clear();
+            self.raw_attributes = raw_attrs;
+        }
+        frame.publish(position);
+        Ok(())
+    }
+
     fn parse_end(&mut self, token: lexical::Slice<'_>, position: Position) -> Result<(), Error> {
         if self.stack.is_empty() && !self.fragment {
             return Err(self.err_at(
@@ -3049,7 +3941,7 @@ impl Parser {
             ));
         }
         if self.stack.last().is_none_or(|element| {
-            element.raw_name != *decoded_name
+            element.name.raw_name() != &*decoded_name
                 || !token.for_slice(name).same_name_encoding(
                     element
                         .raw_encoding
@@ -3067,19 +3959,24 @@ impl Parser {
             .stack
             .pop()
             .ok_or_else(|| self.err(ErrorKind::TagMismatch, "unexpected end tag"))?;
+        // Detach before any fallible emission or restoration. Errors must drop
+        // the unprocessed undo records, not leave an orphaned parser-owned block.
+        let bindings = element
+            .namespace_scope
+            .map(|scope| self.take_namespace_scope(scope));
         self.emit(
             EventKind::EndElement {
-                name: element.expanded_name.unwrap_or(element.raw_name),
+                name: element.name.into_event_name(),
             },
             position,
         )?;
-        for (prefix, previous) in element.bindings.into_iter().rev() {
+        for (prefix, previous) in bindings.into_iter().flatten().rev() {
             match previous {
                 Some(uri) => {
-                    try_insert(&mut self.namespaces, prefix.try_clone()?, uri)?;
+                    self.insert_namespace(prefix.try_clone()?, uri)?;
                 }
                 None => {
-                    self.namespaces.remove(&prefix);
+                    self.remove_namespace(&prefix);
                 }
             }
             self.emit(
@@ -3093,6 +3990,36 @@ impl Parser {
             self.closed_root = true;
         }
         Ok(())
+    }
+
+    /// Detach the closing element's top block while bounding empty-pool retention.
+    fn take_namespace_scope(&mut self, scope: NonZeroUsize) -> NamespaceBindings {
+        debug_assert_eq!(scope.get(), self.namespace_scopes.len());
+        let bindings = self
+            .namespace_scopes
+            .pop()
+            .expect("declaring element owns the top namespace scope");
+        if self.namespace_scopes.is_empty()
+            && self.namespace_scopes.capacity() > 4096 / size_of::<NamespaceBindings>()
+        {
+            self.namespace_scopes = Vec::new_in(self.allocator);
+        }
+        bindings
+    }
+
+    /// Move a matched native End name out without an Event or namespace undo.
+    fn prepare_end_frame(&mut self, frame: &mut AdapterFrame) {
+        debug_assert!(self.pending.is_empty() && !frame.is_active());
+        debug_assert!(!self.fragment && self.sources.len() == 1);
+        let element = self
+            .stack
+            .pop()
+            .expect("matched end has an opening element");
+        debug_assert!(element.namespace_scope.is_none() && element.raw_encoding.is_none());
+        frame.prepare_end(element.name.into_event_name());
+        if self.stack.is_empty() {
+            self.closed_root = true;
+        }
     }
 
     fn expand_name(
@@ -3120,10 +4047,13 @@ impl Parser {
                         "xmlns cannot prefix an element or ordinary attribute",
                     ));
                 }
+                Some("") => Some(self.default_namespace.as_ref().ok_or_else(|| {
+                    self.err(ErrorKind::UndefinedPrefix, "unbound namespace prefix")
+                })?),
                 Some(prefix) => Some(self.namespaces.get(prefix).ok_or_else(|| {
                     self.err(ErrorKind::UndefinedPrefix, "unbound namespace prefix")
                 })?),
-                None if !attribute => self.namespaces.get(""),
+                None if !attribute => self.default_namespace.as_ref(),
                 None => None,
             };
         let Some(uri) = uri else {
@@ -3168,12 +4098,13 @@ impl Parser {
     }
 
     fn charge_expansion(&self, size: usize) -> Result<(), Error> {
+        let limit = self.work_bytes_limit(self.config.limits.max_entity_expansion_bytes);
         self.expanded
             .expanded
             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
                 expanded
                     .checked_add(size)
-                    .filter(|expanded| *expanded <= self.config.limits.max_entity_expansion_bytes)
+                    .filter(|expanded| *expanded <= limit)
             })
             .map_err(|_| {
                 self.err(
@@ -3187,6 +4118,46 @@ impl Parser {
     /// Comments and PI data normalize the converted callback string itself.
     fn markup_text(&self, text: lexical::Slice<'_>) -> Result<String, Error> {
         normalize_newlines(&text.decoded(self.allocator)?, self.allocator)
+    }
+
+    /// Prepare detached Text or an explicit C-host range, or keep the owned projection.
+    /// A prepared frame is not visible until the caller reaches its emit point.
+    fn prepare_character_data(
+        &mut self,
+        count: usize,
+        frame: Option<&mut AdapterFrame>,
+        c_text_context: bool,
+        no_carriage_returns: bool,
+    ) -> Result<Option<Text>, Error> {
+        let text = &self.source().remaining()[..count];
+        if let Some(frame) = frame
+            && count <= arena::MAX_ARENA_BYTES
+            && !self.source().has_conversions()
+            && (no_carriage_returns || self.sources.len() > 1 || !text.contains('\r'))
+        {
+            if count > arena::INLINE_TEXT_BYTES {
+                self.event_recycling
+                    .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
+            }
+            if c_text_context
+                && count > 0
+                && !self.fragment
+                && !self.external_subset
+                && self.sources.len() == 1
+                && let Some(start) = self.source().native_utf8_byte_index()
+            {
+                frame.prepare_native_text(start, count)?;
+            } else {
+                frame.prepare_text(&self.source().remaining()[..count])?;
+            }
+            Ok(None)
+        } else if no_carriage_returns {
+            Text::try_from_str_in(text, self.allocator)
+                .map(Some)
+                .map_err(Into::into)
+        } else {
+            self.character_data(text).map(Some)
+        }
     }
 
     fn character_data(&self, text: &str) -> Result<Text, Error> {
@@ -3407,6 +4378,9 @@ impl Parser {
     }
 }
 
+#[cfg(test)]
+mod context_text_tests;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum ScanMode {
     Tag,
@@ -3455,6 +4429,156 @@ impl RawAttribute {
     }
 }
 
+/// Declaration grammar is independent of the encoding-detection BOM policy.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum DeclarationContext {
+    Document,
+    Text,
+}
+
+impl DeclarationContext {
+    fn error_kind(self) -> ErrorKind {
+        match self {
+            Self::Document => ErrorKind::XmlDeclaration,
+            Self::Text => ErrorKind::TextDeclaration,
+        }
+    }
+}
+
+struct Declaration<'a> {
+    version: Option<lexical::Decoded<'a>>,
+    encoding: Option<lexical::Decoded<'a>>,
+    standalone: Option<bool>,
+}
+
+enum DeclarationFailure {
+    Syntax {
+        message: &'static str,
+        offset: Option<usize>,
+    },
+    Allocation(AllocError),
+}
+
+/// Validate complete fields before checking their declared encoding. The caller
+/// supplies lexical decoding; bootstrap ASCII values use borrowed slices only.
+fn declaration_fields<'a>(
+    rest: &'a str,
+    attrs: &[RawAttribute],
+    context: DeclarationContext,
+    mut decode: impl FnMut(&'a str) -> Result<lexical::Decoded<'a>, AllocError>,
+) -> Result<Declaration<'a>, DeclarationFailure> {
+    let syntax = |message| DeclarationFailure::Syntax {
+        message,
+        offset: None,
+    };
+    let mut decode = |value: &'a str| decode(value).map_err(DeclarationFailure::Allocation);
+    if context == DeclarationContext::Text {
+        let mut attrs = attrs.iter().map(|attribute| attribute.parts(rest));
+        let first = attrs
+            .next()
+            .ok_or_else(|| syntax("empty text declaration"))?;
+        let (version, encoding_attr) = if first.0 == "version" {
+            (Some(decode(first.1)?), attrs.next())
+        } else {
+            (None, Some(first))
+        };
+        let (name, encoding, _, _) =
+            encoding_attr.ok_or_else(|| syntax("text declaration requires an encoding"))?;
+        let encoding = decode(encoding)?;
+        if name != "encoding" || !valid_encoding_name(&encoding) || attrs.next().is_some() {
+            return Err(syntax("invalid text declaration"));
+        }
+        return Ok(Declaration {
+            version,
+            encoding: Some(encoding),
+            standalone: None,
+        });
+    }
+    let version = attrs
+        .first()
+        .map(|attribute| decode(attribute.value(rest)))
+        .transpose()?;
+    if attrs.is_empty()
+        || attrs[0].name(rest) != "version"
+        || !version.as_ref().is_some_and(|version| {
+            !version.is_empty()
+                && version
+                    .bytes()
+                    .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_'))
+        })
+    {
+        return Err(DeclarationFailure::Syntax {
+            message: "XML declaration must begin with a version",
+            offset: Some(attrs.first().map_or(0, |attribute| attribute.name_start)),
+        });
+    }
+    let mut encoding = None;
+    let mut standalone = None;
+    for attribute in attrs.iter().skip(1) {
+        let (name, value, _, _) = attribute.parts(rest);
+        match name {
+            "encoding" if encoding.is_none() && standalone.is_none() => {
+                let value = decode(value)?;
+                if !valid_encoding_name(&value) {
+                    return Err(syntax("invalid encoding name"));
+                }
+                encoding = Some(value);
+            }
+            "standalone" if standalone.is_none() => {
+                standalone = Some(match value {
+                    "yes" => true,
+                    "no" => false,
+                    _ => return Err(syntax("invalid standalone declaration")),
+                });
+            }
+            _ => return Err(syntax("invalid XML declaration attribute")),
+        }
+    }
+    Ok(Declaration {
+        version,
+        encoding,
+        standalone,
+    })
+}
+
+/// Prove malformed syntax only in a complete bounded ASCII bootstrap declaration.
+/// Ordinary parsing still reports the error after token limits, raw publication
+/// and source accounting. This helper creates no owned values or parser state.
+fn malformed_ascii_declaration(rest: &str, context: DeclarationContext) -> bool {
+    debug_assert!(rest.is_ascii());
+    if invalid_xml_char(rest).is_some() {
+        return true;
+    }
+    let empty = RawAttribute {
+        name_start: 0,
+        name_end: 0,
+        value_start: 0,
+        value_end: 0,
+    };
+    let mut attrs = [empty; 3];
+    let mut count = 0;
+    let mut scanner = tag::AttributeScanner::new(0);
+    loop {
+        // Fourth/Fifth edition name rules agree for this proven ASCII input.
+        match scanner.next(rest, true, false, false, 3, NameRules::default()) {
+            Ok(tag::Step::Attribute(attribute)) => {
+                attrs[count] = attribute;
+                count += 1;
+            }
+            Ok(tag::Step::End) => {
+                return declaration_fields(rest, &attrs[..count], context, |value| {
+                    Ok(lexical::Decoded::Borrowed(value))
+                })
+                .is_err();
+            }
+            Err(_) => return true,
+            Ok(tag::Step::Incomplete | tag::Step::TagEnd { .. }) => {
+                unreachable!("complete attribute view excludes a tag delimiter")
+            }
+        }
+    }
+}
+
 fn parse_raw_attributes(
     text: &str,
     allow_refs: bool,
@@ -3462,93 +4586,40 @@ fn parse_raw_attributes(
     limit: usize,
     name_rules: NameRules,
 ) -> Result<(), Error> {
-    let original_len = text.len();
-    let mut text = text;
     result.clear();
-    let error_at = |kind, message, remaining: &str| Error {
-        kind,
-        message,
-        position: Position {
-            byte_index: original_len - remaining.len(),
-            line: 1,
-            column: 0,
-            byte_count: 0,
-        },
-    };
-    while !text.is_empty() {
-        let trimmed = text.trim_start_matches(whitespace);
-        if trimmed.len() == text.len() {
-            return Err(error_at(
-                ErrorKind::InvalidToken,
-                "attributes must be separated by whitespace",
-                text,
-            ));
+    let mut scanner = tag::AttributeScanner::new(0);
+    loop {
+        let step = scanner
+            .next(text, true, false, allow_refs, limit, name_rules)
+            .map_err(|error| Error {
+                kind: error.kind,
+                message: error.message,
+                position: Position {
+                    byte_index: error.offset,
+                    line: 1,
+                    column: 0,
+                    byte_count: 0,
+                },
+            })?;
+        match step {
+            tag::Step::Attribute(attribute) => try_push(result, attribute)?,
+            tag::Step::End => return Ok(()),
+            tag::Step::Incomplete | tag::Step::TagEnd { .. } => {
+                unreachable!("complete attribute views have no tag delimiter")
+            }
         }
-        text = trimmed;
-        if text.is_empty() {
-            break;
-        }
-        if result.len() >= limit {
-            return Err(error_at(
-                ErrorKind::LimitExceeded,
-                "attribute count limit exceeded",
-                text,
-            ));
-        }
-        let name_offset = original_len - text.len();
-        let (name, rest) = take_name(text, name_rules).ok_or(error_at(
-            ErrorKind::InvalidToken,
-            "invalid attribute name",
-            text,
-        ))?;
-        let rest = rest.trim_start_matches(whitespace);
-        let rest = rest
-            .strip_prefix('=')
-            .ok_or(error_at(
-                ErrorKind::InvalidToken,
-                "attribute is missing equals sign",
-                rest,
-            ))?
-            .trim_start_matches(whitespace);
-        let quote = rest
-            .chars()
-            .next()
-            .filter(|c| matches!(c, '\'' | '"'))
-            .ok_or(error_at(
-                ErrorKind::InvalidToken,
-                "attribute value must be quoted",
-                rest,
-            ))?;
-        let rest = &rest[1..];
-        let end = rest.find(quote).ok_or(error_at(
-            ErrorKind::UnclosedToken,
-            "unclosed attribute value",
-            rest,
-        ))?;
-        let value = &rest[..end];
-        let value_offset = original_len - rest.len();
-        if let Some(offset) = value
-            .find('<')
-            .or_else(|| (!allow_refs).then(|| value.find('&')).flatten())
-        {
-            return Err(error_at(
-                ErrorKind::InvalidToken,
-                "invalid character in attribute value",
-                &rest[offset..],
-            ));
-        }
-        try_push(
-            result,
-            RawAttribute {
-                name_start: name_offset,
-                name_end: name_offset + name.len(),
-                value_start: value_offset,
-                value_end: value_offset + value.len(),
-            },
-        )?;
-        text = &rest[end + 1..];
     }
-    Ok(())
+}
+
+/// Resolve a coalesced span before newline boundaries can stop the scalar scan.
+fn coalesced_text_end(text: &str) -> Option<usize> {
+    // Markup takes precedence even at the complete-line cutoff. Search bytes so
+    // the bounded prefix may end inside a UTF-8 character without slicing str.
+    let bytes = text.as_bytes();
+    if let Some(end) = memchr::memchr2(b'<', b'&', &bytes[..bytes.len().min(65_537)]) {
+        return Some(end);
+    }
+    (bytes.len() <= 65_536).then_some(bytes.len())
 }
 
 fn string(text: &str, allocator: Allocator) -> Result<String, Error> {
@@ -3668,6 +4739,420 @@ fn character_reference(name: &str) -> Result<Option<char>, (ErrorKind, usize)> {
 }
 
 #[cfg(test)]
+mod input_bound_tests {
+    use super::*;
+
+    #[test]
+    fn source_limit_rejection_preserves_input_state() {
+        for limit in [0, 7, Limits::default().max_total_bytes, usize::MAX] {
+            let mut config = Config::default();
+            config.limits.max_total_bytes = limit;
+            let mut parser = Parser::new(config);
+            let bound = limit.min(isize::MAX as usize);
+            // Seed cumulative history without allocating the preceding bytes.
+            parser.received = bound.saturating_sub(1);
+            if bound != 0 {
+                assert_eq!(parser.input_bytes_remaining(), 1);
+                parser.feed(b" ", false).unwrap();
+            }
+            assert_eq!(parser.received, bound);
+            assert_eq!(parser.input_bytes_remaining(), 0);
+            parser.feed_start_byte = 17;
+            let before = format!("{:?}{:?}", parser.sources, parser.decoder);
+            let error = parser.feed(b"x", true).unwrap_err();
+            assert_eq!(error.kind, ErrorKind::LimitExceeded);
+            assert_eq!(parser.received, bound);
+            assert_eq!(parser.feed_start_byte, 17);
+            assert!(!parser.final_input);
+            assert_eq!(format!("{:?}{:?}", parser.sources, parser.decoder), before);
+        }
+        let mut config = Config::default();
+        config.limits.max_total_bytes = 0;
+        let mut parser = Parser::new(config);
+        parser.feed(b"", true).unwrap();
+        assert_eq!(parser.received, 0);
+        assert!(parser.final_input);
+    }
+
+    #[test]
+    fn adapter_input_owner_matches_decoded_events_and_positions() {
+        let utf16 = "<r>é</r>"
+            .encode_utf16()
+            .flat_map(u16::to_le_bytes)
+            .collect::<std::vec::Vec<_>>();
+        for input in [
+            b"<r a='v'>abc<n/>tail</r>".as_slice(),
+            "\u{feff}<?xml version='1.0'?><r>é\r\n&amp;z</r>".as_bytes(),
+            b"<?xml version='1.0' encoding='ISO-8859-1'?><r>\xe9</r>",
+            b"<r>abc\xfftail</r>",
+            b"<r>abc\xc3",
+            &utf16,
+        ] {
+            for width in [1, 2, 3, 4, 7, input.len()] {
+                let mut ordinary = Parser::new(Config::default());
+                let mut context = Parser::new(Config::default());
+                context.enable_input_context();
+                let mut fed = 0;
+                for chunk in input.chunks(width) {
+                    fed += chunk.len();
+                    let final_input = fed == input.len();
+                    assert_eq!(
+                        context.feed(chunk, final_input),
+                        ordinary.feed(chunk, final_input)
+                    );
+                    let (raw, start) = context.input_context();
+                    assert_eq!(raw, &input[start..fed]);
+                    loop {
+                        let expected = ordinary.next_event();
+                        let actual = context.next_event();
+                        assert_eq!(actual, expected, "width={width}, fed={fed}");
+                        assert_eq!(context.current_raw(), ordinary.current_raw());
+                        if !matches!(actual, Ok(Some(_))) {
+                            break;
+                        }
+                    }
+                    if context.error.is_some() {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn adapter_input_owner_covers_first_feed_detection_and_fallback() {
+        for input in ["<r>é</r>", "\u{feff}<r>é</r>"] {
+            let mut parser = Parser::new(Config::default());
+            parser.enable_input_context();
+            parser.feed(input.as_bytes(), true).unwrap();
+            assert_eq!(
+                parser.input_context().0.as_ptr(),
+                parser.sources[0].text.as_bytes().as_ptr()
+            );
+            assert_eq!(parser.input_context().0, input.as_bytes());
+            assert_eq!(
+                parser.sources[0].remaining(),
+                input.trim_start_matches('\u{feff}')
+            );
+            while parser.next_event().unwrap().is_some() {}
+        }
+        let mut unaligned = false;
+        for padding in 0..4 {
+            let input = format!("<r>{}{}<n/>", "€".repeat(23_000), "x".repeat(padding));
+            let mut parser = Parser::new(Config::default());
+            parser.enable_input_context();
+            parser.feed(input.as_bytes(), false).unwrap();
+            while parser.next_event().unwrap().is_some() {}
+            parser.feed(b"</r>", true).unwrap();
+            let (context, start) = parser.input_context();
+            assert_eq!(start, input.len() - 1024);
+            assert_eq!(context, [&input.as_bytes()[start..], b"</r>"].concat());
+            let text = parser.sources[0].text.as_bytes();
+            let offset = text.len() - context.len();
+            assert!(offset <= 3);
+            assert_eq!(context.as_ptr(), text.as_ptr().wrapping_add(offset));
+            unaligned |= offset != 0;
+            while parser.next_event().unwrap().is_some() {}
+        }
+        assert!(unaligned);
+        let mut parser = Parser::new(Config::default());
+        parser.enable_input_context();
+        parser.feed(b"<?xml version='1.0'", false).unwrap();
+        assert_eq!(
+            parser.input_context().0.as_ptr(),
+            parser.sources[0].text.as_bytes().as_ptr()
+        );
+        assert!(parser.sources[0].remaining().is_empty());
+        assert_eq!(parser.next_event().unwrap(), None);
+        parser.feed(b"?><r>abc", false).unwrap();
+        assert_eq!(
+            parser.input_context().0.as_ptr(),
+            parser.sources[0].text.as_bytes().as_ptr()
+        );
+        while parser.next_event().unwrap().is_some() {}
+        parser.feed(b"\xc3", false).unwrap();
+        assert_ne!(
+            parser.input_context().0.as_ptr(),
+            parser.sources[0].text.as_bytes().as_ptr()
+        );
+        parser.feed(b"\xa9</r>", true).unwrap();
+        assert_ne!(
+            parser.input_context().0.as_ptr(),
+            parser.sources[0].text.as_bytes().as_ptr()
+        );
+        while parser.next_event().unwrap().is_some() {}
+
+        // A child may already inherit a custom map before its first feed.
+        let mut parent = Parser::new(Config {
+            encoding: Some("test-map".to_owned()),
+            ..Config::default()
+        });
+        parent.feed(b"<r>", false).unwrap();
+        assert_eq!(
+            parent.next_event().unwrap_err().kind,
+            ErrorKind::UnknownEncoding
+        );
+        parent
+            .set_encoding_map("test-map", std::array::from_fn(|byte| byte as i32))
+            .unwrap();
+        while parent.next_event().unwrap().is_some() {}
+        let mut child = parent
+            .external_child_with_encoding(Some(""), Some("test-map"))
+            .unwrap();
+        child.enable_input_context();
+        child.feed(b"abc", true).unwrap();
+        assert_ne!(
+            child.input_context().0.as_ptr(),
+            child.sources[0].text.as_bytes().as_ptr()
+        );
+        assert!(matches!(
+            child.next_event().unwrap().unwrap().kind,
+            EventKind::Text(_)
+        ));
+        assert_eq!(child.next_event().unwrap(), None);
+    }
+
+    #[test]
+    fn external_input_allowance_belongs_to_each_source() {
+        let mut config = Config::default();
+        config.limits.max_total_bytes = 7;
+        let mut parent = Parser::new(config);
+        parent.feed(b"<r>", false).unwrap();
+        while parent.next_event().unwrap().is_some() {}
+        for context in [None, Some("")] {
+            let mut child = parent.external_child(context, None).unwrap();
+            assert_eq!(child.input_bytes_remaining(), 7);
+            let text = if context.is_some() { b"<c/>" } else { b"    " };
+            child.feed(text, true).unwrap();
+            while child.next_event().unwrap().is_some() {}
+            assert_eq!(child.input_bytes_remaining(), 3);
+            assert_eq!(parent.input_bytes_remaining(), 4);
+        }
+        parent.feed(b"</r>", true).unwrap();
+        while parent.next_event().unwrap().is_some() {}
+        assert_eq!(parent.input_bytes_remaining(), 0);
+        assert_eq!(parent.sources[0].position(0).byte_index, 7);
+        assert!(parent.is_finished());
+    }
+}
+
+#[cfg(test)]
+mod streaming_work_tests {
+    use super::*;
+
+    fn drain(parser: &mut Parser) -> Result<(), Error> {
+        while parser.next_event()?.is_some() {}
+        Ok(())
+    }
+
+    #[test]
+    fn linear_namespace_and_default_work_can_outlive_the_initial_allowance() {
+        let documents = [
+            format!("<r xmlns:p='urn:test'>{}</r>", "<p:e/>".repeat(100)),
+            format!(
+                "<!DOCTYPE r [<!ATTLIST e a CDATA 'value'>]><r>{}</r>",
+                "<e/>".repeat(100)
+            ),
+        ];
+        for document in documents {
+            for factor in [None, Some(100)] {
+                let mut config = Config {
+                    namespace_separator: Some(' '),
+                    ..Config::default()
+                };
+                config.limits.max_entity_expansion_bytes = 64;
+                config.limits.max_work_amplification = factor;
+                let mut parser = Parser::new(config);
+                parser.feed(document.as_bytes(), true).unwrap();
+                let result = drain(&mut parser);
+                if factor.is_some() {
+                    result.unwrap();
+                    assert!(parser.is_finished());
+                    assert!(parser.expanded.expanded.load(Ordering::Relaxed) > 64);
+                } else {
+                    assert_eq!(result.unwrap_err().kind, ErrorKind::LimitExceeded);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn large_reused_names_and_defaults_still_exhaust_relative_work() {
+        let value = "x".repeat(2048);
+        let documents = [
+            format!("<r xmlns:p='{value}'>{}</r>", "<p:e/>".repeat(300)),
+            format!(
+                "<!DOCTYPE r [<!ATTLIST e a CDATA '{value}'>]><r>{}</r>",
+                "<e/>".repeat(300)
+            ),
+        ];
+        for document in documents {
+            // If merely feeding bytes earned work credit, this suffix would
+            // finance all of the earlier expansion before it was consumed.
+            let input = format!("{document}{}", " ".repeat(64 * 1024));
+            for chunk_size in [input.len(), 37] {
+                let mut config = Config {
+                    namespace_separator: Some(' '),
+                    ..Config::default()
+                };
+                config.limits.max_entity_expansion_bytes = 64;
+                config.limits.max_work_amplification = Some(100);
+                let mut parser = Parser::new(config);
+                assert!(parser.set_entity_maximum_amplification(f32::INFINITY));
+                assert!(parser.set_entity_activation_threshold(u64::MAX));
+                let result = input
+                    .as_bytes()
+                    .chunks(chunk_size)
+                    .enumerate()
+                    .try_for_each(|(index, chunk)| {
+                        let final_chunk = (index + 1) * chunk_size >= input.len();
+                        parser.feed(chunk, final_chunk)?;
+                        drain(&mut parser)
+                    });
+                let error = result.unwrap_err();
+                assert_eq!(error.kind, ErrorKind::LimitExceeded);
+                assert!(error.position.byte_index < document.len());
+                assert!(parser.expanded.expanded.load(Ordering::Relaxed) > 64);
+                assert!(parser.work_bytes_limit(0) <= 100 * document.len());
+                if chunk_size == input.len() {
+                    assert_eq!(parser.received, input.len());
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn saturated_work_threshold_still_rejects_counter_overflow() {
+        let mut config = Config::default();
+        config.limits.max_work_amplification = Some(100);
+        let parser = Parser::new(config);
+        assert!(parser.expanded.account(usize::MAX, false, false));
+        assert_eq!(parser.work_bytes_limit(0), usize::MAX);
+        parser
+            .expanded
+            .expanded
+            .store(usize::MAX, Ordering::Relaxed);
+        parser.charge_expansion(0).unwrap();
+        assert_eq!(
+            parser.charge_expansion(1).unwrap_err().kind,
+            ErrorKind::LimitExceeded
+        );
+        assert_eq!(parser.expanded.expanded.load(Ordering::Relaxed), usize::MAX);
+    }
+}
+
+#[cfg(test)]
+mod matching_end_tests {
+    use super::*;
+
+    #[test]
+    fn matching_end_tags_resume_across_every_byte_split() {
+        for name in ["r", "prefix:local", "é", "雪", "a·b", &"n".repeat(1024)] {
+            let opening = format!("<{name}>");
+            let closing = format!("</{name}>");
+            for split in 0..closing.len() {
+                let mut parser = Parser::new(Config::default());
+                parser.set_reparse_deferral_enabled(false);
+                parser.feed(opening.as_bytes(), false).unwrap();
+                assert!(matches!(
+                    parser.next_event().unwrap().unwrap().kind,
+                    EventKind::StartElement { .. }
+                ));
+                parser.feed(&closing.as_bytes()[..split], false).unwrap();
+                assert_eq!(parser.matching_root_end_tag(usize::MAX), None);
+                assert!(parser.next_event().unwrap().is_none());
+                parser.feed(&closing.as_bytes()[split..], true).unwrap();
+                assert_eq!(
+                    parser.matching_root_end_tag(closing.len()),
+                    Some(closing.len())
+                );
+                assert!(matches!(
+                    parser.next_event().unwrap().unwrap().kind,
+                    EventKind::EndElement { name: actual } if actual.as_str() == name
+                ));
+                assert!(parser.next_event().unwrap().is_none());
+            }
+        }
+    }
+
+    #[test]
+    fn matching_end_tags_keep_limits_and_fallback_syntax() {
+        for closing in ["</r >", "</r\r\n>", "</other>", "</r:other>", "</r<>"] {
+            let mut parser = Parser::new(Config::default());
+            parser.feed(b"<r>", false).unwrap();
+            parser.next_event().unwrap().unwrap();
+            parser.feed(closing.as_bytes(), true).unwrap();
+            assert_eq!(parser.matching_root_end_tag(usize::MAX), None);
+        }
+        let mut config = Config::default();
+        config.limits.max_token_bytes = 3;
+        let mut parser = Parser::new(config);
+        parser.feed(b"<r></r>", true).unwrap();
+        parser.next_event().unwrap().unwrap();
+        assert_eq!(parser.matching_root_end_tag(3), None);
+        assert_eq!(
+            parser.next_event().unwrap_err().kind,
+            ErrorKind::LimitExceeded
+        );
+
+        let mut parser = Parser::new(Config::default());
+        let utf16: std::vec::Vec<u8> = "<r></r>"
+            .encode_utf16()
+            .flat_map(u16::to_le_bytes)
+            .collect();
+        parser.feed(&utf16, true).unwrap();
+        parser.next_event().unwrap().unwrap();
+        assert_eq!(parser.matching_root_end_tag(usize::MAX), None);
+        assert!(matches!(
+            parser.next_event().unwrap().unwrap().kind,
+            EventKind::EndElement { .. }
+        ));
+    }
+}
+
+#[cfg(test)]
+mod namespace_scope_tests {
+    use super::*;
+
+    #[test]
+    fn large_namespace_scope_metadata_is_released_while_root_stays_open() {
+        let mut parser = Parser::new(Config {
+            namespace_separator: Some('|'),
+            ..Config::default()
+        });
+        parser.feed(b"<r>", false).unwrap();
+        while parser.next_event().unwrap().is_some() {}
+        assert_eq!(parser.namespace_scopes.capacity(), 0);
+
+        // Exceed the retention allowance without closing the ordinary root.
+        for _ in 0..128 {
+            parser.feed(b"<n xmlns:p='u'>", false).unwrap();
+            while parser.next_event().unwrap().is_some() {}
+        }
+        assert!(parser.namespace_scopes.capacity() > 4096 / size_of::<NamespaceBindings>());
+        for _ in 0..128 {
+            parser.feed(b"</n>", false).unwrap();
+            while parser.next_event().unwrap().is_some() {}
+        }
+        assert_eq!(parser.stack.len(), 1);
+        assert!(!parser.closed_root);
+        assert!(!parser.namespaces.contains_key("p"));
+        assert_eq!(parser.namespace_scopes.capacity(), 0);
+
+        // A later small scope remains reusable, with all binding storage gone.
+        parser.feed(b"<e xmlns:p='v'/>", false).unwrap();
+        while parser.next_event().unwrap().is_some() {}
+        assert!(parser.namespace_scopes.is_empty());
+        assert!(parser.namespace_scopes.capacity() > 0);
+        assert!(parser.namespace_scopes.capacity() <= 4096 / size_of::<NamespaceBindings>());
+        assert!(!parser.namespaces.contains_key("p"));
+        parser.feed(b"</r>", true).unwrap();
+        while parser.next_event().unwrap().is_some() {}
+        assert!(parser.is_finished());
+    }
+}
+
+#[cfg(test)]
 mod hash_salt_tests {
     use super::*;
     use std::hash::BuildHasher;
@@ -3679,11 +5164,18 @@ mod hash_salt_tests {
             ..Config::default()
         });
         parser.set_param_entity_parsing(2);
-        parser.feed(b"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p \"<!ATTLIST n b CDATA 'v'>\">%p;<!ATTLIST r a CDATA 'v'>]><r>", false).unwrap();
+        parser.feed(b"<!DOCTYPE r [<!ENTITY e 'ok'><!ENTITY % p \"<!ATTLIST n b CDATA 'v'>\">%p;<!ATTLIST r a CDATA 'v'>]><r xmlns='urn:default'>", false).unwrap();
         while parser.next_event().unwrap().is_some() {}
         let previous = parser.namespaces.hasher().hash_one("xml");
+        let default_owner = parser.default_namespace.as_ref().unwrap().as_ptr();
         parser.set_hash_salt(*b"0123456789abcdef").unwrap();
         assert_ne!(parser.namespaces.hasher().hash_one("xml"), previous);
+        assert_eq!(parser.default_namespace.as_deref(), Some("urn:default"));
+        assert_eq!(
+            parser.default_namespace.as_ref().unwrap().as_ptr(),
+            default_owner
+        );
+        assert!(!parser.namespaces.contains_key(""));
         parser
             .with_dtd_tables(|parser| {
                 assert_eq!(parser.tables.entities.hasher().salt(), parser.hash_salt());
@@ -3707,12 +5199,45 @@ mod hash_salt_tests {
                 Ok(())
             })
             .unwrap();
-        let mut child = parser.external_child(Some(""), None).unwrap();
-        assert_eq!(child.hash_salt(), parser.hash_salt());
-        child.feed(b"<n>&e;</n>", true).unwrap();
-        while child.next_event().unwrap().is_some() {}
+        for (context, uri) in [
+            ("", Some("urn:default")),
+            ("=urn:child", Some("urn:child")),
+            ("=", None),
+        ] {
+            let mut child = parser.external_child(Some(context), None).unwrap();
+            assert_eq!(child.hash_salt(), parser.hash_salt());
+            assert_eq!(child.default_namespace.as_deref(), uri);
+            assert!(!child.namespaces.contains_key(""));
+            let mut parameter = child.external_child(None, None).unwrap();
+            assert_eq!(parameter.default_namespace.as_deref(), uri);
+            parameter.feed(b"", true).unwrap();
+            while parameter.next_event().unwrap().is_some() {}
+            child.feed(b"<n>&e;</n>", true).unwrap();
+            let mut start = false;
+            while let Some(event) = child.next_event().unwrap() {
+                if let EventKind::StartElement { name, attributes } = event.kind {
+                    assert_eq!(
+                        name,
+                        match uri {
+                            Some("urn:default") => "urn:default|n",
+                            Some(_) => "urn:child|n",
+                            None => "n",
+                        }
+                    );
+                    assert_eq!(attributes[0].name, "b");
+                    start = true;
+                }
+            }
+            assert!(start);
+            assert_eq!(child.default_namespace.as_deref(), uri);
+        }
+        assert_eq!(
+            parser.default_namespace.as_ref().unwrap().as_ptr(),
+            default_owner
+        );
         parser.feed(b"<n>&e;</n></r>", true).unwrap();
         while parser.next_event().unwrap().is_some() {}
+        assert!(parser.default_namespace.is_none());
     }
 
     #[test]
@@ -3727,8 +5252,16 @@ mod hash_salt_tests {
             assert!(child.namespaces.is_empty());
             assert_eq!(child.hash_salt(), parser.hash_salt());
         }
-        let mut child = parser.external_child(Some("xml=urn:custom"), None).unwrap();
+        let mut child = parser
+            .external_child(Some("=urn:hidden\u{c}xml=urn:custom"), None)
+            .unwrap();
         assert_eq!(child.namespaces.get("xml").unwrap(), "urn:custom");
+        assert_eq!(child.default_namespace.as_deref(), Some("urn:hidden"));
+        assert!(!child.namespaces.contains_key(""));
+        let inherited = child.external_child(Some(""), None).unwrap();
+        assert_eq!(inherited.default_namespace.as_deref(), Some("urn:hidden"));
+        let removed = child.external_child(Some("="), None).unwrap();
+        assert!(removed.default_namespace.is_none());
         child.feed(b"<xml:r/>", true).unwrap();
         while let Some(event) = child.next_event().unwrap() {
             if let EventKind::StartElement { name, .. } = event.kind {
@@ -3862,6 +5395,601 @@ mod attribute_literal_run_tests {
             let mut actual = String::new_in(Allocator::System);
             append_lexical_attribute(&mut actual, lexical::Slice::plain(&input), true).unwrap();
             assert_eq!(actual, format!("{prefix} 😀 end ").as_str());
+        }
+    }
+}
+
+#[cfg(test)]
+mod coalesced_text_search_tests {
+    use super::coalesced_text_end;
+
+    // The original complete-line selector, including its root/internal CR rule.
+    fn scalar_end(text: &str, internal: bool) -> usize {
+        let coalesce = true;
+        let mut boundary = 0;
+        text.bytes()
+            .enumerate()
+            .find_map(|(index, byte)| {
+                if matches!(byte, b'<' | b'&') {
+                    return Some(index);
+                }
+                if byte == b'\n' || (!internal && byte == b'\r') {
+                    if !coalesce || index >= 65_536 {
+                        return Some(if boundary > 0 { boundary } else { index });
+                    }
+                    boundary = index
+                        + if byte == b'\r' && text.as_bytes().get(index + 1) == Some(&b'\n') {
+                            2
+                        } else {
+                            1
+                        };
+                }
+                // Bound merging across lines, preserving the existing span of
+                // an individual long line and its malformed-input prefix.
+                (index >= 65_536 && boundary > 0).then_some(boundary)
+            })
+            .map_or(text.len(), |index| {
+                if index == 0 && matches!(text.as_bytes()[0], b'\r' | b'\n') {
+                    if text.starts_with("\r\n") { 2 } else { 1 }
+                } else {
+                    index
+                }
+            })
+    }
+
+    fn compare(text: &str) {
+        for internal in [false, true] {
+            let expected = scalar_end(text, internal);
+            let actual = coalesced_text_end(text).unwrap_or_else(|| scalar_end(text, internal));
+            assert_eq!(
+                actual,
+                expected,
+                "internal={internal}, text length={}",
+                text.len()
+            );
+            assert!(text.is_char_boundary(actual));
+        }
+    }
+
+    #[test]
+    fn bounded_search_matches_scalar_selector_for_all_short_sequences() {
+        let alphabet = ['<', '&', '\r', '\n', 'x', ']', 'é', '\0'];
+        for length in 0..=6 {
+            for mut number in 0..alphabet.len().pow(length) {
+                let mut text = std::string::String::new();
+                for _ in 0..length {
+                    text.push(alphabet[number % alphabet.len()]);
+                    number /= alphabet.len();
+                }
+                compare(&text);
+            }
+        }
+    }
+
+    #[test]
+    fn markup_and_crlf_keep_precedence_at_the_complete_line_cutoff() {
+        for length in [65_535, 65_536, 65_537, 65_538, 131_075] {
+            for first in [0, 1, 65_534, 65_535, 65_536, 65_537] {
+                for second in [0, 1, 65_534, 65_535, 65_536, 65_537] {
+                    if first >= length || second >= length {
+                        continue;
+                    }
+                    for left in *b"<&\r\n" {
+                        for right in *b"<&\r\n" {
+                            let mut text = vec![b'x'; length];
+                            text[first] = left;
+                            text[second] = right;
+                            compare(std::str::from_utf8(&text).unwrap());
+                        }
+                    }
+                }
+            }
+        }
+        for prefix in ["é".repeat(32_768), "aé".repeat(21_845), "\r".repeat(65_537)] {
+            for tail in ["", "<", "&", "é<", "\r\n<", "]]>\0"] {
+                compare(&format!("{prefix}{tail}"));
+            }
+        }
+        let crossing = format!("{}\r\n<", "x".repeat(65_535));
+        assert_eq!(coalesced_text_end(&crossing), None);
+        assert_eq!(scalar_end(&crossing, false), 65_537);
+        assert_eq!(scalar_end(&crossing, true), 65_536);
+        let cutoff = format!("\n{}<", "x".repeat(65_535));
+        assert_eq!(coalesced_text_end(&cutoff), Some(65_536));
+    }
+}
+
+#[cfg(test)]
+mod native_raw_context_tests {
+    use super::*;
+
+    fn text_parser(input: &[u8], final_input: bool) -> (Parser, AdapterFrame) {
+        let mut parser = Parser::new(Config::default());
+        parser.enable_input_context();
+        parser.feed(input, final_input).unwrap();
+        parser.next_event().unwrap().unwrap();
+        let mut frame = parser.adapter_frame();
+        let mut event = None;
+        parser
+            .next_event_for_c_text_context_into(&mut event, &mut frame)
+            .unwrap()
+            .unwrap();
+        assert!(parser.native_raw.is_some());
+        (parser, frame)
+    }
+
+    #[test]
+    fn direct_start_raw_views_keep_copied_fallbacks_and_owner_handoffs() {
+        for (prefix, tag, namespace, enabled, c_mode, foreign, direct) in [
+            ("<r><w a='v'/>", "<n a='x'>", false, true, true, false, true),
+            ("<r><w a='v'/>", "<n a='x'>", true, true, true, false, true),
+            (
+                "<r xmlns='urn'><w a='v'/>",
+                "<n a='x'>",
+                true,
+                true,
+                true,
+                false,
+                false,
+            ),
+            (
+                "<r><w a='v'/>",
+                "<n a='x'/>",
+                false,
+                true,
+                true,
+                false,
+                false,
+            ),
+            (
+                "<r><w a='v'/>",
+                "<n a='&amp;'>",
+                false,
+                true,
+                true,
+                false,
+                false,
+            ),
+            (
+                "<r><w a='v'/>",
+                "<n a='x'>",
+                false,
+                false,
+                true,
+                false,
+                false,
+            ),
+            (
+                "<r><w a='v'/>",
+                "<n a='x'>",
+                false,
+                true,
+                false,
+                false,
+                false,
+            ),
+            ("<r><w a='v'/>", "<n a='x'>", false, true, true, true, false),
+        ] {
+            let mut parser = Parser::new(Config {
+                namespace_separator: namespace.then_some('|'),
+                ..Config::default()
+            });
+            if enabled {
+                parser.enable_input_context();
+            }
+            parser.feed(prefix.as_bytes(), false).unwrap();
+            while parser.next_event().unwrap().is_some() {}
+            parser.feed(tag.as_bytes(), false).unwrap();
+            let old_raw = parser.current_raw.as_str().to_owned();
+            let raw_pointer = parser.current_raw.as_ptr();
+            let raw_capacity = parser.current_raw.capacity();
+            let scratch = parser.token_scratch.as_bytes().as_ptr();
+            let scratch_len = parser.token_scratch.len();
+            let mut other = Parser::new(Config::default());
+            let mut frame = if foreign {
+                other.adapter_frame()
+            } else {
+                parser.adapter_frame()
+            };
+            let mut event = None;
+            if c_mode {
+                parser.next_event_for_c_text_context_into(&mut event, &mut frame)
+            } else {
+                parser.next_event_for_adapter_into(&mut event, &mut frame)
+            }
+            .unwrap()
+            .unwrap();
+            assert_eq!(parser.current_raw(), Some(tag));
+            assert_eq!(parser.native_raw.is_some(), direct);
+            if direct {
+                assert_eq!(parser.current_raw.as_str(), old_raw);
+                assert_eq!(parser.current_raw.as_ptr(), raw_pointer);
+                assert_eq!(parser.current_raw.capacity(), raw_capacity);
+                assert_eq!(parser.token_scratch.as_bytes().as_ptr(), scratch);
+                assert_eq!(parser.token_scratch.len(), scratch_len);
+                assert_eq!(frame.name_bytes(), b"n\0");
+                assert_eq!(
+                    frame.attributes().collect::<std::vec::Vec<_>>(),
+                    [(b"a\0".as_slice(), b"x\0".as_slice())]
+                );
+                let raw = parser.native_raw.unwrap();
+                let (context, start) = parser.input_context();
+                assert_eq!(
+                    parser.current_raw().unwrap().as_ptr(),
+                    context[raw.start - start..].as_ptr()
+                );
+                parser.feed(b"</n></r>", true).unwrap();
+                assert_eq!(parser.current_raw(), Some(tag));
+                while parser.next_event().unwrap().is_some() {
+                    assert!(parser.native_raw.is_none());
+                }
+            }
+            if foreign {
+                other.finish_adapter_frame(frame);
+            } else {
+                parser.finish_adapter_frame(frame);
+            }
+        }
+        for bytes in [arena::MAX_ARENA_BYTES, arena::MAX_ARENA_BYTES + 1] {
+            let tag = format!("<n{}>", " ".repeat(bytes - 3));
+            let mut parser = Parser::new(Config::default());
+            parser.enable_input_context();
+            parser.feed(tag.as_bytes(), false).unwrap();
+            let mut frame = parser.adapter_frame();
+            let mut event = None;
+            parser
+                .next_event_for_c_text_context_into(&mut event, &mut frame)
+                .unwrap()
+                .unwrap();
+            assert_eq!(parser.native_raw.is_some(), bytes <= arena::MAX_ARENA_BYTES);
+            assert_eq!(parser.current_raw(), Some(tag.as_str()));
+            parser.finish_adapter_frame(frame);
+        }
+        for count in [arena::MAX_ARENA_ATTRIBUTES, arena::MAX_ARENA_ATTRIBUTES + 1] {
+            let attributes = (0..count)
+                .map(|i| format!(" a{i}='v'"))
+                .collect::<std::string::String>();
+            let mut parser = Parser::new(Config::default());
+            parser.enable_input_context();
+            parser
+                .feed(format!("<r><w{attributes}/>").as_bytes(), false)
+                .unwrap();
+            while parser.next_event().unwrap().is_some() {}
+            let tag = format!("<n{attributes}>");
+            parser.feed(tag.as_bytes(), false).unwrap();
+            let mut frame = parser.adapter_frame();
+            let mut event = None;
+            parser
+                .next_event_for_c_text_context_into(&mut event, &mut frame)
+                .unwrap()
+                .unwrap();
+            assert_eq!(
+                parser.native_raw.is_some(),
+                count <= arena::MAX_ARENA_ATTRIBUTES
+            );
+            assert_eq!(parser.current_raw(), Some(tag.as_str()));
+            parser.finish_adapter_frame(frame);
+        }
+    }
+
+    #[test]
+    fn native_raw_getters_share_context_and_allow_ordinary_handoffs() {
+        for count in [1, 23, 24, 4096, 4097] {
+            let text = format!("{}{}", "é".repeat(count / 2), "x".repeat(count % 2));
+            let input = format!("\u{feff}<r>{text}");
+            for enabled in [false, true] {
+                let mut parser = Parser::new(Config::default());
+                if enabled {
+                    parser.enable_input_context();
+                }
+                parser.feed(input.as_bytes(), false).unwrap();
+                parser.next_event().unwrap().unwrap();
+                let capacity = parser.current_raw.capacity();
+                let mut frame = parser.adapter_frame();
+                let mut event = None;
+                parser
+                    .next_event_for_c_text_context_into(&mut event, &mut frame)
+                    .unwrap()
+                    .unwrap();
+                assert_eq!(parser.current_raw(), Some(text.as_str()));
+                assert_eq!(parser.native_raw.is_some(), enabled && count <= 4096);
+                if let Some(raw) = parser.native_raw {
+                    // These assertions distinguish a real raw view from eager
+                    // copying even when the owned String already had capacity.
+                    assert_eq!(parser.current_raw.as_str(), "<r>");
+                    assert_eq!(parser.current_raw.capacity(), capacity);
+                    let (context, start) = parser.input_context();
+                    assert_eq!(
+                        parser.current_raw().unwrap().as_ptr(),
+                        context[raw.start - start..].as_ptr()
+                    );
+                    assert_eq!(frame.native_text_range_for_c(), Some((6, count)));
+                }
+                parser.finish_adapter_frame(frame);
+                parser.feed(b"", false).unwrap();
+                assert_eq!(parser.current_raw(), Some(text.as_str()));
+                parser.feed(b"<n/>tail</r>", true).unwrap();
+                assert_eq!(parser.current_raw(), Some(text.as_str()));
+                while parser.next_event().unwrap().is_some() {
+                    assert!(parser.native_raw.is_none());
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn matched_native_end_raw_keeps_owned_names_and_mode_boundaries() {
+        for (opening, closing, separator, scoped) in [
+            ("<é>", "</é>", None, false),
+            ("<é>", "</é >", None, false),
+            ("<é>", "</é>", Some('|'), false),
+            ("<é xmlns='urn'>", "</é>", Some('|'), true),
+        ] {
+            for enabled in [false, true] {
+                // Generic, C-context, and a foreign frame's owned fallback.
+                for mode in 0..3 {
+                    let mut parser = Parser::new(Config {
+                        namespace_separator: separator,
+                        ..Config::default()
+                    });
+                    if enabled {
+                        parser.enable_input_context();
+                    }
+                    let input = format!("\u{feff}<r>{opening}\r{closing}\n<z/></r>");
+                    parser.feed(input.as_bytes(), true).unwrap();
+                    while let Some(event) = parser.next_event().unwrap() {
+                        if matches!(event.kind, EventKind::Text(_)) {
+                            break;
+                        }
+                    }
+                    assert_eq!(parser.current_raw(), Some("\r"));
+                    let raw_owner = (parser.current_raw.as_ptr(), parser.current_raw.capacity());
+                    let scratch = (parser.token_scratch.as_ptr(), parser.token_scratch.len());
+                    let name_owner = parser.stack.last().unwrap().name.value.as_ptr();
+                    let mut foreign = Parser::new(Config::default());
+                    let mut frame = if mode == 2 {
+                        foreign.adapter_frame()
+                    } else {
+                        parser.adapter_frame()
+                    };
+                    let mut event = None;
+                    if mode == 0 {
+                        parser.next_event_for_adapter_into(&mut event, &mut frame)
+                    } else {
+                        parser.next_event_for_c_text_context_into(&mut event, &mut frame)
+                    }
+                    .unwrap()
+                    .unwrap();
+                    let (name, position) = if let Some(name) = frame.take_end_name() {
+                        assert!(event.is_none());
+                        (name, frame.position())
+                    } else {
+                        let event = event.take().unwrap();
+                        let EventKind::EndElement { name } = event.kind else {
+                            panic!("closing token must deliver End first");
+                        };
+                        (name, event.position)
+                    };
+                    assert_eq!(name, if scoped { "urn|é" } else { "é" });
+                    assert_eq!(name.as_ptr(), name_owner);
+                    assert_eq!(
+                        (position.byte_index, position.byte_count),
+                        (input.find(closing).unwrap(), closing.len())
+                    );
+                    assert_eq!((position.line, position.column), (2, 0));
+                    let consumed = parser.source().position(0);
+                    assert_eq!(
+                        (consumed.line, consumed.column),
+                        (2, closing.chars().count())
+                    );
+                    let viewed = enabled && mode == 1 && !scoped && closing == "</é>";
+                    assert_eq!(parser.native_raw.is_some(), viewed);
+                    assert_eq!(parser.current_raw(), Some(closing));
+                    if viewed {
+                        assert_eq!(parser.current_raw.as_str(), "\r");
+                        assert_eq!(
+                            (parser.current_raw.as_ptr(), parser.current_raw.capacity()),
+                            raw_owner
+                        );
+                        assert_eq!(
+                            (parser.token_scratch.as_ptr(), parser.token_scratch.len()),
+                            scratch
+                        );
+                        let (context, start) = parser.input_context();
+                        assert_eq!(
+                            parser.current_raw().unwrap().as_ptr(),
+                            context[position.byte_index - start..].as_ptr()
+                        );
+                    }
+                    // Ordinary handoff drains namespace undo and the empty tag,
+                    // then replaces the view with the final owned root End.
+                    while parser.next_event().unwrap().is_some() {}
+                    assert!(parser.native_raw.is_none());
+                    assert_eq!(parser.current_raw(), Some("</r>"));
+                    assert_eq!(parser.source().position(0).line, 3);
+                    if mode == 2 {
+                        foreign.finish_adapter_frame(frame);
+                    } else {
+                        parser.finish_adapter_frame(frame);
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn native_raw_retention_survives_compaction_and_invalid_context_suffixes() {
+        let text = format!("{}x", "€".repeat(1333));
+        let end_name = "é".repeat(2050);
+        let end_tag = format!("</{end_name}>");
+        let mut unaligned = false;
+        for case in 0..6 {
+            let padding = case % 3;
+            let tail = if case < 3 {
+                text.clone()
+            } else {
+                format!("<{end_name}>{end_tag}")
+            };
+            let raw_text = if case < 3 {
+                text.as_str()
+            } else {
+                end_tag.as_str()
+            };
+            let input = format!("<r>{}{}<n/>{tail}", "€".repeat(23_000), "x".repeat(padding));
+            for suffix in [b"\xff".as_slice(), b"\xc3"] {
+                let mut parser = Parser::new(Config::default());
+                parser.enable_input_context();
+                parser.feed(input.as_bytes(), false).unwrap();
+                let mut frame = parser.adapter_frame();
+                let mut event = None;
+                while parser
+                    .next_event_for_c_text_context_into(&mut event, &mut frame)
+                    .unwrap()
+                    .is_some()
+                {}
+                let raw = parser.native_raw.unwrap();
+                assert_eq!(parser.current_raw(), Some(raw_text));
+                // A completed frame can be cleared without discarding raw.
+                assert!(!frame.is_active());
+                parser.feed(b"", false).unwrap();
+                let (context, start) = parser.input_context();
+                assert_eq!(start, raw.start - 1024);
+                assert_eq!(context, &input.as_bytes()[start..]);
+                let physical_extra = parser.sources[0].text.len() - context.len();
+                assert!(physical_extra <= 3);
+                unaligned |= physical_extra != 0;
+                parser.feed(suffix, false).unwrap();
+                assert!(std::str::from_utf8(parser.input_context().0).is_err());
+                assert_eq!(parser.current_raw(), Some(raw_text));
+                assert_ne!(
+                    parser.input_context().0.as_ptr(),
+                    parser.sources[0].text.as_bytes().as_ptr()
+                );
+                if suffix == b"\xc3" {
+                    parser.feed(b"\xa9</r>", true).unwrap();
+                    assert_eq!(parser.current_raw(), Some(raw_text));
+                    parser
+                        .next_event_for_c_text_context_into(&mut event, &mut frame)
+                        .unwrap()
+                        .unwrap();
+                    assert_eq!(parser.current_raw(), Some("é"));
+                    assert!(parser.native_raw.is_some());
+                    while parser.next_event().unwrap().is_some() {}
+                } else {
+                    assert!(parser.next_event().is_err());
+                    assert_eq!(parser.current_raw(), Some(raw_text));
+                }
+                parser.finish_adapter_frame(frame);
+            }
+        }
+        assert!(unaligned);
+    }
+
+    #[test]
+    fn native_raw_overrides_keep_owned_empty_and_failure_publication_order() {
+        for replacement in [None, Some(""), Some("owned")] {
+            let (mut parser, frame) = text_parser(b"<r>text", false);
+            let error = parser.save_current_raw(usize::MAX).unwrap_err();
+            assert_eq!(error.kind, ErrorKind::NoMemory);
+            assert_eq!(parser.current_raw(), Some("text"));
+            parser.emit(EventKind::Default, parser.position()).unwrap();
+            if let Some(raw) = replacement {
+                parser.event_raw(raw).unwrap();
+            }
+            assert_eq!(parser.current_raw(), Some("text"));
+            parser.pop_event().unwrap();
+            assert_eq!(
+                parser.current_raw(),
+                match replacement {
+                    None => Some("text"),
+                    Some("") => None,
+                    Some(raw) => Some(raw),
+                }
+            );
+            assert_eq!(parser.native_raw.is_some(), replacement.is_none());
+            parser.finish_adapter_frame(frame);
+        }
+        let (mut parser, mut frame) = text_parser(b"<r>text&amp;after</wrong>", true);
+        let mut event = None;
+        parser
+            .next_event_for_c_text_context_into(&mut event, &mut frame)
+            .unwrap()
+            .unwrap();
+        assert_eq!(parser.current_raw(), Some("&amp;"));
+        assert!(parser.native_raw.is_none());
+        parser
+            .next_event_for_c_text_context_into(&mut event, &mut frame)
+            .unwrap()
+            .unwrap();
+        assert_eq!(parser.current_raw(), Some("after"));
+        assert!(parser.native_raw.is_some());
+        assert_eq!(
+            parser.next_event().unwrap_err().kind,
+            ErrorKind::TagMismatch
+        );
+        assert_eq!(parser.current_raw(), Some("</wrong>"));
+        assert!(parser.native_raw.is_none());
+        parser.finish_adapter_frame(frame);
+
+        let (mut parser, frame) = text_parser(b"<r>text", false);
+        // Model the delivered writer state without popping its empty-raw
+        // event: popping would itself replace the retained raw view.
+        parser.parameter_mode = 2;
+        parser.start_foreign_dtd(Position::default()).unwrap();
+        parser.foreign_dtd_pending.as_mut().unwrap().delivered = true;
+        parser
+            .shared_parameter_state()
+            .unwrap()
+            .read
+            .store(true, Ordering::Relaxed);
+        assert!(parser.native_raw.is_some());
+        assert_eq!(parser.current_raw(), Some("text"));
+        assert!(matches!(
+            parser.finish_foreign_dtd().unwrap().kind,
+            EventKind::NotStandalone
+        ));
+        assert!(parser.native_raw.is_none());
+        assert_eq!(parser.current_raw(), None);
+        parser.finish_adapter_frame(frame);
+    }
+
+    #[test]
+    fn native_raw_prefix_and_early_feed_errors_remain_readable() {
+        let mut parser = Parser::new(Config::default());
+        parser.enable_input_context();
+        parser.feed(b"<r>abc</r>", true).unwrap();
+        parser.next_event().unwrap().unwrap();
+        assert!(parser.expanded.account(100, true, false));
+        assert!(parser.set_entity_maximum_amplification(1.0));
+        parser.set_entity_activation_threshold(0);
+        let mut frame = parser.adapter_frame();
+        let mut event = None;
+        parser
+            .next_event_for_c_text_context_into(&mut event, &mut frame)
+            .unwrap()
+            .unwrap();
+        assert!(parser.native_raw.is_some() && frame.is_text());
+        assert_eq!(parser.current_raw(), Some("abc"));
+        let error = parser
+            .next_event_for_c_text_context_into(&mut event, &mut frame)
+            .unwrap_err();
+        assert_eq!(error.kind, ErrorKind::LimitExceeded);
+        assert!(!frame.is_active());
+        assert_eq!(parser.feed(b"ignored", false).unwrap_err(), error);
+        assert_eq!(parser.current_raw(), Some("abc"));
+        parser.finish_adapter_frame(frame);
+
+        for final_input in [false, true] {
+            let (mut parser, frame) = text_parser(b"<r>text", final_input);
+            parser.config.limits.max_total_bytes = parser.received;
+            let expected = if final_input {
+                ErrorKind::Finished
+            } else {
+                ErrorKind::LimitExceeded
+            };
+            assert_eq!(parser.feed(b"x", false).unwrap_err().kind, expected);
+            assert_eq!(parser.current_raw(), Some("text"));
+            parser.finish_adapter_frame(frame);
         }
     }
 }

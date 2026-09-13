@@ -2837,7 +2837,7 @@ impl Parser {
                 && !self.source().has_conversions()
             {
                 self.account_source(end)?;
-                self.source_mut().consume_ascii_tag(end);
+                self.source_mut().consume_ascii_token(end);
             } else {
                 self.consume(end)?;
             }
@@ -3247,7 +3247,24 @@ impl Parser {
             None
         };
         let position = self.source().position(end + 1);
-        self.save_current_raw(end + 1)?;
+        // A recognized character reference has ASCII spelling without line breaks.
+        // Its decoded scalar remains detached; only the raw spelling borrows context.
+        let native_reference = matches!(character, Ok(Some(_)))
+            && !self.source().has_conversions()
+            && self.source().native_utf8_byte_index().is_some();
+        if native_reference
+            && output.c_text_context
+            && self.input_context.is_some()
+            && !self.fragment
+            && self.sources.len() == 1
+        {
+            self.native_raw = Some(NativeRawRange {
+                start: position.byte_index,
+                count: NonZeroUsize::new(end + 1).expect("nonempty character reference"),
+            });
+        } else {
+            self.save_current_raw(end + 1)?;
+        }
         self.account_source(end + 1)?;
         if let Some(character) = character
             .map_err(|(kind, offset)| self.err_at(kind, "invalid character reference", offset))?
@@ -3255,7 +3272,11 @@ impl Parser {
             if !self.source().remaining()[1..end].starts_with('#') {
                 self.account_entity_bytes(1, false)?;
             }
-            self.consume(end + 1)?;
+            if native_reference {
+                self.source_mut().consume_ascii_token(end + 1);
+            } else {
+                self.consume(end + 1)?;
+            }
             let mut bytes = [0; 4];
             let text = character.encode_utf8(&mut bytes);
             if let Some(frame) = output.frame.as_deref_mut() {
@@ -6131,6 +6152,88 @@ mod native_raw_context_tests {
     }
 
     #[test]
+    fn character_reference_raw_views_preserve_splits_errors_and_positions() {
+        for suffix in [
+            "&amp;&#65;&#x1F600;&lt;&gt;&apos;&quot;\n<e/></r>",
+            "&#00000000000000000000000000000000000000000065;</r>",
+            "&#0;</r>",
+            "&#xD800;</r>",
+            "&#9999999999999999999999999;</r>",
+            "&#9999999999999999999999999x;</r>",
+            "&amp;&#x;",
+            "&amp;&unknown;",
+            "&amp;&#65",
+        ] {
+            let input = format!("\u{feff}<r>é\r{suffix}");
+            for width in 1..=input.len() {
+                let mut outcomes = std::vec::Vec::new();
+                for native in [false, true] {
+                    let mut parser = Parser::new(Config::default());
+                    parser.enable_input_context();
+                    let mut frame = parser.adapter_frame();
+                    let mut events = std::vec::Vec::new();
+                    let mut error = None;
+                    'feeds: for (index, chunk) in input.as_bytes().chunks(width).enumerate() {
+                        parser
+                            .feed(chunk, (index + 1) * width >= input.len())
+                            .unwrap();
+                        loop {
+                            let mut event = None;
+                            let result = if native {
+                                parser.next_event_for_c_text_context_into(&mut event, &mut frame)
+                            } else {
+                                parser.next_event_for_adapter_into(&mut event, &mut frame)
+                            };
+                            match result {
+                                Ok(None) => break,
+                                Err(failure) => {
+                                    error = Some(failure);
+                                    break 'feeds;
+                                }
+                                Ok(Some(_)) => {}
+                            }
+                            let raw = parser.current_raw().map(str::to_owned);
+                            let position = event
+                                .as_ref()
+                                .map_or(frame.position(), |event| event.position);
+                            let text = if frame.native_text_range_for_c().is_some() {
+                                Some(parser.current_raw().unwrap().as_bytes().to_vec())
+                            } else {
+                                frame.text_bytes().map(<[u8]>::to_vec).or_else(|| {
+                                    if let Some(Event {
+                                        kind: EventKind::Text(text),
+                                        ..
+                                    }) = &event
+                                    {
+                                        Some(text.as_bytes().to_vec())
+                                    } else {
+                                        None
+                                    }
+                                })
+                            };
+                            if raw.as_ref().is_some_and(|raw| raw.starts_with('&')) {
+                                assert_eq!(parser.native_raw.is_some(), native);
+                                if native {
+                                    let (context, start) = parser.input_context();
+                                    assert_eq!(
+                                        parser.current_raw().unwrap().as_ptr(),
+                                        context[position.byte_index - start..].as_ptr()
+                                    );
+                                    assert!(frame.native_text_range_for_c().is_none());
+                                }
+                            }
+                            events.push((raw, position, text, parser.source().position(0)));
+                        }
+                    }
+                    outcomes.push((events, error, parser.current_raw().map(str::to_owned)));
+                    parser.finish_adapter_frame(frame);
+                }
+                assert_eq!(outcomes[0], outcomes[1], "{suffix}, width {width}");
+            }
+        }
+    }
+
+    #[test]
     fn native_raw_retention_survives_compaction_and_invalid_context_suffixes() {
         let text = format!("{}x", "€".repeat(1333));
         let end_name = "é".repeat(2050);
@@ -6229,7 +6332,7 @@ mod native_raw_context_tests {
             .unwrap()
             .unwrap();
         assert_eq!(parser.current_raw(), Some("&amp;"));
-        assert!(parser.native_raw.is_none());
+        assert!(parser.native_raw.is_some());
         parser
             .next_event_for_c_text_context_into(&mut event, &mut frame)
             .unwrap()

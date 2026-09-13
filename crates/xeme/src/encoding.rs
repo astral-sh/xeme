@@ -1254,9 +1254,9 @@ impl Source {
         self.finish_consume(count);
     }
 
-    /// Consume a nonempty native ASCII tag proven to contain no line breaks.
+    /// Consume a nonempty native ASCII token proven to contain no line breaks.
     /// The caller must complete semantic work and accounting before this mutation.
-    pub(crate) fn consume_ascii_tag(&mut self, count: usize) {
+    pub(crate) fn consume_ascii_token(&mut self, count: usize) {
         debug_assert!(self.native_utf8_byte_index().is_some() && !self.has_conversions());
         debug_assert!(
             count > 0
@@ -1753,7 +1753,7 @@ mod tests {
                     let mut eager = make_source();
                     let mut proven = make_source();
                     eager.consume(tag.len());
-                    proven.consume_ascii_tag(tag.len());
+                    proven.consume_ascii_token(tag.len());
                     assert_eq!(proven.position(0), eager.position(0));
                     assert_eq!(proven.previous_cr, eager.previous_cr);
                     assert_eq!(proven.remaining(), eager.remaining());

@@ -604,6 +604,48 @@ fn context_text_warmed_reservations_do_not_allocate() {
 }
 
 #[test]
+fn reference_raw_context_survives_default_reentry_suspend_and_abort() {
+    // SAFETY: Test-owned callback state and parser outlive every synchronous call.
+    unsafe {
+        for buffered in [false, true] {
+            for (reference, value) in [("&amp;", "&"), ("&#65;", "A"), ("&#x1F600;", "😀")] {
+                for action in [0, 1, 2] {
+                    let parser = make_parser();
+                    let mut state = State {
+                        parser,
+                        action,
+                        mutate: true,
+                        ..State::default()
+                    };
+                    XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                    XML_SetCharacterDataHandler(parser, Some(text));
+                    let input = format!("<r>{reference}</r>");
+                    let status = parse(parser, input.as_bytes(), true, buffered);
+                    assert_eq!(state.text, value.as_bytes());
+                    assert!(state.raw.starts_with(reference.as_bytes()));
+                    assert_eq!(state.calls, 1);
+                    match action {
+                        1 => {
+                            assert_eq!(status, SUSPENDED);
+                            assert_eq!((*parser).core.current_raw(), Some(reference));
+                            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                            assert_eq!(XML_ResumeParser(parser), OK);
+                        }
+                        2 => {
+                            assert_eq!(status, ERROR);
+                            assert_eq!(XML_GetErrorCode(parser), 35);
+                        }
+                        _ => assert_eq!(status, OK),
+                    }
+                    XML_ParserFree(parser);
+                    assert_eq!(LIVE.get(), 0);
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn context_text_late_handler_after_suspension_uses_eager_raw() {
     // SAFETY: The callback never retains its input pointer beyond its return.
     unsafe {
@@ -645,6 +687,11 @@ fn context_input_allocation_failures_preserve_sticky_errors_and_owners() {
                 b"".as_slice(),
                 b"<r>hello</r>".as_slice(),
                 b"hello".as_slice(),
+            ),
+            (
+                b"".as_slice(),
+                b"<r>&amp;&#65;&#x1F600;</r>".as_slice(),
+                "&A😀".as_bytes(),
             ),
             (
                 b"<r>seed<n/>".as_slice(),

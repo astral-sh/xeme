@@ -244,3 +244,68 @@ fn resolving_unknown_encoding_keeps_inherited_recursion_membership() {
         ErrorKind::RecursiveEntityReference
     );
 }
+
+#[test]
+fn external_children_preserve_active_general_entity_depth() {
+    fn feed(
+        parser: &mut Parser,
+        input: &[u8],
+        width: usize,
+        nested: bool,
+        text: &mut String,
+    ) -> Result<(), ErrorKind> {
+        for chunk in input.chunks(width).chain(std::iter::once(&[][..])) {
+            parser.feed(chunk, chunk.is_empty()).unwrap();
+            loop {
+                let event = match parser.next_event() {
+                    Ok(Some(event)) => event,
+                    Ok(None) => break,
+                    Err(error) => {
+                        assert_eq!(parser.next_event().unwrap_err(), error);
+                        return Err(error.kind);
+                    }
+                };
+                match event.kind {
+                    EventKind::Text(value) => text.push_str(&value),
+                    EventKind::ExternalEntityReference(reference) => {
+                        let input = match reference.system_id.as_deref() {
+                            Some("first") if nested => b"&middle;".as_slice(),
+                            Some("first" | "second") => b"&inner;",
+                            other => panic!("unexpected external entity {other:?}"),
+                        };
+                        let mut child = parser
+                            .external_child(reference.context.as_deref(), None)
+                            .map_err(|error| error.kind)?;
+                        feed(&mut child, input, width, nested, text)?;
+                    }
+                    _ => {}
+                }
+            }
+        }
+        Ok(())
+    }
+
+    let document = b"<!DOCTYPE r [<!ENTITY inner 'v'><!ENTITY outer '&first;'><!ENTITY first SYSTEM 'first'><!ENTITY middle '&second;'><!ENTITY second SYSTEM 'second'>]><r>&outer;&outer;</r>";
+    for (nested, required_depth) in [(false, 3), (true, 5)] {
+        for depth in [required_depth - 1, required_depth] {
+            for width in [1, 7, document.len()] {
+                let mut parser = Parser::new(Config {
+                    limits: Limits {
+                        max_entity_depth: depth,
+                        ..Limits::default()
+                    },
+                    ..Config::default()
+                });
+                let mut text = String::new();
+                let result = feed(&mut parser, document, width, nested, &mut text);
+                if depth < required_depth {
+                    assert_eq!(result, Err(ErrorKind::LimitExceeded));
+                    assert!(text.is_empty());
+                } else {
+                    assert_eq!(result, Ok(()));
+                    assert_eq!(text, "vv");
+                }
+            }
+        }
+    }
+}

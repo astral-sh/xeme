@@ -591,6 +591,7 @@ pub struct Parser {
     expanded: Shared<EntityBudget>,
     fragment: bool,
     external_subset: bool,
+    // External parsers plus active general-entity sources in their ancestors.
     external_depth: usize,
     entity_chain: Vec<String>,
     active_entities: active::ActiveEntities,
@@ -1049,7 +1050,15 @@ impl Parser {
         child.expanded = self.expanded.clone();
         child.fragment = true;
         child.external_subset = context.is_none();
-        child.external_depth = self.external_depth + 1;
+        // General children replace the parent's source stack. Carry its active
+        // internal entities across that boundary; DTD children account for their
+        // parameter sources separately in `inherit_parameter_context`.
+        child.external_depth = self.external_depth
+            + if context.is_some() {
+                self.sources.len()
+            } else {
+                1
+            };
         child.inherited_parameter_depth = self.inherited_parameter_depth;
         child.declarations_skipped = self.declarations_skipped();
         if context.is_none() {

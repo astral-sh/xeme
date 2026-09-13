@@ -571,6 +571,108 @@ fn expanded_element_frames_preserve_packed_names_and_literal_attributes() {
 }
 
 #[test]
+fn expanded_attribute_frames_preserve_keys_triplets_and_fallbacks() {
+    for input in [
+        "<r xmlns:p='u'><n p:a='first'/><n p:a='next' a='raw'/></r>",
+        "<r xmlns='d' xmlns:p='u'><n p:a='v' xml:lang='en'/></r>",
+        "<r xmlns:p='outer'><n xmlns:p='inner'><n p:a='v'/></n><n p:a='w'/></r>",
+        "<r xmlns:p='a'><n p:b='1' axb='2'/></r>",
+        "<r xmlns:p='ax' xmlns:q='a'><n p:b='1' q:xb='2'/></r>",
+        "<r xmlns:p='u' xmlns:q='u'><n p:a='v' q:a='duplicate'/></r>",
+        "<r xmlns:p='u'><n p:a='v' a='first' a='duplicate'/></r>",
+        "<r xmlns:p='u'><n p:a='v' p:b='&amp;'/></r>",
+    ] {
+        for separator in ['|', '\0', 'x', 'λ'] {
+            for triplets in [false, true] {
+                for chunk in [1, 7, input.len()] {
+                    let config = Config {
+                        namespace_separator: Some(separator),
+                        namespace_triplets: triplets,
+                        ..Config::default()
+                    };
+                    let owned = collect(input.as_bytes(), chunk, config.clone(), false);
+                    for c_context in [false, true] {
+                        let framed =
+                            collect_mode(input.as_bytes(), chunk, config.clone(), true, c_context);
+                        assert_eq!(
+                            framed.0, owned.0,
+                            "{input} {separator:?} {triplets} {chunk}"
+                        );
+                    }
+                }
+            }
+        }
+    }
+    for count in [1, 8, 9, 128] {
+        let attrs = (0..count)
+            .map(|index| format!(" p:a{index}='{index}'"))
+            .collect::<std::string::String>();
+        let input = format!(
+            "<r xmlns:p='u' xmlns:q='u'><warm{attrs}/><n{attrs}/><n{attrs} q:a0='duplicate'/></r>"
+        );
+        for chunk in [1, 4096] {
+            let config = Config {
+                namespace_separator: Some('|'),
+                namespace_triplets: true,
+                ..Config::default()
+            };
+            let framed = collect(input.as_bytes(), chunk, config.clone(), true);
+            let owned = collect(input.as_bytes(), chunk, config, false);
+            assert_eq!(framed.0, owned.0, "{count} {chunk}");
+            assert_eq!(framed.1 > 0, count <= 8, "{count} {chunk}");
+            assert!(framed.0.last().unwrap().contains("DuplicateAttribute"));
+        }
+    }
+}
+
+#[test]
+fn expanded_attribute_frames_keep_uri_accounting_and_arena_bounds() {
+    let tag = "<n p:a='v' p:b='w'/>";
+    for separator in ['|', '\0', 'λ'] {
+        let separator_bytes = if separator == '\0' {
+            0
+        } else {
+            2 * separator.len_utf8()
+        };
+        for extra in [0, 1] {
+            let uri = "u".repeat((4096 - tag.len()) / 2 - separator_bytes + extra);
+            let input = format!("<r xmlns:p='{uri}'>{tag}{tag}</r>");
+            for chunk in [1, 4096] {
+                let config = Config {
+                    namespace_separator: Some(separator),
+                    namespace_triplets: true,
+                    ..Config::default()
+                };
+                let framed = collect(input.as_bytes(), chunk, config.clone(), true);
+                let owned = collect(input.as_bytes(), chunk, config, false);
+                assert_eq!(framed.0, owned.0, "{separator:?} {extra} {chunk}");
+                assert_eq!(framed.1, if extra == 0 { 2 } else { 0 });
+            }
+        }
+    }
+    for (tag, error) in [
+        ("<n p:a='v'/>", "LimitExceeded"),
+        ("<n p:a='v' a='first' a='duplicate'/>", "DuplicateAttribute"),
+    ] {
+        let input = format!("<r xmlns:p='urn:long'>{tag}</r>");
+        for limit in 0..=2 * "urn:long".len() {
+            let mut config = Config {
+                namespace_separator: Some('|'),
+                namespace_triplets: true,
+                ..Config::default()
+            };
+            config.limits.max_entity_expansion_bytes = limit;
+            let owned = collect(input.as_bytes(), 1, config.clone(), false);
+            let framed = collect(input.as_bytes(), 1, config, true);
+            assert_eq!(framed.0, owned.0, "{tag} {limit}");
+            if limit < 2 * "urn:long".len() {
+                assert!(framed.0.last().unwrap().contains(error), "{tag} {limit}");
+            }
+        }
+    }
+}
+
+#[test]
 fn expanded_element_frames_keep_uri_work_and_arena_limits() {
     let tag = "<p:n a='v'/>";
     for separator in ['|', '\0', 'λ'] {

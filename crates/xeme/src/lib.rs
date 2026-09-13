@@ -3680,11 +3680,7 @@ impl Parser {
             matches!(planned, tag::Planned::Complete { .. })
                 && !self.source().has_conversions()
                 && self.raw_attributes.len() <= arena::MAX_ARENA_ATTRIBUTES
-                && self.raw_attributes.iter().all(|attribute| {
-                    let name = attribute.name(rest);
-                    name != "xmlns" && !name.contains(':')
-                })
-                && self.expanded_name_fits_frame(raw_name, token.len())
+                && self.expanded_names_fit_frame(raw_name, rest, token.len())
         }) {
             return self.parse_start_frame::<true>(token, position, raw_name, rest, frame);
         }
@@ -3913,24 +3909,40 @@ impl Parser {
             attrs.retain(|attr| attr.name != "xmlns" && !attr.name.starts_with("xmlns:"));
             self.id_attribute_index =
                 id_name.and_then(|name| attrs.iter().position(|attribute| attribute.name == name));
-            let mut expanded =
-                HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator);
-            for attr in &mut attrs {
+            let mut expanded = (attrs.len() > 8)
+                .then(|| HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator));
+            let mut key_lengths = [0; 8];
+            for index in 0..attrs.len() {
+                let (prior, current) = attrs.split_at_mut(index);
+                let attr = &mut current[0];
                 // An unprefixed attribute has no namespace. Its raw name was
                 // already checked for duplicates, and may legitimately equal
                 // another attribute's serialized expanded name.
                 if !attr.name.contains(':') {
                     continue;
                 }
-                let key = self.expand_name(&attr.name, true, false, None)?;
-                if !try_set_insert(&mut expanded, key)? {
-                    return Err(self.err(
-                        ErrorKind::DuplicateAttribute,
-                        "duplicate expanded attribute name",
-                    ));
+                if let Some(expanded) = &mut expanded {
+                    let key = self.expand_name(&attr.name, true, false, None)?;
+                    if !try_set_insert(expanded, key)? {
+                        return Err(self.err(
+                            ErrorKind::DuplicateAttribute,
+                            "duplicate expanded attribute name",
+                        ));
+                    }
+                    attr.name =
+                        self.expand_name(&attr.name, true, self.config.namespace_triplets, None)?;
+                } else {
+                    let (name, key_length) = self.expand_small_attribute_name(
+                        &attr.name,
+                        prior
+                            .iter()
+                            .zip(key_lengths)
+                            .filter(|(_, length)| *length != 0)
+                            .map(|(attribute, length)| &attribute.name.as_bytes()[..length]),
+                    )?;
+                    key_lengths[index] = key_length;
+                    attr.name = name;
                 }
-                attr.name =
-                    self.expand_name(&attr.name, true, self.config.namespace_triplets, None)?;
             }
         }
         let reusable = self.event_recycling.take_name();
@@ -4045,12 +4057,40 @@ impl Parser {
         }
     }
 
-    /// Check storage eligibility without charging URI work or changing error order.
-    /// The sole caller supplies a valid Name from a native, unconverted tag plan.
-    fn expanded_name_fits_frame(&self, name: &str, token_bytes: usize) -> bool {
-        let Some(separator) = self.config.namespace_separator else {
+    /// Bound final spellings without charging URI work or changing error order.
+    /// The caller supplies the native tag planner's existing Name proofs.
+    fn expanded_names_fit_frame(&self, name: &str, rest: &str, token_bytes: usize) -> bool {
+        let Some(mut bytes) = self
+            .frame_namespace_name_bytes(name, false)
+            .and_then(|extra| token_bytes.checked_add(extra))
+        else {
             return false;
         };
+        for attribute in &self.raw_attributes {
+            let name = attribute.name(rest);
+            if name == "xmlns" {
+                return false;
+            }
+            if name.contains(':') {
+                // Keep expanded duplicate checks bounded and allocation-free.
+                if self.raw_attributes.len() > 8 {
+                    return false;
+                }
+                let Some(total) = self
+                    .frame_namespace_name_bytes(name, true)
+                    .and_then(|extra| bytes.checked_add(extra))
+                else {
+                    return false;
+                };
+                bytes = total;
+            }
+        }
+        bytes <= arena::MAX_ARENA_BYTES
+    }
+
+    /// Additional arena bytes for a validated native QName and its live binding.
+    fn frame_namespace_name_bytes(&self, name: &str, attribute: bool) -> Option<usize> {
+        let separator = self.config.namespace_separator?;
         let uri = match name.split_once(':') {
             Some((prefix, local)) => {
                 // The Name proof covers the prefix and all local continuations.
@@ -4063,14 +4103,15 @@ impl Parser {
                     || local.contains(':')
                     || prefix == "xmlns"
                 {
-                    return false;
+                    return None;
                 }
-                self.namespaces.get(prefix)
+                Some(self.namespaces.get(prefix)?)
             }
-            None => self.default_namespace.as_ref(),
+            None if !attribute => self.default_namespace.as_ref(),
+            None => None,
         };
         let Some(uri) = uri else {
-            return false;
+            return Some(0);
         };
         // Literal fields and their NULs fit within the token. Its raw QName
         // also covers a triplet's prefix; add the URI and both possible separators.
@@ -4079,15 +4120,12 @@ impl Parser {
         } else {
             2 * separator.len_utf8()
         };
-        token_bytes
-            .checked_add(uri.len())
-            .and_then(|bytes| bytes.checked_add(separators))
-            .is_some_and(|bytes| bytes <= arena::MAX_ARENA_BYTES)
+        uri.len().checked_add(separators)
     }
 
-    /// Lower a literal tag, optionally expanding only its element name.
+    /// Lower a literal tag, optionally expanding its element and attribute names.
     /// Keep fallible copies in semantic order and publish after any end event.
-    fn parse_start_frame<const EXPAND_ELEMENT: bool>(
+    fn parse_start_frame<const EXPAND_NAMES: bool>(
         &mut self,
         token: lexical::Slice<'_>,
         position: Position,
@@ -4098,7 +4136,7 @@ impl Parser {
         debug_assert!(self.tables.defaults.is_empty());
         debug_assert!(!self.source().has_conversions());
         debug_assert!(!self.fragment && self.sources.len() == 1);
-        if !EXPAND_ELEMENT && !token.ends_with("/>") {
+        if !EXPAND_NAMES && !token.ends_with("/>") {
             return self
                 .identity_start_state()
                 .lower(name, rest, position, frame);
@@ -4112,7 +4150,7 @@ impl Parser {
             .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
         frame.prepare(raw_attrs.len())?;
         let literal_span =
-            !EXPAND_ELEMENT && !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);
+            !EXPAND_NAMES && !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);
         let mut names =
             AttributeNames::new(raw_attrs.len(), self.namespaces.hasher(), self.allocator);
         for (index, attribute) in raw_attrs.iter().enumerate() {
@@ -4127,15 +4165,35 @@ impl Parser {
                         .position_at(1 + name.len() + attribute_offset, 0)
                 },
             )?;
-            if !literal_span {
+            if !EXPAND_NAMES && !literal_span {
                 frame.push_attribute(attr_name, value)?;
+            }
+        }
+        if EXPAND_NAMES && !raw_attrs.is_empty() {
+            let mut key_lengths = [0; 8];
+            for (index, attribute) in raw_attrs.iter().enumerate() {
+                let name = attribute.name(rest);
+                if name.contains(':') {
+                    let (name, key_length) = self.expand_small_attribute_name(
+                        name,
+                        frame
+                            .attributes()
+                            .zip(key_lengths)
+                            .filter(|(_, length)| *length != 0)
+                            .map(|((name, _), length)| &name[..length]),
+                    )?;
+                    key_lengths[index] = key_length;
+                    frame.push_attribute(&name, attribute.value(rest))?;
+                } else {
+                    frame.push_attribute(name, attribute.value(rest))?;
+                }
             }
         }
         if literal_span {
             frame.push_literal_attributes(rest, &raw_attrs)?;
         }
         self.id_attribute_index = None;
-        let expanded_name = if EXPAND_ELEMENT {
+        let expanded_name = if EXPAND_NAMES {
             let reusable = self.event_recycling.take_name();
             Some(self.expand_name(name, false, self.config.namespace_triplets, reusable)?)
         } else {
@@ -4298,6 +4356,41 @@ impl Parser {
         if self.stack.is_empty() {
             self.closed_root = true;
         }
+    }
+
+    /// Expand once for a bounded attribute list, retaining the pre-triplet key.
+    /// Large lists keep the randomized set; callers exclude unprefixed attributes.
+    fn expand_small_attribute_name<'a>(
+        &self,
+        name: &str,
+        mut prior: impl Iterator<Item = &'a [u8]>,
+    ) -> Result<(String, usize), Error> {
+        let mut expanded = self.expand_name(name, true, false, None)?;
+        if prior.any(|previous| previous == expanded.as_bytes()) {
+            return Err(self.err(
+                ErrorKind::DuplicateAttribute,
+                "duplicate expanded attribute name",
+            ));
+        }
+        let key_length = expanded.len();
+        let (prefix, local) = name.split_once(':').expect("qualified attribute");
+        let separator = self
+            .config
+            .namespace_separator
+            .expect("namespace processing");
+        let separator_bytes = if separator == '\0' {
+            0
+        } else {
+            separator.len_utf8()
+        };
+        // Preserve both URI charges from duplicate-key and callback expansion,
+        // including their order relative to duplicate errors and triplet storage.
+        self.charge_expansion(key_length - local.len() - separator_bytes)?;
+        if self.config.namespace_triplets && separator != '\0' {
+            expanded.try_push(separator)?;
+            expanded.try_push_str(prefix)?;
+        }
+        Ok((expanded, key_length))
     }
 
     fn expand_name(
@@ -5536,7 +5629,7 @@ mod namespace_scope_tests {
                                 .is_some_and(|bytes| bytes <= arena::MAX_ARENA_BYTES)
                         });
                         assert_eq!(
-                            parser.expanded_name_fits_frame(name, token_bytes),
+                            parser.expanded_names_fit_frame(name, "", token_bytes),
                             expected,
                             "{name:?} {name_rules:?} {separator:?} {token_bytes}"
                         );

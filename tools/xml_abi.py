@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ctypes as c
+import os
 from typing import Any
 
 P = c.c_void_p
@@ -17,6 +18,19 @@ NS_START = c.CFUNCTYPE(None, P, S, S)
 DECL = c.CFUNCTYPE(None, P, S, S, I)
 
 
+def load_library(library: str) -> c.CDLL:
+    """Keep a probe library's internal calls bound to its own implementation.
+
+    Ubuntu's Python links a system Expat into the process before our probes run.
+    A normal dlopen can bind another Expat's internal calls to that first copy,
+    even when XML_Parse itself has the requested origin. On ELF platforms that
+    support it, deep binding prevents this mixture of private parser layouts.
+    These ctypes probes load ordinary builds; sanitizer builds use their own
+    harnesses because ASan does not support RTLD_DEEPBIND.
+    """
+    return c.CDLL(library, mode=c.DEFAULT_MODE | getattr(os, "RTLD_DEEPBIND", 0))
+
+
 def decode(value: bytes | None) -> str | None:
     return (
         value.decode("utf-8", errors="backslashreplace") if value is not None else None
@@ -25,7 +39,7 @@ def decode(value: bytes | None) -> str | None:
 
 class Expat:
     def __init__(self, library: str):
-        self.lib = c.CDLL(library)
+        self.lib = load_library(library)
         signatures = {
             "XML_ParserCreate": (P, [S]),
             "XML_ParserCreateNS": (P, [S, c.c_char]),

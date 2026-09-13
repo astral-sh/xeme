@@ -62,6 +62,7 @@ jobs:
       - run: python3 -m unittest discover -s tools/cpython -p test_run.py
       - run: python3 -m unittest discover -s tools -p test_compatibility.py
       - run: python3 -m unittest discover -s tools -p test_differential.py
+      - run: python3 -m unittest discover -s tools -p test_xml_abi.py
       - run: python3 benchmarks/hillclimb.py verify-holdout
       - run: python3 -m unittest discover -s tools/pgo -p test_build.py
       - run: python3 -m unittest discover -s integration/python-build-standalone -p test_pgo_bundle.py
@@ -287,6 +288,7 @@ jobs:
         with:
           toolchain: nightly
       - run: cargo install cargo-fuzz --locked --version 0.13.2
+      - run: cargo test --manifest-path fuzz/Cargo.toml --lib --locked
       - run: cargo fuzz run parse -- -max_total_time=30 -max_len=4096
       - run: cargo fuzz run streaming -- -max_total_time=30 -max_len=4096
       - run: cargo fuzz run ffi fuzz/seeds/ffi -- -max_total_time=30 -max_len=65536

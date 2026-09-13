@@ -12,6 +12,9 @@ import urllib.parse
 import xml.parsers.expat
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from xml_abi import load_library
+
 SUITE = Path()
 OUT = Path()
 
@@ -69,7 +72,7 @@ EXT = C.CFUNCTYPE(C.c_int, C.c_void_p, C.c_void_p, C.c_char_p, C.c_char_p, C.c_c
 
 class Engine:
     def __init__(self, library):
-        self.lib = C.CDLL(library)
+        self.lib = load_library(library)
         for name, args, result in [
             ("XML_ParserCreate", [C.c_char_p], C.c_void_p),
             ("XML_ParserCreateNS", [C.c_char_p, C.c_char], C.c_void_p),

@@ -55,3 +55,10 @@ path = "fuzz_targets/value_family.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "expat_differential"
+path = "fuzz_targets/expat_differential.rs"
+test = false
+doc = false
+bench = false

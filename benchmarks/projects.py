@@ -55,13 +55,12 @@ def worker(spec_path: Path) -> None:
         )
     with gzip.open(spec_path.with_suffix(".callbacks.json.gz"), "wt") as stream:
         json.dump(results, stream, separators=(",", ":"))
-    left, right = results["expat"], results["oriole"]
-    passed = (
-        all(
-            r["status"] == 1 and r["error"] == 0 and not r["callback_errors"]
-            for r in results.values()
-        )
-        and left["normalized_events"] == right["normalized_events"]
+    passed = all(
+        r["status"] == 1 and r["error"] == 0 and not r["callback_errors"]
+        for r in results.values()
+    ) and all(
+        result["normalized_events"] == results["expat"]["normalized_events"]
+        for result in results.values()
     )
     summary = {
         "passed": passed,
@@ -92,6 +91,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--library", type=Path, required=True)
     parser.add_argument("--reference", type=Path, required=True)
+    parser.add_argument("--baseline", type=Path, help="Optional third parser library")
     parser.add_argument("--corpus", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--chunks", nargs="+", type=int, default=[4096, 65536])
@@ -132,6 +132,8 @@ def main() -> int:
         "oriole": args.library.resolve(strict=True),
         "expat": args.reference.resolve(strict=True),
     }
+    if args.baseline is not None:
+        libraries["baseline"] = args.baseline.resolve(strict=True)
     command = [
         args.cc,
         "-std=c11",
@@ -163,7 +165,7 @@ def main() -> int:
         "status": "failed",
         "schema_version": 1,
         "corpus_manifest": manifest,
-        "method": "Seven randomized paired processes by default; per-process median of parse samples after one discarded warmup. Creation, callback registration, parse, native callback hashing and free are timed. File/library loading and process startup are excluded. Full normalized callback streams are compared before timing and derive the expected native output hash. Each measured sample must match its independent preflight hash/counts.",
+        "method": "Seven matched rounds by default, randomizing all engines within each condition; per-process median of parse samples after one discarded warmup. Creation, callback registration, parse, native callback hashing and free are timed. File/library loading and process startup are excluded. Full normalized callback streams are compared before timing and derive the expected native output hash. Each measured sample must match its independent preflight hash/counts.",
         "limitations": "These are parser microbenchmarks on original real-project inputs, not end-to-end project build, rendering or code generation. No external entity handler is installed; no runtime network or file resolution occurs. Batik external DTD is skipped by both parsers. XSL includes are XML data, not resolved transformations. Shared host CPU frequency/load/memory bandwidth are uncontrolled. Warm filesystem caches.",
         "platform": platform.platform(),
         "cpu": next(
@@ -198,7 +200,16 @@ def main() -> int:
         report["processes"].append(row)
         try:
             done = subprocess.run(
-                command, capture_output=True, text=True, check=False, timeout=timeout
+                command,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=timeout,
+                env={
+                    key: value
+                    for key, value in os.environ.items()
+                    if key not in {"LD_PRELOAD", "LD_LIBRARY_PATH", "LD_AUDIT"}
+                },
             )
             row.update(
                 returncode=done.returncode, stdout=done.stdout, stderr=done.stderr
@@ -227,7 +238,14 @@ def main() -> int:
                 + "\n"
             )
             execute(
-                [sys.executable, str(Path(__file__).resolve()), "--worker", str(path)],
+                [
+                    sys.executable,
+                    "-I",
+                    "-S",
+                    str(Path(__file__).resolve()),
+                    "--worker",
+                    str(path),
+                ],
                 key,
             )
             result = json.loads(path.with_suffix(".result.json").read_text())

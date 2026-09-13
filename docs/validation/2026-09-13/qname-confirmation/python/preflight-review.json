@@ -1,0 +1,728 @@
+{
+  "status": "passed",
+  "mode": "normal",
+  "targets_executed": false,
+  "scope": "Six original compile vectors reused without recompilation, and fresh worker-reported module paths plus in-process dladdr parser DSO origins; no module loading or new ELF execution here. These 24 benchmark canonical comparisons coalesce adjacent character callbacks and do not replace the strict CPython suite.",
+  "exact_compile_vectors": [
+    [
+      "cc",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-I/home/dev-user/code/oss/oriole-reference-frame/include",
+      "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12",
+      "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/internal",
+      "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/expat",
+      "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules",
+      "/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/pyexpat.c",
+      "/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate/liboriole_expat.so",
+      "-Wl,-rpath,/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate",
+      "-o",
+      "/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate/pyexpat.cpython-312-x86_64-linux-gnu.so"
+    ],
+    [
+      "cc",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-I/home/dev-user/code/oss/oriole-reference-frame/include",
+      "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12",
+      "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/internal",
+      "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/expat",
+      "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules",
+      "/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/_elementtree.c",
+      "/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate/liboriole_expat.so",
+      "-Wl,-rpath,/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate",
+      "-o",
+      "/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate/_elementtree.cpython-312-x86_64-linux-gnu.so"
+    ],
+    [
+      "cc",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-I/home/dev-user/code/oss/oriole-reference-frame/include",
+      "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12",
+      "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/internal",
+      "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/expat",
+      "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules",
+      "/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/pyexpat.c",
+      "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/expat-control-liboriole_expat.so",
+      "-Wl,-rpath,/tmp/oriole-expanded-start-capacity-study/python/consumers/expat",
+      "-o",
+      "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/pyexpat.cpython-312-x86_64-linux-gnu.so"
+    ],
+    [
+      "cc",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-I/home/dev-user/code/oss/oriole-reference-frame/include",
+      "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12",
+      "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/internal",
+      "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/expat",
+      "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules",
+      "/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/_elementtree.c",
+      "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/expat-control-liboriole_expat.so",
+      "-Wl,-rpath,/tmp/oriole-expanded-start-capacity-study/python/consumers/expat",
+      "-o",
+      "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/_elementtree.cpython-312-x86_64-linux-gnu.so"
+    ],
+    [
+      "cc",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-I/home/dev-user/code/oss/oriole-reference-frame/include",
+      "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12",
+      "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/internal",
+      "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/expat",
+      "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules",
+      "/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/pyexpat.c",
+      "/tmp/oriole-namespace-qname-only-benchmark/python/consumers/candidate/liboriole_expat.so",
+      "-Wl,-rpath,/tmp/oriole-namespace-qname-only-benchmark/python/consumers/candidate",
+      "-o",
+      "/tmp/oriole-namespace-qname-only-benchmark/python/consumers/candidate/pyexpat.cpython-312-x86_64-linux-gnu.so"
+    ],
+    [
+      "cc",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-I/home/dev-user/code/oss/oriole-reference-frame/include",
+      "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12",
+      "-I/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/internal",
+      "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/expat",
+      "-I/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules",
+      "/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/_elementtree.c",
+      "/tmp/oriole-namespace-qname-only-benchmark/python/consumers/candidate/liboriole_expat.so",
+      "-Wl,-rpath,/tmp/oriole-namespace-qname-only-benchmark/python/consumers/candidate",
+      "-o",
+      "/tmp/oriole-namespace-qname-only-benchmark/python/consumers/candidate/_elementtree.cpython-312-x86_64-linux-gnu.so"
+    ]
+  ],
+  "extension_compiles": {
+    "fresh": 0,
+    "reused": 6,
+    "total": 6
+  },
+  "preflight_workers": 72,
+  "conditions": [
+    {
+      "name": "vulkan",
+      "chunk": 4096,
+      "mode": "elementtree",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+      "iterations": 3
+    },
+    {
+      "name": "vulkan",
+      "chunk": 4096,
+      "mode": "pyexpat-events",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+      "iterations": 3
+    },
+    {
+      "name": "vulkan",
+      "chunk": 65536,
+      "mode": "elementtree",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+      "iterations": 3
+    },
+    {
+      "name": "vulkan",
+      "chunk": 65536,
+      "mode": "pyexpat-events",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+      "iterations": 3
+    },
+    {
+      "name": "wayland",
+      "chunk": 4096,
+      "mode": "elementtree",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+      "iterations": 16
+    },
+    {
+      "name": "wayland",
+      "chunk": 4096,
+      "mode": "pyexpat-events",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+      "iterations": 16
+    },
+    {
+      "name": "wayland",
+      "chunk": 65536,
+      "mode": "elementtree",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+      "iterations": 16
+    },
+    {
+      "name": "wayland",
+      "chunk": 65536,
+      "mode": "pyexpat-events",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+      "iterations": 16
+    },
+    {
+      "name": "maven",
+      "chunk": 4096,
+      "mode": "elementtree",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+      "iterations": 32
+    },
+    {
+      "name": "maven",
+      "chunk": 4096,
+      "mode": "pyexpat-events",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+      "iterations": 32
+    },
+    {
+      "name": "maven",
+      "chunk": 65536,
+      "mode": "elementtree",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+      "iterations": 32
+    },
+    {
+      "name": "maven",
+      "chunk": 65536,
+      "mode": "pyexpat-events",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+      "iterations": 32
+    },
+    {
+      "name": "batik",
+      "chunk": 4096,
+      "mode": "elementtree",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+      "iterations": 128
+    },
+    {
+      "name": "batik",
+      "chunk": 4096,
+      "mode": "pyexpat-events",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+      "iterations": 128
+    },
+    {
+      "name": "batik",
+      "chunk": 65536,
+      "mode": "elementtree",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+      "iterations": 128
+    },
+    {
+      "name": "batik",
+      "chunk": 65536,
+      "mode": "pyexpat-events",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+      "iterations": 128
+    },
+    {
+      "name": "gtk",
+      "chunk": 4096,
+      "mode": "elementtree",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+      "iterations": 64
+    },
+    {
+      "name": "gtk",
+      "chunk": 4096,
+      "mode": "pyexpat-events",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+      "iterations": 64
+    },
+    {
+      "name": "gtk",
+      "chunk": 65536,
+      "mode": "elementtree",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+      "iterations": 64
+    },
+    {
+      "name": "gtk",
+      "chunk": 65536,
+      "mode": "pyexpat-events",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+      "iterations": 64
+    },
+    {
+      "name": "docbook",
+      "chunk": 4096,
+      "mode": "elementtree",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+      "iterations": 64
+    },
+    {
+      "name": "docbook",
+      "chunk": 4096,
+      "mode": "pyexpat-events",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+      "iterations": 64
+    },
+    {
+      "name": "docbook",
+      "chunk": 65536,
+      "mode": "elementtree",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+      "iterations": 64
+    },
+    {
+      "name": "docbook",
+      "chunk": 65536,
+      "mode": "pyexpat-events",
+      "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+      "iterations": 64
+    }
+  ],
+  "canonical_outputs": {
+    "vulkan/4096/elementtree": [
+      "1276ced34b4f7f956cacbbf48c1bbd96b949d5f49a2def7dafbe5750ee8471fb",
+      53787
+    ],
+    "vulkan/4096/pyexpat-events": [
+      "508e07b2592ff57cef641b3869b4be669deb3241ef8832bb66081665b698ea46",
+      180750
+    ],
+    "vulkan/65536/elementtree": [
+      "1276ced34b4f7f956cacbbf48c1bbd96b949d5f49a2def7dafbe5750ee8471fb",
+      53787
+    ],
+    "vulkan/65536/pyexpat-events": [
+      "508e07b2592ff57cef641b3869b4be669deb3241ef8832bb66081665b698ea46",
+      180750
+    ],
+    "wayland/4096/elementtree": [
+      "6f19bee1b9f272b66e761898d892a2dc46057180a507bc6b26ae36d1acda3e35",
+      764
+    ],
+    "wayland/4096/pyexpat-events": [
+      "5e809c7e255798f42588a3378dbfa5d1da66806980a8a738bdc8d3a69b63557c",
+      2639
+    ],
+    "wayland/65536/elementtree": [
+      "6f19bee1b9f272b66e761898d892a2dc46057180a507bc6b26ae36d1acda3e35",
+      764
+    ],
+    "wayland/65536/pyexpat-events": [
+      "5e809c7e255798f42588a3378dbfa5d1da66806980a8a738bdc8d3a69b63557c",
+      2639
+    ],
+    "maven/4096/elementtree": [
+      "f5fa13942d644256412a60776885ae9da933bd6c2a224690b02d513d7d048c6c",
+      917
+    ],
+    "maven/4096/pyexpat-events": [
+      "c553fbae20fee3bf37dfd286634f63ecfa69674c66b49a8e176beeb7e7d8ffc4",
+      3662
+    ],
+    "maven/65536/elementtree": [
+      "f5fa13942d644256412a60776885ae9da933bd6c2a224690b02d513d7d048c6c",
+      917
+    ],
+    "maven/65536/pyexpat-events": [
+      "c553fbae20fee3bf37dfd286634f63ecfa69674c66b49a8e176beeb7e7d8ffc4",
+      3662
+    ],
+    "batik/4096/elementtree": [
+      "a6ee51ae6a0c29f2e3f67b580e14794c52cec4bb1df77be6b4776e23e540d0cd",
+      49
+    ],
+    "batik/4096/pyexpat-events": [
+      "6fa895732256af2e78654a95782d0d21f8532c5b44d2d093dd701a2f5ef05a69",
+      167
+    ],
+    "batik/65536/elementtree": [
+      "a6ee51ae6a0c29f2e3f67b580e14794c52cec4bb1df77be6b4776e23e540d0cd",
+      49
+    ],
+    "batik/65536/pyexpat-events": [
+      "6fa895732256af2e78654a95782d0d21f8532c5b44d2d093dd701a2f5ef05a69",
+      167
+    ],
+    "gtk/4096/elementtree": [
+      "e5992a1a6c9341c9cdb0e5f4d586f8057d334416f93497b47cc657b60e63b713",
+      311
+    ],
+    "gtk/4096/pyexpat-events": [
+      "03cb6964301a3d824be17dedd0145f2a671f620048493058090ac443e78c52d9",
+      1212
+    ],
+    "gtk/65536/elementtree": [
+      "e5992a1a6c9341c9cdb0e5f4d586f8057d334416f93497b47cc657b60e63b713",
+      311
+    ],
+    "gtk/65536/pyexpat-events": [
+      "03cb6964301a3d824be17dedd0145f2a671f620048493058090ac443e78c52d9",
+      1212
+    ],
+    "docbook/4096/elementtree": [
+      "e09898a79c3298d31177beaff890ceb30ca400f12aeae8d6f9e7f6cde597d613",
+      241
+    ],
+    "docbook/4096/pyexpat-events": [
+      "2323182c18ddaea3cf654e175c0ec832cf3e5f5b40ae14fd0df0e8e1182dc723",
+      841
+    ],
+    "docbook/65536/elementtree": [
+      "e09898a79c3298d31177beaff890ceb30ca400f12aeae8d6f9e7f6cde597d613",
+      241
+    ],
+    "docbook/65536/pyexpat-events": [
+      "2323182c18ddaea3cf654e175c0ec832cf3e5f5b40ae14fd0df0e8e1182dc723",
+      841
+    ]
+  },
+  "origins": {
+    "control": {
+      "pyexpat": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate/pyexpat.cpython-312-x86_64-linux-gnu.so",
+        "sha256": "caa66837901dfe24f2e28f16024f7c23dc979805fa7033fcd5636433b1538596"
+      },
+      "_elementtree": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate/_elementtree.cpython-312-x86_64-linux-gnu.so",
+        "sha256": "bc04c19157195b7cc5ea7a40faa7acdd9839366281c7bf328a677f8991be52ab"
+      },
+      "parser_library": {
+        "path": "/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate/liboriole_expat.so",
+        "sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025"
+      },
+      "expat_version": "oriole_compat_2.8.4"
+    },
+    "expat": {
+      "pyexpat": {
+        "path": "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/pyexpat.cpython-312-x86_64-linux-gnu.so",
+        "sha256": "2b7b01f5ccf3974bf8465d8c31a1785bbb286baf13ba59b30d33aaa2a20745fa"
+      },
+      "_elementtree": {
+        "path": "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/_elementtree.cpython-312-x86_64-linux-gnu.so",
+        "sha256": "01d16b511ba56646713c1498b83e9797f4a32acc5ad715ee90e1f07d9193ee2b"
+      },
+      "parser_library": {
+        "path": "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/expat-control-liboriole_expat.so",
+        "sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+      },
+      "expat_version": "expat_2.8.4"
+    },
+    "candidate": {
+      "pyexpat": {
+        "path": "/tmp/oriole-namespace-qname-only-benchmark/python/consumers/candidate/pyexpat.cpython-312-x86_64-linux-gnu.so",
+        "sha256": "19bafd0bfc4387f77158aefa8e85dcd3383c7ef5e4febf322861e0f2e0e54fd9"
+      },
+      "_elementtree": {
+        "path": "/tmp/oriole-namespace-qname-only-benchmark/python/consumers/candidate/_elementtree.cpython-312-x86_64-linux-gnu.so",
+        "sha256": "dc2c80af5837ce2f80ac4e03738322f8f1ca54cb5b1f7fe71f3b9756c5e3477b"
+      },
+      "parser_library": {
+        "path": "/tmp/oriole-namespace-qname-only-benchmark/python/consumers/candidate/liboriole_expat.so",
+        "sha256": "24a7d8262675977fd358c20fde32b346d248e0495d59124bbe39cc74717b352e"
+      },
+      "expat_version": "oriole_compat_2.8.4"
+    }
+  },
+  "pins": {
+    "/tmp/oriole-namespace-qname-only-confirmation/binding.json": "8529411451e7f9e8a583a9619036337b5e849ce6bcf1b131717916ed686d37f3",
+    "/tmp/oriole-namespace-qname-only-confirmation/preparation.json": "a8c43ed0a1c1480c58fbe58fa77751e54a470dd14b071bd967d1fe0a6970ab88",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+    "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "/tmp/oriole-grammar-bench-plain/native-driver": "e9478cd0f8572b08ab513377795a07754086a9cdf2c06748183db3c69d232e23",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/native/native-screen/protocol.json": "2a4e8c5aac3d2763b0be6701ad80169bed145f8287c378e8e10e0676a3774a17",
+    "/tmp/oriole-namespace-qname-only-benchmark/commands.json": "2dd523a669c7c4ef0b0a4d476b61f66f13b553c0e0a7fbc38219336207837744",
+    "/tmp/oriole-namespace-qname-only-benchmark/README.md": "3e573ed7664681d81bc39f04d2686991c3905c449aa84f3c79a6e61f45aa330e",
+    "/tmp/oriole-namespace-qname-only-benchmark/observe-host.py": "a0df67eb5c89a0ffbf30ee377dd0302aff64ca2336fedef9f4af1655710a2cb7",
+    "/tmp/oriole-namespace-qname-only-benchmark/commands.json.patch": "fe5735b0f37a23bc74fae7242a807f584b43b1f1d6e0767d467da355b65a8271",
+    "/tmp/oriole-namespace-qname-only-benchmark/monitor-host.py": "bcfd3b9bba19053d43663b9cb79a74cfbf0d6124039b40a72bd9f232bdea4cc4",
+    "/tmp/oriole-namespace-qname-only-benchmark/bind.py": "24b1fc40db7c2d1a0a4aae6cac13b3e1d602306efebb625927382848d284fe7a",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/build_consumers.py": "4e7c91024b658618547c27023955e34a18fdc7a062764aaf1e26bc6910d3a099",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/elapsed_review.py.patch": "5fa8fc8a58dc4333475a2d2649c59c02371213e782c65d6c0743baf5cf02ffb4",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/python_worker.py": "4bc0ccffedb5048412b9cfc3638d28dcb30f711891c3784f3fbd3c0eb536ab68",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/elapsed_review.py": "d56a78f92b99011ec224d37f5b0b3116d23ea0ad4213629ff70b111298984a45",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/reuse.json": "928d24a72bb369858c3586fe4c44731f5370669b9884e390a581f269923950ef",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/preflight_review.py": "be2f8937f8d3107abff1900a046baf9fdc18b9aeb5c657e761396474c90e28ac",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/consumer_screen.py": "1ceb2e83dabdea48fbdaefd00e294c1769fa9e8ba9f7b966c3eb198fb5e140cf",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/run.py": "6b56b00f60a8743921c0df6ff7d0c1aedc58d1b4c5631a6117d720801fb0197f",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/preflight_review.py.patch": "3b2a24d0b2320d65d99040397ea569cdae88831505222ecdc6cc2050e320daa3",
+    "/tmp/oriole-namespace-qname-only-benchmark/native/native_screen.py.patch": "7e3321e0b1f2cacbec123a11d27e69944865898e7d353ba2e49abffd8ab85cbb",
+    "/tmp/oriole-namespace-qname-only-benchmark/native/read_results.py": "9c6382b60b6129e3b706ca674cfc1f4227dd2b71e83aa46ffcd4b99364c74f33",
+    "/tmp/oriole-namespace-qname-only-benchmark/native/native_screen.py": "56f413fc120ce81dfdc652519643c80cbb175c7a6dd901ae0e1bb1e534b5b0bf",
+    "/tmp/oriole-namespace-qname-only-benchmark/native/run.py": "70e1822662ed23fb0bad312cd82e3eb63cd4bdcd74606b4d516ffa79da84b81d",
+    "/tmp/oriole-namespace-qname-only-study/build.json": "f6811b36bf90db23677b2cb33b0b96a5d11618483ca49e331f89db5c475f8300",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/reuse.json": "928d24a72bb369858c3586fe4c44731f5370669b9884e390a581f269923950ef",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/build.json": "e193a0fc36039643ec318446435b85dc253053f1af83a95b5b8b9719dd1f729f",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/python/preflight-review.json": "2f1e50de07ff4afc6bcbc18e74f784564950897eb6678bd13bb2a925d6b00f54",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/python/build_consumers.py": "4e7c91024b658618547c27023955e34a18fdc7a062764aaf1e26bc6910d3a099",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/python/python_worker.py": "4bc0ccffedb5048412b9cfc3638d28dcb30f711891c3784f3fbd3c0eb536ab68",
+    "/tmp/oriole-core-owned-text-raw-study/python/consumers/build.json": "0b285acd00bc1605e3b4ba726e494dcd165bd446bc02f53a11977ebafe7cb529",
+    "/tmp/oriole-core-owned-text-raw-study/python/preflight-review.json": "f73e9d2f033ba6093a0b371cc0cb8f07da68e0a83774ad1b80c2f77808db4872",
+    "/tmp/oriole-core-owned-text-raw-study/python/prepare-controller.json": "98a04870474c42c97992618defac3b94b1899c569a83c5d700a52ccbda990c52",
+    "/tmp/oriole-core-owned-text-raw-study/python/build_consumers.py": "4e7c91024b658618547c27023955e34a18fdc7a062764aaf1e26bc6910d3a099",
+    "/tmp/oriole-core-owned-text-raw-study/python/python_worker.py": "4bc0ccffedb5048412b9cfc3638d28dcb30f711891c3784f3fbd3c0eb536ab68",
+    "/tmp/oriole-core-owned-text-raw-study/python/consumer_screen.py": "ef4c0f1aa66adf06995ddf5181a16266fd9c6774ec67c8b908ebdf051b4492a5",
+    "/tmp/oriole-core-owned-text-raw-study/python/adaptation.json": "1392aae1a80ad7593058bc227864658b372e0a2d75d6c267c943ef909c60c924",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Modules/pyexpat.c": "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0",
+    "/home/dev-user/.cache/oriole/upstream/cpython-3.12.13/Modules/_elementtree.c": "de4c3c8716f7e3b1d2fdf077656246220ef0493053c990ca7b724ad31498fad0",
+    "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12": "021044895e95be79dc2f110367607e684119afbc8ce75f6f0eec94844e0acec7",
+    "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/Python.h": "729ef157f6026e6e1b3104593f87dddc597c3b83b60c7c2965878c62a56c6f7d",
+    "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/pyconfig.h": "638580a20ffa2b5beab53afef1d156d5004e968403c7c23131c5ec85a0c0b8b3",
+    "/home/dev-user/code/oss/oriole-reference-frame/include/expat.h": "c8c8fda28157a2550dd0b276a717df3414d2a91728e6d0f9d9e20ed143f8d42c",
+    "/usr/bin/x86_64-linux-gnu-gcc-13": "1b99826121ae6682a634e5efe09bd3e3df58ce58e0b28f849114ab5b89139c26",
+    "/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate/liboriole_expat.so": "e59d89d6e21b92042b8358bd8ceef45b0a60404c61c9aa06ccf2e85a00f1c7f6",
+    "/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate/pyexpat.cpython-312-x86_64-linux-gnu.so": "3a0acbbd7f86d0842d7f02eb0b1c3c5423175f8b13a28ae94a57cb22fb0ae907",
+    "/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate/_elementtree.cpython-312-x86_64-linux-gnu.so": "3e735d36381729cbc4ee3b25575b71b252a5e1ab2c196f153987e9ad33f6db15",
+    "/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate/pyexpat-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-core-owned-text-raw-study/python/consumers/candidate/_elementtree-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/expat-control-liboriole_expat.so": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/pyexpat.cpython-312-x86_64-linux-gnu.so": "2b7b01f5ccf3974bf8465d8c31a1785bbb286baf13ba59b30d33aaa2a20745fa",
+    "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/_elementtree.cpython-312-x86_64-linux-gnu.so": "01d16b511ba56646713c1498b83e9797f4a32acc5ad715ee90e1f07d9193ee2b",
+    "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/pyexpat-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat/_elementtree-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate/liboriole_expat.so": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate/pyexpat.cpython-312-x86_64-linux-gnu.so": "caa66837901dfe24f2e28f16024f7c23dc979805fa7033fcd5636433b1538596",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate/_elementtree.cpython-312-x86_64-linux-gnu.so": "bc04c19157195b7cc5ea7a40faa7acdd9839366281c7bf328a677f8991be52ab",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate/pyexpat-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate/_elementtree-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-namespace-qname-only-study/normal/liboriole_expat.so": "24a7d8262675977fd358c20fde32b346d248e0495d59124bbe39cc74717b352e",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/prepare-controller.json": "dadda5eea225812d4016db97b923a771b366eb9c89776a85619edc4c79f23a7c",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/consumers/build.json": "2be8354a7ad6effb9ad5011dcedc3a667b57134d440aa6ec754124c797548d84",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/preflight.json": "bf896002b58bae9f24dec0cfa64ab15b71b8d2b4fd6d9d3c9e6e79921a0e7c99",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/run.py": "79e3d2b896a41fc7861db2666000454c14b42bcc609a8a0eb1aa1ca3ffe5482e",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/preflight-controller.log": "19983cabbe818a76728d9a5b7ed700ec69502448c9e78a17a7c21af2a0d15b68",
+    "/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/pyexpat.c": "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0",
+    "/run/user/1000/oriole-artifacts/upstream/cpython-3.12.13/Modules/_elementtree.c": "de4c3c8716f7e3b1d2fdf077656246220ef0493053c990ca7b724ad31498fad0",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/consumers/candidate/liboriole_expat.so": "24a7d8262675977fd358c20fde32b346d248e0495d59124bbe39cc74717b352e",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/consumers/candidate/pyexpat.cpython-312-x86_64-linux-gnu.so": "19bafd0bfc4387f77158aefa8e85dcd3383c7ef5e4febf322861e0f2e0e54fd9",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/consumers/candidate/_elementtree.cpython-312-x86_64-linux-gnu.so": "dc2c80af5837ce2f80ac4e03738322f8f1ca54cb5b1f7fe71f3b9756c5e3477b",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/consumers/candidate/pyexpat-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/consumers/candidate/_elementtree-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/oriole-reference-frame-python-study/normal/screen/preflight.json": "32fc2e3e4c09daa8d2e9e8e2aaeff000dd2a666aa61cc23af1d146938db1aa7e",
+    "/tmp/oriole-reference-frame-python-study/normal/consumers/build.json": "4aef9bddab8e9f406985450b056fbb882a49a7d23649bcc28d3874110d31cab5",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/consumer_screen.py": "1ceb2e83dabdea48fbdaefd00e294c1769fa9e8ba9f7b966c3eb198fb5e140cf",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/python_worker.py": "4bc0ccffedb5048412b9cfc3638d28dcb30f711891c3784f3fbd3c0eb536ab68",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus-manifest.json": "c725b079ba4f0b19912880f53c6f0ac83758711071151abc8765d1e06491ff42",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml": "cf31c965cf6e788697139601da0c7e02a75a9b6c7ac764e7641f5521ffd9da06",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml": "7eb8569529235c85e16d15612fc367da4538b7d515b13e32ec48ba0742c42610",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml": "5dbb69898d881458df5735b8c50c5166d21aa2d69659d21eea4d888a295b3b3f",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg": "15ab08890f4e57be784d687d3522ef8799486e725826f8abeec29c6cde38050f",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui": "2620a2b6553ce99cc564eb3d359eb9cb9c7b8f259e0ccc1aa49bb3534a38101d",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl": "7f13c5f4977faa028462910cf6d3fdeeeab64d87553f1fff12f0afa8f1c49818",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-elementtree-control--1-0.json": "c416893a7f5dc029c9ce7fc5f043b9879b519f4a6963ae1bb4727f05d4a3ae5b",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-elementtree-control--1-0-stdout.gz": "f55e19996eedf562202b855da85b83e3e0f6ae62f6f15c463e2f0b6d13ac14c5",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-elementtree-control--1-0-stderr.gz": "6ac383212618ebf7812120393256d06a2fe03256588051f1f22736150d5b5b37",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-elementtree-candidate--1-0.json": "317c55ee74cafc44cebdc07e4fb9d2bec3a03e7fecdb1f0f29370a7468479e86",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-elementtree-candidate--1-0-stdout.gz": "ef0129f97297970bbb1b69bb905feceb0fbd678baadfab7bbffa12cd95b4b1a3",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-elementtree-candidate--1-0-stderr.gz": "ce43a665fab8e3c8635aca4be8ff9c673319243ba808e0ec5579d6b51a6a34e5",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-elementtree-expat--1-0.json": "1f729035e6461dff27c2500323b443dbd326a0a67ca869b568c723259cb4473f",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-elementtree-expat--1-0-stdout.gz": "0db7d7c7c2129169090d3c02046734ca2dd5cf346312a679cf1bae2b0c34bd12",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-elementtree-expat--1-0-stderr.gz": "c795d52535a173001b8f44599d683202b9647f40d42c9dd5fed9e1a241d13c6a",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-pyexpat-events-control--1-0.json": "1b54d5c31d460356b475912a089106f3368ec75d823937b283060970b7f388f2",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-pyexpat-events-control--1-0-stdout.gz": "6dfe0685adc6e89610a8b624849f005cf47ddb4ab018d4c31c06f60ae60f2ca3",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-pyexpat-events-control--1-0-stderr.gz": "d9c8ade80a11d2ac0ed02911e2faf68f188a51a91e357574e895b4296ca77706",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-pyexpat-events-candidate--1-0.json": "319e339b7ebb7cf039de905964549acc8db066c8787df2b9f64227968d67e6cd",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-pyexpat-events-candidate--1-0-stdout.gz": "3c598a96aa35c36bdcc13c7454c4e9047e9bfca8992a6cf862aa5bf1a68fd3c4",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-pyexpat-events-candidate--1-0-stderr.gz": "f684895edf68c70d7b2034afd2adebde0202d32c7c2eddb5c4639561b31e5b8f",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-pyexpat-events-expat--1-0.json": "f8c70f8738ca35f7259856c45d1951ab7ad1900a26128430924320b6ba714ed9",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-pyexpat-events-expat--1-0-stdout.gz": "153f060d85a5d7b041a2097c5a7687c1eb0f7493fd5bd35ceee5277b1e0e2244",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-4096-pyexpat-events-expat--1-0-stderr.gz": "e082735ac0f15b95214c57482bfd852f371d0048f3e5efbbf05d58a480bf9a43",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-elementtree-control--1-0.json": "ad5198a5627c55a90eaba99a442e578cc300ffbbb5db386693c15af44271953f",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-elementtree-control--1-0-stdout.gz": "6b72acc5fcfd7b877add856f23a69482fa1d2a2966797be3afcbfceb1a731e1a",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-elementtree-control--1-0-stderr.gz": "3765e660229102c5ba319f94a98ea8a94404bb6c2c619dd0b043c8fb8341416c",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-elementtree-candidate--1-0.json": "b3b2431198aeda4841d553683f2c43ac0ed91dd8a915c729597c6193c4f79dea",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-elementtree-candidate--1-0-stdout.gz": "a3c55b7338bbc8ca89a8e01fe9416276314bb4778be866dea19c2063c70eac3f",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-elementtree-candidate--1-0-stderr.gz": "3e3754289a900d1ae698756672bd1b73d412406a221fe489752145436fdf9164",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-elementtree-expat--1-0.json": "c7e8190d1bf4cc1b721be1a6ee715d017a488a8f3156dde1c567fc1c1e24c55b",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-elementtree-expat--1-0-stdout.gz": "6d931f6a28f5f0671c9f5ec4ec552d5fb5e6ef74978ffc92adb556f27c249db1",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-elementtree-expat--1-0-stderr.gz": "8bb91ffdf75bf0882d6f95f15512f1ddb210a4ee65a9c5bcb332c58935d89ad0",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-pyexpat-events-control--1-0.json": "fef465db2269449c74edbdd67475932906e642489961e00b754e8a781b87ef4d",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-pyexpat-events-control--1-0-stdout.gz": "057a029eb1241c24552bb7aed4e2a6362403e3d1cee2eb003115ba4358e3a2e7",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-pyexpat-events-control--1-0-stderr.gz": "8f0d5cd95e4182d75b00a3d6722a42ad0d328f5c3225f69a793cd84e841b9c3a",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-pyexpat-events-candidate--1-0.json": "49be99017b671e848257f942f530db5a1acb7c0174bc0133b7f21309b6fd9d7d",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-pyexpat-events-candidate--1-0-stdout.gz": "d0fe0be1ae4a39dcaea51e7067a4a7af3947eeabe76b26902a6701eb76098848",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-pyexpat-events-candidate--1-0-stderr.gz": "56272a64805c70d7a659ffa5812d7d6cd92aea4820653db5c467363031f4b191",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-pyexpat-events-expat--1-0.json": "70d74fc1275848913aae672a1f2a2050825aa456d17d2de6c67f650a9f90c0d0",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-pyexpat-events-expat--1-0-stdout.gz": "3ec2da770fd508b84745cac0ef37ef18be00ab4b661f56d7aeba4698df3f57e9",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/vulkan-65536-pyexpat-events-expat--1-0-stderr.gz": "9e7668801b7c64a46bee71275fd56aeca399f8408c8e99daf3181f775f6fc8dc",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-elementtree-control--1-0.json": "679089721c28649d4bf1a7cb1ac79f6a87cb1f3744eedd58fd15e343ed4a3cee",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-elementtree-control--1-0-stdout.gz": "21cd5ad8613cfc7c7102ddc755e53293e7042ad5b18b9f0173b1c8a7dc61738b",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-elementtree-control--1-0-stderr.gz": "4f0e7d6e9f67215a03d88ed3d79d5e33aa037b77489be844d4dcf1e35bc6c9a0",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-elementtree-candidate--1-0.json": "e50a5d6bbec16acb42c48642aaabe28b5f5308e8aaedb837ef837943efb217b8",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-elementtree-candidate--1-0-stdout.gz": "064f3a36f746fea0b48bfa5770c627aed9a1ef78454e4561c5d16d99cd55eef6",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-elementtree-candidate--1-0-stderr.gz": "66b51e31430121ef8c6d23650918a3d4eba892a8ea2918a2cee060ff90aa9a0c",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-elementtree-expat--1-0.json": "92fa194acc33428192be839dd656f01e0466cd000d50342a4270adf719011765",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-elementtree-expat--1-0-stdout.gz": "d35090fb00192d55b4f4635ba6253fa0e455aba6fb6ff25ee9ca495f1baead28",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-elementtree-expat--1-0-stderr.gz": "57d77af686f89dd5164e6ea6b2985161c14d48e32b731999d35b82f96e4992bc",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-pyexpat-events-control--1-0.json": "9182f2f35d5ce37f1bd0f1138a285e36ef86c7554c4dee61c4b3ec9ce384766d",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-pyexpat-events-control--1-0-stdout.gz": "3e08a99418ad5a2c191114e6923ec1e08df94880192190ff173813674154ac32",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-pyexpat-events-control--1-0-stderr.gz": "24f060539de03bf63206493a2de5629b12743a40ab7a818e59238d099b7fef8b",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-pyexpat-events-candidate--1-0.json": "2e3784b93beaa58321bf024ad61402f5a98d7fbf1c7a7fff9428ffc5e2f9cc83",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-pyexpat-events-candidate--1-0-stdout.gz": "c41965506e3fe909ba49d03eb94ca5da93dac3b47e1f9e8d4a2a5b80b2ad5bd1",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-pyexpat-events-candidate--1-0-stderr.gz": "aab7ba5ba842875a12bd9dcf73fde9326aeaa5528dbcbbbb33ea1926862420a1",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-pyexpat-events-expat--1-0.json": "eef5f383fb1de6e3347e9ee975cbe9fe43cdb3df3b3226eecfb543718a103eba",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-pyexpat-events-expat--1-0-stdout.gz": "04155a118c38b47229cdd114f7d932ff98bff094d4fb1f51e7100cdc6139453d",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-4096-pyexpat-events-expat--1-0-stderr.gz": "773814aa65a6846dadfde7cbf1262fe6d7865e426e1bf586d121c6f912fb48f6",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-elementtree-control--1-0.json": "5082a9cfd09148e53d796acbcf3471e26289dc83186672294155a1fac07bcce3",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-elementtree-control--1-0-stdout.gz": "aaa0fc2664d01ccb5e25b6ce14d09f7b30524fbf700e23b99f9a8ca20b903d60",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-elementtree-control--1-0-stderr.gz": "2b9f23a03b7b7199b0a8cdb456812136e7bc141bc440913fac7d726ac3f32a1b",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-elementtree-candidate--1-0.json": "063fc3fb560b14f2ba1607be7ce90b3cb858cb3eb98b930dbc53304427fa1e6f",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-elementtree-candidate--1-0-stdout.gz": "a389d425e55e6eb25232a2f2fe00211fc7faec183b93a139b36b09285e33ac60",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-elementtree-candidate--1-0-stderr.gz": "b0f48e1981c002495ad0394cbd59082600758439bf375156339fb0294f4b6a5c",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-elementtree-expat--1-0.json": "4dacd77e554e71ab8ffaf054a544345fc70f78c243de6205bae7f27b0c210c42",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-elementtree-expat--1-0-stdout.gz": "3d8cb705ea6f5c567283c35b209e12c1dc6326895c0b26d32620e094b86527c2",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-elementtree-expat--1-0-stderr.gz": "27903fe1c8d154b08f196a8a43a8ec1e61d3149a07e005dae0cc273571789224",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-pyexpat-events-control--1-0.json": "280e57f3e0f6353cb93afb4afa75a7eea06717d8ad7260d73d255638454ba7dd",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-pyexpat-events-control--1-0-stdout.gz": "db830a5cd7d5bbf97f8a01f138a52cb7589f3f771b00054c65d5d6858d4fc728",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-pyexpat-events-control--1-0-stderr.gz": "83d052a7f40f11787b55d612a93937e6f685a32ee8e09303b71df255db87bcd4",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-pyexpat-events-candidate--1-0.json": "317810a6dfb2642c5d3e81914fbcfd7f349d8e8326c64a156f4afe6bc9cd9107",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-pyexpat-events-candidate--1-0-stdout.gz": "538e2689c4cd0ea4151eae8f6e9c4840bf4059e94bf509966f32a705ab0d24ca",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-pyexpat-events-candidate--1-0-stderr.gz": "e632f7d5bfb5448ac850f3f7172baac3e72360a3a7adf00601438d6e28d93aa7",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-pyexpat-events-expat--1-0.json": "9e8226699cb83179b2505ed1fe4f7b651c7b216f4ae7cc250d2bfe97cd9b88e1",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-pyexpat-events-expat--1-0-stdout.gz": "5ed73072a8b8d513f5388bbe993e910a5782744890f3c60ac5cd06a2e54ba7b3",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/wayland-65536-pyexpat-events-expat--1-0-stderr.gz": "c98c19f169a2b2e55ba46fe6f469e2c79a4766eafa20a56347aa4d767818a1aa",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-elementtree-control--1-0.json": "6edf06c36dacfea15df2137b93799fd49f56db0e307600126073d0eb49628524",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-elementtree-control--1-0-stdout.gz": "36c99be30ae473c55cb7fba5f49f41bbe6aaab1d66c0dc3b7be1906a8d7f20e6",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-elementtree-control--1-0-stderr.gz": "571007806a15fb867a235aece356c9707d9bcbcfa8e4fad368746b9366a4d3c2",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-elementtree-candidate--1-0.json": "79e8ae7a7ad871855e72cfb309ced679a66574b3a62cc7e22136161f2d846d43",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-elementtree-candidate--1-0-stdout.gz": "7b20adf92ba83966ecea13af3ee6b0a7ca9bf96ce2aed03d555b809d84035ec2",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-elementtree-candidate--1-0-stderr.gz": "099bb638855a4b9672d234d7b6a598dfb1afee09148ba624f66aba303c40c63a",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-elementtree-expat--1-0.json": "ddaf0734ea381a7d87cbbcac419d26f3841866f7d4feec3c449a04da44903958",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-elementtree-expat--1-0-stdout.gz": "e333638a6bbeba910c2a0a45809b0a00ab6853ad470b665588e730219de6ca36",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-elementtree-expat--1-0-stderr.gz": "83e2d224ef5b06f3e42920db807ffc118b454f9f930a53f0229846e5e5ede5be",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-pyexpat-events-control--1-0.json": "4cce54249861b90cc7002b3215917d31439db0ce4a4c358755bef1120c215786",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-pyexpat-events-control--1-0-stdout.gz": "71e048be3ef04edc55743c808e9d2eaaac777aaf5084a5df55d6abec16225eed",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-pyexpat-events-control--1-0-stderr.gz": "febc30e1dd53702e10fedb9c9c76ff5ed820cb87e915b6d1f5c92a90659f03ba",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-pyexpat-events-candidate--1-0.json": "cf9ef72446e18b4b8dfd154d44dfabba211e758f64cd843293ecd18e7ffe34cc",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-pyexpat-events-candidate--1-0-stdout.gz": "9ff46d2b84bde3090fd63611fb3b950a9764ab05e6cf19ef9f8901941245e8b9",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-pyexpat-events-candidate--1-0-stderr.gz": "a85a8733b235c4a0b7531371c6718936728b3690539cfae4c0eb6f73a5e0c0d3",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-pyexpat-events-expat--1-0.json": "617dc14b1f56ef80e10f44b92295665d59d1734feff388acff36f1fdfd76553a",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-pyexpat-events-expat--1-0-stdout.gz": "3663256c1543433e51d1a608c6d57461197716355620e05aee7d89cd927c7916",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-4096-pyexpat-events-expat--1-0-stderr.gz": "cc117d81f3b16967c2d029f8ac8259349fbff72a7fa1404d8d596fed85e7035d",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-elementtree-control--1-0.json": "2816b7cbfbdbe67baf97712311f07bd298bbeee3c4a9707dffe35b90db49b34a",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-elementtree-control--1-0-stdout.gz": "4df2795ba205534971489de42cf1557155f196ed6871154f72e5f44bbf100e8f",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-elementtree-control--1-0-stderr.gz": "56d08b8cbd41991c2fbc74a2b889074941e615b71113036526ac2922e4dd9a25",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-elementtree-candidate--1-0.json": "1c046238116857d57ca4d5d0d6598f1a8cba817ea26febe1d0c894073f7df6a0",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-elementtree-candidate--1-0-stdout.gz": "67c7192ba4ec67debb1880c0621c3378f6e43a4e5340e6deb265506ca4f80b2e",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-elementtree-candidate--1-0-stderr.gz": "b48cb6433d4fddef68883c46b821816bdddc6293b64b78804959b4137dd67a4e",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-elementtree-expat--1-0.json": "d8122fcebaab665a550f4421161fdb79bd9f1ee7d6120004cb6e1bad2c3e9cf8",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-elementtree-expat--1-0-stdout.gz": "921b9c043d6229e3bd18c14efca6190b9034eebbe9d82a6968582711c5ffaf31",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-elementtree-expat--1-0-stderr.gz": "ec4bab417401e550be1329a325d2e5bcdf272be10cd205feef563cd55e30bf41",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-pyexpat-events-control--1-0.json": "7035d2dc534dab129bd56646f7088cb1ac24c23b397fa37170c3b470816ab307",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-pyexpat-events-control--1-0-stdout.gz": "b234a743b2beb728f81819d2e7793c94eee44e6cb61603ca7df9d1f32fecf44f",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-pyexpat-events-control--1-0-stderr.gz": "09f20505996aefd21ac3b438ddbde658f9e0dfa0bbeeb978186a54903a87baa1",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-pyexpat-events-candidate--1-0.json": "6742294dc9e328ab08daa3a10bad7926ab72b3ec9ef1f61489b6017592126d62",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-pyexpat-events-candidate--1-0-stdout.gz": "f1fd6f2ab2bbc0f7e58aea9d320c34b71711da61c6f83bf83dd522b60a35c3df",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-pyexpat-events-candidate--1-0-stderr.gz": "b2d4258ef9f2f93f32869e9d0e833a73ea382e64fd585941b9f6f8397e9667e6",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-pyexpat-events-expat--1-0.json": "485bcb223de2145c53c5a5fb93c5ca1acf07739aae1f915c48948e65c08a95a7",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-pyexpat-events-expat--1-0-stdout.gz": "bff2558654df1b5a8a9533d84067fdd5031a2518f8a795d6b0c80d32041f45ea",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/maven-65536-pyexpat-events-expat--1-0-stderr.gz": "afd467da71c09a710d2521860c8ae13f1f77902f183ab5414babcbda47f9ac1f",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-elementtree-control--1-0.json": "ffa3b87fec57670886d28629be9cc96e9af6a85b120d19601ae20ac9c2e41754",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-elementtree-control--1-0-stdout.gz": "cb609dcdac85450e0e13f593adca3fa333347866b59366078fb8f055874da79a",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-elementtree-control--1-0-stderr.gz": "5b82d242db290a00bda656977fde61b7099368c87c8a15c994f9917d53208b28",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-elementtree-candidate--1-0.json": "1cf6eaf3c5a662774c020b502315b709d3b6f012ad79c2753ed8ec6320732621",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-elementtree-candidate--1-0-stdout.gz": "3fdef4871663d17cc865c1fefc454117964be872c5af48b4704f4f584d8535fe",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-elementtree-candidate--1-0-stderr.gz": "d17833b285f82515fae747b35b1c4b2d1eb71640c21bdce9b595c75b29af05fd",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-elementtree-expat--1-0.json": "2e77a03fabd111f3ed310420696ba91fc700a042726067e0b5977969100d805a",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-elementtree-expat--1-0-stdout.gz": "112bfff5a99fb7797bce37bbccbd0ea6e78897b0ce558ae9ccd3f292bc62aacf",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-elementtree-expat--1-0-stderr.gz": "dc953ef378d4d1875241cedced54a000b97ef56b37b51fe8107f5985447ceb4a",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-pyexpat-events-control--1-0.json": "92acce9fdf64b10b5b4a22f62b5b2ef0d5683c50f8fac7560f364c987778b231",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-pyexpat-events-control--1-0-stdout.gz": "33a832f1be04cb55c8e59d2924a563a20180b07e49a88378363abb6117027e87",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-pyexpat-events-control--1-0-stderr.gz": "370e7bc8daa851d0044ee12606e251318a74a3b6dafc6560c09095b7cac0f9cb",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-pyexpat-events-candidate--1-0.json": "9aed462692848e8eb0ed923bfe0ec5b20cdd11c39e2447c245cd49704c667cd4",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-pyexpat-events-candidate--1-0-stdout.gz": "2aee1dc0560012472fcd7a133ecfccc9d39da94186078546bae096123cd88949",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-pyexpat-events-candidate--1-0-stderr.gz": "939cac267c347d40c671910fd6a343ef063de1843987e5a9f5cab8c9893d1f97",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-pyexpat-events-expat--1-0.json": "9574f2384b2279ae5b165987e7cb0027ebaa7c3f4fc14131e05ad49b3e9fbd48",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-pyexpat-events-expat--1-0-stdout.gz": "7d8f9634a249850bb40e0616e6f4ff8acd840c7ab9fa4bac2cd5975bc824b078",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-4096-pyexpat-events-expat--1-0-stderr.gz": "f247cf58dcd343d38d922d625fe3dcd065799acc768d477de2a5dc5754a5a5a2",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-elementtree-control--1-0.json": "18b43551ddb92878b425d2e6184b75c52768253b158a6957ea5a540bcb4689f5",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-elementtree-control--1-0-stdout.gz": "936eaf296dc5d38b981e14b11fb6a0678c5015d74cff7c89636cface715b9ee6",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-elementtree-control--1-0-stderr.gz": "bfb5cc32a63cfca783f2bc68e7315adf88c4e65f8ba22479d80339f39587b2ac",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-elementtree-candidate--1-0.json": "d9b804896e4d7e467e0e45bf5ecdcacb8dbc963a03ca736ef6a9660a49732fd8",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-elementtree-candidate--1-0-stdout.gz": "593ae4551af132acaaa2cc33363e30c4ed996ec73c696f405518d52be74aca34",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-elementtree-candidate--1-0-stderr.gz": "4c73f53f32a828327dda2204393c2d355c7626a96a09e3298f1890b12258bbb4",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-elementtree-expat--1-0.json": "580aa9716887804cbe1d7af38a0613a0b8ccd3ad0114b8c6f638ddd5dbd6c517",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-elementtree-expat--1-0-stdout.gz": "d609ce65d116fb37fe1b5e49d9d6319d4b7f97d9bcefe9631fe214c2c6a7df77",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-elementtree-expat--1-0-stderr.gz": "efb551d708522fa43b59198eeeefeb1301f20189204750210b3a32fd4918211c",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-pyexpat-events-control--1-0.json": "52430bcf511df4ec93a5e61e15aaa6c86552e30cc0bd9c8974352e02d5d32cec",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-pyexpat-events-control--1-0-stdout.gz": "2da6cbaff16882a4878c41003cd9bed8e4b0f9c839767c041a6d459ea3574079",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-pyexpat-events-control--1-0-stderr.gz": "9fdfe2d4bbc49585a65862eeb629970d95530d333920bb01033b596567c20df3",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-pyexpat-events-candidate--1-0.json": "1e952bfb5ef8826165f51a8246d108e5a762db037d249feb7f9a8528ee920810",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-pyexpat-events-candidate--1-0-stdout.gz": "d3110707d1b69c9ac5f3faa387b9b5d5acd6b267e9be2eb9a0c999dcbb57d2cb",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-pyexpat-events-candidate--1-0-stderr.gz": "8ea7ad2627a3cb3a7e5f17d54c208152b733fbd9315a9d4942a4c8aacb3e8870",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-pyexpat-events-expat--1-0.json": "6a75f71765a778f343bb20c1a6ffc6a085e1ba842336fa272e00a27b0798c3ce",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-pyexpat-events-expat--1-0-stdout.gz": "dc255b62a6ad4e511e15c6542a30ff19fae5ec3f2e95fcc9e112e7c0c9f4a36b",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/batik-65536-pyexpat-events-expat--1-0-stderr.gz": "8fca395a11d4d313a585e1b29954ae398aeaf392ebce0157362232fbcbc6cf0d",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-elementtree-control--1-0.json": "7b5cc1ce8f939467726fcb00f7d2db99fab04b2ca69828dac6e37a487a12d0ed",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-elementtree-control--1-0-stdout.gz": "c5d8b19e7068107a751c2ab2ffd14c64b70ec14ced0a3e83089e7e453639f02a",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-elementtree-control--1-0-stderr.gz": "e842e99eec1a0d9a1016a1aaead6a0783062226c44502fd695ebe0d11bb48de0",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-elementtree-candidate--1-0.json": "eb19562bdc6ae0d5a8872eee13ecc794a9101f9ec98244413eace8778ffe72bf",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-elementtree-candidate--1-0-stdout.gz": "6c44477bd428cda41661055a60b1dc63ac2f304e95b3d5c2f93e3223dbf87cdf",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-elementtree-candidate--1-0-stderr.gz": "04dc1b14b56c91765a9743531678d5a6b815a800559191c92ebb2be80e1c999f",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-elementtree-expat--1-0.json": "456f39af9003d3be6f01baab6bf8c436940ae4b2e7c15483c0826b275b81be33",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-elementtree-expat--1-0-stdout.gz": "30eab24c2eb5daa037f9ab6c02fb78a5cb27ef1c13a2b91787b62c37a05365fc",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-elementtree-expat--1-0-stderr.gz": "f336aa1aa700f78a8dc4bb3c8e44c0a42b27157c20ca055c15f54423118432cd",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-pyexpat-events-control--1-0.json": "09bcefff7014f276be9891c355895c73cfac279e8fbe705b384e5b1a0c7b8fa2",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-pyexpat-events-control--1-0-stdout.gz": "a4a55b8ab1ea2c3f351fd4d3450187542316fac9a268db0e588048c8af615ced",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-pyexpat-events-control--1-0-stderr.gz": "64fe67ce0a2ecd488811d8a799dab5d51515bd1146bec57daf30f2fe86b460eb",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-pyexpat-events-candidate--1-0.json": "2fdadec4dc46bcf3fe963c2888f38096f7d04039028477b718fac45cae55a3f2",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-pyexpat-events-candidate--1-0-stdout.gz": "b077021d51cc2f056a064e4f282914d953030421513df2f4a878a15d39ce0709",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-pyexpat-events-candidate--1-0-stderr.gz": "14078593b8774e49cd6ca09990e6fa2c68e521fad1d8fcfc5463480387dbe1f8",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-pyexpat-events-expat--1-0.json": "164ebc2ed89612984141d01765417187065967100b91aabf65e02f58e05ec814",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-pyexpat-events-expat--1-0-stdout.gz": "479c6c4320f643a3b50e7d2e67908b88bb6ae1f7673aacc28d2b76dd3f13f992",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-4096-pyexpat-events-expat--1-0-stderr.gz": "c9017568ce0820e0287353a59d9ac9c6d2d8b927c3c621cd54190dc83f21681c",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-elementtree-control--1-0.json": "b7aaad01de4c639b053611e34d76108056a1d6af12d90312ca7ba23c50407ccf",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-elementtree-control--1-0-stdout.gz": "a83dca920115ec51ca0f2ebfc1e209461ada5b78d3987ba96de094900ecca2a7",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-elementtree-control--1-0-stderr.gz": "724c3ddc83f271866eaeac98384b219f7dd55b875f2c80652f62f8b2b2569f71",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-elementtree-candidate--1-0.json": "e3e53c4f9bda860638a9fd87960ea64b84d0b5c02ce840df68dbf127d96d626d",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-elementtree-candidate--1-0-stdout.gz": "e85c9de1adb2ee17ce5df909a0ca1e8fa01ca6e900bfeea26b2833d315a03ccc",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-elementtree-candidate--1-0-stderr.gz": "0bd2ba4d4612748bab6f5e57d01faf609d238cf7a303d8ab1985f08a4184a8d5",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-elementtree-expat--1-0.json": "86fddaedaeae639f2e75e5fff389ee3057335cba5e7697fd269624396fc15651",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-elementtree-expat--1-0-stdout.gz": "1ec3825b49ea844d1aef8e5a2b52a87dd1534464ceaf3a0539d2001591a6c9a0",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-elementtree-expat--1-0-stderr.gz": "1a8ad43257b5f887bbba90b49dfd929acc40732016f8fdc1254296d7e12d4997",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-pyexpat-events-control--1-0.json": "1c0270fc4c5e673c4219948d53905a140bb9703d9b06e245f709cb08e190976c",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-pyexpat-events-control--1-0-stdout.gz": "022d36187ce75855be2a1e24f146b7eedfb4d50a86be906e536f240c213afaec",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-pyexpat-events-control--1-0-stderr.gz": "28cc10fc4eb14f0ee36183b68411aaaf0be0e460969498b91838df80dbc010dc",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-pyexpat-events-candidate--1-0.json": "1d7305e320e00c6e9b80f5d2a50d42c7086c1d1d2dffe6455aeadc26a42ff02b",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-pyexpat-events-candidate--1-0-stdout.gz": "1fdd5d46f59e7153df1684a2a81aa1706f95f476aff7fa5c1b7d878c3c21db02",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-pyexpat-events-candidate--1-0-stderr.gz": "69707a38c31adb425030117ef733ee518e0a4c09e107363858ff4daecc4bb207",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-pyexpat-events-expat--1-0.json": "4189a48deec9855f793acc8774a066d7dd0906828594092d669e6ea68f3fa705",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-pyexpat-events-expat--1-0-stdout.gz": "378617bb0312ca3a96b8c20a45df7b0097e0eccdcce1dd79e076fbfbc6f7c9a7",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/gtk-65536-pyexpat-events-expat--1-0-stderr.gz": "41520ea733bf1e49b331517ede8257e2dc67380c12feccc995245d22f6f0893d",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-elementtree-control--1-0.json": "8e455d00c5b4e913ead9cba91a9901084619a539461c0a2b6f3ea7b8774df034",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-elementtree-control--1-0-stdout.gz": "b4c2e4addfec64c27e9c6611c01a1f15182f886abee1e80d4d160eb7e3559dd7",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-elementtree-control--1-0-stderr.gz": "53dcbbcf451bd0e68b8a444f0e93936b3bd80e62c42a83e9404f68f9b2dfcab2",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-elementtree-candidate--1-0.json": "92b457cfaa114a49a5040aac7f089504c19e39a620ff62ee78c7b54f8a2ea820",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-elementtree-candidate--1-0-stdout.gz": "02bec7000ea1b52127dfa545de09ff62d1c2b8da35448765df1355b075757a5d",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-elementtree-candidate--1-0-stderr.gz": "45fc37eb9c031628a5cafcf0e78df2a29a1cac5545561c7ace94dda6d72f5e0f",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-elementtree-expat--1-0.json": "398904d3ae18ab36173a99c7e9a7c3e96fcbeba05a07f9b8c3c4fb636ce804a3",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-elementtree-expat--1-0-stdout.gz": "da8fe7ea303003c3165badf2fb9949ef1459bef4e1ae62bc0af7dc2aaa267fc2",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-elementtree-expat--1-0-stderr.gz": "8f85b7bbfcbcca743d8c4f589b598ca026c23e785a112a4bd72a2b95483b2621",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-pyexpat-events-control--1-0.json": "a6d9a798b386c9b17038ab35f4f752a970549dfda08de1fc30e298d1ca3b1d0a",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-pyexpat-events-control--1-0-stdout.gz": "3a6165a06cae47eba310fcbd8dafd5efcd345ab7be8371125fe78ceedf7988b1",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-pyexpat-events-control--1-0-stderr.gz": "8608b0e76fb409e43966f717bf1df86fefe2562bec37761580171b3afdd5b317",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-pyexpat-events-candidate--1-0.json": "442e95fc5834c613d9ce4c50548e104540df5843d276a775e47b53ba1e6398a3",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-pyexpat-events-candidate--1-0-stdout.gz": "c3e39a80455a6025fed0d7a392c6d778e5edd213fd07a3675484d2aa8a345397",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-pyexpat-events-candidate--1-0-stderr.gz": "2755c0a175852b7c66a923d3a7bfbc4af374b42e057e7b7a21c3a51091a29fa3",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-pyexpat-events-expat--1-0.json": "ad813072358d39c29caaec8af52c7202085b6990845dd467dbdefaa8aa176024",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-pyexpat-events-expat--1-0-stdout.gz": "ddc596696a67f7ee055a2321617a5ddc712ed62297770f176f398dce8d0c3247",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-4096-pyexpat-events-expat--1-0-stderr.gz": "54484cad904bd24ceed6b4fa8a805cecf8603799a7e36832a65bb19d45c41915",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-elementtree-control--1-0.json": "cdb7be22e308406262a0cb7e5e1a291cfce592e6130e51ad89e4b8aab7a677c1",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-elementtree-control--1-0-stdout.gz": "7eb21e27b35c7f41047f9418a640b2379a34070837711ad6884a3c427a7c89db",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-elementtree-control--1-0-stderr.gz": "9b392acd168ab27a20dadbed18e1cbeb38d006b8f22404dbe3c5069d6b4bc4ee",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-elementtree-candidate--1-0.json": "bef06bf8160d715119742288697500a1f9c8a13cf9a3de620de1f204b7524226",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-elementtree-candidate--1-0-stdout.gz": "c69f3b0007632b441acea4d0368a1f8853fcb60973e6a8afb476fd9992567f65",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-elementtree-candidate--1-0-stderr.gz": "407624d101272b35839aea484202782601cbae945b8343d3c202dbb77613b413",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-elementtree-expat--1-0.json": "e37d6ee846fedfeb6fdfb34a89224a08ccd6c1f92bce8b4bbc06d6b307672ece",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-elementtree-expat--1-0-stdout.gz": "efff81669be1a4805a903277c7b913d154b3a1dcf317b28d2547b99bc7007c52",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-elementtree-expat--1-0-stderr.gz": "0a5e5922ba6d011f7adad0acc70de71385921e641e15b0182a1646dc93f60b90",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-pyexpat-events-control--1-0.json": "21bffa9294139248193f1e64a8d5e949efd827bc930636fb70629ab17eb7db60",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-pyexpat-events-control--1-0-stdout.gz": "24b4e43416f55ce6c19818238941d06e3ba5513141a7473294f5d3c3911e7c4d",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-pyexpat-events-control--1-0-stderr.gz": "dbc4c858fbfe2336866837d6fe5fc3c383aca8ab262d23b53a835ce772552f1a",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-pyexpat-events-candidate--1-0.json": "945c099bbaf8b66d977596b5b02c7a3fdd60b4fead1939a505d108286b872ca3",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-pyexpat-events-candidate--1-0-stdout.gz": "cd95bdc4007a9d870dd09f283f4ee939dc6f12a244cb46e56b12f740fba2787e",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-pyexpat-events-candidate--1-0-stderr.gz": "c3b786a3c4cd67c47bb7655eff7e900bf93c4b3435d94e924879aeececee5c99",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-pyexpat-events-expat--1-0.json": "cbc94a0b878d3ccb685f85394f97d5cead87d1aaf443afaee3ae3eb0ac3f0424",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-pyexpat-events-expat--1-0-stdout.gz": "9b8eecafe88aa4e60ac88e60236d5ca67201f35c340eaf8221168fdffe695410",
+    "/tmp/oriole-namespace-qname-only-confirmation/python/screen/docbook-65536-pyexpat-events-expat--1-0-stderr.gz": "d6725a7726cc64200cc0c5f819aa192cc609a13b0e8b87b07bacde89370d8d0c"
+  },
+  "reader_sha256": "c352aecc11101bb74df45e5fac68c3853c72ca72de92bb75a7cb5b819d423a0e"
+}

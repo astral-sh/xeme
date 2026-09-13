@@ -1,0 +1,20 @@
+--- /tmp/oriole-namespace-qname-only-benchmark/python/elapsed_review.py
++++ /tmp/oriole-namespace-qname-only-confirmation/python/elapsed_review.py
+@@ -12,7 +12,7 @@
+ import os
+ 
+ assert os.sched_getaffinity(0)=={6}
+-D=Path('/tmp/oriole-namespace-qname-only-benchmark/python');C=Path('/tmp/oriole-namespace-qname-only-benchmark/python');S=C/'screen';original=C
++D=Path('/tmp/oriole-namespace-qname-only-confirmation/python');C=Path('/tmp/oriole-namespace-qname-only-confirmation/python');S=C/'screen';original=C
+ args=SimpleNamespace(mode='normal');pins={}
+ def read(p):
+     p=Path(p);data=p.read_bytes();pins[str(p)]=hashlib.sha256(data).hexdigest();return data
+@@ -107,7 +107,7 @@
+     selected=[r for r in summaries if group=='all' or r['condition']['mode']==group]
+     entry['candidate_within_1_20_of_expat']=sum(r['median_ratios']['candidate_over_expat']<=1.20 for r in selected)
+     entry['adverse_conditions']=[{'condition':r['condition'],**r['median_ratios']} for r in selected if r['median_ratios']['candidate_over_control']>1]
+-report={'status':'passed','mode':'normal','scope':'Saved-only final reconstruction using the selected independent raw-worker arithmetic. Four reused modules and two fresh candidate modules, matched compiler vectors and source bindings, all module and dladdr parser origins, canonical outputs, seeded worker order, sample arithmetic and summaries verified. No target execution or timing rerun.',
++report={'status':'passed','mode':'normal','scope':'Saved-only final reconstruction using the selected independent raw-worker arithmetic. Six existing matched modules reused without recompilation, matched compiler vectors and source bindings, all module and dladdr parser origins, canonical outputs, seeded worker order, sample arithmetic and summaries verified. No target execution or timing rerun.',
+         'counts':{'conditions':24,'cohorts':168,'preflight_workers':72,'timed_workers':504,'all_workers':576,'samples':dict(all_counts),'all_samples':sum(all_counts.values())},
+         'aggregates':aggregates,'summary':summaries,'libraries':libs,'pair_order_verified':True,
+         'limitations':['Original project XML inputs through unmodified CPython consumers, not whole project runs.','Adjacent text callbacks are coalesced by canonical checking; strict-suite callback assertions remain separate.','Parse construction/feed/finalization/callbacks and explicit result destruction timed; input reads/imports/canonical checks/gc.collect outside. GC remains enabled.','All adverse conditions retained; shared-host frequency/cache/bandwidth remain uncontrolled.'],

@@ -1,0 +1,22 @@
+--- /tmp/oriole-namespace-qname-only-benchmark/python/run.py
++++ /tmp/oriole-namespace-qname-only-confirmation/python/run.py
+@@ -19,10 +19,6 @@
+ common = ['--kind', 'python', '--build', str(out / 'consumers/build.json'), '--input', '/home/dev-user/code/oss/oriole/benchmarks/projects/corpus-manifest.json', '--output', str(out / 'screen')]
+ if phase == 'prepare':
+     jobs = [
+-        ('build', 600, ['taskset', '-c', '3', python, '-I', '-S', str(out / 'build_consumers.py'),
+-                        '--library', libraries['candidate']['path'], '--reference', libraries['control']['path'],
+-                        '--expat', libraries['expat']['path'], '--source', '/home/dev-user/.cache/oriole/upstream/cpython-3.12.13',
+-                        '--header', '/home/dev-user/code/oss/oriole-reference-frame/include', '--output', str(out / 'consumers')]),
+         ('preflight', 600, ['taskset', '-c', '3', python, '-I', '-S', str(out / 'consumer_screen.py'), '--phase', 'prepare', *common]),
+     ]
+ else:
+@@ -31,7 +27,7 @@
+ report_path = out / (phase + '-controller.json')
+ assert not report_path.exists()
+ report = {'status': 'incomplete', 'jobs': [], 'controller_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+-          'scope': 'Fresh extension compilation and canonical preflights on CPU3; separate elapsed study on leased CPU0. Worker and measurement boundaries unchanged. Per-worker300s and aggregate timing1200s retained. Process group killed on outer timeout/interruption.'}
++          'scope': 'All six existing matched extensions reused; fresh canonical preflights on CPU3; separate elapsed study on leased CPU0. Worker and measurement boundaries unchanged. Per-worker300s and aggregate timing1200s retained. Process group killed on outer timeout/interruption.'}
+ def save():
+     report_path.write_text(json.dumps(report, indent=2) + '\n')
+ try:

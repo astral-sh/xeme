@@ -25,6 +25,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--library", type=Path, required=True)
     parser.add_argument("--reference", type=Path, required=True)
+    parser.add_argument("--baseline", type=Path, help="Optional third parser library")
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--header", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -45,6 +46,8 @@ def main() -> None:
         "oriole": args.library.resolve(strict=True),
         "expat": args.reference.resolve(strict=True),
     }
+    if args.baseline is not None:
+        libraries["baseline"] = args.baseline.resolve(strict=True)
     includes = [
         args.header.resolve(strict=True),
         Path(sysconfig.get_path("include")),
@@ -66,7 +69,7 @@ def main() -> None:
         "python": sys.version,
         "compiler": subprocess.check_output(["cc", "--version"], text=True),
         "adaptations": None,
-        "method": "Both engines compile identical unmodified CPython 3.12.13 pyexpat.c and _elementtree.c with identical -O2 flags and the same narrow Expat-compatible header. Only the linked parser library and its rpath differ. No source adaptation, alternate allocator, LTO or PGO is applied.",
+        "method": "All engines compile identical unmodified CPython 3.12.13 pyexpat.c and _elementtree.c with identical -O2 flags and the same narrow Expat-compatible header. Only the linked parser library and its rpath differ. No source adaptation, alternate allocator, LTO or PGO is applied.",
         "source_sha256_before": {str(p): digest(p) for p in inputs},
         "consumers": {},
     }

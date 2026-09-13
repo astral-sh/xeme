@@ -223,7 +223,7 @@ def main() -> int:
     hashes = {str(p): digest(p) for p in observed}
     report: dict[str, Any] = {
         "status": "failed",
-        "method": "Matched unmodified CPython 3.12.13 extensions, loaded explicitly. ElementTree creates and destroys a complete tree; pyexpat installs Python handlers and creates/destroys an event list. Parser creation, feed, finalization, native/Python callbacks and result destruction are timed. Input loading, process startup, imports, explicit gc.collect and complete canonical output checks are untimed. GC remains enabled during parsing. Every sample is checked against its complete canonical untimed output and all matched engines. One warmup per process is discarded; medians of paired process medians.",
+        "method": "Matched unmodified CPython 3.12.13 extensions, loaded explicitly. ElementTree creates and destroys a complete tree; pyexpat installs Python handlers and creates/destroys an event list. Parser creation, feed, finalization, native/Python callbacks and result destruction are timed. Input loading, process startup, imports, explicit gc.collect and complete canonical output checks are untimed. GC remains enabled during parsing. Every sample is checked against its complete canonical untimed output and the paired engine. One warmup per process is discarded; medians of paired process medians.",
         "limitations": "This measures realistic Python XML consumers over original project inputs, not full project execution. Native extension compilation uses identical -O2 without PGO/LTO. No external DTDs, SVG rendering, XSL includes or project-specific semantic processing. Shared host CPU frequency/load/memory bandwidth uncontrolled. Explicit destruction is timed separately after output validation, which warms tree/event cache lines equally but differs from production lifetimes.",
         "python": sys.version,
         "platform": platform.platform(),
@@ -261,8 +261,7 @@ def main() -> int:
         path.write_text(json.dumps(spec, indent=2) + "\n")
         command = [
             sys.executable,
-            "-I",
-            "-S",
+            "-s",
             str(Path(__file__).resolve()),
             "--worker",
             str(path),
@@ -271,16 +270,7 @@ def main() -> int:
         report["processes"].append(record)
         try:
             done = subprocess.run(
-                command,
-                capture_output=True,
-                text=True,
-                check=False,
-                timeout=180,
-                env={
-                    key: value
-                    for key, value in os.environ.items()
-                    if key not in {"LD_PRELOAD", "LD_LIBRARY_PATH", "LD_AUDIT"}
-                },
+                command, capture_output=True, text=True, check=False, timeout=180
             )
             record.update(
                 returncode=done.returncode, stdout=done.stdout, stderr=done.stderr

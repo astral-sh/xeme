@@ -1,0 +1,11 @@
+--- /tmp/oriole-namespace-qname-only-benchmark/native/native_screen.py
++++ /tmp/oriole-namespace-qname-only-confirmation/native/native_screen.py
+@@ -9,7 +9,7 @@
+ import subprocess
+ import sys
+ 
+-root = Path('/tmp/oriole-namespace-qname-only-benchmark/native')
++root = Path('/tmp/oriole-namespace-qname-only-confirmation/native')
+ output = root / 'native-screen'
+ manifest = Path('/home/dev-user/code/oss/oriole/benchmarks/projects/corpus-manifest.json')
+ driver = Path('/tmp/oriole-grammar-bench-plain/native-driver')

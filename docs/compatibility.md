@@ -34,10 +34,9 @@ it does not resolve the callback differences above.
 ## Release gates
 
 Production substitution requires XML conformance, Expat API and callback
-compatibility, CPython XML consumers, bounded resource use, sanitizer and fuzz
-coverage, and installed-distribution checks on every supported platform. Passing
-local tests or coalesced callback comparisons does not establish all of these
-contracts. Retain failing outcomes when comparing a change with its parent;
+compatibility, unmodified CPython XML tests, bounded resource use, sanitizer and
+fuzz coverage, and installed-distribution checks on every supported platform.
+Retain failing outcomes when comparing a change with its parent;
 allocation diagnostics with altered retry ceilings must remain separate from the
 unmodified upstream tests.
 
@@ -57,10 +56,8 @@ corpus. Use `--generated 1000` for a longer run.
 
 The semantic gate compares acceptance, exact error codes, and callbacks with only
 adjacent text fragments coalesced. The exact gate (`--strict`) also compares text
-fragmentation and final locations. Every difference remains in the report; neither
-gate silently accepts mismatches. Coalescing is a useful semantic comparison but
-cannot establish compatibility for consumers sensitive to callback boundaries.
-No expected-failure list is used to turn uncovered behavior into a passing test.
+fragmentation and final locations. Both modes fail on any mismatch in their
+comparison.
 
 The named corpus covers declarations, comments, processing instructions, CDATA,
 XML names, attributes, newline normalization, references, entities, DTD attribute
@@ -145,10 +142,6 @@ Crossing this ceiling returns `XML_ERROR_NO_MEMORY`.
 
 ## CPython integration
 
-CPython must execute its actual extension and XML test suites against the candidate
-library. Replacing the Python-level module with a simulation would bypass the
-consumer's callback, ownership, capsule, and error-location contracts.
-
 The [CPython 3.12.13 consumer](https://github.com/python/cpython/blob/v3.12.13/Modules/pyexpat.c)
 requires more than `XML_Parse`:
 
@@ -190,13 +183,6 @@ At the integration's pinned revision
 PBS builds Expat as a static, position-independent library for the target toolchain
 and installs it under `/tools/deps`. Replacing this dependency therefore requires
 cross-compilable Rust static archives, matching headers and native link metadata,
-and the platform's existing deployment-target requirements. A local shared-library
-probe alone does not satisfy that packaging gate.
-
-Before a production substitution, retain evidence for the PBS-built interpreters
-on every supported platform and architecture, including static linking, extension
-loading, shared allocator ownership, and the complete XML consumer suites. Also
-run upstream Expat compatibility tests, sanitizer-backed C callback probes, parser
-fuzzing, independent adversarial review, and reproducible benchmarks. Passing a
-bounded local corpus is evidence of the behaviors tested, not a full replacement
-claim.
+and the platform's existing deployment-target requirements. Follow the
+[integration guide](../integration/python-build-standalone/README.md) for bundling
+and installed-interpreter validation.

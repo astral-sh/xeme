@@ -421,12 +421,7 @@ impl Parser {
                     })
                     .map_or(text.len(), |(offset, _)| state.word_checked + offset);
                 if !space && end == text.len() && !self.is_source_final() {
-                    if state.expansion.token_bytes(end) > self.config.limits.max_token_bytes {
-                        return Err(self.err(
-                            ErrorKind::LimitExceeded,
-                            "expanded declaration token limit exceeded",
-                        ));
-                    }
+                    state.expansion.check_token_length(self, end)?;
                     state.word_checked = end;
                     self.source_mut().mark_deferred();
                     self.conditional.declaration = Some(state);
@@ -485,14 +480,7 @@ impl Parser {
                         .position(|&b| b == quote)
                         .map(|offset| checked + offset + 1)
                     else {
-                        if state.expansion.token_bytes(text.len())
-                            > self.config.limits.max_token_bytes
-                        {
-                            return Err(self.err(
-                                ErrorKind::LimitExceeded,
-                                "expanded declaration token limit exceeded",
-                            ));
-                        }
+                        state.expansion.check_token_length(self, text.len())?;
                         if self.is_source_final() {
                             return Err(self.err(
                                 ErrorKind::UnclosedToken,
@@ -507,12 +495,7 @@ impl Parser {
                     // A nonfinal literal needs a following byte before its token
                     // is complete, matching Expat's declaration tokenizer.
                     if end == text.len() && !self.is_source_final() {
-                        if state.expansion.token_bytes(end) > self.config.limits.max_token_bytes {
-                            return Err(self.err(
-                                ErrorKind::LimitExceeded,
-                                "expanded declaration token limit exceeded",
-                            ));
-                        }
+                        state.expansion.check_token_length(self, end)?;
                         state.quote_checked = end - 1;
                         self.source_mut().mark_deferred();
                         self.conditional.declaration = Some(state);

@@ -73,11 +73,25 @@ struct DeclarationExpansion {
 }
 
 impl DeclarationExpansion {
+    /// Include the omitted `<!` and `>` delimiters for direct-input token limits.
+    /// Composed declarations measure only expanded content.
     fn token_bytes(&self, additional: usize) -> usize {
         self.text
             .len()
             .saturating_add(additional)
             .saturating_add(if self.direct { 3 } else { 0 })
+    }
+
+    /// Check both buffered content and an unconsumed lexical suffix before
+    /// appending it or waiting for more input.
+    fn check_token_length(&self, parser: &Parser, additional: usize) -> Result<(), Error> {
+        if self.token_bytes(additional) > parser.config.limits.max_token_bytes {
+            return Err(parser.err(
+                ErrorKind::LimitExceeded,
+                "expanded declaration token limit exceeded",
+            ));
+        }
+        Ok(())
     }
 
     fn charge_work(&self, parser: &Parser, bytes: usize) -> Result<(), Error> {
@@ -795,12 +809,7 @@ impl Parser {
         text: Slice<'_>,
         boundary: bool,
     ) -> Result<(), Error> {
-        if result.token_bytes(text.len()) > self.config.limits.max_token_bytes {
-            return Err(self.err(
-                ErrorKind::LimitExceeded,
-                "expanded declaration token limit exceeded",
-            ));
-        }
+        result.check_token_length(self, text.len())?;
         if text
             .chars()
             .any(|character| !crate::names::is_xml_char(character))

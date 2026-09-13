@@ -10,10 +10,7 @@ The real corpus is the six pinned, original XML files in
 cover namespaces on/off and 4/64 KiB feeds; Python covers ElementTree and pyexpat at
 both feed sizes. Each consumer has **24 real conditions**. The four deterministic
 inputs from `tools/corpus.py` add **16 separate native generated conditions**.
-These generated controls differ from some historical studies' smaller subsets.
-This recipe also fixes one iteration count per consumer; historical studies used
-other schedules, including per-condition counts. Compare new baseline and candidate
-runs together; this entrypoint does not reproduce historical timings exactly.
+Use the same iteration count per consumer for baseline and candidate runs.
 
 ## 1. Freeze the baseline and candidate
 
@@ -48,13 +45,12 @@ same compiler.
 
 Controlled benchmark builds use a **fresh `output/intermediates` directory** for
 the subprocess's `CARGO_BUILD_BUILD_DIR`, while keeping each worktree's stable
-target directory. A shared intermediate cache incorrectly returned a candidate
-artifact as fresh for a different baseline checkout during harness validation.
-The builder therefore requires actual compiler records for the storage, parser
+target directory. This prevents reuse of artifacts from a different checkout.
+The builder requires actual compiler records for the storage, parser
 and C interface from the requested checkout, writing into the fresh directory,
 before accepting the library. This override applies only to these benchmark
 builds; the normal development shared cache and environment remain unchanged.
-It adds no compiler metadata or optimization flags. Commit the candidate before publishing results so others can recover
+Commit the candidate before publishing results so others can recover
 its exact source; hashes also identify uncommitted experiments.
 
 ## 2. Build the pinned Expat control once

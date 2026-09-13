@@ -52,7 +52,7 @@ tracking allocator. Its tail-removal path stores `entry->next` (always null for
 the tail) instead of `entry->prev`, so a later allocation crashes when earlier
 allocations remain. [allocator_repro.c](allocator_repro.c) reproduces this with
 four allocator calls and no XML parser linked. The correction preserves every
-test assertion; the original ASan crash and corrected run are recorded separately.
+test assertion.
 
 `tests.log` retains assertion diagnostics and per-test outcomes. `results.json`
 contains structured results; a nonzero exit remains nonzero. This is an adapted

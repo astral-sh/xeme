@@ -57,8 +57,3 @@ reduce them, and add deterministic regressions before removing crash artifacts.
 Record the revision, command, toolchain, elapsed time, executions, and corpus hash
 for each campaign. A short smoke run establishes harness operation; it does not
 establish security or XML conformance.
-
-The committed FFI seed reproduces an overlapping processing-instruction delimiter
-inside a DTD. The original campaign found a Rust slicing panic; the scanner now
-looks for the closing delimiter after the opener, and parsing checks both
-delimiters before slicing. The core regression exercises every chunk size.

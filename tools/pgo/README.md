@@ -4,7 +4,7 @@ Profile-guided optimization (PGO) lets the compiler use execution counts from a 
 
 This is an opt-in build workflow. It does not replace the default release or python-build-standalone build. Evaluate the resulting library with your application's tests and benchmarks before deployment; the generated replay is a build check, not a compatibility or security certification.
 
-For a PBS consumer, use the [optional PGO bundle command](../../integration/python-build-standalone/#optional-fresh-pgo-bundle). It runs this pipeline with the required PIC/unwind flags, verifies the effective ThinLTO configuration, and packages the exact optimized archive with its provenance and native linker dependencies. The `--native-static-libs` option is used by that Linux bridge to capture native dependencies from the same profile-use compilation; ordinary PGO invocations remain unchanged.
+For a PBS consumer, use the [optional PGO bundle command](../../integration/python-build-standalone/#optional-fresh-pgo-bundle). It runs this pipeline with the required PIC/unwind flags, verifies the effective ThinLTO configuration, and packages the optimized archive with its build manifest and native linker dependencies. The `--native-static-libs` option is used by that Linux bridge to capture native dependencies from the same profile-use compilation.
 
 ## Requirements
 
@@ -42,13 +42,7 @@ Directory-changing options are rejected. Configuration overrides must use inline
 Build logging uses one `--verbose`, retaining compiler commands and Cargo's normal
 dependency lint policy. The profile-warning rejection remains enabled.
 
-## Measured configuration
-
-Keep the release profile's ThinLTO and one codegen unit when evaluating PGO. In the [current Linux study](../../benchmarks/results/2026-09-11/pgo-lto/), a fresh profile reduced native parsing time by 24.8% and CPython consumer time by 15.5% on held-out project XML. Fat LTO without PGO helped less; combining fat LTO with its own fresh profile increased native time by 6.8% and CPython consumer time by 2.6% relative to ThinLTO PGO. These results support ThinLTO for these inputs and compiler.
-
-The study's Oriole builds used local Ohm with experimental defaults disabled, an explicit host target, and verified final `cdylib,staticlib` compiler invocations. Deployment builds should use the project's normal toolchain and fresh profiles, then repeat application tests and benchmarks. Changing LTO settings also requires retraining; a ThinLTO profile is not the fat-LTO control.
-
-## Outputs and provenance
+## Outputs
 
 Every invocation creates a new `runs/run-*` directory with an empty raw-profile directory. The stable `targets/generate` and `targets/use` directories reuse ordinary Cargo build dependencies, while each run's unique profile paths force fresh instrumented and optimized compilation. Profiles are never reused across source or compiler changes.
 
@@ -56,7 +50,7 @@ A successful run contains:
 
 - `use/liboriole_expat.so` (Linux) or `.dylib` (macOS), and `use/liboriole_expat.a`.
 - The instrumented libraries, raw profiles, merged profile, and complete profile counter dump.
-- The 12 generated XML files and their manifest; 288 instrumented and 288 optimized parse records.
+- Generated XML inputs, their manifest, and instrumented and optimized parse records.
 - `manifest.json` with source, Cargo configuration, script, tool, input, profile, and library hashes; exact commands, selected build environment, exit codes, timeouts, and raw log hashes.
 
 `latest.json` points to the last successful manifest and records its hash. Failed runs retain their manifest and logs without replacing that pointer. An exclusive `.lock` prevents simultaneous use of the output directory. After a killed orchestrator, remove a stale lock only after confirming its recorded process and compiler children have stopped.
@@ -65,7 +59,7 @@ The training corpus is deterministic and generated locally. It covers UTF-8, UTF
 
 Commands inherit the caller's environment with the recorded build overrides. The manifest records an allowlist of build variables, not credentials or a complete environment snapshot.
 
-The tool rejects version mismatches, compiler warnings during profile use, incomplete training, changed build inputs, and differing generated replay records. These checks establish the recorded build's provenance and selected callback equivalence. They do not guarantee bit-for-bit reproducible binaries across paths, machines, or compilers, or performance on workloads absent from training.
+The tool rejects version mismatches, compiler warnings during profile use, incomplete training, changed build inputs, and differing generated replay records. It does not guarantee bit-for-bit reproducible binaries across paths, machines, or compilers, or performance on workloads absent from training.
 
 ## Tool checks
 

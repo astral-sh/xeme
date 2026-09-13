@@ -2,7 +2,7 @@
 
 This recipe overlays Oriole's static archive and public header in the CPython build
 container for [PBS revision `a4553880`](https://github.com/astral-sh/python-build-standalone/tree/a4553880293fe9d1bb62747d34ab0e5121d3554f).
-It is opt-in and initially supports CPython **3.12.13**, a Linux x86_64 host,
+It is opt-in and supports CPython **3.12.13**, a Linux x86_64 host,
 the generic `x86_64-unknown-linux-gnu` target, an explicit
 `x86_64_v3-unknown-linux-gnu` opt-in, and Docker builds of shared Python.
 
@@ -14,7 +14,7 @@ archives retain PBS's normal filenames and must not enter the release artifact p
 
 ## Prepare a bundle
 
-From a frozen Oriole checkout, with Rust 1.96 or newer and its matching documentation
+From an Oriole checkout, with Rust 1.96 or newer and its matching documentation
 component installed:
 
 ```sh
@@ -143,13 +143,6 @@ PBS pull requests use the normal build, including branches whose names contain
 Manual dispatch requires the workflow to be present on the repository's default
 branch.
 
-The [recorded local PGO bundle](../../docs/validation/2026-09-11/pbs-pgo-bundle/)
-passed its fresh Ohm build and both C consumers. The [normal stable PBS baseline](../../docs/validation/2026-09-11/pbs-independent-checks/)
-passed the archive validator and actual glibc 2.17 threaded parsing, while retaining
-the two known strict XML callback assertions. The selected reference-frame stable
-PGO distribution is recorded in [its validation packet](../../docs/validation/2026-09-11/reference-validation/pbs/).
-The explicit v3 PBS distribution trial remains pending.
-
 The archive is built for the GNU target, but target compatibility remains a PBS
 validation gate. At the pinned revision, PBS links x86_64 against a Debian Jessie
 sysroot inside a newer container. A successful link on the development host does
@@ -162,8 +155,7 @@ wrapper. This selects Rust's existing pthread-key fallback instead of acquiring
 a glibc 2.18 version requirement from the Jessie sysroot. No glibc implementation
 is replaced. `validate-tls.py` checks real destructors on C-created threads and
 verifies the resulting ELF symbols. This workaround is scoped to the pinned
-CPython overlay; see the [full failure and correction report](../../docs/validation/2026-09-10/pbs-glibc/).
-
+CPython overlay.
 
 ## Apply and run
 
@@ -208,59 +200,6 @@ license directory, and its extension metadata references Oriole's notices.
 
 ## Validation
 
-### Current normal generic validation
-
-The [current normal installed result](../../docs/validation/2026-09-12/pbs-current-normal/)
-for selected runtime `6320d7b7` is recorded from
-[PR164 attempt 1](https://github.com/astral-sh/oriole/actions/runs/34697381695/attempts/1).
-Archive validation and custom checks pass; the installed parser identifies Oriole
-and completes 1,024 threaded parses on glibc 2.17. Both installed XML campaigns
-retain the two known text-grouping failures, including the main campaign's retries,
-so the workflow remains failed. This generic build uses normal Rust ThinLTO and
-PBS's CPython `noopt` variant, with no PGO. Installed-interpreter performance was
-not measured.
-
-To validate a newly selected runtime, open a dedicated integration pull request
-from its published commit. The [PBS distribution workflow](../../.github/workflows/pbs.yml)
-runs for changes to this integration directory or that workflow when the head
-branch starts with `charlie/codex-oriole-pbs-`, for example
-`charlie/codex-oriole-pbs-current-normal`.
-
-This PR route selects `x86_64-unknown-linux-gnu` and `pgo=false`; it adds no CPU
-requirement. Oriole uses its normal release build with ThinLTO and one codegen
-unit. PBS's CPython build variant remains `noopt`. Keep these experimental
-archives outside the release artifact pool.
-
-Retain the checked-out commit, actual compiler vectors, bundle manifest, archive
-hash and installed provenance. Check that provenance records the generic target,
-`target_cpu: null` and `pgo: false`, and that the installed static archive matches
-the bundle. Record the archive validator, custom checks, installed XML suites,
-parser identity, and glibc 2.17 threaded-parser results, including any failures.
-
-Report these installed-distribution outcomes separately from the local CPython
-module benchmarks and strict extension tests: they use separately built artifacts.
-A new runtime needs a fresh distribution run; the historical results below do not
-establish its installed behavior. Installed-interpreter performance requires its
-own measurements beyond this workflow's compatibility checks.
-
-The runtime at [`1262888`](https://github.com/astral-sh/oriole/commit/1262888)
-includes external DTD declaration grammar, internal declaration composition,
-namespace and encoding corrections, foreign-DTD read policy, and completed-parser
-API behavior. Its [complete distribution validation](../../docs/validation/2026-09-10/pbs-final/)
-passes the archive validator, custom checks, installed XML suites, parser identity,
-and the actual glibc 2.17 baseline. Source/header/manifest hashes match the
-[final local validation and benchmarks](../../docs/validation/2026-09-10/final-runtime/);
-the PBS stable-toolchain bundle has its own binary and distribution hashes.
-
-The combined runtime at [`b68bdca`](https://github.com/astral-sh/oriole/commit/b68bdca)
-includes the reviewed external-value continuations, declaration Default callbacks,
-allocation-free shared state, and inline character data. Its
-[frozen validation report](../../docs/validation/2026-09-10/external-values/)
-identifies the source and local release libraries. The PBS distribution gate
-rebuilds that source with its own pinned toolchain and records separate bundle and
-distribution hashes. Local library results do not substitute for that full build
-or its glibc 2.17 runtime check.
-
 Check the patch and staging logic against a clean pinned PBS source tree:
 
 ```sh
@@ -269,33 +208,37 @@ python3 integration/python-build-standalone/validate.py --pbs /absolute/clean-pb
   --cpython /absolute/cpython-3.12.13
 ```
 
-[The recorded local results](validation.json) include a real PIC archive build,
-native C integration and adversarial tests linked statically, and a shared-library
-link of the complete archive. Commands and source hashes are retained in the
-bundle manifest. These checks passed on the development host.
+This checks clean patch application, Python compilation, shell syntax, the
+default build path, native-linker propagation, target restrictions, and rejection
+of a mismatched header. With `--cpython`, validation also runs the backport shell
+block against the pinned consumer source and verifies that reapplication is
+rejected. Alternatively, `--cpython-archive /absolute/Python-3.12.13.tar.xz`
+verifies the download's size and SHA-256 before exercising the backport on
+`pyexpat.c`. These fixture checks do not compile a Python distribution.
 
-This checks the C-only archive command, clean patch application, Python compilation,
-shell syntax, the unchanged
-default path, native-linker propagation, target restrictions, and rejection of a
-mismatched header. Fixture checks do not compile a Python distribution.
-With `--cpython`, validation also runs the actual backport shell block against
-the pinned consumer source and verifies that reapplication is rejected.
-Alternatively, `--cpython-archive /absolute/Python-3.12.13.tar.xz` verifies the
-download's size and SHA-256 before exercising the backport on its `pyexpat.c`.
+### Distribution workflow
 
-Before deployment, run the actual resulting interpreter's XML test suites, confirm
-`pyexpat.EXPAT_VERSION` identifies Oriole, run PBS's distribution validator, and
-retain archive hashes and glibc/native-library results. Re-run allocator failure,
-callback lifecycle, differential, and sanitizer gates on the same Oriole source.
-The CPython static-extension harness in `tools/cpython/` is a separate local gate.
+The [PBS distribution workflow](../../.github/workflows/pbs.yml) runs for changes
+to this integration directory or the workflow when the head branch starts with
+`charlie/codex-oriole-pbs-`. It can also be dispatched manually with the target
+and PGO options described above. The pull request path uses the generic target,
+normal Rust ThinLTO build, and PBS's CPython `noopt` variant.
 
-The [completed Linux x86-64 validation](../../docs/validation/2026-09-10/pbs-final/)
-identifies runtime `1262888`, matching the final consumer, benchmark and sustained
-fuzz source. The experimental archive is retained as a seven-day CI artifact;
-permanent hashes, metadata, complete compressed logs and independent audits are
-in the repository. Earlier successful archives and failures remain separately
-identified by their source revisions.
+Validate the resulting interpreter and archive:
+
+- Verify the installed bundle manifest, static archive hash, and parser identity.
+  `pyexpat.EXPAT_VERSION` must identify Oriole.
+- Run PBS's archive validator and custom checks, inspecting dynamic dependencies
+  and symbol versions.
+- Run the installed XML suites and threaded parsing on glibc 2.17.
+- Preserve test failures, including the known callback-grouping differences in
+  the [compatibility guide](../../docs/compatibility.md).
+
+The local [CPython extension harness](../../tools/cpython/README.md) builds
+separate artifacts; repeat distribution checks for each runtime and build mode.
+Installed-interpreter performance also needs separate benchmarks.
 
 macOS packaging, Windows packaging, cross builds, and fully static Python
-validation remain open. The default PBS dependency should remain Expat until the
-relevant compatibility and release gates pass.
+validation remain open. Keep these experimental archives outside the release
+artifact pool. The default PBS dependency remains Expat until the relevant
+compatibility and release gates pass.

@@ -96,10 +96,9 @@ UTF-8 input does not allocate provenance records.
 
 This support does not imply exact callback or diagnostic compatibility. External
 DTD default-handler prefixes and some malformed-input errors, callback prefixes,
-and positions still differ. The [custom-encoding validation](../../docs/validation/2026-09-10/custom-encoding-provenance/)
-retains those differences alongside the complete upstream API matrix. Invalid
-maps, supplementary converted characters, and forbidden XML characters remain
-errors; the external value-child declaration restrictions below also apply.
+and positions still differ. Invalid maps, supplementary converted characters,
+and forbidden XML characters remain errors; the external value-child declaration
+restrictions below also apply.
 
 The C interface uses XML 1.0 Fourth Edition name rules to match the pinned
 Expat 2.8.4 reference, including in DTDs, references, and custom-encoding byte
@@ -172,12 +171,6 @@ inherit them. The safe Rust API retains its defaults of 10,000 declarations and
 32 entity levels. Iterative expansion and active-name indexes avoid a matching
 host call stack or repeated scans of the active chain.
 
-The larger C bounds allow more memory use for deep documents that previously
-stopped at the smaller limits. The measured 60,000-entity content fixture used
-about 103 MB of selected allocation; that is a fixture measurement, not a bound
-for every document with 100,000 entities. The shared byte and allocation ceilings
-below remain active.
-
 Reparse deferral is configurable, with progressive scanning in both modes. The
 live-allocation tracker supports Expat's maximum-amplification and activation
 threshold controls, including child allocations. Application-owned blocks requested
@@ -188,10 +181,11 @@ allocation. Allocation headers retain their tracker through reallocation and thr
 A separate 512 MiB ceiling on parser-owned live backing allocations remains active even when
 relative amplification checks are disabled.
 
-A parser family shares a 256 MiB raw-input budget and an 8 MiB entity-expansion
-budget. The C interface also caps aggregate event payloads at 64 MiB, including
-DTD identifiers, namespace metadata, and repeated base strings. It limits child
-creation to 1,024 parsers and external-child ancestry to 32 levels.
+Input calls and buffer requests are limited to 256 MiB. Cumulative source input
+is bounded by representable positions; work and event-payload allowances grow
+with consumed root input. See [streaming resource limits](../../docs/compatibility.md#streaming-resource-limits)
+for the limits and accounting rules. A parser family permits at most 1,024 child
+creations and 32 levels of external-child ancestry.
 
 These remaining boundaries prevent claiming complete Expat compatibility.
 Unmodified CPython can use its standard custom allocator suite; the actual consumer

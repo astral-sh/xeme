@@ -7,11 +7,15 @@
 mod accounting;
 mod active;
 mod arena;
+#[cfg(test)]
+mod default_attribute_tests;
 mod dtd;
 mod dtd_tables;
 mod encoding;
 mod lexical;
 mod names;
+#[cfg(test)]
+mod prolog_whitespace_tests;
 mod recycling;
 mod tag;
 mod text;
@@ -477,6 +481,8 @@ struct DefaultAttribute {
 struct DefaultAttributes {
     ordered: Vec<DefaultAttribute>,
     by_name: HashMap<String, usize>,
+    // Omitted attributes only need declarations with an actual default value.
+    default_indices: Vec<usize>,
 }
 
 impl DefaultAttributes {
@@ -485,6 +491,7 @@ impl DefaultAttributes {
         Self {
             ordered: Vec::new_in(allocator),
             by_name: HashMap::with_hasher_in(map.hasher().with_salt(salt), allocator),
+            default_indices: Vec::new_in(allocator),
         }
     }
 
@@ -495,7 +502,7 @@ impl DefaultAttributes {
     fn try_insert(&mut self, attribute: DefaultAttribute) -> Result<(), AllocError> {
         debug_assert!(self.get(&attribute.name).is_none());
         let name = attribute.name.try_clone()?;
-        // Reserve both containers before changing their logical contents so an
+        // Reserve every container before changing its logical contents so an
         // allocation failure cannot leave an index without its declaration.
         self.ordered
             .try_reserve(1)
@@ -504,6 +511,10 @@ impl DefaultAttributes {
             .try_reserve(1)
             .map_err(|_| AllocError::OutOfMemory)?;
         let index = self.ordered.len();
+        if attribute.value.is_some() {
+            self.default_indices.try_reserve(1)?;
+            self.default_indices.push(index);
+        }
         self.ordered.push(attribute);
         self.by_name.insert(name, index);
         Ok(())
@@ -683,6 +694,10 @@ pub struct Parser {
     error: Option<Error>,
     received: usize,
     feed_start_byte: usize,
+    #[cfg(test)]
+    prolog_bytes_inspected: usize,
+    #[cfg(test)]
+    default_candidates_visited: usize,
     expanded: Shared<EntityBudget>,
     fragment: bool,
     external_subset: bool,
@@ -860,6 +875,10 @@ impl Parser {
             error: None,
             received: 0,
             feed_start_byte: 0,
+            #[cfg(test)]
+            prolog_bytes_inspected: 0,
+            #[cfg(test)]
+            default_candidates_visited: 0,
             expanded: Shared::try_new_in(EntityBudget::new(), allocator)?,
             fragment: false,
             external_subset: false,
@@ -1240,6 +1259,7 @@ impl Parser {
                 self.charge_expansion(attribute.name.len())?;
                 self.charge_expansion(attribute.attribute_type.len())?;
                 if let Some(value) = &attribute.value {
+                    self.charge_expansion(size_of::<usize>())?;
                     self.charge_expansion(value.len())?;
                 }
                 // The ordered declaration and its lookup index each own a name.
@@ -1396,6 +1416,7 @@ impl Parser {
                 self.charge_expansion(attribute.name.len())?;
                 self.charge_expansion(attribute.attribute_type.len())?;
                 if let Some(value) = &attribute.value {
+                    self.charge_expansion(size_of::<usize>())?;
                     self.charge_expansion(value.len())?;
                 }
             }
@@ -2906,23 +2927,35 @@ impl Parser {
         let mut limit = self.source().converted_text_limit();
         let mut before_prolog_literal = false;
         if !self.seen_root && !self.fragment {
-            // Whitespace is a separate prolog token before a quoted literal.
-            // Emit its default callback before diagnosing the following token.
-            let remaining = self.source().remaining();
+            // A quote ends a horizontal whitespace token. Newlines already end
+            // text tokens, so looking beyond one would rescan the remaining
+            // prolog for each line. Converted text also has a bounded window.
+            let remaining = &self.source().remaining()[..limit];
+            #[cfg(test)]
+            let mut inspected = 0;
             let whitespace_end = remaining
-                .char_indices()
-                .find(|(_, character)| !whitespace(*character))
-                .map_or(remaining.len(), |(offset, _)| offset);
+                .bytes()
+                .position(|byte| {
+                    #[cfg(test)]
+                    {
+                        inspected += 1;
+                    }
+                    !matches!(byte, b' ' | b'\t')
+                })
+                .unwrap_or(remaining.len());
             if whitespace_end > 0
                 && matches!(remaining.as_bytes().get(whitespace_end), Some(b'\'' | b'"'))
             {
                 limit = limit.min(whitespace_end);
                 before_prolog_literal = limit == whitespace_end;
             }
+            #[cfg(test)]
+            {
+                self.prolog_bytes_inspected += inspected;
+            }
         }
         let text = &self.source().remaining()[..limit];
-        // A known quote terminates this whitespace token. A preceding CR cannot
-        // acquire a following LF, so withholding it would stall even final input.
+        // A known quote completes the preceding horizontal whitespace token.
         let final_text = before_prolog_literal
             || (self.is_source_final() && limit == self.source().remaining().len());
         let coalesce = !self.stack.is_empty() || self.fragment;
@@ -3680,7 +3713,12 @@ impl Parser {
             attribute.specified = true;
         }
         if let Some(defaults) = self.tables.defaults.get(name) {
-            for default in &defaults.ordered {
+            for &index in &defaults.default_indices {
+                let default = &defaults.ordered[index];
+                #[cfg(test)]
+                {
+                    self.default_candidates_visited += 1;
+                }
                 if !names.index.as_ref().map_or_else(
                     || {
                         raw_attrs.iter().enumerate().any(|(index, attribute)| {

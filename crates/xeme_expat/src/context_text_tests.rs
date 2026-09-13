@@ -883,6 +883,8 @@ fn comment_interest_tracks_callbacks_partial_tokens_suspension_children_and_rese
             }
             assert_eq!(state.comments, ["partial", "seen\né", "resumed"]);
             assert_eq!(state.raw, b"<!--raw\r\n-->");
+            // Refresh callback provenance after the Rust assertions borrow state.
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
             let child = XML_ExternalEntityParserCreate(parser, c"".as_ptr(), ptr::null());
             assert!(!child.is_null());
             assert_eq!(parse(child, b"<!--inherited-->", true, false), OK);

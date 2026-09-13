@@ -22,6 +22,7 @@ from corpus import workloads
 
 ROOT = Path(__file__).resolve().parents[1]
 ENGINES = {"xeme", "baseline", "expat"}
+TARGET = "x86_64-unknown-linux-gnu"
 
 
 def digest(path: Path) -> str:
@@ -64,6 +65,8 @@ def workspace_compilations(log: str, checkout: Path, intermediates: Path) -> dic
                 command
             )
             or not out_dir.is_relative_to(intermediates)
+            or "--target" not in command
+            or command[command.index("--target") + 1] != TARGET
         ):
             raise ValueError(f"unexpected workspace compiler input/output: {crate}")
         compiled[crate] = {
@@ -78,19 +81,51 @@ def workspace_compilations(log: str, checkout: Path, intermediates: Path) -> dic
     return compiled
 
 
+def library_artifact(messages: str, checkout: Path, target_dir: Path) -> Path:
+    """Select the library Cargo emitted for this checkout and explicit target."""
+    artifacts = []
+    for line in messages.splitlines():
+        message = json.loads(line)
+        if (
+            message.get("reason") != "compiler-artifact"
+            or message["target"]["name"] != "xeme_expat"
+        ):
+            continue
+        if (
+            message["fresh"]
+            or Path(message["manifest_path"]).resolve()
+            != checkout / "crates/xeme_expat/Cargo.toml"
+            or Path(message["target"]["src_path"]).resolve()
+            != checkout / "crates/xeme_expat/src/lib.rs"
+        ):
+            raise ValueError("unexpected or cached C library artifact")
+        artifacts.extend(
+            Path(filename).resolve(strict=True)
+            for filename in message["filenames"]
+            if Path(filename).name == "libxeme_expat.so"
+        )
+    expected = target_dir / TARGET / "release/libxeme_expat.so"
+    if artifacts != [expected]:
+        raise ValueError(f"expected one emitted library at {expected}: {artifacts}")
+    return artifacts[0]
+
+
 def build(args: argparse.Namespace) -> None:
     checkout = args.checkout.resolve(strict=True)
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     intermediates = output / "intermediates"
     intermediates.mkdir()
+    toolchain = [f"+{args.toolchain}"] if args.toolchain else []
     command = [
         "cargo",
-        "+ohm",
-        "-Zohm-defaults=no",
+        *toolchain,
+        *(["-Zohm-defaults=no"] if args.toolchain == "ohm" else []),
         "rustc",
         "--locked",
         "--release",
+        "--target",
+        TARGET,
         "--manifest-path",
         str(checkout / "Cargo.toml"),
         "--target-dir",
@@ -105,6 +140,7 @@ def build(args: argparse.Namespace) -> None:
         "xeme_expat",
         "--crate-type",
         "cdylib,staticlib",
+        "--message-format=json-render-diagnostics",
         "-vv",
     ]
     environment = os.environ.copy()
@@ -136,16 +172,20 @@ def build(args: argparse.Namespace) -> None:
         "revision": subprocess.check_output(
             ["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True
         ).strip(),
-        "compiler": subprocess.check_output(["rustc", "+ohm", "-Vv"], text=True),
+        "compiler": subprocess.check_output(
+            ["rustc", *toolchain, "-Vv"], text=True, env=environment, cwd=checkout
+        ),
+        "target": TARGET,
     }
     try:
-        with (output / "build.log").open("w") as stream:
+        messages = output / "cargo-messages.jsonl"
+        with messages.open("w") as stdout, (output / "build.log").open("w") as stderr:
             subprocess.run(
                 command,
                 cwd=checkout,
                 env=environment,
-                stdout=stream,
-                stderr=subprocess.STDOUT,
+                stdout=stdout,
+                stderr=stderr,
                 check=True,
             )
         report["workspace_compilations"] = workspace_compilations(
@@ -153,10 +193,20 @@ def build(args: argparse.Namespace) -> None:
         )
         if source_hashes(checkout) != before:
             raise ValueError("source changed while building")
+        artifact = library_artifact(
+            messages.read_text(), checkout, args.target_dir.resolve()
+        )
+        artifact_sha256 = digest(artifact)
         library = output / "libxeme_expat.so"
-        shutil.copy2(args.target_dir / "release/libxeme_expat.so", library)
+        shutil.copy2(artifact, library)
+        if digest(library) != artifact_sha256 or digest(artifact) != artifact_sha256:
+            raise ValueError("emitted library changed while copying")
         report.update(
-            status="passed", library=str(library), library_sha256=digest(library)
+            status="passed",
+            library=str(library),
+            library_sha256=artifact_sha256,
+            emitted_library=str(artifact),
+            cargo_messages_sha256=digest(messages),
         )
     finally:
         write_json(output / "build.json", report)
@@ -427,6 +477,10 @@ def main() -> None:
     builder.add_argument("--checkout", type=Path, required=True)
     builder.add_argument("--target-dir", type=Path, required=True)
     builder.add_argument("--output", type=Path, required=True)
+    builder.add_argument(
+        "--toolchain",
+        help="Optional rustup toolchain (for example stable or ohm); otherwise use the checkout's default",
+    )
     runner = commands.add_parser(
         "run", help="Compare three frozen parser libraries sequentially"
     )

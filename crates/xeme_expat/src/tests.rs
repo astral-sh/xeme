@@ -782,6 +782,33 @@ fn base_can_be_set_from_its_existing_pointer() {
 }
 
 #[test]
+fn external_child_base_is_unset_and_independent_of_its_parent() {
+    // SAFETY: The test owns each parser; base pointers are read while their owner
+    // is live and unchanged, and every C string is static.
+    unsafe {
+        for initial in [c"parent", c""] {
+            let parent = XML_ParserCreate(ptr::null());
+            assert_eq!(XML_SetBase(parent, initial.as_ptr()), OK);
+            for context in [ptr::null(), c"".as_ptr()] {
+                let child = XML_ExternalEntityParserCreate(parent, context, ptr::null());
+                assert!(!child.is_null());
+                assert!(XML_GetBase(child).is_null());
+                assert_eq!(CStr::from_ptr(XML_GetBase(parent)), initial);
+                assert_eq!(XML_SetBase(child, c"child".as_ptr()), OK);
+                assert_eq!(CStr::from_ptr(XML_GetBase(child)), c"child");
+                assert_eq!(CStr::from_ptr(XML_GetBase(parent)), initial);
+                let grandchild = XML_ExternalEntityParserCreate(child, context, ptr::null());
+                assert!(!grandchild.is_null());
+                assert!(XML_GetBase(grandchild).is_null());
+                XML_ParserFree(grandchild);
+                XML_ParserFree(child);
+            }
+            XML_ParserFree(parent);
+        }
+    }
+}
+
+#[test]
 fn namespace_constructors_reject_non_ascii_separator_bytes() {
     // SAFETY: Both constructors receive NULL encoding/suite pointers and a
     // readable separator byte; every successfully constructed handle is freed.

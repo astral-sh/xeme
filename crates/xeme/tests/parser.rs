@@ -1678,3 +1678,47 @@ fn internal_doctype_does_not_copy_or_charge_the_base_uri() {
     parser.feed(b"<!DOCTYPE r><r/>", true).unwrap();
     while parser.next_event().unwrap().is_some() {}
 }
+
+#[test]
+fn external_children_start_without_a_base_and_preserve_inherited_declaration_bases() {
+    for child_base in [None, Some(b"child".as_slice())] {
+        let mut parent = Parser::new(Config::default());
+        parent.set_base(Some(b"parent")).unwrap();
+        parent
+            .feed(
+                b"<!DOCTYPE r SYSTEM 'dtd' [<!ENTITY inherited SYSTEM 'inherited'>]><r>",
+                false,
+            )
+            .unwrap();
+        while parent.next_event().unwrap().is_some() {}
+
+        let mut dtd = parent.external_child(None, None).unwrap();
+        if let Some(base) = child_base {
+            dtd.set_base(Some(base)).unwrap();
+        }
+        dtd.feed(b"<!ENTITY fresh SYSTEM 'fresh'>", true).unwrap();
+        while dtd.next_event().unwrap().is_some() {}
+
+        let mut content = parent.external_child(Some(""), None).unwrap();
+        content.set_base(Some(b"content")).unwrap();
+        drop(dtd);
+        drop(parent);
+        content.feed(b"&inherited;&fresh;", true).unwrap();
+        let mut references = Vec::new();
+        while let Some(event) = content.next_event().unwrap() {
+            if let EventKind::ExternalEntityReference(reference) = event.kind {
+                references.push((
+                    reference.system_id.as_deref().unwrap().to_owned(),
+                    reference.base.as_deref().map(<[u8]>::to_vec),
+                ));
+            }
+        }
+        assert_eq!(
+            references,
+            [
+                ("inherited".to_owned(), Some(b"parent".to_vec())),
+                ("fresh".to_owned(), child_base.map(<[u8]>::to_vec)),
+            ]
+        );
+    }
+}

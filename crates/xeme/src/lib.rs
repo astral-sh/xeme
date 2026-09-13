@@ -1013,7 +1013,6 @@ impl Parser {
         let mut child =
             Self::try_new_with_encoding_in(self.config.clone(), encoding, self.allocator)?;
         child.set_hash_salt_inner(self.hash_salt())?;
-        child.base = self.base.clone();
         child
             .decoder
             .inherit_map(&self.decoder, &mut child.sources[0])?;

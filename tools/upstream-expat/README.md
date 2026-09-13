@@ -1,7 +1,7 @@
 # Upstream Expat API tests
 
 `run.py` builds the pinned Expat 2.8.4 test sources against a supplied shared
-library. It preserves public test bodies and records every pass, assertion
+library. Its default mode preserves public test bodies and records every pass, assertion
 failure, signal, and timeout.
 
 ```sh
@@ -55,3 +55,52 @@ test assertion.
 `tests.log` retains assertion diagnostics and per-test outcomes. `results.json`
 contains structured results and the test process's exit code. The runner exits
 nonzero if tests fail.
+
+## Allocation behavior
+
+`--allocation-behavior` selects a separate diagnostic with reviewed test-source
+adaptations. It covers all 83 public allocation-suite tests, including
+`test_mem_api_cycle` and `test_mem_api_unlimited`, plus
+`test_bypass_heuristic_when_close_to_bufsize`. The default 12 configurations
+produce 1,008 reported outcomes per engine. The deferral test runs 504 size
+combinations with whole-buffer input and deferral enabled; its other 11
+configurations return early as in upstream.
+
+```sh
+python3 tools/upstream-expat/run.py \
+  --source /path/to/expat-2.8.4 \
+  --config /path/to/expat-build/expat_config.h \
+  --library /path/to/libxeme_expat.so \
+  --allocation-behavior --output /tmp/xeme-allocation-behavior
+```
+
+The [adapter](allocation_behavior.py) checks the pinned source hashes and exact
+test inventory before changing copied sources. It raises retry ceilings to 512,
+permits success without Expat's allocation counts or buffer-growth schedule, and
+sweeps two previously fixed allocation-failure points. It retains checks for
+callback data, handler flags, parser states, error propagation and eventual
+success. An empty parse may succeed without allocating; if it fails there, it
+must report `XML_ERROR_NO_MEMORY`.
+
+The [ownership tracker](allocation_tracker.c) records the injected allocator's
+successful allocations, reallocations, frees and denied requests. Teardown
+checks detect retained blocks; unknown or repeated frees, invalid reallocations
+and unexpected system allocation failures fail the run. Counts describe
+allocator calls across retries and configurations, not distinct failure sites.
+Tracking applies to the custom memory suites, not all process allocations.
+In this diagnostic, default constructors also use a tracked, non-injecting
+memory suite so the public memory-API and allocation-setting fixtures receive
+ownership checks. The original API mode keeps its normal constructor calls.
+
+`allocation-behavior.patch` records the exact source changes. The manifest binds
+the original and adapted sources, adapter, tracker, patch, library, configuration
+and executable. `tests.log` includes an ownership report for each completed test.
+For the complete two-engine gate, use `tools/compatibility.py allocation`; it
+requires the full inventory and every retained assertion and ownership report to
+pass, with no known-failure allowance. Focused `--tests` selections remain useful
+for diagnosis but cannot satisfy that full gate.
+
+The original API mode and its failure baseline remain separate. Some allocation
+fixtures assert successful parsing without checking complete event data, and the
+bounded sweeps do not cover every possible allocation failure. See the
+[measured scope and results](../../docs/evidence/2026-09-13-allocation-behavior.md).

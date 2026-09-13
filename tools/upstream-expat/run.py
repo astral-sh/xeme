@@ -12,6 +12,7 @@ import shlex
 import shutil
 import signal
 import subprocess
+import sys
 from pathlib import Path
 
 REVISION = "12cf0b1f25f026a022fe728ad8f7e3d017285b80"
@@ -48,6 +49,11 @@ def main() -> int:
     parser.add_argument("--chunks", default="0,1,2,3,4,5")
     parser.add_argument(
         "--tests", nargs="+", help="exact public test names for a focused run"
+    )
+    parser.add_argument(
+        "--allocation-behavior",
+        action="store_true",
+        help="separately audit allocation behavior with recorded test adaptations",
     )
     parser.add_argument("--deferral", default="0,1")
     parser.add_argument("--test-timeout", type=int, default=3)
@@ -93,6 +99,13 @@ def main() -> int:
     here = Path(__file__).resolve().parent
     for name in ("bridge.h", "bridge.c"):
         shutil.copy2(here / name, adapted / name)
+    allocation_manifest = None
+    if args.allocation_behavior:
+        # The runner also works with Python's isolated mode (-I).
+        sys.path.insert(0, str(here))
+        from allocation_behavior import adapt_sources, selected_tests
+
+        allocation_manifest = adapt_sources(adapted)
     seen_exclusions: set[str] = set()
     public_tests: set[str] = set()
     for path in adapted.glob("*.c"):
@@ -131,9 +144,18 @@ def main() -> int:
                 "alloc_tail = entry->next;", "alloc_tail = entry->prev;"
             )
         if path.name == "minicheck.c":
+            if args.allocation_behavior:
+                text = '#include "allocation_tracker.h"\n' + text
             start = text.index("void\nsrunner_run_all(")
             end = text.index("void\nsrunner_summarize(", start)
-            text = text[:start] + (here / "runner.c").read_text() + "\n" + text[end:]
+            runner = (here / "runner.c").read_text()
+            if args.allocation_behavior:
+                assert runner.count("        fflush(NULL);\n        _Exit(0);") == 1
+                runner = runner.replace(
+                    "        fflush(NULL);\n        _Exit(0);",
+                    "        xeme_audit_finish();\n        fflush(NULL);\n        _Exit(0);",
+                )
+            text = text[:start] + runner + "\n" + text[end:]
             text = text.replace(
                 "longjmp(env, 1);",
                 'fprintf(stderr, "ASSERTION: %s at %s:%d\\n", '
@@ -157,6 +179,15 @@ def main() -> int:
         parser.error(
             f"exclusion set drifted: {sorted(EXCLUDED.keys() - seen_exclusions)}"
         )
+    if args.allocation_behavior:
+        allocation_tests = selected_tests(public_tests)
+        if args.tests and set(args.tests) - set(allocation_tests):
+            parser.error(
+                "allocation behavior mode only accepts its audited test inventory"
+            )
+        args.tests = args.tests or allocation_tests
+        for name in ("allocation_tracker.c", "allocation_tracker.h"):
+            shutil.copy2(here / name, adapted / name)
     if args.tests and set(args.tests) - public_tests:
         parser.error(f"unknown public tests: {sorted(set(args.tests) - public_tests)}")
     frozen_library = output / library.name
@@ -176,6 +207,7 @@ def main() -> int:
             "-O1",
             "-DXML_TESTING",
             "-D_GNU_SOURCE",
+            *(["-DXEME_ALLOCATION_BEHAVIOR"] if args.allocation_behavior else []),
             f"-I{adapted}",
             f"-I{output / 'lib'}",
         ]
@@ -214,6 +246,7 @@ def main() -> int:
         "per_test_address_space_bytes": args.memory_mib * 1024**2,
         "per_test_rss_limit_bytes": args.rss_mib * 1024**2,
         "total_timeout_seconds": args.timeout,
+        "allocation_behavior": allocation_manifest,
     }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     build = subprocess.run(
@@ -277,6 +310,7 @@ def main() -> int:
         "failed": sum(result["outcome"] != "pass" for result in results),
         "timed_out": code == 124,
         "excluded_internal_tests": EXCLUDED,
+        "allocation_behavior": args.allocation_behavior,
     }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     (output / "results.json").write_text(json.dumps(summary, indent=2) + "\n")

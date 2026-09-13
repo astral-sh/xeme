@@ -16,10 +16,21 @@ XML_Parser xeme_test_create_mm(const XML_Char *encoding,
                                const XML_Char *separator);
 XML_Bool xeme_test_reset(XML_Parser parser, const XML_Char *encoding);
 
+#ifdef XEME_ALLOCATION_BEHAVIOR
+enum XML_Status xeme_test_parse(XML_Parser parser, const char *text, int length,
+                               int final_input);
+enum XML_Status xeme_test_parse_buffer(XML_Parser parser, int length,
+                                      int final_input);
+#endif
+
 #ifndef XEME_BRIDGE_IMPLEMENTATION
 #define XML_ParserCreate xeme_test_create
 #define XML_ParserCreateNS xeme_test_create_ns
 #define XML_ParserCreate_MM xeme_test_create_mm
 #define XML_ParserReset xeme_test_reset
+#ifdef XEME_ALLOCATION_BEHAVIOR
+#define XML_Parse xeme_test_parse
+#define XML_ParseBuffer xeme_test_parse_buffer
+#endif
 #endif
 #endif

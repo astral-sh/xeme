@@ -8,6 +8,46 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef XEME_ALLOCATION_BEHAVIOR
+#include "allocation_tracker.h"
+
+/* Diagnostic default constructors retain unlimited allocation while exposing
+ * ownership to the audit. Otherwise memory-API tests would track only their
+ * unrelated setup parser, leaving the parsers used by their bodies unobserved. */
+static const XML_Memory_Handling_Suite audit_default_memory_suite = {
+    xeme_audit_malloc, xeme_audit_realloc, xeme_audit_free};
+
+/* Retry loops often check only ERROR. A denial during this exact call must
+ * report OOM, or the parent-side external-entity error that propagates it. */
+static enum XML_Status
+check_allocation_error(XML_Parser parser, enum XML_Status status, size_t before) {
+  if (status == XML_STATUS_ERROR && xeme_audit_failure_count() != before) {
+    enum XML_Error error = XML_GetErrorCode(parser);
+    if (error != XML_ERROR_NO_MEMORY && error != XML_ERROR_EXTERNAL_ENTITY_HANDLING) {
+      fprintf(stderr, "XEME_ALLOCATION_ERROR\tinjected failure reported wrong parse error"
+                      "\terror=%d\n", (int)error);
+      fflush(NULL);
+      _Exit(102);
+    }
+  }
+  return status;
+}
+
+enum XML_Status
+xeme_test_parse(XML_Parser parser, const char *text, int length, int final_input) {
+  size_t before = xeme_audit_failure_count();
+  enum XML_Status status = XML_Parse(parser, text, length, final_input);
+  return check_allocation_error(parser, status, before);
+}
+
+enum XML_Status
+xeme_test_parse_buffer(XML_Parser parser, int length, int final_input) {
+  size_t before = xeme_audit_failure_count();
+  enum XML_Status status = XML_ParseBuffer(parser, length, final_input);
+  return check_allocation_error(parser, status, before);
+}
+#endif
+
 /* This is harness state, never a substitute for an implementation counter. */
 XML_Bool g_reparseDeferralEnabledDefault = XML_TRUE;
 static struct {
@@ -52,10 +92,19 @@ static XML_Parser set_defaults(XML_Parser parser) {
 }
 
 XML_Parser xeme_test_create(const XML_Char *encoding) {
+#ifdef XEME_ALLOCATION_BEHAVIOR
+  return set_defaults(XML_ParserCreate_MM(encoding, &audit_default_memory_suite, NULL));
+#else
   return set_defaults(XML_ParserCreate(encoding));
+#endif
 }
 XML_Parser xeme_test_create_ns(const XML_Char *encoding, XML_Char separator) {
+#ifdef XEME_ALLOCATION_BEHAVIOR
+  return set_defaults(XML_ParserCreate_MM(encoding, &audit_default_memory_suite,
+                                        &separator));
+#else
   return set_defaults(XML_ParserCreateNS(encoding, separator));
+#endif
 }
 XML_Parser xeme_test_create_mm(const XML_Char *encoding,
                                const XML_Memory_Handling_Suite *suite,

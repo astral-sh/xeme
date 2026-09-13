@@ -1,18 +1,17 @@
 # Xeme
 
-A streaming XML parser and Expat C interface, written in Rust.
+A streaming XML parser written in Rust, with an Expat-compatible C API.
 
 > [!WARNING]
-> This project's code, PR summaries, and documentation were authored by AI agents
-> in [Codex](https://openai.com/codex/). Xeme is experimental and is not yet a
-> production-ready replacement for Expat. Use at your own risk.
+> This README is human-edited, but all code changes, PR summaries, and additional
+> documentation were authored entirely by GPT-6 Astra in [Codex](https://openai.com/codex/).
+> Use at your own risk.
 
 ## Highlights
 
 - Parse XML incrementally, with namespaces, encodings, entities, and DTD attribute defaults.
 - Check XML and inspect parser events from the command line.
 - Embed the safe Rust parser or use the Expat-compatible C interface.
-- Try an opt-in python-build-standalone integration for CPython's XML consumers.
 
 | Project XML | Xeme (normal) | Expat (normal) | Xeme / Expat |
 | --- | ---: | ---: | ---: |
@@ -40,9 +39,8 @@ Build from this checkout with Rust 1.96 or later:
 cargo install --path crates/xeme_cli --bin xeme --locked
 ```
 
-The executable uses jemalloc on supported Unix platforms and mimalloc on Windows.
-Library consumers choose their own allocator. See the [command-line guide](docs/usage.md)
-for allocator options, input handling, and resource limits.
+See the [command-line guide](docs/usage.md) for allocator options, input handling,
+and resource limits.
 
 ## Getting started
 

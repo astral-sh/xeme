@@ -3,7 +3,7 @@
 use std::sync::OnceLock;
 use std::sync::atomic::Ordering;
 
-use xeme_storage::{Shared, String, TryClone, TryLock, Vec, try_box, try_push};
+use xeme_storage::{Shared, String, TryClone, TryLock, TryLockGuard, Vec, try_box, try_push};
 
 use crate::lexical::{Buffer, Slice};
 use crate::value_lexer::{ValueScan, ValueScanner};
@@ -187,23 +187,24 @@ impl Parser {
         })
     }
 
-    fn value_append(&self, state: &State, text: Slice<'_>, normalize: bool) -> Result<(), Error> {
-        let mut output = state.output.try_lock().ok_or_else(|| {
+    /// Borrow the output shared with value children without waiting, reporting
+    /// contention at this parser's position. Drop the guard before callbacks or yields.
+    fn value_output<'a>(&self, state: &'a State) -> Result<TryLockGuard<'a, Output>, Error> {
+        state.output.try_lock().ok_or_else(|| {
             self.err(
                 ErrorKind::ExternalEntityHandling,
                 "entity value output is unavailable",
             )
-        })?;
+        })
+    }
+
+    fn value_append(&self, state: &State, text: Slice<'_>, normalize: bool) -> Result<(), Error> {
+        let mut output = self.value_output(state)?;
         self.append_entity_value(&mut output.text, text, normalize)
     }
 
     fn value_skip(&self, state: &State) -> Result<(), Error> {
-        let mut output = state.output.try_lock().ok_or_else(|| {
-            self.err(
-                ErrorKind::ExternalEntityHandling,
-                "entity value output is unavailable",
-            )
-        })?;
+        let mut output = self.value_output(state)?;
         output.skipped = !output.standalone;
         Ok(())
     }
@@ -242,16 +243,7 @@ impl Parser {
             + state.named_frames
             + state.parameters.len();
         child.parameter_state = OnceLock::from(state.read.clone());
-        child.standalone = state
-            .output
-            .try_lock()
-            .ok_or_else(|| {
-                self.err(
-                    ErrorKind::ExternalEntityHandling,
-                    "entity value output is unavailable",
-                )
-            })?
-            .standalone;
+        child.standalone = self.value_output(state)?.standalone;
         self.charge_expansion(size_of::<State>())?;
         child.value_state = Some(try_box(
             State {
@@ -322,12 +314,7 @@ impl Parser {
                     self.value_state = Some(state);
                     self.parse_pi(token.view(), position)?;
                     let state = self.value_state.as_ref().expect("value declaration");
-                    let mut output = state.output.try_lock().ok_or_else(|| {
-                        self.err(
-                            ErrorKind::ExternalEntityHandling,
-                            "entity value output is unavailable",
-                        )
-                    })?;
+                    let mut output = self.value_output(state)?;
                     output.standalone |= self.standalone;
                     self.standalone = output.standalone;
                     drop(output);
@@ -544,12 +531,7 @@ impl Parser {
 
     fn finish_value_declaration(&mut self, state: &mut State) -> Result<(), Error> {
         let declaration = state.declaration.take().expect("value declaration");
-        let mut output = state.output.try_lock().ok_or_else(|| {
-            self.err(
-                ErrorKind::ExternalEntityHandling,
-                "entity value output is unavailable",
-            )
-        })?;
+        let mut output = self.value_output(state)?;
         let value = std::mem::replace(&mut output.text, String::new_in(self.allocator));
         let skipped = output.skipped;
         self.standalone = output.standalone;

@@ -60,8 +60,70 @@ jobs:
       - run: uvx --from ty==0.0.80 ty check --extra-search-path tools tools benchmarks integration
       - run: python3 -m unittest discover -s benchmarks -p test_hillclimb.py
       - run: python3 -m unittest discover -s tools/cpython -p test_run.py
+      - run: python3 -m unittest discover -s tools -p test_compatibility.py
+      - run: python3 -m unittest discover -s tools -p test_differential.py
+      - run: python3 benchmarks/hillclimb.py verify-holdout
       - run: python3 -m unittest discover -s tools/pgo -p test_build.py
       - run: python3 -m unittest discover -s integration/python-build-standalone -p test_pgo_bundle.py
+  compatibility:
+    name: Compatibility regression (${{ matrix.suite }})
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [api, w3c, differential]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: libexpat/libexpat
+          ref: 12cf0b1f25f026a022fe728ad8f7e3d017285b80
+          path: .cache/expat
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        if: matrix.suite == 'w3c'
+        with:
+          repository: lddubeau/xml-conformance-suite
+          ref: 3fb4516daedd0ac736249a383733883b95fcdbb2
+          path: .cache/w3c
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: stable
+      - name: Build the candidate and pinned reference
+        run: |
+          cargo rustc --release --locked -p oriole_expat --lib --crate-type cdylib,staticlib
+          cmake -S .cache/expat/expat -B .cache/expat-build -DCMAKE_BUILD_TYPE=Release -DEXPAT_BUILD_TESTS=ON -DEXPAT_SHARED_LIBS=ON -DEXPAT_BUILD_TOOLS=OFF -DEXPAT_BUILD_EXAMPLES=OFF -DEXPAT_CONTEXT_BYTES=1024
+          cmake --build .cache/expat-build --target expat --parallel 2
+      - name: Run full Expat API matrix with reviewed failure boundaries
+        if: matrix.suite == 'api'
+        run: >-
+          python3 -I -S tools/compatibility.py api
+          --source .cache/expat --config .cache/expat-build/expat_config.h
+          --library target/release/liboriole_expat.so --reference .cache/expat-build/libexpat.so
+          --output "$RUNNER_TEMP/oriole-compat-api"
+      - name: Run the complete pinned W3C catalog
+        if: matrix.suite == 'w3c'
+        run: >-
+          python3 -I -S tools/compatibility.py w3c
+          --source .cache/w3c/packages/test-data/xmlconf
+          --library target/release/liboriole_expat.so --reference .cache/expat-build/libexpat.so
+          --output "$RUNNER_TEMP/oriole-compat-w3c"
+      - name: Compare generated XML semantics against Expat
+        if: matrix.suite == 'differential'
+        run: >-
+          python3 -I -S tools/compatibility.py differential
+          --library target/release/liboriole_expat.so --reference .cache/expat-build/libexpat.so
+          --output "$RUNNER_TEMP/oriole-compat-differential"
+      - name: Retain original failures and regression reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: compatibility-${{ matrix.suite }}
+          path: ${{ runner.temp }}/oriole-compat-*
+          if-no-files-found: warn
+          retention-days: 30
   allocator-miri:
     name: Allocator ownership (${{ matrix.model }})
     runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
@@ -212,9 +274,15 @@ jobs:
   fuzz:
     name: Sanitized parser fuzz smoke
     runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-aarch64-4' || 'ubuntu-24.04-arm' }}
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: libexpat/libexpat
+          ref: 12cf0b1f25f026a022fe728ad8f7e3d017285b80
+          path: .cache/expat
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
         with:
           toolchain: nightly
@@ -225,6 +293,23 @@ jobs:
       - run: cargo fuzz run ffi_family fuzz/seeds/ffi_family -- -max_total_time=30 -max_len=65536
       - run: cargo fuzz run multibyte fuzz/seeds/multibyte -- -max_total_time=30 -max_len=65536
       - run: cargo fuzz run value_family fuzz/seeds/value_family -- -max_total_time=30 -max_len=65536
+      - name: Build the isolated Expat oracle
+        run: |
+          cmake -S .cache/expat/expat -B .cache/expat-build -DCMAKE_BUILD_TYPE=Release -DEXPAT_SHARED_LIBS=ON -DEXPAT_BUILD_TESTS=OFF -DEXPAT_BUILD_TOOLS=OFF -DEXPAT_BUILD_EXAMPLES=OFF
+          cmake --build .cache/expat-build --target expat --parallel 2
+          cc -std=c11 -O2 -Wall -Wextra -Werror -Iinclude fuzz/expat_oracle.c "$GITHUB_WORKSPACE/.cache/expat-build/libexpat.so" -Wl,-rpath,"$GITHUB_WORKSPACE/.cache/expat-build" -o "$RUNNER_TEMP/expat-oracle"
+      - name: Fuzz semantic compatibility against Expat
+        run: >-
+          ORIOLE_EXPAT_ORACLE="$RUNNER_TEMP/expat-oracle"
+          cargo fuzz run expat_differential fuzz/seeds/expat_differential --
+          -max_len=8193 -timeout=10 -rss_limit_mb=1536 -max_total_time=300
+      - name: Retain differential fuzz failures
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: differential-fuzz-failures
+          path: fuzz/artifacts/expat_differential/
+          if-no-files-found: ignore
 
   cpython:
     name: CPython XML consumers (${{ matrix.linkage }})

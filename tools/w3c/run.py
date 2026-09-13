@@ -188,11 +188,10 @@ def worker(library, label):
                 "path": case["path"],
                 "type": case["TYPE"],
                 "chunk": chunk,
+                "namespaces": case.get("NAMESPACE", "yes") != "no",
             }
             (OUT / (label + "-progress.json")).write_text(json.dumps(row) + "\n")
-            row["result"] = engine.parse(
-                SUITE / case["path"], chunk, case.get("NAMESPACE", "yes") != "no"
-            )
+            row["result"] = engine.parse(SUITE / case["path"], chunk, row["namespaces"])
             rows.append(row)
     (OUT / (label + ".json")).write_text(
         json.dumps(
@@ -274,6 +273,8 @@ def main():
     for label, library in (("reference", args.reference), ("oriole", args.library)):
         command = [
             sys.executable,
+            "-I",
+            "-S",
             str(Path(__file__).resolve()),
             "--suite",
             str(SUITE),

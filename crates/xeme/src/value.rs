@@ -590,6 +590,7 @@ impl Parser {
             self.emit(
                 EventKind::EntityDeclaration(xeme_storage::try_box(
                     crate::EntityDeclaration {
+                        base: None,
                         name: declaration.name,
                         parameter: declaration.parameter,
                         value: Some(value),

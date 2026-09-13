@@ -11,6 +11,7 @@ pub(super) struct Declaration {
     pub(super) expansion: DeclarationExpansion,
     pub(super) position: Position,
     quote_checked: usize,
+    word_checked: usize,
     pub(super) semantic: Option<semantic::State>,
     pub(super) request: Option<semantic::Request>,
     pub(super) complete: bool,
@@ -311,11 +312,17 @@ impl Parser {
         self.conditional.declaration.is_some()
     }
 
-    pub(super) fn start_declaration_composition(&mut self) -> Result<bool, Error> {
-        self.charge_expansion(size_of::<Declaration>())?;
+    pub(super) fn start_declaration_composition(
+        &mut self,
+        incremental: bool,
+    ) -> Result<bool, Error> {
+        if !incremental {
+            self.charge_expansion(size_of::<Declaration>())?;
+        }
         self.conditional.declaration = Some(xeme_storage::try_box(
             Declaration {
                 expansion: DeclarationExpansion {
+                    direct: incremental,
                     text: Buffer::new_in(self.allocator),
                     raw: Buffer::new_in(self.allocator),
                     literals: Vec::new_in(self.allocator),
@@ -326,7 +333,8 @@ impl Parser {
                 },
                 position: self.here(),
                 quote_checked: 0,
-                semantic: None,
+                word_checked: 0,
+                semantic: incremental.then(|| semantic::State::new(self)),
                 request: None,
                 complete: false,
                 ready: 0,
@@ -335,6 +343,18 @@ impl Parser {
         )?);
         self.consume(2)?; // The declaration opener is one lexical token.
         self.continue_declaration_composition()
+    }
+
+    fn charge_declaration_composition(&self, state: &mut Declaration) -> Result<(), Error> {
+        if state.expansion.direct {
+            self.charge_expansion(
+                size_of::<Declaration>()
+                    + size_of::<semantic::State>()
+                    + grammar::Cursor::maximum_stack_bytes(self.config.limits.max_depth),
+            )?;
+            state.expansion.direct = false;
+        }
+        Ok(())
     }
 
     /// Consume each physical byte once. Entity source boundaries add grammar
@@ -366,6 +386,7 @@ impl Parser {
                             "declaration crosses a between-declaration parameter boundary",
                         ));
                     }
+                    self.charge_declaration_composition(&mut state)?;
                     self.pop_entity_source();
                     self.append_declaration_token(&mut state.expansion, Slice::plain(" "), true)?;
                     state.ready = state.expansion.text.len();
@@ -377,8 +398,45 @@ impl Parser {
                 self.conditional.declaration = Some(state);
                 return Ok(false);
             }
+            if state.expansion.direct
+                && self.reparse_deferral
+                && !self.is_source_final()
+                && self.source().should_defer(
+                    self.config
+                        .limits
+                        .max_token_bytes
+                        .saturating_sub(state.expansion.token_bytes(0)),
+                )
+            {
+                self.conditional.declaration = Some(state);
+                return Ok(false);
+            }
             let text = self.source().remaining();
-            let end = text.find(['\'', '"', '%', '<', '>']).unwrap_or(text.len());
+            let end = if state.expansion.direct {
+                let space = text.starts_with(whitespace);
+                let end = text[state.word_checked..]
+                    .char_indices()
+                    .find(|(_, c)| {
+                        whitespace(*c) != space || matches!(c, '\'' | '"' | '%' | '<' | '>')
+                    })
+                    .map_or(text.len(), |(offset, _)| state.word_checked + offset);
+                if !space && end == text.len() && !self.is_source_final() {
+                    if state.expansion.token_bytes(end) > self.config.limits.max_token_bytes {
+                        return Err(self.err(
+                            ErrorKind::LimitExceeded,
+                            "expanded declaration token limit exceeded",
+                        ));
+                    }
+                    state.word_checked = end;
+                    self.source_mut().mark_deferred();
+                    self.conditional.declaration = Some(state);
+                    return Ok(false);
+                }
+                state.word_checked = 0;
+                end
+            } else {
+                text.find(['\'', '"', '%', '<', '>']).unwrap_or(text.len())
+            };
             if end != 0 {
                 if let Some((offset, character)) =
                     text[..end].char_indices().rfind(|(_, c)| whitespace(*c))
@@ -408,6 +466,18 @@ impl Parser {
                     return Err(self.err(ErrorKind::InvalidToken, "markup inside a declaration"));
                 }
                 b'\'' | b'"' => {
+                    if self.reparse_deferral
+                        && !self.is_source_final()
+                        && self.source().should_defer(
+                            self.config
+                                .limits
+                                .max_token_bytes
+                                .saturating_sub(state.expansion.token_bytes(0)),
+                        )
+                    {
+                        self.conditional.declaration = Some(state);
+                        return Ok(false);
+                    }
                     let quote = text.as_bytes()[0];
                     let checked = state.quote_checked.max(1);
                     let Some(end) = text.as_bytes()[checked..]
@@ -415,7 +485,7 @@ impl Parser {
                         .position(|&b| b == quote)
                         .map(|offset| checked + offset + 1)
                     else {
-                        if state.expansion.text.len().saturating_add(text.len())
+                        if state.expansion.token_bytes(text.len())
                             > self.config.limits.max_token_bytes
                         {
                             return Err(self.err(
@@ -430,10 +500,27 @@ impl Parser {
                             ));
                         }
                         state.quote_checked = text.len();
+                        self.source_mut().mark_deferred();
                         self.conditional.declaration = Some(state);
                         return Ok(false);
                     };
-                    self.charge_expansion(size_of::<DeclarationLiteral>())?;
+                    // A nonfinal literal needs a following byte before its token
+                    // is complete, matching Expat's declaration tokenizer.
+                    if end == text.len() && !self.is_source_final() {
+                        if state.expansion.token_bytes(end) > self.config.limits.max_token_bytes {
+                            return Err(self.err(
+                                ErrorKind::LimitExceeded,
+                                "expanded declaration token limit exceeded",
+                            ));
+                        }
+                        state.quote_checked = end - 1;
+                        self.source_mut().mark_deferred();
+                        self.conditional.declaration = Some(state);
+                        return Ok(false);
+                    }
+                    state
+                        .expansion
+                        .charge_work(self, size_of::<DeclarationLiteral>())?;
                     let mut parameters = Vec::new_in(self.allocator);
                     for source in &self.sources {
                         if let Some(name) = source
@@ -477,6 +564,7 @@ impl Parser {
                         self.consume(1)?;
                         continue;
                     }
+                    self.charge_declaration_composition(&mut state)?;
                     let limit = self.config.limits.max_token_bytes;
                     let end =
                         self.source_mut()

@@ -61,12 +61,32 @@ struct DeclarationLiteral {
 
 #[derive(Debug)]
 struct DeclarationExpansion {
+    // Ordinary token bookkeeping follows direct-input accounting. Once a
+    // parameter replacement participates, retain the existing composition costs.
+    direct: bool,
     text: Buffer,
     raw: Buffer,
     literals: Vec<DeclarationLiteral>,
     parameters: Vec<DeclarationParameter>,
     capture_raw: bool,
     raw_offsets: Vec<(usize, usize)>,
+}
+
+impl DeclarationExpansion {
+    fn token_bytes(&self, additional: usize) -> usize {
+        self.text
+            .len()
+            .saturating_add(additional)
+            .saturating_add(if self.direct { 3 } else { 0 })
+    }
+
+    fn charge_work(&self, parser: &Parser, bytes: usize) -> Result<(), Error> {
+        if self.direct {
+            Ok(())
+        } else {
+            parser.charge_expansion(bytes)
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -330,6 +350,15 @@ impl Parser {
         self.event_raw("")
     }
 
+    /// Whether the current external request is the implicit foreign DTD.
+    /// Unfinished parameter declarations can also request a null system ID.
+    #[must_use]
+    pub fn is_foreign_dtd_reference(&self) -> bool {
+        self.foreign_dtd_pending
+            .as_ref()
+            .is_some_and(|foreign| foreign.delivered)
+    }
+
     /// Report that no external-entity handler was installed for the last event.
     ///
     /// An absent handler leaves a possible foreign subset unresolved. A handler
@@ -553,6 +582,11 @@ impl Parser {
                 2,
             ));
         }
+        // Entity metadata and default callbacks advance at lexical boundaries,
+        // rather than waiting for the whole declaration to be buffered.
+        if text.starts_with("<!ENTITY") && text[8..].starts_with(whitespace) {
+            return self.start_declaration_composition(true);
+        }
         let final_input = self.is_source_final();
         if self.reparse_deferral && !final_input && self.source().should_defer(limit) {
             return Ok(false);
@@ -574,7 +608,7 @@ impl Parser {
                         "declaration opener crosses a parameter boundary",
                     ));
                 }
-                return self.start_declaration_composition();
+                return self.start_declaration_composition(false);
             }
             if final_input {
                 return Err(self.err(ErrorKind::UnclosedToken, "unclosed DTD declaration"));
@@ -589,7 +623,7 @@ impl Parser {
         if mode == crate::ScanMode::DtdDeclaration
             && self.source().remaining().as_bytes()[end - 1] == b'%'
         {
-            return self.start_declaration_composition();
+            return self.start_declaration_composition(false);
         }
         self.account_source(end)?;
         let token = self
@@ -761,7 +795,7 @@ impl Parser {
         text: Slice<'_>,
         boundary: bool,
     ) -> Result<(), Error> {
-        if result.text.len().saturating_add(text.len()) > self.config.limits.max_token_bytes {
+        if result.token_bytes(text.len()) > self.config.limits.max_token_bytes {
             return Err(self.err(
                 ErrorKind::LimitExceeded,
                 "expanded declaration token limit exceeded",
@@ -908,7 +942,11 @@ impl Parser {
             }
         }
         if !assigned && !cursor.silent_defaults {
-            self.charge_expansion(size_of::<crate::PendingEvent>())?;
+            // Prefix events from ordinary input are part of direct token work.
+            // Parameter composition retains the existing indirect event charge.
+            if !cursor.direct {
+                self.charge_expansion(size_of::<crate::PendingEvent>())?;
+            }
             self.emit(
                 if unconditional {
                     EventKind::Default
@@ -1039,7 +1077,7 @@ impl Parser {
                 .require_space()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
             match declaration {
-                "ENTITY" => self.entity_declaration(&mut cursor, position)?,
+                "ENTITY" => self.entity_declaration(&mut cursor, position, self.base.clone())?,
                 "ATTLIST" => self.attlist_declaration(&mut cursor, position)?,
                 "ELEMENT" => self.element_declaration(&mut cursor, position, offset + 2)?,
                 "NOTATION" => self.notation_declaration(&mut cursor, position, true)?,
@@ -1300,6 +1338,7 @@ impl Parser {
         &mut self,
         cursor: &mut Cursor<'_>,
         position: Position,
+        base: Option<xeme_storage::Shared<Vec<u8>>>,
     ) -> Result<(), Error> {
         let parameter = cursor.eat("%");
         if parameter {
@@ -1409,6 +1448,8 @@ impl Parser {
                 ));
             }
             let value_open = self.new_parameter_value_open(parameter && value.is_some())?;
+            let base = system_id.as_ref().and(base);
+            let callback_base = self.copy_external_base(base.as_ref())?;
             let declarations = if parameter {
                 &mut self.tables.parameter_entities
             } else {
@@ -1418,7 +1459,7 @@ impl Parser {
                 declarations,
                 name.try_clone()?,
                 Entity {
-                    base: system_id.as_ref().and(self.base.clone()),
+                    base,
                     value: value.try_clone()?,
                     system_id: system_id.try_clone()?,
                     public_id: public_id.try_clone()?,
@@ -1430,6 +1471,7 @@ impl Parser {
             self.emit(
                 EventKind::EntityDeclaration(xeme_storage::try_box(
                     crate::EntityDeclaration {
+                        base: callback_base,
                         name,
                         value,
                         parameter,
@@ -1935,6 +1977,7 @@ struct Cursor<'a> {
     raw_closed: bool,
     closes_declaration: bool,
     silent_defaults: bool,
+    direct: bool,
     raw: Slice<'a>,
 }
 impl<'a> Cursor<'a> {
@@ -1962,6 +2005,7 @@ impl<'a> Cursor<'a> {
             raw_closed: false,
             closes_declaration: true,
             silent_defaults: false,
+            direct: false,
             raw: Slice::plain(""),
         }
     }

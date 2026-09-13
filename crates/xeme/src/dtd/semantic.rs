@@ -235,7 +235,7 @@ impl Parser {
             let Some((name, parameter)) = &state.reserved else {
                 continue;
             };
-            self.charge_expansion(end - start)?;
+            declaration.expansion.charge_work(self, end - start)?;
             let value = declaration
                 .expansion
                 .text
@@ -362,7 +362,9 @@ impl Parser {
                 "entity declaration count limit exceeded",
             ));
         }
-        self.charge_expansion(2 * name.len() + size_of::<Entity>())?;
+        declaration
+            .expansion
+            .charge_work(self, 2 * name.len() + size_of::<Entity>())?;
         let name = string(name, self.allocator)?;
         let table = if parameter {
             &mut self.tables.parameter_entities
@@ -415,6 +417,7 @@ impl Parser {
         cursor.raw_event = self.pending.len();
         cursor.closes_declaration = false;
         cursor.silent_defaults = !self.default_events;
+        cursor.direct = expansion.direct;
         cursor.parameter_defaults = !state.previously_skipped;
         cursor.entity_defaults = state.grammar.kind() == Some(grammar::Kind::Entity);
         cursor.projection = state.grammar.kind();
@@ -441,7 +444,9 @@ impl Parser {
         self.declaration_parameters(&mut cursor)?;
         {
             let end = cursor.raw.len();
-            self.charge_expansion(end.saturating_sub(cursor.raw_offset) + 3)?;
+            declaration
+                .expansion
+                .charge_work(self, end.saturating_sub(cursor.raw_offset) + 3)?;
             let unconditional = self.declarations_skipped()
                 && matches!(
                     state.grammar.kind(),
@@ -486,6 +491,7 @@ impl Parser {
         if commit.kind == grammar::Kind::Entity {
             self.semantic_parameters_through(declaration, state, commit.end)?;
         }
+        let mut entity_base = self.base.clone();
         if commit.kind == grammar::Kind::Entity
             && !self.declarations_skipped()
             && let Some((name, parameter)) = state.reserved.take()
@@ -497,7 +503,9 @@ impl Parser {
             } else {
                 &mut self.tables.entities
             };
-            table.remove(&name);
+            // Preserve the base captured when the system identifier was read,
+            // even if SetBase changed it before this declaration completed.
+            entity_base = table.remove(&name).and_then(|entity| entity.base);
         }
         let skipped_before = self.declarations_skipped();
         let mut cursor =
@@ -506,7 +514,7 @@ impl Parser {
         if commit.kind == grammar::Kind::Attlist {
             if state.element.is_none() {
                 let (start, end) = state.grammar.element_span().expect("ATTLIST element");
-                self.charge_expansion(end - start)?;
+                declaration.expansion.charge_work(self, end - start)?;
                 state.element = Some(
                     declaration
                         .expansion
@@ -541,7 +549,7 @@ impl Parser {
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
             match commit.kind {
                 grammar::Kind::Entity => {
-                    self.entity_declaration(&mut cursor, position)?;
+                    self.entity_declaration(&mut cursor, position, entity_base)?;
                     state.entity_committed = true;
                 }
                 grammar::Kind::Element => self.element_declaration(&mut cursor, position, 2)?,
@@ -583,7 +591,9 @@ impl Parser {
             cursor.raw_started = true;
         } else {
             let raw_end = cursor.raw.len();
-            self.charge_expansion(raw_end.saturating_sub(cursor.raw_offset) + 2)?;
+            declaration
+                .expansion
+                .charge_work(self, raw_end.saturating_sub(cursor.raw_offset) + 2)?;
             let unconditional = skipped_before
                 && matches!(commit.kind, grammar::Kind::Entity | grammar::Kind::Attlist)
                 || state.notation_capture == Some(false)

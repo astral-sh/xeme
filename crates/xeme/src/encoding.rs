@@ -133,13 +133,15 @@ impl Detection {
                 .position(|window| window == b"?>")
                 .map(|end| end + start);
             self.declaration_checked = content.len().saturating_sub(1);
+            // Enforce the complete token bound before inspecting or copying an
+            // encoding name, including when the closing delimiter just arrived.
+            if end.map_or(content.len(), |end| end + 2) > max_token {
+                return Err(Error::bare(
+                    ErrorKind::LimitExceeded,
+                    "XML declaration byte limit exceeded",
+                ));
+            }
             let Some(end) = end else {
-                if content.len() > max_token {
-                    return Err(Error::bare(
-                        ErrorKind::LimitExceeded,
-                        "XML declaration byte limit exceeded",
-                    ));
-                }
                 if !final_input {
                     return Ok(None);
                 }
@@ -164,7 +166,6 @@ impl Detection {
                             || matches!(encoding, Some(Encoding::Utf16Le | Encoding::Utf16Be));
                         if encoding.is_none()
                             && !mismatch
-                            && declaration.len() + 2 <= max_token
                             && declaration
                                 .bytes()
                                 .all(|byte| required_ascii(i32::from(byte)))

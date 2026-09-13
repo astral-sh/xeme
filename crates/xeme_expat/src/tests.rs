@@ -498,6 +498,68 @@ fn buffer_reservation_cannot_bypass_input_budget() {
 }
 
 #[test]
+fn oversized_declarations_do_not_call_unknown_encoding_handlers() {
+    unsafe extern "C" fn encoding(
+        data: *mut c_void,
+        _: *const c_char,
+        info: *mut XML_Encoding,
+    ) -> c_int {
+        // SAFETY: The test keeps its callback counter live; Expat supplies the map.
+        unsafe {
+            *data.cast::<usize>() += 1;
+            (*info).map = std::array::from_fn(|byte| byte as i32);
+        }
+        OK
+    }
+    let declaration = b"<?xml version='1.0' encoding='custom'?>";
+    let document = [declaration.as_slice(), b"<r/>"].concat();
+    // SAFETY: Each parser, input buffer, and callback counter is owned by this test.
+    unsafe {
+        for limit in [32, declaration.len() - 1, declaration.len()] {
+            for width in [1, document.len()] {
+                for buffered in [false, true] {
+                    let parser = XML_ParserCreate(ptr::null());
+                    let mut limits = (*parser).config.limits.clone();
+                    limits.max_token_bytes = limit;
+                    (*parser).core.set_limits(limits).unwrap();
+                    let mut calls = 0usize;
+                    XML_SetUnknownEncodingHandler(
+                        parser,
+                        Some(encoding),
+                        ptr::from_mut(&mut calls).cast(),
+                    );
+                    let mut status = OK;
+                    for (index, bytes) in document.chunks(width).enumerate() {
+                        let final_input = c_int::from((index + 1) * width >= document.len());
+                        status = if buffered {
+                            let buffer = XML_GetBuffer(parser, bytes.len() as c_int);
+                            assert!(!buffer.is_null());
+                            ptr::copy_nonoverlapping(bytes.as_ptr(), buffer.cast(), bytes.len());
+                            XML_ParseBuffer(parser, bytes.len() as c_int, final_input)
+                        } else {
+                            XML_Parse(
+                                parser,
+                                bytes.as_ptr().cast(),
+                                bytes.len() as c_int,
+                                final_input,
+                            )
+                        };
+                        if status != OK {
+                            break;
+                        }
+                    }
+                    let allowed = limit == declaration.len();
+                    assert_eq!(status, if allowed { OK } else { ERROR });
+                    assert_eq!(XML_GetErrorCode(parser), if allowed { 0 } else { 43 });
+                    assert_eq!(calls, usize::from(allowed));
+                    XML_ParserFree(parser);
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn source_bound_preflight_preserves_family_and_input_storage() {
     // SAFETY: The handles and buffers belong to this test. Lower only the core
     // allowance so the per-source preflight rejects before family mutation.

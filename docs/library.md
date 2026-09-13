@@ -50,23 +50,11 @@ large-token protections, and the limits required when a caller decompresses inpu
 
 ## Python API
 
-The [`xeme_python` crate](../crates/xeme_python/) provides an independently
-installable `xeme` Python package backed by PyO3. Install it from this checkout
-with `uv pip install .`, then feed bytes and consume owned events:
-
-```python
-from xeme import Parser
-
-parser = Parser()
-parser.feed(b"<message>Hello</message>", final=True)
-for event in parser.read_events():
-    print(event.kind, event.data)
-```
-
-The package exposes namespace options, configurable limits, source positions,
-and structured parse errors. Its event API is separate from `pyexpat`'s callback
-interface. See its [documentation](../crates/xeme_python/README.md) for supported
-events, incremental input, and external-entity restrictions.
+The `xeme` Python package parses bytes incrementally into events, with namespace
+options, resource limits, and source positions. Install it from this checkout
+with `uv pip install .`. See the [Python API guide](../crates/xeme_python/README.md)
+for examples and supported events. This API is separate from `pyexpat`'s callback
+interface.
 
 ## Expat consumers
 

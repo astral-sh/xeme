@@ -1,12 +1,10 @@
 //! Python's streaming event interface to the safe Xeme parser.
 #![forbid(unsafe_code)]
 
-use pyo3::PyTraverseError;
-use pyo3::PyVisit;
 use pyo3::exceptions::{PyException, PyMemoryError, PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyDict};
-use pyo3::{IntoPyObjectExt, create_exception};
+use pyo3::{IntoPyObjectExt, PyTraverseError, PyVisit, create_exception};
 use xeme::{Config, Error, ErrorKind, EventKind};
 
 create_exception!(
@@ -147,8 +145,7 @@ impl PyEvent {
 }
 
 impl PyEvent {
-    /// Copy only public events into ordinary owned Python values.
-    fn from_event(py: Python<'_>, event: xeme::Event) -> PyResult<Option<Self>> {
+    fn from_event(py: Python<'_>, event: xeme::Event) -> PyResult<Option<Py<Self>>> {
         let (kind, data) = match event.kind {
             EventKind::StartElement { name, attributes } => {
                 let attrs = PyDict::new(py);
@@ -206,11 +203,14 @@ impl PyEvent {
             | EventKind::SkippedEntity { .. }
             | EventKind::ExternalEntityReference(_) => return Ok(None),
         };
-        Ok(Some(Self {
-            kind,
-            data,
-            position: event.position.into(),
-        }))
+        Ok(Some(Py::new(
+            py,
+            Self {
+                kind,
+                data,
+                position: event.position.into(),
+            },
+        )?))
     }
 }
 
@@ -221,6 +221,13 @@ struct PyParser {
     needs_drain: bool,
     final_input: bool,
     error: Option<Error>,
+}
+
+impl PyParser {
+    fn fail(&mut self, py: Python<'_>, error: Error) -> PyErr {
+        self.error = Some(error);
+        python_error(py, error)
+    }
 }
 
 #[pymethods]
@@ -236,16 +243,11 @@ impl PyParser {
         limits: Option<PyRef<'_, PyLimits>>,
     ) -> PyResult<Self> {
         let separator = namespace_separator
-            .map(|separator| {
-                let mut chars = separator.chars();
-                match (chars.next(), chars.next()) {
-                    (Some(char), None) => Ok(char),
-                    _ => Err(PyValueError::new_err(
-                        "namespace_separator must be exactly one character",
-                    )),
-                }
-            })
-            .transpose()?;
+            .map(str::parse::<char>)
+            .transpose()
+            .map_err(|_| {
+                PyValueError::new_err("namespace_separator must be exactly one character")
+            })?;
         if namespace_triplets && separator.is_none() {
             return Err(PyValueError::new_err(
                 "namespace_triplets requires namespace_separator",
@@ -288,10 +290,9 @@ impl PyParser {
                 "drain read_events() before feeding more input",
             ));
         }
-        if let Err(error) = self.parser.feed(data.as_bytes(), r#final) {
-            self.error = Some(error);
-            return Err(python_error(py, error));
-        }
+        self.parser
+            .feed(data.as_bytes(), r#final)
+            .map_err(|error| self.fail(py, error))?;
         self.needs_drain = true;
         self.final_input = r#final;
         Ok(())
@@ -303,16 +304,13 @@ impl PyParser {
             return Err(python_error(py, error));
         }
         loop {
-            let event = match self.parser.next_event() {
-                Ok(Some(event)) => event,
-                Ok(None) => {
-                    self.needs_drain = false;
-                    return Ok(None);
-                }
-                Err(error) => {
-                    self.error = Some(error);
-                    return Err(python_error(py, error));
-                }
+            let Some(event) = self
+                .parser
+                .next_event()
+                .map_err(|error| self.fail(py, error))?
+            else {
+                self.needs_drain = false;
+                return Ok(None);
             };
             // This package cannot resolve external resources. Reject requests before
             // advancing the engine, including external subsets otherwise skipped by default.
@@ -329,13 +327,10 @@ impl PyParser {
                     message: "external entities are not supported by the Python API",
                     position: event.position,
                 };
-                self.error = Some(error);
-                return Err(python_error(py, error));
+                return Err(self.fail(py, error));
             }
             let position = event.position;
-            let converted = PyEvent::from_event(py, event)
-                .and_then(|event| event.map(|event| Py::new(py, event)).transpose());
-            match converted {
+            match PyEvent::from_event(py, event) {
                 Ok(Some(event)) => return Ok(Some(event)),
                 Ok(None) => continue,
                 Err(error) => {

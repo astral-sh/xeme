@@ -1,7 +1,6 @@
 # Xeme for Python
 
-Xeme parses XML incrementally and exposes owned events through a PyO3 extension
-over the safe Rust parser. It supports Python 3.10 and later.
+Xeme is an incremental XML parser for Python 3.10 and later.
 
 ## Install from a checkout
 
@@ -30,27 +29,13 @@ for event in parser.read_events():
 # end message
 ```
 
-Feed `bytes`, then fully consume `read_events()` before feeding another chunk.
+Feed `bytes` in chunks, fully consuming the `read_events()` iterator after each
+chunk. Set `final=True` on the last chunk, which may be empty. Feeding before
+consuming all events raises `RuntimeError`; feeding after final input raises
+`ValueError`. Create a new parser for each document.
+
 Events can be retained after subsequent input. Text may be split across events;
 concatenate adjacent text events if your application needs a single string.
-
-For a file, feed chunks and finish with an empty final chunk:
-
-```python
-parser = Parser()
-with open("document.xml", "rb") as source:
-    for chunk in iter(lambda: source.read(64 * 1024), b""):
-        parser.feed(chunk)
-        for event in parser.read_events():
-            print(event.kind, event.data)
-parser.feed(b"", final=True)
-for event in parser.read_events():
-    print(event.kind, event.data)
-```
-
-`read_events()` is a lazy iterator. Feeding while its events remain raises
-`RuntimeError`. After final input, further `feed()` calls raise `ValueError`.
-Create a new parser for each document.
 
 ## Events and positions
 
@@ -71,8 +56,7 @@ attributes are an ordinary Python dictionary, independent of the parser.
 | `end_doctype` | `None` |
 
 `event.position` has `line` (one-based), `column` (zero-based), `byte_index`
-(zero-based input offset), and `byte_count` (input span length). The native
-extension and public Python wrapper include type annotations.
+(zero-based input offset), and `byte_count` (input span length).
 
 ## Configuration and errors
 
@@ -115,7 +99,7 @@ original document.
 | `max_entities` | 10,000 |
 
 `ParseError` reports malformed XML, unsupported encodings, and exceeded limits.
-Its `kind` is a Rust error-kind name such as `TagMismatch`; its other properties
+Its `kind` is a name such as `TagMismatch`; `line`, `column`, and `byte_index`
 identify the error location. It can arise during `feed()` or `read_events()`.
 Parse errors are terminal: subsequent operations raise the stored error.
 Allocation failures raise `MemoryError` and also leave the parser unusable.
@@ -132,16 +116,4 @@ The Python event API is separate from `xml.parsers.expat`'s callback API and is
 not a drop-in replacement. The [C interface](../xeme_expat/) and
 [CPython consumer harness](../../tools/cpython/) cover existing Expat consumers.
 
-## Development
-
-After installation, run the tests from the repository root:
-
-```console
-uv run --no-sync python -m unittest discover -s crates/xeme_python/tests -v
-uv build --wheel --out-dir dist
-uv build --sdist --out-dir dist
-```
-
-Reinstall with `uv pip install --reinstall .` after changing Rust code. CI builds
-and installs wheels on Linux, macOS, and Windows and checks a source-distribution
-roundtrip on Linux.
+See [contributing](../../CONTRIBUTING.md#python-bindings) for build and test commands.

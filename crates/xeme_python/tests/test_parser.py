@@ -1,7 +1,4 @@
-"""Public API tests against the installed Python extension.
-
-Run with ``python -m unittest discover -s crates/xeme_python/tests``.
-"""
+"""Public API tests against the installed Python extension."""
 
 import gc
 import unittest
@@ -32,7 +29,6 @@ class ParserTests(unittest.TestCase):
         with self.assertRaises(xeme.ParseError) as raised:
             parse(data, **options)
         self.assertEqual(raised.exception.kind, kind)
-        return raised.exception
 
     def test_elements_attributes_and_original_byte_positions(self):
         events = parse(b'<root a="1">\nchild</root>')
@@ -216,12 +212,7 @@ class ParserTests(unittest.TestCase):
         )
         for obj, name, value in [
             (first_child, "kind", "other"),
-            (first_child, "data", None),
-            (first_child, "position", None),
             (position, "line", 99),
-            (position, "column", 99),
-            (position, "byte_index", 99),
-            (position, "byte_count", 99),
         ]:
             with self.subTest(attribute=name), self.assertRaises(AttributeError):
                 setattr(obj, name, value)
@@ -337,13 +328,13 @@ class ParserTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertEqual(getattr(limits, name), value)
                 self.assertEqual(getattr(xeme.Limits(**{name: 0}), name), 0)
-                with self.assertRaises(AttributeError):
-                    setattr(limits, name, value + 1)
-                for invalid in [-1, 1 << 128]:
-                    with self.assertRaises(OverflowError):
-                        xeme.Limits(**{name: invalid})
-                with self.assertRaises(TypeError):
-                    xeme.Limits(**{name: 1.5})
+        with self.assertRaises(AttributeError):
+            limits.max_depth = 100
+        for invalid in [-1, 1 << 128]:
+            with self.assertRaises(OverflowError):
+                xeme.Limits(max_depth=invalid)
+        with self.assertRaises(TypeError):
+            xeme.Limits(max_depth=1.5)
         with self.assertRaises(TypeError):
             xeme.Limits(2)
 

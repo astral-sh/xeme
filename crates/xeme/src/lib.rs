@@ -477,7 +477,49 @@ impl TryClone for DefaultAttributes {
     }
 }
 
+impl DefaultAttribute {
+    /// Copy imported strings into the receiving parser's allocator.
+    fn clone_in(&self, allocator: Allocator) -> Result<Self, AllocError> {
+        Ok(Self {
+            name: String::try_from_str_in(&self.name, allocator)?,
+            attribute_type: String::try_from_str_in(&self.attribute_type, allocator)?,
+            value: self
+                .value
+                .as_deref()
+                .map(|value| String::try_from_str_in(value, allocator))
+                .transpose()?,
+        })
+    }
+}
+
 impl Entity {
+    /// Copy imported storage while preserving the declaration's shared open flag.
+    fn clone_in(&self, allocator: Allocator) -> Result<Self, AllocError> {
+        let copy = |value: &Option<String>| {
+            value
+                .as_deref()
+                .map(|value| String::try_from_str_in(value, allocator))
+                .transpose()
+        };
+        Ok(Self {
+            base: self
+                .base
+                .as_ref()
+                .map(|base| {
+                    let mut bytes = Vec::new_in(allocator);
+                    xeme_storage::try_extend_from_slice(&mut bytes, base)?;
+                    Shared::try_new_in(bytes, allocator)
+                })
+                .transpose()?,
+            value: copy(&self.value)?,
+            system_id: copy(&self.system_id)?,
+            public_id: copy(&self.public_id)?,
+            notation: copy(&self.notation)?,
+            declared_in_parameter_entity: self.declared_in_parameter_entity,
+            value_open: self.value_open.clone(),
+        })
+    }
+
     fn is_value_open(&self) -> bool {
         self.value_open
             .as_ref()
@@ -1272,7 +1314,60 @@ impl Parser {
         Ok(())
     }
 
+    /// Charge only new declarations before copying an unrelated DTD into this family.
+    fn charge_dtd_import(&self, tables: &DtdTables) -> Result<(), Error> {
+        for (source, destination) in [
+            (&tables.entities, &self.tables.entities),
+            (&tables.parameter_entities, &self.tables.parameter_entities),
+        ] {
+            for (name, entity) in source {
+                if destination.contains_key(name) {
+                    continue;
+                }
+                self.charge_expansion(size_of::<(String, Entity)>())?;
+                self.charge_expansion(name.len())?;
+                if let Some(base) = &entity.base {
+                    self.charge_expansion(size_of::<Vec<u8>>())?;
+                    self.charge_expansion(base.len())?;
+                }
+                for value in [
+                    &entity.value,
+                    &entity.system_id,
+                    &entity.public_id,
+                    &entity.notation,
+                ]
+                .into_iter()
+                .flatten()
+                {
+                    self.charge_expansion(value.len())?;
+                }
+            }
+        }
+        for (name, attributes) in &tables.defaults {
+            let existing = self.tables.defaults.get(name);
+            if existing.is_none() {
+                self.charge_expansion(size_of::<(String, DefaultAttributes)>())?;
+                self.charge_expansion(name.len())?;
+            }
+            for attribute in &attributes.ordered {
+                if existing.is_some_and(|attributes| attributes.get(&attribute.name).is_some()) {
+                    continue;
+                }
+                self.charge_expansion(size_of::<DefaultAttribute>())?;
+                self.charge_expansion(size_of::<(String, usize)>())?;
+                self.charge_expansion(attribute.name.len())?;
+                self.charge_expansion(attribute.name.len())?;
+                self.charge_expansion(attribute.attribute_type.len())?;
+                if let Some(value) = &attribute.value {
+                    self.charge_expansion(value.len())?;
+                }
+            }
+        }
+        Ok(())
+    }
+
     fn import_dtd_tables(&mut self, tables: &DtdTables) -> Result<(), Error> {
+        self.charge_dtd_import(tables)?;
         for (name, entity) in &tables.entities {
             if !self.tables.entities.contains_key(name) {
                 if self.tables.entities.len() + self.tables.parameter_entities.len()
@@ -1285,8 +1380,8 @@ impl Parser {
                 }
                 try_insert(
                     &mut self.tables.entities,
-                    name.try_clone()?,
-                    entity.try_clone()?,
+                    string(name, self.allocator)?,
+                    entity.clone_in(self.allocator)?,
                 )?;
             }
         }
@@ -1302,8 +1397,8 @@ impl Parser {
                 }
                 try_insert(
                     &mut self.tables.parameter_entities,
-                    name.try_clone()?,
-                    entity.try_clone()?,
+                    string(name, self.allocator)?,
+                    entity.clone_in(self.allocator)?,
                 )?;
             }
         }
@@ -1312,7 +1407,7 @@ impl Parser {
             if !self.tables.defaults.contains_key(name) {
                 try_insert(
                     &mut self.tables.defaults,
-                    name.try_clone()?,
+                    string(name, self.allocator)?,
                     DefaultAttributes::new(self.allocator, self.tables.salt),
                 )?;
             }
@@ -1329,7 +1424,7 @@ impl Parser {
                             "default attribute count limit exceeded",
                         ));
                     }
-                    target.try_insert(attribute.try_clone()?)?;
+                    target.try_insert(attribute.clone_in(self.allocator)?)?;
                     self.tables.max_default_attributes =
                         self.tables.max_default_attributes.max(target.ordered.len());
                 }

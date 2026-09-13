@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build real CPython XML extensions against Oriole and run upstream tests.
+"""Build real CPython XML extensions against Xeme and run upstream tests.
 
 Run with a CPython 3.12.13 interpreter and its development headers. Sources are
 pinned and never edited in place. Optional consumer adaptations are recorded
@@ -164,16 +164,16 @@ def main() -> int:
             marker
             + """
 
-/* Explicit Oriole opt-in: parser storage uses the Rust system allocator. */
+/* Explicit Xeme opt-in: parser storage uses the Rust system allocator. */
 static XML_Parser
-oriole_create_system(const XML_Char *encoding,
+xeme_create_system(const XML_Char *encoding,
                      const XML_Memory_Handling_Suite *suite,
                      const XML_Char *separator)
 {
     (void)suite;
     return XML_ParserCreate_MM(encoding, NULL, separator);
 }
-#define XML_ParserCreate_MM oriole_create_system
+#define XML_ParserCreate_MM xeme_create_system
 """,
         )
     adapted = output / "pyexpat.c"

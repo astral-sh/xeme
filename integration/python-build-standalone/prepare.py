@@ -44,7 +44,7 @@ def sources() -> dict[str, str]:
             "integration/python-build-standalone/consumer-fix/provenance.json",
         )
     ]
-    for crate in ("oriole", "oriole_storage", "oriole_expat"):
+    for crate in ("xeme", "xeme_storage", "xeme_expat"):
         paths.extend((ROOT / "crates" / crate).rglob("*.rs"))
         paths.append(ROOT / "crates" / crate / "Cargo.toml")
     return {str(path.relative_to(ROOT)): digest(path) for path in sorted(paths)}
@@ -83,7 +83,7 @@ def main() -> None:
     output = args.output.resolve()
     if args.pgo:
         if output.is_relative_to(ROOT) or ROOT.is_relative_to(output):
-            parser.error("PGO output must be outside the Oriole source tree")
+            parser.error("PGO output must be outside the Xeme source tree")
     output.mkdir(parents=True, exist_ok=False)
     before = sources()
     config_before = pgo_bundle.build.cargo_configs(ROOT, dict(os.environ))
@@ -106,7 +106,7 @@ def main() -> None:
         "--target",
         TARGET,
         "-p",
-        "oriole_expat",
+        "xeme_expat",
         "--lib",
         "--crate-type",
         "cdylib,staticlib",
@@ -145,7 +145,7 @@ def main() -> None:
     sys.stdout.write(result.stdout)
     result.check_returncode()
     pgo = None
-    archive = target_dir / TARGET / "release/liboriole_expat.a"
+    archive = target_dir / TARGET / "release/libxeme_expat.a"
     if args.pgo:
         archive, libraries, pgo, command = pgo_bundle.verify(
             pgo_output, ROOT, env, args.toolchain, args.cargo_arg, target_cpu
@@ -181,13 +181,13 @@ def main() -> None:
             raise RuntimeError(f"native linker arguments need review: {libraries!r}")
     if sources() != before:
         raise RuntimeError(
-            "Oriole sources changed during the build; discard this bundle and retry"
+            "Xeme sources changed during the build; discard this bundle and retry"
         )
     shutil.copyfile(archive, output / "libexpat.a")
     if pgo is not None:
         pgo_bundle.require(
             digest(output / "libexpat.a")
-            == pgo["manifest"]["libraries_sha256"]["use/liboriole_expat.a"],
+            == pgo["manifest"]["libraries_sha256"]["use/libxeme_expat.a"],
             "Copied PBS PGO archive checksum mismatch",
         )
     # Only an optional weak reference can safely select Rust's null-hook path.
@@ -220,8 +220,8 @@ def main() -> None:
     api_version = ".".join(version_parts)
     (output / "expat.pc").write_text(
         "prefix=/tools/deps\nexec_prefix=${prefix}\nlibdir=${prefix}/lib\nincludedir=${prefix}/include\n"
-        "implementation=oriole\n\nName: Oriole Expat interface\n"
-        "Description: Experimental Oriole implementation of the Expat C ABI\n"
+        "implementation=xeme\n\nName: Xeme Expat interface\n"
+        "Description: Experimental Xeme implementation of the Expat C ABI\n"
         f"Version: {api_version}\nLibs: -L${{libdir}} -lexpat\n"
         f"Libs.private: {' '.join(libraries)}\nCflags: -I${{includedir}}\n"
     )
@@ -245,7 +245,7 @@ def main() -> None:
     pending = [
         package_id
         for package_id, package in packages.items()
-        if package["name"] == "oriole_expat"
+        if package["name"] == "xeme_expat"
     ]
     used = set()
     while pending:
@@ -290,7 +290,7 @@ def main() -> None:
     for path in sorted((sysroot / "share/doc/rust/licenses").glob("*")):
         if path.is_file():
             notices.append(f"\n=== Rust / {path.name} ===\n{path.read_text()}")
-    (output / "LICENSE.oriole.txt").write_text("\n".join(notices))
+    (output / "LICENSE.xeme.txt").write_text("\n".join(notices))
     rustc_version = subprocess.check_output([*rustc, "-vV"], text=True)
     if pgo is not None:
         pgo_bundle.require(
@@ -307,7 +307,7 @@ def main() -> None:
     if pgo_bundle.build.cargo_configs(ROOT, env) != config_before:
         raise RuntimeError("Cargo configuration changed during packaging")
     if sources() != before:
-        raise RuntimeError("Oriole bundle inputs changed during packaging")
+        raise RuntimeError("Xeme bundle inputs changed during packaging")
     manifest = {
         "format": 1,
         "pbs_revision": PBS_REVISION,
@@ -321,7 +321,7 @@ def main() -> None:
         "implementation_version": next(
             package["version"]
             for package in packages.values()
-            if package["name"] == "oriole_expat"
+            if package["name"] == "xeme_expat"
         ),
         "rustc": rustc_version,
         "command": command,
@@ -335,7 +335,7 @@ def main() -> None:
                 "expat.h",
                 "expat.pc",
                 "native-static-libs.txt",
-                "LICENSE.oriole.txt",
+                "LICENSE.xeme.txt",
                 "cpython-external-parser.patch",
             )
         },

@@ -21,7 +21,7 @@ import projects
 
 def fixture() -> dict:
     durations = {
-        "oriole": [1.0, 100.0, 3.0],
+        "xeme": [1.0, 100.0, 3.0],
         "baseline": [1.0, 2.0, 3.0],
         "expat": [2.0, 4.0, 6.0],
     }
@@ -58,7 +58,7 @@ class FreshBuildTests(unittest.TestCase):
         checkout.mkdir()
         (checkout / "Cargo.toml").write_text("workspace")
         (checkout / "Cargo.lock").write_text("locked")
-        for crate in ["oriole_storage", "oriole", "oriole_expat"]:
+        for crate in ["xeme_storage", "xeme", "xeme_expat"]:
             source = checkout / "crates" / crate / "src/lib.rs"
             source.parent.mkdir(parents=True)
             source.write_text(name)
@@ -69,7 +69,7 @@ class FreshBuildTests(unittest.TestCase):
         )
 
     def compiler_log(self, stream, checkout: Path, intermediates: Path):
-        for crate in ["oriole_storage", "oriole", "oriole_expat"]:
+        for crate in ["xeme_storage", "xeme", "xeme_expat"]:
             command = [
                 f"CARGO_MANIFEST_DIR={checkout / 'crates' / crate}",
                 "rustc",
@@ -98,7 +98,7 @@ class FreshBuildTests(unittest.TestCase):
                 stream.getvalue(), args.checkout, intermediates
             )
             self.assertEqual(
-                set(compiled), {"oriole_storage", "oriole", "oriole_expat"}
+                set(compiled), {"xeme_storage", "xeme", "xeme_expat"}
             )
 
     def test_distinct_sources_cannot_reuse_the_shared_intermediate_artifact(self):
@@ -114,7 +114,7 @@ class FreshBuildTests(unittest.TestCase):
             def compiler(command, *, cwd, env, stdout, **kwargs):
                 target = (
                     Path(command[command.index("--target-dir") + 1])
-                    / "release/liboriole_expat.so"
+                    / "release/libxeme_expat.so"
                 )
                 target.parent.mkdir(parents=True, exist_ok=True)
                 self.assertNotIn("RUSTC", env)
@@ -122,13 +122,13 @@ class FreshBuildTests(unittest.TestCase):
                 intermediate = Path(env["CARGO_BUILD_BUILD_DIR"])
                 if intermediate == shared:
                     stdout.write(
-                        "Fresh oriole_storage\nFresh oriole\nFresh oriole_expat\n"
+                        "Fresh xeme_storage\nFresh xeme\nFresh xeme_expat\n"
                     )
                     target.write_bytes(cached.read_bytes())
                 else:
                     self.assertEqual(list(intermediate.iterdir()), [])
                     self.compiler_log(stdout, cwd, intermediate)
-                    target.write_bytes((cwd / "crates/oriole/src/lib.rs").read_bytes())
+                    target.write_bytes((cwd / "crates/xeme/src/lib.rs").read_bytes())
 
             with (
                 patch.dict(
@@ -146,10 +146,10 @@ class FreshBuildTests(unittest.TestCase):
                 hillclimb.build(candidate)
                 self.assertEqual(os.environ["CARGO_BUILD_BUILD_DIR"], str(shared))
             self.assertEqual(
-                (baseline.output / "liboriole_expat.so").read_bytes(), b"baseline"
+                (baseline.output / "libxeme_expat.so").read_bytes(), b"baseline"
             )
             self.assertEqual(
-                (candidate.output / "liboriole_expat.so").read_bytes(), b"candidate"
+                (candidate.output / "libxeme_expat.so").read_bytes(), b"candidate"
             )
             self.assertEqual(cached.read_bytes(), b"wrong candidate cache")
             for args in [baseline, candidate]:
@@ -157,7 +157,7 @@ class FreshBuildTests(unittest.TestCase):
                 self.assertEqual(report["status"], "passed")
                 self.assertEqual(
                     set(report["workspace_compilations"]),
-                    {"oriole_storage", "oriole", "oriole_expat"},
+                    {"xeme_storage", "xeme", "xeme_expat"},
                 )
 
     def test_cached_or_foreign_workspace_commands_cannot_pass(self):
@@ -168,7 +168,7 @@ class FreshBuildTests(unittest.TestCase):
                 def compiler(command, *, cwd, env, stdout, mode=mode, **kwargs):
                     if mode == "cached":
                         stdout.write(
-                            "Fresh oriole_storage\nFresh oriole\nFresh oriole_expat\n"
+                            "Fresh xeme_storage\nFresh xeme\nFresh xeme_expat\n"
                         )
                     else:
                         self.compiler_log(
@@ -189,7 +189,7 @@ class FreshBuildTests(unittest.TestCase):
                     json.loads((args.output / "build.json").read_text())["status"],
                     "failed",
                 )
-                self.assertFalse((args.output / "liboriole_expat.so").exists())
+                self.assertFalse((args.output / "libxeme_expat.so").exists())
 
 
 class BuildBindingTests(unittest.TestCase):
@@ -317,7 +317,7 @@ class SummaryTests(unittest.TestCase):
             spec.write_text(
                 json.dumps(
                     {
-                        "libraries": {"oriole": "a", "expat": "b", "baseline": "c"},
+                        "libraries": {"xeme": "a", "expat": "b", "baseline": "c"},
                         "input": str(data),
                         "chunk": 4096,
                         "namespaces": False,

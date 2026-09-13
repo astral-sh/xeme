@@ -217,7 +217,7 @@ def main():
     parser.add_argument("--reference", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
-        "--worker", choices=("oriole", "reference"), help=argparse.SUPPRESS
+        "--worker", choices=("xeme", "reference"), help=argparse.SUPPRESS
     )
     args = parser.parse_args()
     SUITE = args.suite.resolve(strict=True)
@@ -271,7 +271,7 @@ def main():
         resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
 
     all_rows = {}
-    for label, library in (("reference", args.reference), ("oriole", args.library)):
+    for label, library in (("reference", args.reference), ("xeme", args.library)):
         command = [
             sys.executable,
             str(Path(__file__).resolve()),
@@ -352,14 +352,14 @@ def main():
         }
         report["mismatches"][label] = failed
         report["inconclusive"][label] = inconclusive
-    pairs = list(zip(all_rows["reference"], all_rows["oriole"], strict=True))
+    pairs = list(zip(all_rows["reference"], all_rows["xeme"], strict=True))
     report["inconclusive_comparisons"] = [
-        {"reference": left, "oriole": right}
+        {"reference": left, "xeme": right}
         for left, right in pairs
         if left["result"]["resolver_errors"] or right["result"]["resolver_errors"]
     ]
     report["acceptance_differences"] = [
-        {"reference": left, "oriole": right}
+        {"reference": left, "xeme": right}
         for left, right in pairs
         if not left["result"]["resolver_errors"]
         and not right["result"]["resolver_errors"]

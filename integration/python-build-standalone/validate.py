@@ -65,7 +65,7 @@ def validate_archive_recipe() -> None:
         assert cargo_arguments[cargo_arguments.index("--target") + 1] == (
             "x86_64-unknown-linux-gnu"
         )
-        assert cargo_arguments[cargo_arguments.index("-p") + 1] == "oriole_expat"
+        assert cargo_arguments[cargo_arguments.index("-p") + 1] == "xeme_expat"
         assert arguments[separator + 1 :] == ["--print=native-static-libs"]
     print(
         "Archive recipe: C-only Cargo targets, release/locked host, native link flags."
@@ -94,7 +94,7 @@ def validate_source_selection(checkout: Path, pbs: Path) -> dict:
         subprocess.check_output(
             [sys.executable, "-c", probe],
             cwd=checkout,
-            env={**environment, "PYBUILD_ORIOLE_BUNDLE": "fixture"},
+            env={**environment, "PYBUILD_XEME_BUNDLE": "fixture"},
         )
     )
     expected = {
@@ -176,7 +176,7 @@ def main() -> None:
     )
     args = parser.parse_args()
     validate_archive_recipe()
-    with tempfile.TemporaryDirectory(prefix="oriole-pbs-validation-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="xeme-pbs-validation-") as temporary:
         checkout = Path(temporary) / "pbs"
         checkout.mkdir()
         for name in (
@@ -224,7 +224,7 @@ def main() -> None:
             node
             for node in tree.body
             if isinstance(node, ast.FunctionDef)
-            and node.name == "install_oriole_overlay"
+            and node.name == "install_xeme_overlay"
         )
         namespace = {
             "os": os,
@@ -241,7 +241,7 @@ def main() -> None:
             compile(ast.Module(body=[function], type_ignores=[]), "overlay", "exec"),
             namespace,
         )
-        install = namespace["install_oriole_overlay"]
+        install = namespace["install_xeme_overlay"]
         assert callable(install)
 
         class Environment:
@@ -273,7 +273,7 @@ def main() -> None:
             "expat.h": b"fixture header",
             "expat.pc": b"fixture pkg-config",
             "native-static-libs.txt": b"-lgcc_s -lpthread -ldl -lm -lc\n",
-            "LICENSE.oriole.txt": b"fixture notices",
+            "LICENSE.xeme.txt": b"fixture notices",
             "cpython-external-parser.patch": (
                 DIRECTORY / "consumer-fix/cpython-3.12.13-external-parser.patch"
             ).read_bytes(),
@@ -293,7 +293,7 @@ def main() -> None:
             (bundle / name).write_bytes(data)
         (bundle / "manifest.json").write_text(json.dumps(manifest))
         with (
-            patch.dict(os.environ, {"PYBUILD_ORIOLE_BUNDLE": str(bundle)}, clear=True),
+            patch.dict(os.environ, {"PYBUILD_XEME_BUNDLE": str(bundle)}, clear=True),
             patch.object(platform, "system", return_value="Linux"),
         ):
             install(
@@ -306,15 +306,15 @@ def main() -> None:
             assert env.copies["/tools/deps/lib", "libexpat.a"] == files["libexpat.a"]
             assert env.copies["/tools/deps/include", "expat.h"] == files["expat.h"]
             assert (
-                env.copies["/tools/deps/share/oriole", "cpython-external-parser.patch"]
+                env.copies["/tools/deps/share/xeme", "cpython-external-parser.patch"]
                 == files["cpython-external-parser.patch"]
             )
             assert (
-                namespace["DOWNLOADS"]["expat"]["license_file"] == "LICENSE.oriole.txt"
+                namespace["DOWNLOADS"]["expat"]["license_file"] == "LICENSE.xeme.txt"
             )
             shell = (checkout / "cpython-unix/build-cpython.sh").read_text()
             block = shell[
-                shell.index("# Oriole's optional overlay") : shell.index(
+                shell.index("# Xeme's optional overlay") : shell.index(
                     "# configure somehow"
                 )
             ]
@@ -333,7 +333,7 @@ def main() -> None:
             )
             assert unchanged.splitlines() == ["original-cflags", "original-ldflags"]
             (tools / "deps/lib").mkdir(parents=True)
-            (tools / "deps/lib/oriole-native-static-libs.txt").write_bytes(
+            (tools / "deps/lib/xeme-native-static-libs.txt").write_bytes(
                 files["native-static-libs.txt"]
             )
             configured = subprocess.check_output(
@@ -351,7 +351,7 @@ def main() -> None:
                     cpython / "Modules/pyexpat.c", consumer / "Modules/pyexpat.c"
                 )
                 backport = shell[
-                    shell.index("# Oriole's bounded allocations") : shell.index(
+                    shell.index("# Xeme's bounded allocations") : shell.index(
                         "# configure doesn't support cross-compiling on Apple."
                     )
                 ]
@@ -364,8 +364,8 @@ def main() -> None:
                     check=True,
                 )
                 assert (consumer / "Modules/pyexpat.c").read_bytes() == original
-                (tools / "deps/share/oriole").mkdir(parents=True)
-                (tools / "deps/share/oriole/cpython-external-parser.patch").write_bytes(
+                (tools / "deps/share/xeme").mkdir(parents=True)
+                (tools / "deps/share/xeme/cpython-external-parser.patch").write_bytes(
                     files["cpython-external-parser.patch"]
                 )
                 subprocess.run(
@@ -402,7 +402,7 @@ def main() -> None:
                 accepted = Environment()
                 install(accepted, "linux_x86_64", target, "3.12.13", "noopt")
                 installed = json.loads(
-                    accepted.copies["/build", "LICENSE.oriole-build.txt"]
+                    accepted.copies["/build", "LICENSE.xeme-build.txt"]
                 )
                 pbs_target.validate(installed, target)
                 for key, value in [

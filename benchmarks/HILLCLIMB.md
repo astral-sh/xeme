@@ -21,7 +21,7 @@ study directory; build and measurement commands refuse to overwrite existing
 outputs.
 
 ```sh
-benchmark_root="$PWD/../oriole-bench"
+benchmark_root="$PWD/../xeme-bench"
 study="$benchmark_root/study-001"
 mkdir -p "$study"
 export CARGO_BUILD_BUILD_DIR="$benchmark_root/shared-build"
@@ -56,7 +56,7 @@ its exact source; hashes also identify uncommitted experiments.
 ## 2. Build the pinned Expat control once
 
 Keep this normal GCC O3 build unchanged across candidates. Expat uses its own
-normal build configuration, without LTO; Oriole's recipe is the one above. Use the
+normal build configuration, without LTO; Xeme's recipe is the one above. Use the
 same GCC version throughout a study and retain its version and CMake cache.
 
 ```sh
@@ -84,8 +84,8 @@ frequency, caches or memory bandwidth from other users.
 
 ```sh
 python3 -I -S benchmarks/hillclimb.py run --mode screen --cpu 0 \
-  --baseline "$study/baseline/liboriole_expat.so" \
-  --candidate "$study/candidate/liboriole_expat.so" --expat "$expat" \
+  --baseline "$study/baseline/libxeme_expat.so" \
+  --candidate "$study/candidate/libxeme_expat.so" --expat "$expat" \
   --baseline-build "$study/baseline/build.json" \
   --candidate-build "$study/candidate/build.json" \
   --build-manifest "$benchmark_root/expat-build/CMakeCache.txt" \
@@ -96,7 +96,7 @@ A screen uses three rounds and three measured parses per process after a discard
 warmup. It covers every condition; it is a quick rejection signal, not evidence
 for a small improvement. Every parser must pass the same complete normalized
 callback checks, and every timed parse must match its expected output hash.
-Both Oriole build records must report success and match their supplied library
+Both Xeme build records must report success and match their supplied library
 SHA-256; failed, stale or swapped records stop the run. Python targets use isolated
 mode with site initialization disabled, and target child processes clear loader
 overrides (`LD_PRELOAD`, `LD_LIBRARY_PATH` and `LD_AUDIT`).
@@ -114,14 +114,14 @@ git -C "$benchmark_root/cpython-source" checkout --detach \
   3bb231a6a5dc02b95658877318bf61501a7209e9
 
 "$python312" -I -S benchmarks/build_project_consumers.py \
-  --library "$study/candidate/liboriole_expat.so" \
-  --baseline "$study/baseline/liboriole_expat.so" --reference "$expat" \
+  --library "$study/candidate/libxeme_expat.so" \
+  --baseline "$study/baseline/libxeme_expat.so" --reference "$expat" \
   --source "$benchmark_root/cpython-source" --header include \
   --output "$study/consumers"
 
 python3 -I -S benchmarks/hillclimb.py run --mode confirm --cpu 0 \
-  --baseline "$study/baseline/liboriole_expat.so" \
-  --candidate "$study/candidate/liboriole_expat.so" --expat "$expat" \
+  --baseline "$study/baseline/libxeme_expat.so" \
+  --candidate "$study/candidate/libxeme_expat.so" --expat "$expat" \
   --python "$python312" --consumers "$study/consumers/build.json" \
   --baseline-build "$study/baseline/build.json" \
   --candidate-build "$study/candidate/build.json" \

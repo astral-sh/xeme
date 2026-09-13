@@ -1,6 +1,6 @@
 # Experimental python-build-standalone integration
 
-This recipe overlays Oriole's static archive and public header in the CPython build
+This recipe overlays Xeme's static archive and public header in the CPython build
 container for [PBS revision `a4553880`](https://github.com/astral-sh/python-build-standalone/tree/a4553880293fe9d1bb62747d34ab0e5121d3554f).
 It is opt-in and supports CPython **3.12.13**, a Linux x86_64 host,
 the generic `x86_64-unknown-linux-gnu` target, an explicit
@@ -14,11 +14,11 @@ archives retain PBS's normal filenames and must not enter the release artifact p
 
 ## Prepare a bundle
 
-From an Oriole checkout, with Rust 1.96 or newer and its matching documentation
+From an Xeme checkout, with Rust 1.96 or newer and its matching documentation
 component installed:
 
 ```sh
-python3 integration/python-build-standalone/prepare.py --output /absolute/oriole-bundle
+python3 integration/python-build-standalone/prepare.py --output /absolute/xeme-bundle
 ```
 
 For local Ohm development, add `--toolchain ohm --cargo-arg=-Zohm-defaults=no` and set a separate
@@ -38,9 +38,9 @@ Generic remains the default. To select a distribution that requires x86-64-v3:
 
 ```sh
 python3 integration/python-build-standalone/prepare.py \
-  --output /absolute/oriole-v3-bundle --pbs-target x86_64_v3-unknown-linux-gnu
+  --output /absolute/xeme-v3-bundle --pbs-target x86_64_v3-unknown-linux-gnu
 bash integration/python-build-standalone/run.sh \
-  /absolute/pbs-oriole /absolute/oriole-v3-bundle x86_64_v3-unknown-linux-gnu
+  /absolute/pbs-xeme /absolute/xeme-v3-bundle x86_64_v3-unknown-linux-gnu
 ```
 
 The same `--pbs-target` option combines with `--pgo --llvm-profdata ...`. PBS uses
@@ -62,7 +62,7 @@ The manual workflow's `pbs_target` choice defaults to generic. Artifact names
 include the product target and normal/PGO mode. Installed provenance checks bind
 the distribution filename, `PYTHON.json.target_triple`, installed bundle manifest
 and exact static archive before running the installed parser. PBS's v3 archive
-filename expresses its CPU requirement, but does not identify Oriole by itself;
+filename expresses its CPU requirement, but does not identify Xeme by itself;
 these experimental artifacts must remain outside release pools.
 
 This wiring enables a controlled trial. Local v3 PGO Python results do not
@@ -78,12 +78,12 @@ The recipe CI job also builds this bundle with stable Rust and its documentation
 component, exercising native-library extraction and the weak TLS-hook check.
 The bundle contains:
 
-- `libexpat.a`: Oriole's Rust static archive under the dependency's expected name.
+- `libexpat.a`: Xeme's Rust static archive under the dependency's expected name.
 - `expat.h`: the matching narrow-character C header.
 - `expat.pc`: static linker metadata. Its version identifies the Expat API target;
-  the `implementation` variable identifies Oriole.
+  the `implementation` variable identifies Xeme.
 - `native-static-libs.txt`: native libraries reported by this exact Rust toolchain.
-- `LICENSE.oriole.txt`: Oriole, dependency, Expat-header, and Rust runtime notices.
+- `LICENSE.xeme.txt`: Xeme, dependency, Expat-header, and Rust runtime notices.
 - `cpython-external-parser.patch`: the upstream CPython child-parser cleanup fix,
   backported to 3.12.13 with recorded source and patch hashes.
 - `manifest.json`: source and file hashes, PBS/Rust/CPU targets, toolchain, actual
@@ -97,7 +97,7 @@ LLVM major, minor, and patch version:
 
 ```sh
 python3 integration/python-build-standalone/prepare.py \
-  --output /absolute/oriole-pgo-bundle \
+  --output /absolute/xeme-pgo-bundle \
   --pgo --llvm-profdata /absolute/matching/llvm-profdata
 ```
 
@@ -162,15 +162,15 @@ CPython overlay.
 Create an isolated PBS checkout, then apply the small patch:
 
 ```sh
-git clone https://github.com/astral-sh/python-build-standalone.git /absolute/pbs-oriole
-git -C /absolute/pbs-oriole checkout --detach a4553880293fe9d1bb62747d34ab0e5121d3554f
-git -C /absolute/pbs-oriole apply --check /absolute/oriole/integration/python-build-standalone/pbs-a455388.patch
-git -C /absolute/pbs-oriole apply /absolute/oriole/integration/python-build-standalone/pbs-a455388.patch
-bash integration/python-build-standalone/run.sh /absolute/pbs-oriole /absolute/oriole-bundle
+git clone https://github.com/astral-sh/python-build-standalone.git /absolute/pbs-xeme
+git -C /absolute/pbs-xeme checkout --detach a4553880293fe9d1bb62747d34ab0e5121d3554f
+git -C /absolute/pbs-xeme apply --check /absolute/xeme/integration/python-build-standalone/pbs-a455388.patch
+git -C /absolute/pbs-xeme apply /absolute/xeme/integration/python-build-standalone/pbs-a455388.patch
+bash integration/python-build-standalone/run.sh /absolute/pbs-xeme /absolute/xeme-bundle
 ```
 
 The wrapper verifies the PBS revision and applied patch, then sets
-`PYBUILD_ORIOLE_BUNDLE` for the normal PBS build command. Without that variable,
+`PYBUILD_XEME_BUNDLE` for the normal PBS build command. Without that variable,
 the patch leaves the existing build path unchanged. The opt-in path rejects other
 targets, CPython versions, non-container builds, and fully static Python builds.
 
@@ -190,13 +190,13 @@ pyexpat's C API capsule, as in upstream CPython.
 The overlay also applies the [upstream CPython cleanup fix](consumer-fix/) before
 configure. CPython 3.12.13 can crash or decrement the parent reference twice when
 an external parser allocation fails, including when linked to reference Expat.
-Oriole's resource limits make this failure path relevant. The recipe verifies the
+Xeme's resource limits make this failure path relevant. The recipe verifies the
 original source hash, applies the backport without fuzzy matching, and verifies
 the resulting hash. The ordinary PBS build path does not apply this backport.
 
 The installer verifies every bundled file's hash before modifying the container.
 PBS retains the combined notices and build manifest in the distribution's existing
-license directory, and its extension metadata references Oriole's notices.
+license directory, and its extension metadata references Xeme's notices.
 
 ## Validation
 
@@ -220,14 +220,14 @@ verifies the download's size and SHA-256 before exercising the backport on
 
 The [PBS distribution workflow](../../.github/workflows/pbs.yml) runs for changes
 to this integration directory or the workflow when the head branch starts with
-`charlie/codex-oriole-pbs-`. It can also be dispatched manually with the target
+`charlie/codex-xeme-pbs-`. It can also be dispatched manually with the target
 and PGO options described above. The pull request path uses the generic target,
 normal Rust ThinLTO build, and PBS's CPython `noopt` variant.
 
 Validate the resulting interpreter and archive:
 
 - Verify the installed bundle manifest, static archive hash, and parser identity.
-  `pyexpat.EXPAT_VERSION` must identify Oriole.
+  `pyexpat.EXPAT_VERSION` must identify Xeme.
 - Run PBS's archive validator and custom checks, inspecting dynamic dependencies
   and symbol versions.
 - Run the installed XML suites and threaded parsing on glibc 2.17.

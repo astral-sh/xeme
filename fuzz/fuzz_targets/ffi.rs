@@ -8,7 +8,7 @@ use std::ffi::{c_char, c_int, c_void};
 use std::ptr;
 
 use libfuzzer_sys::fuzz_target;
-use oriole_expat::*;
+use xeme_expat::*;
 
 unsafe extern "C" {
     fn malloc(size: usize) -> *mut c_void;

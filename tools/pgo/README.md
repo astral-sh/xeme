@@ -1,8 +1,8 @@
 # Optional profile-guided builds
 
-Profile-guided optimization (PGO) lets the compiler use execution counts from a training run to lay out and optimize code. This tool builds an instrumented Oriole library, trains it on generated XML, merges the profile, and builds an optimized library. It does not change the parser's allocator, limits, or runtime configuration.
+Profile-guided optimization (PGO) lets the compiler use execution counts from a training run to lay out and optimize code. This tool builds an instrumented Xeme library, trains it on generated XML, merges the profile, and builds an optimized library. It does not change the parser's allocator, limits, or runtime configuration.
 
-This is an opt-in build workflow. It does not replace the default release or python-build-standalone build. Evaluate the resulting library with your application's tests and benchmarks before deployment; the generated replay is a build check, not a compatibility or security certification.
+This workflow is separate from the default release and python-build-standalone builds. Evaluate the resulting library with your application's tests and benchmarks before deployment.
 
 For a PBS consumer, use the [optional PGO bundle command](../../integration/python-build-standalone/#optional-fresh-pgo-bundle). It runs this pipeline with the required PIC/unwind flags, verifies the effective ThinLTO configuration, and packages the optimized archive with its build manifest and native linker dependencies. The `--native-static-libs` option is used by that Linux bridge to capture native dependencies from the same profile-use compilation.
 
@@ -10,7 +10,7 @@ For a PBS consumer, use the [optional PGO bundle command](../../integration/pyth
 
 - Linux or macOS, Python 3.11 or later, and an installed native Rust toolchain.
 - An installed `llvm-profdata` with the same LLVM major, minor, and patch version reported by `rustc -vV`.
-- Oriole's Cargo dependencies already cached. Cargo runs with `--locked --offline`; the tool downloads neither toolchains nor XML.
+- Xeme's Cargo dependencies already cached. Cargo runs with `--locked --offline`; the tool downloads neither toolchains nor XML.
 - Separate, non-overlapping source and output directories. Use one output directory per build configuration.
 
 Run from the repository, supplying paths appropriate to your machine:
@@ -18,7 +18,7 @@ Run from the repository, supplying paths appropriate to your machine:
 ```sh
 uv run --offline tools/pgo/build.py \
   --source "$PWD" \
-  --output "$PWD/../oriole-pgo-output" \
+  --output "$PWD/../xeme-pgo-output" \
   --llvm-profdata /path/to/llvm-profdata
 ```
 
@@ -30,7 +30,7 @@ keeping `rlib` available in the manifest for Rust tests and consumers. Verbose b
 logs retain the actual compiler commands. A matching normal C build uses:
 
 ```sh
-cargo rustc --release --locked --target YOUR_HOST_TARGET -p oriole_expat --lib --crate-type cdylib,staticlib
+cargo rustc --release --locked --target YOUR_HOST_TARGET -p xeme_expat --lib --crate-type cdylib,staticlib
 ```
 
 Global Cargo options can be repeated with `--cargo-arg=OPTION`, attaching any option
@@ -39,8 +39,6 @@ disabled, use `--toolchain ohm --cargo-arg=-Zohm-defaults=no`. These options are
 recorded and passed before Cargo's operation, separately from Rust compiler flags.
 Directory-changing options are rejected. Configuration overrides must use inline
 `--config=KEY=VALUE` syntax; additional configuration files are not accepted.
-Build logging uses one `--verbose`, retaining compiler commands and Cargo's normal
-dependency lint policy. The profile-warning rejection remains enabled.
 
 ## Outputs
 
@@ -48,7 +46,7 @@ Every invocation creates a new `runs/run-*` directory with an empty raw-profile 
 
 A successful run contains:
 
-- `use/liboriole_expat.so` (Linux) or `.dylib` (macOS), and `use/liboriole_expat.a`.
+- `use/libxeme_expat.so` (Linux) or `.dylib` (macOS), and `use/libxeme_expat.a`.
 - The instrumented libraries, raw profiles, merged profile, and complete profile counter dump.
 - Generated XML inputs, their manifest, and instrumented and optimized parse records.
 - `manifest.json` with source, Cargo configuration, script, tool, input, profile, and library hashes; exact commands, selected build environment, exit codes, timeouts, and raw log hashes.

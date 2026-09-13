@@ -1,10 +1,10 @@
-# Oriole
+# Xeme
 
 A streaming XML parser and Expat C interface, written in Rust.
 
 > [!WARNING]
 > This project's code, PR summaries, and documentation were authored by AI agents
-> in [Codex](https://openai.com/codex/). Oriole is experimental and is not yet a
+> in [Codex](https://openai.com/codex/). Xeme is experimental and is not yet a
 > production-ready replacement for Expat. Use at your own risk.
 
 ## Highlights
@@ -14,7 +14,7 @@ A streaming XML parser and Expat C interface, written in Rust.
 - Embed the safe Rust parser or use the Expat-compatible C interface.
 - Try an opt-in python-build-standalone integration for CPython's XML consumers.
 
-| Project XML | Oriole (normal) | Expat (normal) | Oriole / Expat |
+| Project XML | Xeme (normal) | Expat (normal) | Xeme / Expat |
 | --- | ---: | ---: | ---: |
 | Vulkan registry | 36.366 ms | 28.906 ms | 1.266× |
 | Wayland protocol | 0.887 ms | 1.069 ms | 0.840× |
@@ -37,7 +37,7 @@ describes remaining gaps.
 Build from this checkout with Rust 1.96 or later:
 
 ```console
-cargo install --path crates/oriole_cli --bin oriole --locked
+cargo install --path crates/xeme_cli --bin xeme --locked
 ```
 
 The executable uses jemalloc on supported Unix platforms and mimalloc on Windows.
@@ -55,19 +55,19 @@ Given `message.xml`:
 Check the document:
 
 ```console
-oriole message.xml
+xeme message.xml
 ```
 
 Invalid XML exits with a nonzero status. Omit the filename or pass `-` to read
-standard input. Oriole can also print parser events and expand namespaces:
+standard input. Xeme can also print parser events and expand namespaces:
 
 ```console
-oriole --events message.xml
-oriole --events --namespaces --chunk-size 4096 message.xml
+xeme --events message.xml
+xeme --events --namespaces --chunk-size 4096 message.xml
 ```
 
 See the [command-line guide](docs/usage.md), the [Rust library guide](docs/library.md),
-or the [Expat interface](crates/oriole_expat/) for embedding and callback contracts.
+or the [Expat interface](crates/xeme_expat/) for embedding and callback contracts.
 The parser performs no filesystem or network I/O; applications supply input and
 resolve external entities. The CLI does not fetch external resources.
 
@@ -76,7 +76,7 @@ See [contributing](CONTRIBUTING.md) for development and acceptance criteria, and
 
 ## License
 
-Oriole is licensed under either of
+Xeme is licensed under either of
 
 - Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or
   <https://www.apache.org/licenses/LICENSE-2.0>)
@@ -84,6 +84,6 @@ Oriole is licensed under either of
 
 at your option.
 
-Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in Oriole
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in Xeme
 by you, as defined in the Apache-2.0 license, shall be dually licensed as above, without any
 additional terms or conditions.

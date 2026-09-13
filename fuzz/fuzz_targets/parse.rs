@@ -1,7 +1,7 @@
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;
-use oriole::{Config, Limits, Parser};
+use xeme::{Config, Limits, Parser};
 
 fuzz_target!(|data: &[u8]| {
     let mut parser = Parser::new(Config {

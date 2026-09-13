@@ -6,11 +6,11 @@ srunner_run_all(SRunner *runner, const char *context, int verbosity) {
   (void)verbosity;
   for (TCase *tc = runner->suite->tests; tc; tc = tc->next_tcase) {
     for (int i = 0; i < tc->ntests; ++i) {
-      const char *name = oriole_test_name(tc->tests[i]);
-      if (!oriole_test_enabled(name))
+      const char *name = xeme_test_name(tc->tests[i]);
+      if (!xeme_test_enabled(name))
         continue;
       ++runner->nchecks;
-      printf("ORIOLE_BEGIN\t%s\t%s\n", context, name);
+      printf("XEME_BEGIN\t%s\t%s\n", context, name);
       fflush(NULL);
       pid_t child = fork();
       if (child < 0) {
@@ -18,14 +18,14 @@ srunner_run_all(SRunner *runner, const char *context, int verbosity) {
         exit(2);
       }
       if (child == 0) {
-        const char *memory_text = getenv("ORIOLE_MEMORY_MIB");
+        const char *memory_text = getenv("XEME_MEMORY_MIB");
         rlim_t bytes = (memory_text ? strtoull(memory_text, NULL, 10) : 1024)
                        * 1024ULL * 1024;
         struct rlimit memory = {bytes, bytes};
         struct rlimit core = {0, 0};
         if (setrlimit(RLIMIT_AS, &memory) || setrlimit(RLIMIT_CORE, &core))
           _Exit(101);
-        const char *timeout = getenv("ORIOLE_TEST_TIMEOUT");
+        const char *timeout = getenv("XEME_TEST_TIMEOUT");
         alarm(timeout ? (unsigned)atoi(timeout) : 3);
         set_subtest("%s", "");
         if (tc->setup)
@@ -38,7 +38,7 @@ srunner_run_all(SRunner *runner, const char *context, int verbosity) {
       }
       int status, rss_limited = 0;
       unsigned polls = 0;
-      const char *rss_text = getenv("ORIOLE_RSS_MIB");
+      const char *rss_text = getenv("XEME_RSS_MIB");
       unsigned long long rss_limit = (rss_text ? strtoull(rss_text, NULL, 10) : 768) * 1024;
       for (;;) {
         pid_t waited = waitpid(child, &status, WNOHANG);
@@ -69,7 +69,7 @@ srunner_run_all(SRunner *runner, const char *context, int verbosity) {
       int passed = WIFEXITED(status) && WEXITSTATUS(status) == 0;
       if (!passed)
         ++runner->nfailures;
-      printf("ORIOLE_RESULT\t%s\t%s\t%s\t%d\n", context, name,
+      printf("XEME_RESULT\t%s\t%s\t%s\t%d\n", context, name,
              passed ? "pass" : rss_limited ? "rss-limit"
              : WIFSIGNALED(status) && WTERMSIG(status) == SIGALRM ? "timeout"
              : WIFSIGNALED(status) ? "signal" : "fail",

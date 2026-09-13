@@ -1776,6 +1776,21 @@ impl Parser {
         self.next_event_for_adapter_mode_into(event, frame, true)
     }
 
+    /// Whether the already consumed tag has another callback to deliver.
+    /// C hosts finish these callbacks before honoring suspension or abortion.
+    #[doc(hidden)]
+    pub fn has_pending_tag_event(&self) -> bool {
+        self.pending.front().is_some_and(|pending| {
+            matches!(
+                pending.event.kind,
+                EventKind::StartElement { .. }
+                    | EventKind::EndElement { .. }
+                    | EventKind::StartNamespace { .. }
+                    | EventKind::EndNamespace { .. }
+            )
+        })
+    }
+
     fn next_event_for_adapter_mode_into(
         &mut self,
         event: &mut Option<Event>,

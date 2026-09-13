@@ -29,7 +29,6 @@ default timing configuration disables namespace processing in both libraries.
 Pass `--namespaces` to enable namespace expansion in both the complete callback
 preflight and the timed C driver; the report records the selected mode. Keep
 results from the two modes separate.
-All numbers are generated-workload measurements on the recorded host.
 
 ## Allocators and the safe Rust API
 
@@ -74,8 +73,6 @@ remaining below the parser's resource limits. The native callback digest omits
 DTD declaration and ID metadata; deterministic regressions check those contracts
 separately. Compare complete normalized callbacks outside the timed region too.
 
-No benchmark result is a compatibility or production-readiness certification.
-
 ## DTD composition and incremental scanning
 
 `dtd_composition_workload.py` generates declaration delimiters supplied by internal
@@ -95,9 +92,8 @@ python3 benchmarks/dtd_scaling.py \
   --build-manifest /absolute/build.json --output /tmp/dtd-results
 ```
 
-As with the other runners, the build manifest should identify the parser source,
-compiler, commands, header and driver hashes. The report retains its hash along
-with all samples, preflight metadata, worker failures, and input/library hashes.
+Include header and driver hashes in the build manifest as well. The report retains
+the manifest hash, samples, preflight metadata, worker failures and input/library hashes.
 The optional `--external-grammar` generator flag adds repeated empty external
 references inside declarations; use it only for implementations supporting that
 mode. Positions and Default callbacks remain separate compatibility checks.

@@ -36,29 +36,119 @@ TEXT_FRAGMENTATION_FAILURES = {
     "test_handlers (test.test_sax.CDATAHandlerTest.test_handlers)",
 }
 
+# The optional exception is deliberately tied to these exact upstream assertions,
+# rather than every failure that happens to occur in the same test methods.
+FRAGMENTATION_ASSERTIONS = {
+    "test1 (test.test_pyexpat.BufferTextTest.test1)": (
+        "test_pyexpat.py",
+        401,
+        "test1",
+        "self.assertEqual(self.stuff,",
+        "AssertionError: Lists differ: ['<a>', '1', '<b>', '2\\n3', '<c>', '4\\n5'] != "
+        "['<a>', '1', '<b>', '2', '\\n', '3', '<c>', '4\\n5']",
+    ),
+    "test_handlers (test.test_sax.CDATAHandlerTest.test_handlers)": (
+        "test_sax.py",
+        1543,
+        "characters",
+        "h.assertEqual(t[0], content)",
+        "AssertionError: 'Parseable character data' != '\\nParseable character data\\n'",
+    ),
+}
+FRAGMENTATION_SOURCE_HASHES = {
+    "test_pyexpat.py": "44129616745434f065948aa9cee6a9be4546aa7cea93b952259e140cbc3fe844",
+    "test_sax.py": "b061db0792bb838bf2568ff145b770db0b89cbf7bfa995664f4d392d5e41ec34",
+}
+# --list-cases includes cases skipped in setUpClass. Their identities are stable
+# across the supported 3.12.13 environments even when resource skips differ.
+TEST_INVENTORY_SHA256 = (
+    "78757aa1f8927a3eabd8ab26acdc16d037d9bf936ebd5a3e8c420e4b4b59db68"
+)
 
-def only_text_fragmentation(log: str, returncode: int, file_count: int) -> bool:
+
+def test_inventory(text: str) -> list[str]:
+    """Validate every pinned case identity, including cases omitted by class skips."""
+    cases = text.splitlines()
+    digest = hashlib.sha256(("\n".join(sorted(cases)) + "\n").encode()).hexdigest()
+    if digest != TEST_INVENTORY_SHA256 or len(cases) != len(set(cases)):
+        raise ValueError("unexpected CPython XML test inventory")
+    return cases
+
+
+def complete_inventory(log: str, cases: list[str], reported_count: int) -> bool:
+    """Require each expected test or an explicit skip of its entire class."""
+    records = re.findall(r"^(\w+) \((test\.[^()\n]+)\)([^\n]*)$", log, re.MULTILINE)
+    observed = [identity for method, identity, _ in records if method != "setUpClass"]
+    skipped_classes = {
+        identity
+        for method, identity, tail in records
+        if method == "setUpClass" and tail.startswith(" ... skipped ")
+    }
+    omitted = {case for case in cases if case.rsplit(".", 1)[0] in skipped_classes}
+    return (
+        len(observed) == len(set(observed))
+        and set(observed) == set(cases) - omitted
+        and reported_count == len(observed)
+        and all(
+            any(case.startswith(cls + ".") for case in omitted)
+            for cls in skipped_classes
+        )
+    )
+
+
+def only_text_fragmentation(
+    log: str, returncode: int, file_count: int, cases: list[str]
+) -> bool:
     """Recognize only the two pinned upstream callback-boundary assertions."""
     failures = re.findall(r"^(FAIL|ERROR): (.+)$", log, re.MULTILINE)
     total = re.search(
-        r"^Total tests: run=\d+ failures=(\d+)(?: skipped=\d+)?$", log, re.MULTILINE
+        r"^Total tests: run=(\d+) failures=(\d+)(?: skipped=\d+)?$", log, re.MULTILINE
     )
     complete = (
         f"Total test files: run={file_count}/{file_count} failed={len(failures)}"
         in log.splitlines()
     )
-    return (
+    valid = (
         returncode == 2
         and bool(failures)
         and total is not None
-        and int(total[1]) == len(failures)
+        and int(total[2]) == len(failures)
         and complete
+        and complete_inventory(log, cases, int(total[1]))
         and len({name for _, name in failures}) == len(failures)
         and all(
             kind == "FAIL" and name in TEXT_FRAGMENTATION_FAILURES
             for kind, name in failures
         )
     )
+    if not valid:
+        return False
+    for _, name in failures:
+        section = re.search(
+            r"^FAIL: " + re.escape(name) + r"\n-+\n(.*?)\n-+\n",
+            log,
+            re.MULTILINE | re.DOTALL,
+        )
+        if section is None:
+            return False
+        traceback = section[1]
+        filename, line, function, source_line, assertion = FRAGMENTATION_ASSERTIONS[
+            name
+        ]
+        frames = re.findall(
+            r'^  File "([^"\n]+)", line (\d+), in ([^\n]+)\n    ([^\n]+)',
+            traceback,
+            re.MULTILINE,
+        )
+        assertions = re.findall(r"^AssertionError: [^\n]*$", traceback, re.MULTILINE)
+        if (
+            not frames
+            or not frames[-1][0].endswith(f"/Lib/test/{filename}")
+            or frames[-1][1:] != (str(line), function, source_line)
+            or assertions != [assertion]
+        ):
+            return False
+    return True
 
 
 def apply_consumer_fix(text: str, root: Path, output: Path) -> tuple[str, dict]:
@@ -128,6 +218,19 @@ def main() -> int:
         parser.error(f"expected CPython {REVISION}, got {revision}")
     if subprocess.check_output(["git", "-C", str(source), "status", "--porcelain"]):
         parser.error("CPython source must be clean")
+    if args.allow_text_fragmentation:
+        if sorted(args.tests) != sorted(TESTS):
+            parser.error(
+                "the fragmentation exception requires all six XML test modules"
+            )
+        for filename, expected in FRAGMENTATION_SOURCE_HASHES.items():
+            if (
+                hashlib.sha256(
+                    (source / "Lib/test" / filename).read_bytes()
+                ).hexdigest()
+                != expected
+            ):
+                parser.error(f"fragmentation fixture source changed: {filename}")
     output.mkdir(parents=True, exist_ok=True)
     frozen_library = output / library.name
     shutil.copy2(library, frozen_library)
@@ -252,6 +355,27 @@ oriole_create_system(const XML_Char *encoding,
         return 1
     env["TMPDIR"] = str(output / "tmp")
     Path(env["TMPDIR"]).mkdir(exist_ok=True)
+    cases = None
+    inventory_command = [executable, "-s", "-m", "test", "--list-cases", *args.tests]
+    if args.allow_text_fragmentation:
+        inventory = subprocess.run(
+            inventory_command,
+            env=env,
+            text=True,
+            capture_output=True,
+            timeout=120,
+            check=False,
+        )
+        (output / "test-inventory.log").write_text(inventory.stdout)
+        (output / "test-inventory.stderr").write_text(inventory.stderr)
+        if inventory.returncode:
+            print("test inventory failed; see test-inventory.stderr")
+            return 1
+        try:
+            cases = test_inventory(inventory.stdout)
+        except ValueError as error:
+            print(error)
+            return 1
     command = [
         executable,
         "-s",
@@ -275,6 +399,14 @@ oriole_create_system(const XML_Char *encoding,
     gate_exit_code = result.returncode
     fragmentation = None
     if args.allow_text_fragmentation:
+        assert cases is not None
+        tests_log = (output / "tests.log").read_text()
+        total = re.search(r"^Total tests: run=(\d+)\b", tests_log, re.MULTILINE)
+        inventory_complete = total is not None and complete_inventory(
+            tests_log, cases, int(total[1])
+        )
+        if not inventory_complete:
+            gate_exit_code = 1
         semantic_script = Path(__file__).with_name("text_fragmentation.py")
         semantic_command = [executable, "-s", str(semantic_script), str(output)]
         with (output / "text-fragmentation.log").open("w") as log:
@@ -287,7 +419,7 @@ oriole_create_system(const XML_Char *encoding,
                 check=False,
             )
         known_failures = only_text_fragmentation(
-            (output / "tests.log").read_text(), result.returncode, len(args.tests)
+            tests_log, result.returncode, len(args.tests), cases
         )
         accepted = known_failures and semantic.returncode == 0
         if accepted:
@@ -302,6 +434,11 @@ oriole_create_system(const XML_Char *encoding,
             "semantic_source_sha256": hashlib.sha256(
                 semantic_script.read_bytes()
             ).hexdigest(),
+            "upstream_fixture_sha256": FRAGMENTATION_SOURCE_HASHES,
+            "inventory_command": inventory_command,
+            "inventory_sha256": TEST_INVENTORY_SHA256,
+            "inventory_case_count": len(cases),
+            "inventory_complete": inventory_complete,
         }
     evidence = {
         "schema_version": 1,

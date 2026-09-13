@@ -325,3 +325,51 @@ fn small_input_and_token_limits_still_allow_complete_utf8_and_utf16_tags() {
         }
     }
 }
+
+#[test]
+fn declaration_limits_precede_encoding_detection_across_chunk_boundaries() {
+    for (declaration, within_limit) in [
+        (
+            "<?xml version='1.0' encoding='custom'?>",
+            Err(ErrorKind::UnknownEncoding),
+        ),
+        (
+            "<?xml version='1.0' encoding='UTF-16'?>",
+            Err(ErrorKind::IncorrectEncoding),
+        ),
+        ("<?xml version='1.0' encoding='UTF-8'?>", Ok(String::new())),
+        ("<?xml version='1.0'?>", Ok(String::new())),
+        (
+            "<?xml encoding='custom' version='1.0'?>",
+            Err(ErrorKind::XmlDeclaration),
+        ),
+    ] {
+        for bom in ["", "\u{feff}"] {
+            let input = format!("{bom}{declaration}<r/>{}", " ".repeat(100));
+            for width in [1, 7, input.len()] {
+                for limit in [32, declaration.len() - 1, declaration.len()] {
+                    let mut config = Config::default();
+                    config.limits.max_token_bytes = limit;
+                    let mut parser = Parser::new(config);
+                    let result = encoded_content(&mut parser, input.as_bytes(), width);
+                    assert_eq!(
+                        result,
+                        if limit < declaration.len() {
+                            Err(ErrorKind::LimitExceeded)
+                        } else {
+                            within_limit.clone()
+                        },
+                        "{declaration}, bom={bom:?}, width={width}, limit={limit}",
+                    );
+                    if limit < declaration.len() {
+                        assert!(parser.unknown_encoding().is_none());
+                        assert_eq!(
+                            parser.next_event().unwrap_err().kind,
+                            ErrorKind::LimitExceeded
+                        );
+                    }
+                }
+            }
+        }
+    }
+}

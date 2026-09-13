@@ -11,3 +11,15 @@ Oriole can combine character-data callbacks across line breaks. Expat permits ar
 Two additional semantic checks must also pass. They preserve ordered element/CDATA boundaries, every text character and callback-controlled buffering, using the same compiled extensions. All original failures and exit codes remain in `tests.log` and `summary.json`; an accepted gate does not mean the unchanged upstream suite passed. A new fragmentation shape requires an explicit reviewed exception instead of being accepted by test name.
 
 The default runner remains strict. `--consumer-fix` separately applies the pinned upstream allocation-failure backport to a temporary C source copy. `--system-allocator` separately selects the system allocator. Each adaptation is recorded explicitly.
+
+For an installed PBS distribution, run its actual interpreter in isolated mode:
+
+```console
+/absolute/python/install/bin/python3.12 -I tools/cpython/installed.py --output /tmp/installed-xml
+```
+
+The output directory must be new. This runner applies the same fixture hashes,
+complete inventory, exact assertion exceptions and semantic checks to the
+installed modules, retaining raw logs and exit codes. It does not load replacement
+extensions or modify CPython sources. Distribution structure, parser identity,
+and the old-glibc threaded checks remain separate requirements.

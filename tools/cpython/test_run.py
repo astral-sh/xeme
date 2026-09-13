@@ -1,6 +1,7 @@
 """Keep the optional callback-fragmentation gate closed on unrelated failures."""
 
 import unittest
+from pathlib import Path
 
 from run import FRAGMENTATION_ASSERTIONS, only_text_fragmentation, test_inventory
 
@@ -71,6 +72,13 @@ class FragmentationGateTests(unittest.TestCase):
                 ValueError, "unexpected CPython XML test inventory"
             ):
                 test_inventory(text)
+
+    def test_installed_tracebacks_must_use_the_verified_fixture_directory(self) -> None:
+        log, cases = self.log()
+        directory = Path("/python/install/lib/python3.12/test")
+        log = log.replace("/cpython/Lib/test", str(directory))
+        self.assertTrue(only_text_fragmentation(log, 2, 6, cases, directory))
+        self.assertFalse(only_text_fragmentation(log, 2, 6, cases, Path("/other/test")))
 
     @staticmethod
     def log() -> tuple[str, list[str]]:

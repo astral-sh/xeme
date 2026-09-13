@@ -112,8 +112,13 @@ class TextFragmentationTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    expected_directory = Path(sys.argv.pop(1)).resolve()
-    native_origin = Path(expat.__file__).parent
-    if native_origin != expected_directory:
-        raise RuntimeError(f"unexpected pyexpat origin: {native_origin}")
+    selection = sys.argv.pop(1)
+    if selection == "--installed":
+        if not sys.flags.isolated or not expat.EXPAT_VERSION.startswith("oriole_"):
+            raise RuntimeError("installed checks require isolated Python with Oriole")
+    else:
+        expected_directory = Path(selection).resolve()
+        native_origin = Path(expat.__file__).parent
+        if native_origin != expected_directory:
+            raise RuntimeError(f"unexpected pyexpat origin: {native_origin}")
     unittest.main(verbosity=2)

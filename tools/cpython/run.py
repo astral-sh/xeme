@@ -97,7 +97,11 @@ def complete_inventory(log: str, cases: list[str], reported_count: int) -> bool:
 
 
 def only_text_fragmentation(
-    log: str, returncode: int, file_count: int, cases: list[str]
+    log: str,
+    returncode: int,
+    file_count: int,
+    cases: list[str],
+    test_directory: Path | None = None,
 ) -> bool:
     """Recognize only the two pinned upstream callback-boundary assertions."""
     failures = re.findall(r"^(FAIL|ERROR): (.+)$", log, re.MULTILINE)
@@ -143,7 +147,11 @@ def only_text_fragmentation(
         assertions = re.findall(r"^AssertionError: [^\n]*$", traceback, re.MULTILINE)
         if (
             not frames
-            or not frames[-1][0].endswith(f"/Lib/test/{filename}")
+            or (
+                Path(frames[-1][0]).resolve() != (test_directory / filename).resolve()
+                if test_directory is not None
+                else not frames[-1][0].endswith(f"/Lib/test/{filename}")
+            )
             or frames[-1][1:] != (str(line), function, source_line)
             or assertions != [assertion]
         ):
@@ -419,7 +427,7 @@ oriole_create_system(const XML_Char *encoding,
                 check=False,
             )
         known_failures = only_text_fragmentation(
-            tests_log, result.returncode, len(args.tests), cases
+            tests_log, result.returncode, len(args.tests), cases, source / "Lib/test"
         )
         accepted = known_failures and semantic.returncode == 0
         if accepted:

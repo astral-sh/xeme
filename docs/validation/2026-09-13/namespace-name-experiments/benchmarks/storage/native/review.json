@@ -1,0 +1,3209 @@
+{
+  "status": "passed",
+  "counts": {
+    "preflight_workers": 84,
+    "timed_workers": 588,
+    "preflight_samples": 168,
+    "timed_warmups": 588,
+    "measured_samples": 105420,
+    "all_workers": 672,
+    "all_samples": 106176,
+    "cohorts": 196,
+    "conditions": 28
+  },
+  "groups": {
+    "real": {
+      "conditions": 24,
+      "geomean_ratios": {
+        "candidate_over_control": 1.006361519906519,
+        "candidate_over_expat": 1.189458412794176,
+        "control_over_expat": 1.1816119979340545
+      },
+      "candidate_faster_than_control": 11,
+      "adverse": [
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 64
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.01009819494903,
+              1.0022026395385344,
+              0.9895421302440915,
+              1.0033035427144505,
+              0.9918937256332018,
+              0.9990722811368051,
+              1.010600848728559
+            ],
+            "candidate_over_expat": [
+              0.88987024405724,
+              0.8505746536422107,
+              0.8467396008498601,
+              0.8962319811816328,
+              0.8503333606739861,
+              0.8650635688464263,
+              0.859945085138648
+            ],
+            "control_over_expat": [
+              0.8809739968916026,
+              0.8487052618758408,
+              0.8556882774066363,
+              0.8932809892775478,
+              0.8572827296907773,
+              0.865866849856053,
+              0.8509245625714134
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0022026395385344,
+            "candidate_over_expat": 0.859945085138648,
+            "control_over_expat": 0.8572827296907773
+          }
+        },
+        {
+          "condition": {
+            "name": "maven",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 128
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0348464765269543,
+              1.045216333982563,
+              1.0451508577176232,
+              1.0440038319161937,
+              1.0306355446116078,
+              1.0438638404643852,
+              1.0192649349911893
+            ],
+            "candidate_over_expat": [
+              1.627079143397236,
+              1.6244991857729985,
+              1.6108569763527372,
+              1.595370774558198,
+              1.611558020034257,
+              1.5469263331236323,
+              1.60955958667847
+            ],
+            "control_over_expat": [
+              1.572290364130023,
+              1.5542229230031332,
+              1.5412674299196294,
+              1.5281273169563088,
+              1.5636546094881372,
+              1.4819234780998343,
+              1.5791376034066973
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0438638404643852,
+            "candidate_over_expat": 1.6108569763527372,
+            "control_over_expat": 1.5542229230031332
+          }
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 512
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.020635931842557,
+              1.0234457728092086,
+              1.010013716872553,
+              1.034975335845906,
+              1.0032577943026295,
+              1.0124231552254448,
+              1.039982228341792
+            ],
+            "candidate_over_expat": [
+              0.9471411626923696,
+              0.9531952856502935,
+              0.9361218703089383,
+              0.9571606743825211,
+              0.94403351492228,
+              0.9444888059701493,
+              0.9745983638225485
+            ],
+            "control_over_expat": [
+              0.927991199548004,
+              0.9313588574741115,
+              0.9268407494579219,
+              0.924814960542238,
+              0.9409680346201381,
+              0.9328992537313433,
+              0.9371298251668247
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.020635931842557,
+            "candidate_over_expat": 0.9471411626923696,
+            "control_over_expat": 0.9313588574741115
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0295976496283739,
+              1.0404374911223393,
+              1.0042630617049815,
+              1.0022165439759894,
+              1.0034979924565033,
+              1.0048879771139083,
+              1.001558854333049
+            ],
+            "candidate_over_expat": [
+              1.1808762463809095,
+              1.2071694950370104,
+              1.1582679005421574,
+              1.1491409398157946,
+              1.1519659763072563,
+              1.1536067485147041,
+              1.145357897608775
+            ],
+            "control_over_expat": [
+              1.1469298194368824,
+              1.1602518222741227,
+              1.153351093662367,
+              1.1465994517082378,
+              1.147950454277753,
+              1.1479953734026396,
+              1.1435752304056896
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0042630617049815,
+            "candidate_over_expat": 1.1536067485147041,
+            "control_over_expat": 1.147950454277753
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0176303686928236,
+              1.0263025888203092,
+              1.0174981648026824,
+              1.0412430443663983,
+              1.0563794018757742,
+              1.0334337016137956,
+              1.0207962869875684
+            ],
+            "candidate_over_expat": [
+              1.1699599502578546,
+              1.1926037541097296,
+              1.1780866435017376,
+              1.2753222638814496,
+              1.2319319445559083,
+              1.2039488827304283,
+              1.0983959482889474
+            ],
+            "control_over_expat": [
+              1.1496904831571633,
+              1.1620391170215953,
+              1.1578267993536846,
+              1.2248074748556805,
+              1.1661832314871075,
+              1.1649986649848545,
+              1.0760187534874175
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0263025888203092,
+            "candidate_over_expat": 1.1926037541097296,
+            "control_over_expat": 1.1620391170215953
+          }
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0086704571326985,
+              1.0012769185583543,
+              1.0096552481679664,
+              1.1072832585079901,
+              1.0089351430246627,
+              1.0243028302868111,
+              1.0438866493550614
+            ],
+            "candidate_over_expat": [
+              1.525078927947449,
+              1.4422926385614676,
+              1.5302325470778215,
+              1.6762646846153122,
+              1.4877670778032246,
+              1.4856942996653315,
+              1.553503047553063
+            ],
+            "control_over_expat": [
+              1.5119694615451724,
+              1.4404532970140675,
+              1.5155990620109685,
+              1.5138535435584897,
+              1.4745913928055703,
+              1.4504443956767432,
+              1.4881913170485082
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0096552481679664,
+            "candidate_over_expat": 1.525078927947449,
+            "control_over_expat": 1.4881913170485082
+          }
+        },
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 7
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0004184051503735,
+              1.0068548019489878,
+              1.0045482799282306,
+              0.9776662469549653,
+              1.0056864666382392,
+              0.997567498086411,
+              1.000438469676199
+            ],
+            "candidate_over_expat": [
+              1.2395120037349243,
+              1.2485886577681415,
+              1.208667522508265,
+              1.2201051957175455,
+              1.2424123737987594,
+              1.2186021049467113,
+              1.2317989579131234
+            ],
+            "control_over_expat": [
+              1.2389936024303878,
+              1.2400880994471346,
+              1.2031950545917192,
+              1.2479772105436588,
+              1.2353873846506418,
+              1.2215735850298863,
+              1.2312590881394296
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.000438469676199,
+            "candidate_over_expat": 1.2317989579131234,
+            "control_over_expat": 1.2353873846506418
+          }
+        },
+        {
+          "condition": {
+            "name": "maven",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 128
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.026886657617845,
+              1.0409515202449162,
+              1.0237395803355969,
+              1.0367341129616765,
+              1.0461201081973632,
+              1.0361746675301864,
+              0.9968035610054944
+            ],
+            "candidate_over_expat": [
+              1.749817737664802,
+              1.6566373804251524,
+              1.717429491915435,
+              1.7247682019732953,
+              1.7386901916017077,
+              1.7264158712729116,
+              1.7178760819164978
+            ],
+            "control_over_expat": [
+              1.7040027978589194,
+              1.591464490138193,
+              1.6776038798386952,
+              1.6636553002448105,
+              1.662036871270696,
+              1.6661436776754792,
+              1.7233847762177374
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0361746675301864,
+            "candidate_over_expat": 1.7247682019732953,
+            "control_over_expat": 1.6661436776754792
+          }
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 512
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0267047734475445,
+              1.0012199699699702,
+              1.0154491436560644,
+              0.9765625000000001,
+              1.012577739124727,
+              1.0108138078321045,
+              1.020479177377892
+            ],
+            "candidate_over_expat": [
+              1.0716734051919412,
+              1.0517817801513893,
+              1.0465905767771848,
+              1.0538501371610025,
+              1.0541218071635696,
+              1.0548697903272815,
+              1.0661280965988442
+            ],
+            "control_over_expat": [
+              1.0437989896485995,
+              1.05050020145217,
+              1.0306676442790603,
+              1.0791425404528665,
+              1.0410280282032995,
+              1.0435846662894959,
+              1.0447328277077113
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.012577739124727,
+            "candidate_over_expat": 1.0541218071635696,
+            "control_over_expat": 1.0437989896485995
+          }
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 512
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0101206527928488,
+              1.0101050192553183,
+              0.9988156661251887,
+              1.0236179945939914,
+              1.0095783177810946,
+              1.016446919346147,
+              1.0211565738043935
+            ],
+            "candidate_over_expat": [
+              1.1422040082448845,
+              1.156670460966482,
+              1.1321369185221235,
+              1.1638797492183535,
+              1.1621009175445898,
+              1.1576621548634183,
+              1.160851584103982
+            ],
+            "control_over_expat": [
+              1.1307599791043206,
+              1.145099211386175,
+              1.1334793364967353,
+              1.1370254874036243,
+              1.151075550135345,
+              1.138930260724398,
+              1.136800774614949
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0101206527928488,
+            "candidate_over_expat": 1.1576621548634183,
+            "control_over_expat": 1.1370254874036243
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0172651085580227,
+              1.018419451211884,
+              1.0179909694057767,
+              1.0212048665787576,
+              1.0206425882679122,
+              1.0179641094023668,
+              1.0148420545226062
+            ],
+            "candidate_over_expat": [
+              1.2618479802489888,
+              1.3036614825068533,
+              1.2561387386441212,
+              1.3141241076331684,
+              1.2901003097444137,
+              1.2720869006513895,
+              1.2611566270102856
+            ],
+            "control_over_expat": [
+              1.2404317907233282,
+              1.280083055125804,
+              1.2339389802026992,
+              1.2868369028006588,
+              1.2640079147919805,
+              1.2496382621959183,
+              1.2427122244195414
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0179909694057767,
+            "candidate_over_expat": 1.2720869006513895,
+            "control_over_expat": 1.2496382621959183
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.021273668213743,
+              1.0209997176404637,
+              1.008031980319803,
+              1.0120562859490552,
+              1.0215965227928947,
+              1.0233949642293043,
+              1.0142373452094229
+            ],
+            "candidate_over_expat": [
+              1.2850036950713435,
+              1.2737248892465682,
+              1.2566587441539523,
+              1.2773008807112063,
+              1.3063263918536439,
+              1.2674934792614947,
+              1.273908199528567
+            ],
+            "control_over_expat": [
+              1.2582363915431962,
+              1.2475271709086797,
+              1.2466457103427127,
+              1.2620848251670294,
+              1.2787106873487977,
+              1.2385183859254336,
+              1.2560257276520679
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0209997176404637,
+            "candidate_over_expat": 1.273908199528567,
+            "control_over_expat": 1.2560257276520679
+          }
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0086916294676918,
+              1.009802161908689,
+              1.0188787838352724,
+              1.0148814988773238,
+              1.0089042552681111,
+              0.9967309328311842,
+              1.003020439797723
+            ],
+            "candidate_over_expat": [
+              1.610263195683837,
+              1.5887153603691841,
+              1.615331482911636,
+              1.5970845362810726,
+              1.5546823789175894,
+              1.611851935819619,
+              1.613164259571314
+            ],
+            "control_over_expat": [
+              1.596387982850227,
+              1.5732936809783173,
+              1.5854010393966504,
+              1.5736660270660072,
+              1.54096126644291,
+              1.6171384700996507,
+              1.6083064667123208
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0089042552681111,
+            "candidate_over_expat": 1.610263195683837,
+            "control_over_expat": 1.5854010393966504
+          }
+        }
+      ]
+    },
+    "generated": {
+      "conditions": 4,
+      "geomean_ratios": {
+        "candidate_over_control": 1.0058510844752688,
+        "candidate_over_expat": 3.5092979713824084,
+        "control_over_expat": 3.4901792701740058
+      },
+      "candidate_faster_than_control": 2,
+      "adverse": [
+        {
+          "condition": {
+            "name": "generated-rare-declarations",
+            "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 32
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0075103692105591,
+              1.025755491366411,
+              1.015583893212417,
+              1.004488386232996,
+              1.0220184181458798,
+              1.0243818859174865,
+              1.0097713037931764
+            ],
+            "candidate_over_expat": [
+              4.594992938591903,
+              4.7092571731408235,
+              4.7762665925082235,
+              4.667452282545635,
+              4.6823804596589556,
+              4.691983278701392,
+              4.709368218971268
+            ],
+            "control_over_expat": [
+              4.560740096593088,
+              4.591013367978769,
+              4.702975918021211,
+              4.646596562504204,
+              4.581503010634204,
+              4.580306761768852,
+              4.663796843186833
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.015583893212417,
+            "candidate_over_expat": 4.691983278701392,
+            "control_over_expat": 4.591013367978769
+          }
+        },
+        {
+          "condition": {
+            "name": "generated-rare-declarations",
+            "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 32
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              0.996860576252462,
+              1.0043383845605554,
+              1.0402737467527865,
+              1.0551657350905035,
+              1.0046256332757526,
+              1.0140172395703022,
+              1.0146495034155998
+            ],
+            "candidate_over_expat": [
+              4.616154183637918,
+              4.74781038868068,
+              4.857579943310392,
+              4.87114043485732,
+              4.616615013616033,
+              4.649694050119078,
+              3.7275876599178703
+            ],
+            "control_over_expat": [
+              4.6306918877177505,
+              4.727301536680854,
+              4.669520843406192,
+              4.616469501295467,
+              4.595358570100163,
+              4.585419131620902,
+              3.673768771748024
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0140172395703022,
+            "candidate_over_expat": 4.649694050119078,
+            "control_over_expat": 4.616469501295467
+          }
+        }
+      ]
+    },
+    "real_namespaces_off": {
+      "conditions": 12,
+      "geomean_ratios": {
+        "candidate_over_control": 1.0009445161809716,
+        "candidate_over_expat": 1.1351039108597647,
+        "control_over_expat": 1.1344126665118315
+      },
+      "candidate_faster_than_control": 7,
+      "adverse": [
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 512
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.020635931842557,
+              1.0234457728092086,
+              1.010013716872553,
+              1.034975335845906,
+              1.0032577943026295,
+              1.0124231552254448,
+              1.039982228341792
+            ],
+            "candidate_over_expat": [
+              0.9471411626923696,
+              0.9531952856502935,
+              0.9361218703089383,
+              0.9571606743825211,
+              0.94403351492228,
+              0.9444888059701493,
+              0.9745983638225485
+            ],
+            "control_over_expat": [
+              0.927991199548004,
+              0.9313588574741115,
+              0.9268407494579219,
+              0.924814960542238,
+              0.9409680346201381,
+              0.9328992537313433,
+              0.9371298251668247
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.020635931842557,
+            "candidate_over_expat": 0.9471411626923696,
+            "control_over_expat": 0.9313588574741115
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0295976496283739,
+              1.0404374911223393,
+              1.0042630617049815,
+              1.0022165439759894,
+              1.0034979924565033,
+              1.0048879771139083,
+              1.001558854333049
+            ],
+            "candidate_over_expat": [
+              1.1808762463809095,
+              1.2071694950370104,
+              1.1582679005421574,
+              1.1491409398157946,
+              1.1519659763072563,
+              1.1536067485147041,
+              1.145357897608775
+            ],
+            "control_over_expat": [
+              1.1469298194368824,
+              1.1602518222741227,
+              1.153351093662367,
+              1.1465994517082378,
+              1.147950454277753,
+              1.1479953734026396,
+              1.1435752304056896
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0042630617049815,
+            "candidate_over_expat": 1.1536067485147041,
+            "control_over_expat": 1.147950454277753
+          }
+        },
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 7
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0004184051503735,
+              1.0068548019489878,
+              1.0045482799282306,
+              0.9776662469549653,
+              1.0056864666382392,
+              0.997567498086411,
+              1.000438469676199
+            ],
+            "candidate_over_expat": [
+              1.2395120037349243,
+              1.2485886577681415,
+              1.208667522508265,
+              1.2201051957175455,
+              1.2424123737987594,
+              1.2186021049467113,
+              1.2317989579131234
+            ],
+            "control_over_expat": [
+              1.2389936024303878,
+              1.2400880994471346,
+              1.2031950545917192,
+              1.2479772105436588,
+              1.2353873846506418,
+              1.2215735850298863,
+              1.2312590881394296
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.000438469676199,
+            "candidate_over_expat": 1.2317989579131234,
+            "control_over_expat": 1.2353873846506418
+          }
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 512
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0267047734475445,
+              1.0012199699699702,
+              1.0154491436560644,
+              0.9765625000000001,
+              1.012577739124727,
+              1.0108138078321045,
+              1.020479177377892
+            ],
+            "candidate_over_expat": [
+              1.0716734051919412,
+              1.0517817801513893,
+              1.0465905767771848,
+              1.0538501371610025,
+              1.0541218071635696,
+              1.0548697903272815,
+              1.0661280965988442
+            ],
+            "control_over_expat": [
+              1.0437989896485995,
+              1.05050020145217,
+              1.0306676442790603,
+              1.0791425404528665,
+              1.0410280282032995,
+              1.0435846662894959,
+              1.0447328277077113
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.012577739124727,
+            "candidate_over_expat": 1.0541218071635696,
+            "control_over_expat": 1.0437989896485995
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0172651085580227,
+              1.018419451211884,
+              1.0179909694057767,
+              1.0212048665787576,
+              1.0206425882679122,
+              1.0179641094023668,
+              1.0148420545226062
+            ],
+            "candidate_over_expat": [
+              1.2618479802489888,
+              1.3036614825068533,
+              1.2561387386441212,
+              1.3141241076331684,
+              1.2901003097444137,
+              1.2720869006513895,
+              1.2611566270102856
+            ],
+            "control_over_expat": [
+              1.2404317907233282,
+              1.280083055125804,
+              1.2339389802026992,
+              1.2868369028006588,
+              1.2640079147919805,
+              1.2496382621959183,
+              1.2427122244195414
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0179909694057767,
+            "candidate_over_expat": 1.2720869006513895,
+            "control_over_expat": 1.2496382621959183
+          }
+        }
+      ]
+    },
+    "real_namespaces_on": {
+      "conditions": 12,
+      "geomean_ratios": {
+        "candidate_over_control": 1.0118078398717665,
+        "candidate_over_expat": 1.246415682503654,
+        "control_over_expat": 1.230775144599592
+      },
+      "candidate_faster_than_control": 4,
+      "adverse": [
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 64
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.01009819494903,
+              1.0022026395385344,
+              0.9895421302440915,
+              1.0033035427144505,
+              0.9918937256332018,
+              0.9990722811368051,
+              1.010600848728559
+            ],
+            "candidate_over_expat": [
+              0.88987024405724,
+              0.8505746536422107,
+              0.8467396008498601,
+              0.8962319811816328,
+              0.8503333606739861,
+              0.8650635688464263,
+              0.859945085138648
+            ],
+            "control_over_expat": [
+              0.8809739968916026,
+              0.8487052618758408,
+              0.8556882774066363,
+              0.8932809892775478,
+              0.8572827296907773,
+              0.865866849856053,
+              0.8509245625714134
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0022026395385344,
+            "candidate_over_expat": 0.859945085138648,
+            "control_over_expat": 0.8572827296907773
+          }
+        },
+        {
+          "condition": {
+            "name": "maven",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 128
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0348464765269543,
+              1.045216333982563,
+              1.0451508577176232,
+              1.0440038319161937,
+              1.0306355446116078,
+              1.0438638404643852,
+              1.0192649349911893
+            ],
+            "candidate_over_expat": [
+              1.627079143397236,
+              1.6244991857729985,
+              1.6108569763527372,
+              1.595370774558198,
+              1.611558020034257,
+              1.5469263331236323,
+              1.60955958667847
+            ],
+            "control_over_expat": [
+              1.572290364130023,
+              1.5542229230031332,
+              1.5412674299196294,
+              1.5281273169563088,
+              1.5636546094881372,
+              1.4819234780998343,
+              1.5791376034066973
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0438638404643852,
+            "candidate_over_expat": 1.6108569763527372,
+            "control_over_expat": 1.5542229230031332
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0176303686928236,
+              1.0263025888203092,
+              1.0174981648026824,
+              1.0412430443663983,
+              1.0563794018757742,
+              1.0334337016137956,
+              1.0207962869875684
+            ],
+            "candidate_over_expat": [
+              1.1699599502578546,
+              1.1926037541097296,
+              1.1780866435017376,
+              1.2753222638814496,
+              1.2319319445559083,
+              1.2039488827304283,
+              1.0983959482889474
+            ],
+            "control_over_expat": [
+              1.1496904831571633,
+              1.1620391170215953,
+              1.1578267993536846,
+              1.2248074748556805,
+              1.1661832314871075,
+              1.1649986649848545,
+              1.0760187534874175
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0263025888203092,
+            "candidate_over_expat": 1.1926037541097296,
+            "control_over_expat": 1.1620391170215953
+          }
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0086704571326985,
+              1.0012769185583543,
+              1.0096552481679664,
+              1.1072832585079901,
+              1.0089351430246627,
+              1.0243028302868111,
+              1.0438866493550614
+            ],
+            "candidate_over_expat": [
+              1.525078927947449,
+              1.4422926385614676,
+              1.5302325470778215,
+              1.6762646846153122,
+              1.4877670778032246,
+              1.4856942996653315,
+              1.553503047553063
+            ],
+            "control_over_expat": [
+              1.5119694615451724,
+              1.4404532970140675,
+              1.5155990620109685,
+              1.5138535435584897,
+              1.4745913928055703,
+              1.4504443956767432,
+              1.4881913170485082
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0096552481679664,
+            "candidate_over_expat": 1.525078927947449,
+            "control_over_expat": 1.4881913170485082
+          }
+        },
+        {
+          "condition": {
+            "name": "maven",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 128
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.026886657617845,
+              1.0409515202449162,
+              1.0237395803355969,
+              1.0367341129616765,
+              1.0461201081973632,
+              1.0361746675301864,
+              0.9968035610054944
+            ],
+            "candidate_over_expat": [
+              1.749817737664802,
+              1.6566373804251524,
+              1.717429491915435,
+              1.7247682019732953,
+              1.7386901916017077,
+              1.7264158712729116,
+              1.7178760819164978
+            ],
+            "control_over_expat": [
+              1.7040027978589194,
+              1.591464490138193,
+              1.6776038798386952,
+              1.6636553002448105,
+              1.662036871270696,
+              1.6661436776754792,
+              1.7233847762177374
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0361746675301864,
+            "candidate_over_expat": 1.7247682019732953,
+            "control_over_expat": 1.6661436776754792
+          }
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 512
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0101206527928488,
+              1.0101050192553183,
+              0.9988156661251887,
+              1.0236179945939914,
+              1.0095783177810946,
+              1.016446919346147,
+              1.0211565738043935
+            ],
+            "candidate_over_expat": [
+              1.1422040082448845,
+              1.156670460966482,
+              1.1321369185221235,
+              1.1638797492183535,
+              1.1621009175445898,
+              1.1576621548634183,
+              1.160851584103982
+            ],
+            "control_over_expat": [
+              1.1307599791043206,
+              1.145099211386175,
+              1.1334793364967353,
+              1.1370254874036243,
+              1.151075550135345,
+              1.138930260724398,
+              1.136800774614949
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0101206527928488,
+            "candidate_over_expat": 1.1576621548634183,
+            "control_over_expat": 1.1370254874036243
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.021273668213743,
+              1.0209997176404637,
+              1.008031980319803,
+              1.0120562859490552,
+              1.0215965227928947,
+              1.0233949642293043,
+              1.0142373452094229
+            ],
+            "candidate_over_expat": [
+              1.2850036950713435,
+              1.2737248892465682,
+              1.2566587441539523,
+              1.2773008807112063,
+              1.3063263918536439,
+              1.2674934792614947,
+              1.273908199528567
+            ],
+            "control_over_expat": [
+              1.2582363915431962,
+              1.2475271709086797,
+              1.2466457103427127,
+              1.2620848251670294,
+              1.2787106873487977,
+              1.2385183859254336,
+              1.2560257276520679
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0209997176404637,
+            "candidate_over_expat": 1.273908199528567,
+            "control_over_expat": 1.2560257276520679
+          }
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0086916294676918,
+              1.009802161908689,
+              1.0188787838352724,
+              1.0148814988773238,
+              1.0089042552681111,
+              0.9967309328311842,
+              1.003020439797723
+            ],
+            "candidate_over_expat": [
+              1.610263195683837,
+              1.5887153603691841,
+              1.615331482911636,
+              1.5970845362810726,
+              1.5546823789175894,
+              1.611851935819619,
+              1.613164259571314
+            ],
+            "control_over_expat": [
+              1.596387982850227,
+              1.5732936809783173,
+              1.5854010393966504,
+              1.5736660270660072,
+              1.54096126644291,
+              1.6171384700996507,
+              1.6083064667123208
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0089042552681111,
+            "candidate_over_expat": 1.610263195683837,
+            "control_over_expat": 1.5854010393966504
+          }
+        }
+      ]
+    }
+  },
+  "all_conditions": [
+    {
+      "condition": {
+        "name": "vulkan",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 7
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9840853678984328,
+          0.9999080438199865,
+          0.9930353884744686,
+          1.033420351767174,
+          1.003319939855008,
+          1.0024408417149158,
+          0.9976184879714027
+        ],
+        "candidate_over_expat": [
+          1.2509664017454463,
+          1.2491421852762723,
+          1.264766581239818,
+          1.261336432248598,
+          1.267631644778313,
+          1.2347121240875998,
+          1.2712221282117846
+        ],
+        "control_over_expat": [
+          1.271197034884232,
+          1.2492570621835655,
+          1.2736369679461184,
+          1.2205453764208165,
+          1.2634371095639754,
+          1.2317057253726098,
+          1.2742567860753446
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9999080438199865,
+        "candidate_over_expat": 1.261336432248598,
+        "control_over_expat": 1.2634371095639754
+      }
+    },
+    {
+      "condition": {
+        "name": "vulkan",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 7
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0010254171604174,
+          0.9941797138249221,
+          0.9959268008062712,
+          0.9914189954951711,
+          0.9817938977056451,
+          0.9923138934603702,
+          0.981423870952541
+        ],
+        "candidate_over_expat": [
+          1.275854965653423,
+          1.2830108634419033,
+          1.2911761385317824,
+          1.2782282466894792,
+          1.2533637649633846,
+          1.2951265069106974,
+          1.2820888892663178
+        ],
+        "control_over_expat": [
+          1.2745480222396426,
+          1.2905220712116092,
+          1.2964568655914135,
+          1.2892916642686065,
+          1.2766057803907433,
+          1.3051580910495642,
+          1.3063559255207031
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9923138934603702,
+        "candidate_over_expat": 1.2820888892663178,
+        "control_over_expat": 1.2905220712116092
+      }
+    },
+    {
+      "condition": {
+        "name": "wayland",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 64
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0070738743400194,
+          1.0129927411472484,
+          0.9989286819524548,
+          0.9873389404375946,
+          1.0002523070677938,
+          0.9913647490064524,
+          0.9961846702597207
+        ],
+        "candidate_over_expat": [
+          0.8335059245943716,
+          0.8469408697477574,
+          0.8239931605652003,
+          0.8590040658869279,
+          0.8370750086804742,
+          0.8196067988100783,
+          0.8299708058664883
+        ],
+        "control_over_expat": [
+          0.8276512238395672,
+          0.8360779256804627,
+          0.8248768660387903,
+          0.8700194337581906,
+          0.8368638620133071,
+          0.826745957662394,
+          0.8331495461078539
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9989286819524548,
+        "candidate_over_expat": 0.8335059245943716,
+        "control_over_expat": 0.8331495461078539
+      }
+    },
+    {
+      "condition": {
+        "name": "wayland",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 64
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.01009819494903,
+          1.0022026395385344,
+          0.9895421302440915,
+          1.0033035427144505,
+          0.9918937256332018,
+          0.9990722811368051,
+          1.010600848728559
+        ],
+        "candidate_over_expat": [
+          0.88987024405724,
+          0.8505746536422107,
+          0.8467396008498601,
+          0.8962319811816328,
+          0.8503333606739861,
+          0.8650635688464263,
+          0.859945085138648
+        ],
+        "control_over_expat": [
+          0.8809739968916026,
+          0.8487052618758408,
+          0.8556882774066363,
+          0.8932809892775478,
+          0.8572827296907773,
+          0.865866849856053,
+          0.8509245625714134
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0022026395385344,
+        "candidate_over_expat": 0.859945085138648,
+        "control_over_expat": 0.8572827296907773
+      }
+    },
+    {
+      "condition": {
+        "name": "maven",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 128
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.972050658811909,
+          0.9894804142538559,
+          0.9839292160175706,
+          0.9895385378409233,
+          0.9939142146193444,
+          0.991244582435578,
+          0.9847727634996392
+        ],
+        "candidate_over_expat": [
+          1.3788169726768782,
+          1.3517976904260236,
+          1.295426579277646,
+          1.376325836415752,
+          1.3736732610669011,
+          1.3400891569667193,
+          1.3278741659818283
+        ],
+        "control_over_expat": [
+          1.4184620525458418,
+          1.366169224729307,
+          1.316585134569795,
+          1.3908764376360327,
+          1.382084329675272,
+          1.3519258321432621,
+          1.3484066732947524
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9894804142538559,
+        "candidate_over_expat": 1.3517976904260236,
+        "control_over_expat": 1.366169224729307
+      }
+    },
+    {
+      "condition": {
+        "name": "maven",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 128
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0348464765269543,
+          1.045216333982563,
+          1.0451508577176232,
+          1.0440038319161937,
+          1.0306355446116078,
+          1.0438638404643852,
+          1.0192649349911893
+        ],
+        "candidate_over_expat": [
+          1.627079143397236,
+          1.6244991857729985,
+          1.6108569763527372,
+          1.595370774558198,
+          1.611558020034257,
+          1.5469263331236323,
+          1.60955958667847
+        ],
+        "control_over_expat": [
+          1.572290364130023,
+          1.5542229230031332,
+          1.5412674299196294,
+          1.5281273169563088,
+          1.5636546094881372,
+          1.4819234780998343,
+          1.5791376034066973
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0438638404643852,
+        "candidate_over_expat": 1.6108569763527372,
+        "control_over_expat": 1.5542229230031332
+      }
+    },
+    {
+      "condition": {
+        "name": "batik",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 512
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.020635931842557,
+          1.0234457728092086,
+          1.010013716872553,
+          1.034975335845906,
+          1.0032577943026295,
+          1.0124231552254448,
+          1.039982228341792
+        ],
+        "candidate_over_expat": [
+          0.9471411626923696,
+          0.9531952856502935,
+          0.9361218703089383,
+          0.9571606743825211,
+          0.94403351492228,
+          0.9444888059701493,
+          0.9745983638225485
+        ],
+        "control_over_expat": [
+          0.927991199548004,
+          0.9313588574741115,
+          0.9268407494579219,
+          0.924814960542238,
+          0.9409680346201381,
+          0.9328992537313433,
+          0.9371298251668247
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.020635931842557,
+        "candidate_over_expat": 0.9471411626923696,
+        "control_over_expat": 0.9313588574741115
+      }
+    },
+    {
+      "condition": {
+        "name": "batik",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 512
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9886661128292482,
+          0.9979448759851153,
+          1.0042169185742362,
+          1.0129772573302023,
+          0.9929445906776065,
+          1.0097393105343058,
+          0.9963578037556646
+        ],
+        "candidate_over_expat": [
+          1.01906893239164,
+          1.0104473335482251,
+          1.0168544553888446,
+          1.03820693624982,
+          1.0130085603335455,
+          0.9814438213402902,
+          1.014509704635332
+        ],
+        "control_over_expat": [
+          1.0307513519153484,
+          1.0125282045772,
+          1.0125844691329744,
+          1.024906461361347,
+          1.0202065350315739,
+          0.9719774313044789,
+          1.018218255340848
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9979448759851153,
+        "candidate_over_expat": 1.014509704635332,
+        "control_over_expat": 1.018218255340848
+      }
+    },
+    {
+      "condition": {
+        "name": "gtk",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0295976496283739,
+          1.0404374911223393,
+          1.0042630617049815,
+          1.0022165439759894,
+          1.0034979924565033,
+          1.0048879771139083,
+          1.001558854333049
+        ],
+        "candidate_over_expat": [
+          1.1808762463809095,
+          1.2071694950370104,
+          1.1582679005421574,
+          1.1491409398157946,
+          1.1519659763072563,
+          1.1536067485147041,
+          1.145357897608775
+        ],
+        "control_over_expat": [
+          1.1469298194368824,
+          1.1602518222741227,
+          1.153351093662367,
+          1.1465994517082378,
+          1.147950454277753,
+          1.1479953734026396,
+          1.1435752304056896
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0042630617049815,
+        "candidate_over_expat": 1.1536067485147041,
+        "control_over_expat": 1.147950454277753
+      }
+    },
+    {
+      "condition": {
+        "name": "gtk",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0176303686928236,
+          1.0263025888203092,
+          1.0174981648026824,
+          1.0412430443663983,
+          1.0563794018757742,
+          1.0334337016137956,
+          1.0207962869875684
+        ],
+        "candidate_over_expat": [
+          1.1699599502578546,
+          1.1926037541097296,
+          1.1780866435017376,
+          1.2753222638814496,
+          1.2319319445559083,
+          1.2039488827304283,
+          1.0983959482889474
+        ],
+        "control_over_expat": [
+          1.1496904831571633,
+          1.1620391170215953,
+          1.1578267993536846,
+          1.2248074748556805,
+          1.1661832314871075,
+          1.1649986649848545,
+          1.0760187534874175
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0263025888203092,
+        "candidate_over_expat": 1.1926037541097296,
+        "control_over_expat": 1.1620391170215953
+      }
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9848852584126082,
+          0.9922409838083408,
+          0.9844112725319698,
+          0.964335291909306,
+          1.0052405747118693,
+          0.9950140320975868,
+          0.9931890470034043
+        ],
+        "candidate_over_expat": [
+          1.195399234731658,
+          1.1977383425497945,
+          1.1848434661822844,
+          1.1922251815392586,
+          1.2150444543352477,
+          1.2028927269196747,
+          1.1967017388773298
+        ],
+        "control_over_expat": [
+          1.213744671798973,
+          1.2071042842362045,
+          1.2036061545036865,
+          1.2363181058931785,
+          1.2087101186534517,
+          1.2089203650564198,
+          1.2049083127607507
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9922409838083408,
+        "candidate_over_expat": 1.1967017388773298,
+        "control_over_expat": 1.2087101186534517
+      }
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0086704571326985,
+          1.0012769185583543,
+          1.0096552481679664,
+          1.1072832585079901,
+          1.0089351430246627,
+          1.0243028302868111,
+          1.0438866493550614
+        ],
+        "candidate_over_expat": [
+          1.525078927947449,
+          1.4422926385614676,
+          1.5302325470778215,
+          1.6762646846153122,
+          1.4877670778032246,
+          1.4856942996653315,
+          1.553503047553063
+        ],
+        "control_over_expat": [
+          1.5119694615451724,
+          1.4404532970140675,
+          1.5155990620109685,
+          1.5138535435584897,
+          1.4745913928055703,
+          1.4504443956767432,
+          1.4881913170485082
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0096552481679664,
+        "candidate_over_expat": 1.525078927947449,
+        "control_over_expat": 1.4881913170485082
+      }
+    },
+    {
+      "condition": {
+        "name": "generated-rare-declarations",
+        "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0075103692105591,
+          1.025755491366411,
+          1.015583893212417,
+          1.004488386232996,
+          1.0220184181458798,
+          1.0243818859174865,
+          1.0097713037931764
+        ],
+        "candidate_over_expat": [
+          4.594992938591903,
+          4.7092571731408235,
+          4.7762665925082235,
+          4.667452282545635,
+          4.6823804596589556,
+          4.691983278701392,
+          4.709368218971268
+        ],
+        "control_over_expat": [
+          4.560740096593088,
+          4.591013367978769,
+          4.702975918021211,
+          4.646596562504204,
+          4.581503010634204,
+          4.580306761768852,
+          4.663796843186833
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.015583893212417,
+        "candidate_over_expat": 4.691983278701392,
+        "control_over_expat": 4.591013367978769
+      }
+    },
+    {
+      "condition": {
+        "name": "generated-entities",
+        "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0075657169711112,
+          0.9948980175400223,
+          0.9935285584189082,
+          0.9974526153389283,
+          0.9956559032653224,
+          1.000281550160349,
+          0.9872218039999454
+        ],
+        "candidate_over_expat": [
+          2.6608133506980183,
+          2.624294249467612,
+          2.622314486235782,
+          2.666758777180722,
+          2.626352236406154,
+          2.625590599128852,
+          2.603690102575086
+        ],
+        "control_over_expat": [
+          2.6408335514797083,
+          2.6377520139766917,
+          2.6393951779392313,
+          2.6735693868270363,
+          2.6378111431799383,
+          2.624851571747934,
+          2.637391204312612
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9956559032653224,
+        "candidate_over_expat": 2.625590599128852,
+        "control_over_expat": 2.6378111431799383
+      }
+    },
+    {
+      "condition": {
+        "name": "vulkan",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 7
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0004184051503735,
+          1.0068548019489878,
+          1.0045482799282306,
+          0.9776662469549653,
+          1.0056864666382392,
+          0.997567498086411,
+          1.000438469676199
+        ],
+        "candidate_over_expat": [
+          1.2395120037349243,
+          1.2485886577681415,
+          1.208667522508265,
+          1.2201051957175455,
+          1.2424123737987594,
+          1.2186021049467113,
+          1.2317989579131234
+        ],
+        "control_over_expat": [
+          1.2389936024303878,
+          1.2400880994471346,
+          1.2031950545917192,
+          1.2479772105436588,
+          1.2353873846506418,
+          1.2215735850298863,
+          1.2312590881394296
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.000438469676199,
+        "candidate_over_expat": 1.2317989579131234,
+        "control_over_expat": 1.2353873846506418
+      }
+    },
+    {
+      "condition": {
+        "name": "vulkan",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 7
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.991516017985866,
+          0.994574725259837,
+          0.9896225891567166,
+          1.0026426195171216,
+          0.9987269115293917,
+          0.9950934849311481,
+          0.996416104006085
+        ],
+        "candidate_over_expat": [
+          1.256714549549872,
+          1.2626294200600403,
+          1.2598284513918139,
+          1.2789458620769838,
+          1.2587381721641477,
+          1.2732260747131023,
+          1.2697304595872934
+        ],
+        "control_over_expat": [
+          1.2674677229145745,
+          1.2695168980190732,
+          1.2730393032614047,
+          1.2755750026793509,
+          1.260342699924437,
+          1.2795039802729675,
+          1.2742974089663441
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9950934849311481,
+        "candidate_over_expat": 1.2626294200600403,
+        "control_over_expat": 1.2730393032614047
+      }
+    },
+    {
+      "condition": {
+        "name": "wayland",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 64
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0175447017738486,
+          1.0118577688717296,
+          0.9978696025674082,
+          0.9968337998882659,
+          0.9752979073540226,
+          1.0153766626546925,
+          0.9826936070457043
+        ],
+        "candidate_over_expat": [
+          0.8480302216892677,
+          0.8158418987555064,
+          0.8049907791167122,
+          0.8077060313270545,
+          0.8028416913337927,
+          0.8277404434639147,
+          0.7907923223018154
+        ],
+        "control_over_expat": [
+          0.8334083212373152,
+          0.8062812026093445,
+          0.8067093907315744,
+          0.8102715130823107,
+          0.8231758576329743,
+          0.81520530647198,
+          0.8047191073921744
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9978696025674082,
+        "candidate_over_expat": 0.8077060313270545,
+        "control_over_expat": 0.8102715130823107
+      }
+    },
+    {
+      "condition": {
+        "name": "wayland",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 64
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9996023077811224,
+          0.9729388584796386,
+          0.9978067813140316,
+          1.0063287607078315,
+          0.9974066880638597,
+          1.0068505947925437,
+          1.024986541112261
+        ],
+        "candidate_over_expat": [
+          0.8199989954580352,
+          0.8295628228261086,
+          0.8290976934526315,
+          0.8522149294513337,
+          0.829401404202958,
+          0.8295467063825939,
+          0.8471305452671196
+        ],
+        "control_over_expat": [
+          0.8203252324199175,
+          0.8526361297999996,
+          0.8309200829050052,
+          0.8468553843695202,
+          0.8315578932130191,
+          0.8239024843139886,
+          0.8264796768432281
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9996023077811224,
+        "candidate_over_expat": 0.8295467063825939,
+        "control_over_expat": 0.8309200829050052
+      }
+    },
+    {
+      "condition": {
+        "name": "maven",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 128
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0281006764403269,
+          0.9908082517189624,
+          0.9910836419224331,
+          0.995550757468498,
+          0.9829891834440649,
+          0.9796816172681924,
+          0.9826954700772024
+        ],
+        "candidate_over_expat": [
+          1.4444934194962211,
+          1.5017491061894723,
+          1.5139748927021346,
+          1.5015348313287102,
+          1.3522191643672588,
+          1.423838508846149,
+          1.374252941922023
+        ],
+        "control_over_expat": [
+          1.4050116419508674,
+          1.5156808631580065,
+          1.527595481008479,
+          1.5082453808250185,
+          1.3756195766361698,
+          1.4533686084837156,
+          1.3984525051428796
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9908082517189624,
+        "candidate_over_expat": 1.4444934194962211,
+        "control_over_expat": 1.4533686084837156
+      }
+    },
+    {
+      "condition": {
+        "name": "maven",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 128
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.026886657617845,
+          1.0409515202449162,
+          1.0237395803355969,
+          1.0367341129616765,
+          1.0461201081973632,
+          1.0361746675301864,
+          0.9968035610054944
+        ],
+        "candidate_over_expat": [
+          1.749817737664802,
+          1.6566373804251524,
+          1.717429491915435,
+          1.7247682019732953,
+          1.7386901916017077,
+          1.7264158712729116,
+          1.7178760819164978
+        ],
+        "control_over_expat": [
+          1.7040027978589194,
+          1.591464490138193,
+          1.6776038798386952,
+          1.6636553002448105,
+          1.662036871270696,
+          1.6661436776754792,
+          1.7233847762177374
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0361746675301864,
+        "candidate_over_expat": 1.7247682019732953,
+        "control_over_expat": 1.6661436776754792
+      }
+    },
+    {
+      "condition": {
+        "name": "batik",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 512
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0267047734475445,
+          1.0012199699699702,
+          1.0154491436560644,
+          0.9765625000000001,
+          1.012577739124727,
+          1.0108138078321045,
+          1.020479177377892
+        ],
+        "candidate_over_expat": [
+          1.0716734051919412,
+          1.0517817801513893,
+          1.0465905767771848,
+          1.0538501371610025,
+          1.0541218071635696,
+          1.0548697903272815,
+          1.0661280965988442
+        ],
+        "control_over_expat": [
+          1.0437989896485995,
+          1.05050020145217,
+          1.0306676442790603,
+          1.0791425404528665,
+          1.0410280282032995,
+          1.0435846662894959,
+          1.0447328277077113
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.012577739124727,
+        "candidate_over_expat": 1.0541218071635696,
+        "control_over_expat": 1.0437989896485995
+      }
+    },
+    {
+      "condition": {
+        "name": "batik",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 512
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0101206527928488,
+          1.0101050192553183,
+          0.9988156661251887,
+          1.0236179945939914,
+          1.0095783177810946,
+          1.016446919346147,
+          1.0211565738043935
+        ],
+        "candidate_over_expat": [
+          1.1422040082448845,
+          1.156670460966482,
+          1.1321369185221235,
+          1.1638797492183535,
+          1.1621009175445898,
+          1.1576621548634183,
+          1.160851584103982
+        ],
+        "control_over_expat": [
+          1.1307599791043206,
+          1.145099211386175,
+          1.1334793364967353,
+          1.1370254874036243,
+          1.151075550135345,
+          1.138930260724398,
+          1.136800774614949
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0101206527928488,
+        "candidate_over_expat": 1.1576621548634183,
+        "control_over_expat": 1.1370254874036243
+      }
+    },
+    {
+      "condition": {
+        "name": "gtk",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0172651085580227,
+          1.018419451211884,
+          1.0179909694057767,
+          1.0212048665787576,
+          1.0206425882679122,
+          1.0179641094023668,
+          1.0148420545226062
+        ],
+        "candidate_over_expat": [
+          1.2618479802489888,
+          1.3036614825068533,
+          1.2561387386441212,
+          1.3141241076331684,
+          1.2901003097444137,
+          1.2720869006513895,
+          1.2611566270102856
+        ],
+        "control_over_expat": [
+          1.2404317907233282,
+          1.280083055125804,
+          1.2339389802026992,
+          1.2868369028006588,
+          1.2640079147919805,
+          1.2496382621959183,
+          1.2427122244195414
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0179909694057767,
+        "candidate_over_expat": 1.2720869006513895,
+        "control_over_expat": 1.2496382621959183
+      }
+    },
+    {
+      "condition": {
+        "name": "gtk",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.021273668213743,
+          1.0209997176404637,
+          1.008031980319803,
+          1.0120562859490552,
+          1.0215965227928947,
+          1.0233949642293043,
+          1.0142373452094229
+        ],
+        "candidate_over_expat": [
+          1.2850036950713435,
+          1.2737248892465682,
+          1.2566587441539523,
+          1.2773008807112063,
+          1.3063263918536439,
+          1.2674934792614947,
+          1.273908199528567
+        ],
+        "control_over_expat": [
+          1.2582363915431962,
+          1.2475271709086797,
+          1.2466457103427127,
+          1.2620848251670294,
+          1.2787106873487977,
+          1.2385183859254336,
+          1.2560257276520679
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0209997176404637,
+        "candidate_over_expat": 1.273908199528567,
+        "control_over_expat": 1.2560257276520679
+      }
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9831209565856576,
+          0.9863253560772265,
+          0.9966075914360122,
+          0.9868626472486873,
+          0.987579983443027,
+          0.983595938215625,
+          0.9986822159046403
+        ],
+        "candidate_over_expat": [
+          1.265449202967751,
+          1.2454224174709145,
+          1.2960283398868324,
+          1.2776190617313221,
+          1.2840780353781789,
+          1.2599697889609915,
+          1.2862517729023375
+        ],
+        "control_over_expat": [
+          1.2871754940130755,
+          1.2626892432575783,
+          1.3004399635561523,
+          1.294627033755149,
+          1.3002268746896455,
+          1.280983115126264,
+          1.287949011625492
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9868626472486873,
+        "candidate_over_expat": 1.2776190617313221,
+        "control_over_expat": 1.287949011625492
+      }
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0086916294676918,
+          1.009802161908689,
+          1.0188787838352724,
+          1.0148814988773238,
+          1.0089042552681111,
+          0.9967309328311842,
+          1.003020439797723
+        ],
+        "candidate_over_expat": [
+          1.610263195683837,
+          1.5887153603691841,
+          1.615331482911636,
+          1.5970845362810726,
+          1.5546823789175894,
+          1.611851935819619,
+          1.613164259571314
+        ],
+        "control_over_expat": [
+          1.596387982850227,
+          1.5732936809783173,
+          1.5854010393966504,
+          1.5736660270660072,
+          1.54096126644291,
+          1.6171384700996507,
+          1.6083064667123208
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0089042552681111,
+        "candidate_over_expat": 1.610263195683837,
+        "control_over_expat": 1.5854010393966504
+      }
+    },
+    {
+      "condition": {
+        "name": "generated-rare-declarations",
+        "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.996860576252462,
+          1.0043383845605554,
+          1.0402737467527865,
+          1.0551657350905035,
+          1.0046256332757526,
+          1.0140172395703022,
+          1.0146495034155998
+        ],
+        "candidate_over_expat": [
+          4.616154183637918,
+          4.74781038868068,
+          4.857579943310392,
+          4.87114043485732,
+          4.616615013616033,
+          4.649694050119078,
+          3.7275876599178703
+        ],
+        "control_over_expat": [
+          4.6306918877177505,
+          4.727301536680854,
+          4.669520843406192,
+          4.616469501295467,
+          4.595358570100163,
+          4.585419131620902,
+          3.673768771748024
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0140172395703022,
+        "candidate_over_expat": 4.649694050119078,
+        "control_over_expat": 4.616469501295467
+      }
+    },
+    {
+      "condition": {
+        "name": "generated-entities",
+        "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9983075091439914,
+          1.0579712685109628,
+          0.9870209865826655,
+          0.9913101718592731,
+          0.9963452713596479,
+          1.0025721190706505,
+          1.0043033135066866
+        ],
+        "candidate_over_expat": [
+          2.6477266069703185,
+          2.7959671008911444,
+          2.6197213481219612,
+          2.638998690474551,
+          2.649321036828669,
+          2.6435467656110245,
+          2.675291399136243
+        ],
+        "control_over_expat": [
+          2.652215457380099,
+          2.6427627896042174,
+          2.654169854272448,
+          2.662132161445413,
+          2.6590391031949316,
+          2.6367646928597024,
+          2.6638281116439146
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9983075091439914,
+        "candidate_over_expat": 2.6477266069703185,
+        "control_over_expat": 2.654169854272448
+      }
+    }
+  ],
+  "libraries": {
+    "control": {
+      "path": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025"
+    },
+    "candidate": {
+      "path": "/tmp/oriole-namespace-name-storage-study/normal/liboriole_expat.so",
+      "sha256": "87ff6d407ec35b3391ff27e6a79985b6f048e3db9c8254e92ee3452feaaa8360"
+    },
+    "expat": {
+      "path": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+    }
+  },
+  "raw_schedule_process_medians_ratios_callback_equality_exact": true,
+  "reader_sha256": "9c6382b60b6129e3b706ca674cfc1f4227dd2b71e83aa46ffcd4b99364c74f33",
+  "conditions_csv_sha256": "1a324af3201b70d38ce4a2765f51d284919fb5e76a9505c91d335dd8b9b591d6",
+  "limitations": [
+    "All 28 conditions and adverse results retained. Median of seven paired process-median ratios, equally weighted geometric mean across conditions.",
+    "Shared host and CPU affinity do not establish isolation or whole-application performance.",
+    "Native callback hashes merge adjacent text fragments and do not establish exact callback fragmentation compatibility."
+  ],
+  "inputs": {
+    "/tmp/oriole-namespace-name-storage-benchmark/binding.json": "aa68527fc4487dbbd0e78f39e99caccc35e59a87b7c92f7b7aee15429c2ad28b",
+    "/tmp/oriole-namespace-name-storage-benchmark/preparation.json": "722f7df32016223871e39f94b94591f506318d3f5439bd1a0ea0a09a4650ead9",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+    "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "/tmp/oriole-grammar-bench-plain/native-driver": "e9478cd0f8572b08ab513377795a07754086a9cdf2c06748183db3c69d232e23",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/native/native-screen/protocol.json": "2a4e8c5aac3d2763b0be6701ad80169bed145f8287c378e8e10e0676a3774a17",
+    "/tmp/oriole-namespace-name-storage-benchmark/commands.json": "6ad377a42e001a3e00a9d5886fc38c92d6c0805b2524e03b80d7f7d7f60fc178",
+    "/tmp/oriole-namespace-name-storage-benchmark/README.md": "3e573ed7664681d81bc39f04d2686991c3905c449aa84f3c79a6e61f45aa330e",
+    "/tmp/oriole-namespace-name-storage-benchmark/observe-host.py": "a0df67eb5c89a0ffbf30ee377dd0302aff64ca2336fedef9f4af1655710a2cb7",
+    "/tmp/oriole-namespace-name-storage-benchmark/commands.json.patch": "4f275ad705024c3b834e34d1beb084b9e8581550d73d0b5589e5148d0922a08a",
+    "/tmp/oriole-namespace-name-storage-benchmark/monitor-host.py": "bcfd3b9bba19053d43663b9cb79a74cfbf0d6124039b40a72bd9f232bdea4cc4",
+    "/tmp/oriole-namespace-name-storage-benchmark/bind.py": "24b1fc40db7c2d1a0a4aae6cac13b3e1d602306efebb625927382848d284fe7a",
+    "/tmp/oriole-namespace-name-storage-benchmark/python/build_consumers.py": "4e7c91024b658618547c27023955e34a18fdc7a062764aaf1e26bc6910d3a099",
+    "/tmp/oriole-namespace-name-storage-benchmark/python/elapsed_review.py.patch": "edcef19d8a04e978ef76b7d9125d86b1141eff2e16fddec04aa3c7f9f031ab33",
+    "/tmp/oriole-namespace-name-storage-benchmark/python/python_worker.py": "4bc0ccffedb5048412b9cfc3638d28dcb30f711891c3784f3fbd3c0eb536ab68",
+    "/tmp/oriole-namespace-name-storage-benchmark/python/elapsed_review.py": "4be603820c5f2dfcb9a1f1ea4a1253931655ce2d756bf2da95c7e73e37158335",
+    "/tmp/oriole-namespace-name-storage-benchmark/python/reuse.json": "928d24a72bb369858c3586fe4c44731f5370669b9884e390a581f269923950ef",
+    "/tmp/oriole-namespace-name-storage-benchmark/python/preflight_review.py": "769e36fe6667fad25b13719cd03e00c944d81be38bf5e7311c8f8df2d43148d0",
+    "/tmp/oriole-namespace-name-storage-benchmark/python/consumer_screen.py": "1ceb2e83dabdea48fbdaefd00e294c1769fa9e8ba9f7b966c3eb198fb5e140cf",
+    "/tmp/oriole-namespace-name-storage-benchmark/python/run.py": "6b56b00f60a8743921c0df6ff7d0c1aedc58d1b4c5631a6117d720801fb0197f",
+    "/tmp/oriole-namespace-name-storage-benchmark/python/preflight_review.py.patch": "4209d1e39b7b3455738571f7ed261f65d7660ddc6ae30e24436b2eeb88770d0e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native_screen.py.patch": "c84c7872ae0cc6a7fdba17c1d6530bc8d08a6d6f2222769f70d40824e07cde16",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/read_results.py": "9c6382b60b6129e3b706ca674cfc1f4227dd2b71e83aa46ffcd4b99364c74f33",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native_screen.py": "a78c80c79fdf2c110367f3ba8f52402dc1446f492f771c8ece807b0dab9bab26",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/run.py": "70e1822662ed23fb0bad312cd82e3eb63cd4bdcd74606b4d516ffa79da84b81d",
+    "/tmp/oriole-namespace-name-storage-study/build.json": "ef1665c640369b20300212c1833da6784049f0903baeb20397306c3d8db4feae",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/protocol.json": "61164da0e11d8e151e10ce1068c0ed88ba4eab5ca8bdd68280e4c72a252882a4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/preflight.json": "e7cfdbd1408d7db49bba0d2a2df4600b71743270f4c524dfc3fcedea9206da20",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/results.json": "12726668633c4bcc370541f5fb2f81e180c37f3bacdaa2d85dc4e2232fdb5ca7",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/controller.json": "e6736c7f43076ee1f3c0c9c3b6600b865b900b95fe401e1be5bb9aeaee7071d6",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus-manifest.json": "c725b079ba4f0b19912880f53c6f0ac83758711071151abc8765d1e06491ff42",
+    "/tmp/oriole-namespace-name-storage-study/normal/liboriole_expat.so": "87ff6d407ec35b3391ff27e6a79985b6f048e3db9c8254e92ee3452feaaa8360",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml": "cf31c965cf6e788697139601da0c7e02a75a9b6c7ac764e7641f5521ffd9da06",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml": "7eb8569529235c85e16d15612fc367da4538b7d515b13e32ec48ba0742c42610",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml": "5dbb69898d881458df5735b8c50c5166d21aa2d69659d21eea4d888a295b3b3f",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg": "15ab08890f4e57be784d687d3522ef8799486e725826f8abeec29c6cde38050f",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui": "2620a2b6553ce99cc564eb3d359eb9cb9c7b8f259e0ccc1aa49bb3534a38101d",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl": "7f13c5f4977faa028462910cf6d3fdeeeab64d87553f1fff12f0afa8f1c49818",
+    "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml": "1a1beb69a6a29bc1314d6a95ee96e87eafd8cbaa832a66b2f6e35d60513b8eb0",
+    "/tmp/oriole-grammar-bench-plain/entities.xml": "886867572522d64996e8396ae12a85c634966b960c47dbcf548a62659e1eb333",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/preflight-controller.log": "a24bc33b149997b15045b5410e26157774cc711a3e3c2f98e9cc8aaab531bdc4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/time-controller.log": "ff4d3521f295fc0d7a168c84fafb2014cf5ef8078af073ff7bae713001a5d945",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0000.json": "6378a8b6665c30243d535be3db6b59a0debe2478ff54a94db52b1099e55392b8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0001.json": "5dfa8e86a684a2f213d4fe2aea7092de6d05d095ac48e564172123f0bb32c7e1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0002.json": "34d8e897ccc89a72dd9a3fe79286e79e211fb5a6551393ba4589a89674d49fb4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0003.json": "953d51d1951e85a19f19c6a2a83eb0a9ab7dc0457b5d97443940154ab276d44e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0004.json": "5d171de834ac2bcd3444f82cb6230a6cb3913d8f94d20583a3077c81b591b2e3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0005.json": "52de1bcf9b9af44da2c34e0263082104f8ece41f35863f51fd591ed2bfd00ef6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0006.json": "13410589f1904fa27515bfae638bfa1554cd9ff11e3b814004d4c8c1d4a6aa48",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0007.json": "62c3e1509504bcb5d7acdf146411c6e0954bffe40d986389623917d997d2fc83",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0008.json": "0d53a27558038fd4c9a43c23b1bf4bd049d69894e4a00103d19447c8988d6d8e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0009.json": "7035b0dd920c39df101294bf9c0abedca46bde6004ac7eac9d8be3af1ace2347",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0010.json": "20c2966aaeee72d6747fabc5553f55873a1409d589dccb26353cfc48aeb99de5",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0011.json": "fa5a5a93d020e70eb7a546564d8d073a939ea5499445db275679952c983275a3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0012.json": "c2dee9821f2523b3000a86e08e33f06eba54fdb1db38385bdb12d831dcac1d4f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0013.json": "4eef1c98cd6692820a31f64541d82dc67e34c231d4705c0969adb9542cf86070",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0014.json": "030e915ea59dd5535f698afcd1e6016162532ca35b01581423afc86c6ac5b3dd",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0015.json": "598166b52fde2c316713793bfb51b7318bcb4a22e1cea32b57935af45ee50965",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0016.json": "c1b359588f92316fd68e7a68eb05dc5beeaff6df83966697bf7a4aaa8e13431f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0017.json": "8415537145541da58367201073149775bc6df6daf2390cca36476c6da8ab4073",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0018.json": "013566fdf4dcc84658644fe5e9f707f33cb7ca1ae39fe5c35d24be5f84de6d3e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0019.json": "c410c37b15818e725387f8665229b9a56851f4d96f789d8afc2805fe65f6ee13",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0020.json": "08dbc7a5f74e54575031d438c89c5abe945dd5cf76abed96b2cc2531c6d35074",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0021.json": "16063e7957e9730c4fd3fa36f1ef8e905c0cf79a55f04dca7c40bf3357825712",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0022.json": "a4ff8086f116086a444ef55fe484f3baf072412d2087802b0f557f3de8cda5a1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0023.json": "2fb69106d035597ce60b4cf62cfce5ab2e7180b9e5a06b3f757e66f5eaa165b0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0024.json": "0e54af97ecc545cc8ef0ab8e4221132740bb97d06b128d1c201de5e5571baa88",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0025.json": "873a62c7572b97e4dd52b6f766e23cc3cc0991d424b633ff0d6bc5148d2cb0c8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0026.json": "c468f4f63c54ae1fc1f0cf64886959e89b3be490d1c8d55f14f6e6af0ea13c01",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0027.json": "708382a8ef1dee545f55c7f98517e025ce60162ee921d663dfc8522181c479d2",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0028.json": "5e1b9087c7c9d593e675f9d1643180b3dd3d01462c4ffd96165500da557eb8fc",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0029.json": "a29bad727a4a096aa33f857799a28cd7288403dbc138053d9bea6973a47c10cf",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0030.json": "380a7b31985e22582dbdcd2a9dad021752a85c8d3517fbdf9895c06d689f3fdc",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0031.json": "19b4f8427775e0cd84b2c237e167d20d8eadecbc205c5b7a92aad97f9c3a659e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0032.json": "fc3c43fcc4316bcca4e54f2e81254b68b590d6a67a0e36d0b12586c187ae2bc7",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0033.json": "9922da7626d6a12c01e8c5027ae6e8edafd1045d55207081ce3a2ce755d8e61f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0034.json": "356d57b77b82ba8615633c519501599414c7763d6f9907edc972b5bfc4a3d630",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0035.json": "7bdf48793993d01b5df134217c8782389b3ba6afb74e6aa60a570bbfe7a715e3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0036.json": "77194642fcf517efdf8a8f9553d84594e26ee1cf621675fc7172566ad437c71c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0037.json": "f8899dd15d8009053ff9331e6647c5d5e400708185171b239881b8efd704dc95",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0038.json": "7401454b4f701f749621084e43e47cf22b556dd2e571bcf321ce6bc5a4fb1aff",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0039.json": "a5dc3e0ee350e57d133e7833192253f3712dbc1410e9f901b2c586b3868373b7",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0040.json": "e8408077cee3e0c8c334d8f481d66fe824a2bdeb08fbba9bf6b92a8e3fd8833a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0041.json": "b899390277efe2bed8dc2af10487951a3dedab21f92aea29ae5ec58f249be6a9",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0042.json": "95666d664e60e8de860692b8b672f3d9e361e3f0f744c48fec63f8670205ccaa",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0043.json": "9b887ec7ff9ef278cbf6d14b8419aa449e21436c4c533bf14ff389ed814481b5",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0044.json": "09e45588ec2b8f86f3793e0bffdd8f15e465afec7541c9daa120675f105fe48a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0045.json": "82f03cf4aacca957c23de6b93a8f058827737f1d92cec6aa344045e901b7de9f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0046.json": "433802ae2e7eb224ecfb2c03fa0443a1d0739949cb49042945f37cb52488e4ae",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0047.json": "58e5d476f2f84319f5406782e296b03ef2301508b714e9cfc0b8f74074711c79",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0048.json": "6434102f6fb36eb15e320c36de31f87af64fe7e5798c34eb7466b8ce8e1f6047",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0049.json": "b349c60bb4270ee0d50a05bc196a7c1b99250923d6ce1017dc9a3f3b95625d97",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0050.json": "435bffe7419be634460d45ef603e095fbf8e902e3845c89482d428462f922ef6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0051.json": "8be268096c86aec972b61dbc7e9a4b15e9aac0d8d185995e34f4c0bac6299afe",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0052.json": "ac18850b7de59a16861a39d1cf0310bf0c024b9792112d234273454db723bb8c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0053.json": "5504e8cc70704d8d6f2128d859fa14750da01532836a69eff7b767d9e637c945",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0054.json": "250e259b14cf43884e0c6c80753d00319cc73f00918f0d70dcfd8ea58ad9e94c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0055.json": "7c3142f5aea9315d6707ff7287ddd5b9e05f20f3505566526179d0aba53fabbe",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0056.json": "35fbecbd1a1402482ffa8b8c9fafa2240266ac0c3f9e9eada39ea0617f29a583",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0057.json": "6a5a6f07f80d87788b919ce119df306713ba7f63c4ff609958b60c54d663ac35",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0058.json": "87de34219147db68f4dfa54fef4a9cd257b8638d0b089a9f259f85187a754d07",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0059.json": "035acff0301cc4eb8c2217bfca1c9bbd83371a59d0031910ae073620c91a362b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0060.json": "dc15618bcadf9728f7625faca318b333d1d0dcdac87319d5b683b3e61b2ee052",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0061.json": "939b7d11a9d809b80d95c206f3675280eb045386cb64ace13de2951d4c9973cd",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0062.json": "f49e2991286cab85fbf6582ba7a67f400dbf973a785a63a72a2098c5d2ef2a09",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0063.json": "5c5c23be7d022cd3f9aa45052caa4a5ebec9d11282eb0c60c78bbced12665863",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0064.json": "5c306c8d3ee47d6e2de71e18cdb5e84b638e0eec0eb82b6b73930a9b2ba87422",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0065.json": "fcdb1eea004386238d78e4cb46006a89c929762e684cf50cc572f1d0dd1fd1d9",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0066.json": "df9d9dceb199b49e04594a23875e939e250e0f98aa3b9b4655ef6b2fba6acff3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0067.json": "9765ed83b16df82ce16c90762751ec7ec5eaa13a8b8ecbf5e8d8294dd79e74d1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0068.json": "937e5a465ff5b32b47f579b5a797ba04f370bbbb46b46596e838c389f004d250",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0069.json": "0d49a5daa1b135607b167314f37b5e1c3550ff88af43e3ae158dde6633fb0fd5",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0070.json": "1ec66b957b544c3f193c4c4c2ec5aca32d7a84f989fbb2c47dd1c0a596205889",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0071.json": "9a203536f9374aa353d9ec4c3e71d69cba8157f7bede4e885c57d7fd6c96fc71",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0072.json": "dee1e357969d2db33d7f0c0cc4cab5fdebadae96a6ce5bcde8bba357e2e2e699",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0073.json": "9e88adf374ff3e9bf0e4c24aca241a0cd5063dfee33f3942be1aacc0e18d262f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0074.json": "ba0815da00d95d7c24066b5fba77f39a46f59a4788ddd9c5ca1454b8b5c3ed7a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0075.json": "314de06d5a32bb0e31b1e0a0eba2f5e2f8dbd7e4ecb6d2283de1414bf75d53c7",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0076.json": "ebda459220b94a5825a4ae99ac047fbf9df639f7a3189b3876245d1bd81db77b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0077.json": "43c4f2eeccb09dee5969a5b77072ba3dacc9e4968c1232a2ddc951cf91ab3494",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0078.json": "7f45932a2b02b3e2a8ddc15df60bc2e9c15be7508bdeeec319a63ba4e5b58fc1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0079.json": "99c3f809ac27bff906ca41a412f180638f5519358bccde765e8ad4d468789c15",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0080.json": "a5b7df451cd01fa895a012634474fd6400d0a58678908311dbf26872be15f58d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0081.json": "314a3f41c7f8b7f829bfdc594ead250acc6643ea4bb5a48b1bf19f3fa73b4929",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0082.json": "412111b5fd4d88ad6a9ec5cd0c7a229ef4e20549a1714c99e8fb2d4c39925952",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0083.json": "9d5fd54de97fcaf12c010583ce2449b73e1813d585dc6b2a0985d46f608583b0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0084.json": "ac9b589e611e2058d5636da3e96f62d3f72e38e50c36e148b43161dc129da2ea",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0085.json": "5438c151e7013d730d21fd5d0cd58fcb5134f7bdcdd346c48a323b066878b563",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0086.json": "ce873300371354dab87eb0dcc71330a759527d7ff23661a615afeafc4fba4781",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0087.json": "2fa058e58b87f3dab4c9b484062256753076cb79f7e1d076e0afce09f41cacd4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0088.json": "03270aec4a02f88ff75af724f9fc3b158507ef333eb45157c91fa9e8721b878e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0089.json": "0ccf8e30653bec8627d164d64e27ddd8c1c9b702353525d5c124d9a83fab0d0b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0090.json": "e6ef15838c39d853a70252c226d46269a71123e0e281bcfd0d0272a850953dcf",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0091.json": "b9481c59a7587eea99d28dd9d83b072fa559a7200c467b501d0c07fb2ad6f9a5",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0092.json": "b435373fa56bb66dc4b2c61f3a537415c416c4a14debb5134bcc565f43e803d7",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0093.json": "612dcbe424392e890eb737ff1ff26c88ea594f706f4bc3f5ed3b5203dc059d21",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0094.json": "12812aa42562154ea33b26f39708f66809e013810a9cd7411b2486ef17fdc91b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0095.json": "81d24c8ab4ae709175296215bb038fd073c58ed8ab79bafeff415c5aa92ca8ec",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0096.json": "6b83080293dd3e194e3e31746bb73c668ee492d1ba879dc13890b95285ad1885",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0097.json": "791658fd8a8ff29010380969ac3a343eac8e77980ccbc408bbecf42e2e7290bc",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0098.json": "e524fbd4b6bdc04403eee8b9e9ed41ad1316147af44a8947346a3e3c4142fd9b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0099.json": "35f156638ebc8eda2a3269574b8cc64bba2866353c5bbade01797de7bc01f705",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0100.json": "e3844a37bf41dd003dcd2f01d2cbd6a0355567daf09cec3f0a55d06fdbf017c2",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0101.json": "cdd44b5a57147849537654acf81a178ba12f5ba911fbb6ed414e01346c23d34b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0102.json": "aa338b2d1eff2f66f9eeea99442c0fb3ddfc21fad2cfd74d6e819bdad32bb5f1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0103.json": "2beebeeac54d9de0a668973854359f5e8593ce3cb57a732004285e00b2dac04e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0104.json": "b4f51695e30173dcc5757bcd2042d2bd3b66000a6be459063e4f14f0b0da9a22",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0105.json": "e2c4241df063bd116768f2f167dbe6b3069ef6f4513986c95f95192103fe0011",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0106.json": "61b7deda3213ea0bfd92a6e247bfee14d94ded71903714a54e29788596401009",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0107.json": "10095bdf8ced2f767354c103f2780615c7b2bb144182111c51cfa1359f577897",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0108.json": "3335bfaf7d3e6abc03eb379f372ef02f65a704238d3b22093b16bf5ad86ee740",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0109.json": "2d5d085581578941cd6e151e4e62e02a16b5e69965aaa698c926154b2cf19285",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0110.json": "6d26e532b954da44f382c94eef81a568d972565abe1b6e459781cd5879fc7f74",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0111.json": "1fef8e8f372027ed2836055fa1a4cb31c5a468ddcc2c1424b7c7416debb9c09a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0112.json": "4865687233887effc02e8d892a9a99b2ceaa69482ff7e0f79bdaf3b18fd51bb2",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0113.json": "613704bcba20bc6b118f976f03f65e6f639d6ac6eb5157d8a8dc04441ae23b7b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0114.json": "9f14f81ae8e915411a6f1b5e6e00418675c63b09dbf8951a8825e89454497a10",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0115.json": "0eeaea871acc23eddfdf59e069bc0ff16d1ca4869324a99e47942bf8bbe477c2",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0116.json": "4c4c6a81a9ca2a516a977c78176a7459b05c494c335459cead146d0e90b7c01d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0117.json": "1b976e04724b4e5bfdb5f1579de5f9bbe36b7cf1a295186e8d5702781faf7d07",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0118.json": "c57f1ba5032f0305699dd3ed83cdd3a16255faad9af74f75d7c5a5cd4549a453",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0119.json": "31e75cb5ac291c92a50358b43d6cce2970a6709a3298439bcaca797fa0b9dd5e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0120.json": "a3c5f16c449bfd8b6b90b17f3f3874c689685afe1773c4ba327344566a6e5961",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0121.json": "2bfe74588f59bc2fb6f9e66aec1e4244a0e4fa18885d5a105873a7ec00a98d9f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0122.json": "70e5dd9b7212c77e25542c1e95ca3cdcba184c674a566a92cd3012a65f631ab2",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0123.json": "dc522ff8e5331be37876abc29833743cbcb825b0ae0394fb875de94054749eb0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0124.json": "8369a1d4d451be3d67323c23aeb42afacb8f4710de6386fd0e008ad1d4028b5a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0125.json": "81dbd78f5e62cfc84491354b7bcb084b46fc03b87968a6c88978c52fdadfd04f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0126.json": "2e5d6ec35e864f8adae7901150cf59c8ea769060e751219fa114a630946b5f93",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0127.json": "7f520b0b1bb2302bc0bf049f02730fa69f8018b76e36aa4a2d1e977fc10a5f76",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0128.json": "80e8ee17337eae5e67529ebe9cc5b0cac3ff3c2e3455f47f7fc5ed7a1460c937",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0129.json": "6c24bcc2919b3e533628491acead6b791ed6853332da83d31201ac126802ddb9",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0130.json": "c9e72c7dbee789c8cbbb604497ea32c48189a22e05d67a8bafc39a946391714c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0131.json": "b879765b4310150db28c63465f24b32895c52fac7d74eae8d5e377ac07f70ec4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0132.json": "eefbc027cff61c65475cf86811ebcb0f3bf353d4faf0f2fec41ff84d83860c7d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0133.json": "899d54839590a61b2658c1754dc5c4cf790606ae8b8b6b6ec8869b9cc3a47554",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0134.json": "cdbd9f07a60bc605657aee0d26f67c2533c7ece5929f10152a8d1d37910b6299",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0135.json": "2730d83e7b35a65ba08383dd1a149c756d3d9856ea8281d287277b57a56e4d43",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0136.json": "f941d52c32eada2b437d70a0baa8cb670087d4b9f5719f0141ce6519144b6ce3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0137.json": "19e81b53d8993914532a235010a42df5e596b41bd0d543aeb6d1f169bf621958",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0138.json": "1adb6ec1d5ce4e9ad54e5dc7325d17e66dd9e956e8ccef58895275359f52f046",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0139.json": "3a1afe7ff796bd4f512536ba3c754dba599654ee24415bd54aae2bda4f940b58",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0140.json": "cc9a8c978e1323c026952ee3fedcc3e7f3e6a39d9376c9bcd1c17ff22c4e57d2",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0141.json": "d4e05f1d22f5596de2af48bf094b91238b7c300bfe22d64d337c6b98aa60b2b4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0142.json": "fbc39d9eccbb4c5c4556b3221baa8c1a9f90f249ada84450a53e4ef394e8c3a8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0143.json": "405337dc2a1d107b1c3edb89156fefd3042644168055579fc3a1be6f46725094",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0144.json": "477a41e21edcf1e7c03230a25fd7c89d72acdb1318d1c10952b154bc06253981",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0145.json": "5021038a1c8c5a305c7f8e910507812d4fb13b3615b356c8b58f0cb8cf5940c9",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0146.json": "b9575c0ed51d219a04db5e9dd31b42602b34dfbb9c9b5ed9cfd54e4d6f7c052c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0147.json": "1474c1bd0873d4030bfa768671187445bddff0fb2d5f27181b0a0db90be031e4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0148.json": "1b4462ff43bd9467e61b38741414f91c70b37251454b2e45373d3effe902e9bd",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0149.json": "87a580f5c72cb64220cf15d97f86b49dee6461dcd9eb04c5b49cfd35cf16f129",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0150.json": "415cfed60345a74c6bd9d418ca55539805f17669acd7a3ebf9c4c6242d107b1a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0151.json": "f99fa5e7cf5c86c645056e41ae5fdb6c51df3fa5ee1c0ca91c038278e28c67a2",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0152.json": "76ba2977946e27fc3e2d9b6f248f8ce7db804d93d1668361160699fe3d6c2af9",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0153.json": "0a30fa0cf7d3b13c2c87c7e776ea1d63d0eb1e8a1226a037bddd9915269d9a3f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0154.json": "21c6b56ed72c05d90a53c66967d5ef23d6a1ed5a15b44204d4be63ab2073a38c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0155.json": "3de4de21eb07c44bf50c9a81e79a4bc3642b9cabc0ff9e08129ba2ffb0a9ab4a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0156.json": "05c7573991231a0c580d54f7ccb431fb590bd723f4163865bfa86a67a46300a1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0157.json": "b15b21fbebd4381d6c728367d8da0e3bbbc53fd3ee69bb8b4277bb0ed520e05b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0158.json": "20dab49491352c1727cb053c3d4fd5f66a662447ac637075241cc44e9d506507",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0159.json": "d8221b2fcfe5d9b9bcbf2c934464757273110a022c3cc609575bcf0116005877",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0160.json": "11fca96d99d39fbf991094aae2ef4421ff9050e83e1724176794ac4116baedce",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0161.json": "53b2475706333c63b8e9bb188429de2b8fd622bec3f599b7d9ce29af942a0417",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0162.json": "b21f9c19e3c24cad95412266e607e1a993eb2282749f03aac2ce945f37f0d182",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0163.json": "59388ad35a29fb8cb4033b699d25214e742672ace7cd9cf582cce9b7dbe2ae32",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0164.json": "049d8c4f590db731d673bf992fea4895cdb6d4043a9cef098f6028b3eb768335",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0165.json": "cacde4ec121a7d5280e14f1b95e45fad639053dda47a7d7de9920ce7f0962eb7",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0166.json": "0f7db1dee8d692585b41923412b5e101477b3f037313b7d2b139d39151e9c3ad",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0167.json": "de6ae44b8196dfcdb5c846474465058ccb33e084622cb64e77edc8b6f7c798a5",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0168.json": "271349753385f8406be2d752d759518942d7ec1392ea0a837d8ea7dfa4f55510",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0169.json": "f413552dabdf0050c869947ae8852d83624cd39668e96c35b7a4aa8f5f6acac4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0170.json": "fb736f6c368ea61bd56ce942435f38dee6ef9ece957c05725560e151a0a3bfb6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0171.json": "527980d9469e4295c87807cc2cddeae2daaad8012a89ddd91b0bb9ded730631e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0172.json": "76bce9b1a987b0b8edc135f82bf630a3d15c2f328e16ea7d7d8a7fdeb270c001",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0173.json": "9858662e2b61abd71310a0fd1a8038ea30f41287aac5e927dd74d1a9846c6f3c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0174.json": "1e0f05a33ebd9dda09499feded4556759ba4eb1934b58d6814c6be6307402bd5",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0175.json": "31221734462e55b5f1903662bfcb37998b405ece5c229365713b78ab753acc7a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0176.json": "197f916c3e9b57b8546fb2f357c0ffc3db5fbbd5ac1ccc82b030ee31a98baedf",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0177.json": "b06494e007b164576f9ba589ede19a3a4b543cc4027e54cee62b14df947ffbae",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0178.json": "2d4a8eb9e51b2e60424e39d1935e34646a0b5f979a52fc53b3071fbbe01f1a58",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0179.json": "77767ae24bde9cfdbe1b9e78529d187da5fba9de83f5cf0a89f20aa2fe66092f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0180.json": "621e421a5460fbed293ccdd5b0d9f582d1bc0e1c96fd992a7a6357256aabaa7e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0181.json": "80dec5da111344cbd5b4dcad0e5f0906de6f3ddb565bb23b77307991bbacc1c8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0182.json": "bb7f126e43772867ca1b6777f4f730c7febf85b7b71c5697a9f0e596896e4a2d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0183.json": "be924f53467266bd6ba1c97462e4af08a4b65142e913d1d32d495a64657ce80f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0184.json": "006dba05072667bc739a15895940df0c63f14989a43d5fd0e3522239c6944c1c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0185.json": "fb28ac6655d482982aaf232b466dc278c1821578c253cc8dcabdfad547b1c34e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0186.json": "f793d6f22b6eca610b007e22b1ba2f1f6821f3ebbf495b37364e4fc8d1fe5b6b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0187.json": "94642eeed7fe66266f8227823437d400a64fb1919b3906a09d0dc83a5bc3411c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0188.json": "63fe20fe011c073287897e90555e8f7c743ffa336c733d3204ffabe7b8f9ed66",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0189.json": "b3e470ec464dd41f31e1ca3ac4314ba8bb29735bab20f135a7c136838ebabb97",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0190.json": "966092c029d92f6183a9aed8f98340116c6b6e5bc13dc8698c8adfd58673dd8b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0191.json": "34503625af73260f37f9a4c17c97acfd4e4b33827c6ceb31ad25fd026eda43f2",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0192.json": "7f729814bfcb82e66439c08153ed93f4210aaa200679f798eb88223fa676505e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0193.json": "c1c524b793e7e5991b49eb50236b3f21d7e8a26eae9aa1998cd4c2111f572212",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0194.json": "857cb11b54d469b35ff66d3b600f2872b9d338c97197c148066cf2a37dab93b0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0195.json": "89b8c58a0cf6e4a6c0a5d20c8014e85a1748864853aaab85b008bf5c77c4fe33",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0196.json": "5cc4a6f4a966d86548e9a670185f9fd53e165117f29159290e4dc0778b807640",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0197.json": "59e8578c257c7d4393e6eacd05033b2de6ec0760db537305445bf7202d6a73e4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0198.json": "0c2b198aac93813dffc5ce6428dffc122d43f06c08be07ca9c437a789fee6a20",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0199.json": "5237e8369edd7c0a211694bb9a1f7cc651f3b68855cf34ba30e75915c10d4754",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0200.json": "47a3a746f6e3522f498cee734f49092d0c62882653f7e1d3a1bc610cd31d825d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0201.json": "e4a50f772e6610152de54598e5166a8d9f8d462c88858a101b12439ed9eeefba",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0202.json": "35f3e5999249a30668e6f76d384c5809cfdd2608519e1da11e921483a99eb70d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0203.json": "30c67f8c6a177148092168cbeaeca3f81858c875629d78d087eb81a639f345e4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0204.json": "143768d3f5f191bd9f120c35a394a5e2ef114a1aad41c8fd489e30e165031734",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0205.json": "62b62d152c20315dc65045057c910ae26c3e67e8e33b4ae080c99b8e3fdabda4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0206.json": "a20f664f7d7638f4ea3ad0cd7635a907016c156ea808db4580a28ac9600a8aec",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0207.json": "9c8a051a579f56ac46a310592c230513fb6d64f7838008e96216c57e5e1e5abd",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0208.json": "6bcf22b28c43996c68562d78c50535613ca633ca8894aa1053a7874438ac1417",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0209.json": "ac4e5353d3cba69a4dda4e5ca4aa2184e1897547ce14683233b2243f4e2b5597",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0210.json": "27b8aa6b01d60a105ad3fa4f23bdc61de2989e0bf0bfaed6548ab227f3750995",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0211.json": "5224a75f162266938e5e1f3d651f9a40948f132cb0bf3c2824a50837b3abdc4d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0212.json": "bd7e540d2d7ec71c700bf197f68b72cbf4f5e405871d57b3a5fd0c865f25feef",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0213.json": "5285323c2e1f2d2a162a1bfc73952e81b9ca814618619abc78e8a2b461aefba6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0214.json": "d99ec8b9d5b366209c2a3541cbe23887349e28576f8d51d97062daff549a294c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0215.json": "e53678390572cc0ff881c7dda6a8a888ef309ba6c11cbb56dac4f605d6617a16",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0216.json": "fe680f0f36526a6f7ddd85d891844b78e830711db231805e5fab0daff5b4462c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0217.json": "93dbc0bd91829d063b4c13a02292066e350923634db95a8e0b6dd4e78497ded3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0218.json": "6f3a05bc45273fed33ffa268a128f428ad52e4a706f6a57d4c8274b927298b8b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0219.json": "e7500a81e6003f19d1d130e5de637435c2cfab78e1cd675d7981dfafb962897c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0220.json": "cb62e7e54842f26933d152b56b23d35c5380dba6674866ab4e18dedb8c4d70cf",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0221.json": "752f82b14bc6dc7969b9728496daaf266c78bef452b698a1c37c6c83d2accead",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0222.json": "c96284a645477337a2b11207e3e19afe0846e6150f1af1141268b6c74d29ad18",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0223.json": "2d40c9810af82362a4eeab2ca90f049a427a266a5d672dba66a3d93dbd8aa591",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0224.json": "8661cba08a9d38ba04729ecac869eddabaaa8f7dfb6d01ad6afd646b5444f0d4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0225.json": "64e155278930372eda20d99a516e37e3f9fbdf570b8d220ebc615fe969795207",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0226.json": "1d869a7736ccadda357aa57b31345e956c7ec1fbe475507dcdb7ded4b2ea65b9",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0227.json": "5e8dde35140719f7da85acbac998dd35c89def3d7c6b78fc874e017974f48677",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0228.json": "1cce0d79af5d7046c004020332e1519beb41f38b3f3ecd3c6921c5960f6dc6b0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0229.json": "193a470399b8b22749babe6959db3ecf471a27e56031f75d30dd605ebea12a51",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0230.json": "756aff9c188d2314f0f7e2cf7f89cebda2407a11752b8174a9c94ce0e430c31c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0231.json": "30333d024a7baeb85838b38fffd25b6f9aa2b1d3679d05cb66b3db8cec0a34d5",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0232.json": "00028df67ba34934eb085ccbea85125a0a8254df6f663af84e05fddd850d00af",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0233.json": "b596b8e2c138f2d3c53c2dd3b0baf860e6bd4a048754d914074a2eb7b4af0b7c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0234.json": "0da50fde62a4e5347f00424c31130ec514c3968a7c6c993f4e0aaed706001c57",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0235.json": "65c647f4be9b7a3978966845645538da195ef148e536b57ec890fd9a38ccaab6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0236.json": "394683a2753f160b81a606cf0fcdf9e57a3a70bcd1217f2a4b4300c7df9cbf00",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0237.json": "dc67b6fff7e92838ac42d63638eb92b897266a5131c287c2a1cd98f2cc1df74e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0238.json": "ac0b54f25208009d12a85ae8a8d19746426118ed2f49d31d82a3dc66582493bd",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0239.json": "16a55395693fd39695f61515515542f29ce99966eefdb45b305e92cb9c514516",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0240.json": "7f6b4f4325e1e649fac847b851e10a3891989c5cf728f898f457e4333c316650",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0241.json": "f46d269cb1a2bafee2365e27844272ade3a994b16654475f7ac975846f85c4f3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0242.json": "7097683c1d69a11eb7ca257a9363708adb2289ca6331455b12036af50365571f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0243.json": "d2a665fb2b2d4a72ec06ca7dcaa0af0b65f6a031a1a1bfe95413ffbede892c14",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0244.json": "1dfdf2628c921a82b1759a8e3ef7da1d531a4c6f19cc29727671971465c82e13",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0245.json": "630be27594de24db5affe339a1d5607202e1b32e649e99333bf8e90aeb4f3d3c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0246.json": "0e543451e6d30ce43492620dc689851b6c0730c6705e809077f2da43337fcfd3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0247.json": "290e7beafd1b85497db02eedf5a3925fe176dc16fd0339e2a65de3fc3eece191",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0248.json": "5973e7b3b7c5bc31a47c2289ad0839822316f86cab5f361cad1de3d57748d359",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0249.json": "616d8bd140358afe3ba1e36fa89b2fbcac15e0a499e68cd17249d6ac7d42f798",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0250.json": "150c03a7f569b818cf973ffb04609341c758f9b03821d24fb538e3141f0f450a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0251.json": "de67ec7652ac4cc6a569e0fe7bb621dea371065f5f94da7666758eb326a603ec",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0252.json": "d0fe42500d3123db609c7f3eeb7dd8378673d201058a7e4ff79fe758f14aadf0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0253.json": "0308c777b691914fcc688589ffe7c80e68503c026fb5e03bc6d4ef4ed885de82",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0254.json": "65e8f47f735b7c5383bd10f148fe91c1c9455b5c7fc4024b8a4adb951eee7aa4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0255.json": "10a36d8d9de13ef610a26d303818f06dc3a351a2ffe4bef6a6edcb7dd7a53d0b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0256.json": "4c8296bb95e7be51bb54f57e58ea6e6683c8429d7002ddd6268f14f23c982763",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0257.json": "5ba7cf67d59cc1c20a3a6ec58f38e49a23e883cca36ca6e08a06e3d571b8603a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0258.json": "70342ca44899634ddfcb03c0e45f18081f178daddf8357742ffe58231e7e6b0f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0259.json": "ea312328323fd137754df0756cd7cca5064697ffbe241e8349f786c30ae581ea",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0260.json": "caa824cf7dbb1d2ed08f66ab7942add4898df4d5d829ec980f174fa0cdfc27aa",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0261.json": "b055b431b8d91f9522a7dcd76aa1668c3cfaa06ac358a2a0e1c89afbd7bd0efe",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0262.json": "1fa67222191e48e65e213f388c08d23fac9074277a67cab95bd4c85f5b4777ae",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0263.json": "a4e99c826594521a4c09edd299c69ec5fbbfcbd4ff296742aec7a1ccd1de2313",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0264.json": "6f00f381e9e233dd23e3cb4e9ddb3acfcdf914e05eeddcb24dacaf3fbac7f90c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0265.json": "50416a9f8680e50dd2c0a4cb2f92b561e45dddb2caf4b1c8a534ebf4cab69db8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0266.json": "de3bb33f09adcd18248ccd8068daf9e0a91176aefb555eec1bb0cf092d80b9f5",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0267.json": "2e0dcd53ac8527c4869ce83090f82d481efeffcdc198b46fc800a8b217646350",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0268.json": "6583a9a23d38bb8e8297707c9acc9163c13c916105be2c1308fed2876ffdd166",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0269.json": "8ed7f0a60dda222e7cc3f5a50f00fd8654a7c321f2d2924db53a0b4d3a5bd6e3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0270.json": "3e470f68c3534fbf9b4bae2aeb66e8ee3f0a57ae5c57ebc76701a127c26cab5a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0271.json": "42f5ac13da7d69601e7607e184ae6abade2a22af27f74e8c86db7fbb4080dd91",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0272.json": "6a7f567905a7e074ce7145f6f6c291c25dc53511c349319c3662c76985f61b79",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0273.json": "fdc5b458d8613aeca1baf07493744e7d893f9728b80e948afb344e868d78c064",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0274.json": "279fc8e4229415820c3f1a19d914ce6fc107489cb0d9a568bbb0c641ab516b0a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0275.json": "f2ebfcacee023b925d565154fc8a41fc3d9e56e3fa54eb57fc7c48cbf8db6bfb",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0276.json": "037393e4db7b2b18ac9beef2a8fe4ef68810bc9744c82e72d1682ac4a79e6705",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0277.json": "30ed93586a86b0de6526de5f181218e560b4e8565c9db9ed616ae790a385b435",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0278.json": "7ef295826b8186c8658495cebaa296593a8e7c1c2698a21919a4bfa2fdf22d2c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0279.json": "9fc2a5b8fbe690e495988da4093645cfc2abffb174d552e4f516b0aa0a9ae45d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0280.json": "cf6fcb9c919ad9e63d45b8ce979ed679a8409f2d694379b6e75229fd6ad2da18",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0281.json": "bb8de5c4ca251464c30a02d8a44344d5b0eed9fdf02ad4545e9e37897d857fc0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0282.json": "8bd55966fa5e561c509ef415b30ab0bca3b362c6b332462cad351886d56cadd6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0283.json": "02500c88b1a203c6bb74f32c10e5acd7cb19b10422269e3ff61daab848b1dc54",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0284.json": "1c9e2b50f032d06e5d7118c066f39723aa6c2f1b6cc3bc4e2b0166e6bd8f0fb6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0285.json": "252608ed18be4286e166466f95083a8844ef9949d9ce423b6885896d20d36cb6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0286.json": "9c0b58412bfa547629b56e3ee00bed737ddd380400c28cb61185a99d621c25c3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0287.json": "04bb39f3f794d524101bfe3b71979865bf3e9cd23421ee594deb12ca5975684c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0288.json": "4985a4b3080ab9dad1b94a6558416b57fce7542aed8a4565970634e474460053",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0289.json": "6639843700c8831e71c979ab82c599eec87727789c2c8f8b5f841a4808164881",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0290.json": "cb90a781301b501613497275fa268a04cfd0368c9821fc71bda5c1d2f2b619c9",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0291.json": "106417b04e676acd084a8dbf2951fa539f93768c5ed9b2a41c1b094460c79fe9",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0292.json": "8c11d0fb8b853ff8dcb12746f604ac5480c77d1239ddb14866c1189276b0b341",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0293.json": "4e984f679a1b72c475b890571d58cc1f46e9184f2d2e631a793f93a2f37d2bf7",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0294.json": "990fff8255f6169e36d16ee0276e42585c07d8b599fa2790e11490ce33963160",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0295.json": "9755c10f0aea5db8ca66bc8dcfdbb4ee4a1f98b6fded08e9e487051a53bf8b9f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0296.json": "3c65f9eeb9108f3a1d6603940cb0633dd678169caae4f310988c9f986a8f5d45",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0297.json": "ceb9550380eb013d0fc592da5afb850a9afdeb4eb7435e4863fdfa09547715c6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0298.json": "71ee0bfce8a21b9cfcf59bdbf402a1d1f1374cc584992caf4da388206d6eb0f8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0299.json": "80a4408e833e2af909841ace3461f22c8b049f573a43d98f3671650fb5b0c607",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0300.json": "a930eb012a915bce06e0c53f9d4b6e665ef51a4efcdcc4a07b719ce06ae45403",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0301.json": "8d1b0276771251835da984956eb54c811cf22bc29e4b64b21463d000b3a41827",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0302.json": "5ada76da26f56be46e6598f07e5d853a1d392d76c4c6a0ed740870221d4f5099",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0303.json": "a221af33e1fe48d60618594a522d7e8c27fdd97ad2f49934fb3d890c85ef26e1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0304.json": "7a976dde7487b07023256df2eb64cb1a2e21393541489177852fc6ece5bb6260",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0305.json": "6c7be141944222381518b51c6b9ff3381ee1301b720a6c08b690d7741330e7f3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0306.json": "fce7d99c63cbebc6838e0243ccca2b0f4509c5e363aec9242a138c1f29951681",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0307.json": "1a5af6163bbe01eda6ae89dcf8b754da01c2955c47032e169604184cc5cb4ad7",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0308.json": "771324a973669df80a05dd98979fecc629dc7ba49733aa1f3242550b683ad21e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0309.json": "1d1f6c23bef2475482599b0ec6ee2c717db5212014d94067f97426060c03b864",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0310.json": "0ee886d333c8640acda4efdc70828edf883727a893d06c81c67b333ae2d0483a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0311.json": "93e6b0774ae0006f5e7a9fdb71d4fcd1380902824717e8b2598c18d5e292c68d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0312.json": "b2f09a2b99e35eeab8dceefdb2fc41251e5140dbdd8c2f3b0e307a3d66593165",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0313.json": "096c122317b998606e513a4bdf6ebddbbbe91bc515c90dc5c04d9295c6c63cab",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0314.json": "159fa805e38b050a1e7fe94d808255ef883aa219f084ca664f657febc9342326",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0315.json": "27560cd7b3dfac73ac173a66d7166099106134303b9d48080285d97162d6c70e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0316.json": "7dc7c548b0ee26b757882a62955dd0c873e881e861f2d56c71a1aabee1d0060d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0317.json": "04cf114f46c3d634cfcea0cb427fff2b34984256af546dad555f27e8fa1a367f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0318.json": "66cb38bbecc2e66824551838996cb580ed90fa0dcd6ff07d83540a83004cc320",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0319.json": "0df11ba61f63321ae766015e0d3592c397517960a775dfd05f1992d413ab9db1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0320.json": "b2c737c3a9c45e49ff4ff2b18ec53b86ee5af0054475fff24e464190a1a6c259",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0321.json": "4ca200fb5cba84c01149e7af5a1bc4dfb4056935411050c46aa588d5b8e535e4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0322.json": "99fa46e94efeb4c84aba3d816374870da7cfedb84d6de9d0006406274b465c43",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0323.json": "8fa91f2c30434e1e909a1962d9486126fa8672a0f0be4761a54974d717300e4a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0324.json": "64c297c24155d316e7127ee7f8825643c0a85546d08d1c54026f3d88c14c77ca",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0325.json": "bda941030c0bed40f3057ec4183ba5e7282bda7005ca263b1cb79947686a2432",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0326.json": "e88051d7dc2148595b19b4e0d945d3e36909dd53fca715bf0487e42f40c5a317",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0327.json": "ad5c86109eda0a8b0447d894a76d83c0b7bc1756b0286aa396e461be04dfd700",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0328.json": "3bea590bfa7271b81bebcfda976c119aa0f3bac1301f157ebfc97a7ded141423",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0329.json": "234bebb719252b602ede24a6d0a49a84a3842e6613e5edec8a93948d510c9a80",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0330.json": "36437241212bce3a85cc748a19627e1b1a90c931ff9501b48b231234f28ed82b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0331.json": "05ef0061a8497d97ee2397d581ba0f511cfb3fadc008e409b258e18692436859",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0332.json": "643d0ff73ea37e5817d8fa81f8138e76b9eab9e86dcda601f78b637fc6e8d5a9",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0333.json": "16ec15574d081b45604747f402dc92375ef1c9455712fe97b4f03ab6a6ef814e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0334.json": "6cbf11e7e2dd65b414bd79d284d5a782c70c94c23123b72899e348337dae9683",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0335.json": "b7796dcbe5f10f2084cfaeaf284f152ea9f504cf41aec47181050d93fb0fa19a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0336.json": "a6e97d4bb3071044796558901d677367e30715a3648842e787e7a9f4cbf5e34f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0337.json": "84139b329139fe17cb3ba6d343e4682569bb3cbd91d795074469eaad1a6c9593",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0338.json": "60faa90ffd91cd886f97082f3d83901d328604c75b6bd55d7d6196da3a1442f5",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0339.json": "4c3597f4aa8fdb58f78d024978f3f390369e71d9acc320e43d433b9cffaa3ea3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0340.json": "1c043d36037090265b3601b7139fe67483b3a6adb15433534e9409095f09687a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0341.json": "04d0d2ca36787176ed0c96ec47a3ed323a5b450e845be892ad4d79dadb09a6cb",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0342.json": "b6c7970c11cbf9e0be0b7e3c7f2cc5680f6d84d43dc57ed5cedab102da26bfcb",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0343.json": "3c33d849a973bbf544de2474d6707cf467887301e86064647905e13bbd5784fe",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0344.json": "af7364b14333d8a15b6db7996084685dcc7f10b052000ed43eb10645f0d3dee8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0345.json": "49db098c783ea843914262bc550296fc8f9fd163024a357e1226e8f178b87396",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0346.json": "69cd96ef2f1630b7635cff067b76093e2dd5708463d0d698b9424ecf0940df2b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0347.json": "b9a043a22410613f746bed972097fcc537a3891abbc4565d4070d936b11a19cf",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0348.json": "dd501684b6420da4f667246a77aa96d38cf40f8ebd8c71490af79e4e9f4769aa",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0349.json": "b896a923ab298915399b53d3aea02708548ae9b45fa406fffc8c6d0241ac59e0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0350.json": "7c0bdd848d8413928cc0a0bbe5eced4f43c69de69faedc5e6f141a2328913248",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0351.json": "05f3f66a1d1ad0bb6fe5b52749ef8ea79cbefc8cfd318c452c3467d77b98d059",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0352.json": "5b338be4eba976391e2ee55140231bee8c83e7316fa24520b4c1e3de1b79e270",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0353.json": "2375945a2233e5514b48c1a9f9e9af853d40a7e7e07e4b2a211a3bed9d1b30dc",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0354.json": "ceb3c7886ff4f5d7b89217d3c2e134f056fa098569d8a61b3ef4acb17bff7941",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0355.json": "3fc5c08a5e5f369a5e84be5fcf2c4c6c66011a34a5ffcd33ba2b28435796916f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0356.json": "0a44f6d64ff1194b2b1f1b35728d959f9b8448287b525860708f705aacab3f61",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0357.json": "76f58554d4224ad477406b6ca05f9b41eb714fa8d4556ee4dae9260c07eeeb87",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0358.json": "1afac0b65e17eb1203608f9bdf544d52a3451df7bb28c16af36180e485f04450",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0359.json": "58f0ec96bf1a2b5aaf1f73559bc78eb220182cd176b0a8b4e046a9a0fce870ed",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0360.json": "2d5ffb933cc0ab06f4c6d1acbe20e7ab0d1afd19e50a91010dcf9a7423317a9f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0361.json": "cc6905a3c7c1c519b6abfac3888409a338d50260ca3a9b3ddb7d8b2a862e8c75",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0362.json": "17713c4cd7ae85a84631d6ccf367efd543fc9ad5b09b33d4fec240b0ed9f4281",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0363.json": "0c993299e42e08b6b66c46cc1887eae571ceb96ef0e82827b3ca054f00ded9e0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0364.json": "e073693dde09c94db331b80a86df8a1ebcf56d059c2d48cfc2cde0d4b4c15db2",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0365.json": "b2e536ebc2718f532c3f9a791fd504eca861a222961d7a1a40abc4166ee88845",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0366.json": "98672f63f0b67077449536779a97f1aeda520ec2b5cfd0a732b13727ea713f04",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0367.json": "05bb5fdcd895f63fc42ee301ed915b9ba6944c0a725e5bf35fb3221441af06d5",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0368.json": "6f95e192ab1e94b1587085743e259dcef21ea00050c78798b7deb14f4ac4d307",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0369.json": "68378045a31ff0efdadad862e62c8d7a6fea2c583ee3d7bc10cca71dd350870e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0370.json": "a503035f023333042528977b91ab26fc0b8eb978447e1e22545baa07ac855305",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0371.json": "196fa04ab629ddd9a791d678f732cdd62707eafa80a7a4f2c2b64e02b68a4e71",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0372.json": "4a5c06f9713459b3d84ce63fdc5147f2336e51e8f49af551f87fd7a03d7d542e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0373.json": "01fbfba5513d8c6a96ef75303c668999cb885c0375b41cdd5e583f4526205725",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0374.json": "4d3badbd4f01c5f16c25c06556b0b624b1ff06d833ca9759db0ff0b1b7d07b8d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0375.json": "d69aa11f8de747fd06f7abb57d8a33be3089dc7d5fcc6fea61fdfdcb17839feb",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0376.json": "9170f78c1b78bbe8626d87f6956a7e1a8b8d2bc7158f63304db4602faf0ae536",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0377.json": "85543966b9cf59f514c734adeae80db54f3ef22abca9a890f48ad9aed488baeb",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0378.json": "c30f7efe08ab9a0d949f8e88f2d72ee2a79af6673b1d02e19fdaaf155035eae5",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0379.json": "e0aa4a4803c6c96012ffe36a11ba30b0399f55a5cd9b1dce842a9f0d23a798de",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0380.json": "43846c541abf082e8b9e24ae692ca3a05cafad128cd47a0b58c52f494b3dbd4e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0381.json": "c9a0ee38b0b9329121f4dcd0180eb878825e789ff7c3a3e03498260a71042150",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0382.json": "19ba76ff668ba851fc55036c34302339f260d79d932b87a066372c78d47843e6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0383.json": "81015dce764f7b3318c4157b35abdcfe421fb3712ab574b0d436cc232aeac6d8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0384.json": "93074f8cd4906a8fc5398ea1a2ee6df31a31b2c7d9b98c4e4ef23dacb5def017",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0385.json": "0fcbf251789b11db420b57fc389870f46eae1110a107f1cdb2fa1724af426a9a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0386.json": "79d7e96d1684ed1e1c308e5cc208101e61fd671cc87f0b41160461972a0810e9",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0387.json": "f960b21441cf55b8bc94fefa22d76bce6780af7bd992283973594ad95fa36301",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0388.json": "816143eb5206cf99357e2942a5ce0a1fcd9200a181509f255c6f4b32c42ed7a8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0389.json": "fcfae2a97652b5f836d896058af7778fc9a71fbe2ac0976597b109268485cf6d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0390.json": "e5073db590f09bffb9303ec1fea9e8e8975f728b3638299db3b689eec449de4c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0391.json": "fa5f896150e4b6dbed1d07c5badefb79a6de02324de685b8ddc0df177a2c950a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0392.json": "62535978c59b0050532b6584366683cd1c76d97ddd432a3689c26c2ebab9579c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0393.json": "527fba82cc6cab5739be81c5bd34762bfe48e874c06a1c4c0f8962e4b3492a0c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0394.json": "fd53df5b0aa803412e73ff89a446f13ce09554fdd492d34868f0393a2015d8cf",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0395.json": "8c9f2816b91b58f90e1178feadf04f839d7ae8cb12737633c4fa2c6251a86c7a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0396.json": "bbc30e5c5cf8ccd00b248b06493d209fc3317cb7146d2f2f25f307d986987662",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0397.json": "f95bf6cc439aab2074eadccfc248d5df8ba8f993db4350620f5822da83e2c149",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0398.json": "1e13b6d0effa0198dc4c0e0d617093791f600a4631e3691655b6ed16a6f64812",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0399.json": "44acf2048be6c9235bc1211f20c3b5ffb4d10cf23ba29b071d4b6f1df73c32a8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0400.json": "70095e0196463410264ebc391bf9a17ace4d338a45fc06ba27b787e71b12fb3a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0401.json": "502bda2fc95f0c03597c80914a2c9944c1ac2090552f5fca1f7c9700221b49ac",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0402.json": "7a08fe33d117557b4620a64bf901a12c07c1b76c7ef75c2ddcfef723abc91b83",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0403.json": "55ea6a73fe12b55228543ce613e3fadb6ecadf5e07b52e86f8d8f80ac6fc25a8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0404.json": "4f89ff9bdf8236da60b4bbc2c6253f9f6aaea91728fdba83beba12d670464810",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0405.json": "eb0ef96710fbc5b4da94a97abee840f271e1c7a22e876e7bdf018aa46a942b00",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0406.json": "2ee70d645e703a1d37d1fd08b1aa4da5b20fe719812b49d48cd2dea76750bb79",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0407.json": "c3625e45d7395d71ab5774e881f7bd760c1f9481e1055e36bd0a9c0c50e85e53",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0408.json": "60f479084d14ced2e29da89c8c595360439bbe9b24f31f6995934358f68e25c1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0409.json": "bcb0566ba9d15a65c8bb10d53d13caba710073d53741d1c6552a70863ca42930",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0410.json": "30893d1a5da7fff854aa352559f50a2ed7ea069ed11e10f6f2897416f4d191a1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0411.json": "ea2f0ec38070e3e24c7d0c40dbe75b275bc486b1d3a6aafa1a44612109c9ee79",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0412.json": "facaf01b6f820ea19b2f55e5661c068615a69eb5cc9fdda13449a43f7e5ceda0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0413.json": "663b5c7f0f83b7da770953fccbd65afa9337b9f2934e9144fcc5f6ba28f030ca",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0414.json": "73d9ed124c098871adc334636e1d4ade1fd47f2eeb4c6badd27aefa2e3bf75ff",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0415.json": "fd373ff5189a0612041f3df8ee929eefff120b951fd38f75c64a7f8486f61096",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0416.json": "bf25418985ed346ddd74e69ae0817519340e9ba9bb005460599c80758e097c71",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0417.json": "1f76e1eae813aaa00524c4e73b28b9638a2d4009f83aa55c616ee99c0080aff4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0418.json": "960fe92039b13322c266cede3e26a76f4502cf9b1e14963830ef5f93655b5f5e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0419.json": "983098154e51357a2c98122086ec060fbe0b0223741a3882bb933d03cf014d76",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0420.json": "bd72ae89df0e7a5f5cd14dd6868da066e9be61252c4213f13b6618e60988f9bd",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0421.json": "00b4f40536c644ca259793cbeab8947c2a10cb3080a770bee4411df131f2055d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0422.json": "fc4c708990533afa12fd66c1d630760498394ec9826d38ca61cd2e0f563decf0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0423.json": "b74f76cd208d944856ba44e8b4207954b5e42ae3398dea64a41d2e9d32c3b1cb",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0424.json": "90f87506cea6706868209d5b0cab59df94bdf8215dba33bd8a09ee07ba5c6390",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0425.json": "d7acca9e02a274a816d433ec8b22b872d8a185439bb9885e1f187b8cd8b78a4d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0426.json": "758c113fc9b6dc54514d09852276f18d266f07a6b791cfd61d01719ab735b07c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0427.json": "03dfdbffc307c97601dac93cd79e29a7c2356b1134387efb05aa362b0f395d16",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0428.json": "cd4d2a4f094fa3b755247b3c6b7d2a5c1eb040c96438f0845f417e646c8536e1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0429.json": "3731f14c499c024c6895ca617508d541ce524c703909059071fe011f34a9ef06",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0430.json": "13907cc7b9662b5eb6c547213dd3ee52f1e9fdd2947bcae4ddb46b02b114a811",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0431.json": "54d2abf7a511afb1262abf7badf6f215c2ad801bc6870cb60e24dd9545bada84",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0432.json": "fb841bb6e4faa51930985028d52dfa4055b1601f4511e0795c0fae3a1dcc634a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0433.json": "6faaf165ca0ad85088ac5e9e0655495f8e113f6ada42a5d7168e4c087d809b0a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0434.json": "a0ab5399a16e3a3b5eafad90194b8dfabcf3f0bc9f60490c89d95ddc7138c794",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0435.json": "f0e458e63de5164cf54dbf39ac20a34450ea563faa25fe302f823b95040d2de7",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0436.json": "8fb220a62dec519d39e1d9a0c0b7179e38725f69c77998870b0bf6205c1e086b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0437.json": "e768ef750d98a0ce456902d5727d0679b1973b2e735a57be3dc0960fcdf5ac88",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0438.json": "78b47063c0ce9343082620c9c10bf9fed062390a777f988ee21219673a587600",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0439.json": "6f3db921919306b106c1d170721e6a5ac4a08b48998f2a95a4a079181aa04861",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0440.json": "e082765435b0d01ecb81f85826f939d71a392f92267958337568689c4e525900",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0441.json": "aecda780302aa98992c61abfaa0dd23bb1ae66f53ba70b4228d2019ce1857457",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0442.json": "190e214692f67e58f36d254b7ad72f687536afd8ce5e1e5be7ea11363010cb0f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0443.json": "2194176907e6c5167af6c14dad17dfd79b3025c67fc1b1ccde4bd05809415b6c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0444.json": "d6c41509426a8e766205a988029dc6bf96a256cab0f0efedcdb0757929cbee30",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0445.json": "0516d292c11b362b976b50f882e717f5192cd8668c0d5749f76b36fc662e0ba4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0446.json": "4cb93832ffc4401b679434944dbe71307f09bca701b299114c70f83b6f8e78e2",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0447.json": "7cfa972b79372a920a14e42221e91de62d4a88e4c30366f76a8e99ea228a7489",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0448.json": "3fa179690c6677938743045675ca063f228df0b2741df3f08d845b1e6614c547",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0449.json": "b296f011384e1b2021131d9d80475a0916eabc35ffc0f31d35b76f52b87a93eb",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0450.json": "6327ffcb28d5b27f1f9ee17c13bbdf5df03171f28243fbcf8ea4da80303ea57b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0451.json": "403fa8f3d76a1c04f40961e8bc44dd290fc4f61385219e341ca70bad99933454",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0452.json": "d2a6357f5451ec3c7401b685a76971675ba0b521176a2f65217bf246c7b424cd",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0453.json": "5fc9dda49d118711f9723c91fc7b879909cbac259d112e0b890d05cc48190526",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0454.json": "2e213198ee3e3a54498c7de698bdb9b96c966767f562f51f7239565938f187d7",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0455.json": "2f724cfc27b177bd8a85d4bc80d9d402e9a41583a93204f407f0b82cb92acad6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0456.json": "959beae31db62b83394400eebf51600144aab908862b3808f1c768e3f041fbe9",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0457.json": "23005d1def3d830a33ec5b3f416af1077e060f09e528592f3c6369fd2be0018f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0458.json": "2babfa467d586e9938826deccbbfc0c1346aaf43a60f49744316ba75d2454b0f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0459.json": "3cc5d1b549ad73740d37dcd5f107866e472dccef5d66eaecd8cc1153b25b8dfa",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0460.json": "75b77609ee4b8aeaf71c8045d1101c7de04faa80da0b88c24ea831c678474826",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0461.json": "ef933655b5d390bf5e42d5f00854ff8f66a093f1f69118e2cbc1176152c3ccd7",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0462.json": "bd7702206fc9bd9027bccfa53f59d562cdad28df53a736ff2a63728876e11a13",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0463.json": "3306069407545dd0240e69ebcd40b69d5c39606693138a602ee5fef0bbbe5274",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0464.json": "d01a3aa606d1e7a2cccab22f4f18ae6594b9c616a760ce668ba10728db771af8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0465.json": "d2b964847f7c181442aed37884bb07e5cf8749183edfa002a003356ad6823bb0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0466.json": "0192fdc7c0206e32efefdd7bd14ebc93cae48bf67d70e158a881b8018e672424",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0467.json": "8fa387e4ca53f34b6330aa90bdf1cf94451a8796de3675aa4d816a58dcf990b2",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0468.json": "e17719b264dbf146b734bd39b242b14126cd44c2835b19587e5a9d540f6b054c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0469.json": "1d0ce27cd5d549124f0f637b166f1eed54723b2ae24cd6d6d0afe846da1871f2",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0470.json": "daf9fce24ac657bf74e5a161c45f31a94511e914183852839ed400ea8a06aefe",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0471.json": "92d4911dafc760711550e8c725bc45fe9bf05afab070dc21ef924b80aa02df59",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0472.json": "a7132bfaa0c3dedd0a9403755a3ed64757f959b0a164c9cd4decf65beee47057",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0473.json": "d91a82b505fdd2773245d068d2770c1a02623f1a8ead53166a954539cf8c3915",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0474.json": "2703a0ac1220045a05e6ad9522c6230c7bdc2f96940c89d3dc2b7bcfe02088e1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0475.json": "691282086b5c6536e46e52c678d1cffc4a195a55352f0c12dfd029d9ee5ff920",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0476.json": "b95b9584608de5e81e3ddda487be9d125030a3f8346956b23f798c5c473eac17",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0477.json": "5497b35668a24302d628ca42bc3b4384eb1fa9015861cb413632034e52cd27fb",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0478.json": "b6aff8760457efd322e715497614b099bbdc4370bfc5f523296790f704689327",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0479.json": "bf524d88639d7b5ba559a13719637f82f4058c6da9752f725e4c1f674349dfbe",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0480.json": "e1e800fe45a5919efc4713b4cb6aa534bb7bed416c1c3f7f65bcd2bf300f7623",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0481.json": "0b72c91a0da54461bd299fc7e64e1f94b2fd3ccf75bd9d5c45b8e3ea319ea373",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0482.json": "f4608803895a9c4b6add8a42300d23f31a638a309f19fddef5928c6d9a72e560",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0483.json": "739c5c813995e0e025c7e77f1017b54aea14a6b46232fb00411994e0ea434513",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0484.json": "8b306af816c0c7aaf7e7fad35414f8ae3e518845576c620ada760caa088115f3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0485.json": "014306d383a1664683f13d8de2e900d1c451b0a84615cb0532a80810f6121de7",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0486.json": "d52e4fb24ae45bc8df46293b6dc974e2b6512849047ddb8ad4a8b976e8f6a91e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0487.json": "9a1dc2421d08457bb88d17323dbf26f9625c19f7ae325df255d4e8c4a109f13f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0488.json": "c6a3e52f86cdf4312fad75418c2fd7fbf7ed182ae8987681a5b908a1220a88c8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0489.json": "833341c1529e3bd1c45857e0ecd6cd5c50b606ef1547a6e0864508af3203c948",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0490.json": "c64ab420b7d2893ed2ee76572b771c8f13f76a5e5cc1d79eea5a568dd3e6f7a1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0491.json": "fca08d468b8730da75935daf9769af5e477573f207c401293529e65ab7a1622d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0492.json": "639e8166a562cfc4d69dd393d10be4eeab8117e80e6e8df635e72f805af61668",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0493.json": "5df64c059db1851f405793433216a0132d0c905a53dcb1a1e6cc62cee598ba68",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0494.json": "30cc8ea2d9293b6fcfbe066c41b04c10ac0ec251260c4d3c76e799b0b78d6ea0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0495.json": "0e1630fe7a929eb34ab5bfcce60ad40ad12beb7428f75fd21a3bd0d21d6863fe",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0496.json": "e3ae9a6f11ac2a1436e598de1a1ce976b4f835915534e15ee9632190a2a9a10c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0497.json": "0d5656a2ea47b7deb25699b4b0cc96f36aa8d44d805d1c76c1385be93f58eb54",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0498.json": "913a9ed3f01d746657f77422f1dc9d549f02a1a92ad3b7f923421044c151f417",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0499.json": "1643aa7276388f8f587e5413684dc751fa0a925a8d1e1e7c49762d8c577cbf5b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0500.json": "4986568fad9ff236b910e770827c738daa9e3cabb1254cebf51bd76b4e774887",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0501.json": "6abc0a4031d84aa06ed7afd045df021577813385c0d0d143a3ae7d4b768a0417",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0502.json": "df565a4356d7da68ea5bee35e3191a6c5b84a4c8a0a34d0a1c507956aaee1419",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0503.json": "8344526dbb29d456658bae981e8d5fe304b572b94e0fa3de892580f99c770ad1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0504.json": "a0c6b40e79fbc5124f0205d563dc68df41de08c5b1072ca5e17a86f6799d078f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0505.json": "b695f1a6b5224bf5763faf588ff68c0f69cd6cda48b4dee6982ddb56df877bac",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0506.json": "190c4698f5df15438203e00183c2422b2d876b91122a04746902d24cdc997fce",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0507.json": "75d9348548f246d94ac01dbd25d56cd9edf76d4acaf91a0d1c0c0b8ee1d45d8f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0508.json": "4ea893267b05c5ce97056ef215b6f9b01d94ab4a00be06777fca78a5fe9198e3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0509.json": "3e942d36884ed46894fe9b3a6a68765a1c9308f7af8452578ee3ac2ad0ab9349",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0510.json": "cc81c95434978387963a294756922c773635333eb23acd9bec0600a8b2306abb",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0511.json": "1175d5c84adcebc935a7cdfdc170893427330e97d2416f816c7112ee0eea4fcf",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0512.json": "c12200ac140d063e08a97357107dcad8d36e980ebfb2b2792e5e4745e4b05dfc",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0513.json": "3ba8cc28a7b65acb3059ef21fc622e4ab28fdceed8ca6630dd59e87747f9117f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0514.json": "61b1f5b7573bd7f5e8628549da20078197589b2a3115c2b21f87f0e1cdf64995",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0515.json": "5dcfa498705ba533de963008ad4a0074590995ebdeacda6d7f9e487d00898ad4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0516.json": "d0779b06a3e267105341d8c10d64a50e97d73f8397482f6477db5d4fe99c7d14",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0517.json": "4fd33d568ee5a59ce98720f15af0392b4f55c124c76abcbf167f99d328c8d837",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0518.json": "848177634bc7400874dd6a3e6c384e01d5749fe021605d7b9a7b5b82a03fdf12",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0519.json": "64ed0c84fd8e3a75e2cfb46cc0f90272c0fc7260834d01e33dc4cd5c2eab994a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0520.json": "65e9e5d7ac7e9676b3949142e53e04a9a4b9e3e73ca8fdeb8c1d6fa4696900fd",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0521.json": "f9bc354a9ad228c4b36b1ecf5b82674024c328849320c8e79b44dfe63d4b82f3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0522.json": "9685885de32e6e5cc07192c30f579678d601780dd65d5a40c6eaf28b5fa8858c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0523.json": "380bc9bd37c1176251af5c20c221efb6e3b94d7547463dc8bc9656bc715dde79",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0524.json": "3e38cb66d5d5ef5a1e98861e66bddc319323357af46f5805c9ea556b74c8ddad",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0525.json": "58f41b00fcb04ed9d9e4e71a6e34dffb278df991ade1e790c11684aed7b7c654",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0526.json": "3acba0f5a7139c28f85d7788d8f9645a019e156e2ad2460630499f3da43df6ff",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0527.json": "d85fd0aeccdc8e6bfefb69e1a5d03704c2c81399ffb63036eee31d7933c197ce",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0528.json": "dd3a44e0059e377a18a6dd6d84ed146d0716e14b185143b7987ad5a08e3a1e1d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0529.json": "a46a40019dfd895cbae392763960af632172ff8dbb4ec6bfc6ca5e21837efc3b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0530.json": "bc26e9dbc5c827528f48371e9ea7d6f29542924e67c3ccb76bce6d684a47850f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0531.json": "1f82e235829c4e493707e33170a36f4ae9d8cc041ae272f3f9f1d9932b112a72",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0532.json": "4743e78498c2b1656b03f89db979ab23fdfa6082c171259337a40281de75a20b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0533.json": "39610c975beb00ea8200a84f47fd37487a7e392b79b89d643d587283495d7bac",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0534.json": "f3b9131f4bb2f0e2ed6d2aada69e29350819ad2b38596b073c9867f5d8020158",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0535.json": "11266c6e3753986bd2a91a7d10094e46614c88d76039a47087c20ad965e2c569",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0536.json": "dda931174bdc5c75321a6591d31d1fff00ed1c1af54fea30cae7d9e639b1c152",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0537.json": "8d9eca6eacebb23859ecfee859e1bed61cca9848834a5dcf99c27b973acd0b8b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0538.json": "13bc8544724ae9b42fa6a83eae73b4e7282fd742a82340985a451996d9f2dfc6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0539.json": "116220ceed9df7f745610b4c6f0df4c7285776d1cc88176817b93a309161b405",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0540.json": "fd7261620c4e805f59411a2ae0dd5d4b8f2871c75bee60e3b8e1180a29865787",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0541.json": "2a59628b24495f49dfeef1cd31108e572e54294852d975bdf032ab699e49c288",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0542.json": "f85cdd4b33161542a008e3e00419bae37047597747b2f28d342142f2e0f9203d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0543.json": "cfc0c4459117a4ca66d175b12a8329523beb6d7be135b2283dd2f8cdfdbf1998",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0544.json": "504702ad11d7440ef55d2c364fc05a705b0277d1c8dc7469c2154c30c7e924da",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0545.json": "326b41038bc5185987097e7ffc267073dfc948fcb3cf2a9c3c48d3675203eaf5",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0546.json": "1b4e30d340c6b534ce847eedc97d82c3d1c0cd87cd5a5d46be954316ce91cf27",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0547.json": "c717d3a5cd761fba4bec458597d7d76dd33c1f5a0475844ec5fd55a0f3397397",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0548.json": "2f88941f8ea0b68e080cdb6d8082f882c3c1a4a8f5ea1941e7d7e2a3401e6086",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0549.json": "d865f6c0e07177c97ebf0933d862436b22907b4172cb897d6f5f9888c87d3830",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0550.json": "39c09398235468e0da9c5c6ebb34ef207cee78ce36a1071c1ab6d54f54cebce5",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0551.json": "b9d32be873e0b69e5bc7b238730c77a5345bb47371917ff4e05a1cdf6813defa",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0552.json": "f483e0bf1510394c9ede7b3cef315a7e0f5763aa7bfe71bc0f0b1d4a8585171e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0553.json": "4f24bd9682b510f8628ff57241e3c86edf4e679c4813222057eb796c591ddef8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0554.json": "cf7347045cd01a000c2b3ae20a69fef2a1cd1f3eaa9e754cbcfb4ff478ce19c3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0555.json": "cbca6f47ee5ebe0063cfba14fac3b5319f29caf47e545a65b85d2fad9e736f54",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0556.json": "a4b98a66a9adca4a02d3db055a4a4c3f7a3a8213fd8d83b8404e64edc74c7dc3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0557.json": "b0f71e4fd5ae1aa237efa2234d4f47d289e003570aebed700b4bb47795e7547f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0558.json": "768f393e409b02d451fb1923671116dca1a2644396ad1d423ea33fd95e733134",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0559.json": "266a8b160ab4af846734ed45fe940640cf39c9998bae15eaa38441d3b9b29726",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0560.json": "0db6d961d51cb854508089cf7880b1c17de3942af0e9eeb0921f86d70b48f908",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0561.json": "e3f338be2f0e658a8cf7fd99b81e5d7f949999b2fc7352fb1e6a09dccbf645b1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0562.json": "9225315f824c82e3c56cf41a517dbbdea50d1f407fcbb3f771282d6c52d3b833",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0563.json": "6f6b9627d057ac77c9f0243c1082ae4d3f7ee1c9966697d40919c3a2f22b9080",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0564.json": "a977e50acdcba609f976cd39961f3062a7fdf8e7055c6545aa96a4e79e513ad6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0565.json": "ac089fbe5e526fe0155464d015aeaf88f20d186484520a4d77ccd4a242b996dc",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0566.json": "fb5b29db2e34f09e69396a0c88e1aa21759a5fe642a234e1bf5b07e4b32ccfae",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0567.json": "d9a11a11ce947ae0477e0a788db3ff542dab5d30dfd6848d70dfbe06696f24e9",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0568.json": "4cee91d6d42055b378487c66f397315a03da91d5b9aad8d95287e3eac0a17502",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0569.json": "2acc322a85c819ba715c962796d5d8303fee996562047242116fb11b9e6949c6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0570.json": "1a9d7b4712cc96968feaa67bdae11985f34430e0a7f65f0177ee3d852919d4d1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0571.json": "d93adb840a88d0cd07fd189f8b8adae03e3e7ea5e4f5a2ffb9226a0a6ed8cb7e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0572.json": "2bc394cc239c2d986fbff5a76a409f9ef2b61072b1e191a573c09532c9915184",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0573.json": "70cd80dcb61c3cd7a6f4da711ed9328b8544321e9014bec5058c41752df0ba2a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0574.json": "268619d80614f5c63133b43c51e98dd92ce508bf295379d1082618b1b80f6fe9",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0575.json": "4ef1d44304a14b89320565542c133f2aa8de79f063e4f0dc145d9c43b7954471",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0576.json": "9a327acc47e094e122bbd0e0da117e1b69a571b588eb08feb7744148172a4c77",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0577.json": "08b9cf0d4a0592d77e84127675101bdbf42e6e2373db11e14c1c83913b6de620",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0578.json": "a467ed551855850920d46214ad6aba44fe711730bac1bc1a07c77583048b802b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0579.json": "9070cb44bdb35ed085905f7e9e7f6659221d6050306f4d76fa5e015393c2850f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0580.json": "8950ebac90b1f54f6e4205edbe281cadc2313244e95989a90b44ad940ed8f717",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0581.json": "e6ad1b08e2634c2f8055146f640e6fcafc393daead2a3e882630de1393f24c02",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0582.json": "8ceb67bd993fb1401ca5a19a84f2de400b55b73ea6ace6074c6435de0b24071b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0583.json": "9308e922c4c5da23aebb84073dd6d382f38fdfe0c96932fbc46b644549ace425",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0584.json": "768adb2337c6c96669c53d1cbc4fac1e0c5539268dcd4a37821c13b945d1d360",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0585.json": "1e8392175976626e2d5e1361202e6333442ffb9855b9ae213cef2f302546d584",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0586.json": "f58f5e78ae665f2ac8841982514d8e15b1074f4dbfa926dad92c2aa0e9ece88f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0587.json": "d4903fda376050432744b2fea18c0a2b1837fcfecd38d6bd971011f591032d2b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0588.json": "84c57db7912c7512153e368558d79b2df0b0b9bed9c836d04466c3cf6e348818",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0589.json": "8bf97b9e3ccca9035629d856958c890dc29e9a6161a33a546d3cb278d2ddb83e",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0590.json": "e46f2ba66b385623b1ae940caad67209d3e9a5dd247dbef789b6736110e63a9b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0591.json": "222af3ec5615d974cfcfd12c46a46024354e4678799e903644fe95d996566b1f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0592.json": "4fdd194c55c877bd54caccb1735e08596738fba32653ecea73e080db7a095d7d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0593.json": "16d20bbcd0724998760b0d8aa72700e19b77c8510564e13c25581e43ea78fd83",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0594.json": "3dd96c56e114cb1adfca9c2133a424c540a73e064d4336753c69f17a9bb34dd0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0595.json": "7b9064e5b8b565c3325cc81d5861a121063af8900d1733d5e2d5205da37586e1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0596.json": "dba5ce058e6b614822e93f5f1e1b0295ed90cd68342df5aad86f1a75dfedad79",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0597.json": "848b7e72117540add413febf4e2a23c7cb2e635be91fa623b4ad5babbc6f2d72",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0598.json": "0394691614be33fa2d2af7f531d9fe27b02d29fea2da4f92d64158e9e96156b2",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0599.json": "702b88dba5ccebcfe655adee04fc4bb6a63e95e693d1c05e1323d6b8592ba65b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0600.json": "894e28cee9a881ea4a16d95b0ad5aa85814ae5057cacfe58c9eb17a7a4aaa198",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0601.json": "b04f059427146f1e5c8dc0ff8353d9943ec381fff96fd55c34609ba8639b4313",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0602.json": "b9e68b8e06da010fb750b3e3d3ada6b91948a8dd7bff5b17074647168ab22c19",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0603.json": "b70bf8c830de8972f1d92073d44a099ee7288870c7aa121342ab1b2d1ceac46f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0604.json": "d1c7fead743ff8dedd4c0a5a9b412ae706db5ed4451808624f7fcd9534a9fa85",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0605.json": "f5072be6dbfa612abec8ad1ed81b0addfc80af96b6b96eff9e6d6135177750ee",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0606.json": "61dbab8399ad17d3df8d5c2b708e4eda506602d60bb6d6ae6cd1c2a8b8913a41",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0607.json": "3c95d1e7119a6d28a0df21bd54bfd5df8c03e17fa464a24c77312b2240c47e37",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0608.json": "c738999cd48259a82216153a3ab6f86dd2d517683b538cf5594b534e0b85e2eb",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0609.json": "ae8dfd7917e89adff52fdf145b8b06f2e24134a36a8b8eaaf44305801a2a60f7",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0610.json": "865ee9d4ca02769d31b6bba3e67236c1eb706294679622e99d68eb2abb15291b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0611.json": "0f832d716b217bc6f8a494dfdeaaafc9b2fa2739338ca9e2268414b80dad1568",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0612.json": "967a9458713c126a5bff2be5d372aecf7c04c35e8825dce8d80fb8d5ce70e114",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0613.json": "7043cdf233dc9575eb4c766f164ccb54a0bf94244aebe112b2a39febe53d8d8a",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0614.json": "b60fc0ce654a303b82f76bda277fab84e51fae4ae580a8f5cf47b6e41a99e20f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0615.json": "4901894313beb10a51af3686e1ac77a777a07fcf751f147b000e9612fe358880",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0616.json": "77fa82c7fbfe88f5be90812a47861868ecbf22a1422a090ca6fdc02789056c1c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0617.json": "4e54a7f0822ca9003a8a7270941b32d6ecf6dfe9584229890518fd36b2738525",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0618.json": "49cca21c597f8f244fab30c4682d2ec95141c195494c931dc490e24117f8bda8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0619.json": "5b8c3f357a74dd890cad1182018ec1f5c2798ad296a8822cec95f23e9b2d3621",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0620.json": "6549d1730fcad6ae7e9dc37f34456d7b24b4d8066efa2810668462f4be020069",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0621.json": "a631204635e4087a53bcba31e743c11ac845a0ed702dfb2fdc2beec40034b156",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0622.json": "477bafe71deba69ca208f1e8e70dd9eaa4e600245ab8ceac6fbdb16a86b10622",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0623.json": "bd600c3540bdd90d186efa2e85caab0f6ce60b57044c63a0df4e0c695d7e5f42",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0624.json": "37027aa768b6401c134393a766fe46119322a4995eeb656b089e89ab14171876",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0625.json": "2e9c194eea7406b038387e0c3c880f0d76bf60534f90ce105d50a2405260fcff",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0626.json": "8489eef9f4fb2dc07779bd222453c8ab37b7a01d9e907d6ca4dc94163c07e71b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0627.json": "8a2ce6d595c9de51f5f442912f9cc5c948619234c1e87f4023504fc7c8407616",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0628.json": "d9b5b570325501b4a903607b79c4cea1f4a7c72707e5eae65aa81b350995792b",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0629.json": "4cb8ff93c294457a5d3c19e6dca2192215f3ce9edb9bbcb78917e3b43c75d672",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0630.json": "5e667e5ae23bc0a730b58e5992a65344766f58a007930919d4b06a3b8f6079b6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0631.json": "6175d4f20e475857fa43dfff29549a2236c033a0aa3495c191e651476731c6d3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0632.json": "8e76e2c8108d1596b3232cdbbe75ab7bc5d32b7ff8a96d6e082cc623df730b85",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0633.json": "6a997551ba693c62e1eada8d1dba630b874ec06208a3ecee8aa7765a6deac5ad",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0634.json": "dc73b519e5ef87ede49341fc612536584c6f824762d6f0afa63872056a3849af",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0635.json": "c31e11d335199e12f66186f3c86d904022d5b15ee7272ec0f2941177d407b9c8",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0636.json": "71bea9d8b65846cffffc7d1c323a48d22301390f8105bc9ac2636112de014701",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0637.json": "67f79b2846a00f1ad5e5ab7ca42d457ad5fec63cef8e53b8d285554451da5274",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0638.json": "3b3e21ddf2f4afe31d5036199026a4d3712664be7be8a1e0dde69327c161f014",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0639.json": "f8474505f29613cfb6bc37c6d07723efd40421fe67b70e350deb5ffeec7c968c",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0640.json": "d3f1151878f2252ff0047f4e7451c3e0615722392fbca4deec667a76e3c9935f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0641.json": "71fcb4de92131ce774a6308e88f419f1cbd4c5d1fbe2fc8b7d219d1a28e9ca32",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0642.json": "dd74e96e0651eeb1834f509198d54bdd9f21e4be000d6d825d866e53c06c9fe6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0643.json": "b64b41adac3f88d5f48b4416628cb656824a60be776b776fdd35d119d97f00ec",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0644.json": "a8945fa6a6f7ed62ebd30889f014cb75b4044249a1d67870d40830b1608bbd24",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0645.json": "eba1eae25516845e05d4042e06b08409c2866d0140dcbb3bf0b89928a4a44327",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0646.json": "3dca70d801048ed36e627914578a2167ecfaf2d4354b0c1ebd9988be9dc91fd3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0647.json": "41f28dcf73262e2dc075ad16ab71037bb22f1142b64be5c99a06ea1c8ee62470",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0648.json": "c11c0654e1cfbb76a05bea439194fde241b3dede5c7744bb580dd8bb78df9ae1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0649.json": "f87c8d4834ffb9034e35346596d8810eff62bf9eca2b2bc5ae980594547c836d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0650.json": "ea6d392f10f9fe20f29ace4969fdfa0d164a7e9a9c7dc7372b6fd6cdebeb05e7",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0651.json": "381476162d99abd9fdf684baf4af96cd7ce2a387e82a8f8b91ccf0c8be87bdc1",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0652.json": "951bd914875740b06a7735033cc44a50e5f278157aa8346e12e8eece699ed6ec",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0653.json": "8158952ad3d140302bb52daea107436a361430237df91ef94921dde1eff5cc16",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0654.json": "04c5adfe22d943b9557bd6aa6688239b915f3c5f5ea42801de96778e0b658fd6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0655.json": "21c3d0c5a9e5d6829f57799781f20128c2251c684a9259c2ef67a47e702af750",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0656.json": "1a9eade8e4cd8474893eec2bbe8cffceeafede229257c72ababbf8c98cb4595d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0657.json": "5e7091f63a0ccf84ddc111f9f22fda72b174b364e573d8e6be7be3ea5784b6ef",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0658.json": "736fbaaed3d1eebac5e9f4f1d0203ac1a77beee0e59a86d1b3ffd5cb3675274f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0659.json": "15438fe287351ed7db5f0aa220b844c3b13efbb80887394fbdbe0062dcd5dd8d",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0660.json": "4968b483494d04080747668e64834d4a21f1c5ae5800f3e68cd3c6dd9f609ae3",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0661.json": "cc22259685ffe73bb62c5c825cf13e95a8cef9c616ba148b45b61a9a1d4ef354",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0662.json": "0338f7e9cdb432c129fd244d4509f3c46000e6552ed672ebf554140a7e5a21d4",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0663.json": "8b97be34690024bf34d8cbdec45091ea376ed66087b639edf5ecf101c70dbf3f",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0664.json": "ca06c30b8488787842b4d5b00008572cb47fadc4acf2648f56cd308fa93a75b0",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0665.json": "4af6e359a69d8b1812a0fa2b4053c2ae5b90b9a3678369fc6eb552283469d2f5",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0666.json": "73243880624c576b4133654ec59dc53540d3bb28407738617da72019dd4e0556",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0667.json": "dab02fdc4fc765994586eaf106aac88c93fde6ebb61ecec3f3261cea15c7c014",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0668.json": "79018387da1e55b6bc4bbbb0eb24c878294fc253e0098cfac15bd2499534c880",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0669.json": "cd1a92a4b828e0e10254dac9e4421a9a6860fef79737ee2ed192a5475a974aac",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0670.json": "a26a7aaf13bf96f3e8fc05ce22b0faab3cae31e2551bed44b94991806ab63cc6",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/worker-0671.json": "7fab76e41fee8a76f083e7be25a24b386bf53fa57b2226a818de6db7394f9512",
+    "/tmp/oriole-namespace-name-storage-benchmark/native/conditions.csv": "1a324af3201b70d38ce4a2765f51d284919fb5e76a9505c91d335dd8b9b591d6"
+  }
+}

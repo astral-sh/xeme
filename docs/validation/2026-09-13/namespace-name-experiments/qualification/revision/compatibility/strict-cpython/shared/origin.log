@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "origins": {
+    "initial:pyexpat": {
+      "path": "/tmp/oriole-namespace-binding-revision-correctness/strict-cpython/shared/pyexpat.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "b37864e742ee168658f020883f46c82c95dcdf5f5b2bd655925b7b5a5dc7539c"
+    },
+    "fresh:pyexpat": {
+      "path": "/tmp/oriole-namespace-binding-revision-correctness/strict-cpython/shared/pyexpat.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "b37864e742ee168658f020883f46c82c95dcdf5f5b2bd655925b7b5a5dc7539c"
+    },
+    "initial:_elementtree": {
+      "path": "/tmp/oriole-namespace-binding-revision-correctness/strict-cpython/shared/_elementtree.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "d587b80166aee32e9e3ed1ef81e9be771a015638e370668aec0a00981224887b"
+    },
+    "fresh:_elementtree": {
+      "path": "/tmp/oriole-namespace-binding-revision-correctness/strict-cpython/shared/_elementtree.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "d587b80166aee32e9e3ed1ef81e9be771a015638e370668aec0a00981224887b"
+    }
+  },
+  "accelerator_imports": [
+    "cET",
+    "cET_alias"
+  ],
+  "pure_python_and_blocked_imports": "passed"
+}

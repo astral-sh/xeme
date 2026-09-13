@@ -1,0 +1,13 @@
+{
+  "methods": 802,
+  "rendered_outcomes": 809,
+  "method_changes": [],
+  "rendered_changes": [],
+  "supplementary_changes": [],
+  "failures": [
+    "test.test_pyexpat.BufferTextTest.test1",
+    "test.test_sax.CDATAHandlerTest.test_handlers"
+  ],
+  "baseline_log_sha256": "50901cfce20eac16b7c0a8f4782e1374d0dcd5df806bdfaea1c6b30234509f16",
+  "candidate_log_sha256": "5d3cdf67f4b194fe1aa9728ac31fc34aeb62d1ee623bd7affd28dd85c103bc14"
+}

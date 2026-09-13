@@ -1,0 +1,1647 @@
+{
+  "status": "exact_copies_verified",
+  "root": "/tmp/oriole-namespace-name-storage-publication/evidence",
+  "candidates": [
+    "storage",
+    "proof",
+    "revision",
+    "qname-only"
+  ],
+  "files": [
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/bind.py",
+      "destination": "benchmarks/proof/bind.py",
+      "sha256": "24b1fc40db7c2d1a0a4aae6cac13b3e1d602306efebb625927382848d284fe7a",
+      "bytes": 2047
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/binding.json",
+      "destination": "benchmarks/proof/binding.json",
+      "sha256": "92057194b142732478eab7df39513f4cdee583562ba427f07a9ef66852292f39",
+      "bytes": 1381
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-study/build.json",
+      "destination": "benchmarks/proof/build/build.json",
+      "sha256": "6be22cb6d954afa07d5820c1967baf12d9ad063804f22f0d2b9a5673572114d7",
+      "bytes": 10439
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-study/candidate.patch",
+      "destination": "benchmarks/proof/build/candidate.patch",
+      "sha256": "e8494ee000a52b8e0981a44a6691d520590d29dac73bbef22addc5ae92e9bd5e",
+      "bytes": 5628
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-study/clippy.log",
+      "destination": "benchmarks/proof/build/clippy.log",
+      "sha256": "57b958cea4c6f6b069d42771f98d130b1d3608cbc1ad93a0142faaa430eb42ea",
+      "bytes": 383
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-study/fmt.log",
+      "destination": "benchmarks/proof/build/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-study/release.log",
+      "destination": "benchmarks/proof/build/release.log",
+      "sha256": "bcf0e454b899e69511b7c0ef29df485252f109d053e970725371f9e26ebd69d7",
+      "bytes": 3349
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-study/rustc-version.log",
+      "destination": "benchmarks/proof/build/rustc-version.log",
+      "sha256": "7f8aefa1f89997f46b979665c40b511a92cdf04f6c8463fbec02d30743fb3d6f",
+      "bytes": 219
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-study/source-commit.json",
+      "destination": "benchmarks/proof/build/source-commit.json",
+      "sha256": "8a1b958b85d5214c5948f33e05227451038128cc15b41afa658efdac1e066051",
+      "bytes": 219
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-study/tests.log",
+      "destination": "benchmarks/proof/build/tests.log",
+      "sha256": "8efd44c6ea6241f61bd4d9ff969d31e7036d6c8621a56d3886800e75923d5232",
+      "bytes": 46035
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/commands.json",
+      "destination": "benchmarks/proof/commands.json",
+      "sha256": "fbd55f2e4969820c6db00da3db8fdaab41adafb491f6bdf65f794e6c7659ac96",
+      "bytes": 9858
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/execution-native.json",
+      "destination": "benchmarks/proof/execution-native.json",
+      "sha256": "91021ca064ed72f07fbab895acaa3fbcfa40ad155fa96653567879025dfc0d58",
+      "bytes": 6574
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/execution-python.json",
+      "destination": "benchmarks/proof/execution-python.json",
+      "sha256": "5a28ff927741d973f8081b99ef90e0b561304aec7f156f7bcb514426dec130be",
+      "bytes": 7661
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/host-before-native.json",
+      "destination": "benchmarks/proof/host-before-native.json",
+      "sha256": "6c8f281c08439d3f7d1d5df13fb453cf737b390ea3d08da90b85bec5c129945d",
+      "bytes": 783
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/host-before-python.json",
+      "destination": "benchmarks/proof/host-before-python.json",
+      "sha256": "3ac336d0b5ff38d0a83b2d8b9bc6a17a79bfca19dff2b3073f44a9af28f8d1db",
+      "bytes": 781
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/host-during-native.json",
+      "destination": "benchmarks/proof/host-during-native.json",
+      "sha256": "98324c230da169cc5b5c5565ec4d594cc60e2c37668c4410b40f75c499071f20",
+      "bytes": 5006
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/host-during-python.json",
+      "destination": "benchmarks/proof/host-during-python.json",
+      "sha256": "4732724129c1332f6b35665a71e4f98f998f5ae3c1b1c919cc609acaacbda5ae",
+      "bytes": 10807
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/independent-review.json",
+      "destination": "benchmarks/proof/independent-review.json",
+      "sha256": "5ef706a9b29d59902ad5d33ee664ea4a3bca149a2082d0b165c299ee67d1d2c7",
+      "bytes": 12053
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/monitor-host.py",
+      "destination": "benchmarks/proof/monitor-host.py",
+      "sha256": "bcfd3b9bba19053d43663b9cb79a74cfbf0d6124039b40a72bd9f232bdea4cc4",
+      "bytes": 1906
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/native/conditions.csv",
+      "destination": "benchmarks/proof/native/conditions.csv",
+      "sha256": "8663b4e7ff17a924a80d69087a5cd34e62cadf33bed075f711d85d34f9f70cab",
+      "bytes": 2249
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/native/controller.json",
+      "destination": "benchmarks/proof/native/controller.json",
+      "sha256": "33e5442cfedc750e811d0332e78d95ffc45048597f9dabbf23fce693caf1cbcf",
+      "bytes": 1302
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/native/native_screen.py",
+      "destination": "benchmarks/proof/native/native_screen.py",
+      "sha256": "138a5afb29468778adddefad948fc7b6bdd315908bb87ef46860c04ad705adb9",
+      "bytes": 7430
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/native/preflight-controller.log",
+      "destination": "benchmarks/proof/native/preflight-controller.log",
+      "sha256": "32225b4d75a8d99046886ac4f1c6a6eb183ad731a4b5e7929dec10a0d1a50337",
+      "bytes": 126
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/native/native-screen/protocol.json",
+      "destination": "benchmarks/proof/native/protocol.json",
+      "sha256": "8816324c99573c1c83da9be363f03eecb651acc91ef20ef5079b7eb684d95a17",
+      "bytes": 9045
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/native/read_results.py",
+      "destination": "benchmarks/proof/native/read_results.py",
+      "sha256": "9c6382b60b6129e3b706ca674cfc1f4227dd2b71e83aa46ffcd4b99364c74f33",
+      "bytes": 8346
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/native/review.json",
+      "destination": "benchmarks/proof/native/review.json",
+      "sha256": "75edd8877efddabdb7a190450e90da2dc9798e8fc6cdecdb136ec0ec0ed25555",
+      "bytes": 170270
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/native/run.py",
+      "destination": "benchmarks/proof/native/run.py",
+      "sha256": "70e1822662ed23fb0bad312cd82e3eb63cd4bdcd74606b4d516ffa79da84b81d",
+      "bytes": 1564
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/native/time-controller.log",
+      "destination": "benchmarks/proof/native/time-controller.log",
+      "sha256": "2d0d405d0a4c3b406144229af7277607aa8e777d9f0504a9d861e6ec9e1d4381",
+      "bytes": 23558
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/observe-host.py",
+      "destination": "benchmarks/proof/observe-host.py",
+      "sha256": "a0df67eb5c89a0ffbf30ee377dd0302aff64ca2336fedef9f4af1655710a2cb7",
+      "bytes": 1302
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/preparation.json",
+      "destination": "benchmarks/proof/preparation.json",
+      "sha256": "7395832d5458f17bad049b4bbc0f171ba492f688447f80973b25eaf4d8e81c61",
+      "bytes": 9385
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/build-controller.log",
+      "destination": "benchmarks/proof/python/build-controller.log",
+      "sha256": "e942f6ac87f061859ac1659d6d3bf4113e228a79ae4bca98c750731656984ec5",
+      "bytes": 100
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/build_consumers.py",
+      "destination": "benchmarks/proof/python/build_consumers.py",
+      "sha256": "4e7c91024b658618547c27023955e34a18fdc7a062764aaf1e26bc6910d3a099",
+      "bytes": 7987
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/consumer_screen.py",
+      "destination": "benchmarks/proof/python/consumer_screen.py",
+      "sha256": "1ceb2e83dabdea48fbdaefd00e294c1769fa9e8ba9f7b966c3eb198fb5e140cf",
+      "bytes": 16060
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/consumers/build.json",
+      "destination": "benchmarks/proof/python/consumers/build.json",
+      "sha256": "228d3aba6cf625596d72330a68c13c1d259caf6d5192b162a993e6a1111103b3",
+      "bytes": 23585
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/elapsed_review.py",
+      "destination": "benchmarks/proof/python/elapsed_review.py",
+      "sha256": "4ffdca2256633ab0b666db55303b1a6d26f545082da1d415c047d2b833ce9cb3",
+      "bytes": 10094
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/normal-conditions.csv",
+      "destination": "benchmarks/proof/python/normal-conditions.csv",
+      "sha256": "e400005ef0f2b3e9dcb612c637b3a5e3e37da103a322cf5cdf79cde2a0937e83",
+      "bytes": 2159
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/normal-review.json",
+      "destination": "benchmarks/proof/python/normal-review.json",
+      "sha256": "e114e4dde914846a3c01a5da9242ec40b9a86e3a692bc86bd7bbbe59fbc5e86b",
+      "bytes": 377197
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/preflight-controller.log",
+      "destination": "benchmarks/proof/python/preflight-controller.log",
+      "sha256": "19983cabbe818a76728d9a5b7ed700ec69502448c9e78a17a7c21af2a0d15b68",
+      "bytes": 84
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/preflight-review.json",
+      "destination": "benchmarks/proof/python/preflight-review.json",
+      "sha256": "e88d5821d22a767b9670c4aac63f6b6f271cd9b3d670bde12ef7b599c9bbec6d",
+      "bytes": 67611
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/preflight_review.py",
+      "destination": "benchmarks/proof/python/preflight_review.py",
+      "sha256": "0c46ddeb91e20b33d37eb1554b1252895234921477a1411271f49add09b39e17",
+      "bytes": 7420
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/prepare-controller.json",
+      "destination": "benchmarks/proof/python/prepare-controller.json",
+      "sha256": "f1f1e9a91c07063cf8fe58298441e1d7f68a3aac8bf45d70fd52d9877728b5c4",
+      "bytes": 2350
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/python_worker.py",
+      "destination": "benchmarks/proof/python/python_worker.py",
+      "sha256": "4bc0ccffedb5048412b9cfc3638d28dcb30f711891c3784f3fbd3c0eb536ab68",
+      "bytes": 15312
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/reuse.json",
+      "destination": "benchmarks/proof/python/reuse.json",
+      "sha256": "928d24a72bb369858c3586fe4c44731f5370669b9884e390a581f269923950ef",
+      "bytes": 6378
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/run.py",
+      "destination": "benchmarks/proof/python/run.py",
+      "sha256": "6b56b00f60a8743921c0df6ff7d0c1aedc58d1b4c5631a6117d720801fb0197f",
+      "bytes": 3626
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/time-controller.json",
+      "destination": "benchmarks/proof/python/time-controller.json",
+      "sha256": "225d87f1b67183d571f7d40bcc144ccce1e2147b381846ef5c50e1a931416e76",
+      "bytes": 1271
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-proof-benchmark/python/time-controller.log",
+      "destination": "benchmarks/proof/python/time-controller.log",
+      "sha256": "388f726667dfb9646ad3dc27d853ca5bf03019270a53e853164927836b04e84d",
+      "bytes": 76
+    },
+    {
+      "source": "/tmp/oriole-run-namespace-name-proof-benchmark.py",
+      "destination": "benchmarks/proof/run-benchmark.py",
+      "sha256": "f285db5519bf17c63189d3a2553b7e70848961397284f1be8a6eeda77460d905",
+      "bytes": 2373
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/bind.py",
+      "destination": "benchmarks/qname-only/bind.py",
+      "sha256": "24b1fc40db7c2d1a0a4aae6cac13b3e1d602306efebb625927382848d284fe7a",
+      "bytes": 2047
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/binding.json",
+      "destination": "benchmarks/qname-only/binding.json",
+      "sha256": "8529411451e7f9e8a583a9619036337b5e849ce6bcf1b131717916ed686d37f3",
+      "bytes": 1381
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-study/build.json",
+      "destination": "benchmarks/qname-only/build/build.json",
+      "sha256": "f6811b36bf90db23677b2cb33b0b96a5d11618483ca49e331f89db5c475f8300",
+      "bytes": 10435
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-study/candidate.patch",
+      "destination": "benchmarks/qname-only/build/candidate.patch",
+      "sha256": "79e14ced93deef6c1a3bdb66e8971bfb4eb3af2adb919dba15840317a289c44c",
+      "bytes": 5628
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-study/clippy.log",
+      "destination": "benchmarks/qname-only/build/clippy.log",
+      "sha256": "eac82ef087191905fb8be27b4054668b68e9c79e0c104ddd43b1e86e90969460",
+      "bytes": 383
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-study/fmt.log",
+      "destination": "benchmarks/qname-only/build/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-study/release.log",
+      "destination": "benchmarks/qname-only/build/release.log",
+      "sha256": "4308b182ba4f93e8f37b61ec1839225365ccfba13d9eb322418b6962f8bba85b",
+      "bytes": 3350
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-study/rustc-version.log",
+      "destination": "benchmarks/qname-only/build/rustc-version.log",
+      "sha256": "7f8aefa1f89997f46b979665c40b511a92cdf04f6c8463fbec02d30743fb3d6f",
+      "bytes": 219
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-study/source-commit.json",
+      "destination": "benchmarks/qname-only/build/source-commit.json",
+      "sha256": "a135024f5595c3cad25db9a258d33ae5ed48591ee87a9f9aeae64c73c28ab816",
+      "bytes": 219
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-study/tests.log",
+      "destination": "benchmarks/qname-only/build/tests.log",
+      "sha256": "aa48d2c002226162aeb4038220c5174d91c75974d1d0a18b8fa6bb4e6f925839",
+      "bytes": 45945
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/commands.json",
+      "destination": "benchmarks/qname-only/commands.json",
+      "sha256": "2dd523a669c7c4ef0b0a4d476b61f66f13b553c0e0a7fbc38219336207837744",
+      "bytes": 9858
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/execution-native.json",
+      "destination": "benchmarks/qname-only/execution-native.json",
+      "sha256": "b8c25e6ffc43c8b8f0ac809161c5b9356364cac8ea11255e4c591ec9b5895307",
+      "bytes": 6577
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/execution-python.json",
+      "destination": "benchmarks/qname-only/execution-python.json",
+      "sha256": "36efc53c667034361e6328041c23afdef1f032719230eae8a983662ad578972f",
+      "bytes": 7666
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/host-before-native.json",
+      "destination": "benchmarks/qname-only/host-before-native.json",
+      "sha256": "0f56f072576f1ee02c7ee61de65d558564414ce6ae3f73c0daa48d6609260be7",
+      "bytes": 780
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/host-before-python.json",
+      "destination": "benchmarks/qname-only/host-before-python.json",
+      "sha256": "ba6a77362d5740701993cf7c97c27b28034861c4ea2d32c69c046ebe8cb10747",
+      "bytes": 782
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/host-during-native.json",
+      "destination": "benchmarks/qname-only/host-during-native.json",
+      "sha256": "bae766a2aac8a61c9e7f786070302334890aa2b6fddfebac1e1d5a12f3cab254",
+      "bytes": 4762
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/host-during-python.json",
+      "destination": "benchmarks/qname-only/host-during-python.json",
+      "sha256": "b632d79798669cadc9332444a2755677f15364f6c9d1f660d5494f2f8d13d012",
+      "bytes": 10567
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/independent-review.json",
+      "destination": "benchmarks/qname-only/independent-review.json",
+      "sha256": "63667b1763686f3198aaee96b9f0096506842037ca36c0eae82a7a6acf766209",
+      "bytes": 11647
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/monitor-host.py",
+      "destination": "benchmarks/qname-only/monitor-host.py",
+      "sha256": "bcfd3b9bba19053d43663b9cb79a74cfbf0d6124039b40a72bd9f232bdea4cc4",
+      "bytes": 1906
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/native/conditions.csv",
+      "destination": "benchmarks/qname-only/native/conditions.csv",
+      "sha256": "4581223cf6fccb60630759024010d0298579ac6bd064275afa957e7f30cb764e",
+      "bytes": 2248
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/native/controller.json",
+      "destination": "benchmarks/qname-only/native/controller.json",
+      "sha256": "dd0a761e68913d37dfa208f17599e62342f70a74148b6b65b0b438e108f2bd3f",
+      "bytes": 1301
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/native/native_screen.py",
+      "destination": "benchmarks/qname-only/native/native_screen.py",
+      "sha256": "56f413fc120ce81dfdc652519643c80cbb175c7a6dd901ae0e1bb1e534b5b0bf",
+      "bytes": 7430
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/native/preflight-controller.log",
+      "destination": "benchmarks/qname-only/native/preflight-controller.log",
+      "sha256": "8f139ebf0f3a96cab42d8869467bbc9c786f5b064ce2926a70f62d85ad84cfe1",
+      "bytes": 126
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/native/native-screen/protocol.json",
+      "destination": "benchmarks/qname-only/native/protocol.json",
+      "sha256": "53714aca5447f65816d5237545628726a2b76de1c73abdbb299a8fc5680bfbc0",
+      "bytes": 9045
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/native/read_results.py",
+      "destination": "benchmarks/qname-only/native/read_results.py",
+      "sha256": "9c6382b60b6129e3b706ca674cfc1f4227dd2b71e83aa46ffcd4b99364c74f33",
+      "bytes": 8346
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/native/review.json",
+      "destination": "benchmarks/qname-only/native/review.json",
+      "sha256": "60752d6371b1dcdf1523d759b4feb8529b13699a753719adb6bb5b86b71d3861",
+      "bytes": 174476
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/native/run.py",
+      "destination": "benchmarks/qname-only/native/run.py",
+      "sha256": "70e1822662ed23fb0bad312cd82e3eb63cd4bdcd74606b4d516ffa79da84b81d",
+      "bytes": 1564
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/native/time-controller.log",
+      "destination": "benchmarks/qname-only/native/time-controller.log",
+      "sha256": "47a9e04c29cd29a81b095181806333f1e5c105f5ba1956ca822b81d63c50321b",
+      "bytes": 23572
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/observe-host.py",
+      "destination": "benchmarks/qname-only/observe-host.py",
+      "sha256": "a0df67eb5c89a0ffbf30ee377dd0302aff64ca2336fedef9f4af1655710a2cb7",
+      "bytes": 1302
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/preparation.json",
+      "destination": "benchmarks/qname-only/preparation.json",
+      "sha256": "a8c43ed0a1c1480c58fbe58fa77751e54a470dd14b071bd967d1fe0a6970ab88",
+      "bytes": 9400
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/build-controller.log",
+      "destination": "benchmarks/qname-only/python/build-controller.log",
+      "sha256": "e5fdb2d3ef9903b149b0c93b003e294443131f671d5b913577cd044b64b5c8ad",
+      "bytes": 100
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/build_consumers.py",
+      "destination": "benchmarks/qname-only/python/build_consumers.py",
+      "sha256": "4e7c91024b658618547c27023955e34a18fdc7a062764aaf1e26bc6910d3a099",
+      "bytes": 7987
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/consumer_screen.py",
+      "destination": "benchmarks/qname-only/python/consumer_screen.py",
+      "sha256": "1ceb2e83dabdea48fbdaefd00e294c1769fa9e8ba9f7b966c3eb198fb5e140cf",
+      "bytes": 16060
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/consumers/build.json",
+      "destination": "benchmarks/qname-only/python/consumers/build.json",
+      "sha256": "2be8354a7ad6effb9ad5011dcedc3a667b57134d440aa6ec754124c797548d84",
+      "bytes": 23585
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/elapsed_review.py",
+      "destination": "benchmarks/qname-only/python/elapsed_review.py",
+      "sha256": "d56a78f92b99011ec224d37f5b0b3116d23ea0ad4213629ff70b111298984a45",
+      "bytes": 10094
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/normal-conditions.csv",
+      "destination": "benchmarks/qname-only/python/normal-conditions.csv",
+      "sha256": "b8494f48896dc93b11846aa519cdc1acef61f7a5b825e3effe2e171d7a376731",
+      "bytes": 2156
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/normal-review.json",
+      "destination": "benchmarks/qname-only/python/normal-review.json",
+      "sha256": "fd6058339b38e575f722cd6f85a974c8af611015726a9e1e87dd8da502d649dd",
+      "bytes": 378256
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/preflight-controller.log",
+      "destination": "benchmarks/qname-only/python/preflight-controller.log",
+      "sha256": "19983cabbe818a76728d9a5b7ed700ec69502448c9e78a17a7c21af2a0d15b68",
+      "bytes": 84
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/preflight-review.json",
+      "destination": "benchmarks/qname-only/python/preflight-review.json",
+      "sha256": "d87f0410c3733338122cff0d98bc01378beb64bae86ce5315065366b00ea4a04",
+      "bytes": 67611
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/preflight_review.py",
+      "destination": "benchmarks/qname-only/python/preflight_review.py",
+      "sha256": "be2f8937f8d3107abff1900a046baf9fdc18b9aeb5c657e761396474c90e28ac",
+      "bytes": 7420
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/prepare-controller.json",
+      "destination": "benchmarks/qname-only/python/prepare-controller.json",
+      "sha256": "c2288947296bf6b2e8ed560bebe8eae35787ff1aee81f58607db33d8e6e08df9",
+      "bytes": 2352
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/python_worker.py",
+      "destination": "benchmarks/qname-only/python/python_worker.py",
+      "sha256": "4bc0ccffedb5048412b9cfc3638d28dcb30f711891c3784f3fbd3c0eb536ab68",
+      "bytes": 15312
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/reuse.json",
+      "destination": "benchmarks/qname-only/python/reuse.json",
+      "sha256": "928d24a72bb369858c3586fe4c44731f5370669b9884e390a581f269923950ef",
+      "bytes": 6378
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/run.py",
+      "destination": "benchmarks/qname-only/python/run.py",
+      "sha256": "6b56b00f60a8743921c0df6ff7d0c1aedc58d1b4c5631a6117d720801fb0197f",
+      "bytes": 3626
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/time-controller.json",
+      "destination": "benchmarks/qname-only/python/time-controller.json",
+      "sha256": "ab7c1aafa214900ae6b219e19ed902fdc7771de137a0adcb4c0d48dac6476ab8",
+      "bytes": 1270
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-benchmark/python/time-controller.log",
+      "destination": "benchmarks/qname-only/python/time-controller.log",
+      "sha256": "388f726667dfb9646ad3dc27d853ca5bf03019270a53e853164927836b04e84d",
+      "bytes": 76
+    },
+    {
+      "source": "/tmp/oriole-run-namespace-qname-only-benchmark.py",
+      "destination": "benchmarks/qname-only/run-benchmark.py",
+      "sha256": "7dd826c8e59176e362c422f9150dd2f179e47bd58cfe73ad4b060a9074446807",
+      "bytes": 2373
+    },
+    {
+      "source": "/tmp/oriole-save-qname-only-independent-review.py",
+      "destination": "benchmarks/qname-only/save-independent-review.py",
+      "sha256": "ce1b3f68ff84fa65184f96b1d829e28936d50151c5eeebbea8a2182247c68c39",
+      "bytes": 455
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/bind.py",
+      "destination": "benchmarks/revision/bind.py",
+      "sha256": "24b1fc40db7c2d1a0a4aae6cac13b3e1d602306efebb625927382848d284fe7a",
+      "bytes": 2047
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/binding.json",
+      "destination": "benchmarks/revision/binding.json",
+      "sha256": "a23b53eb957859de90bb333200c7f209b3dde7fda72545ca61625db4bfeb2cda",
+      "bytes": 1399
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-study/build.json",
+      "destination": "benchmarks/revision/build/build.json",
+      "sha256": "1fcd7d454391a878c9ee7a5c08faefe970e5cc69af805ad056e8e1d5b30d2ad8",
+      "bytes": 10449
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-study/candidate.patch",
+      "destination": "benchmarks/revision/build/candidate.patch",
+      "sha256": "ccb2e949b895b71b74e6fd5e576567fa6dc4ea115331f82d795506d8ead548e6",
+      "bytes": 15612
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-study/clippy.log",
+      "destination": "benchmarks/revision/build/clippy.log",
+      "sha256": "3c7ad580107a3d502571d8bfa031b9be01bb4cffe56745bb71a391edad2d2961",
+      "bytes": 383
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-study/fmt.log",
+      "destination": "benchmarks/revision/build/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-study/release.log",
+      "destination": "benchmarks/revision/build/release.log",
+      "sha256": "228fb624b4fba7fda2f7dc57cf7848594ea6012883660e85faf830eee0c6da48",
+      "bytes": 3349
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-study/rustc-version.log",
+      "destination": "benchmarks/revision/build/rustc-version.log",
+      "sha256": "7f8aefa1f89997f46b979665c40b511a92cdf04f6c8463fbec02d30743fb3d6f",
+      "bytes": 219
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-study/source-commit.json",
+      "destination": "benchmarks/revision/build/source-commit.json",
+      "sha256": "fe31c76eb403d563421fd195b78f47c660475de123edf4439a3f8917fa3ba2b8",
+      "bytes": 219
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-study/tests.log",
+      "destination": "benchmarks/revision/build/tests.log",
+      "sha256": "737cf68b8061ea2d9d23ba115f69e754a0ad84e18ef82fada034431b7148e985",
+      "bytes": 46220
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/commands.json",
+      "destination": "benchmarks/revision/commands.json",
+      "sha256": "8022db3d545327ce093506e8d188e9daa08b6c200db32f8a6b4cbdfd0909db0e",
+      "bytes": 9924
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/execution-native.json",
+      "destination": "benchmarks/revision/execution-native.json",
+      "sha256": "89f51cb891fc70b9d559aa53603d2323d6dd2e111276dad24a292efca879c874",
+      "bytes": 6616
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/execution-python.json",
+      "destination": "benchmarks/revision/execution-python.json",
+      "sha256": "95aca609ae63743ea4ff9584500c452b46ba7657514ff705d2fcb58b42f8c236",
+      "bytes": 7702
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/host-before-native.json",
+      "destination": "benchmarks/revision/host-before-native.json",
+      "sha256": "2d7972594ca36cc17fc791b2cf663b094537b794559ec59a9e55d9eb45f5b63f",
+      "bytes": 783
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/host-before-python.json",
+      "destination": "benchmarks/revision/host-before-python.json",
+      "sha256": "08156299015d59ae2b54188484f725750fa247c61444d4da9ee805caeb7e4adb",
+      "bytes": 782
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/host-during-native.json",
+      "destination": "benchmarks/revision/host-during-native.json",
+      "sha256": "81fd6607dd53693e9ea287ab67ffae9be4f5e508fd82f3801d1bf81b38c70c25",
+      "bytes": 5006
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/host-during-python.json",
+      "destination": "benchmarks/revision/host-during-python.json",
+      "sha256": "a73c4b6d47ce53dfef24b88e646d0dc40fcd84872069fd5770975c280529aaa6",
+      "bytes": 10563
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/independent-review.json",
+      "destination": "benchmarks/revision/independent-review.json",
+      "sha256": "bb2c20c5156fd19547279b93d293a092177bb7e193a863607f6a8f94a12937a3",
+      "bytes": 12005
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/monitor-host.py",
+      "destination": "benchmarks/revision/monitor-host.py",
+      "sha256": "bcfd3b9bba19053d43663b9cb79a74cfbf0d6124039b40a72bd9f232bdea4cc4",
+      "bytes": 1906
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/native/conditions.csv",
+      "destination": "benchmarks/revision/native/conditions.csv",
+      "sha256": "a8b4d732202d572e31eae52651e6810a6e5b2723f7a3a47c54d09bcc6acfca08",
+      "bytes": 2254
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/native/controller.json",
+      "destination": "benchmarks/revision/native/controller.json",
+      "sha256": "76b910a00cebedd5c7b258a52ad8eda01b1d413a01a7ff977ee6d32af7ee20ff",
+      "bytes": 1313
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/native/native_screen.py",
+      "destination": "benchmarks/revision/native/native_screen.py",
+      "sha256": "d7671921c09aa2fe1b3605db1c55face197fe527e326edbe9a2851e8157d0d2a",
+      "bytes": 7436
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/native/preflight-controller.log",
+      "destination": "benchmarks/revision/native/preflight-controller.log",
+      "sha256": "2a803ad975a4439e64269577deaae1e43a1de5ec99f1a1e96d193137b5cbef8d",
+      "bytes": 126
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/native/native-screen/protocol.json",
+      "destination": "benchmarks/revision/native/protocol.json",
+      "sha256": "b27a02c7f3f20f9715fd2cfe88c7c66733c53d9bcbf75c9940b487351bf93934",
+      "bytes": 9069
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/native/read_results.py",
+      "destination": "benchmarks/revision/native/read_results.py",
+      "sha256": "9c6382b60b6129e3b706ca674cfc1f4227dd2b71e83aa46ffcd4b99364c74f33",
+      "bytes": 8346
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/native/review.json",
+      "destination": "benchmarks/revision/native/review.json",
+      "sha256": "8b2bc6bde2a97a8f84abf7d4bc4aec25adab15df57986fb709c5231be8fb749e",
+      "bytes": 196760
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/native/run.py",
+      "destination": "benchmarks/revision/native/run.py",
+      "sha256": "70e1822662ed23fb0bad312cd82e3eb63cd4bdcd74606b4d516ffa79da84b81d",
+      "bytes": 1564
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/native/time-controller.log",
+      "destination": "benchmarks/revision/native/time-controller.log",
+      "sha256": "6f90cbb57f95115ce6ccdf9630a89b6de2a89fa6b3e1465fef6fd795018cd026",
+      "bytes": 23559
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/observe-host.py",
+      "destination": "benchmarks/revision/observe-host.py",
+      "sha256": "a0df67eb5c89a0ffbf30ee377dd0302aff64ca2336fedef9f4af1655710a2cb7",
+      "bytes": 1302
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/preparation.json",
+      "destination": "benchmarks/revision/preparation.json",
+      "sha256": "00fb336d8b9e13b42c69d18dc8a56b27482f6d32e5ecabe7fb317ac302b5cc73",
+      "bytes": 9468
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/build-controller.log",
+      "destination": "benchmarks/revision/python/build-controller.log",
+      "sha256": "7929490a32d66f55b81fe2a9aa55748e8ef3e489023eabe2999a23997785bfcd",
+      "bytes": 106
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/build_consumers.py",
+      "destination": "benchmarks/revision/python/build_consumers.py",
+      "sha256": "4e7c91024b658618547c27023955e34a18fdc7a062764aaf1e26bc6910d3a099",
+      "bytes": 7987
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/consumer_screen.py",
+      "destination": "benchmarks/revision/python/consumer_screen.py",
+      "sha256": "1ceb2e83dabdea48fbdaefd00e294c1769fa9e8ba9f7b966c3eb198fb5e140cf",
+      "bytes": 16060
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/consumers/build.json",
+      "destination": "benchmarks/revision/python/consumers/build.json",
+      "sha256": "9d43b5a2f4aef645893d592d018da46bd2e9eedbbfdf342c921cbcad16a4f2d2",
+      "bytes": 23693
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/elapsed_review.py",
+      "destination": "benchmarks/revision/python/elapsed_review.py",
+      "sha256": "4dd06ff4b464cdb3860e8cdc6a604b8016e58ea97f21bfc82aee482d988f77c6",
+      "bytes": 10106
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/normal-conditions.csv",
+      "destination": "benchmarks/revision/python/normal-conditions.csv",
+      "sha256": "a88596f863f569743000c009a19dd204870be6bbd6f62c0d1a8bcafc26dae9d6",
+      "bytes": 2159
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/normal-review.json",
+      "destination": "benchmarks/revision/python/normal-review.json",
+      "sha256": "e54babea6d5da36c5abbfa1e4f2c9bf9874c9a61677a193d6de264aa7f138660",
+      "bytes": 393157
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/preflight-controller.log",
+      "destination": "benchmarks/revision/python/preflight-controller.log",
+      "sha256": "19983cabbe818a76728d9a5b7ed700ec69502448c9e78a17a7c21af2a0d15b68",
+      "bytes": 84
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/preflight-review.json",
+      "destination": "benchmarks/revision/python/preflight-review.json",
+      "sha256": "257081da205156c79ef09c7050e55b067442da59d55a79a4c6c15cc4c40e4aab",
+      "bytes": 69159
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/preflight_review.py",
+      "destination": "benchmarks/revision/python/preflight_review.py",
+      "sha256": "11403d8efac7ce84e98f36d0cfc5c3567f255d5259a99c2f0219bcd62e2b1d53",
+      "bytes": 7426
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/prepare-controller.json",
+      "destination": "benchmarks/revision/python/prepare-controller.json",
+      "sha256": "f2293735b366042bb49229d4bdb463fda438d9503c66ae51aaf7d3dedfc13ed8",
+      "bytes": 2387
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/python_worker.py",
+      "destination": "benchmarks/revision/python/python_worker.py",
+      "sha256": "4bc0ccffedb5048412b9cfc3638d28dcb30f711891c3784f3fbd3c0eb536ab68",
+      "bytes": 15312
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/reuse.json",
+      "destination": "benchmarks/revision/python/reuse.json",
+      "sha256": "928d24a72bb369858c3586fe4c44731f5370669b9884e390a581f269923950ef",
+      "bytes": 6378
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/run.py",
+      "destination": "benchmarks/revision/python/run.py",
+      "sha256": "6b56b00f60a8743921c0df6ff7d0c1aedc58d1b4c5631a6117d720801fb0197f",
+      "bytes": 3626
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/time-controller.json",
+      "destination": "benchmarks/revision/python/time-controller.json",
+      "sha256": "27178c0dc650ac5cfebb97cdc9e13f60527ca132cfefa24527444aebafd3e8db",
+      "bytes": 1289
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-benchmark/python/time-controller.log",
+      "destination": "benchmarks/revision/python/time-controller.log",
+      "sha256": "388f726667dfb9646ad3dc27d853ca5bf03019270a53e853164927836b04e84d",
+      "bytes": 76
+    },
+    {
+      "source": "/tmp/oriole-run-namespace-binding-revision-benchmark.py",
+      "destination": "benchmarks/revision/run-benchmark.py",
+      "sha256": "ae4f72e7d070df594eba022e1674b9f7c0f1520786a7f337f1fc000e325014ed",
+      "bytes": 2391
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/bind.py",
+      "destination": "benchmarks/storage/bind.py",
+      "sha256": "24b1fc40db7c2d1a0a4aae6cac13b3e1d602306efebb625927382848d284fe7a",
+      "bytes": 2047
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/binding.json",
+      "destination": "benchmarks/storage/binding.json",
+      "sha256": "aa68527fc4487dbbd0e78f39e99caccc35e59a87b7c92f7b7aee15429c2ad28b",
+      "bytes": 1387
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-study/build.json",
+      "destination": "benchmarks/storage/build/build.json",
+      "sha256": "ef1665c640369b20300212c1833da6784049f0903baeb20397306c3d8db4feae",
+      "bytes": 10439
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-study/candidate.patch",
+      "destination": "benchmarks/storage/build/candidate.patch",
+      "sha256": "5a80dca611c3a4a8f2a701241107a9784eed43fbb595f6bd2c56b2e81081488b",
+      "bytes": 42312
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-study/clippy.log",
+      "destination": "benchmarks/storage/build/clippy.log",
+      "sha256": "346ee5a192046610e9074f0fa9458022bc39db957d1531203e170beee8bf161f",
+      "bytes": 497
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-study/fmt.log",
+      "destination": "benchmarks/storage/build/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-study/release.log",
+      "destination": "benchmarks/storage/build/release.log",
+      "sha256": "a895dfd2e1af0add336c01b479fdb535dff6af0f32c018bbcfd8712b686ba6ee",
+      "bytes": 4899
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-study/rustc-version.log",
+      "destination": "benchmarks/storage/build/rustc-version.log",
+      "sha256": "7f8aefa1f89997f46b979665c40b511a92cdf04f6c8463fbec02d30743fb3d6f",
+      "bytes": 219
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-study/tests.log",
+      "destination": "benchmarks/storage/build/tests.log",
+      "sha256": "90f7611a2c031dcc97efa53834f8062c2d0a92fc5ce4b8a2b86a82cc09cb4f69",
+      "bytes": 45742
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/commands.json",
+      "destination": "benchmarks/storage/commands.json",
+      "sha256": "6ad377a42e001a3e00a9d5886fc38c92d6c0805b2524e03b80d7f7d7f60fc178",
+      "bytes": 9880
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/execution-native.json",
+      "destination": "benchmarks/storage/execution-native.json",
+      "sha256": "c0a2d19fc5b575c0057bd88fa3723c4c5cfc3d234e8b72f92b1770271db22d48",
+      "bytes": 6592
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/host-before-native.json",
+      "destination": "benchmarks/storage/host-before-native.json",
+      "sha256": "e22db25b6801d747b5af84633041f17b6834bd937ef61d67830c8d2137f9bacf",
+      "bytes": 780
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/host-during-native.json",
+      "destination": "benchmarks/storage/host-during-native.json",
+      "sha256": "970a7e0808e8d7fe42d9627c4c669189a6704515cb7c8527432cd7a1dba023aa",
+      "bytes": 5002
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/independent-review.json",
+      "destination": "benchmarks/storage/independent-review.json",
+      "sha256": "fad96358093f8b68f1af1bbfea2d094ff910f83720cd41a940161c1c271edd01",
+      "bytes": 8999
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/monitor-host.py",
+      "destination": "benchmarks/storage/monitor-host.py",
+      "sha256": "bcfd3b9bba19053d43663b9cb79a74cfbf0d6124039b40a72bd9f232bdea4cc4",
+      "bytes": 1906
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/native/conditions.csv",
+      "destination": "benchmarks/storage/native/conditions.csv",
+      "sha256": "1a324af3201b70d38ce4a2765f51d284919fb5e76a9505c91d335dd8b9b591d6",
+      "bytes": 2250
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/native/controller.json",
+      "destination": "benchmarks/storage/native/controller.json",
+      "sha256": "e6736c7f43076ee1f3c0c9c3b6600b865b900b95fe401e1be5bb9aeaee7071d6",
+      "bytes": 1304
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/native/native_screen.py",
+      "destination": "benchmarks/storage/native/native_screen.py",
+      "sha256": "a78c80c79fdf2c110367f3ba8f52402dc1446f492f771c8ece807b0dab9bab26",
+      "bytes": 7432
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/native/preflight-controller.log",
+      "destination": "benchmarks/storage/native/preflight-controller.log",
+      "sha256": "a24bc33b149997b15045b5410e26157774cc711a3e3c2f98e9cc8aaab531bdc4",
+      "bytes": 126
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/native/native-screen/protocol.json",
+      "destination": "benchmarks/storage/native/protocol.json",
+      "sha256": "61164da0e11d8e151e10ce1068c0ed88ba4eab5ca8bdd68280e4c72a252882a4",
+      "bytes": 9053
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/native/read_results.py",
+      "destination": "benchmarks/storage/native/read_results.py",
+      "sha256": "9c6382b60b6129e3b706ca674cfc1f4227dd2b71e83aa46ffcd4b99364c74f33",
+      "bytes": 8346
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/native/review.json",
+      "destination": "benchmarks/storage/native/review.json",
+      "sha256": "08489abab466ef025c23e0a37c24f1a37cb27e818c92967af7a1cafed4192e1d",
+      "bytes": 188366
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/native/run.py",
+      "destination": "benchmarks/storage/native/run.py",
+      "sha256": "70e1822662ed23fb0bad312cd82e3eb63cd4bdcd74606b4d516ffa79da84b81d",
+      "bytes": 1564
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/native/time-controller.log",
+      "destination": "benchmarks/storage/native/time-controller.log",
+      "sha256": "ff4d3521f295fc0d7a168c84fafb2014cf5ef8078af073ff7bae713001a5d945",
+      "bytes": 23563
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/observe-host.py",
+      "destination": "benchmarks/storage/observe-host.py",
+      "sha256": "a0df67eb5c89a0ffbf30ee377dd0302aff64ca2336fedef9f4af1655710a2cb7",
+      "bytes": 1302
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-benchmark/preparation.json",
+      "destination": "benchmarks/storage/preparation.json",
+      "sha256": "722f7df32016223871e39f94b94591f506318d3f5439bd1a0ea0a09a4650ead9",
+      "bytes": 9630
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-failed-build-01/build.json",
+      "destination": "benchmarks/storage/preserved-failures/01/build.json",
+      "sha256": "5ac6270c69ce475226e95c632857c5d4b8d3321d97da17c5a949c28169f094c0",
+      "bytes": 8995
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-failed-build-01/tests.log",
+      "destination": "benchmarks/storage/preserved-failures/01/tests.log",
+      "sha256": "060ea2e9ceb04394412a4afca223dab20e8d3d7dcbd4b935050d0ea94a21f031",
+      "bytes": 771
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-failed-build-02/build.json",
+      "destination": "benchmarks/storage/preserved-failures/02/build.json",
+      "sha256": "73e79636dab38f836f06f11432574890b59f34e515b81788d2cabe0a739acb8a",
+      "bytes": 8996
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-failed-build-02/tests.log",
+      "destination": "benchmarks/storage/preserved-failures/02/tests.log",
+      "sha256": "c3080db25a2ade3c24befdfa342fd115ea1da860bff95256ef27e95058fd3d8b",
+      "bytes": 42607
+    },
+    {
+      "source": "/tmp/oriole-run-namespace-name-storage-benchmark.py",
+      "destination": "benchmarks/storage/run-benchmark.py",
+      "sha256": "d192f4a977af4ac138c0144450e98ca6bcd6b6f49fb211636e963c7b71f0dae9",
+      "bytes": 2379
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-publication/ci/pr173.json",
+      "destination": "ci/pr173.json",
+      "sha256": "306ebfec67a4c897b8040e9eaa96daced62f9a6fb759456c0ff08f7bcdecc711",
+      "bytes": 4917
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-publication/ci/pr174.json",
+      "destination": "ci/pr174.json",
+      "sha256": "819c70bc2c6e833aa6a4ab2f52b45943ffeb322f4e0a1b170f7de8c98984e484",
+      "bytes": 4913
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-publication/ci/pr175.json",
+      "destination": "ci/pr175.json",
+      "sha256": "217ba308cbc1839377f7528659713ea9a5afe6fb8c33da59d983b72a63557f8d",
+      "bytes": 4917
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-publication/ci/pr176.json",
+      "destination": "ci/pr176.json",
+      "sha256": "466e14f7dc53d371dc8fee133a2107bdd3b58bb645d081ae712dbfe0ac8c80fd",
+      "bytes": 4915
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-correctness-preparation/README.md",
+      "destination": "qualification/controller/README.md",
+      "sha256": "ac42393ebfcf5fecea3c8dd9ff23f7bbee90936112a6c048573215d0d5f9cc3c",
+      "bytes": 3037
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-correctness-preparation/methods.py",
+      "destination": "qualification/controller/methods.py",
+      "sha256": "b009ba5bc77ca977381c62c0c9ad6e0ec81ee3195a59421f0b425649313d44f5",
+      "bytes": 1058
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-correctness-preparation/pins.json",
+      "destination": "qualification/controller/pins.json",
+      "sha256": "55171cbfd7b7118e26893a2bd70b7fb7cc6e6bd20934a32f9a0184f9919d4a68",
+      "bytes": 6026
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-correctness-preparation/preparation.json",
+      "destination": "qualification/controller/preparation.json",
+      "sha256": "a6b07293a1fd5f3952d9568f82687272965e5df4de429803b60d0688cd5fa4fc",
+      "bytes": 2905
+    },
+    {
+      "source": "/tmp/oriole-namespace-name-storage-correctness-preparation/run.py",
+      "destination": "qualification/controller/run.py",
+      "sha256": "0b1bd1e26e252dce6d7632e0f11da149176041da076a3278990cbc86cef38852",
+      "bytes": 13190
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/build-ffi.log",
+      "destination": "qualification/qname-only/asan/build-ffi.log",
+      "sha256": "e74291423ed91fb7ce475baa391bc5f77b575b3d0c9a0d18a642523592623786",
+      "bytes": 2657
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/build-multibyte.log",
+      "destination": "qualification/qname-only/asan/build-multibyte.log",
+      "sha256": "75e85d704a32d2208d4c2a2971fd25804b83643774c95642fdd54d2ba3eb6d4c",
+      "bytes": 2669
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/build-streaming.log",
+      "destination": "qualification/qname-only/asan/build-streaming.log",
+      "sha256": "0d0c9b7474b4f573b09f2f3bff5117b730b266b8246c3d88316308fd3e09a353",
+      "bytes": 30514
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/compiler-proof.json",
+      "destination": "qualification/qname-only/asan/compiler-proof.json",
+      "sha256": "039216c711b13444d747e5a2a1e4bed0eeacec469d260e2c4719af722adface0",
+      "bytes": 57438
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/explore-ffi.log",
+      "destination": "qualification/qname-only/asan/explore-ffi.log",
+      "sha256": "a77cb18408d9014406445826d055c62d260a29119e9352ae6f08a2016c61785d",
+      "bytes": 27797
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/explore-multibyte.log",
+      "destination": "qualification/qname-only/asan/explore-multibyte.log",
+      "sha256": "e0e952f1e891b6c3898ffeebda6d07727255c84fe389b6870cdbc049d1d9e998",
+      "bytes": 19665
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/explore-streaming.log",
+      "destination": "qualification/qname-only/asan/explore-streaming.log",
+      "sha256": "f3224d4cb5ef7495c0258170e2be851e848cddff3473f83274bcd4d17f367e10",
+      "bytes": 18870
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/independent-readback.json",
+      "destination": "qualification/qname-only/asan/independent-readback.json",
+      "sha256": "1917334735a7178315093f75995d17cd085c2cfd43b195fdcc02d03523613617",
+      "bytes": 7009
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/normal-build.json",
+      "destination": "qualification/qname-only/asan/normal-build.json",
+      "sha256": "f6811b36bf90db23677b2cb33b0b96a5d11618483ca49e331f89db5c475f8300",
+      "bytes": 10435
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/plan.json",
+      "destination": "qualification/qname-only/asan/plan.json",
+      "sha256": "4796e1f4669a80557d7db72949ff3fca3d141bdfb5a17f9abf18d8fe71fa1733",
+      "bytes": 29523
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/replay-ffi.log",
+      "destination": "qualification/qname-only/asan/replay-ffi.log",
+      "sha256": "473c8d7af9f3c3a1605e9525b46c2bcbd65bf0f2feb30a41292ec92ccf8e38d3",
+      "bytes": 703
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/replay-multibyte.log",
+      "destination": "qualification/qname-only/asan/replay-multibyte.log",
+      "sha256": "134e32dbef76613a65c87a715ead662b3036989265204f1da75f8bb210a07171",
+      "bytes": 706
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/replay-streaming.log",
+      "destination": "qualification/qname-only/asan/replay-streaming.log",
+      "sha256": "f8fe697a5df0727ea54e23cf7e61db283f3d18c0e67bffbce200dfb6a59cf5ad",
+      "bytes": 708
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/report.json",
+      "destination": "qualification/qname-only/asan/report.json",
+      "sha256": "ddd7002635e58a8db17830193aa0ac0fcbfe57b23d1945617f788414a88845ed",
+      "bytes": 79621
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/run.py",
+      "destination": "qualification/qname-only/asan/run.py",
+      "sha256": "28e3a66ed64a7c4d4761b884481e1d251b9095b391d89418e9cf0bef598946b8",
+      "bytes": 11584
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/symbols-ffi.log",
+      "destination": "qualification/qname-only/asan/symbols-ffi.log",
+      "sha256": "b1ee968afc3b6e20a848b52724e5f5418786bad01e4c78a4a769dde8ca3eec26",
+      "bytes": 151993
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/symbols-multibyte.log",
+      "destination": "qualification/qname-only/asan/symbols-multibyte.log",
+      "sha256": "d34301a649af7fe4bef5df99d482357ccc5f23131dcd73b67a488414ccceb0f6",
+      "bytes": 151993
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-asan-study/symbols-streaming.log",
+      "destination": "qualification/qname-only/asan/symbols-streaming.log",
+      "sha256": "1c4d041adbccda572f1122daee640e0ccfce50c22dd9302fc929d8f6f346a297",
+      "bytes": 151942
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/api-comparison.json",
+      "destination": "qualification/qname-only/compatibility/api-comparison.json",
+      "sha256": "3ba8b874c3ce0ca79ecb32652d6e5e42fcd48e704c726d6e03a412914d89c5b7",
+      "bytes": 376
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/api.stderr",
+      "destination": "qualification/qname-only/compatibility/api.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/api.stdout",
+      "destination": "qualification/qname-only/compatibility/api.stdout",
+      "sha256": "f2a99886385ff2d16d49c127959694c59053dad1bdb50ea57003420297f267ac",
+      "bytes": 130
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/build.json",
+      "destination": "qualification/qname-only/compatibility/build.json",
+      "sha256": "f6811b36bf90db23677b2cb33b0b96a5d11618483ca49e331f89db5c475f8300",
+      "bytes": 10435
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/report.json",
+      "destination": "qualification/qname-only/compatibility/report.json",
+      "sha256": "5ce9d2574fad89ecab866c220af1ee94b4c761257ab846d2d1fbab0e49ad8b45",
+      "bytes": 19235
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/strict-cpython/shared/comparison.json",
+      "destination": "qualification/qname-only/compatibility/strict-cpython/shared/comparison.json",
+      "sha256": "6766c3fd949874e3f73b7c76c4729464b07d143febe9327305bccb308704e925",
+      "bytes": 435
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/strict-cpython/shared/origin.log",
+      "destination": "qualification/qname-only/compatibility/strict-cpython/shared/origin.log",
+      "sha256": "c276c0f7424b95c1f7d8be25b28363836147d2c23952b327e464ec8daa9fe45f",
+      "bytes": 1122
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/strict-cpython/shared/probe.log",
+      "destination": "qualification/qname-only/compatibility/strict-cpython/shared/probe.log",
+      "sha256": "fc1db83f53ea261a6524e067509c538ae85a99229863b1449f8e8a80c68d9879",
+      "bytes": 239
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/strict-cpython/shared/summary.json",
+      "destination": "qualification/qname-only/compatibility/strict-cpython/shared/summary.json",
+      "sha256": "b6af47942d754b0b80c4587ec97d967f6df4c6828f68a14f83a690fe4755dff5",
+      "bytes": 4031
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/strict-cpython/shared/tests.log",
+      "destination": "qualification/qname-only/compatibility/strict-cpython/shared/tests.log",
+      "sha256": "5d3cdf67f4b194fe1aa9728ac31fc34aeb62d1ee623bd7affd28dd85c103bc14",
+      "bytes": 77561
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/strict-cpython/static/comparison.json",
+      "destination": "qualification/qname-only/compatibility/strict-cpython/static/comparison.json",
+      "sha256": "e1615b7895392072dedc60400664183c00caab332a1fee61f56560eeb0cd30cd",
+      "bytes": 435
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/strict-cpython/static/origin.log",
+      "destination": "qualification/qname-only/compatibility/strict-cpython/static/origin.log",
+      "sha256": "1478463f19d32c9ab3e3642e66c6d2ade8f8bbc63fab369ea16f46b885f23547",
+      "bytes": 1122
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/strict-cpython/static/probe.log",
+      "destination": "qualification/qname-only/compatibility/strict-cpython/static/probe.log",
+      "sha256": "4f03d4dcde53fa1594c2098707102136db57c40f1a38ea53784eec50e28c2dca",
+      "bytes": 239
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/strict-cpython/static/summary.json",
+      "destination": "qualification/qname-only/compatibility/strict-cpython/static/summary.json",
+      "sha256": "1534705ab480fd2175e09b21845320684ee316953a24088e71aa6e7c24e1c877",
+      "bytes": 4241
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/strict-cpython/static/tests.log",
+      "destination": "qualification/qname-only/compatibility/strict-cpython/static/tests.log",
+      "sha256": "e11278b8b65f917ebd62e3fcdd22f3ddaa8dc680797769e86c17a3b38c0dbd3a",
+      "bytes": 77561
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/strict-shared.stderr",
+      "destination": "qualification/qname-only/compatibility/strict-shared.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/strict-shared.stdout",
+      "destination": "qualification/qname-only/compatibility/strict-shared.stdout",
+      "sha256": "b6af47942d754b0b80c4587ec97d967f6df4c6828f68a14f83a690fe4755dff5",
+      "bytes": 4031
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/strict-static.stderr",
+      "destination": "qualification/qname-only/compatibility/strict-static.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/strict-static.stdout",
+      "destination": "qualification/qname-only/compatibility/strict-static.stdout",
+      "sha256": "1534705ab480fd2175e09b21845320684ee316953a24088e71aa6e7c24e1c877",
+      "bytes": 4241
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness-supervision/receipt.json",
+      "destination": "qualification/qname-only/compatibility/supervision/receipt.json",
+      "sha256": "769a7405f3d35c187d764f6a159243f092619698aff76ec36b8bed34eaf4dbc2",
+      "bytes": 1915
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness-supervision/stderr",
+      "destination": "qualification/qname-only/compatibility/supervision/stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness-supervision/stdout",
+      "destination": "qualification/qname-only/compatibility/supervision/stdout",
+      "sha256": "2f84507dfe595b44ba1d4437207ecda077d37ad1d794c2ebfd3641e6ef14efa0",
+      "bytes": 301
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/upstream-api/manifest.json",
+      "destination": "qualification/qname-only/compatibility/upstream-api/manifest.json",
+      "sha256": "c30364dac4ab7c49b5ba1b4eb96a1f1c8b6a4f573c30dc1bc8f293ee693cdf3d",
+      "bytes": 25000
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/upstream-api/results.json",
+      "destination": "qualification/qname-only/compatibility/upstream-api/results.json",
+      "sha256": "3720775bc940c14fdb25706ba791e77da545c48c8d74e923180ef44a8e910543",
+      "bytes": 682982
+    },
+    {
+      "source": "/tmp/oriole-namespace-qname-only-correctness/upstream-api/tests.log",
+      "destination": "qualification/qname-only/compatibility/upstream-api/tests.log",
+      "sha256": "9f2903287a62d227933eb49b1c3f4552b8a14f0a5d0e8b23d624621dc8fa5b49",
+      "bytes": 731133
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/build-ffi.log",
+      "destination": "qualification/revision/asan/build-ffi.log",
+      "sha256": "7c0e924e7a4e4b5c1be41a61898dadd407e2c37f46bf175196266681ba4d8ac4",
+      "bytes": 2663
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/build-multibyte.log",
+      "destination": "qualification/revision/asan/build-multibyte.log",
+      "sha256": "a4cf8ea6f00892390dbb8dd9ed7d0a569df586626ba6f624b12d672d5881f698",
+      "bytes": 2675
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/build-streaming.log",
+      "destination": "qualification/revision/asan/build-streaming.log",
+      "sha256": "6e0174ec4c8c044a7f88cb042c2f6b51571ba83205723cb8371dbef6108593c4",
+      "bytes": 30520
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/compiler-proof.json",
+      "destination": "qualification/revision/asan/compiler-proof.json",
+      "sha256": "6bb856cda13e9f894f2e5a66a2948a4452a5338993151ab6067c285c267a3428",
+      "bytes": 57438
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/explore-ffi.log",
+      "destination": "qualification/revision/asan/explore-ffi.log",
+      "sha256": "feccd662795dd0dd8b1ab6bd29797b95dca019fc7b69452155b437c4d7981c81",
+      "bytes": 27925
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/explore-multibyte.log",
+      "destination": "qualification/revision/asan/explore-multibyte.log",
+      "sha256": "07cd84d0e8d2019b7646c0a057ac91de6aa3cbac2a66562a4970fdcab21c9d3e",
+      "bytes": 14805
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/explore-streaming.log",
+      "destination": "qualification/revision/asan/explore-streaming.log",
+      "sha256": "36f71ef2acf21a67af70c1acdd6fb4b0116c368ab7394177b5729766d1d802fb",
+      "bytes": 19331
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/independent-readback.json",
+      "destination": "qualification/revision/asan/independent-readback.json",
+      "sha256": "0649a4a65098187fdca30e03952918028e78b1165e1ee4d6a520561defe4e9dd",
+      "bytes": 5799
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/normal-build.json",
+      "destination": "qualification/revision/asan/normal-build.json",
+      "sha256": "1fcd7d454391a878c9ee7a5c08faefe970e5cc69af805ad056e8e1d5b30d2ad8",
+      "bytes": 10449
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/plan.json",
+      "destination": "qualification/revision/asan/plan.json",
+      "sha256": "029504b8d70a7f8fc09ef884c247fb9412fd92091f0b2ad97b3740d6e1c3eace",
+      "bytes": 29681
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/replay-ffi.log",
+      "destination": "qualification/revision/asan/replay-ffi.log",
+      "sha256": "2242d9abad575acd78b96ed1b9be02e1a306bcdfb1313337a48a2ee1e0a8a078",
+      "bytes": 782
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/replay-multibyte.log",
+      "destination": "qualification/revision/asan/replay-multibyte.log",
+      "sha256": "50374698986b571dc9c217459fe04784f5e78e8b597b01f311608de854c5108b",
+      "bytes": 783
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/replay-streaming.log",
+      "destination": "qualification/revision/asan/replay-streaming.log",
+      "sha256": "4e7276af2b448da5e064976bb33110736295734ca7fd85b43131bcb59f697601",
+      "bytes": 714
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/report.json",
+      "destination": "qualification/revision/asan/report.json",
+      "sha256": "66c600c52c4bf5edc88be21727824bed0b6aced0075018b353a5107a406d76a6",
+      "bytes": 74748
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/run.py",
+      "destination": "qualification/revision/asan/run.py",
+      "sha256": "28e3a66ed64a7c4d4761b884481e1d251b9095b391d89418e9cf0bef598946b8",
+      "bytes": 11584
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/symbols-ffi.log",
+      "destination": "qualification/revision/asan/symbols-ffi.log",
+      "sha256": "bcd67009d0acc4ac19ce35315a17501086335b972bfd6f7b7410c9a01f90d8e6",
+      "bytes": 151993
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/symbols-multibyte.log",
+      "destination": "qualification/revision/asan/symbols-multibyte.log",
+      "sha256": "99aa59e1660349353a6b13ca1616bb731bb1153e2c3a32cc9cab46150ee7cae3",
+      "bytes": 151993
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-asan-study/symbols-streaming.log",
+      "destination": "qualification/revision/asan/symbols-streaming.log",
+      "sha256": "7c2aeaa50933eedb30a076a7bfab4c566d3eca44254c6ae0249c18f6f5c03b9d",
+      "bytes": 151942
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/api-comparison.json",
+      "destination": "qualification/revision/compatibility/api-comparison.json",
+      "sha256": "3ba8b874c3ce0ca79ecb32652d6e5e42fcd48e704c726d6e03a412914d89c5b7",
+      "bytes": 376
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/api.stderr",
+      "destination": "qualification/revision/compatibility/api.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/api.stdout",
+      "destination": "qualification/revision/compatibility/api.stdout",
+      "sha256": "f2a99886385ff2d16d49c127959694c59053dad1bdb50ea57003420297f267ac",
+      "bytes": 130
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/build.json",
+      "destination": "qualification/revision/compatibility/build.json",
+      "sha256": "1fcd7d454391a878c9ee7a5c08faefe970e5cc69af805ad056e8e1d5b30d2ad8",
+      "bytes": 10449
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/report.json",
+      "destination": "qualification/revision/compatibility/report.json",
+      "sha256": "7315f12af644ab8234884a545a69e3da229c7a127b57a3afa47f02f15369b2a4",
+      "bytes": 19289
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/strict-cpython/shared/comparison.json",
+      "destination": "qualification/revision/compatibility/strict-cpython/shared/comparison.json",
+      "sha256": "14c75f4a5f422d8904e5c1bf60b80eafaad19b4636b162dfc50aef0fe7c2e22c",
+      "bytes": 435
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/strict-cpython/shared/origin.log",
+      "destination": "qualification/revision/compatibility/strict-cpython/shared/origin.log",
+      "sha256": "74a91cdeeea21e4a66920fd3160d5b85923c2156b0a800b62fdd3f2d24001d49",
+      "bytes": 1146
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/strict-cpython/shared/probe.log",
+      "destination": "qualification/revision/compatibility/strict-cpython/shared/probe.log",
+      "sha256": "7e492c0dc127891bbe2a86dcf70a698866b33b83b4eb0aa39b5e117df0047c32",
+      "bytes": 251
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/strict-cpython/shared/summary.json",
+      "destination": "qualification/revision/compatibility/strict-cpython/shared/summary.json",
+      "sha256": "b16370a2a294c30a37786e8c00c278538f6f18e8ffbed2a1dcd49751277063f6",
+      "bytes": 4079
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/strict-cpython/shared/tests.log",
+      "destination": "qualification/revision/compatibility/strict-cpython/shared/tests.log",
+      "sha256": "5c6d63bf7f2f863b05435b5c9ea4a57cb87c59b9859cd484d5ec46d8ef5ce625",
+      "bytes": 77572
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/strict-cpython/static/comparison.json",
+      "destination": "qualification/revision/compatibility/strict-cpython/static/comparison.json",
+      "sha256": "601f711b1a320495f66b8d3580870e57d9a777cb54b51d2b51c0481d54b1292b",
+      "bytes": 435
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/strict-cpython/static/origin.log",
+      "destination": "qualification/revision/compatibility/strict-cpython/static/origin.log",
+      "sha256": "c8efeaf7fd3295c74e5d0144f7405ffac1f823071c1258c16cc60d9f27982f3c",
+      "bytes": 1146
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/strict-cpython/static/probe.log",
+      "destination": "qualification/revision/compatibility/strict-cpython/static/probe.log",
+      "sha256": "87246d17da3ee9c31eec45b9184e48653e921d6fff4665a4a381a44f143afa8f",
+      "bytes": 251
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/strict-cpython/static/summary.json",
+      "destination": "qualification/revision/compatibility/strict-cpython/static/summary.json",
+      "sha256": "094e10ed338a38e1ddb1cc9f25674a8c6023efaa92fdefaaf8951d5e503b200f",
+      "bytes": 4289
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/strict-cpython/static/tests.log",
+      "destination": "qualification/revision/compatibility/strict-cpython/static/tests.log",
+      "sha256": "cfb4228d046a313029e8ca502fff634d6fdec0e558dd06932f7347f6df42b1c0",
+      "bytes": 77573
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/strict-shared.stderr",
+      "destination": "qualification/revision/compatibility/strict-shared.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/strict-shared.stdout",
+      "destination": "qualification/revision/compatibility/strict-shared.stdout",
+      "sha256": "b16370a2a294c30a37786e8c00c278538f6f18e8ffbed2a1dcd49751277063f6",
+      "bytes": 4079
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/strict-static.stderr",
+      "destination": "qualification/revision/compatibility/strict-static.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/strict-static.stdout",
+      "destination": "qualification/revision/compatibility/strict-static.stdout",
+      "sha256": "094e10ed338a38e1ddb1cc9f25674a8c6023efaa92fdefaaf8951d5e503b200f",
+      "bytes": 4289
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness-supervision/receipt.json",
+      "destination": "qualification/revision/compatibility/supervision/receipt.json",
+      "sha256": "ee65bf4a5b87ef0c38e039df74af7d3913ba8508a5cbd3fef4342cde54841a2b",
+      "bytes": 1927
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness-supervision/stderr",
+      "destination": "qualification/revision/compatibility/supervision/stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness-supervision/stdout",
+      "destination": "qualification/revision/compatibility/supervision/stdout",
+      "sha256": "591055e6d290ffc490accb890505fef933e79c4171c0914277aa9429a9d56e14",
+      "bytes": 307
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/upstream-api/manifest.json",
+      "destination": "qualification/revision/compatibility/upstream-api/manifest.json",
+      "sha256": "dab784fb867fb0ecc0a4f24e73a902b0f4f580585a669b870611330dd3df742b",
+      "bytes": 25120
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/upstream-api/results.json",
+      "destination": "qualification/revision/compatibility/upstream-api/results.json",
+      "sha256": "3720775bc940c14fdb25706ba791e77da545c48c8d74e923180ef44a8e910543",
+      "bytes": 682982
+    },
+    {
+      "source": "/tmp/oriole-namespace-binding-revision-correctness/upstream-api/tests.log",
+      "destination": "qualification/revision/compatibility/upstream-api/tests.log",
+      "sha256": "2887df9928750acf551e5c31baf03c71d687ff25f0275f2dd54373776fe93cbe",
+      "bytes": 733485
+    },
+    {
+      "source": "/tmp/oriole-save-namespace-independent-review.py",
+      "destination": "save-independent-review.py",
+      "sha256": "3a6381a127c2f1102558351f8e7737a29151375ef51fed103fd597d17d6b8c1b",
+      "bytes": 8422
+    }
+  ],
+  "file_count": 174,
+  "bytes": 3235130,
+  "generated_metadata": {
+    "LOCAL_RAW.md": {
+      "sha256": "30b732ecf9e90023b88534ebbdd4f603be15dc2700d2316513f5cae2ec00b870",
+      "bytes": 4895
+    }
+  },
+  "exclusions": [
+    "raw workers",
+    "parser and Python extension binaries",
+    "corpora"
+  ],
+  "extensions": [
+    {
+      "candidate": "qname-only",
+      "previous_index_sha256": "42971bae003370ce52f00d1051633e25eb9092e97fe653ec6e941048a2a917dd",
+      "added_files": 48,
+      "added_bytes": 908157
+    }
+  ]
+}

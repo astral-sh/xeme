@@ -1,0 +1,40 @@
+{
+  "status": "passed",
+  "commands": [
+    {
+      "phase": "preflight",
+      "command": [
+        "taskset",
+        "-c",
+        "5",
+        "python3",
+        "/tmp/oriole-namespace-name-storage-benchmark/native/native_screen.py",
+        "preflight"
+      ],
+      "start": 1789263080.88847,
+      "timeout": 600,
+      "exit": 0,
+      "end": 1789263082.6644254,
+      "log_sha256": "a24bc33b149997b15045b5410e26157774cc711a3e3c2f98e9cc8aaab531bdc4"
+    },
+    {
+      "phase": "time",
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "python3",
+        "/tmp/oriole-namespace-name-storage-benchmark/native/native_screen.py",
+        "time"
+      ],
+      "start": 1789263082.6651816,
+      "timeout": 1200,
+      "exit": 0,
+      "end": 1789263165.9389462,
+      "log_sha256": "ff4d3521f295fc0d7a168c84fafb2014cf5ef8078af073ff7bae713001a5d945"
+    }
+  ],
+  "controller_sha256": "a78c80c79fdf2c110367f3ba8f52402dc1446f492f771c8ece807b0dab9bab26",
+  "wrapper_sha256": "70e1822662ed23fb0bad312cd82e3eb63cd4bdcd74606b4d516ffa79da84b81d",
+  "scope": "Sequential preflight CPU5 then native elapsed with CPU0 affinity; one attempt each, original90-second workers and1200-second aggregate timing bound. Controller process-group cleanup retains failure logs; no tuning/rerun."
+}

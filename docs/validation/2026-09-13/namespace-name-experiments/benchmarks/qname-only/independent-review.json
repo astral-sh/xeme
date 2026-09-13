@@ -1,0 +1,264 @@
+{
+  "status": "completed_saved_evidence_review",
+  "reviewer_role": "Benchmark preparer independently checked root-run saved evidence; this is not a separate third-party audit.",
+  "scope": "No parser, compiler, profiler, benchmark target, sanitizer, or qualification run was executed by this review. Only saved files, Git blobs and read-only arithmetic were examined. This receipt records checks completed earlier in the task and rechecks saved artifact pins.",
+  "source": {
+    "commit": "735948097c48a2a30cdc88be49632c1410b4edc8",
+    "recorded_files_checked_against_commit": 69,
+    "additional_control_C_and_header_files_checked": 5,
+    "scope": "Committed source blobs were matched to the build snapshot. The mutable working tree may have advanced; this does not claim the current working tree equals the tested commit."
+  },
+  "build": {
+    "status": "passed",
+    "tests": 484,
+    "test_groups": 35,
+    "failed": 0,
+    "ignored": 0,
+    "compiler_comparison": "Same rustc version and release Cargo command as qualified c3e65339 control. Fresh Rust compiler vectors match after excluding output paths and crate disambiguators. Existing dependencies retain normal Cargo reuse.",
+    "settings": "Generic x86-64, O3, ThinLTO, one codegen unit; no PGO or Ohm experimental optimization flags."
+  },
+  "libraries": {
+    "control": {
+      "path": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025"
+    },
+    "candidate": {
+      "path": "/tmp/oriole-namespace-qname-only-study/normal/liboriole_expat.so",
+      "sha256": "24a7d8262675977fd358c20fde32b346d248e0495d59124bbe39cc74717b352e"
+    },
+    "expat": {
+      "path": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+    }
+  },
+  "native": {
+    "status": "passed",
+    "counts": {
+      "preflight_workers": 84,
+      "timed_workers": 588,
+      "preflight_samples": 168,
+      "timed_warmups": 588,
+      "measured_samples": 105420,
+      "all_workers": 672,
+      "all_samples": 106176,
+      "cohorts": 196,
+      "conditions": 28
+    },
+    "groups": {
+      "real": {
+        "conditions": 24,
+        "geomean_ratios": {
+          "candidate_over_control": 0.9915082512138217,
+          "candidate_over_expat": 1.1720469454991385,
+          "control_over_expat": 1.1817521720287145
+        },
+        "candidate_faster_than_control": 15
+      },
+      "generated": {
+        "conditions": 4,
+        "geomean_ratios": {
+          "candidate_over_control": 0.9571479965540575,
+          "candidate_over_expat": 3.352662490051756,
+          "control_over_expat": 3.510689882902258
+        },
+        "candidate_faster_than_control": 3
+      },
+      "real_namespaces_off": {
+        "conditions": 12,
+        "geomean_ratios": {
+          "candidate_over_control": 0.9950324864536938,
+          "candidate_over_expat": 1.126888759398315,
+          "control_over_expat": 1.1323126020657277
+        },
+        "candidate_faster_than_control": 8
+      },
+      "real_namespaces_on": {
+        "conditions": 12,
+        "geomean_ratios": {
+          "candidate_over_control": 0.9879964982136703,
+          "candidate_over_expat": 1.2190147705327394,
+          "control_over_expat": 1.2333503959479197
+        },
+        "candidate_faster_than_control": 7
+      }
+    },
+    "real_adverse": {
+      "count": 9,
+      "above_1_percent": 2,
+      "above_2_percent": 0,
+      "largest_three": [
+        {
+          "condition": {
+            "name": "batik",
+            "chunk": 4096,
+            "namespaces": false
+          },
+          "candidate_over_control": 1.0187761679934566
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "chunk": 4096,
+            "namespaces": true
+          },
+          "candidate_over_control": 1.0136804508364123
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "chunk": 65536,
+            "namespaces": false
+          },
+          "candidate_over_control": 1.0088550343137879
+        }
+      ]
+    },
+    "generated_adverse": {
+      "count": 1,
+      "above_1_percent": 0,
+      "above_2_percent": 0,
+      "largest_three": [
+        {
+          "condition": {
+            "name": "generated-rare-declarations",
+            "chunk": 4096,
+            "namespaces": false
+          },
+          "candidate_over_control": 1.002967544676151
+        }
+      ]
+    },
+    "full_results": {
+      "path": "/tmp/oriole-namespace-qname-only-benchmark/native/review.json",
+      "sha256": "60752d6371b1dcdf1523d759b4feb8529b13699a753719adb6bb5b86b71d3861"
+    },
+    "raw_input_pins_count": 715,
+    "raw_input_pins_sha256": "64ba2eb09f88a89784cfd4535094d3b201ca7e8b15bd844ab132f0f276c4a940",
+    "checks": [
+      "All 672 saved workers and 106176 samples reconstructed earlier in this task.",
+      "Every condition median and paired ratio matched the saved results; native canonical callback hashes matched across engines.",
+      "All saved native input pins rechecked when writing this receipt."
+    ]
+  },
+  "python": {
+    "status": "passed",
+    "counts": {
+      "conditions": 24,
+      "cohorts": 168,
+      "preflight_workers": 72,
+      "timed_workers": 504,
+      "all_workers": 576,
+      "samples": {
+        "preflight_warmups": 72,
+        "time_warmups": 504,
+        "time_measured": 25788
+      },
+      "all_samples": 26364
+    },
+    "aggregates": {
+      "all": {
+        "conditions": 24,
+        "geomean_ratios": {
+          "candidate_over_control": 0.9942671782892317,
+          "control_over_expat": 1.055928521781582,
+          "candidate_over_expat": 1.0499957897476564
+        },
+        "candidate_lower_than_control": 14,
+        "candidate_within_1_20_of_expat": 19
+      },
+      "elementtree": {
+        "conditions": 12,
+        "geomean_ratios": {
+          "candidate_over_control": 0.9911434040316058,
+          "control_over_expat": 1.0923163259406143,
+          "candidate_over_expat": 1.0799018927586088
+        },
+        "candidate_lower_than_control": 8,
+        "candidate_within_1_20_of_expat": 8
+      },
+      "pyexpat-events": {
+        "conditions": 12,
+        "geomean_ratios": {
+          "candidate_over_control": 0.9974007977070767,
+          "control_over_expat": 1.0207528868999571,
+          "candidate_over_expat": 1.0209178869679465
+        },
+        "candidate_lower_than_control": 6,
+        "candidate_within_1_20_of_expat": 11
+      }
+    },
+    "adverse": {
+      "count": 10,
+      "above_1_percent": 2,
+      "above_2_percent": 1,
+      "largest_three": [
+        {
+          "condition": {
+            "name": "wayland",
+            "chunk": 4096,
+            "mode": "pyexpat-events"
+          },
+          "candidate_over_control": 1.0225351138626917
+        },
+        {
+          "condition": {
+            "name": "vulkan",
+            "chunk": 4096,
+            "mode": "elementtree"
+          },
+          "candidate_over_control": 1.0147730398579922
+        },
+        {
+          "condition": {
+            "name": "vulkan",
+            "chunk": 65536,
+            "mode": "elementtree"
+          },
+          "candidate_over_control": 1.0081793637067646
+        }
+      ]
+    },
+    "full_results": {
+      "path": "/tmp/oriole-namespace-qname-only-benchmark/python/normal-review.json",
+      "sha256": "fd6058339b38e575f722cd6f85a974c8af611015726a9e1e87dd8da502d649dd"
+    },
+    "raw_input_pins_count": 1813,
+    "raw_input_pins_sha256": "00a57a209f48db43669127e2021fe9da311feef4c355ad7bdb28dea67a48fb8a",
+    "checks": [
+      "All 576 saved workers and 26364 samples reconstructed in this task using the existing saved-file reader with output writes removed.",
+      "Canonical outputs, module hashes, in-process dladdr parser origins, seeded order, warmups, process medians, paired ratios and aggregate arithmetic matched.",
+      "All saved Python evidence pins rechecked when writing this receipt."
+    ]
+  },
+  "corrections_and_preserved_failures": [],
+  "limitations": [
+    "Shared-host observations and CPU affinity do not establish isolation or statistical significance.",
+    "Real project XML fixtures, not whole-project executions.",
+    "Canonical checks coalesce adjacent text callbacks and do not establish exact fragmentation compatibility.",
+    "This saved-result audit does not establish full upstream API, CPython, sanitizer, or fuzz qualification."
+  ],
+  "audited_artifacts_sha256": {
+    "/tmp/oriole-namespace-qname-only-benchmark/native/review.json": "60752d6371b1dcdf1523d759b4feb8529b13699a753719adb6bb5b86b71d3861",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/normal-review.json": "fd6058339b38e575f722cd6f85a974c8af611015726a9e1e87dd8da502d649dd",
+    "/tmp/oriole-namespace-qname-only-benchmark/execution-python.json": "36efc53c667034361e6328041c23afdef1f032719230eae8a983662ad578972f",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/elapsed_review.py": "d56a78f92b99011ec224d37f5b0b3116d23ea0ad4213629ff70b111298984a45",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/preflight-review.json": "d87f0410c3733338122cff0d98bc01378beb64bae86ce5315065366b00ea4a04",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/consumers/build.json": "2be8354a7ad6effb9ad5011dcedc3a667b57134d440aa6ec754124c797548d84",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/screen/preflight.json": "07529eeaa193149eeba213384bfb6e36ba8484ff5bb9163f76adeba781c7c028",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/screen/results.json": "e3a761e0ed5121c30366bbd5e350ea63fbb40a9c400cbbc83bc884517ecbe3f1",
+    "/tmp/oriole-namespace-qname-only-study/build.json": "f6811b36bf90db23677b2cb33b0b96a5d11618483ca49e331f89db5c475f8300",
+    "/tmp/oriole-namespace-qname-only-study/release.log": "4308b182ba4f93e8f37b61ec1839225365ccfba13d9eb322418b6962f8bba85b",
+    "/tmp/oriole-namespace-qname-only-study/tests.log": "aa48d2c002226162aeb4038220c5174d91c75974d1d0a18b8fa6bb4e6f925839",
+    "/tmp/oriole-namespace-qname-only-study/rustc-version.log": "7f8aefa1f89997f46b979665c40b511a92cdf04f6c8463fbec02d30743fb3d6f",
+    "/tmp/oriole-namespace-qname-only-study/candidate.patch": "79e14ced93deef6c1a3bdb66e8971bfb4eb3af2adb919dba15840317a289c44c",
+    "/tmp/oriole-namespace-qname-only-benchmark/binding.json": "8529411451e7f9e8a583a9619036337b5e849ce6bcf1b131717916ed686d37f3",
+    "/tmp/oriole-namespace-qname-only-benchmark/preparation.json": "a8c43ed0a1c1480c58fbe58fa77751e54a470dd14b071bd967d1fe0a6970ab88",
+    "/tmp/oriole-namespace-qname-only-benchmark/execution-native.json": "b8c25e6ffc43c8b8f0ac809161c5b9356364cac8ea11255e4c591ec9b5895307",
+    "/tmp/oriole-namespace-qname-only-benchmark/native/read_results.py": "9c6382b60b6129e3b706ca674cfc1f4227dd2b71e83aa46ffcd4b99364c74f33",
+    "/tmp/oriole-namespace-qname-only-benchmark/native/native-screen/protocol.json": "53714aca5447f65816d5237545628726a2b76de1c73abdbb299a8fc5680bfbc0",
+    "/tmp/oriole-namespace-qname-only-benchmark/native/native-screen/preflight.json": "9707ddbb0fb9e833e73803991aea76b21ee38ffcdff682435d958350534095de",
+    "/tmp/oriole-namespace-qname-only-benchmark/native/native-screen/results.json": "99c1f32b327d031abc02ef4d4f2658e6fe65c67096668719b8c7799a08d7424e",
+    "/tmp/oriole-namespace-qname-only-study/normal/liboriole_expat.so": "24a7d8262675977fd358c20fde32b346d248e0495d59124bbe39cc74717b352e",
+    "/tmp/oriole-namespace-qname-only-study/normal/liboriole_expat.a": "67edf9b54334b0747f78cc23b35a6bed4233690532b937dea1b634822bc05579"
+  }
+}

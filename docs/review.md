@@ -10,6 +10,12 @@ The exact final source passes 483 Rust tests in 35 groups and all seven ordinary
 
 Native and Python meet the current 20% aggregate target in both epochs: confirmation is 1.1841× and 1.0558× Expat. The [complete performance summary](validation/2026-09-12/native-start-end-namespace-declaration/combined/performance-summary.json) retains 104 epoch-condition rows, 2,496 workers, 265,080 samples and all 12 adverse rows across nine distinct conditions. No samples are pooled and no individual outlier is waived. The [six README rows](validation/2026-09-12/native-start-end-namespace-declaration/combined/native-confirmation/readme-benchmarks.json) independently reconstruct confirmation raw samples. Source identity is exact; standalone measurements do not establish per-layer additive gains or intermediate binary results.
 
+## Namespace optimization drafts
+
+The [namespace experiment report](validation/2026-09-13/namespace-name-experiments/) compares [URI storage #173](https://github.com/astral-sh/oriole/pull/173), [scanner-proof composition #174](https://github.com/astral-sh/oriole/pull/174), [default-binding revisions #175](https://github.com/astral-sh/oriole/pull/175), and the [lean scanner-proof alternative #176](https://github.com/astral-sh/oriole/pull/176). The lean draft records 0.85% less native time and 0.57% less CPython time across the real-project suites, with no new cache state. Its exact source passes 484 Rust tests, preserves the complete API/strict CPython outcomes, and passes a fresh three-harness Rust ASan campaign.
+
+These remain draft experiments. The report retains every regression, generated-workload gaps and known compatibility failures; one timing epoch does not establish repeatability. The selected trial runtime remains `5d983f7e`.
+
 ## Historical checkpoints
 
 ### Shared native/raw Text checkpoint

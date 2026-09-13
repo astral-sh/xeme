@@ -1,0 +1,11 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 20260913
+INFO: Loaded 1 modules   (50114 inline 8-bit counters): 50114 [0x5cc545862520, 0x5cc54586e8e2), 
+INFO: Loaded 1 PC tables (50114 PCs): 50114 [0x5cc54586e8e8,0x5cc545932508), 
+INFO:    13819 files found in /tmp/oriole-namespace-binding-revision-asan-study/campaigns/ffi/initial-corpus
+INFO: seed corpus: files: 13819 min: 1b max: 14424b total: 3469702b rss: 206Mb
+#4096	pulse  cov: 6601 ft: 23718 corp: 1920/49Kb exec/s: 2048 rss: 206Mb
+#8192	pulse  cov: 7713 ft: 31585 corp: 3065/122Kb exec/s: 2048 rss: 290Mb
+#13820	INITED cov: 8000 ft: 41624 corp: 4479/1085Kb exec/s: 1256 rss: 464Mb
+#13820	DONE   cov: 8000 ft: 41624 corp: 4479/1085Kb lim: 14424 exec/s: 1256 rss: 464Mb
+Done 13820 runs in 11 second(s)

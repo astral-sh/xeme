@@ -1,0 +1,841 @@
+diff --git a/crates/oriole/src/arena.rs b/crates/oriole/src/arena.rs
+index ff94d3e..2a9fe1d 100644
+--- a/crates/oriole/src/arena.rs
++++ b/crates/oriole/src/arena.rs
+@@ -21,6 +21,7 @@ struct ArenaAttribute {
+ #[derive(Debug)]
+ enum Payload {
+     Start,
++    NamespaceStart,
+     InlineText,
+     HeapText,
+     End(String),
+@@ -39,6 +40,8 @@ pub struct AdapterFrame {
+     bytes: Vec<u8>,
+     attributes: Vec<ArenaAttribute>,
+     name: Range<usize>,
++    namespace_name: String,
++    namespace_uri_len: usize,
+     position: Position,
+     callback_bytes: usize,
+     inline: [u8; INLINE_TEXT_BYTES],
+@@ -50,6 +53,7 @@ impl AdapterFrame {
+     pub(crate) fn finish(self) -> RecyclingToken {
+         drop(self.bytes);
+         drop(self.attributes);
++        drop(self.namespace_name);
+         self.generation
+     }
+ 
+@@ -59,6 +63,8 @@ impl AdapterFrame {
+             bytes: Vec::new_in(allocator),
+             attributes: Vec::new_in(allocator),
+             name: 0..0,
++            namespace_name: String::new_in(allocator),
++            namespace_uri_len: 0,
+             position: Position::default(),
+             callback_bytes: 0,
+             inline: [0; INLINE_TEXT_BYTES],
+@@ -79,6 +85,17 @@ impl AdapterFrame {
+             self.bytes.clear();
+         }
+         self.attributes.clear();
++        // Keep a validated URI prefix across intervening Start/End/Text frames.
++        // The separate name buffer shares the aggregate recycling reservation.
++        if self.namespace_name.capacity() > MAX_ARENA_BYTES {
++            self.namespace_name = String::new_in(self.namespace_name.allocator());
++            self.namespace_uri_len = 0;
++        }
++    }
++
++    /// Reserve the common arena ceiling together with any retained namespace cache.
++    pub(crate) fn reservation_bytes(&self) -> usize {
++        RETAINED_ARENA_BYTES + self.namespace_name.capacity()
+     }
+ 
+     pub(crate) fn prepare(&mut self, count: usize) -> Result<(), AllocError> {
+@@ -203,6 +220,82 @@ impl AdapterFrame {
+         Ok(())
+     }
+ 
++    /// Build a namespaced callback spelling while retaining a reusable URI prefix.
++    /// This buffer remains owned by the frame throughout callback delivery.
++    pub(crate) fn set_expanded_name(
++        &mut self,
++        uri: &str,
++        local: &str,
++        prefix: Option<&str>,
++        separator: char,
++        triplets: bool,
++    ) -> Result<(), AllocError> {
++        debug_assert!(!self.active && matches!(self.payload, Payload::Start));
++        debug_assert!(!uri.as_bytes().contains(&0) && !local.as_bytes().contains(&0));
++        let mut encoded_separator = [0; 4];
++        let separator = if separator == '\0' {
++            ""
++        } else {
++            separator.encode_utf8(&mut encoded_separator)
++        };
++        let prefix = prefix.filter(|_| triplets && !separator.is_empty());
++        let name_len = uri
++            .len()
++            .checked_add(separator.len())
++            .and_then(|len| len.checked_add(local.len()))
++            .and_then(|len| {
++                len.checked_add(prefix.map_or(0, |prefix| separator.len() + prefix.len()))
++            })
++            .ok_or(AllocError::CapacityOverflow)?;
++        let required = name_len
++            .checked_add(1)
++            .ok_or(AllocError::CapacityOverflow)?;
++        if required > MAX_ARENA_BYTES {
++            return Err(AllocError::CapacityOverflow);
++        }
++        let count = self
++            .callback_bytes
++            .checked_add(name_len)
++            .ok_or(AllocError::CapacityOverflow)?;
++        let same_uri = self.namespace_uri_len == uri.len()
++            && self.namespace_name.as_bytes().get(..uri.len()) == Some(uri.as_bytes());
++        if same_uri {
++            self.namespace_name.truncate(uri.len());
++        } else {
++            self.namespace_name.clear();
++            self.namespace_uri_len = 0;
++        }
++        let additional = required - self.namespace_name.len();
++        if required > self.namespace_name.capacity()
++            && self.namespace_name.capacity() > MAX_ARENA_BYTES / 2
++        {
++            self.namespace_name
++                .try_reserve_exact(MAX_ARENA_BYTES - self.namespace_name.len())?;
++        } else {
++            self.namespace_name.try_reserve(additional)?;
++        }
++        if !same_uri {
++            self.namespace_name.try_push_str(uri)?;
++            self.namespace_uri_len = uri.len();
++        }
++        self.namespace_name.try_push_str(separator)?;
++        self.namespace_name.try_push_str(local)?;
++        if let Some(prefix) = prefix {
++            self.namespace_name.try_push_str(separator)?;
++            self.namespace_name.try_push_str(prefix)?;
++        }
++        self.namespace_name.try_push('\0')?;
++        self.callback_bytes = count;
++        self.payload = Payload::NamespaceStart;
++        Ok(())
++    }
++
++    /// Borrow the prepared UTF-8 name while constructing its retained stack owner.
++    pub(crate) fn prepared_expanded_name(&self) -> &str {
++        debug_assert!(matches!(self.payload, Payload::NamespaceStart));
++        &self.namespace_name[..self.namespace_name.len() - 1]
++    }
++
+     /// Detach the opening element's name without displacing the reusable arena.
+     pub(crate) fn prepare_end(&mut self, name: String) {
+         debug_assert!(!self.active && self.attributes.is_empty());
+@@ -262,7 +355,7 @@ impl AdapterFrame {
+             return None;
+         }
+         match self.payload {
+-            Payload::Start | Payload::End(_) => None,
++            Payload::Start | Payload::NamespaceStart | Payload::End(_) => None,
+             Payload::InlineText => Some(&self.inline[..self.callback_bytes]),
+             Payload::HeapText => Some(self.bytes.as_slice()),
+             Payload::NativeText { .. } => panic!("C-context Text requires the host range resolver"),
+@@ -290,7 +383,11 @@ impl AdapterFrame {
+             !matches!(self.payload, Payload::NativeText { .. }),
+             "C-context Text has no name bytes"
+         );
+-        &self.bytes.as_slice()[self.name.clone()]
++        if matches!(self.payload, Payload::NamespaceStart) {
++            self.namespace_name.as_bytes()
++        } else {
++            &self.bytes.as_slice()[self.name.clone()]
++        }
+     }
+ 
+     /// Attribute name/value bytes including each final NUL, in source order.
+@@ -318,6 +415,83 @@ mod tests {
+     use super::*;
+     use crate::{Config, Parser};
+ 
++    #[test]
++    fn namespace_name_cache_survives_other_payloads_and_bounds_growth() {
++        let mut parser = Parser::new(Config::default());
++        let mut frame = parser.adapter_frame();
++        assert_eq!(frame.reservation_bytes(), RETAINED_ARENA_BYTES);
++        // Start with an odd capacity above half the bound to exercise capped growth.
++        frame.namespace_name.try_reserve_exact(3001).unwrap();
++        for separator in ['\0', '|', ':', 'λ'] {
++            for triplets in [false, true] {
++                for uri in ["urn:a", "urn:ab", "urn:ac", "urn:a", "urn:π"] {
++                    for local in ["long_local_name", "n", "é"] {
++                        frame.clear();
++                        frame.prepare(1).unwrap();
++                        frame.push_attribute("a", "value").unwrap();
++                        let pointer = frame.namespace_name.as_bytes().as_ptr();
++                        frame
++                            .set_expanded_name(uri, local, Some("p"), separator, triplets)
++                            .unwrap();
++                        let mut expected = uri.to_owned();
++                        if separator != '\0' {
++                            expected.push(separator);
++                        }
++                        expected.push_str(local);
++                        if triplets && separator != '\0' {
++                            expected.push(separator);
++                            expected.push('p');
++                        }
++                        assert_eq!(frame.prepared_expanded_name(), expected);
++                        assert_eq!(frame.callback_bytes(), expected.len() + 6);
++                        expected.push('\0');
++                        assert_eq!(frame.name_bytes(), expected.as_bytes());
++                        assert_eq!(frame.namespace_name.as_bytes().as_ptr(), pointer);
++                        assert_eq!(frame.namespace_uri_len, uri.len());
++                        assert_eq!(frame.namespace_name.capacity(), 3001);
++                        assert!(!frame.is_active());
++                        frame.publish(Position::default());
++                        assert_eq!(frame.text_bytes(), None);
++                        frame.clear();
++                        frame.prepare_text("text").unwrap();
++                        frame.publish(Position::default());
++                        assert_eq!(frame.text_bytes(), Some(b"text".as_slice()));
++                        frame.clear();
++                        frame.prepare(0).unwrap();
++                        frame.set_name("plain").unwrap();
++                        assert_eq!(frame.name_bytes(), b"plain\0");
++                        assert_eq!(frame.namespace_name.as_bytes(), expected.as_bytes());
++                    }
++                }
++            }
++        }
++        for length in [3002, 4093, 4094] {
++            frame.clear();
++            frame
++                .set_expanded_name("u", &"n".repeat(length), None, '\0', false)
++                .unwrap();
++            assert!(frame.namespace_name.capacity() <= MAX_ARENA_BYTES);
++            assert_eq!(frame.prepared_expanded_name().len(), length + 1);
++            assert_eq!(
++                frame.reservation_bytes(),
++                RETAINED_ARENA_BYTES + frame.namespace_name.capacity()
++            );
++        }
++        frame.clear();
++        assert!(matches!(
++            frame.set_expanded_name("u", &"n".repeat(4095), None, '\0', false),
++            Err(AllocError::CapacityOverflow)
++        ));
++        assert!(!frame.is_active());
++        assert_eq!(frame.name_bytes(), b"");
++        frame.clear();
++        frame
++            .set_expanded_name("u", "last", None, '|', false)
++            .unwrap();
++        assert_eq!(frame.name_bytes(), b"u|last\0");
++        parser.finish_adapter_frame(frame);
++    }
++
+     #[test]
+     fn warmed_literal_spans_keep_byte_ranges_and_capacity() {
+         let mut parser = Parser::new(Config::default());
+@@ -562,9 +736,10 @@ mod tests {
+                 (b"b\0".as_slice(), b"more\0".as_slice()),
+             ]
+         );
+-        let retained =
+-            frame.bytes.capacity() + frame.attributes.capacity() * size_of::<ArenaAttribute>();
+-        assert!(retained <= RETAINED_ARENA_BYTES);
++        let retained = frame.bytes.capacity()
++            + frame.namespace_name.capacity()
++            + frame.attributes.capacity() * size_of::<ArenaAttribute>();
++        assert!(retained <= frame.reservation_bytes());
+         parser.feed(text.as_bytes(), false).unwrap();
+         parser
+             .next_event_for_c_text_context_into(&mut event, &mut frame)
+@@ -620,11 +795,13 @@ mod tests {
+         assert_eq!(frame.name_bytes(), b"n\0");
+         assert_eq!(frame.bytes.len(), 3476);
+         assert_eq!(frame.attributes.len(), MAX_ARENA_ATTRIBUTES);
+-        let retained =
+-            frame.bytes.capacity() + frame.attributes.capacity() * size_of::<ArenaAttribute>();
++        let retained = frame.bytes.capacity()
++            + frame.namespace_name.capacity()
++            + frame.attributes.capacity() * size_of::<ArenaAttribute>();
+         assert!(
+-            retained <= RETAINED_ARENA_BYTES,
+-            "active frame retains {retained} bytes against its {RETAINED_ARENA_BYTES}-byte reservation"
++            retained <= frame.reservation_bytes(),
++            "active frame retains {retained} bytes against its {}-byte reservation",
++            frame.reservation_bytes()
+         );
+         parser.finish_adapter_frame(frame);
+     }
+diff --git a/crates/oriole/src/lib.rs b/crates/oriole/src/lib.rs
+index 98eb5f7..1dda5c6 100644
+--- a/crates/oriole/src/lib.rs
++++ b/crates/oriole/src/lib.rs
+@@ -649,7 +649,7 @@ impl IdentityStartState<'_> {
+             });
+         }
+         self.event_recycling
+-            .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
++            .reserve_adapter(&frame.generation, frame.reservation_bytes());
+         frame.prepare(raw_attrs.len())?;
+         let literal_span = !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);
+         let mut names = (raw_attrs.len() > 8)
+@@ -3810,8 +3810,15 @@ impl Parser {
+         if raw_attrs.len() > self.config.limits.max_attributes {
+             return Err(self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded"));
+         }
++        // Expansion may grow its separate name buffer. Later identity/text
++        // frames reserve only the capacity actually retained by that buffer.
++        let reservation = if EXPAND_ELEMENT {
++            arena::RETAINED_ARENA_BYTES + arena::MAX_ARENA_BYTES
++        } else {
++            frame.reservation_bytes()
++        };
+         self.event_recycling
+-            .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
++            .reserve_adapter(&frame.generation, reservation);
+         frame.prepare(raw_attrs.len())?;
+         let literal_span =
+             !EXPAND_ELEMENT && !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);
+@@ -3841,40 +3848,43 @@ impl Parser {
+             frame.push_literal_attributes(rest, &raw_attrs)?;
+         }
+         self.id_attribute_index = None;
+-        let expanded_name = if EXPAND_ELEMENT {
+-            let reusable = self.event_recycling.take_name();
+-            Some(self.expand_name(name, false, self.config.namespace_triplets, reusable)?)
+-        } else {
+-            frame.set_name(name)?;
+-            None
+-        };
+-        self.seen_root = true;
+-        self.declaration_allowed = false;
+-        let stack_name = if let Some(mut value) = expanded_name {
+-            // Detach callback bytes before extending the stack's packed owner.
+-            // Matching and End delivery keep the same raw/expanded slices.
+-            frame.set_name(&value)?;
+-            let expanded_end = value.len();
+-            let shared_suffix = value.ends_with(name);
+-            let additional = if shared_suffix { 0 } else { name.len() };
++        let stack_name = if EXPAND_ELEMENT {
++            let separator = self
++                .config
++                .namespace_separator
++                .expect("expanded frame has namespaces enabled");
++            let (prefix, local, uri) = match name.split_once(':') {
++                Some((prefix, local)) => (Some(prefix), local, self.namespaces.get(prefix)),
++                None => (None, name, self.default_namespace.as_ref()),
++            };
++            let uri = uri.expect("expanded frame eligibility checked the binding");
++            // URI reuse still consumes the same expansion-work budget on every tag.
++            self.charge_expansion(uri.len())?;
++            frame.set_expanded_name(
++                uri,
++                local,
++                prefix,
++                separator,
++                self.config.namespace_triplets,
++            )?;
++            self.seen_root = true;
++            self.declaration_allowed = false;
++            let expanded = frame.prepared_expanded_name();
++            let expanded_end = expanded.len();
++            let shared_suffix = expanded.ends_with(name);
+             let capacity = expanded_end
+-                .checked_add(additional)
+-                .and_then(|length| length.checked_add(1))
++                .checked_add(if shared_suffix { 0 } else { name.len() })
++                .and_then(|len| len.checked_add(1))
+                 .ok_or(AllocError::CapacityOverflow)?;
+-            if value.capacity() < capacity {
+-                // Keep the expansion scratch reusable when a nested name needs
+-                // a larger packed owner. Suffixes with spare capacity still move.
+-                let mut packed = self
+-                    .event_recycling
+-                    .take_name()
+-                    .unwrap_or_else(|| String::new_in(self.allocator));
+-                packed.clear();
+-                packed.try_reserve(capacity)?;
+-                packed.try_push_str(&value)?;
+-                self.event_recycling
+-                    .recycle_end(self.event_recycling.token(), value);
+-                value = packed;
+-            }
++            // The callback buffer already contains the complete spelling. Make
++            // one final stack owner, including raw matching bytes when needed.
++            let mut value = self
++                .event_recycling
++                .take_name()
++                .unwrap_or_else(|| String::new_in(self.allocator));
++            value.clear();
++            value.try_reserve(capacity)?;
++            value.try_push_str(expanded)?;
+             let raw_start = if shared_suffix {
+                 expanded_end - name.len()
+             } else {
+@@ -3887,6 +3897,9 @@ impl Parser {
+                 expanded_end,
+             }
+         } else {
++            frame.set_name(name)?;
++            self.seen_root = true;
++            self.declaration_allowed = false;
+             let reusable = self.event_recycling.take_name();
+             let value = recycling::copy_name(name, reusable, self.allocator)?;
+             ElementName {
+@@ -4137,7 +4150,7 @@ impl Parser {
+         {
+             if count > arena::INLINE_TEXT_BYTES {
+                 self.event_recycling
+-                    .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
++                    .reserve_adapter(&frame.generation, frame.reservation_bytes());
+             }
+             if c_text_context
+                 && count > 0
+diff --git a/crates/oriole/tests/adapter_frame.rs b/crates/oriole/tests/adapter_frame.rs
+index 13115e6..48ec9b3 100644
+--- a/crates/oriole/tests/adapter_frame.rs
++++ b/crates/oriole/tests/adapter_frame.rs
+@@ -391,9 +391,17 @@ fn namespace_plans_preserve_errors_and_owned_expansions() {
+         "<r><warm a='v'/><:n a='v'/></r>",
+         "<r><warm a='v'/><n: a='v'/></r>",
+         "<r><warm a='v'/><p::n a='v'/></r>",
++        "<r><warm a='v'/><p:1n a='v'></p:1n></r>",
++        "<r><warm a='v'/><p:-n a='v'></p:-n></r>",
++        "<r><warm a='v'/><p:.n a='v'></p:.n></r>",
++        "<r><warm a='v'/><p:\u{0300}n a='v'></p:\u{0300}n></r>",
+         "<r><warm a='v'/><n :a='v'/></r>",
+         "<r><warm a='v'/><n a:='v'/></r>",
+         "<r><warm a='v'/><n a:b:c='v'/></r>",
++        "<r><warm a='v'/><n p:1a='v'></n></r>",
++        "<r><warm a='v'/><n p:-a='v'></n></r>",
++        "<r><warm a='v'/><n p:.a='v'></n></r>",
++        "<r><warm a='v'/><n p:\u{0300}a='v'></n></r>",
+         "<r><warm a='v'/><n a='v' a='duplicate'/></r>",
+         "<r><warm a='v'/><p::n a='v' b='unterminated",
+         "<r><warm a='v'/><n a:b:c='v' b='&missing;'/></r>",
+@@ -401,19 +409,25 @@ fn namespace_plans_preserve_errors_and_owned_expansions() {
+         "<r><xmlns:n a='v' a='duplicate'/></r>",
+         "<r xmlns:p='u'><p:n></p:m></r>",
+     ] {
+-        for separator in ['|', '\0', 'x'] {
++        for separator in [None, Some('|'), Some('\0'), Some('x')] {
+             for triplets in [false, true] {
+                 for chunk in 1..=input.len() {
+                     let config = Config {
+-                        namespace_separator: Some(separator),
++                        namespace_separator: separator,
+                         namespace_triplets: triplets,
+                         ..Config::default()
+                     };
++                    let owned = collect(input.as_bytes(), chunk, config.clone(), false);
++                    let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
++                    let c_context = collect_mode(input.as_bytes(), chunk, config, true, true);
+                     assert_eq!(
+-                        collect(input.as_bytes(), chunk, config.clone(), true).0,
+-                        collect(input.as_bytes(), chunk, config, false).0,
++                        adapter.0, owned.0,
+                         "{input:?} {separator:?} {triplets} {chunk}"
+                     );
++                    assert_eq!(
++                        c_context.0, owned.0,
++                        "C context {input:?} {separator:?} {triplets} {chunk}"
++                    );
+                 }
+             }
+         }
+@@ -433,6 +447,16 @@ fn expanded_element_frames_preserve_packed_names_and_literal_attributes() {
+             "<r xmlns:p='urn:example'><p:node><p:node><p:node><p:élong a='v'/></p:node></p:node></p:node><p:node/></r>",
+             5,
+         ),
++        // Reused callback storage must follow URI shadowing and restoration,
++        // including common prefixes and equal-length bindings with different bytes.
++        (
++            "<r xmlns:p='urn:alpha'><p:n>text<!--gap--><plain/><p:n/></p:n><s xmlns:p='urn:a'><p:n/></s><p:n/><s xmlns:p='urn:alphabet'><p:n/></s><p:n/><s xmlns:p='urn:omega'><p:n/></s><p:n/></r>",
++            9,
++        ),
++        (
++            "<r xmlns='urn:alpha'><n/><s xmlns='urn:a'><n/></s><n/><s xmlns=''><plain>text<!--gap--><plain/></plain></s><n/><s xmlns='urn:alphabet'><n/></s><n/><s xmlns='urn:omega'><n/></s><n/></r>",
++            10,
++        ),
+     ] {
+         for separator in ['|', '\0', ':', 'λ'] {
+             for triplets in [false, true] {
+@@ -448,7 +472,8 @@ fn expanded_element_frames_preserve_packed_names_and_literal_attributes() {
+                             ..Config::default()
+                         };
+                         let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
+-                        let owned = collect(input.as_bytes(), chunk, config, false);
++                        let owned = collect(input.as_bytes(), chunk, config.clone(), false);
++                        let c_context = collect_mode(input.as_bytes(), chunk, config, true, true);
+                         assert_eq!(
+                             adapter.0, owned.0,
+                             "{input:?} {separator:?} {triplets} {chunk}"
+@@ -457,6 +482,11 @@ fn expanded_element_frames_preserve_packed_names_and_literal_attributes() {
+                             adapter.1, expected_frames,
+                             "{input:?} {separator:?} {triplets} {chunk}"
+                         );
++                        assert_eq!(
++                            c_context.0, owned.0,
++                            "C context {input:?} {separator:?} {triplets} {chunk}"
++                        );
++                        assert_eq!(c_context.1, expected_frames);
+                     }
+                 }
+             }
+@@ -468,64 +498,92 @@ fn expanded_element_frames_preserve_packed_names_and_literal_attributes() {
+             .collect::<std::string::String>();
+         // The planner records only into existing capacity; the first wide tag
+         // warms it through the owned path before the valid/duplicate pair.
+-        let input = format!("<r xmlns='u'><warm{attrs}/><n{attrs}/><n{attrs} a0='duplicate'/></r>");
+-        for chunk in [1, 4096, input.len()] {
+-            let config = Config {
+-                namespace_separator: Some('|'),
+-                ..Config::default()
+-            };
+-            let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
+-            let owned = collect(input.as_bytes(), chunk, config, false);
+-            assert_eq!(adapter.0, owned.0, "{count} {chunk}");
+-            assert_eq!(adapter.1, usize::from(count <= 128), "{count} {chunk}");
+-            assert!(adapter.0.last().unwrap().contains("DuplicateAttribute"));
++        for close in ["/>", "></n>"] {
++            let input = format!(
++                "<r xmlns='u'><warm{attrs}/><n{attrs}{close}<n{attrs} a0='duplicate'{close}</r>"
++            );
++            for chunk in [1, 4096, input.len()] {
++                let config = Config {
++                    namespace_separator: Some('|'),
++                    ..Config::default()
++                };
++                let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
++                let owned = collect(input.as_bytes(), chunk, config.clone(), false);
++                let c_context = collect_mode(input.as_bytes(), chunk, config, true, true);
++                assert_eq!(adapter.0, owned.0, "{count} {close:?} {chunk}");
++                assert_eq!(c_context.0, owned.0, "C context {count} {close:?} {chunk}");
++                assert_eq!(
++                    adapter.1,
++                    usize::from(count <= 128),
++                    "{count} {close:?} {chunk}"
++                );
++                assert_eq!(
++                    c_context.1, adapter.1,
++                    "C context {count} {close:?} {chunk}"
++                );
++                assert!(adapter.0.last().unwrap().contains("DuplicateAttribute"));
++            }
+         }
+     }
+ }
+ 
+ #[test]
+ fn expanded_element_frames_keep_uri_work_and_arena_limits() {
+-    let tag = "<p:n a='v'/>";
+-    for separator in ['|', '\0', 'λ'] {
+-        let separator_bytes = if separator == '\0' {
+-            0
+-        } else {
+-            2 * separator.len_utf8()
+-        };
+-        for triplets in [false, true] {
+-            for extra in [0, 1, 2] {
+-                let uri = "u".repeat(4096 - tag.len() - separator_bytes - 1 + extra);
+-                let input = format!("<r xmlns:p='{uri}'>{tag}{tag}</r>");
+-                for chunk in [1, 4096, input.len()] {
+-                    let config = Config {
+-                        namespace_separator: Some(separator),
+-                        namespace_triplets: triplets,
+-                        ..Config::default()
+-                    };
+-                    let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
+-                    let owned = collect(input.as_bytes(), chunk, config, false);
+-                    assert_eq!(
+-                        adapter.0, owned.0,
+-                        "{separator:?} {triplets} {extra} {chunk}"
+-                    );
+-                    assert_eq!(adapter.1, if extra == 2 { 0 } else { 2 });
++    for (tag, close) in [("<p:n a='v'/>", ""), ("<p:n a='v'>", "</p:n>")] {
++        for separator in ['|', '\0', 'λ'] {
++            let separator_bytes = if separator == '\0' {
++                0
++            } else {
++                2 * separator.len_utf8()
++            };
++            for triplets in [false, true] {
++                for extra in [0, 1, 2] {
++                    let uri = "u".repeat(4096 - tag.len() - separator_bytes - 1 + extra);
++                    let input = format!("<r xmlns:p='{uri}'>{tag}{close}{tag}{close}</r>");
++                    for chunk in [1, 4096, input.len()] {
++                        let config = Config {
++                            namespace_separator: Some(separator),
++                            namespace_triplets: triplets,
++                            ..Config::default()
++                        };
++                        let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
++                        let owned = collect(input.as_bytes(), chunk, config.clone(), false);
++                        let c_context = collect_mode(input.as_bytes(), chunk, config, true, true);
++                        assert_eq!(
++                            adapter.0, owned.0,
++                            "{tag:?} {separator:?} {triplets} {extra} {chunk}"
++                        );
++                        assert_eq!(
++                            c_context.0, owned.0,
++                            "C context {tag:?} {separator:?} {triplets} {extra} {chunk}"
++                        );
++                        assert_eq!(adapter.1, if extra == 2 { 0 } else { 2 });
++                        assert_eq!(c_context.1, adapter.1);
++                    }
+                 }
+             }
+         }
+     }
+-    let input = "<r xmlns:p='urn:long'><p:n a='v'/><p:n/><p:n/></r>";
+-    for limit in 0..=3 * "urn:long".len() {
+-        let mut config = Config {
+-            namespace_separator: Some('|'),
+-            ..Config::default()
+-        };
+-        config.limits.max_entity_expansion_bytes = limit;
+-        for chunk in [1, 7, input.len()] {
+-            assert_eq!(
+-                collect(input.as_bytes(), chunk, config.clone(), true).0,
+-                collect(input.as_bytes(), chunk, config.clone(), false).0,
+-                "URI work limit {limit}, chunk {chunk}"
+-            );
++    for input in [
++        "<r xmlns:p='urn:long'><p:n a='v'/><p:n/><p:n/></r>",
++        "<r xmlns:p='urn:long'><p:n a='v'></p:n><p:n></p:n><p:n></p:n></r>",
++    ] {
++        for limit in 0..=3 * "urn:long".len() {
++            let mut config = Config {
++                namespace_separator: Some('|'),
++                ..Config::default()
++            };
++            config.limits.max_entity_expansion_bytes = limit;
++            for chunk in [1, 7, input.len()] {
++                let owned = collect(input.as_bytes(), chunk, config.clone(), false);
++                let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
++                let c_context = collect_mode(input.as_bytes(), chunk, config.clone(), true, true);
++                assert_eq!(adapter.0, owned.0, "URI work limit {limit}, chunk {chunk}");
++                assert_eq!(
++                    c_context.0, owned.0,
++                    "C context URI work limit {limit}, chunk {chunk}"
++                );
++            }
+         }
+     }
+ }
+diff --git a/crates/oriole/tests/allocation.rs b/crates/oriole/tests/allocation.rs
+index 72b858d..f707b07 100644
+--- a/crates/oriole/tests/allocation.rs
++++ b/crates/oriole/tests/allocation.rs
+@@ -455,10 +455,12 @@ fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
+         allocator: Allocator,
+         namespace_separator: Option<char>,
+         input: &[u8],
++        triplets: bool,
+     ) -> Result<(), Error> {
+         let mut parser = Parser::try_new_in(
+             Config {
+                 namespace_separator,
++                namespace_triplets: triplets,
+                 ..Config::default()
+             },
+             allocator,
+@@ -517,21 +519,31 @@ fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
+         result
+     }
+     check_allocations(|allocator| {
+-        frames(allocator, None, b"<r>inline\nabcdefghijklmnopqrstuvwxyz1234567890<n a='first' b='value'/><![CDATA[abcdefghijklmnopqrstuvwxyz1234567890]]><n a='second' b='new'/>fallback\r\n<n a='literal' b='other'/><n a='&amp;'/><n a='last'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/>abcdefghijklmnopqrstuvwxyz1234567890</r>")?;
+-        frames(allocator, Some('|'), b"<r xmlns:p='urn:p'><p:n a='first'/><p:n a='next'/><n xmlns='urn:default'><n a='value'/></n><p:n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><p:n a='last'/></r>")?;
++        frames(allocator, None, b"<r>inline\nabcdefghijklmnopqrstuvwxyz1234567890<n a='first' b='value'/><![CDATA[abcdefghijklmnopqrstuvwxyz1234567890]]><n a='second' b='new'/>fallback\r\n<n a='literal' b='other'/><n a='&amp;'/><n a='last'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/>abcdefghijklmnopqrstuvwxyz1234567890</r>", false)?;
++        frames(allocator, Some('|'), b"<r xmlns:p='urn:p'><p:n a='first'/><p:n a='next'/><n xmlns='urn:default'><n a='value'/></n><p:n a0='0' a1='1' a2='2' a3='3' a4='4' a5='5' a6='6' a7='7' a8='8'/><p:n a='last'/></r>", false)?;
+         // Two wide literal tags warm the lexical and callback buffers. The last
+         // tag then uses one warmed span, including an empty and Unicode value.
+-        frames(allocator, None, "<r><n a='abcdefghijklmnopqrstuvwxyz' b='abcdefghijklmnopqrstuvwxyz' c='abcdefghijklmnopqrstuvwxyz'/><n a='abcdefghijklmnopqrstuvwxyz' b='abcdefghijklmnopqrstuvwxyz' c='abcdefghijklmnopqrstuvwxyz'/><n π = '😀' empty=\"\" tail='λ'/></r>".as_bytes())?;
++        frames(allocator, None, "<r><n a='abcdefghijklmnopqrstuvwxyz' b='abcdefghijklmnopqrstuvwxyz' c='abcdefghijklmnopqrstuvwxyz'/><n a='abcdefghijklmnopqrstuvwxyz' b='abcdefghijklmnopqrstuvwxyz' c='abcdefghijklmnopqrstuvwxyz'/><n π = '😀' empty=\"\" tail='λ'/></r>".as_bytes(), false)?;
+         // Grow both stacks with live undo blocks, then restore shadowed prefixes.
+         // Four root declarations also exercise Start publication after commitment.
+-        frames(allocator, Some('|'), b"<r xmlns:p='one' xmlns:q='q' xmlns:s='s' xmlns:t='t'><n xmlns:p='two'><n xmlns:p='three'><n xmlns:p='four'><n xmlns:p='five'><n xmlns:p='six'><p:leaf></p:leaf><e xmlns:p='empty'/><p:leaf/></n></n></n></n></n><p:leaf/></r>")?;
++        frames(allocator, Some('|'), b"<r xmlns:p='one' xmlns:q='q' xmlns:s='s' xmlns:t='t'><n xmlns:p='two'><n xmlns:p='three'><n xmlns:p='four'><n xmlns:p='five'><n xmlns:p='six'><p:leaf></p:leaf><e xmlns:p='empty'/><p:leaf/></n></n></n></n></n><p:leaf/></r>", false)?;
+         // More live prefixed names than cache slots force fresh packed owners;
+         // grow the spelling while the expansion scratch is returned for reuse.
+-        frames(allocator, Some('|'), b"<r xmlns:p='urn:example'><p:node><p:node><p:node><p:longer a='v'/></p:node></p:node></p:node><p:node/></r>")?;
++        frames(allocator, Some('|'), b"<r xmlns:p='urn:example'><p:node><p:node><p:node><p:longer a='v'/></p:node></p:node></p:node><p:node/></r>", false)?;
+         // A warm oversized raw-name owner precedes nested equal serialized names.
+         // Their packed owners must survive both empty and explicit End delivery.
+-        frames(allocator, Some('\0'), b"<r xmlns:p='p:'><abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz/><p:n><p:n><p:n a='v'/></p:n></p:n></r>")?;
+-        frames(allocator, Some(':'), b"<r xmlns:p='p'><abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz/><p:n><p:n><p:n a='v'/></p:n></p:n></r>")
++        frames(allocator, Some('\0'), b"<r xmlns:p='p:'><abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz/><p:n><p:n><p:n a='v'/></p:n></p:n></r>", false)?;
++        frames(allocator, Some(':'), b"<r xmlns:p='p'><abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz/><p:n><p:n><p:n a='v'/></p:n></p:n></r>", false)?;
++        // Retained URI bytes must survive shadowing, payload changes and every
++        // selected failure while a replacement binding grows or shrinks.
++        let input = b"<r xmlns:p='urn:alpha'><p:n>text<!--gap--><plain/><p:n/></p:n><s xmlns:p='urn:a'><p:n/></s><p:n/><s xmlns:p='urn:alphabet'><p:n/></s><p:n/><s xmlns:p='urn:omega'><p:n/></s><p:n/></r>";
++        for separator in ['|', '\0', ':', 'λ'] {
++            for triplets in [false, true] {
++                frames(allocator, Some(separator), input, triplets)?;
++            }
++        }
++        frames(allocator, Some('|'), b"<r xmlns='urn:alpha'><n/><s xmlns='urn:a'><n/></s><n/><s xmlns=''><plain>text<!--gap--><plain/></plain></s><n/><s xmlns='urn:alphabet'><n/></s><n/><s xmlns='urn:omega'><n/></s><n/></r>", false)?;
++        Ok(())
+     });
+ }
+ 
+diff --git a/crates/oriole_expat/src/tests.rs b/crates/oriole_expat/src/tests.rs
+index 76c6e3f..a01567f 100644
+--- a/crates/oriole_expat/src/tests.rs
++++ b/crates/oriole_expat/src/tests.rs
+@@ -4127,6 +4127,7 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
+         parser: XML_Parser,
+         starts: usize,
+         name: &'static [u8],
++        triplets_after_first: Option<bool>,
+         raw: Vec<String>,
+         ends: Vec<String>,
+     }
+@@ -4168,13 +4169,23 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
+             let context = XML_GetInputContext(parser, &mut offset, &mut size);
+             assert!(!context.is_null());
+             let context = std::slice::from_raw_parts(context.cast::<u8>(), size as usize);
+-            assert!(context[offset as usize..].starts_with(b"<n a="));
++            assert!(
++                context[offset as usize..].starts_with((*state).raw.last().unwrap().as_bytes())
++            );
+             assert_eq!(XML_SetBase(parser, c"changed".as_ptr()), OK);
+             XML_ParserFree(parser);
+             assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
+             assert_eq!(XML_Parse(parser, c"<reenter/>".as_ptr(), 10, 1), ERROR);
+             assert_eq!(CStr::from_ptr(name).to_bytes(), (*state).name);
+             assert_eq!(CStr::from_ptr(*attrs.add(1)).to_bytes(), value);
++            if (*state).starts == 1
++                && let Some(enabled) = (*state).triplets_after_first
++            {
++                // The C setter ignores changes once parsing has begun. The
++                // current callback and later cached names keep the initial mode.
++                XML_SetReturnNSTriplet(parser, c_int::from(enabled));
++                assert_eq!(CStr::from_ptr(name).to_bytes(), (*state).name);
++            }
+             if (*state).starts == 2 {
+                 assert_eq!(XML_GetSpecifiedAttributeCount(parser), 4);
+                 assert_eq!(CStr::from_ptr(*attrs.add(3)).to_bytes(), b"more");
+@@ -4186,35 +4197,79 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
+     }
+     // SAFETY: Each parser and state stays live through its callbacks and resumes.
+     unsafe {
+-        for (input, namespace, name, expected_ends, second_raw) in [
++        for (input, namespace, name, triplets_after_first, expected_ends, first_raw, second_raw) in [
+             (
+                 b"<r><n a='first'/><n a='second' b='more'/></r>".as_slice(),
+                 false,
+                 b"n".as_slice(),
++                None,
+                 ["n", "r"],
++                "<n a='first'/>",
+                 "<n a='second' b='more'/>",
+             ),
+             (
+                 b"<r><n a='first'/><n a='second' b='more'></n></r>".as_slice(),
+                 false,
+                 b"n".as_slice(),
++                None,
+                 ["n", "r"],
++                "<n a='first'/>",
+                 "<n a='second' b='more'>",
+             ),
+             (
+                 b"<r><n a='first'/><n a='second' b='more'></n></r>".as_slice(),
+                 true,
+                 b"n".as_slice(),
++                None,
+                 ["n", "r"],
++                "<n a='first'/>",
+                 "<n a='second' b='more'>",
+             ),
+             (
+                 b"<r xmlns='urn'><n a='first'/><n a='second' b='more'/></r>".as_slice(),
+                 true,
+                 b"urn|n".as_slice(),
++                None,
+                 ["urn|n", "urn|r"],
++                "<n a='first'/>",
+                 "<n a='second' b='more'/>",
+             ),
++            (
++                b"<r xmlns='urn'><n a='first'/><n a='second' b='more'></n></r>".as_slice(),
++                true,
++                b"urn|n".as_slice(),
++                None,
++                ["urn|n", "urn|r"],
++                "<n a='first'/>",
++                "<n a='second' b='more'>",
++            ),
++            (
++                b"<r xmlns:p='urn'><p:n a='first'/><p:n a='second' b='more'></p:n></r>".as_slice(),
++                true,
++                b"urn|n".as_slice(),
++                None,
++                ["urn|n", "r"],
++                "<p:n a='first'/>",
++                "<p:n a='second' b='more'>",
++            ),
++            (
++                b"<r xmlns:p='urn'><p:n a='first'/><p:n a='second' b='more'></p:n></r>".as_slice(),
++                true,
++                b"urn|n".as_slice(),
++                Some(true),
++                ["urn|n", "r"],
++                "<p:n a='first'/>",
++                "<p:n a='second' b='more'>",
++            ),
++            (
++                b"<r xmlns:p='urn'><p:n a='first'/><p:n a='second' b='more'></p:n></r>".as_slice(),
++                true,
++                b"urn|n|p".as_slice(),
++                Some(false),
++                ["urn|n|p", "r"],
++                "<p:n a='first'/>",
++                "<p:n a='second' b='more'>",
++            ),
+         ] {
+             for width in [1, 7, input.len()] {
+                 let parser = if namespace {
+@@ -4225,8 +4280,12 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
+                 let mut state = ArenaState {
+                     parser,
+                     name,
++                    triplets_after_first,
+                     ..ArenaState::default()
+                 };
++                if let Some(enabled) = triplets_after_first {
++                    XML_SetReturnNSTriplet(parser, c_int::from(!enabled));
++                }
+                 XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                 XML_SetStartElementHandler(parser, Some(start));
+                 XML_SetDefaultHandler(parser, Some(raw));
+@@ -4242,8 +4301,8 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
+                         assert_eq!(
+                             XML_GetCurrentByteIndex(parser) as usize,
+                             input
+-                                .windows(b"<n a='second'".len())
+-                                .position(|value| value == b"<n a='second'")
++                                .windows(second_raw.len())
++                                .position(|value| value == second_raw.as_bytes())
+                                 .unwrap()
+                         );
+                         let raw_count = state.raw.len();
+@@ -4261,7 +4320,7 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
+                         .iter()
+                         .filter(|value| !value.is_empty())
+                         .collect::<Vec<_>>(),
+-                    [&"<n a='first'/>".to_owned(), &second_raw.to_owned()]
++                    [&first_raw.to_owned(), &second_raw.to_owned()]
+                 );
+                 assert_eq!(state.ends, expected_ends);
+                 XML_ParserFree(parser);

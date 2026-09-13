@@ -28,8 +28,12 @@ which source each measurement or qualification actually tested.
 Some malformed-input errors, byte positions and external-DTD default-handler
 prefixes differ, including with custom encodings. External value children have
 encoding-declaration restrictions described in the [C guide](../crates/xeme_expat/README.md).
-Like the pinned Expat build, Xeme accepts some external XML 1.1 declarations
-and UTF-8 BOM/ISO-8859-1 combinations that the W3C catalog rejects.
+Like the pinned Expat build, the C interface accepts some external XML 1.1
+declarations and UTF-8 BOM/ISO-8859-1 combinations that the W3C catalog rejects.
+The native Rust parser rejects a UTF-8 BOM that conflicts with the declared
+encoding unless an explicit higher-level encoding override applies.
+`Config::allow_utf8_bom_encoding_mismatch` defaults to `false`; the C adapter
+explicitly enables this legacy compatibility option.
 
 The pinned CPython consumer needs the explicit [allocation-cleanup backport](../tools/cpython/consumer-fix/README.md).
 It changes consumer ownership handling and is separate from callback fragmentation.
@@ -68,7 +72,41 @@ relative work. Importing an unrelated DTD charges new declaration bytes and
 structure to the recipient and copies strings and retained declaration bases through its allocator. See the
 [Rust guide](library.md) for configuration.
 
-## Continuous compatibility checks
+## Native Rust conformance gate
+
+CI checks the safe Rust parser directly with
+[`tools/w3c/native.py`](../tools/w3c/native.py), independently of the C interface
+and Expat. The gate uses XML 1.0 Fifth Edition names, each catalog case's
+Namespaces 1.0 mode, and the native parser's default resource limits. Its oracle
+is the pinned W3C catalog interpreted under Fifth Edition, with no
+accepted-failure baseline.
+
+All 6,003 selected rows must run, covering chunks of 1, 7 and 4,096 bytes and
+including 81 optional observations. As a nonvalidating parser, Xeme must accept
+both `valid` documents and `invalid` documents containing DTD validity errors;
+it must reject `not-wf` documents after the edition correction below. Catalog
+`error` cases permit either outcome.
+XML 1.1 and older-edition-only cases are recorded with their exclusion reasons.
+The checked-in corpus manifest binds the selection and suite bytes: incomplete
+or changed inputs, resolver failures, and worker failures reject the gate.
+Resource-limit and allocation failures are inconclusive and also fail the gate;
+they cannot count as successful rejections of malformed input.
+
+One catalog expectation needs a Fifth Edition correction: `rmt-e2e-38` labels
+an external entity with a `1.1` declaration as `not-wf`, although its content
+uses only XML 1.0 features. [W3C erratum E10](https://www.w3.org/XML/xml-V10-4e-errata#E10)
+reversed the earlier rule, so the native gate requires acceptance in all three
+chunk sizes. The manifest binds this specification-based correction alongside
+the corpus inventory. Reports retain the original catalog descriptor and raw
+catalog mismatches; the case remains mandatory and the selection stays at
+6,003 rows.
+
+External entities use a local-only resolver confined to the pinned suite, with
+2 MiB files, depth 32 and at most 1,024 requests. This is a standard acceptance
+gate, not DTD validation or canonical-output conformance. See the
+[W3C harness guide](../tools/w3c/README.md) for commands and report scope.
+
+## Expat compatibility regression gates
 
 CI runs four pinned regression suites through
 [`tools/compatibility.py`](../tools/compatibility.py). They retain raw failures;
@@ -78,7 +116,7 @@ passing the regression gate means the reviewed boundary has not worsened.
 | --- | --- |
 | Expat 2.8.4 API | All 395 tests in 12 configurations: 4,740 rows. Expat must pass every row. Candidate failures must match the checked-in configuration and assertion baseline. |
 | Allocation behavior | All 83 public allocation-suite tests plus the deferral-growth test in 12 configurations: 1,008 reported rows per engine. Both engines must pass the adapted tests and their ownership checks, with no failure allowance. |
-| W3C XML catalog | All 6,003 selected rows per engine, including 81 optional observations. Bind selection, loaded bytes and namespace mode; compare acceptance and child outcomes. |
+| W3C XML catalog through the C interface | All 6,003 selected rows per engine, including 81 optional observations. Bind selection, loaded bytes and namespace mode; compare acceptance and child outcomes. |
 | Differential corpus | Named fixtures plus 200 deterministic generated cases, complete worker inventory and semantic callbacks. Error codes are compared; exact text fragmentation and final positions have a separate strict mode. |
 
 The API baseline retains 509 failures: 484 allocation retry/schedule assertions,
@@ -98,10 +136,12 @@ reference tests use 30 seconds and 4 GiB so their large-buffer cases can complet
 allocation-behavior reference tests use the candidate limits. All keep a 768 MiB
 RSS cap. Commands and limits remain in the raw reports.
 
-The W3C baseline retains 960 mandatory failures in both engines: 954 Fifth Edition
-name-profile rows and six version/BOM/declaration rows. Matching Expat does not
-establish conformance to that catalog. New failures, missing configurations,
-changed assertions, resolver failures and corpus drift reject the regression gate;
+The C-interface W3C baseline retains 960 mandatory failures in both engines:
+954 Fifth Edition name-profile rows and six version/BOM/declaration rows. These
+are C-interface results; the native Rust gate independently requires Fifth
+Edition acceptance. Matching Expat does not establish conformance to that
+catalog. New failures, missing configurations, changed assertions, resolver
+failures and corpus drift reject the regression gate;
 improvements are reported separately. Baseline changes require review.
 
 For a local run, use a fresh output directory and the pinned sources from CI:

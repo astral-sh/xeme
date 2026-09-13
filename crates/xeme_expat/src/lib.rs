@@ -311,6 +311,7 @@ unsafe fn create(
             let config = Config {
                 namespace_separator: separator,
                 name_rules: NameRules::FourthEdition,
+                allow_utf8_bom_encoding_mismatch: true,
                 // Iterative expansion supports Expat's deep-entity workloads.
                 // Shared work, live-allocation and external-child bounds still apply.
                 limits: xeme::Limits {

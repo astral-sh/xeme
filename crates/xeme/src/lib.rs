@@ -93,6 +93,9 @@ pub struct Config {
     pub namespace_separator: Option<char>,
     pub namespace_triplets: bool,
     pub encoding: Option<std::string::String>,
+    /// Let an encoding declaration override a UTF-8 BOM, matching Expat.
+    /// Disabled by default because XML requires the declaration to match the BOM.
+    pub allow_utf8_bom_encoding_mismatch: bool,
     pub limits: Limits,
 }
 
@@ -833,7 +836,7 @@ impl Parser {
         allocator: Allocator,
     ) -> Result<Self, Error> {
         config.encoding = None;
-        let decoder = Decoder::new(encoding, allocator)?;
+        let decoder = Decoder::new(encoding, allocator, config.allow_utf8_bom_encoding_mismatch)?;
         let mut namespaces = hash_map(allocator);
         if config.namespace_separator.is_some() {
             try_insert(
@@ -1049,7 +1052,11 @@ impl Parser {
         }
         // This initialization setter is transactional: an allocation failure must
         // leave the previous decoder available for autodetection during parsing.
-        self.decoder = Decoder::new(encoding, self.allocator)?;
+        self.decoder = Decoder::new(
+            encoding,
+            self.allocator,
+            self.config.allow_utf8_bom_encoding_mismatch,
+        )?;
         Ok(())
     }
 

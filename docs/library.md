@@ -32,6 +32,23 @@ Fourth Edition rules, which the C interface uses to match Expat. The parser is
 non-validating: it checks XML syntax without validating documents against their
 DTD content models.
 
+By default, a UTF-8 byte order mark (BOM) must agree with the declared encoding.
+A conflicting declaration is rejected unless an explicit higher-level encoding
+override applies. `Config::allow_utf8_bom_encoding_mismatch` defaults to `false`;
+the C interface explicitly enables this legacy compatibility option to match
+Expat.
+
+CI runs the pinned W3C XML catalog directly against this Rust interface, with
+Fifth Edition names and the catalog's namespace mode. Its
+[conformance gate](../tools/w3c/README.md#native-rust-conformance-gate) requires
+every mandatory Fifth Edition acceptance/rejection expectation to pass,
+including one [documented catalog correction](../tools/w3c/README.md#fifth-edition-expectation-correction),
+without an Expat oracle or a known-failure allowance. DTD-invalid but well-formed
+documents must be accepted because the parser is nonvalidating. Resource-limit
+and allocation failures are inconclusive and fail the gate, including on
+malformed input. The separate C-interface compatibility gate does not define
+native Rust acceptance.
+
 ## Resource limits
 
 `Config::limits` bounds document bytes, unfinished tokens, element depth,

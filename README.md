@@ -27,9 +27,11 @@ use six pinned XML projects, 4 KiB chunks, and namespaces disabled on a shared
 Linux host. Times are medians of seven process medians; ratios are medians of
 paired ratios. See the [benchmark guide](benchmarks/README.md) to measure a new build.
 
-Validation combines Rust and C tests, differential XML checks, Expat API and
-CPython suites, and fuzzing; the [compatibility guide](docs/compatibility.md)
-describes remaining gaps.
+The [compatibility guide](docs/compatibility.md) defines the current contract and
+regression gates. Known strict failures remain: 391 Expat API configurations, two
+CPython text-grouping assertions and 960 shared W3C catalog rows. These are
+documented differences. [Qualification evidence](docs/evidence/README.md) identifies
+the tested source and scope of the opt-in Linux CPython 3.12.13 trial.
 
 ## Installation
 

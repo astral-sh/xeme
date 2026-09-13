@@ -2,7 +2,10 @@
 
 Profile-guided optimization (PGO) lets the compiler use execution counts from a training run to lay out and optimize code. This tool builds an instrumented Xeme library, trains it on generated XML, merges the profile, and builds an optimized library. It does not change the parser's allocator, limits, or runtime configuration.
 
-This workflow is separate from the default release and python-build-standalone builds. Evaluate the resulting library with your application's tests and benchmarks before deployment.
+This optional workflow is retained from earlier optimization experiments and is
+separate from default release and python-build-standalone builds. Historical PGO
+measurements apply only to their recorded source, compiler, profile, and inputs.
+Evaluate a new library with your application's tests and benchmarks before deployment.
 
 For a PBS consumer, use the [optional PGO bundle command](../../integration/python-build-standalone/#optional-fresh-pgo-bundle). It runs this pipeline with the required PIC/unwind flags, verifies the effective ThinLTO configuration, and packages the optimized archive with its build manifest and native linker dependencies. The `--native-static-libs` option is used by that Linux bridge to capture native dependencies from the same profile-use compilation.
 
@@ -39,6 +42,8 @@ disabled, use `--toolchain ohm --cargo-arg=-Zohm-defaults=no`. These options are
 recorded and passed before Cargo's operation, separately from Rust compiler flags.
 Directory-changing options are rejected. Configuration overrides must use inline
 `--config=KEY=VALUE` syntax; additional configuration files are not accepted.
+Build logging uses one `--verbose`, preserving compiler commands and Cargo's
+normal dependency lint policy. Profile-warning rejection remains enabled.
 
 ## Outputs
 

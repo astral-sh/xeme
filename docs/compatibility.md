@@ -1,188 +1,142 @@
 # Compatibility and release gates
 
-Xeme is experimental. The C interface targets Expat 2.8.4's narrow-character
-ABI, with an opt-in Linux x86-64 CPython 3.12.13 integration. It is not a complete
-production replacement for Expat.
+Xeme is experimental. The supported trial is an opt-in Linux x86-64 CPython
+3.12.13 integration. General production substitution requires broader platform,
+consumer and adversarial validation. Exact callback fragmentation and some error
+positions differ from Expat.
 
-## Known differences
+This document defines current contracts. [Evidence](evidence/README.md) records
+which source each measurement or qualification actually tested.
 
-- Text callback fragmentation can differ, including the CPython assertions in
-  `BufferTextTest.test1` and `CDATAHandlerTest.test_handlers`. Coalescing adjacent
-  text can establish semantic agreement without satisfying these consumers.
-- Some malformed-input errors, byte positions, and external-DTD default-handler
-  prefixes differ, including with custom encodings.
-- The C interface uses XML 1.0 Fourth Edition name rules, matching the pinned
-  Expat reference. The Rust API defaults to Fifth Edition. This affects W3C
-  corpus fixtures that require Fifth Edition names.
-- Like the reference Expat build, Xeme can accept external entities declaring
-  XML 1.1 and documents combining a UTF-8 BOM with an ISO-8859-1 declaration,
-  although the W3C catalog marks those cases as not well formed.
-- Allocation schedules, resource ceilings, and reparse-deferral allocation growth
-  differ from Expat. Upstream tests that assume its allocation counts or retry
-  schedule can fail before reaching later semantic assertions.
-- `XML_ExpatVersion()` identifies Xeme and its Expat API target, so literal Expat
-  version-string checks fail.
-- Wide-character and `XML_LARGE_SIZE` builds are unsupported. Namespace separators
-  must be ASCII. External value children have encoding-declaration restrictions
-  described in the [C interface guide](../crates/xeme_expat/README.md).
+## Interface scope
 
-CPython's external-parser allocation cleanup needs the explicit
-[upstream backport](../integration/python-build-standalone/consumer-fix/README.md)
-for the pinned consumer version. The backport changes consumer ownership handling;
-it does not resolve the callback differences above.
+- The safe Rust interface defaults to XML 1.0 Fifth Edition names. The C interface
+  selects Fourth Edition names to match Expat; both are nonvalidating parsers.
+- The C ABI supports narrow characters, namespaces, DTD processing, custom memory
+  suites, incremental and buffer input, reset, suspension and external children.
+  Wide-character, `XML_LARGE_SIZE` and `XML_ATTR_INFO` configurations are rejected.
+  Namespace separators must be ASCII.
+- Applications supply external resources. The parser performs no filesystem or
+  network I/O. External-entity policy belongs to the embedding application.
+- [C callback contracts](../crates/xeme_expat/README.md) define pointer lifetimes,
+  custom encodings and remaining unsupported behavior. A normalized callback
+  comparison does not establish compatibility for consumers that depend on text
+  fragmentation or exact positions.
 
-## Release gates
+## Known semantic differences
 
-Production substitution requires XML conformance, Expat API and callback
-compatibility, unmodified CPython XML tests, bounded resource use, sanitizer and
-fuzz coverage, and installed-distribution checks on every supported platform.
-Retain failing outcomes when comparing a change with its parent;
-allocation diagnostics with altered retry ceilings must remain separate from the
-unmodified upstream tests.
+Some malformed-input errors, byte positions and external-DTD default-handler
+prefixes differ, including with custom encodings. External value children have
+encoding-declaration restrictions described in the [C guide](../crates/xeme_expat/README.md).
+Like the pinned Expat build, Xeme accepts some external XML 1.1 declarations
+and UTF-8 BOM/ISO-8859-1 combinations that the W3C catalog rejects.
 
-## Differential testing
-
-```console
-python3 tools/differential.py --library /absolute/path/libxeme_expat.so \
-  --output /tmp/xeme-differential
-```
-
-The reference is the host's `libexpat`, whose version is recorded. Override it with
-`--reference /absolute/path/libexpat.so`. Each implementation runs in a subprocess
-with a timeout. The report retains every input as base64 and SHA-256, the random
-seed, chunk sizes, callbacks, status, error code, and final line/column/byte index.
-Generated valid documents and deterministic byte mutations supplement the named
-corpus. Use `--generated 1000` for a longer run.
-
-The semantic gate compares acceptance, exact error codes, and callbacks with only
-adjacent text fragments coalesced. The exact gate (`--strict`) also compares text
-fragmentation and final locations. Both modes fail on any mismatch in their
-comparison.
-
-The named corpus covers declarations, comments, processing instructions, CDATA,
-XML names, attributes, newline normalization, references, entities, DTD attribute
-defaults, namespaces, UTF-8, UTF-16, and Latin-1. Invalid documents cover malformed
-names, UTF-8, numeric references, attribute syntax, entity recursion, reserved
-namespaces, truncation, and misplaced markup. Resource exhaustion and callback
-lifecycle probes are additional tests, not ordinary differential assertions:
-Xeme's documented resource ceilings intentionally differ from Expat's defaults.
-
-Custom-encoding probes additionally distinguish converted ASCII from raw markup,
-reference syntax, name spellings, namespace separators, whitespace, and DTD
-keywords. Include original byte templates, converter maps, and chunk sizes in
-regressions so decoding does not erase the syntax distinction being tested.
-
-The C interface selects XML 1.0 Fourth Edition name rules to match Expat;
-the Rust interface defaults to Fifth Edition and exposes `Config::name_rules`.
-Name validation uses the selected edition in element and attribute names, DTD
-grammar, entity references, incremental scanners, and external children.
-Custom-encoding PUBLIC identifiers classify the original bytes with that same
-edition before reporting decoded callback text.
+The pinned CPython consumer needs the explicit [allocation-cleanup backport](../integration/python-build-standalone/consumer-fix/README.md).
+It changes consumer ownership handling; it does not resolve callback fragmentation.
 
 ## Streaming resource limits
 
-The C interface accepts at most 256 MiB in one input call or buffer request. Each
-original source, including an external child's source, can accept cumulative input
-up to `min(c_long::MAX, isize::MAX)` so byte positions and one-based line counts
-remain representable.
+This is the authoritative description of the fixed C resource policy.
 
-Cumulative indirect work is bounded by `max(8 MiB, 100 × consumed root bytes)`;
-cumulative event payload is bounded by `max(64 MiB, 100 × consumed root bytes)`.
-Only consumed original root input supplies credit. Buffered suffixes, external
-input and reset documents cannot subsidize work in the earlier document. Children
-retained across a root reset keep the original budget. Checked counters reject
-overflow even when the relative threshold saturates.
-
-The 512 MiB live/reserved family-allocation ceiling and existing allocation and
-entity amplification checks remain independent. Token, attribute, depth, entity,
-cycle, external-depth and child-construction limits still apply. Expat-compatible
-amplification setters do not disable the fixed C work policy or live ceiling.
-The Rust interface keeps its default 256 MiB cumulative input and absolute 8 MiB
-work limits; `Limits.max_work_amplification` defaults to `None` and explicitly
-opts into relative work when set.
-
-## Native consumer tests
-
-`tests/c/integration.c` compiles against the public header and exercises:
-
-- Agreement between the version string and numeric compatibility revision.
-- One-byte incremental input, parser finalization, and reset.
-- The public `XML_GetUserData` macro, whose ABI reads the parser's first field.
-- `XML_GetBuffer` and `XML_ParseBuffer`.
-- Callback suspension and resumption.
-- Custom memory allocation, reallocation, freeing, and initial allocation failure.
-- Parser pointers as callback arguments.
-- Custom conversion callbacks with ASCII aliases, original-byte end-tag identity,
-  decoded duplicate attributes, incremental buffer input, and encoding release.
-
-Every invocation includes the custom memory suite and initial allocation failure
-gates. Parser storage uses fallible allocator-aware containers. Allocation failure
-must return a null parser or `XML_ERROR_NO_MEMORY`, release all successfully
-allocated blocks, and leave a failed `XML_MemRealloc` block available to its owner.
-
-`tests/c/adversarial.c` independently probes callback-time parser deletion,
-same-parser reentry rejection, recursive default-handler rejection, independent
-parsers in callbacks, and alias-safe base replacement. Following Expat 2.8.4,
-freeing an actively parsing parser from its callback is ignored; the caller frees
-it after the outer call returns. Forbidden nested parsing, buffer, reset, and
-resume calls fail without poisoning the outer parse. Separate guards protect
-recursive encoding-release callbacks and allocator callbacks.
-
-Compile the same integration source against both libraries. A reference run must
-pass before its assertions are used to judge Xeme. These C allocation counts
-validate public ownership. Separate Rust tests inject failure at each allocation,
-detect allocations escaping the supplied suite, force reallocations to move
-across alignment offsets, and exercise
-concurrent shared ownership. The allocation tracker counts live backing bytes,
-including adapter metadata, across a parser family. Resizing and freeing a block
-use the tracker owned by that block, including after the parser that created it
-has been freed. A 512 MiB ceiling on live backing allocations applies to each
-parser family, independently of its configured amplification factor and threshold.
-Crossing this ceiling returns `XML_ERROR_NO_MEMORY`.
-
-## CPython integration
-
-The [CPython 3.12.13 consumer](https://github.com/python/cpython/blob/v3.12.13/Modules/pyexpat.c)
-requires more than `XML_Parse`:
-
-| Area | Required behavior |
+| Resource | C interface limit |
 | --- | --- |
-| Construction | `XML_ParserCreate_MM`, a caller-supplied memory suite, namespace separator, encoding, hash salt |
-| Event delivery | All element, text, namespace, CDATA, declaration, DTD, entity, default, and skipped-entity callbacks |
-| DTD models | `XML_Content` layout, recursive model ownership, and `XML_FreeContentModel` |
-| Input | `XML_GetBuffer`, `XML_ParseBuffer`, `XML_GetInputContext`, custom encoding maps |
-| State | Correct callback stop behavior, base URI, specified attribute count, namespace triplets |
-| External entities | Child parser construction, callback return values, context, and parent lifetime |
-| Introspection | Error constants/strings, positions, version structure, feature list |
-| Integration | The `pyexpat` C capsule used by `_elementtree`, including identical callbacks and allocator ownership |
+| One input call or buffer request | 256 MiB |
+| Cumulative original input, per source | `min(c_long::MAX, isize::MAX)` |
+| Cumulative indirect work, per parser family | `max(8 MiB, 100 × consumed root bytes)` |
+| Cumulative event payload, per parser family | `max(64 MiB, 100 × consumed root bytes)` |
+| Tracked live/reserved parser backing allocations, per family | 512 MiB |
+| External-child construction | 1,024 attempts (including failures), ancestry depth 32 |
+| Declared entities / internal expansion depth | 100,000 / 100,000 |
 
-The [upstream pyexpat tests](https://github.com/python/cpython/blob/v3.12.13/Lib/test/test_pyexpat.py)
-are one gate. ElementTree, SAX, minidom, and pulldom exercise separate consumers and
-must also pass. Supported CPython versions need separate builds and reports.
-The executable integration harness lives in `tools/cpython/`. It pins CPython
-3.12.13 at `3bb231a6a5dc02b95658877318bf61501a7209e9`, builds both `pyexpat` and
-`_elementtree`, and verifies their loaded paths in every test worker. This check
-matters for PBS interpreters that normally load built-in versions before modules
-on `PYTHONPATH`.
+Token, attribute, element-depth and entity-cycle limits also apply. Only consumed
+original root input supplies work credit. Buffered suffixes, external input and
+reset documents cannot subsidize earlier work. Children retained across root reset
+keep the original work, callback and child counters. Allocation tracking remains
+shared across reset, including its reset input denominator. Checked counters reject
+overflow.
+
+Expat-compatible entity and allocation amplification setters do not disable the
+fixed work policy or live allocation ceiling. Application-owned blocks requested
+through `XML_MemMalloc` and `XML_MemRealloc` use the selected allocator but are
+exempt from parser amplification accounting. Allocation headers retain their
+tracker through reallocation and destruction of the originating parser.
+
+The Rust interface defaults to 256 MiB cumulative input, 16 MiB tokens, 256 nested
+elements, 10,000 declarations, 32 entity levels and 8 MiB cumulative work.
+`Limits.max_work_amplification` defaults to `None`; setting it explicitly enables
+relative work. Importing an unrelated DTD charges new declaration bytes and
+structure to the recipient and copies strings and retained declaration bases through its allocator. See the
+[Rust guide](library.md) for configuration.
+
+## Continuous compatibility checks
+
+CI runs three pinned regression suites through
+[`tools/compatibility.py`](../tools/compatibility.py). They retain raw failures;
+passing the regression gate means the reviewed boundary has not worsened.
+
+| Suite | Required coverage and interpretation |
+| --- | --- |
+| Expat 2.8.4 API | All 395 tests in 12 configurations: 4,740 rows. Expat must pass every row. Candidate failures must match the checked-in configuration and assertion baseline. |
+| W3C XML catalog | All 6,003 selected rows per engine, including 81 optional observations. Bind selection, loaded bytes and namespace mode; compare acceptance and child outcomes. |
+| Differential corpus | Named fixtures plus 200 deterministic generated cases, complete worker inventory and semantic callbacks. Error codes are compared; exact text fragmentation and final positions have a separate strict mode. |
+
+The API baseline retains 391 failures: 366 allocation retry/schedule assertions,
+12 literal version checks, 12 single-buffer policy checks and one deferral-growth
+assertion. An early allocation assertion can hide later semantic assertions.
+Separate raised-retry diagnostics exercise those tails; they do not turn the
+original tests into passes or prove exhaustive allocation-failure coverage.
+Candidate tests retain three-second and 1 GiB address-space limits. Reference
+Expat tests use 30 seconds and 4 GiB so their large-buffer cases can complete;
+both keep a 768 MiB RSS cap. Commands and limits remain in the raw reports.
+
+The W3C baseline retains 960 mandatory failures in both engines: 954 Fifth Edition
+name-profile rows and six version/BOM/declaration rows. Matching Expat does not
+establish conformance to that catalog. New failures, missing configurations,
+changed assertions, resolver failures and corpus drift reject the regression gate;
+improvements are reported separately. Baseline changes require review.
+
+For a local run, use a fresh output directory and the pinned sources from CI:
 
 ```console
-python3.12 tools/cpython/run.py --source /path/to/cpython-3.12.13 \
-  --library /path/to/libxeme_expat.so --output /tmp/xeme-cpython
+python3 tools/compatibility.py api --library /absolute/libxeme_expat.so \
+  --reference /absolute/libexpat.so --source /absolute/expat-2.8.4 \
+  --config /absolute/expat-build/expat_config.h --output /tmp/xeme-api
+python3 tools/compatibility.py w3c --library /absolute/libxeme_expat.so \
+  --reference /absolute/libexpat.so --source /absolute/xmlconf --output /tmp/xeme-w3c
+python3 tools/compatibility.py differential --library /absolute/libxeme_expat.so \
+  --reference /absolute/libexpat.so --output /tmp/xeme-differential
 ```
 
-The source checkout must be clean and the interpreter must be exactly 3.12.13.
-The optional `--system-allocator` flag adapts the consumer's construction calls;
-its results measure that explicit adaptation and cannot pass the unmodified
-consumer gate. The report retains source, compiled-source and library hashes,
-compile commands, module origins, and complete upstream test output.
+## CPython and distribution checks
 
-## python-build-standalone
+[`tools/cpython`](../tools/cpython/README.md) pins CPython 3.12.13, builds its real
+`pyexpat` and `_elementtree` extensions, and verifies loaded module origins. Its
+unchanged upstream tests retain two failures: `BufferTextTest.test1` and
+`CDATAHandlerTest.test_handlers`. The separate regression gate checks the exact
+assertions, pinned fixture hashes, complete discovered/executed inventory and
+semantic checks on those inputs. An arbitrary failure in the same method is fatal.
+The disclosed allocation-cleanup backport remains separate from upstream tests;
+benchmark extensions use unmodified consumer sources.
 
-At the integration's pinned revision
-[`a4553880293fe9d1bb62747d34ab0e5121d3554f`](https://github.com/astral-sh/python-build-standalone/blob/a4553880293fe9d1bb62747d34ab0e5121d3554f/cpython-unix/build-expat.sh),
-PBS builds Expat as a static, position-independent library for the target toolchain
-and installs it under `/tools/deps`. Replacing this dependency therefore requires
-cross-compilable Rust static archives, matching headers and native link metadata,
-and the platform's existing deployment-target requirements. Follow the
-[integration guide](../integration/python-build-standalone/README.md) for bundling
-and installed-interpreter validation.
+The [PBS integration](../integration/python-build-standalone/README.md) builds and
+validates an actual static distribution. Integration changes run regardless of
+branch name. Archive structure, installed identity, custom tests and glibc 2.17
+threaded parsing are independent checks; installed XML results retain the same
+strict assertions and use the bounded regression gate. Packaging and installed
+performance require their own evidence for each supported target.
+
+## Safety and release criteria
+
+The core forbids unsafe Rust. The storage and C boundary still need careful
+ownership review, allocation-failure injection, callback reentry checks, Miri and
+sanitizers. [Fuzzing](../fuzz/README.md) includes deterministic replay, bounded
+mutation campaigns and an isolated Expat oracle; coverage and bounds must be
+reported for the exact tested source. Bounded campaigns cannot establish exhaustive
+memory safety.
+
+A production decision requires consumer-specific acceptance of remaining semantic
+and resource differences, native platform and packaging evidence, sustained
+adversarial coverage, and independent review. The performance goal is roughly
+within 20% of Expat on representative project XML through both C and CPython;
+report every workload and keep the untouched holdout separate from tuning inputs.
+See [benchmarking](../benchmarks/HILLCLIMB.md) and [acceptance](../CONTRIBUTING.md#review-and-performance).

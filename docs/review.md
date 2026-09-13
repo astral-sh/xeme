@@ -25,6 +25,11 @@ allocator state, and may outlive a reset or freed parent.
 
 ## Validation
 
+CI runs the complete pinned API, W3C and differential regression gates through
+[`tools/compatibility.py`](../tools/compatibility.py). Known strict failures are
+checked against exact assertions and complete inventories; a passing regression
+gate does not turn those upstream failures into passes.
+
 Start with the workspace tests, formatting, and Clippy commands in
 [contributing](../CONTRIBUTING.md). Choose additional checks for the affected
 behavior:
@@ -32,7 +37,7 @@ behavior:
 | Change | Checks |
 | --- | --- |
 | XML acceptance, events, or diagnostics | [`tools/differential.py`](../tools/differential.py), [W3C corpus](../tools/w3c/README.md) |
-| Expat API behavior | [Upstream Expat tests](../tools/upstream-expat/README.md), [native consumer tests](compatibility.md#native-consumer-tests) |
+| Expat API behavior | [Upstream Expat tests](../tools/upstream-expat/README.md), [native consumer tests](../tests/c/) |
 | Storage or callback ownership | Allocator and callback Miri jobs in [CI](../.github/workflows/ci.yml), [fuzz harnesses](../fuzz/README.md) |
 | Python consumers | [CPython extension harness](../tools/cpython/README.md) |
 | Distribution packaging | [python-build-standalone recipe](../integration/python-build-standalone/README.md) |
@@ -46,3 +51,7 @@ limits.
 
 See [contributing](../CONTRIBUTING.md#review-and-performance) for performance
 comparison requirements.
+
+The [evidence index](evidence/README.md) separates tested-source reports from current
+contracts and links checksummed raw archives. Benchmark results must identify the
+measured runtime; historical qualification does not cover later code changes.

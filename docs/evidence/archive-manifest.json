@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "release_tag": "evidence-2026-09-13",
+  "source_commit": "fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f",
+  "archive_format": "tar with normalized metadata, compressed with zstd; original file bytes unchanged",
+  "verification": "Every archive member was independently read back and SHA-256 checked against its source; tracked sources also match the source commit Git blobs. Each archive contains an exact membership manifest.",
+  "archives": [
+    {
+      "asset": "validation-through-fe31da9.tar.zst",
+      "download_url": "https://github.com/astral-sh/oriole/releases/download/evidence-2026-09-13/validation-through-fe31da9.tar.zst",
+      "source_directory": "docs/validation",
+      "archive_root": "docs/validation",
+      "sha256": "f93b1e492579783f869b9973a3bdb5010917ec452d510b615daf5b6d7d6fb5ac",
+      "archive_bytes": 741778967,
+      "source_file_count": 2769,
+      "source_bytes": 872981758,
+      "member_manifest": "ARCHIVE-MANIFEST.json",
+      "member_manifest_sha256": "3e580c62d23f041a11df4cfa816c3d00faff1d232dbb8ea54b04b84f7e486c27"
+    },
+    {
+      "asset": "benchmarks-through-fe31da9.tar.zst",
+      "download_url": "https://github.com/astral-sh/oriole/releases/download/evidence-2026-09-13/benchmarks-through-fe31da9.tar.zst",
+      "source_directory": "benchmarks/results",
+      "archive_root": "benchmarks/results",
+      "sha256": "41dda12162e1fdbd4f084489646dd17565ca7fbbb2734949476b0b8b32f7240f",
+      "archive_bytes": 173776474,
+      "source_file_count": 205,
+      "source_bytes": 186864016,
+      "member_manifest": "ARCHIVE-MANIFEST.json",
+      "member_manifest_sha256": "3f5b5725423e7295ef07a96ad44ce3ede91a49283306272032ce60097b99bdcb"
+    },
+    {
+      "asset": "qname-confirmation-raw.tar.zst",
+      "download_url": "https://github.com/astral-sh/oriole/releases/download/evidence-2026-09-13/qname-confirmation-raw.tar.zst",
+      "source_directory": "/tmp/oriole-namespace-qname-only-confirmation",
+      "archive_root": "qname-confirmation-raw",
+      "sha256": "3675dd3fe8e8f9b4dba78c103548534924ab0d2641ffd0f334eaf8d8cdb90d9b",
+      "archive_bytes": 2766931,
+      "source_file_count": 2455,
+      "source_bytes": 39792610,
+      "member_manifest": "ARCHIVE-MANIFEST.json",
+      "member_manifest_sha256": "cf3ecec249a798bf3fffac8c1bbad6f99c40a714286917320400e21dd12e70a5",
+      "summary_path": "qname-confirmation-raw/summary.json",
+      "summary_sha256": "934159bf23b79c05b7229c6b1085b02ec3ce2c3529d7ff08e8dbbe70b8e3c38c"
+    }
+  ],
+  "corrections": [
+    {
+      "scope": "Namespace qualification fuzz reports",
+      "original_field": "total_exploration_executions",
+      "explanation": "The recorded total includes corpus initialization. Mutation-only executions subtract that initialization; separate replay counts are unchanged.",
+      "campaigns": [
+        {
+          "archive": "validation-through-fe31da9.tar.zst",
+          "directory": "docs/validation/2026-09-13/namespace-name-experiments/qualification/revision/asan",
+          "files": [
+            "report.json",
+            "independent-readback.json"
+          ],
+          "total_executions_including_initialization": 366981,
+          "corpus_initialization_executions": 45181,
+          "mutation_executions": 321800
+        },
+        {
+          "archive": "validation-through-fe31da9.tar.zst",
+          "directory": "docs/validation/2026-09-13/namespace-name-experiments/qualification/qname-only/asan",
+          "files": [
+            "report.json",
+            "independent-readback.json"
+          ],
+          "total_executions_including_initialization": 367176,
+          "corpus_initialization_executions": 45181,
+          "mutation_executions": 321995
+        }
+      ]
+    }
+  ]
+}

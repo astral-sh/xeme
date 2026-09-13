@@ -11,6 +11,8 @@ input, reset, suspension, callback changes, callback-time deletion, and rejected
 reentry. It retains and frees content models and injects failure into a custom
 allocator, checking that every successful allocation is released. It does not
 pass invalid pointers or deliberately use already-freed handles.
+Bits 1–3 of the second control byte select a built-in protocol encoding.
+Named Unicode-signature seeds exercise detection with a conflicting protocol.
 
 The `ffi_family` target creates bounded external-parser families with a custom
 allocator, then varies child input, allocation failures, buffer requests, parent

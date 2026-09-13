@@ -5618,3 +5618,83 @@ fn external_entity_references_retain_declaration_bases() {
         }
     }
 }
+
+#[test]
+fn builtin_protocol_detection_preserves_external_content_exceptions() {
+    // The mode distinguishes root, external DTD and external general content.
+    for (input, protocol, mode, expected) in [
+        (
+            b"\xef\xbb\xbf<r>\xc3\xa9</r>".as_slice(),
+            c"ISO-8859-1",
+            0,
+            "é",
+        ),
+        (b"<\0r\0>\0\xe9\0<\0/\0r\0>\0", c"UTF-8", 0, "é"),
+        (b"\xef\xbb\xbf<!ELEMENT r ANY>", c"UTF-16", 1, ""),
+        (b"<\0r\0>\0\xe9\0<\0/\0r\0>\0", c"ISO-8859-1", 2, "é"),
+        (b"\xff\xfeL ", c"ISO-8859-1", 2, "ÿþL "),
+        (b"\xef\xbb\xbfX", c"ISO-8859-1", 2, "ï»¿X"),
+        (b"\xef\xbb\xbf\0", c"UTF-16", 2, "\u{efbb}\u{bf00}"),
+        (b"\xef\xbb\xbf\0", c"UTF-16LE", 2, "믯¿"),
+        (b"<\0", c"UTF-16BE", 2, "㰀"),
+        (b"\0<", c"UTF-16LE", 2, "㰀"),
+        (b"a\0b\0c\0", c"UTF-16", 2, "愀戀挀"),
+    ] {
+        for setter in [false, true] {
+            for split in 0..=input.len() {
+                let mut state = State::default();
+                // SAFETY: Parsers, input and callback state remain live until
+                // all feeds complete; every encoded byte span is length-delimited.
+                unsafe {
+                    let requested = if setter {
+                        ptr::null()
+                    } else {
+                        protocol.as_ptr()
+                    };
+                    let parent = XML_ParserCreate(if mode == 0 { requested } else { ptr::null() });
+                    assert!(!parent.is_null());
+                    let parser = if mode == 0 {
+                        parent
+                    } else {
+                        XML_ExternalEntityParserCreate(
+                            parent,
+                            if mode == 1 { ptr::null() } else { c"".as_ptr() },
+                            requested,
+                        )
+                    };
+                    assert!(!parser.is_null());
+                    if setter {
+                        assert_eq!(XML_SetEncoding(parser, protocol.as_ptr()), 1);
+                    }
+                    XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                    XML_SetCharacterDataHandler(parser, Some(text));
+                    for (part, final_input) in [(&input[..split], 0), (&input[split..], 1)] {
+                        assert_eq!(
+                            XML_Parse(
+                                parser,
+                                part.as_ptr().cast(),
+                                part.len() as c_int,
+                                final_input
+                            ),
+                            OK,
+                            "input={input:?}, protocol={protocol:?}, mode={mode}, setter={setter}, split={split}"
+                        );
+                    }
+                    assert_eq!(XML_GetCurrentByteIndex(parser), input.len() as c_long);
+                    XML_ParserFree(parser);
+                    if mode != 0 {
+                        XML_ParserFree(parent);
+                    }
+                }
+                assert_eq!(
+                    state
+                        .events
+                        .iter()
+                        .filter_map(|event| event.strip_prefix("text:"))
+                        .collect::<String>(),
+                    expected
+                );
+            }
+        }
+    }
+}

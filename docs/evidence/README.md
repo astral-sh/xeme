@@ -4,6 +4,12 @@ Current behavior is documented in the [compatibility guide](../compatibility.md)
 Evidence below identifies the source it tested. Historical results do not qualify
 later code, and passing a regression gate does not erase strict upstream failures.
 
+## API baseline after rebase
+
+The [rebase comparison](2026-09-13-rebase.md) records identical full API outcomes
+on main and the review runtime, the update to 509 known allocation/API failures,
+and separate raised-retry diagnostics. Original failures remain visible.
+
 ## Pre-rebase evaluation (2026-09-13)
 
 The [2026-09-13 review report](2026-09-13-review.md) records pre-rebase runtime `ec4d068` compatibility

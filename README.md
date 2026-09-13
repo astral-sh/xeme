@@ -13,22 +13,25 @@ A streaming XML parser written in Rust, with an Expat-compatible C API.
 - Check XML and inspect parser events from the command line.
 - Embed the safe Rust parser or use the Expat-compatible C interface.
 
-| Project XML | Xeme (normal) | Expat (normal) | Xeme / Expat |
+| Project XML | Xeme¹ | Expat | Xeme / Expat |
 | --- | ---: | ---: | ---: |
-| Vulkan registry | 36.366 ms | 28.906 ms | 1.266× |
-| Wayland protocol | 0.887 ms | 1.069 ms | 0.840× |
-| Maven POM | 0.589 ms | 0.440 ms | 1.332× |
-| Batik SVG | 0.124 ms | 0.134 ms | 0.931× |
-| GTK UI | 0.248 ms | 0.212 ms | 1.165× |
-| DocBook XSL | 0.225 ms | 0.189 ms | 1.192× |
+| .NET runtime | 2.133 ms | 1.938 ms | 1.089× |
+| Apache Hadoop | 1.302 ms | 1.024 ms | 1.269× |
+| LibreOffice | 1.597 ms | 0.638 ms | 2.530× |
+| MuseScore | 9.795 ms | 6.425 ms | 1.523× |
+| Qt translations | 6.630 ms | 2.133 ms | 3.018× |
 
-These [measurements](https://github.com/astral-sh/oriole/tree/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/docs/validation/2026-09-12/native-start-end-namespace-declaration)
-use six pinned XML projects, 4 KiB chunks, and namespaces disabled on a shared
-Linux host. Times are medians of seven process medians; ratios are medians of
-paired ratios. See the [benchmark guide](benchmarks/README.md) to measure a new build.
+¹ Measured under the former name Oriole. These [pre-rebase measurements](docs/evidence/2026-09-13-review.md#performance)
+tested runtime `ec4d068` on five previously unused project files, with 4 KiB chunks
+and namespaces disabled. Times are medians of seven process medians; ratios are
+medians of paired ratios. Across all conditions, this holdout took **1.787× Expat's
+native time and 1.216× its CPython time**, missing the 1.20× goal. The original six
+tuning projects remained at 1.191× and 1.049×. These are parser/consumer measurements
+on a shared Linux host. Later revisions need fresh measurements; see the
+[benchmark guide](benchmarks/HILLCLIMB.md).
 
 The [compatibility guide](docs/compatibility.md) defines the current contract and
-regression gates. Known strict failures remain: 391 Expat API configurations, two
+regression gates. Known strict failures remain: 509 Expat API configurations, two
 CPython text-grouping assertions and 960 shared W3C catalog rows. These are
 documented differences. [Qualification evidence](docs/evidence/README.md) identifies
 the tested source and scope of the opt-in Linux CPython 3.12.13 trial.

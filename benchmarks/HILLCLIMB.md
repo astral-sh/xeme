@@ -8,13 +8,17 @@ change allocators.
 The **tuning corpus** is the six pinned, original XML files in
 [projects/corpus-manifest.json](projects/corpus-manifest.json). Native conditions
 cover namespaces on/off and 4/64 KiB feeds; Python covers ElementTree and pyexpat at
-both feed sizes. Each consumer has **24 real conditions**. The four deterministic
-inputs from `tools/corpus.py` add **16 separate native generated conditions**.
-Use the same iteration count per consumer for baseline and candidate runs.
+both feed sizes. The native and combined Python campaigns each have **24 real
+conditions**. Four deterministic inputs from `tools/corpus.py` add **16 separate
+native generated conditions**. Use the same iteration count per consumer for
+baseline and candidate runs. Historical studies used other iteration schedules
+and generated subsets, so compare each study separately.
+
 These six files have informed optimization decisions. Repeating them tests
-repeatability, not unseen performance. The separate [reserved holdout](holdout/README.md)
-is for final evaluation after code selection. Historical studies used other
-iteration schedules and generated subsets, so compare each study separately.
+repeatability, not unseen performance. The [first holdout](holdout/README.md) was
+evaluated after code selection on 2026-09-13 and is now a regression corpus.
+Future independent evaluations need newly reserved inputs; the final-evaluation
+protocol below explains how to preserve that boundary.
 
 ## 1. Freeze the baseline and candidate
 
@@ -173,11 +177,13 @@ For lower-level controls and complete Wayland code generation, see
 
 ## Final evaluation on unseen projects
 
-The reserved holdout contains original pinned LibreOffice, .NET, Hadoop, Qt and
+The first holdout contains original pinned LibreOffice, .NET, Hadoop, Qt and
 MuseScore files, selected independently by document role before parsing or
 timing. They are different projects from the tuning corpus. Their input bytes,
 licenses, acquisition records and pre-measurement freeze are in
 [`holdout/`](holdout/README.md). No performance result was used to select them.
+Its [first results](../docs/evidence/2026-09-13-review.md#performance) are now public;
+repeating this command measures a known regression corpus, not unseen performance.
 
 First finish candidate selection and correctness review using the tuning corpus.
 Freeze the selected source/libraries and write a short decision note identifying
@@ -188,8 +194,8 @@ python3 -I -S benchmarks/hillclimb.py verify-holdout
 # Write $study/selection.md with the decision already made above.
 python3 -I -S benchmarks/hillclimb.py run --mode holdout --cpu 0 \
   --selection-note "$study/selection.md" \
-  --baseline "$study/baseline/liboriole_expat.so" \
-  --candidate "$study/candidate/liboriole_expat.so" --expat "$expat" \
+  --baseline "$study/baseline/libxeme_expat.so" \
+  --candidate "$study/candidate/libxeme_expat.so" --expat "$expat" \
   --python "$python312" --consumers "$study/consumers/build.json" \
   --baseline-build "$study/baseline/build.json" \
   --candidate-build "$study/candidate/build.json" \

@@ -6,12 +6,17 @@ matched rounds, with separate real-project and generated summaries.
 
 ## Corpus selection
 
-The six original project files are now a tuning set: repeated optimization has
-used them. The [reserved five-project holdout](holdout/README.md) is for evaluation
-after code selection. Keep its results separate and retain every adverse condition.
-Once observed, it becomes a regression corpus; a new independent evaluation needs
-new inputs. [Historical evidence](../docs/evidence/README.md) identifies the exact
-source and corpus each earlier result measured.
+The six original project files are a tuning set: repeated optimization has used
+them. The [2026-09-13 pre-rebase evaluation](../docs/evidence/2026-09-13-review.md#performance)
+tested runtime `ec4d068`: 1.1906× Expat's native time and 1.0489× its CPython time
+on that set. Five independently selected projects instead reported **1.7867×
+native and 1.2158× CPython**, missing the 1.20× goal. Most of that gap already
+existed in the measured baseline.
+
+The [five-project holdout](holdout/README.md) is now observed. Keep every condition
+and report it separately as a regression corpus; a new independent evaluation
+needs new inputs. These historical results do not measure later revisions.
+[Checksummed archives](../docs/evidence/README.md) retain the full raw evidence.
 
 ## Running benchmarks
 

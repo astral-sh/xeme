@@ -4,6 +4,21 @@ Current behavior is documented in the [compatibility guide](../compatibility.md)
 Evidence below identifies the source it tested. Historical results do not qualify
 later code, and passing a regression gate does not erase strict upstream failures.
 
+## API baseline after rebase
+
+The [rebase comparison](2026-09-13-rebase.md) records identical full API outcomes
+on main and the review runtime, the update to 509 known allocation/API failures,
+and separate raised-retry diagnostics. Original failures remain visible.
+
+## Pre-rebase evaluation (2026-09-13)
+
+The [2026-09-13 review report](2026-09-13-review.md) records pre-rebase runtime `ec4d068` compatibility
+and bounded fuzz results, and publishes the first independent project
+measurements. The holdout reports 1.7867× Expat's native time
+and 1.2158× its CPython time; both miss the 1.20× goal. Tuning results remain
+separate. The report identifies exact sources, all adverse conditions and durable
+raw evidence.
+
 ## Historical archives
 
 The [evidence release](https://github.com/astral-sh/oriole/releases/tag/evidence-2026-09-13)
@@ -26,8 +41,8 @@ previously tracked files. Uploaded assets match the server's SHA-256 digests.
 Download an archive, compare its SHA-256 with the manifest, then extract into a
 fresh directory with `tar --zstd -xf ARCHIVE`. Use each internal manifest to verify
 members. Each archive has its own manifest, so extract them into separate directories.
-These historical trees accounted for about 1.06 GB and are no longer in the
-current tree. Git history is unchanged; a full clone can still contain those bytes. Some older reports reference
+This removes about 1.06 GB from the current tree. Git history is unchanged; a full
+historical clone can still contain those bytes. Some older reports reference
 additional local-only artifacts; those references do not imply that every earlier
 worker is in this release.
 

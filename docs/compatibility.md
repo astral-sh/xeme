@@ -80,9 +80,10 @@ passing the regression gate means the reviewed boundary has not worsened.
 | W3C XML catalog | All 6,003 selected rows per engine, including 81 optional observations. Bind selection, loaded bytes and namespace mode; compare acceptance and child outcomes. |
 | Differential corpus | Named fixtures plus 200 deterministic generated cases, complete worker inventory and semantic callbacks. Error codes are compared; exact text fragmentation and final positions have a separate strict mode. |
 
-The API baseline retains 391 failures: 366 allocation retry/schedule assertions,
+The API baseline retains 509 failures: 484 allocation retry/schedule assertions,
 12 literal version checks, 12 single-buffer policy checks and one deferral-growth
 assertion. An early allocation assertion can hide later semantic assertions.
+The [rebase check](evidence/2026-09-13-rebase.md) records the latest baseline update.
 Separate raised-retry diagnostics exercise those tails; they do not turn the
 original tests into passes or prove exhaustive allocation-failure coverage.
 Candidate tests retain three-second and 1 GiB address-space limits. Reference

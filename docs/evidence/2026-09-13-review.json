@@ -1,0 +1,238 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-13",
+  "assessment": "Review fixes validated within the recorded scope; the independent performance target is unmet and strict upstream differences remain.",
+  "runtime_revision": "ec4d068bdb70b3bb19f9d11d31b31ed919ac27ba",
+  "tooling_revision": "bc784f16851775aba2a9e7efb20c280259bc1514",
+  "libraries": {
+    "candidate": {
+      "sha256": "5573e09ba77acd0147bf7a34b351cf0d65fead5216b063f7a7eeabe21eb03af0",
+      "source": "ec4d068bdb70b3bb19f9d11d31b31ed919ac27ba"
+    },
+    "baseline": {
+      "sha256": "2273e7ab4808b27a541018764eb051457111020498046e9554f86259ff20574e",
+      "source": "fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f"
+    },
+    "expat": {
+      "sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+      "source": "12cf0b1f25f026a022fe728ad8f7e3d017285b80"
+    }
+  },
+  "source_note": [
+    {
+      "build": "candidate",
+      "path": "crates/oriole_expat/README.md",
+      "recorded_source_sha256": "ead6a281d043fba5e6e75c70fa1f2cbd003d29eca94ddba91902096c67d0282f",
+      "revision_blob_sha256": "1a100f81b9d902e8dc1ea3b398b122a0e5daa15e656100e04757312e6833026e"
+    }
+  ],
+  "performance": {
+    "groups": [
+      {
+        "phase": "confirmation",
+        "group": "native-real",
+        "conditions": 24,
+        "candidate_over_baseline": 1.0156340458494248,
+        "candidate_over_expat": 1.1906330489060304,
+        "adverse_conditions": 21,
+        "parser_processes": 528,
+        "timed_workers": 504,
+        "measured_samples": 10080,
+        "discarded_warmups": 504,
+        "preflight_processes": 24,
+        "python_preflight_samples": 0
+      },
+      {
+        "phase": "confirmation",
+        "group": "native-generated",
+        "conditions": 16,
+        "candidate_over_baseline": 1.0013732505942219,
+        "candidate_over_expat": 1.4670814135114403,
+        "adverse_conditions": 7,
+        "parser_processes": 352,
+        "timed_workers": 336,
+        "measured_samples": 6720,
+        "discarded_warmups": 336,
+        "preflight_processes": 16,
+        "python_preflight_samples": 0
+      },
+      {
+        "phase": "confirmation",
+        "group": "python-real",
+        "conditions": 24,
+        "candidate_over_baseline": 1.0005247296996949,
+        "candidate_over_expat": 1.0488935621225826,
+        "adverse_conditions": 10,
+        "parser_processes": 576,
+        "timed_workers": 504,
+        "measured_samples": 5040,
+        "discarded_warmups": 504,
+        "preflight_processes": 72,
+        "python_preflight_samples": 72
+      },
+      {
+        "phase": "holdout",
+        "group": "native-holdout",
+        "conditions": 20,
+        "candidate_over_baseline": 1.0114162512135734,
+        "candidate_over_expat": 1.7867375125999587,
+        "adverse_conditions": 14,
+        "parser_processes": 440,
+        "timed_workers": 420,
+        "measured_samples": 8400,
+        "discarded_warmups": 420,
+        "preflight_processes": 20,
+        "python_preflight_samples": 0
+      },
+      {
+        "phase": "holdout",
+        "group": "native-generated",
+        "conditions": 16,
+        "candidate_over_baseline": 1.0010551191001316,
+        "candidate_over_expat": 1.4780598907208213,
+        "adverse_conditions": 6,
+        "parser_processes": 352,
+        "timed_workers": 336,
+        "measured_samples": 6720,
+        "discarded_warmups": 336,
+        "preflight_processes": 16,
+        "python_preflight_samples": 0
+      },
+      {
+        "phase": "holdout",
+        "group": "python-holdout",
+        "conditions": 20,
+        "candidate_over_baseline": 0.9936529653237174,
+        "candidate_over_expat": 1.215817792311059,
+        "adverse_conditions": 7,
+        "parser_processes": 480,
+        "timed_workers": 420,
+        "measured_samples": 4200,
+        "discarded_warmups": 420,
+        "preflight_processes": 60,
+        "python_preflight_samples": 60
+      }
+    ],
+    "totals_inventory_only": {
+      "conditions": 120,
+      "parser_processes": 2728,
+      "timed_workers": 2520,
+      "measured_samples": 41160,
+      "discarded_warmups": 2520,
+      "preflight_processes": 208,
+      "python_preflight_samples": 132
+    },
+    "aggregation": "Each condition uses the median of seven within-round ratios of process medians. Group aggregates are equal-weight geometric means of condition ratios. No group or epoch pooling.",
+    "holdout_target": {
+      "threshold_candidate_over_expat": 1.2,
+      "native_met": false,
+      "combined_python_met": false,
+      "future_use": "Consumed evaluation; now regression corpus, not unseen holdout for further selection."
+    },
+    "limitations": [
+      "One sequential epoch per corpus on a shared host; CPU affinity does not establish isolation, statistical significance or causal attribution.",
+      "Parser and consumer workloads, not full application benchmarks.",
+      "All adverse conditions retained. No retuning or input replacement."
+    ]
+  },
+  "performance_evidence_sha256": {
+    "performance/confirmation/report.json": "b9486e8748542a962c0c9bbfbbebcd4d80a47c4dd10086653fc80dde61bac663",
+    "performance/holdout/report.json": "193375d2ef5ecc1c8521d2f080ae6bc0e799cc98463a0dfcefdde7d7a808b632",
+    "performance/confirmation-independent-review.json": "f9e12e94e5baa4327e68462861db798522536f8751dea1a637d0f9e56ac071c5",
+    "performance/holdout-independent-review.json": "043b942cc713efe0d8ef45e547ade94be64661ec1eafed9b13c89fe7914f4e64",
+    "performance/holdout-project-breakdown.json": "ade62c14633d9901321b806180b43cb23b54b474f81083f0d579d93f6a1e1cd6",
+    "performance/holdout-python-subgroups.json": "f36299b1b61a98f736a259f3a4e8573cea7f25170fc628438c68a772b51dd4b1",
+    "performance/selection.md": "9b8eac25f921822b1e3a85a73d64a5c5a40f50e771be5da90a15f8fe92d188fe",
+    "performance/baseline/build.json": "23b3fc8728984a7e201fc78b9b5d495a38bf9677d9af721d596b21387893e742",
+    "performance/candidate/build.json": "99dc1f6683766f5effdda43027e13e590c3d54c3f60219696d25a77401e8b757",
+    "performance/consumers/build.json": "2f6c0e502a00aedab574cf4ad491f94b3d6dedf012c25734fa70fb8196713540",
+    "2026-09-13-tuning.csv": "e97807b2ef1882185440badec505361dc3012629106e4fd724d2e7dee79d66d1",
+    "2026-09-13-holdout.csv": "dced9698c19912ad687860d80e3a1306336a66f794442b308ff1280be3b10f92",
+    "performance/confirmation/conditions.csv": "09699bbc8eda9e59d7ff6bf65e0742d8c488e6309b8def91b34e3562cf251952",
+    "performance/holdout/conditions.csv": "1b01fb3011839cd2dde81f28d5a153342d9503c14c323671003e8f6ecc582ab5"
+  },
+  "compatibility": {
+    "rust_tests_passed": 489,
+    "api_configurations": 4740,
+    "api_known_failures": 391,
+    "w3c_rows_per_engine": 6003,
+    "w3c_mandatory_failures_per_engine": 960,
+    "differential_cases": 2718,
+    "differential_semantic_differences": 0,
+    "differential_exact_callback_differences": 12,
+    "differential_position_differences": 84
+  },
+  "fuzz": {
+    "local": {
+      "generated_executions": 2974362,
+      "initialization_executions": 10,
+      "replay_cases": 23,
+      "sanitizer": "none",
+      "summary": "local-fuzz/summary.json"
+    },
+    "ci": {
+      "generated_executions": 4603052,
+      "initialization_executions": 265,
+      "targets": 7,
+      "sanitizer": "cargo-fuzz 0.13.2 ASan default; flags and binary symbols not directly attested in log",
+      "summary": "ci-fuzz/summary.json",
+      "url": "https://github.com/astral-sh/oriole/actions/runs/34758172896/job/103726114929"
+    },
+    "counts_note": "Generated executions include scope-filtered inputs; actual Expat comparisons are not counted separately."
+  },
+  "archive": {
+    "url": "https://github.com/astral-sh/oriole/releases/download/review-2026-09-13/review-qualification.tar.zst",
+    "release": "https://github.com/astral-sh/oriole/releases/tag/review-2026-09-13",
+    "sha256": "5e8815e84d564a0a14699175b6097e88e5897080b7a5579a7e0816bc9c216102",
+    "bytes": 71976392,
+    "manifest_sha256": "775199f0db5e03aea9525fd8f8f4df27cd265a96be1fe4665a9e93eee600880f",
+    "files_including_manifest": 5364,
+    "verification": "Independent decompression checked every member/header/content against internal manifest; uploaded asset size and GitHub server SHA-256 match the local file.",
+    "index": "README.md",
+    "uploaded_verification": "https://github.com/astral-sh/oriole/releases/download/review-2026-09-13/uploaded-verification.json"
+  },
+  "installed_cpython": {
+    "status": "regression_gates_passed_with_exact_upstream_failures",
+    "url": "https://github.com/astral-sh/oriole/actions/runs/34759013064",
+    "workflow_head": "bc784f16851775aba2a9e7efb20c280259bc1514",
+    "python": "3.12.13",
+    "pgo": false,
+    "target": "x86_64-unknown-linux-gnu",
+    "glibc217_threaded_parses": 1024,
+    "distribution_sha256": "a3907db6183c3b406b9b61b6867d27907d641652ff1df7ce21fa4b8f5e192c85",
+    "known_failures": [
+      "test.test_pyexpat.BufferTextTest.test1",
+      "test.test_sax.CDATAHandlerTest.test_handlers"
+    ],
+    "environments": {
+      "host": {
+        "tests_exit_code": 2,
+        "gate_exit_code": 0,
+        "inventory_case_count": 803,
+        "inventory_complete": true,
+        "semantic_exit_code": 0,
+        "raw_counts": "run=802 failures=2 skipped=13",
+        "report": "ci-final/pbs-204-validation/pbs-host-xml/summary.json",
+        "report_sha256": "93c89c1428c04a20fabba52591c33b82902eb488422bfc0221037fe5bfcd9547"
+      },
+      "glibc217": {
+        "tests_exit_code": 2,
+        "gate_exit_code": 0,
+        "inventory_case_count": 803,
+        "inventory_complete": true,
+        "semantic_exit_code": 0,
+        "raw_counts": "run=802 failures=2 skipped=13",
+        "report": "ci-final/pbs-204-validation/pbs-glibc-evidence/glibc217-xml/summary.json",
+        "report_sha256": "6d6ad7b8ff036431d0dd595695bd0221f80e45490ebe8ac58e60a796a8a033de"
+      }
+    }
+  },
+  "ci": {
+    "status": "success",
+    "url": "https://github.com/astral-sh/oriole/actions/runs/34759013089",
+    "head": "bc784f16851775aba2a9e7efb20c280259bc1514",
+    "scope": "ordinary CI including complete compatibility gates and both callback Miri modes; docs-only qualification PR has its own subsequent checks"
+  },
+  "tracked_csv_note": "Tracked copies normalize CRLF to LF only; all fields/rows and archived original bytes are unchanged.",
+  "historical_scope": "Original pre-rebase evaluation of ec4d068 and its recorded tooling follow-ups; these results do not qualify later main-branch fixes or the rebased stack."
+}

@@ -283,7 +283,7 @@ def check_profile_output(text: str) -> None:
 
 
 def native_static_libraries(text: str) -> list[str]:
-    """Read the exact use build's native dependencies for the Linux PBS bundle."""
+    """Read the exact use build's native dependencies for static linking on Linux."""
     matches = re.findall(r"native-static-libs:\s*([^\n]+)", text)
     libraries = matches[-1].split() if matches else []
     if not libraries or any(
@@ -608,7 +608,7 @@ def main() -> int:
     parser.add_argument(
         "--native-static-libs",
         action="store_true",
-        help="Capture the use build's native linker libraries for a Linux PBS bundle",
+        help="Capture the use build's native linker libraries for static linking on Linux",
     )
     parser.add_argument(
         "--command-timeout",

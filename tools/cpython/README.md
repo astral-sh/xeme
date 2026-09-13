@@ -19,11 +19,11 @@ must preserve element/CDATA order, every text character, and callback-controlled
 buffering. Original failures and exit codes remain in `tests.log` and
 `summary.json`; an accepted gate does not mean the upstream suite passed.
 
-The default runner remains strict. `--consumer-fix` separately applies the pinned upstream allocation-failure backport to a temporary C source copy. `--system-allocator` separately selects the system allocator. Each adaptation is recorded explicitly.
+The default runner remains strict. `--consumer-fix` separately applies the pinned upstream [allocation-failure backport](consumer-fix/) to a temporary C source copy. `--system-allocator` separately selects the system allocator. Each adaptation is recorded explicitly.
 
 ## Installed distributions
 
-Run the actual installed PBS interpreter in isolated mode:
+To check a CPython 3.12.13 distribution built with Xeme, run its installed interpreter in isolated mode:
 
 ```console
 /absolute/python/install/bin/python3.12 -I tools/cpython/installed.py --output /tmp/installed-xml
@@ -32,6 +32,6 @@ Run the actual installed PBS interpreter in isolated mode:
 The output directory must be new. This runner applies the same fixture hashes,
 complete inventory, exact assertion exceptions, and semantic checks to the
 installed modules, retaining raw logs and exit codes. It does not substitute
-extensions or modify CPython sources. Distribution structure, parser identity,
-and glibc 2.17 threaded parsing remain separate checks. Results identify the
-installed artifact they tested; earlier runs do not qualify a later build.
+extensions or modify CPython sources. Packaging, platform compatibility, and
+threaded parsing need separate validation. Results identify the installed artifact
+they tested; earlier runs do not qualify a later build.

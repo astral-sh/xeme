@@ -11,6 +11,4 @@ pinned upstream projects:
 | libxml2 | `97bd75ab83e6c2c2596cc520abe80d6779e4a69c` | [MIT](licenses/libxml2.txt) |
 | CPython | `3bb231a6a5dc02b95658877318bf61501a7209e9` | [Python licenses](licenses/cpython.txt) |
 
-Cargo dependencies retain their own licenses. The python-build-standalone bundle
-collects notices for the linked crates, Rust runtime, and Expat header alongside
-its exact build manifest.
+Cargo dependencies retain their own licenses.

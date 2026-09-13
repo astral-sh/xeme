@@ -38,7 +38,7 @@ CPU limit, and a 1 GiB address-space limit. A direct extension import checks the
 tested module's origin, even when the interpreter has a builtin `pyexpat`.
 
 ```shell
-python3 integration/python-build-standalone/consumer-fix/run.py \
+python3 tools/cpython/consumer-fix/run.py \
   --original-extension /absolute/original-reference/pyexpat.cpython-312-x86_64-linux-gnu.so \
   --original-extension /absolute/original-xeme/pyexpat.cpython-312-x86_64-linux-gnu.so \
   --fixed-extension /absolute/fixed-reference/pyexpat.cpython-312-x86_64-linux-gnu.so \

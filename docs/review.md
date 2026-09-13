@@ -40,7 +40,6 @@ behavior:
 | Expat API behavior | [Upstream Expat tests](../tools/upstream-expat/README.md), [native consumer tests](../tests/c/) |
 | Storage or callback ownership | Allocator and callback Miri jobs in [CI](../.github/workflows/ci.yml), [fuzz harnesses](../fuzz/README.md) |
 | Python consumers | [CPython extension harness](../tools/cpython/README.md) |
-| Distribution packaging | [python-build-standalone recipe](../integration/python-build-standalone/README.md) |
 | Performance | [Benchmarks](../benchmarks/README.md), [performance iteration guide](../benchmarks/HILLCLIMB.md) |
 
 Compare compatibility changes with reference Expat and keep reduced failures as

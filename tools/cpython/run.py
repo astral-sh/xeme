@@ -161,7 +161,7 @@ def only_text_fragmentation(
 
 def apply_consumer_fix(text: str, root: Path, output: Path) -> tuple[str, dict]:
     """Apply the pinned upstream allocation-failure backport to a temporary copy."""
-    directory = root / "integration/python-build-standalone/consumer-fix"
+    directory = root / "tools/cpython/consumer-fix"
     patch = directory / "cpython-3.12.13-external-parser.patch"
     provenance = json.loads((directory / "provenance.json").read_text())
     if hashlib.sha256(text.encode()).hexdigest() != provenance["source_sha256"]:

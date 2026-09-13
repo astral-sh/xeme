@@ -56,8 +56,8 @@ jobs:
       - run: cargo fmt --manifest-path benchmarks/inprocess/Cargo.toml --check
       - run: cargo clippy --manifest-path benchmarks/inprocess/Cargo.toml --all-targets --locked -- -D warnings
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
-      - run: uvx --from ruff==0.16.6 ruff check tools benchmarks integration
-      - run: uvx --from ty==0.0.80 ty check --extra-search-path tools tools benchmarks integration
+      - run: uvx --from ruff==0.16.6 ruff check tools benchmarks
+      - run: uvx --from ty==0.0.80 ty check --extra-search-path tools tools benchmarks
       - run: python3 -m unittest discover -s benchmarks -p test_hillclimb.py
       - run: python3 -m unittest discover -s tools/cpython -p test_run.py
       - run: python3 -m unittest discover -s tools -p test_compatibility.py
@@ -65,7 +65,6 @@ jobs:
       - run: python3 -m unittest discover -s tools -p test_xml_abi.py
       - run: python3 benchmarks/hillclimb.py verify-holdout
       - run: python3 -m unittest discover -s tools/pgo -p test_build.py
-      - run: python3 -m unittest discover -s integration/python-build-standalone -p test_pgo_bundle.py
   compatibility:
     name: Compatibility regression (${{ matrix.suite }})
     runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
@@ -366,37 +365,13 @@ jobs:
           fi
       - name: Check CPython cleanup under child allocation failure
         run: |
-          uv run --no-project --python 3.12.13 python integration/python-build-standalone/consumer-fix/run.py \
+          uv run --no-project --python 3.12.13 python tools/cpython/consumer-fix/run.py \
             --original-extension /tmp/xeme-cpython-${{ matrix.linkage }}/pyexpat*.so \
             --fixed-extension /tmp/xeme-cpython-fixed/pyexpat*.so \
             --output /tmp/xeme-cpython-fault
       - name: Show patched consumer results
         if: always()
         run: cat /tmp/xeme-cpython-*/probe.log /tmp/xeme-cpython-*/tests.log
-
-  pbs-recipe:
-    name: PBS integration recipe
-    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          repository: astral-sh/python-build-standalone
-          ref: a4553880293fe9d1bb62747d34ab0e5121d3554f
-          path: .cache/pbs
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          repository: python/cpython
-          ref: 3bb231a6a5dc02b95658877318bf61501a7209e9
-          path: .cache/cpython
-      - run: python3 integration/python-build-standalone/validate.py --pbs .cache/pbs --cpython .cache/cpython
-      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
-        with:
-          toolchain: stable
-          components: rust-docs
-      - name: Build the PBS static library bundle
-        run: python3 integration/python-build-standalone/prepare.py --output "$RUNNER_TEMP/xeme-pbs-bundle"
 
   pgo:
     name: Profile-guided library

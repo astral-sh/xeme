@@ -586,6 +586,32 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
     unsafe { with_parser_tracking(parser, operation) }
 }
 
+/// Charge an event before publishing it and copy its callback argument.
+///
+/// Every owned, arena and input-context dispatch path uses this policy. The
+/// returned pointer is a scalar; no parser or budget borrow crosses a callback.
+#[inline]
+unsafe fn begin_callback(parser: XML_Parser, bytes: usize) -> Option<*mut c_void> {
+    // SAFETY: Dispatch owns the busy guard and family access is serialized.
+    // Charging and copying the argument cannot allocate or call foreign code.
+    unsafe {
+        let family = &(*parser).family;
+        if !charge(
+            &family.callback_bytes,
+            bytes,
+            (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
+        ) {
+            fail_parse(parser, 43);
+            return None;
+        }
+        Some(if (*parser).handler_arg_is_parser {
+            parser.cast()
+        } else {
+            (*parser).user_data
+        })
+    }
+}
+
 /// Run callbacks after releasing all references to the opaque parser.
 unsafe fn dispatch(
     parser: XML_Parser,
@@ -600,14 +626,9 @@ unsafe fn dispatch(
     );
     // SAFETY: Parser is pinned by the busy flag until the outer parse exits.
     // Copies and owned strings are the only values retained across callbacks.
-    let (h, arg, base_bytes) = unsafe {
+    let (h, base_bytes) = unsafe {
         (
             (*parser).handlers,
-            if (*parser).handler_arg_is_parser {
-                parser.cast()
-            } else {
-                (*parser).user_data
-            },
             if needs_base {
                 (*parser)
                     .base
@@ -681,18 +702,10 @@ unsafe fn dispatch(
         | EventKind::EndDoctype
         | EventKind::NotStandalone => 0,
     };
-    // SAFETY: Family access is serialized; charging never invokes user code.
-    unsafe {
-        let family = &(*parser).family;
-        if !charge(
-            &family.callback_bytes,
-            callback_bytes + base_bytes,
-            (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
-        ) {
-            fail_parse(parser, 43);
-            return Ok(());
-        }
-    }
+    // SAFETY: The busy guard pins the parser through this event's dispatch.
+    let Some(arg) = (unsafe { begin_callback(parser, callback_bytes + base_bytes) }) else {
+        return Ok(());
+    };
     // SAFETY: Charge repeated base metadata before cloning. The clone owns its
     // bytes across callbacks, including callbacks that replace the parser base.
     let base = unsafe {
@@ -1182,27 +1195,13 @@ unsafe fn dispatch_start_frame(
     // SAFETY: The busy guard pins the parser. Frame bytes are independently
     // owned by run_events, and only scalar handler/allocator copies escape.
     let (callback, arg, allocator) = unsafe {
-        let family = &(*parser).family;
-        if !charge(
-            &family.callback_bytes,
-            frame.callback_bytes(),
-            (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
-        ) {
-            fail_parse(parser, 43);
+        let Some(arg) = begin_callback(parser, frame.callback_bytes()) else {
             return Ok(());
-        }
+        };
         (*parser).specified_attributes = (frame.attributes().len() * 2)
             .try_into()
             .unwrap_or(c_int::MAX);
-        (
-            (*parser).handlers.start_element,
-            if (*parser).handler_arg_is_parser {
-                parser.cast()
-            } else {
-                (*parser).user_data
-            },
-            (*parser).allocator,
-        )
+        ((*parser).handlers.start_element, arg, (*parser).allocator)
     };
     let Some(callback) = callback else {
         // SAFETY: No parser borrow crosses the owned raw-fragment callbacks.
@@ -1235,23 +1234,10 @@ unsafe fn dispatch_text_frame(parser: XML_Parser, bytes: &[u8]) -> Result<(), Al
     // SAFETY: The busy guard pins the parser. The bytes belong to the detached
     // frame, and only scalar callback/argument copies cross the callback.
     let (callback, arg) = unsafe {
-        let family = &(*parser).family;
-        if !charge(
-            &family.callback_bytes,
-            bytes.len(),
-            (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
-        ) {
-            fail_parse(parser, 43);
+        let Some(arg) = begin_callback(parser, bytes.len()) else {
             return Ok(());
-        }
-        (
-            (*parser).handlers.text,
-            if (*parser).handler_arg_is_parser {
-                parser.cast()
-            } else {
-                (*parser).user_data
-            },
-        )
+        };
+        ((*parser).handlers.text, arg)
     };
     if let Some(callback) = callback {
         // SAFETY: The independent owned frame remains live through the callback.
@@ -1272,23 +1258,10 @@ unsafe fn dispatch_context_text(
     // SAFETY: Called under the busy guard. Borrow only the accounting fields,
     // then capture scalars exactly as for owned Text dispatch.
     let (callback, arg) = unsafe {
-        let family = &(*parser).family;
-        if !charge(
-            &family.callback_bytes,
-            count,
-            (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
-        ) {
-            fail_parse(parser, 43);
+        let Some(arg) = begin_callback(parser, count) else {
             return Ok(());
-        }
-        (
-            (*parser).handlers.text,
-            if (*parser).handler_arg_is_parser {
-                parser.cast()
-            } else {
-                (*parser).user_data
-            },
-        )
+        };
+        ((*parser).handlers.text, arg)
     };
     let Some(callback) = callback else {
         // SAFETY: Eager raw storage and the default dispatch path are unchanged.
@@ -1416,23 +1389,9 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut oriole::AdapterF
                     // its terminator, recycle after callbacks, then raw fallback.
                     (|| -> Result<(), AllocError> {
                         let callback = (*parser).handlers.end_element;
-                        let arg = if (*parser).handler_arg_is_parser {
-                            parser.cast()
-                        } else {
-                            (*parser).user_data
-                        };
-                        let charged = {
-                            let family = &(*parser).family;
-                            charge(
-                                &family.callback_bytes,
-                                name.len(),
-                                (*parser).core.work_bytes_limit(INITIAL_CALLBACK_BYTES),
-                            )
-                        };
-                        if !charged {
-                            fail_parse(parser, 43);
+                        let Some(arg) = begin_callback(parser, name.len()) else {
                             return Ok(());
-                        }
+                        };
                         if let Some(callback) = callback {
                             if name.as_bytes().contains(&0) {
                                 return Err(AllocError::InteriorNul);

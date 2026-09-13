@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/pbs.yml'
       - 'integration/python-build-standalone/**'
+      - 'tools/cpython/**'
   workflow_dispatch:
     inputs:
       pbs_target:
@@ -30,8 +31,7 @@ concurrency:
 
 jobs:
   distribution:
-    # This expensive integration gate has a dedicated review layer.
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.head_ref, 'charlie/codex-xeme-pbs-')
+    # Path filters run integration changes regardless of the contributor's branch name.
     runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
     timeout-minutes: 180
     env:
@@ -139,16 +139,18 @@ jobs:
           set -o pipefail
           target/release/pythonbuild validate-distribution dist/*.tar.zst 2>&1 | tee "$RUNNER_TEMP/pbs-validate.log"
           uv run --no-dev test-distribution.py dist/*.tar.zst 2>&1 | tee "$RUNNER_TEMP/pbs-custom-tests.log"
-          uv run --no-dev test-distribution.py --stdlib dist/*.tar.zst \
-            test_pyexpat test_xml_etree test_xml_etree_c test_minidom test_sax test_pulldom \
-            2>&1 | tee "$RUNNER_TEMP/pbs-xml-tests.log"
+          "$RUNNER_TEMP/pbs-extracted/python/install/bin/python3.12" -I \
+            "$GITHUB_WORKSPACE/tools/cpython/installed.py" --output "$RUNNER_TEMP/pbs-host-xml"
       - name: Run the installed interpreter on glibc 2.17
         if: ${{ !cancelled() && steps.installed_identity.outcome == 'success' }}
         run: |
           set -o pipefail
+          mkdir -p "$RUNNER_TEMP/pbs-glibc-evidence"
           docker run --rm --network=none \
             -v "$RUNNER_TEMP/pbs-extracted/python:/python:ro" \
             -v "$GITHUB_WORKSPACE/integration/python-build-standalone:/checks:ro" \
+            -v "$GITHUB_WORKSPACE/tools/cpython:/checks/cpython:ro" \
+            -v "$RUNNER_TEMP/pbs-glibc-evidence:/evidence:rw" \
             docker.io/library/centos@sha256:dead07b4d8ed7e29e98de0f4504d87e8880d4347859d839686a31da35a3b532f \
             /python/install/bin/python3.12 -I /checks/test-old-glibc.py \
             2>&1 | tee "$RUNNER_TEMP/pbs-glibc217-tests.log"
@@ -162,6 +164,8 @@ jobs:
             ${{ runner.temp }}/pbs-archive-sha256.txt
             ${{ runner.temp }}/pbs-host-cpu.json
             ${{ runner.temp }}/pbs-installed-provenance.json
+            ${{ runner.temp }}/pbs-host-xml/
+            ${{ runner.temp }}/pbs-glibc-evidence/
             ${{ runner.temp }}/xeme-bundle/manifest.json
             ${{ runner.temp }}/xeme-bundle/build.log
             ${{ runner.temp }}/xeme-bundle/pgo/latest.json

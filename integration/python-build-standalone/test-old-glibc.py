@@ -38,14 +38,9 @@ subprocess.run(
     [
         sys.executable,
         "-I",
-        "-m",
-        "test",
-        "test_pyexpat",
-        "test_xml_etree",
-        "test_xml_etree_c",
-        "test_minidom",
-        "test_sax",
-        "test_pulldom",
+        "/checks/cpython/installed.py",
+        "--output",
+        "/evidence/glibc217-xml",
     ],
     check=True,
 )

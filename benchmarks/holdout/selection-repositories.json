@@ -1,0 +1,35 @@
+{
+  "selected_at": "2026-09-13T12:13:37.709950+00:00",
+  "repositories": [
+    {
+      "name": "libreoffice",
+      "repository": "LibreOffice/core",
+      "branch": "master",
+      "commit": "bcc91ade19d17e81688587c1d0e83956fa5813a5"
+    },
+    {
+      "name": "dotnet",
+      "repository": "dotnet/runtime",
+      "branch": "main",
+      "commit": "40caa5753b677322f2202f6fd1037660e85b45b6"
+    },
+    {
+      "name": "hadoop",
+      "repository": "apache/hadoop",
+      "branch": "trunk",
+      "commit": "40433c51b4826127535c76035a970ba688cac82b"
+    },
+    {
+      "name": "qt",
+      "repository": "qt/qttranslations",
+      "branch": "dev",
+      "commit": "8b1c94c7125f1539317a43b43840ba918cd45e92"
+    },
+    {
+      "name": "musescore",
+      "repository": "musescore/MuseScore",
+      "branch": "main",
+      "commit": "c855c21114333cc42676e4dbbf341a9cbb91056e"
+    }
+  ]
+}

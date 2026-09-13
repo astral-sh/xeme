@@ -1,0 +1,2 @@
+# Keep the original upstream input/license bytes on every checkout.
+corpus/** -text

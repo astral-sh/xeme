@@ -1,0 +1,11 @@
+{
+  "paths_selected_at": "2026-09-13T12:13:51.959637+00:00",
+  "criterion": "Named production document roles selected before any parser or benchmark execution. No size/timing criterion used. Unavailable paths may be located within the same project with failures retained.",
+  "paths": {
+    "libreoffice": "officecfg/registry/schema/org/openoffice/Office/Calc.xcs",
+    "dotnet": "src/libraries/System.Private.CoreLib/System.Private.CoreLib.Shared.projitems",
+    "hadoop": "hadoop-common-project/hadoop-common/src/main/resources/core-default.xml",
+    "qt": "translations/qtbase_de.ts",
+    "musescore": "share/instruments/instruments.xml"
+  }
+}

@@ -357,6 +357,49 @@ struct ElementName {
     expanded_end: usize,
 }
 
+/// Layout shared by ordinary and arena-backed expanded element names.
+struct ElementNameLayout {
+    raw_start: usize,
+    expanded_end: usize,
+    capacity: usize,
+}
+
+impl ElementNameLayout {
+    /// Reuse a raw-name suffix and reserve one trailing C terminator byte.
+    #[inline]
+    fn new(expanded: &str, raw: &str) -> Result<Self, AllocError> {
+        let expanded_end = expanded.len();
+        let suffix = expanded.ends_with(raw);
+        let capacity = expanded_end
+            .checked_add(if suffix { 0 } else { raw.len() })
+            .and_then(|length| length.checked_add(1))
+            .ok_or(AllocError::CapacityOverflow)?;
+        Ok(Self {
+            raw_start: if suffix {
+                expanded_end - raw.len()
+            } else {
+                expanded_end
+            },
+            expanded_end,
+            capacity,
+        })
+    }
+
+    /// Append only a missing raw spelling after the caller reserves and copies.
+    #[inline]
+    fn finish(self, mut value: String, raw: &str) -> Result<ElementName, AllocError> {
+        debug_assert_eq!(value.len(), self.expanded_end);
+        if self.raw_start == self.expanded_end {
+            value.try_push_str(raw)?;
+        }
+        Ok(ElementName {
+            value,
+            raw_start: self.raw_start,
+            expanded_end: self.expanded_end,
+        })
+    }
+}
+
 impl ElementName {
     /// Compare end tags against their decoded raw spelling, before expansion.
     fn raw_name(&self) -> &str {
@@ -705,26 +748,20 @@ impl IdentityStartState<'_> {
             .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
         frame.prepare(raw_attrs.len())?;
         let literal_span = !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);
-        let mut names = (raw_attrs.len() > 8)
-            .then(|| HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator));
+        let mut names =
+            AttributeNames::new(raw_attrs.len(), self.namespaces.hasher(), self.allocator);
         for (index, attribute) in raw_attrs.iter().enumerate() {
             let (attr_name, value, attribute_offset, _) = attribute.parts(rest);
-            let duplicate = if let Some(names) = &mut names {
-                !try_set_insert(names, attr_name)?
-            } else {
+            names.check(
+                attr_name,
                 raw_attrs[..index]
                     .iter()
-                    .any(|attribute| attribute.name(rest) == attr_name)
-            };
-            if duplicate {
-                return Err(Error {
-                    kind: ErrorKind::DuplicateAttribute,
-                    message: "duplicate attribute",
-                    position: self
-                        .source
-                        .position_at(1 + name.len() + attribute_offset, 0),
-                });
-            }
+                    .map(|attribute| attribute.name(rest)),
+                || {
+                    self.source
+                        .position_at(1 + name.len() + attribute_offset, 0)
+                },
+            )?;
             if !literal_span {
                 frame.push_attribute(attr_name, value)?;
             }
@@ -3571,8 +3608,8 @@ impl Parser {
         }
         // Most elements have only a few attributes. Keep the linear scan bounded;
         // larger elements retain a randomized hash table against collision attacks.
-        let mut names = (raw_attrs.len() > 8)
-            .then(|| HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator));
+        let mut names =
+            AttributeNames::new(raw_attrs.len(), self.namespaces.hasher(), self.allocator);
         for (index, attribute) in raw_attrs.iter().enumerate() {
             let (attr_name, value, attribute_offset, _) = attribute.parts(rest);
             if self.config.namespace_separator.is_some()
@@ -3581,26 +3618,21 @@ impl Parser {
                 return Err(self.err(ErrorKind::InvalidToken, "invalid qualified attribute name"));
             }
             let attr_name = decoded_names.get(index).map_or(attr_name, |name| &**name);
-            let duplicate = if let Some(names) = &mut names {
-                !try_set_insert(names, attr_name)?
-            } else {
+            names.check(
+                attr_name,
                 raw_attrs[..index]
                     .iter()
                     .enumerate()
-                    .any(|(prior, attribute)| {
+                    .map(|(prior, attribute)| {
                         decoded_names
                             .get(prior)
                             .map_or(attribute.name(rest), |name| &**name)
-                            == attr_name
-                    })
-            };
-            if duplicate {
-                return Err(self.err_at(
-                    ErrorKind::DuplicateAttribute,
-                    "duplicate attribute",
-                    1 + raw_name.len() + attribute_offset,
-                ));
-            }
+                    }),
+                || {
+                    self.source()
+                        .position_at(1 + raw_name.len() + attribute_offset, 0)
+                },
+            )?;
             if index == attrs.len() {
                 try_push(
                     &mut attrs,
@@ -3630,7 +3662,7 @@ impl Parser {
         }
         if let Some(defaults) = self.tables.defaults.get(name) {
             for default in &defaults.ordered {
-                if !names.as_ref().map_or_else(
+                if !names.index.as_ref().map_or_else(
                     || {
                         raw_attrs.iter().enumerate().any(|(index, attribute)| {
                             decoded_names
@@ -3774,30 +3806,16 @@ impl Parser {
         };
         self.seen_root = true;
         self.declaration_allowed = false;
-        let expanded_end = expanded_name.len();
-        let (stack_name, raw_start) = if expanded_name.as_str() != name {
-            // A raw name often already occupies the expanded spelling's suffix.
-            // Otherwise append it after the event name, which can be truncated
-            // without moving bytes when the end event takes ownership.
-            let shared_suffix = expanded_name.ends_with(name);
-            let capacity = expanded_end
-                .checked_add(if shared_suffix { 0 } else { name.len() })
-                .and_then(|length| length.checked_add(1))
-                .ok_or(AllocError::CapacityOverflow)?;
+        let stack_name = if expanded_name.as_str() != name {
+            let layout = ElementNameLayout::new(&expanded_name, name)?;
             let mut value = self
                 .event_recycling
                 .take_name()
                 .unwrap_or_else(|| String::new_in(self.allocator));
             value.clear();
-            value.try_reserve(capacity)?;
+            value.try_reserve(layout.capacity)?;
             value.try_push_str(&expanded_name)?;
-            let raw_start = if shared_suffix {
-                expanded_end - name.len()
-            } else {
-                value.try_push_str(name)?;
-                expanded_end
-            };
-            (value, raw_start)
+            layout.finish(value, name)?
         } else {
             let value = match name_value {
                 lexical::Decoded::Borrowed(name) => {
@@ -3806,7 +3824,11 @@ impl Parser {
                 }
                 lexical::Decoded::Owned(name) => name,
             };
-            (value, 0)
+            ElementName {
+                expanded_end: value.len(),
+                value,
+                raw_start: 0,
+            }
         };
         // Reserve both slots before moving either owner. An error still drops
         // the local undo block without restoring the already updated map.
@@ -3822,11 +3844,7 @@ impl Parser {
             NonZeroUsize::new(self.namespace_scopes.len())
         };
         self.stack.push(Element {
-            name: ElementName {
-                value: stack_name,
-                raw_start,
-                expanded_end,
-            },
+            name: stack_name,
             raw_encoding,
             namespace_scope,
         });
@@ -3957,24 +3975,20 @@ impl Parser {
         frame.prepare(raw_attrs.len())?;
         let literal_span =
             !EXPAND_ELEMENT && !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);
-        let mut names = (raw_attrs.len() > 8)
-            .then(|| HashSet::with_hasher_in(self.namespaces.hasher().clone(), self.allocator));
+        let mut names =
+            AttributeNames::new(raw_attrs.len(), self.namespaces.hasher(), self.allocator);
         for (index, attribute) in raw_attrs.iter().enumerate() {
             let (attr_name, value, attribute_offset, _) = attribute.parts(rest);
-            let duplicate = if let Some(names) = &mut names {
-                !try_set_insert(names, attr_name)?
-            } else {
+            names.check(
+                attr_name,
                 raw_attrs[..index]
                     .iter()
-                    .any(|attribute| attribute.name(rest) == attr_name)
-            };
-            if duplicate {
-                return Err(self.err_at(
-                    ErrorKind::DuplicateAttribute,
-                    "duplicate attribute",
-                    1 + name.len() + attribute_offset,
-                ));
-            }
+                    .map(|attribute| attribute.name(rest)),
+                || {
+                    self.source()
+                        .position_at(1 + name.len() + attribute_offset, 0)
+                },
+            )?;
             if !literal_span {
                 frame.push_attribute(attr_name, value)?;
             }
@@ -3996,14 +4010,8 @@ impl Parser {
             // Detach callback bytes before extending the stack's packed owner.
             // Matching and End delivery keep the same raw/expanded slices.
             frame.set_name(&value)?;
-            let expanded_end = value.len();
-            let shared_suffix = value.ends_with(name);
-            let additional = if shared_suffix { 0 } else { name.len() };
-            let capacity = expanded_end
-                .checked_add(additional)
-                .and_then(|length| length.checked_add(1))
-                .ok_or(AllocError::CapacityOverflow)?;
-            if value.capacity() < capacity {
+            let layout = ElementNameLayout::new(&value, name)?;
+            if value.capacity() < layout.capacity {
                 // Keep the expansion scratch reusable when a nested name needs
                 // a larger packed owner. Suffixes with spare capacity still move.
                 let mut packed = self
@@ -4011,23 +4019,13 @@ impl Parser {
                     .take_name()
                     .unwrap_or_else(|| String::new_in(self.allocator));
                 packed.clear();
-                packed.try_reserve(capacity)?;
+                packed.try_reserve(layout.capacity)?;
                 packed.try_push_str(&value)?;
                 self.event_recycling
                     .recycle_end(self.event_recycling.token(), value);
                 value = packed;
             }
-            let raw_start = if shared_suffix {
-                expanded_end - name.len()
-            } else {
-                value.try_push_str(name)?;
-                expanded_end
-            };
-            ElementName {
-                value,
-                raw_start,
-                expanded_end,
-            }
+            layout.finish(value, name)?
         } else {
             let reusable = self.event_recycling.take_name();
             let value = recycling::copy_name(name, reusable, self.allocator)?;
@@ -4595,6 +4593,44 @@ impl RawAttribute {
             self.name_start,
             self.value_start,
         )
+    }
+}
+
+/// One duplicate-name policy for ordinary and arena-backed start events.
+struct AttributeNames<'a> {
+    index: Option<HashSet<&'a str>>,
+}
+
+impl<'a> AttributeNames<'a> {
+    /// Keep short attribute lists allocation-free and larger lists randomized.
+    #[inline]
+    fn new(count: usize, hasher: &xeme_storage::SaltedRandomState, allocator: Allocator) -> Self {
+        Self {
+            index: (count > 8).then(|| HashSet::with_hasher_in(hasher.clone(), allocator)),
+        }
+    }
+
+    /// Hash large lists, scan small lists, and compute coordinates only on failure.
+    #[inline]
+    fn check(
+        &mut self,
+        name: &'a str,
+        mut prior: impl Iterator<Item = &'a str>,
+        position: impl FnOnce() -> Position,
+    ) -> Result<(), Error> {
+        let duplicate = if let Some(names) = &mut self.index {
+            !try_set_insert(names, name)?
+        } else {
+            prior.any(|previous| previous == name)
+        };
+        if duplicate {
+            return Err(Error {
+                kind: ErrorKind::DuplicateAttribute,
+                message: "duplicate attribute",
+                position: position(),
+            });
+        }
+        Ok(())
     }
 }
 

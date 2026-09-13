@@ -219,6 +219,7 @@ jobs:
                   "context_text_bounds_and_ordinary_api_reuse",
                   "context_text_excluded_sources_keep_owned_text",
                   "context_text_foreign_generation_uses_owned_events",
+                  "native_text_retains_partial_source_precharges",
               },
               "c": {
                   "context_input_allocation_failures_preserve_sticky_errors_and_owners",

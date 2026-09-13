@@ -2012,7 +2012,7 @@ impl Parser {
             || self.has_declaration_composition()
             || self.input_context.is_none()
             || source.has_conversions()
-            || source.accounting_bytes(0) != 0
+            || !source.accounted_to_cursor()
         {
             return Ok(false);
         }
@@ -2044,7 +2044,9 @@ impl Parser {
         frame.publish(position);
         // Match parse_text's published-prefix behavior if accounting fails.
         self.last_position = position;
-        self.account_source(count)?;
+        // Native UTF-8 and the accounting cursor check prove this token's
+        // original byte delta. Keep the charge after publication on rejection.
+        self.account_source_bytes(count)?;
         self.source_mut().consume_text(plan);
         Ok(true)
     }
@@ -2805,9 +2807,9 @@ impl Parser {
                     start: position.byte_index,
                     count: NonZeroUsize::new(end).expect("nonempty matched End"),
                 });
-                // Accounting above is complete and name detachment allocates
-                // nothing. Commit ordinary Unicode coordinates before delivery.
-                self.consume(end)?;
+                // The complete token was charged before semantic processing;
+                // name detachment cannot allocate. Commit coordinates now.
+                self.source_mut().consume(end);
                 frame.publish(position);
                 continue;
             }
@@ -2938,10 +2940,9 @@ impl Parser {
             ) && self.source().native_utf8_byte_index().is_some()
                 && !self.source().has_conversions()
             {
-                self.account_source(end)?;
                 self.source_mut().consume_ascii_tag(end);
             } else {
-                self.consume(end)?;
+                self.source_mut().consume(end);
             }
             if framed_end {
                 // Native token publication only swaps owners. Consume sees the

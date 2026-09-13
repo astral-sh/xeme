@@ -48,6 +48,26 @@ Library crates leave global allocator selection to the embedding application.
 See [XML denial-of-service protections](security.md) for entity-expansion and
 large-token protections, and the limits required when a caller decompresses input.
 
+## Python API
+
+The [`xeme_python` crate](../crates/xeme_python/) provides an independently
+installable `xeme` Python package backed by PyO3. Install it from this checkout
+with `uv pip install .`, then feed bytes and consume owned events:
+
+```python
+from xeme import Parser
+
+parser = Parser()
+parser.feed(b"<message>Hello</message>", final=True)
+for event in parser.read_events():
+    print(event.kind, event.data)
+```
+
+The package exposes namespace options, configurable limits, source positions,
+and structured parse errors. Its event API is separate from `pyexpat`'s callback
+interface. See its [documentation](../crates/xeme_python/README.md) for supported
+events, incremental input, and external-entity restrictions.
+
 ## Expat consumers
 
 The [C interface](../crates/xeme_expat/) exports shared and static libraries with
@@ -67,6 +87,7 @@ XML extensions against Xeme and runs their upstream tests. See the
 | [`xeme_storage`](../crates/xeme_storage) | Fallible storage, allocator ownership, and resource accounting |
 | [`xeme_expat`](../crates/xeme_expat) | Expat C interface and callback integration |
 | [`xeme_cli`](../crates/xeme_cli) | Command-line XML checker |
+| [`xeme_python`](../crates/xeme_python) | Python event API and extension package |
 
 See [contributing](../CONTRIBUTING.md) for development commands and acceptance
 criteria, [fuzzing](../fuzz/README.md) for the adversarial harnesses, and the

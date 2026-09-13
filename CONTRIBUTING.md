@@ -18,6 +18,26 @@ the reference Expat implementation. Preserve reduced failures in the corpus.
 Unsupported features must be visible in the compatibility documentation and must
 not silently accept malformed XML.
 
+## Python bindings
+
+The `xeme_python` workspace member requires Python 3.10 or later to build. To
+install the Python package and exercise the installed extension from the
+repository root:
+
+```console
+uv venv
+uv pip install .
+uv run --no-sync python -m unittest discover -s crates/xeme_python/tests -v
+uv build --wheel --out-dir dist
+uv build --sdist --out-dir dist
+```
+
+Reinstall after changing Rust code. Keep the native type stub and public wrapper
+annotations synchronized with the bindings. See the
+[Python API guide](crates/xeme_python/README.md) for API behavior and examples.
+Python CI checks installed wheels across Linux, macOS, and Windows and rebuilds
+a wheel from the source distribution.
+
 ## Review and performance
 
 The [review guide](docs/review.md) maps the implementation and validation tools.

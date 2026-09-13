@@ -1,0 +1,71 @@
+{
+  "name": {
+    "geomean_slowdown": {
+      "elementtree": 2.0689846050294722,
+      "pyexpat-events": 1.6592755755192887
+    },
+    "slowdown": {
+      "maven/4096/pyexpat-events": 1.856417059887678,
+      "vulkan/4096/elementtree": 1.8239761552031075,
+      "gtk/4096/pyexpat-events": 1.7686873645028018,
+      "docbook/4096/elementtree": 2.0629086663207055,
+      "vulkan/4096/pyexpat-events": 1.5920167227301136,
+      "wayland/4096/pyexpat-events": 1.2020874248518476,
+      "gtk/4096/elementtree": 2.29591735807132,
+      "maven/4096/elementtree": 2.4747263311470404,
+      "batik/4096/pyexpat-events": 1.9655593171677053,
+      "wayland/4096/elementtree": 1.714083413664554,
+      "batik/4096/elementtree": 2.140567931748956,
+      "docbook/4096/pyexpat-events": 1.6897196893512374
+    },
+    "source_build_manifest": "name/real-consumers/build.json",
+    "pairs": 5,
+    "iterations": 5
+  },
+  "recycled": {
+    "geomean_slowdown": {
+      "elementtree": 1.8703991075203992,
+      "pyexpat-events": 1.541384340325523
+    },
+    "slowdown": {
+      "maven/4096/pyexpat-events": 1.788960757279459,
+      "vulkan/4096/elementtree": 1.714512763651804,
+      "gtk/4096/pyexpat-events": 1.7607446148536776,
+      "docbook/4096/elementtree": 1.7545317463601213,
+      "vulkan/4096/pyexpat-events": 1.5081205991520472,
+      "wayland/4096/pyexpat-events": 1.0627341378138735,
+      "gtk/4096/elementtree": 2.1305970744105434,
+      "maven/4096/elementtree": 2.4550982976468254,
+      "batik/4096/pyexpat-events": 1.6352243121761287,
+      "wayland/4096/elementtree": 1.5569064823901055,
+      "batik/4096/elementtree": 1.7477166669692952,
+      "docbook/4096/pyexpat-events": 1.6245400894738917
+    },
+    "source_build_manifest": "recycled/real-consumers/build.json",
+    "pairs": 5,
+    "iterations": 5
+  },
+  "prefix64": {
+    "geomean_slowdown": {
+      "elementtree": 1.8245033931807955,
+      "pyexpat-events": 1.5193043411284755
+    },
+    "slowdown": {
+      "maven/4096/pyexpat-events": 1.8149540000705897,
+      "vulkan/4096/elementtree": 1.6691019864122718,
+      "gtk/4096/pyexpat-events": 1.6446483310910545,
+      "docbook/4096/elementtree": 1.7589728085770755,
+      "vulkan/4096/pyexpat-events": 1.5357572318041908,
+      "wayland/4096/pyexpat-events": 1.047870427617882,
+      "gtk/4096/elementtree": 2.125010135591693,
+      "maven/4096/elementtree": 2.3502728933061503,
+      "batik/4096/pyexpat-events": 1.5852102348589314,
+      "wayland/4096/elementtree": 1.5364019112946266,
+      "batik/4096/elementtree": 1.6373514780826344,
+      "docbook/4096/pyexpat-events": 1.6151504422380074
+    },
+    "source_build_manifest": "prefix64/real-consumers/build.json",
+    "pairs": 5,
+    "iterations": 5
+  }
+}

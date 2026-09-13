@@ -1,0 +1,181 @@
+//! Fallible storage that carries its allocator through parser and callback lifetimes.
+
+mod allocator;
+mod hashing;
+mod queue;
+mod shared;
+mod string;
+mod tracking;
+mod try_lock;
+
+pub use allocator::{Allocator, CustomAllocator, MemorySuite, in_allocator_callback};
+pub use allocator_api2::alloc::{Allocator as AllocatorApi, Layout};
+pub use hashing::SaltedRandomState;
+pub use queue::Queue;
+pub use shared::Shared;
+pub use string::{CString, String, Text};
+pub use tracking::{
+    ACTIVATION_THRESHOLD_DEFAULT, AllocationTracker, MAXIMUM_AMPLIFICATION_DEFAULT,
+    MAXIMUM_LIVE_BYTES, with_tracking, without_tracking,
+};
+pub use try_lock::{TryLock, TryLockGuard};
+
+/// An allocation failure that can be reported without allocating another object.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum AllocError {
+    OutOfMemory,
+    CapacityOverflow,
+    InvalidAllocator,
+    InteriorNul,
+}
+impl std::fmt::Display for AllocError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::OutOfMemory => "out of memory",
+            Self::CapacityOverflow => "allocation size overflow",
+            Self::InvalidAllocator => "incomplete memory handling suite",
+            Self::InteriorNul => "string contains a NUL character",
+        })
+    }
+}
+impl std::error::Error for AllocError {}
+impl From<allocator_api2::alloc::AllocError> for AllocError {
+    fn from(_: allocator_api2::alloc::AllocError) -> Self {
+        Self::OutOfMemory
+    }
+}
+impl From<allocator_api2::collections::TryReserveError> for AllocError {
+    fn from(error: allocator_api2::collections::TryReserveError) -> Self {
+        match error.kind() {
+            allocator_api2::collections::TryReserveErrorKind::CapacityOverflow => {
+                Self::CapacityOverflow
+            }
+            allocator_api2::collections::TryReserveErrorKind::AllocError { .. } => {
+                Self::OutOfMemory
+            }
+        }
+    }
+}
+impl From<hashbrown::TryReserveError> for AllocError {
+    fn from(error: hashbrown::TryReserveError) -> Self {
+        match error {
+            hashbrown::TryReserveError::CapacityOverflow => Self::CapacityOverflow,
+            hashbrown::TryReserveError::AllocError { .. } => Self::OutOfMemory,
+        }
+    }
+}
+
+pub type Vec<T> = allocator_api2::vec::Vec<T, Allocator>;
+pub type Box<T> = allocator_api2::boxed::Box<T, Allocator>;
+pub type HashMap<K, V> = hashbrown::HashMap<K, V, SaltedRandomState, Allocator>;
+pub type HashSet<K> = hashbrown::HashSet<K, SaltedRandomState, Allocator>;
+
+#[must_use]
+pub fn hash_map<K, V>(allocator: Allocator) -> HashMap<K, V> {
+    HashMap::with_hasher_in(SaltedRandomState::default(), allocator)
+}
+#[must_use]
+pub fn hash_set<K>(allocator: Allocator) -> HashSet<K> {
+    HashSet::with_hasher_in(SaltedRandomState::default(), allocator)
+}
+pub fn try_box<T>(value: T, allocator: Allocator) -> Result<Box<T>, AllocError> {
+    Box::try_new_in(value, allocator).map_err(Into::into)
+}
+pub fn try_push<T>(values: &mut Vec<T>, value: T) -> Result<(), AllocError> {
+    values.try_reserve(1)?;
+    values.push(value);
+    Ok(())
+}
+/// Append bitwise copies after reserving all space fallibly.
+///
+/// `allocator-api2` cannot specialize its generic `extend_from_slice` for `Copy`
+/// elements on stable Rust. Copy the whole slice instead of checking capacity
+/// and cloning each byte separately.
+#[inline]
+pub fn try_extend_from_slice<T: Copy>(values: &mut Vec<T>, other: &[T]) -> Result<(), AllocError> {
+    let old_len = values.len();
+    let new_len = old_len
+        .checked_add(other.len())
+        .ok_or(AllocError::CapacityOverflow)?;
+    values.try_reserve(other.len())?;
+    // SAFETY: Reservation provides space for every copied element, and both
+    // pointers are aligned even for empty or zero-sized slices. The exclusive
+    // vector borrow excludes overlap with `other`. `Copy` elements need no
+    // cloning or destruction, and the new length exposes only initialized data.
+    unsafe {
+        std::ptr::copy_nonoverlapping(
+            other.as_ptr(),
+            values.as_mut_ptr().add(old_len),
+            other.len(),
+        );
+        values.set_len(new_len);
+    }
+    Ok(())
+}
+pub fn try_insert<K: Eq + std::hash::Hash, V>(
+    map: &mut HashMap<K, V>,
+    key: K,
+    value: V,
+) -> Result<Option<V>, AllocError> {
+    map.try_reserve(1)?;
+    Ok(map.insert(key, value))
+}
+pub fn try_set_insert<K: Eq + std::hash::Hash>(
+    set: &mut HashSet<K>,
+    key: K,
+) -> Result<bool, AllocError> {
+    set.try_reserve(1)?;
+    Ok(set.insert(key))
+}
+pub fn try_format(
+    allocator: Allocator,
+    arguments: std::fmt::Arguments<'_>,
+) -> Result<String, AllocError> {
+    use std::fmt::Write;
+    let mut output = String::new_in(allocator);
+    output
+        .write_fmt(arguments)
+        .map_err(|_| AllocError::OutOfMemory)?;
+    Ok(output)
+}
+
+/// Explicit fallible cloning, avoiding collection Clone implementations that abort.
+pub trait TryClone: Sized {
+    fn try_clone(&self) -> Result<Self, AllocError>;
+}
+impl TryClone for String {
+    fn try_clone(&self) -> Result<Self, AllocError> {
+        String::try_clone(self)
+    }
+}
+impl<T: TryClone> TryClone for Option<T> {
+    fn try_clone(&self) -> Result<Self, AllocError> {
+        self.as_ref().map(TryClone::try_clone).transpose()
+    }
+}
+impl<T: TryClone> TryClone for Vec<T> {
+    fn try_clone(&self) -> Result<Self, AllocError> {
+        let mut output = Self::new_in(*self.allocator());
+        output.try_reserve_exact(self.len())?;
+        for item in self {
+            output.push(item.try_clone()?);
+        }
+        Ok(output)
+    }
+}
+impl<A: TryClone, B: TryClone> TryClone for (A, B) {
+    fn try_clone(&self) -> Result<Self, AllocError> {
+        Ok((self.0.try_clone()?, self.1.try_clone()?))
+    }
+}
+macro_rules! copy_clone {
+    ($($ty:ty),* $(,)?) => {$(impl TryClone for $ty {
+        fn try_clone(&self) -> Result<Self, AllocError> { Ok(*self) }
+    })*};
+}
+copy_clone!(
+    u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, bool, char
+);
+
+#[cfg(test)]
+mod tests;

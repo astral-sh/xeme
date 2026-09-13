@@ -1,0 +1,44 @@
+{
+  "status": "reviewed_and_selected",
+  "runtime_base": "4b11ace3d89fe6b7bf66ca55290eb23444f11de2",
+  "integration_base": "450b3321a3ffb7e59879695a67776d08c7b5114f",
+  "source_files": 65,
+  "libraries": {
+    "liboriole_expat.a": "7c1a89338998b3f5ccffa4fe9deb4a63973b3293aae2c4d72db6ddaaed583db9",
+    "liboriole_expat.so": "3a80baddfd3189123378c63d08c85dd756d22b16b3d715abf2e8c2eedbf2e5ea"
+  },
+  "patch_sha256": "54f18e3b5f29afc6e8297b28fc3e75b364069dafca6b4c704a26326a551576cc",
+  "workspace_checks": {
+    "session_id": 14072,
+    "exit_code": 0,
+    "all_targets_passed": 369,
+    "clippy_warnings_denied": true,
+    "fmt_check_passed": true
+  },
+  "focused_positions": {
+    "session_id": 99779,
+    "exit_code": 0,
+    "tests_passed": 3
+  },
+  "strict_baseline_differential": {
+    "session_id": 99897,
+    "exit_code": 0,
+    "observations": 3318,
+    "all_exactly_unchanged": true,
+    "reference_is_published_oriole_baseline_not_expat": true
+  },
+  "original_api": {
+    "configurations": 4740,
+    "before_passed": 4323,
+    "before_failed": 417,
+    "after_passed": 4335,
+    "after_failed": 405,
+    "fixed": 12,
+    "new_failures": 0,
+    "other_changes": 0,
+    "exit_code": 1,
+    "unchanged_assertions_and_bounds": true
+  },
+  "scope": "An exhausted unbalanced entity retains its reference origin after pop. No allocation, accepted/rejected outcome, callback, resource limit or performance claim changes.",
+  "remaining_probe_differences": "Other premature-close paths retain nonzero byte counts; nested CDATA retains error13 versus Expat20. These pre-existing differences are preserved in exact probe rows."
+}

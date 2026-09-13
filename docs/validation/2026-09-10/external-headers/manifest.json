@@ -1,0 +1,126 @@
+{
+  "base_snapshot": "/tmp/oriole-pe-values",
+  "source_snapshot": "/tmp/oriole-external-parameter-context",
+  "base_library_sha256": "2891a41f8b7b1e4da48dc00de37ba408d360db0e4f12459f7ce8ee263b84f64f",
+  "candidate_library": "/home/dev-user/.cache/oriole/external-parameter-context-target/debug/liboriole_expat.so",
+  "candidate_library_sha256": "0fe9bbbe69b22392ed034add98f551a6591b7720c6e6995861dcc8758e6078a7",
+  "patch_sha256": "5e2f51b1861c007bf05502c4662383920cb1c1d0cdc0035c577262bd9016a35f",
+  "files": [
+    {
+      "path": "crates/oriole/src/dtd.rs",
+      "base_sha256": "ae0c3bf44859502071ac7b81e3f02a524940c3e761ee6c7496af0800e1ff9650",
+      "candidate_sha256": "c22a6eb04702c3a3dbabc32176d81f9c7370ce4424329bb59b136219e4f82402"
+    },
+    {
+      "path": "crates/oriole/src/encoding.rs",
+      "base_sha256": "61247cc43c44cea305f6cba93af010752a8f31f72b014d4057bf140294003e57",
+      "candidate_sha256": "b7c278c06436b42cb1d5cf9afa869b375246a1c6957ad455e181259016164a45"
+    },
+    {
+      "path": "crates/oriole/src/lib.rs",
+      "base_sha256": "c136819490e702bfb214c7ea75a921d74064ed12ec8f9e86d3347a8e2eea87dd",
+      "candidate_sha256": "a68f49b3bfaab720bd33ca360f26a862473fe08fe52b6fcaa3f68a9430dd8102"
+    },
+    {
+      "path": "crates/oriole/tests/allocation.rs",
+      "base_sha256": "7882ec4ff6f98da4aec457a3a1f268ac85032fd1bbe28b52264e330213dd39ea",
+      "candidate_sha256": "27a716b0c061cfb180419116b6203277298849090e5df10e2c5df461f0b4d8b5"
+    },
+    {
+      "path": "crates/oriole/tests/external_headers.rs",
+      "base_sha256": null,
+      "candidate_sha256": "28b24c217dc3bfe3ef633e930ad3cc59652d940befdc7de0b82f1450d90ec688"
+    },
+    {
+      "path": "crates/oriole/tests/parser.rs",
+      "base_sha256": "c1caf6e2eb01c0e42f03927a4bb2a86e19c665a14e3f40a65a37a18462ce7bbd",
+      "candidate_sha256": "62cfd871299f1ee8f6f2d2ccb610793d5edc400c0fc093941a25596874124286"
+    },
+    {
+      "path": "crates/oriole_expat/README.md",
+      "base_sha256": "a8b15e5c0375ab05654bd9d09709a55c5d476ae563e49ae825ff56b5649ee2c2",
+      "candidate_sha256": "c66214cbab11cb36d3990f60cf2ca68384b57467cab5fa300256d51b62d83506"
+    },
+    {
+      "path": "crates/oriole_expat/src/tests.rs",
+      "base_sha256": "d05cf7f62d6df805dfc51e0b83c92eb221e24fc8f66efd760c77cd7f3ca1e901",
+      "candidate_sha256": "009b974db2c4f2eff01d815c0295507a6d59075ecdc18192a35423fa9372c050"
+    }
+  ],
+  "validation": {
+    "primary_differential": {
+      "cases": 1836,
+      "status_error_matches": 1792,
+      "status_error_fixed": 1156,
+      "new_status_error_differences": 0,
+      "full_normalized_matches": 896,
+      "new_normalized_differences": 0,
+      "parent_status_error_matches": 1836,
+      "events_except_root_not_standalone_matches": 1836
+    },
+    "extra_mixed_headers": {
+      "cases": 576,
+      "status_error_matches": 576,
+      "scoped_event_matches": 564,
+      "known_duplicate_entity_default_fragment_differences": 12
+    },
+    "upstream": {
+      "reference": {
+        "pass": 192
+      },
+      "baseline": {
+        "pass": 168,
+        "fail": 24
+      },
+      "candidate": {
+        "pass": 192
+      }
+    },
+    "tests": {
+      "core": 97,
+      "ffi": 52,
+      "total": 149,
+      "clippy": "pass",
+      "format": "pass",
+      "allocator_failure_and_no_global_bypass": "pass"
+    }
+  },
+  "evidence": [
+    {
+      "path": "/tmp/oriole-external-header-final-tests.log",
+      "sha256": "0427325d589ed49748d4f899b9b07a9a6fb1dc94efab3b01eb6a927fca03f41c"
+    },
+    {
+      "path": "/tmp/oriole-external-header-final-clippy.log",
+      "sha256": "1869edb7b2523f67f5c2658abc87eb488b1ea740b8d359a22df894ccdce1509a"
+    },
+    {
+      "path": "/tmp/oriole-external-header-final-build.log",
+      "sha256": "2461b00c8697c4189b2de92ca6fb05b5d72273c78a0a47b1ce4e83ccca077b70"
+    },
+    {
+      "path": "/tmp/oriole-external-pe-initial-comparison.json",
+      "sha256": "0aae0d0f3a05e41ffb876e4ca66a2ce658c21619716e729d3a2bb37d87a03b33"
+    },
+    {
+      "path": "/tmp/oriole-external-pe-baseline-comparison.json",
+      "sha256": "ad18089fc31c6e3b5f561b71ad7ba2750aa87a28d5f60cc5747ba1d8e2dd5a29"
+    },
+    {
+      "path": "/tmp/oriole-external-header-extra.json",
+      "sha256": "e0ef9d66efd38370ab1353b0426f6c24437528c1555f84d73b89732e3dcd6f58"
+    },
+    {
+      "path": "/tmp/oriole-external-header-upstream/candidate-final/manifest.json",
+      "sha256": "5b9ce20c03b677baf132bf1a6cfe28dd4c396241add051641edebaea1b4267d0"
+    },
+    {
+      "path": "/tmp/oriole-external-header-upstream/candidate-final/results.json",
+      "sha256": "314f7f37c6429102ba3117cabac278072701a2e47ad3f7d7880742da988d9bfa"
+    }
+  ],
+  "independent_review": {
+    "path": "/tmp/oriole-external-header-results/independent-review.json",
+    "sha256": "67e0487eb0e7a1925b4513e316a92e01808499bad1803c60c76946de87f0510b"
+  }
+}

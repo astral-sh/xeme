@@ -1,0 +1,46 @@
+{
+  "scope": "Root tooling import integration; parser source unchanged. Original build and profile artifacts preserve their author tool hashes.",
+  "files_sha256": {
+    "tools/pgo/README.md": "b0c772e7e51a54dee7f3cf4fa9ce15d77d5f680d84bd6fe2dc1502bc63ac4830",
+    "tools/pgo/__init__.py": "9b382322d3844ca36ad8f0e11b0542d1f87403adaac42b9e35b02a19e87af215",
+    "tools/pgo/build.py": "47cada5abeec0986c8f1b85846aa84527c054f0be22e77c59d84d9c9c9aeee16",
+    "tools/pgo/corpus.py": "f9b0d9f7c3b8d30674c64c86c79870aaaf0da65039e0178a6bc99e7030034cd2",
+    "tools/pgo/test_build.py": "a51be41e12b820474876d60ef6e63166d2f88370db4c1981096ce5332cf14924",
+    "tools/pgo/train.py": "5948d1a482a0727a74612bab98df2411c08884dac45fd143debdae6b8e42e590"
+  },
+  "changed_files": {
+    "build.py": {
+      "reviewed": "6f7a16d5c3e91f40fe91012f7470687e07294f1f9dfdd15382d9ae4b866f3a84",
+      "integrated": "47cada5abeec0986c8f1b85846aa84527c054f0be22e77c59d84d9c9c9aeee16"
+    },
+    "train.py": {
+      "reviewed": "17a47d4833517071143445b2a6097fa079ec5a28ca5a09d9b253ac68eee90929",
+      "integrated": "5948d1a482a0727a74612bab98df2411c08884dac45fd143debdae6b8e42e590"
+    },
+    "test_build.py": {
+      "reviewed": "28cd7cd0f3d6defadd0ef99d4d8041351e95b5da6d2f38f4a242be880a241e40",
+      "integrated": "a51be41e12b820474876d60ef6e63166d2f88370db4c1981096ce5332cf14924"
+    },
+    "README.md": {
+      "reviewed": "e77b9139aaa0f410501b2ab6ecb0522403faccc262cf67a0b2a38860cb766dfa",
+      "integrated": "b0c772e7e51a54dee7f3cf4fa9ce15d77d5f680d84bd6fe2dc1502bc63ac4830"
+    }
+  },
+  "additional_files": [
+    "tools/pgo/__init__.py"
+  ],
+  "reason": "Unqualified corpus/build imports resolved unrelated modules during repository-wide ty. Package-qualified imports and a resolved parent path support direct and isolated script execution.",
+  "validation": {
+    "tests_passed": 12,
+    "ruff": "All checks passed: ruff 0.16.6 check tools benchmarks integration",
+    "ty": "All checks passed: ty 0.0.80 check --extra-search-path tools tools benchmarks integration",
+    "generated_records_compared": 288,
+    "record_identity": "Integrated trainer rows exactly match the final reviewed-tool optimized replay.",
+    "xml_parse_origin": {
+      "path": "/tmp/oriole-pgo-tool-validation with spaces/runs/run-yldc34vh/use/liboriole_expat.so",
+      "sha256": "bb43c2fc4df100c7f6761e22ca38be54825e4c94ab1a162525eaff530dbdc422"
+    },
+    "training_replay_sha256": "fc4ab085ba9fa8ff15f03314c5a8566175a24c40894819b0a9aa60a7a8094a93"
+  },
+  "ci": "Additional Linux paid/fork-fallback job builds normal and fresh PGO libraries, compares exact callbacks, and executes C callback/allocation tests. Full integrated-tool build will be independently rerun by this job."
+}

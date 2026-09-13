@@ -1,0 +1,35 @@
+{
+  "run": "https://github.com/astral-sh/oriole/actions/runs/34436738490",
+  "oriole_branch": "charlie/codex-oriole-pbs-source-pin",
+  "oriole_revision": "20bba5a",
+  "pbs_revision": "a4553880293fe9d1bb62747d34ab0e5121d3554f",
+  "distribution": "cpython-3.12.13-x86_64-unknown-linux-gnu-noopt-20260910T0100.tar.zst",
+  "archive_sha256_from_build_log": "3a507ce4c481d4ec304fdcdeb7ba326f8760a97d3b47291f36d7e1175f40f3d1",
+  "build": "passed",
+  "distribution_validator": "not run: Cargo workspace discovery prevented validator compilation",
+  "runtime_xml_suites": "not run",
+  "installed_identity": "not run",
+  "older_glibc_symbol_validation": "not run",
+  "files": {
+    "oriole-pbs-source-pin-failure.log.gz": {
+      "sha256": "d93adcf04b5a3e713bff9c8105b9506236bd7d504dcf57818fb52a033fe91b8b",
+      "original_sha256": "79d63c385783242453f9c8df64519cc41f85c60104b1944eeefcf2bf9523670d"
+    },
+    "pbs-build.log.gz": {
+      "sha256": "098576665508b45ce7ff134ff4ff3238b3532b8ca432774f09b7f248429e10b8",
+      "original_sha256": "0b9020e9f42f90d99de9c241f5cd16970e346de211935286e58ba545d62761b8"
+    },
+    "manifest.json.gz": {
+      "sha256": "8daaf926f084cef44701a6ce408d95b36ae1bcb51353731a6f2256bad7694a2f",
+      "original_sha256": "094e2a66f9a7386209af71b376e54a245c8ff9b2db45237d6bc7a30d5d33f9e7"
+    },
+    "build.log.gz": {
+      "sha256": "1d61e6f5cd35ded0e6a64ffdb9d983db20cf873fb91071d53af9971154424926",
+      "original_sha256": "4700578ed2884dfd6d1d5dba02aa8b64888e47e402914e95d2bab0bd4b83818d"
+    },
+    "oriole-pbs-validator-metadata.json.gz": {
+      "sha256": "057c3481b1fb2cb2a53f758ee9de1e5c045028169ec011b822fb1430a0114989",
+      "original_sha256": "99212db6e4417e2eb5e61ab3ef4d486b3d328afd91794bcac94e9587248299c0"
+    }
+  }
+}

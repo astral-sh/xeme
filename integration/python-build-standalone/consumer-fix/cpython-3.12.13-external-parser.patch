@@ -1,0 +1,58 @@
+--- a/Modules/pyexpat.c
++++ b/Modules/pyexpat.c
+@@ -1044,11 +1044,6 @@
+         return NULL;
+     }
+ 
+-    // The new subparser will make use of the parent XML_Parser inside of Expat.
+-    // So we need to take subparsers into account with the reference counting
+-    // of their parent parser.
+-    Py_INCREF(self);
+-
+     new_parser->buffer_size = self->buffer_size;
+     new_parser->buffer_used = 0;
+     new_parser->buffer = NULL;
+@@ -1058,7 +1053,10 @@
+     new_parser->ns_prefixes = self->ns_prefixes;
+     new_parser->itself = XML_ExternalEntityParserCreate(self->itself, context,
+                                                         encoding);
+-    new_parser->parent = (PyObject *)self;
++    // The new subparser will make use of the parent XML_Parser inside of Expat.
++    // So we need to take subparsers into account with the reference counting
++    // of their parent parser.
++    new_parser->parent = Py_NewRef(self);
+     new_parser->handlers = 0;
+     new_parser->intern = Py_XNewRef(self->intern);
+ 
+@@ -1066,13 +1064,11 @@
+         new_parser->buffer = PyMem_Malloc(new_parser->buffer_size);
+         if (new_parser->buffer == NULL) {
+             Py_DECREF(new_parser);
+-            Py_DECREF(self);
+             return PyErr_NoMemory();
+         }
+     }
+     if (!new_parser->itself) {
+         Py_DECREF(new_parser);
+-        Py_DECREF(self);
+         return PyErr_NoMemory();
+     }
+ 
+@@ -1085,7 +1081,6 @@
+     new_parser->handlers = PyMem_New(PyObject *, i);
+     if (!new_parser->handlers) {
+         Py_DECREF(new_parser);
+-        Py_DECREF(self);
+         return PyErr_NoMemory();
+     }
+     clear_handlers(new_parser, 1);
+@@ -2341,6 +2336,9 @@
+ static void
+ clear_handlers(xmlparseobject *self, int initial)
+ {
++    if (self->handlers == NULL) {
++        return;
++    }
+     int i = 0;
+ 
+     for (; handler_info[i].name != NULL; i++) {

@@ -1,0 +1,43 @@
+{
+  "replay_command": [
+    "taskset",
+    "-c",
+    "2",
+    "/home/dev-user/.cache/oriole/fuzz-newfeatures-final/multibyte",
+    "-seed=20260910",
+    "-max_len=65536",
+    "-timeout=10",
+    "-rss_limit_mb=1536",
+    "-runs=0",
+    "/home/dev-user/.cache/oriole/fuzz-newfeatures-final/multibyte-evidence/initial-corpus"
+  ],
+  "replay_exit_code": 0,
+  "initial_inputs": 1963,
+  "campaign_command": [
+    "taskset",
+    "-c",
+    "2",
+    "/home/dev-user/.cache/oriole/fuzz-newfeatures-final/multibyte",
+    "-seed=20260910",
+    "-max_len=65536",
+    "-timeout=10",
+    "-rss_limit_mb=1536",
+    "-max_total_time=600",
+    "-print_final_stats=1",
+    "-artifact_prefix=/home/dev-user/.cache/oriole/fuzz-newfeatures-final/multibyte-evidence/artifacts/",
+    "/home/dev-user/.cache/oriole/fuzz-newfeatures-final/multibyte-evidence/corpus",
+    "/home/dev-user/.cache/oriole/fuzz-newfeatures-final/multibyte-evidence/initial-corpus"
+  ],
+  "campaign_exit_code": 0,
+  "campaign_elapsed_seconds": 601.1182330670126,
+  "artifacts": [],
+  "binary_unchanged": true,
+  "stats": {
+    "number_of_executed_units": 2564903,
+    "average_exec_per_sec": 4267,
+    "new_units_added": 5747,
+    "slowest_unit_time_sec": 0,
+    "peak_rss_mb": 476
+  },
+  "binary_sha256": "8c83b45b2d615e88b561f34858a043fba9ff92433d6864be92c63621e6acbc55"
+}

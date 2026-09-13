@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-10",
+  "artifacts": {
+    "canonical-multibyte-results.json.gz": {
+      "sha256": "1153337fdb6b5f5525ec4620dd5199d00ca030b6362d793d0670c4872776e15d",
+      "bytes": 16748
+    },
+    "canonical-multibyte-probe.py.gz": {
+      "sha256": "4a0632134c51bc33bb349b6d196f48aae69bc303ccebe807178190e06e1ce1d1",
+      "bytes": 2626
+    },
+    "archive-members.json": {
+      "sha256": "83d7385dfeaf8c1d7f46a157e1962a28af176b7180c8fb048d3a5e4ba3028b9e",
+      "bytes": 8914
+    },
+    "consumer-evidence.tar.gz": {
+      "sha256": "2ab4e85e922a0daad517f36ab24bb03d55bf3834829230251f057073415ea7d9",
+      "bytes": 127115
+    },
+    "source.json": {
+      "sha256": "718053d91efb6b056aad132844a572b35ca90d42442539a9659f7ebf6073e91f",
+      "bytes": 8910
+    },
+    "summary.json": {
+      "sha256": "7c04d51a8844d59cc2a5333958dee9ad3a945c480fd860ac782e004e3b91d366",
+      "bytes": 4771
+    },
+    "README.md": {
+      "sha256": "33c5cf0c8d0112a1a87b1b55562960779e62b4e7c13c5d30eefc8d52d8e96940",
+      "bytes": 3615
+    }
+  },
+  "runtime_source_manifest_sha256": "718053d91efb6b056aad132844a572b35ca90d42442539a9659f7ebf6073e91f",
+  "raw_archive_note": "The original archived summary predates completed sanitizer campaigns and retains a pending pointer; current summary.json resolves that pointer. Raw logs and compiled source files are unchanged."
+}

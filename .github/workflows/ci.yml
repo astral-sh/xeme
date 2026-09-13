@@ -1,0 +1,232 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }}, ${{ matrix.toolchain }})
+    runs-on: ${{ github.repository_owner == 'astral-sh' && (matrix.os == 'ubuntu-24.04' && 'github-ubuntu-24.04-x86_64-4' || matrix.os == 'ubuntu-24.04-arm' && 'github-ubuntu-24.04-aarch64-4') || matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm, windows-latest, macos-15]
+        toolchain: [stable]
+        include:
+          - os: ubuntu-24.04
+            toolchain: 1.96.0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: ${{ matrix.toolchain }}
+      - run: cargo test --workspace --locked
+      - run: cargo test --workspace --locked --no-default-features
+      - run: cargo doc --workspace --no-deps --locked
+        env:
+          RUSTDOCFLAGS: -D warnings
+  lint:
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - run: cargo fmt --manifest-path benchmarks/inprocess/Cargo.toml --check
+      - run: cargo clippy --manifest-path benchmarks/inprocess/Cargo.toml --all-targets --locked -- -D warnings
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+      - run: uvx --from ruff==0.16.6 ruff check tools benchmarks integration
+      - run: uvx --from ty==0.0.80 ty check --extra-search-path tools tools benchmarks integration
+      - run: python3 -m unittest discover -s tools/cpython -p test_run.py
+      - run: python3 -m unittest discover -s tools/pgo -p test_build.py
+  native:
+    name: C ABI and callback safety
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-aarch64-4' || 'ubuntu-24.04-arm' }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: stable
+      - run: sudo apt-get update && sudo apt-get install -y libexpat1-dev pkg-config
+      - run: cargo build --release --locked -p oriole_expat
+      - name: Reference C consumer
+        run: |
+          cc -std=c11 -O2 -Wall -Wextra -Werror tests/c/integration.c $(pkg-config --cflags --libs expat) -o /tmp/reference-c
+          /tmp/reference-c
+      - name: Oriole C consumer and adversarial callbacks
+        run: |
+          cc -std=c11 -O2 -Wall -Wextra -Werror -I include tests/c/integration.c -L target/release -loriole_expat -o /tmp/oriole-c
+          cc -std=c11 -O2 -Wall -Wextra -Werror -I include tests/c/adversarial.c -L target/release -loriole_expat -o /tmp/oriole-adversarial
+          LD_LIBRARY_PATH=target/release /tmp/oriole-c
+          LD_LIBRARY_PATH=target/release /tmp/oriole-adversarial
+          cc -std=c11 -O2 -Wall -Wextra -Werror -I include tests/c/allocations.c -L target/release -loriole_expat -o /tmp/oriole-allocations
+          LD_LIBRARY_PATH=target/release /tmp/oriole-allocations
+  fuzz:
+    name: Sanitized parser fuzz smoke
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-aarch64-4' || 'ubuntu-24.04-arm' }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: nightly
+      - run: cargo install cargo-fuzz --locked --version 0.13.2
+      - run: cargo fuzz run parse -- -max_total_time=30 -max_len=4096
+      - run: cargo fuzz run streaming -- -max_total_time=30 -max_len=4096
+      - run: cargo fuzz run ffi fuzz/seeds/ffi -- -max_total_time=30 -max_len=65536
+      - run: cargo fuzz run ffi_family fuzz/seeds/ffi_family -- -max_total_time=30 -max_len=65536
+      - run: cargo fuzz run multibyte fuzz/seeds/multibyte -- -max_total_time=30 -max_len=65536
+      - run: cargo fuzz run value_family fuzz/seeds/value_family -- -max_total_time=30 -max_len=65536
+
+  cpython:
+    name: CPython XML consumers (${{ matrix.linkage }})
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        linkage: [shared, static]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: python/cpython
+          ref: 3bb231a6a5dc02b95658877318bf61501a7209e9
+          path: .cache/cpython
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: stable
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+      - run: uv python install 3.12.13
+      - run: cargo build --release --locked -p oriole_expat
+      - name: Run actual shared-library consumers
+        if: matrix.linkage == 'shared'
+        run: >-
+          uv run --no-project --python 3.12.13 python tools/cpython/run.py
+          --source .cache/cpython --library target/release/liboriole_expat.so
+          --output /tmp/oriole-cpython-shared --allow-text-fragmentation
+      - name: Run actual static-library consumers
+        if: matrix.linkage == 'static'
+        run: >-
+          uv run --no-project --python 3.12.13 python tools/cpython/run.py
+          --source .cache/cpython --library target/release/liboriole_expat.a
+          --native-library gcc_s --native-library util --native-library rt
+          --native-library pthread --native-library m --native-library dl
+          --native-library c --output /tmp/oriole-cpython-static --allow-text-fragmentation
+      - name: Show consumer test results
+        if: always()
+        run: cat /tmp/oriole-cpython-*/probe.log /tmp/oriole-cpython-*/tests.log
+      - name: Run consumers with upstream cleanup backport
+        run: |
+          if [ '${{ matrix.linkage }}' = shared ]; then
+            uv run --no-project --python 3.12.13 python tools/cpython/run.py \
+              --source .cache/cpython --library target/release/liboriole_expat.so \
+              --output /tmp/oriole-cpython-fixed --consumer-fix --allow-text-fragmentation
+          else
+            uv run --no-project --python 3.12.13 python tools/cpython/run.py \
+              --source .cache/cpython --library target/release/liboriole_expat.a \
+              --native-library gcc_s --native-library util --native-library rt \
+              --native-library pthread --native-library m --native-library dl \
+              --native-library c --output /tmp/oriole-cpython-fixed --consumer-fix --allow-text-fragmentation
+          fi
+      - name: Check CPython cleanup under child allocation failure
+        run: |
+          uv run --no-project --python 3.12.13 python integration/python-build-standalone/consumer-fix/run.py \
+            --original-extension /tmp/oriole-cpython-${{ matrix.linkage }}/pyexpat*.so \
+            --fixed-extension /tmp/oriole-cpython-fixed/pyexpat*.so \
+            --output /tmp/oriole-cpython-fault
+      - name: Show patched consumer results
+        if: always()
+        run: cat /tmp/oriole-cpython-*/probe.log /tmp/oriole-cpython-*/tests.log
+
+  pbs-recipe:
+    name: PBS integration recipe
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: astral-sh/python-build-standalone
+          ref: a4553880293fe9d1bb62747d34ab0e5121d3554f
+          path: .cache/pbs
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: python/cpython
+          ref: 3bb231a6a5dc02b95658877318bf61501a7209e9
+          path: .cache/cpython
+      - run: python3 integration/python-build-standalone/validate.py --pbs .cache/pbs --cpython .cache/cpython
+
+  pgo:
+    name: Profile-guided library
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: stable
+          components: llvm-tools-preview
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+      - name: Build the normal and profile-guided libraries
+        run: |
+          host=$(rustc -vV | sed -n 's/^host: //p')
+          sysroot=$(rustc --print sysroot)
+          cargo build --release --locked --target "$host" -p oriole_expat
+          uv run --offline tools/pgo/build.py \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/oriole-pgo" \
+            --llvm-profdata "$sysroot/lib/rustlib/$host/bin/llvm-profdata"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'oriole-pgo'
+          latest = json.loads((root / 'latest.json').read_text())
+          manifest = pathlib.Path(latest['manifest'])
+          assert hashlib.sha256(manifest.read_bytes()).hexdigest() == latest['sha256']
+          data = json.loads(manifest.read_text())
+          assert data['status'] == 'passed'
+          library = manifest.parent / 'use/liboriole_expat.so'
+          assert hashlib.sha256(library.read_bytes()).hexdigest() == data['libraries_sha256']['use/liboriole_expat.so']
+          with open(os.environ['GITHUB_ENV'], 'a') as stream:
+              stream.write(f'ORIOLE_PGO_LIBRARY={library}\n')
+              stream.write(f'ORIOLE_NORMAL_LIBRARY={os.environ["GITHUB_WORKSPACE"]}/target/{data["host"]}/release/liboriole_expat.so\n')
+          PY
+      - name: Compare optimized callbacks with the normal build
+        run: >-
+          python3 tools/differential.py --library "$ORIOLE_PGO_LIBRARY"
+          --reference "$ORIOLE_NORMAL_LIBRARY" --strict
+          --output "$RUNNER_TEMP/oriole-pgo-differential" --generated 100
+      - name: Exercise optimized C callbacks and allocation failures
+        run: |
+          for source in integration adversarial allocations; do
+            cc -std=c11 -O2 -Wall -Wextra -Werror -I include \
+              "tests/c/$source.c" "$ORIOLE_PGO_LIBRARY" \
+              -Wl,-rpath,"$(dirname "$ORIOLE_PGO_LIBRARY")" -o "$RUNNER_TEMP/oriole-pgo-$source"
+            "$RUNNER_TEMP/oriole-pgo-$source"
+          done
+      - name: Retain profile build and comparison evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: oriole-pgo-validation
+          path: |
+            ${{ runner.temp }}/oriole-pgo/latest.json
+            ${{ runner.temp }}/oriole-pgo/runs/
+            ${{ runner.temp }}/oriole-pgo-differential/
+          retention-days: 14

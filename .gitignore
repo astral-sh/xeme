@@ -4,4 +4,4 @@
 .DS_Store
 /fuzz/target/
 /fuzz/artifacts/
-/benchmarks/results/
+/.cache/

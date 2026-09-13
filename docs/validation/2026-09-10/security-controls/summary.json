@@ -1,0 +1,32 @@
+{
+  "library_sha256": {
+    "liboriole_expat.a": "ffdec6d0fbae7f54c8f99ab6a1d375145fd0d6405a34ffcfdccf98aa19304230",
+    "liboriole_expat.so": "7d3c1aac8f17c4a392eebe66cf71cae6df8ef7104e1b6c247d387c4f87df1ecb"
+  },
+  "rust_tests": 268,
+  "upstream_api": {
+    "passed": 3871,
+    "failed": 869,
+    "selection_complete": true,
+    "library_origin_verified": true,
+    "timed_out": false
+  },
+  "matrix_configurations": 4740,
+  "changed_adapted_test_files_vs_initial": [],
+  "allocation_test_failures": 596,
+  "amplification_grids": [
+    {
+      "comparisons": 5544,
+      "acceptance_mismatches": 0,
+      "nested_error_differences": 12
+    },
+    {
+      "comparisons": 14480,
+      "acceptance_mismatches": 0,
+      "nested_error_differences": 4
+    }
+  ],
+  "native_runs": 6,
+  "allocation_scenarios_per_linkage": 332,
+  "performance": "Paired screening measures approximately 3\u201310% overhead from the combined controls; the raw per-process samples are retained. This layer does not claim a speed improvement."
+}

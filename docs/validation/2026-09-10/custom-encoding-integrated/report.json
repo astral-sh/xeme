@@ -1,0 +1,997 @@
+{
+  "base_commit": "dc552f460cbdf4fdc8efcda87ce3f39fbf3a9e74",
+  "original_provenance_commit": "ad80aa0",
+  "shared_sha256": "11fffafee50dfef91328cb142e7d50a38578c138333860d6327892a61d09214b",
+  "static_sha256": "103b880e501e394dcdfec74800b419287dd05014117c6477141ba7d627b36f0a",
+  "checks": {
+    "rust_tests": 262,
+    "test_scope": "261 affected-package tests plus one added regression; final multibyte suite 12/12",
+    "clippy": "passed",
+    "native_suites": 6,
+    "native_allocation_scenarios_per_linkage": 341,
+    "ordinary_differential_cases": 3918,
+    "ordinary_differential_exact": "passed"
+  },
+  "api_comparison": {
+    "same_cases": true,
+    "same_adapted_source_hashes": true,
+    "baseline": {
+      "passed": 4003,
+      "failed": 737,
+      "selection_complete": true,
+      "library_origin_verified": true,
+      "timed_out": false
+    },
+    "candidate": {
+      "passed": 4051,
+      "failed": 689,
+      "selection_complete": true,
+      "library_origin_verified": true,
+      "timed_out": false
+    },
+    "changes": [
+      {
+        "context": "chunksize=0 deferral=0",
+        "test": "test_misc_unknown_encoding_callbacks_protected",
+        "before": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=0 deferral=0",
+        "test": "test_misc_input_2gb",
+        "before": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_misc_input_2gb",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_misc_input_2gb",
+          "outcome": "timeout",
+          "code": 14
+        }
+      },
+      {
+        "context": "chunksize=0 deferral=0",
+        "test": "test_unknown_encoding_success",
+        "before": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_unknown_encoding_success",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_unknown_encoding_success",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=0 deferral=0",
+        "test": "test_unknown_encoding_long_name_1",
+        "before": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=0 deferral=0",
+        "test": "test_bad_doctype",
+        "before": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_bad_doctype",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_bad_doctype",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=0 deferral=1",
+        "test": "test_misc_unknown_encoding_callbacks_protected",
+        "before": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=0 deferral=1",
+        "test": "test_unknown_encoding_success",
+        "before": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_unknown_encoding_success",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_unknown_encoding_success",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=0 deferral=1",
+        "test": "test_unknown_encoding_long_name_1",
+        "before": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=0 deferral=1",
+        "test": "test_bad_doctype",
+        "before": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_bad_doctype",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=1",
+          "test": "test_bad_doctype",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=1 deferral=0",
+        "test": "test_misc_unknown_encoding_callbacks_protected",
+        "before": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=1 deferral=0",
+        "test": "test_unknown_encoding_success",
+        "before": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_unknown_encoding_success",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_unknown_encoding_success",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=1 deferral=0",
+        "test": "test_unknown_encoding_long_name_1",
+        "before": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=1 deferral=0",
+        "test": "test_bad_doctype",
+        "before": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_bad_doctype",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=0",
+          "test": "test_bad_doctype",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=1 deferral=1",
+        "test": "test_misc_unknown_encoding_callbacks_protected",
+        "before": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=1 deferral=1",
+        "test": "test_unknown_encoding_success",
+        "before": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_unknown_encoding_success",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_unknown_encoding_success",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=1 deferral=1",
+        "test": "test_unknown_encoding_long_name_1",
+        "before": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=1 deferral=1",
+        "test": "test_bad_doctype",
+        "before": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_bad_doctype",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=1 deferral=1",
+          "test": "test_bad_doctype",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=2 deferral=0",
+        "test": "test_misc_unknown_encoding_callbacks_protected",
+        "before": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=2 deferral=0",
+        "test": "test_unknown_encoding_success",
+        "before": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_unknown_encoding_success",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_unknown_encoding_success",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=2 deferral=0",
+        "test": "test_unknown_encoding_long_name_1",
+        "before": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=2 deferral=0",
+        "test": "test_bad_doctype",
+        "before": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_bad_doctype",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=0",
+          "test": "test_bad_doctype",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=2 deferral=1",
+        "test": "test_misc_unknown_encoding_callbacks_protected",
+        "before": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=2 deferral=1",
+        "test": "test_unknown_encoding_success",
+        "before": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_unknown_encoding_success",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_unknown_encoding_success",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=2 deferral=1",
+        "test": "test_unknown_encoding_long_name_1",
+        "before": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=2 deferral=1",
+        "test": "test_bad_doctype",
+        "before": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_bad_doctype",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=2 deferral=1",
+          "test": "test_bad_doctype",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=3 deferral=0",
+        "test": "test_misc_unknown_encoding_callbacks_protected",
+        "before": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=3 deferral=0",
+        "test": "test_unknown_encoding_success",
+        "before": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_unknown_encoding_success",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_unknown_encoding_success",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=3 deferral=0",
+        "test": "test_unknown_encoding_long_name_1",
+        "before": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=3 deferral=0",
+        "test": "test_bad_doctype",
+        "before": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_bad_doctype",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=0",
+          "test": "test_bad_doctype",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=3 deferral=1",
+        "test": "test_misc_unknown_encoding_callbacks_protected",
+        "before": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=3 deferral=1",
+        "test": "test_unknown_encoding_success",
+        "before": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_unknown_encoding_success",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_unknown_encoding_success",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=3 deferral=1",
+        "test": "test_unknown_encoding_long_name_1",
+        "before": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=3 deferral=1",
+        "test": "test_bad_doctype",
+        "before": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_bad_doctype",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=3 deferral=1",
+          "test": "test_bad_doctype",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=4 deferral=0",
+        "test": "test_misc_unknown_encoding_callbacks_protected",
+        "before": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=4 deferral=0",
+        "test": "test_unknown_encoding_success",
+        "before": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_unknown_encoding_success",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_unknown_encoding_success",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=4 deferral=0",
+        "test": "test_unknown_encoding_long_name_1",
+        "before": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=4 deferral=0",
+        "test": "test_bad_doctype",
+        "before": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_bad_doctype",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=0",
+          "test": "test_bad_doctype",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=4 deferral=1",
+        "test": "test_misc_unknown_encoding_callbacks_protected",
+        "before": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=4 deferral=1",
+        "test": "test_unknown_encoding_success",
+        "before": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_unknown_encoding_success",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_unknown_encoding_success",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=4 deferral=1",
+        "test": "test_unknown_encoding_long_name_1",
+        "before": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=4 deferral=1",
+        "test": "test_bad_doctype",
+        "before": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_bad_doctype",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=4 deferral=1",
+          "test": "test_bad_doctype",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=5 deferral=0",
+        "test": "test_misc_unknown_encoding_callbacks_protected",
+        "before": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=5 deferral=0",
+        "test": "test_unknown_encoding_success",
+        "before": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_unknown_encoding_success",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_unknown_encoding_success",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=5 deferral=0",
+        "test": "test_unknown_encoding_long_name_1",
+        "before": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=5 deferral=0",
+        "test": "test_bad_doctype",
+        "before": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_bad_doctype",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=0",
+          "test": "test_bad_doctype",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=5 deferral=1",
+        "test": "test_misc_unknown_encoding_callbacks_protected",
+        "before": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_misc_unknown_encoding_callbacks_protected",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=5 deferral=1",
+        "test": "test_unknown_encoding_success",
+        "before": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_unknown_encoding_success",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_unknown_encoding_success",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=5 deferral=1",
+        "test": "test_unknown_encoding_long_name_1",
+        "before": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_unknown_encoding_long_name_1",
+          "outcome": "pass",
+          "code": 0
+        }
+      },
+      {
+        "context": "chunksize=5 deferral=1",
+        "test": "test_bad_doctype",
+        "before": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_bad_doctype",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=5 deferral=1",
+          "test": "test_bad_doctype",
+          "outcome": "pass",
+          "code": 0
+        }
+      }
+    ],
+    "grouped": {
+      "test_misc_unknown_encoding_callbacks_protected": 12,
+      "test_misc_input_2gb": 1,
+      "test_unknown_encoding_success": 12,
+      "test_unknown_encoding_long_name_1": 12,
+      "test_bad_doctype": 12
+    },
+    "changed_pass_fail_outcomes": 48,
+    "newly_passing": 48,
+    "newly_failing": 0,
+    "changed_failing_dispositions": [
+      {
+        "context": "chunksize=0 deferral=0",
+        "test": "test_misc_input_2gb",
+        "before": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_misc_input_2gb",
+          "outcome": "fail",
+          "code": 100
+        },
+        "after": {
+          "context": "chunksize=0 deferral=0",
+          "test": "test_misc_input_2gb",
+          "outcome": "timeout",
+          "code": 14
+        }
+      }
+    ]
+  },
+  "converter_grids": [
+    {
+      "name": "compare",
+      "cases": 9300,
+      "library_sha256": "11fffafee50dfef91328cb142e7d50a38578c138333860d6327892a61d09214b",
+      "all_differences": 1851,
+      "acceptance_differences": 0,
+      "successful_callback_differences": 0,
+      "report": "/tmp/oriole-custom-integrated/probes/initial-comparison.json.gz",
+      "report_sha256": "cb1b783ec8101bf970ea407baeed51b253d9b33729be230e7bc42ca48d2b3b87",
+      "script_sha256": "f6068faab0b505d9a311cc404255cc4bfac7d7ddfe59c8fae588263ae601723b"
+    },
+    {
+      "name": "expanded-compare",
+      "cases": 54096,
+      "library_sha256": "11fffafee50dfef91328cb142e7d50a38578c138333860d6327892a61d09214b",
+      "all_differences": 7860,
+      "acceptance_differences": 0,
+      "successful_callback_differences": 0,
+      "report": "/tmp/oriole-custom-integrated/probes/expanded-comparison.json.gz",
+      "report_sha256": "cdbc167b6396648adbe77e41cf276041e85099d6a1e9710dde35afed3d5cdbab",
+      "script_sha256": "df26f90e593d6197cda6a8fc5fc16fe5bbdcbe9d3143a23ef0ad17469f715492"
+    },
+    {
+      "name": "full-events",
+      "cases": 28812,
+      "library_sha256": "11fffafee50dfef91328cb142e7d50a38578c138333860d6327892a61d09214b",
+      "all_differences": 5808,
+      "acceptance_differences": 0,
+      "successful_callback_differences": 0,
+      "report": "/tmp/oriole-custom-integrated/probes/full-events-comparison.json.gz",
+      "report_sha256": "0f09eeee6f5f669c27b8ad9de944c067610c2ba0216fbc6cf6c2b25dd9bf0b51",
+      "script_sha256": "bac88da8ffaf04dcc37ceecfbdf01f01762f9c2a85c04f58e121a540073b56b7"
+    },
+    {
+      "name": "external-compare",
+      "cases": 7644,
+      "library_sha256": "11fffafee50dfef91328cb142e7d50a38578c138333860d6327892a61d09214b",
+      "all_differences": 7644,
+      "acceptance_differences": 0,
+      "successful_callback_differences": 5112,
+      "report": "/tmp/oriole-custom-integrated/probes/external-comparison.json.gz",
+      "report_sha256": "e73ce80ada94c3e6133ad03abbf86b0b055cfb701d58de85ca67647ea215da16",
+      "script_sha256": "90e03ed811cc190aa3a969422dce00cf9e3ed140631728c737711045bcb64e48"
+    },
+    {
+      "name": "external-semantic-compare",
+      "cases": 7644,
+      "library_sha256": "11fffafee50dfef91328cb142e7d50a38578c138333860d6327892a61d09214b",
+      "all_differences": 2316,
+      "acceptance_differences": 0,
+      "successful_callback_differences": 0,
+      "report": "/tmp/oriole-custom-integrated/probes/external-semantic-comparison.json.gz",
+      "report_sha256": "4a55ebb96924e4e55e03155ce5b20dd27615ffc7c18334d9e138c68a6b37710b",
+      "script_sha256": "68c32de775b8d2bcf3b93dc80564f46645c7fdf6d4ad39bc6685a3736b07fc98"
+    }
+  ],
+  "additional_converter_grids": {
+    "public_map_cases": 7154,
+    "name_identity_cases": 64,
+    "acceptance_differences": 0,
+    "successful_callback_differences": 0
+  },
+  "performance_screen": [
+    {
+      "chunk": 4096,
+      "workload": "vulkan",
+      "median_candidate_speedup": 0.8819574180537643
+    },
+    {
+      "chunk": 4096,
+      "workload": "wayland",
+      "median_candidate_speedup": 0.9091407467181002
+    },
+    {
+      "chunk": 4096,
+      "workload": "maven",
+      "median_candidate_speedup": 0.9071443862899833
+    },
+    {
+      "chunk": 4096,
+      "workload": "batik",
+      "median_candidate_speedup": 0.9809592094729549
+    },
+    {
+      "chunk": 4096,
+      "workload": "gtk",
+      "median_candidate_speedup": 0.8921220672451372
+    },
+    {
+      "chunk": 4096,
+      "workload": "docbook",
+      "median_candidate_speedup": 0.9107493965973981
+    },
+    {
+      "chunk": 4096,
+      "workload": "generated-rare-declarations",
+      "median_candidate_speedup": 0.9480833480022688
+    },
+    {
+      "chunk": 4096,
+      "workload": "generated-entities",
+      "median_candidate_speedup": 0.9610829613422796
+    },
+    {
+      "chunk": 65536,
+      "workload": "vulkan",
+      "median_candidate_speedup": 0.8910044693186085
+    },
+    {
+      "chunk": 65536,
+      "workload": "wayland",
+      "median_candidate_speedup": 0.9128286696255921
+    },
+    {
+      "chunk": 65536,
+      "workload": "maven",
+      "median_candidate_speedup": 0.9078408232431855
+    },
+    {
+      "chunk": 65536,
+      "workload": "batik",
+      "median_candidate_speedup": 0.8875157572483342
+    },
+    {
+      "chunk": 65536,
+      "workload": "gtk",
+      "median_candidate_speedup": 0.8794293307047141
+    },
+    {
+      "chunk": 65536,
+      "workload": "docbook",
+      "median_candidate_speedup": 0.9120957969732969
+    },
+    {
+      "chunk": 65536,
+      "workload": "generated-rare-declarations",
+      "median_candidate_speedup": 0.9860210532481685
+    },
+    {
+      "chunk": 65536,
+      "workload": "generated-entities",
+      "median_candidate_speedup": 0.9287208419530317
+    }
+  ],
+  "independent_review": "Bounded source review of composition only; no findings and no independent execution claimed.",
+  "artifacts": {
+    "files": 398,
+    "archive_sha256": "4213972ad43f309f20d333fa548af742a05968df1416b89c12fa40befce37902"
+  }
+}

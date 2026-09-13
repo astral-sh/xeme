@@ -1,0 +1,282 @@
+{
+  "decision": "recommended_for_composed_validation",
+  "status": "complete",
+  "runtime_base": "353dc3f19ebe6554b8c224a400c588bdf49e901a",
+  "validation": {
+    "rust_checks": 142,
+    "differential_cases": 1518,
+    "custom_cases": 36456,
+    "upstream_pass": 4113,
+    "upstream_fail": 627,
+    "upstream_changed": 0,
+    "streaming_conditions": 64,
+    "native_runs": 6,
+    "native_allocation_failures_per_linkage": 336,
+    "clippy": "passed",
+    "fmt": "passed"
+  },
+  "timing_summary": {
+    "status": "passed",
+    "conditions": 28,
+    "project_conditions": 24,
+    "positive_project_conditions": 24,
+    "project_geomean_speedup": 1.0578405612841475,
+    "rows": [
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": false,
+        "median_speedup": 1.072758293011946,
+        "min": 1.048494013816045,
+        "max": 1.0791975801615477
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": false,
+        "median_speedup": 1.048375608719702,
+        "min": 1.008850233148146,
+        "max": 1.063255745517743
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": false,
+        "median_speedup": 1.057710386525695,
+        "min": 1.005851833307949,
+        "max": 1.7926041269437738
+      },
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": false,
+        "median_speedup": 1.0295969110162055,
+        "min": 0.9967511258331743,
+        "max": 1.1447230327424547
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": false,
+        "median_speedup": 1.042543740984503,
+        "min": 1.0151623209904719,
+        "max": 1.0868414729036981
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": false,
+        "median_speedup": 1.0692231102866963,
+        "min": 0.9481326192930382,
+        "max": 1.124345361178893
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 4096,
+        "namespaces": false,
+        "median_speedup": 1.0116790566604998,
+        "min": 0.9856146932403733,
+        "max": 1.0420253712383607
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 4096,
+        "namespaces": false,
+        "median_speedup": 1.0300167541280558,
+        "min": 1.0015213618759757,
+        "max": 1.0566047863521526
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": true,
+        "median_speedup": 1.0772002408211887,
+        "min": 1.0385986355909371,
+        "max": 1.1017424612490363
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": true,
+        "median_speedup": 1.0426056125868963,
+        "min": 1.0112788208505474,
+        "max": 1.050576182864798
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": true,
+        "median_speedup": 1.0675479607560656,
+        "min": 1.006328625085965,
+        "max": 1.082472985171883
+      },
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": true,
+        "median_speedup": 1.0227568569197079,
+        "min": 0.8927891119526906,
+        "max": 1.0467108885721197
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": true,
+        "median_speedup": 1.0407063590785393,
+        "min": 1.0250628683823189,
+        "max": 1.071940679766184
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": true,
+        "median_speedup": 1.0564610580605718,
+        "min": 1.04878909797911,
+        "max": 1.0757246962993183
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": false,
+        "median_speedup": 1.105195087692946,
+        "min": 1.067789078312421,
+        "max": 1.1164688098306128
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": false,
+        "median_speedup": 1.0487022610091696,
+        "min": 1.0277479905577727,
+        "max": 1.0663091054551594
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": false,
+        "median_speedup": 1.1210427186798793,
+        "min": 1.061498291341455,
+        "max": 1.1301912564696683
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": false,
+        "median_speedup": 1.0508975422803009,
+        "min": 1.0208704841159766,
+        "max": 1.1510619204307508
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": false,
+        "median_speedup": 1.062132849668561,
+        "min": 0.9741572463300819,
+        "max": 1.1061240755782296
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": false,
+        "median_speedup": 1.0873123826388977,
+        "min": 1.007410967381111,
+        "max": 1.2436524019549409
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 65536,
+        "namespaces": false,
+        "median_speedup": 0.967218616070033,
+        "min": 0.9361024487007567,
+        "max": 1.005350432830808
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 65536,
+        "namespaces": false,
+        "median_speedup": 1.0245332072314972,
+        "min": 1.015447793319161,
+        "max": 1.0397063383392648
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": true,
+        "median_speedup": 1.0801582258457367,
+        "min": 1.068263240145313,
+        "max": 1.1026020068140825
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": true,
+        "median_speedup": 1.0334858423399238,
+        "min": 1.0111146832388866,
+        "max": 1.0446236902200772
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": true,
+        "median_speedup": 1.0607361700400841,
+        "min": 1.0232283925525993,
+        "max": 1.0894790218455432
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": true,
+        "median_speedup": 1.011966021617759,
+        "min": 0.9573791129623165,
+        "max": 1.1657700104092477
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": true,
+        "median_speedup": 1.0809166606594383,
+        "min": 1.0735109127026146,
+        "max": 1.088403706061249
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": true,
+        "median_speedup": 1.0255278723222192,
+        "min": 1.0063513911070017,
+        "max": 1.059489177626311
+      }
+    ],
+    "all_observations_agree": true,
+    "all_input_library_and_driver_hashes_unchanged": true
+  },
+  "instruction_summary": {
+    "scope": "Callgrind XML_Parse-only collection, one warmup plus one parse,4KiB feeds, identicalcallback hashes; excludesconstructor/free/loader. Instructioncounts nottimings.",
+    "control_sha256": "e6849aa2cc0d75c74b42370ecd568c6dd7581dfadbc892244176a6a03acf576d",
+    "candidate_sha256": "fef31ffcaa4988ce470bf81fb86356ed3f25ec8278b9dff5a54e107e919c88c3",
+    "rows": [
+      {
+        "workload": "maven",
+        "namespaces": false,
+        "control_Ir": 23693200,
+        "candidate_Ir": 23220272,
+        "change_percent": -1.996049499434438
+      },
+      {
+        "workload": "wayland",
+        "namespaces": false,
+        "control_Ir": 30365821,
+        "candidate_Ir": 30047890,
+        "change_percent": -1.0470028128006126
+      },
+      {
+        "workload": "declarations",
+        "namespaces": false,
+        "control_Ir": 137671709,
+        "candidate_Ir": 137019812,
+        "change_percent": -0.47351558627052315
+      }
+    ]
+  },
+  "review_scope": "Independent root source review of measured runtime. Final additions are tests and exact-verified SAFETY comment relocation."
+}

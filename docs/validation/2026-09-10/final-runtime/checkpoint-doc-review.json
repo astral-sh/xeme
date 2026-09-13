@@ -1,0 +1,34 @@
+{
+  "status": "passed_after_small_documentation_corrections",
+  "reviewer": "/root/ffi/conditional_review",
+  "files": {
+    "docs/validation/2026-09-10/final-runtime/README.md": "548b3e4d81c70c29dee677efa4af17573331eb697e7401b9874a49997679ab8a",
+    "docs/validation/2026-09-10/README.md": "6384d30dc2d0dd993ac5fddd5a5f4433cf53dde23537bf82beb070f5cff03102",
+    "benchmarks/results/2026-09-10/final-runtime/README.md": "a3f8768d9c5869e8765e9be58e1c9fd604665d269093a027d46fbeefe1b1381b"
+  },
+  "local_markdown_links_verified": 34,
+  "source_lineage": {
+    "runtime": "1262888",
+    "fuzz_harness": "338dcd0",
+    "value_family_sha256": "ccc605c3f0ae465a65e3cb1ce8151c646dd022d071a40516498545c79b14dbb3",
+    "library_sha256": "ff5d86621114e464a0b20f108b6308fe155d9e8c87bd764bc00872cf124750f8",
+    "static_archive_sha256": "4fa096d9ffdfcf2c01d764ae83190ab689064e10a87860822d6301d04da62651"
+  },
+  "checked_claims": [
+    "The exact600-second requested/601-second actual Rust ASan campaigns,10-second input timeout and1536MiB RSS limits match retained results.",
+    "15,713 corpus input files versus15,714 bootstrap-inclusive executions and84 stress replays are distinguished.",
+    "The987 public API failures, strict-fragment/position differences, W3C failures, resource/API limitations and experimental status remain visible.",
+    "Allocation retry-ceiling overlays are explicitly diagnostic and do not modify original pass/fail counts.",
+    "Final PBS34456274540 outcome remains pending; earlier successful b68bdca distribution evidence is explicitly separate.",
+    "Benchmark sections distinguish C ABI/safe API, per-namespace counts, paired ratios, requested allocation bytes, C-only driver instrumentation and uncontrolled host effects."
+  ],
+  "corrections_verified": [
+    "Added final-directory SHA256SUMS manifests.",
+    "Older CPython rows now distinguish803 reported tests and31 skips.",
+    "Native C preflight/timing counts explicitly apply to each namespace mode.",
+    "Remaining-deployment paragraph now names/links the earlier b68bdca PBS job."
+  ],
+  "package_audit": "/tmp/oriole-checkpoint-package-audit.json",
+  "benchmark_arithmetic_audit": "/tmp/oriole-final-benchmark-independent-review.json",
+  "issues": []
+}

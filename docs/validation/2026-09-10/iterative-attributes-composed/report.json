@@ -1,0 +1,42 @@
+{
+  "runtime_commit": "bbb8bddafd872b8bcc2ef9d95d0f9ad7bc5bd610",
+  "parent_commit": "60958f0959fc41c7e0b9200303820a5fc3260638",
+  "library_sha256": {
+    "liboriole_expat.so": "f3e747984278e02b11614ebca146a3c8ee67ff5c79850e288ef3490bf9560fa8",
+    "liboriole_expat.a": "0fe9a4d8c1970fbe63a059982779ee6c7177a0b70777bb405b2d2f142f31e8d2"
+  },
+  "rust_checks": 289,
+  "ordinary": {
+    "cases": 1518,
+    "exact_pass": true,
+    "difference_counts": {
+      "status": 0,
+      "error": 0,
+      "normalized_events": 0,
+      "events": 0,
+      "position": 0,
+      "callback_errors": 0
+    }
+  },
+  "attribute_oracle": {
+    "conditions": 5796,
+    "baseline_changes": 0,
+    "reference_acceptance": 0,
+    "reference_errors": 252,
+    "reference_events": 732,
+    "reference_positions": 2460
+  },
+  "alias_oracle": {
+    "conditions": 132,
+    "baseline_changes": 0,
+    "reference_differences": 30
+  },
+  "upstream": {
+    "passed": 4065,
+    "failed": 675,
+    "changed_outcomes": 0
+  },
+  "native_suites": 6,
+  "allocation_scenarios_per_linkage": 336,
+  "scope": "Original iterative-attributes evidence remains separate. Root composition adds DOCTYPE correction; all baseline outcomes unchanged. C sanitizers cover callers; Rust uninstrumented. No throughput claim."
+}

@@ -1,0 +1,32 @@
+{
+  "scope": "Read-only factual audit of two validation READMEs and docs/compatibility.md introduction against frozen source/check and consumer evidence. No repository edits, builds, tests, parser runs or benchmark runs. Package hash integrity was root-owned; this review checks claims.",
+  "documents": {
+    "/home/dev-user/code/oss/oriole/docs/validation/2026-09-10/version-consistent-runtime/README.md": "05b21bafe438be5128784500b1a04e5daacf64c540d5f3a9e794dcbd203a41cd",
+    "/home/dev-user/code/oss/oriole/docs/validation/2026-09-10/prior-buffer-consumers/README.md": "b8922f653d03b9dc41e03816e87e495c3902fdf17f2d16cb5ea1e1e5f552f2c3",
+    "/home/dev-user/code/oss/oriole/docs/compatibility.md": "68c579b1ec9de987933e56bd9904fcd492021fd599c03f4c3dbd1bb28dc7437b"
+  },
+  "status": "No outstanding factual mismatch in reviewed text.",
+  "verified": [
+    "Runtime4b11ace,358 complete source/tool files and64 runtime files, normalac6a/7fd andPGO4584/6683 identities match the frozen source and reports.",
+    "Current version textoriole_compat_2.8.4 agrees with tuple2.8.4/header while implementation0.0.1 remains separate. New regression old failure/final+Expat pass and12 original literal-identity failures are correctly distinguished.",
+    "Original395public tests across12contexts=4740;4323pass417fail40names and category total417 are exact. Historical584fixed403retained14new all retained; the14 newly failed contexts are reallocation-schedule assertions.",
+    "Four CPython configurations per build each803tests31existing skips2known failures with strict exit2; separate semantics2/2 do not waive original failures.3212 named test records and32subtest lines matchnormal/PGO.",
+    "Native6processes per build and327allocation scenarios per linkage; C ASan/UBSan only, releaseRust uninstrumented,LSan disabled. SustainedRust sanitizer campaign is separate.",
+    "W3C first complete scan rows/summary/catalog/worker logs retained after accidental second invocation rejected at existing-output guard; outermetadata/log alone overwritten, wrapperfailure ignored; final PGOscanonce.4962/960/81 and954FifthEdition name observations correct; mirror identity, canonical-output and fullRust limitations are explicit.",
+    "368 passing all-target checks recomputed from retained test.log; one compile-fail documentation check is supported by root captured-session report only. README explicitly does not claim a separate rawdocumentation log.",
+    "Older normal9cc/PGObb43 handoffs have sameAPI/CPython/native totals. PriorPGO handoff does not claim newW3C rerun. Current compatibilityintro links correctcheckpoint and retains all417 failures."
+  ],
+  "findings": [],
+  "root_check_evidence": {
+    "report_sha256": "deb7d663f22c2cf251673095b05d0d40358e2feb300d4ec348d3453f8c15cfbf",
+    "test_log_sha256": "70182cc327c7c406b7460cb0808288c2f2a944f2276a6ee50cf1d01fefff50e2",
+    "count_recomputed": 368,
+    "documentation_scope": "Command output captured by Codex tool session; no separate raw log file was redirected."
+  },
+  "frozen_evidence": {
+    "/tmp/oriole-version-final-independent-review.json": "fcdabc84a6d1aa32b3e066182ebad94b3aaf971a1a12a983ffce1c965f39a420",
+    "/tmp/oriole-version-final-consumer-validation/cpython/review.json": "f1741f1dd43ac761c442d50af1e6a31bf2dba0c317962717361ab494352a6de5",
+    "/tmp/oriole-version-final-pgo-correctness/cpython/review.json": "fd837345f8c6fb58dccbb749f2ae3cfc009dcffec644aebec93cc9d2020394cd",
+    "/tmp/oriole-final-consumer-independent-review.json": "f727880324a5d4dfbabb62fe55ada9f7cad0ecce4037b652371d6655ad5100f9"
+  }
+}

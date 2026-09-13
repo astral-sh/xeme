@@ -1,0 +1,34 @@
+{
+  "runtime_commit": "2b4d4dc280fce5b21b31ff079ac37f63f144de57",
+  "library_sha256": {
+    "liboriole_expat.so": "a9bb484b0b1469a7d767151fa15b59e471eceb9295a13d52abb8a23c5d769c6a",
+    "liboriole_expat.a": "276418fa200deba65941638f181579fb2e3a74e619eeb6da8b26d274f748980f"
+  },
+  "rust_checks": 319,
+  "upstream": {
+    "passed": 4077,
+    "failed": 663,
+    "changed_outcomes": 0
+  },
+  "ordinary_exact": 1518,
+  "attribute_exact_to_baseline": 6468,
+  "custom_attribute_exact": 372,
+  "malformed_attributes": 384,
+  "malformed_text": 2392,
+  "streaming": 32,
+  "custom_exact": 36456,
+  "active_membership": 4680,
+  "doctype_exact": 4104,
+  "missing_parameter_cases": 1944,
+  "child_cases": 6,
+  "publication": {
+    "cases": 432,
+    "changed_from_shared_baseline": 0,
+    "reference_full_differences": 9,
+    "parent_outcome_differences": 0,
+    "child_outcome_differences": 0
+  },
+  "native_suites": 6,
+  "allocation_scenarios_per_linkage": 336,
+  "scope": "Final shared-DTD layer with ordinary no-owner fast path. Compared with original shared-DTD runtime; all results retained."
+}

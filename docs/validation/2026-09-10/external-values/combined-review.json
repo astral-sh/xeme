@@ -1,0 +1,85 @@
+{
+  "conclusion": "Combined merge fixes pass independent source review and all successful/outcome cases in targeted matrices; no unresolved merge blocker.",
+  "library": "/tmp/oriole-values-combined-fixed2.so",
+  "library_sha256": "be396376256ad04cc5d666def50ea123497cfc21397d2789af58ba8de635cfa1",
+  "source_sha256": {
+    "crates/oriole/src/lib.rs": "db9a31904b910c7410caa04a7759f52b38de6b3840622f2e6086bc8dc4707bec",
+    "crates/oriole/src/dtd.rs": "e55174c7037656f10b5b3f1aec41baad4e7a0c0bd4a977e1519b05ea2393b0eb",
+    "crates/oriole/src/value.rs": "adbdb9ca3848dd577f50d9f46cc8b6faa843a9a0bd5b0155c7287e50263aacef",
+    "crates/oriole/src/value_lexer.rs": "33d8e447e61e81605f5c76f059932c5eb4601b544fb9acc2609ee648160bc69d",
+    "crates/oriole_storage/src/try_lock.rs": "e08e75c6b2a1410d74d3fda3667e7f031dfade5eb26e0d5db5b98f6233ce6fde",
+    "crates/oriole_expat/src/lib.rs": "0d04f3ef06e979df974086774f196ec85eb2458140704b3b3339c6eeaa47e4c0"
+  },
+  "artifact_sha256": {
+    "merge_matrix.py": "4179bb10d90585934963f0b02d59ced5d7a2fc40e15050fc74ab13ed367650d5",
+    "merge-final.json": "b8b1d1b6fbb2aea014eb712d18d77a4b4538e8fb8b98de58bccc18b285f23884",
+    "merge-final.cases.json.gz": "c9146a2634e818026b6b0e3d8e4dafa703e433f3228e61b0176be57de247d65a",
+    "default_switch_matrix.py": "015d947c916a6dc4e52898a2f8f12eae2197c7408712449cea5b190ef2669b80",
+    "default-switch-final.json": "b39390aebca6f03f0f0bb9f907351134fe91208954b027d3e937a99d2106e33b",
+    "default-switch-final.cases.json.gz": "7d75232bbecccb0fc6e8f1327be649370cda32a9b0fd897503486cd60c45069f",
+    "default_layer_combined_final.py": "3457806a6dcecdbdafa1df7e9a60e9ce1c73c12d204dda6077eff4f0cf8460d0",
+    "default-layer-combined-final.json": "4609b08ef98dba7450eadd34348fcf530ffe4c40bc9be9d43238783aa4cc7171",
+    "final_malformed_baseline.py": "04f2a49f8bdd8948047cb6ca5d07d05656a31f82fe250881cd62bdec4d82b6ef",
+    "final-malformed-baseline.json": "c4b200dc0b992c2df03a2eba7c99cf6fa81aac01cef166d8912eabcd4b19348e",
+    "independent-combined-final.json": "effc830f52e31a2e6bf3b96befc8300f09be9ae0f1b262faada8ad0ec99ffd74",
+    "independent-combined-final.cases.json.gz": "b4f2cecf4c8075c41335bb4793a51be2bacb75bb399c355d176a282a2b032cfb"
+  },
+  "matrices": [
+    {
+      "name": "grammar prefix/quoted value/duplicate plus EntityDecl handler switches",
+      "cases": 3456,
+      "outcome_differences": 0,
+      "successful_event_differences": 0,
+      "malformed_callback_differences": 768
+    },
+    {
+      "name": "Default absent/present/install/remove during external callback",
+      "cases": 6912,
+      "outcome_differences": 0,
+      "successful_event_differences": 0,
+      "malformed_callback_differences": 1152
+    },
+    {
+      "name": "Original full declaration Default oracle",
+      "cases": 2880,
+      "outcome_differences": 0,
+      "successful_event_differences": 0,
+      "malformed_callback_differences": 48
+    },
+    {
+      "name": "Original value Unicode/UTF16 every width on combined build",
+      "cases": 18468,
+      "outcome_differences": 0,
+      "successful_event_differences": 0,
+      "malformed_callback_differences": 0
+    }
+  ],
+  "baseline_classification": "Independently replayed all768+1152 malformed differing rows against frozen Default layer f5fa56ab: full normalized candidate callbacks/outcomes match baseline exactly. Original2880 retains its known48 malformed prefix timing cases.",
+  "source_review": [
+    "ENTITY grammar expansions retain raw bytes/mappings even when Default is initially disabled, allowing later handler installation and eliminating empty-raw quote panic. Capture is limited to ENTITY or active default projection.",
+    "Owned continuation records prefix_start from previously assigned raw cursor offset; prefix bytes cannot be replayed before external callback.",
+    "Remaining declaration-parameter metadata is copied into owned tail storage with work/memory charge; only entries reached by the validated trailing grammar cursor are retained.",
+    "After EntityDecl/duplicate callback enqueue, finish_value_raw reuses the existing Cursor/parameter/default projection. It evaluates standalone and skip state after child completion, retaining child-induced sticky state and processing trailing missing references before later declarations.",
+    "If value processing already skipped unread input, only the quoted literal is attached to the semantic event; raw gap/tail bytes are unconditional. Matching quote scan stays within an already validated, owned literal and costs one linear pass.",
+    "The global prefix projection checks existing declarations_skipped; original2880-case Default oracle shows no new difference.",
+    "Value/TryLock ownership, allocation routing, inherited recursion/depth, scanner linearity and error limits retain earlier independent review conclusions."
+  ],
+  "limits": [
+    "Exact byte positions, parent NotStandalone timing and boundaries between consecutive Default callbacks are normalized as in prior evidence.",
+    "Late prefixed encoding switches, custom encoding callback order, partial parent callback on external failure and unfinished child XMLdecl timing remain separately documented value-layer limits.",
+    "No live runtime edits by this reviewer."
+  ],
+  "release_source": {
+    "crates/oriole/src/lib.rs": "db9a31904b910c7410caa04a7759f52b38de6b3840622f2e6086bc8dc4707bec",
+    "crates/oriole/src/dtd.rs": "e55174c7037656f10b5b3f1aec41baad4e7a0c0bd4a977e1519b05ea2393b0eb",
+    "crates/oriole/src/value.rs": "adbdb9ca3848dd577f50d9f46cc8b6faa843a9a0bd5b0155c7287e50263aacef",
+    "crates/oriole/src/value_lexer.rs": "33d8e447e61e81605f5c76f059932c5eb4601b544fb9acc2609ee648160bc69d",
+    "crates/oriole_storage/src/try_lock.rs": "e08e75c6b2a1410d74d3fda3667e7f031dfade5eb26e0d5db5b98f6233ce6fde",
+    "crates/oriole_expat/src/lib.rs": "0d04f3ef06e979df974086774f196ec85eb2458140704b3b3339c6eeaa47e4c0"
+  },
+  "release_library": {
+    "path": "/tmp/oriole-values-final-source/liboriole_expat.so",
+    "sha256": "f7e602e300daebedfc08854ed32adebeb656165cddc019dcc0b0226063f9f569"
+  },
+  "release_note": "Root reports only formatting and regression-test changes between reviewed combined debug candidate and frozen final source; release upstream matrix is recorded separately."
+}

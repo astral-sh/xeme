@@ -1,0 +1,20 @@
+{
+  "archive_sha256": "b99571d729acb0298bac46e8276db6d03890e902512c7f3d01275caaf7a9e3ae",
+  "members": {
+    "source.json": "4e179b55c944a0f4264fc365ef6b75e17b94f090556d133fdcdac0bbc92f2cf6",
+    "differential.log": "5aeff3ef4116bf61cb47e794f94fb83cc46153f19f8d0d45c7ea0636523f7388",
+    "probe-support.py": "fdbbb2eba26a36a3cb8ea6bc09ac1ef6b94d234f44fe72185abcb79d9bfe299f",
+    "tests.log": "398cd236fec8d50a978419562cd3388f2a5a9e68b522165316a8a85fdf8c0814",
+    "build.log": "8294ba501a4d72bb0ea27c0bc938fe2e932587018620c155f6fa907b9307761c",
+    "oracle.log": "43dbd23aa0c8697a0f9e964daebac2358bd58f62eafe294c6f9134384500dea0",
+    "probe.py": "e39901c185c4c9b39d5f219e6230f077bc2e0d4bff1aa02431b1586adbd0d341",
+    "clippy.log": "82272e1aec1777f75748e89cebd3db9dc3fc146dcfc26c52bcfbfad9d7725a87",
+    "oracle.json": "d4d79a1c71f1d71550c87b1c864824506bdceac58b7bc20cb8b1caf6c1bcb270",
+    "differential/corpus.json": "f5382e0e4c03ec7bbcad6f137aec823dc46909cc32b74ab01668130cfc7bc312",
+    "differential/oriole.json": "4e7494602872aae88a304577f69cf2e2d7b79eadb1296ef67225a7264f4f0892",
+    "differential/reference.json": "4e7494602872aae88a304577f69cf2e2d7b79eadb1296ef67225a7264f4f0892",
+    "differential/reference.progress.json": "63f17f0d2e6ff2870efd5a35a35b73c004464243200dd613ea9a0a946c34c23d",
+    "differential/oriole.progress.json": "63f17f0d2e6ff2870efd5a35a35b73c004464243200dd613ea9a0a946c34c23d",
+    "differential/summary.json": "7a158ebbdc5584265169f1e7ac04e5c0240c8af9086c56896cee1424a546c964"
+  }
+}

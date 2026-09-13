@@ -1,0 +1,23 @@
+{
+  "source": "/tmp/oriole-default-declarations",
+  "conclusion": "No blocking source-review finding in the isolated declaration Default layer.",
+  "files": {
+    "crates/oriole/src/dtd.rs": "8c526d886f9a1896e8718c4cfe92babbf19c59b7dab738a9544344ac09fa1dbf",
+    "crates/oriole/src/lib.rs": "225bd5494f6626c0558a5c47a14cd3eb958dcb0c2e889dec0785472a41518f4f",
+    "crates/oriole_expat/src/lib.rs": "5a56728a3c5b8e49958cd95dade419cbca9d6409684ce7067c8e4dd85c723ca9"
+  },
+  "review": [
+    "Raw slices derive from complete-string offsets, and monotonic raw_offset plus raw_closed assigns each byte/closing delimiter once.",
+    "Queued-event cursor advances after each raw segment; assignment scans disjoint pending-event suffixes rather than rescanning all declarations.",
+    "Raw strings and queue entries use selected fallible allocator; additional events charge structural expansion budget.",
+    "Duplicate filtering selects original raw tokens without reparsing them as XML; entity names named SYSTEM/PUBLIC and NDATA notation-name handling remain distinguished.",
+    "Handler-dependent prefix events resolve current handler at dispatch; ownership stays inside the existing event/default queue lifetime.",
+    "All prior inherited recursion and depth checks remain unchanged."
+  ],
+  "merge_requirements": [
+    "Merge EntityDeclarationPrefix and EntityDeclarationDuplicate only once with external-value layer.",
+    "Do not overwrite the pending-value implementation preassigned raw suffix.",
+    "Run combined tests and consumer/fuzz gates after merge."
+  ],
+  "oracle_scope": "Independent agent owns reported 12,784 encoding/chunk,576header and2,880handler cases. Root review does not count them as fresh executions."
+}

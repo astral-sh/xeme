@@ -1,0 +1,71 @@
+{
+  "commands": [
+    [
+      "cargo",
+      "+ohm",
+      "build",
+      "--release",
+      "--locked",
+      "--offline",
+      "--manifest-path",
+      "benchmarks/inprocess/Cargo.toml"
+    ],
+    [
+      "cargo",
+      "+ohm",
+      "build",
+      "--release",
+      "--locked",
+      "--offline",
+      "--manifest-path",
+      "benchmarks/inprocess/Cargo.toml",
+      "--features",
+      "jemalloc"
+    ],
+    [
+      "cargo",
+      "+ohm",
+      "build",
+      "--release",
+      "--locked",
+      "--offline",
+      "--manifest-path",
+      "benchmarks/inprocess/Cargo.toml",
+      "--features",
+      "mimalloc"
+    ],
+    [
+      "cargo",
+      "+ohm",
+      "build",
+      "--release",
+      "--locked",
+      "--offline",
+      "--manifest-path",
+      "benchmarks/inprocess/Cargo.toml",
+      "--features",
+      "allocation-counts"
+    ],
+    [
+      "cargo",
+      "+ohm",
+      "build",
+      "--release",
+      "--locked",
+      "--offline",
+      "-p",
+      "oriole_expat"
+    ]
+  ],
+  "source": "/tmp/oriole-reuse-snapshot",
+  "source_manifest_sha256": "171bf5654a1a1ea589056abc81506a30d2026077c33a4faff888b8c68f167651",
+  "binaries": {
+    "liboriole_expat.a": "6cf1eff3a6a5c03ecf6482002c9cd759c47dbae8d8b9cbae3e5f5a87856a1a93",
+    "liboriole_expat.so": "1fdcc3839bf8f6168a90440ea9ea956eecfae20870abe6c450990ef17e57eff0",
+    "bench-system": "f8484b5073fc5a5f7089d821b226ad562c2f3b0862180d9d93021ac1e74af388",
+    "bench-mimalloc": "270d93712b7ee5eea0c2db6dc6692848f7dcf3f1b8533d80976d9a87a803f0f5",
+    "bench-jemalloc": "080f320fea061281ffbb124c3cdb6bb8321f18b6901f8f12af9006b9f87c0592",
+    "bench-counts": "5d71a596cd25f7560f1c04cdd901b4d6df59a1f70fe0e86afa32f379d2229a2a"
+  },
+  "rustc": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n"
+}

@@ -1,0 +1,44 @@
+{
+  "commands": [
+    [
+      "cargo",
+      "+ohm",
+      "build",
+      "--release",
+      "--locked",
+      "--offline",
+      "--manifest-path",
+      "benchmarks/inprocess/Cargo.toml"
+    ],
+    [
+      "cargo",
+      "+ohm",
+      "build",
+      "--release",
+      "--locked",
+      "--offline",
+      "--manifest-path",
+      "benchmarks/inprocess/Cargo.toml",
+      "--features",
+      "allocation-counts"
+    ],
+    [
+      "cargo",
+      "+ohm",
+      "build",
+      "--release",
+      "--locked",
+      "--offline",
+      "-p",
+      "oriole_expat"
+    ]
+  ],
+  "source": "/tmp/oriole-index-snapshot",
+  "source_manifest_sha256": "8e24d41f34ba318b1827e2995d7c97ca30a2e1c7748cc378f0d046854f15225b",
+  "binaries": {
+    "liboriole_expat.so": "d47623668c069fd62cd574bcec9aba70dd2c1d9ab2edb624785d20a0925ce079",
+    "bench-system": "72b45b67b2f42f8d2d40ed48e59c08952590bec11590cba5754d275704a5fe45",
+    "bench-counts": "b4e1713f4dd7097b312e320636f333cc160280edf318a748efc980e9206eb0d0"
+  },
+  "rustc": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n"
+}

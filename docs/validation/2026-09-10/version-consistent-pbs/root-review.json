@@ -1,0 +1,34 @@
+{
+  "scope": "Root independent saved-evidence audit: Git source hashes, downloaded archive and extracted native binary hashes, raw unittest module totals/failure names/skips/expected failures, accelerator smoke lines, fresh import probes, and glibc thread record. No parser/compiler/container rerun; no claim of independent full per-method reconciliation.",
+  "status": "passed_with_original_failures_preserved",
+  "report_sha256": "b9b5f710e5595d50f35cf0eda49749dc503e87f590f14c18ca55cf6a42cf2c74",
+  "source_files": 64,
+  "archive_sha256": "504b3457b6ed8205f9f884bd1c454504e041982f55ce24e85aab20ca7793050e",
+  "native_artifacts": 9,
+  "logs": {
+    "host-xml-verbose.log": {
+      "sha256": "ccb27f5d457eff9aa2bfbbb01be661601ff66b844a090a2c003faf5cb48318d4",
+      "reported_tests": 802,
+      "skips": 13,
+      "unexpected_failures": [
+        "test.test_pyexpat.BufferTextTest.test1",
+        "test.test_sax.CDATAHandlerTest.test_handlers"
+      ],
+      "expected_failures": 3
+    },
+    "glibc217-xml-verbose.log": {
+      "sha256": "6b6f5956dafaaf68d6e0f7917d5b6b3467e09710baa21dac3f85865f8874bd66",
+      "reported_tests": 802,
+      "skips": 13,
+      "unexpected_failures": [
+        "test.test_pyexpat.BufferTextTest.test1",
+        "test.test_sax.CDATAHandlerTest.test_handlers"
+      ],
+      "expected_failures": 3
+    }
+  },
+  "threaded_parses": 1024,
+  "workflow_conclusion": "FAILED",
+  "original_glibc_followup_conclusion": "FAILED",
+  "fresh_import_coverage_gap_confirmed": true
+}

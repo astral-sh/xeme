@@ -1,0 +1,448 @@
+{
+  "status": "passed",
+  "scope": "Independent bounded read-only arithmetic/source/provenance review of saved final4b native timing on CPU7. No parser run, build, profile training, benchmark rerun or network retrieval. Earlier study reviews remain unchanged.",
+  "counts": {
+    "preflight_engine_parses": 96,
+    "preflight_raw_events": 3380172,
+    "preflight_normalized_events": 3031904,
+    "timed_processes": 672,
+    "measured_parses": 136976,
+    "warmup_parses": 672,
+    "timed_samples_including_warmup": 137648
+  },
+  "conditions": 24,
+  "cohorts": 168,
+  "cohorts_per_condition": 7,
+  "raw_record_files_verified": 1368,
+  "frozen_inputs_current_hashes_verified": 30,
+  "random_seed_reproduced": 202609101757,
+  "first_engine_counts": {
+    "expat-pgo": 44,
+    "oriole-normal": 39,
+    "oriole-pgo": 39,
+    "expat-normal": 46
+  },
+  "verification": [
+    "All96preflight engine parses accept with no callback errors. Adjacent text normalization independently reconstructed; registered callback order and values equal across four engines.",
+    "Reference normalized event streams independently reduced to native FNV/element/text-byte totals. Every native warmup and measured sample matches those exact expected totals.",
+    "All672process commands, library/input identities, exits, stdout/stderr hashes, numbered iterations, one warmup and positive finite durations checked.",
+    "Every process median and same-cohort ratio recomputed exactly, as are all24condition medians, four aggregate ratio groups and six project groups. Geometric aggregates match to floating-point tolerance.",
+    "Randomized condition/cohort jobs and within-cohort four-engine order reproduced exactly. All1368declared raw record files accounted for, no skipped row/sample found.",
+    "All30preflight input/tool/library/profile/build hashes still match. Final script enforces the same after-timing check, but emits no separate hashes_after map.",
+    "Matched normal/PGO commands,62source build inputs and effective environments agree except profile flags/target directories; PGO source inputs match complete358-file4b snapshot. Exact libraries, merged profile, generated fixture hashes, command logs and training report hashes checked. Heldout project fixture hashes are disjoint from12generated training fixtures."
+  ],
+  "summary": {
+    "oriole-pgo_over_oriole-normal": {
+      "geomean": 0.7733423620508794,
+      "min": 0.7342422999836472,
+      "max": 0.8357880770122472,
+      "cells_below_one": 24
+    },
+    "expat-pgo_over_expat-normal": {
+      "geomean": 0.8660123612066588,
+      "min": 0.805955004381406,
+      "max": 0.9604928071953598,
+      "cells_below_one": 24
+    },
+    "oriole-normal_over_expat-normal": {
+      "geomean": 2.4995617737521667,
+      "min": 1.1424044919809737,
+      "max": 3.7544558713930645,
+      "cells_below_one": 0
+    },
+    "oriole-pgo_over_expat-pgo": {
+      "geomean": 2.229267110607637,
+      "min": 0.9722584233947871,
+      "max": 3.630033169810106,
+      "cells_below_one": 1
+    }
+  },
+  "projects": {
+    "vulkan": {
+      "oriole-pgo_over_oriole-normal": 0.7678198614214895,
+      "expat-pgo_over_expat-normal": 0.8245710440912902,
+      "oriole-normal_over_expat-normal": 3.098375711457818,
+      "oriole-pgo_over_expat-pgo": 2.8752164339726356
+    },
+    "wayland": {
+      "oriole-pgo_over_oriole-normal": 0.8183307535745427,
+      "expat-pgo_over_expat-normal": 0.8817262243950571,
+      "oriole-normal_over_expat-normal": 1.9221920818400107,
+      "oriole-pgo_over_expat-pgo": 1.7881027591413203
+    },
+    "maven": {
+      "oriole-pgo_over_oriole-normal": 0.750986661766781,
+      "expat-pgo_over_expat-normal": 0.8324238618286578,
+      "oriole-normal_over_expat-normal": 3.57718351278255,
+      "oriole-pgo_over_expat-pgo": 3.222581139829386
+    },
+    "batik": {
+      "oriole-pgo_over_oriole-normal": 0.7858358588931136,
+      "expat-pgo_over_expat-normal": 0.9435993899795206,
+      "oriole-normal_over_expat-normal": 1.2872726580593066,
+      "oriole-pgo_over_expat-pgo": 1.0695705813992091
+    },
+    "gtk": {
+      "oriole-pgo_over_oriole-normal": 0.7755447349103753,
+      "expat-pgo_over_expat-normal": 0.8297921662700705,
+      "oriole-normal_over_expat-normal": 3.397357024728385,
+      "oriole-pgo_over_expat-pgo": 3.1645277190329675
+    },
+    "docbook": {
+      "oriole-pgo_over_oriole-normal": 0.7438265379773246,
+      "expat-pgo_over_expat-normal": 0.8901869138300116,
+      "oriole-normal_over_expat-normal": 2.617576772979557,
+      "oriole-pgo_over_expat-pgo": 2.1887059706386016
+    }
+  },
+  "per_condition": [
+    {
+      "name": "vulkan",
+      "namespaces": false,
+      "chunk": 4096,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7770401102934706,
+        "expat-pgo_over_expat-normal": 0.8248926205200626,
+        "oriole-normal_over_expat-normal": 2.9724130423794395,
+        "oriole-pgo_over_expat-pgo": 2.779725170185091
+      }
+    },
+    {
+      "name": "vulkan",
+      "namespaces": false,
+      "chunk": 65536,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7839639164600392,
+        "expat-pgo_over_expat-normal": 0.8324117542529962,
+        "oriole-normal_over_expat-normal": 2.982395952648768,
+        "oriole-pgo_over_expat-pgo": 2.7932212540614856
+      }
+    },
+    {
+      "name": "vulkan",
+      "namespaces": true,
+      "chunk": 4096,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7557755919784241,
+        "expat-pgo_over_expat-normal": 0.8113518218839177,
+        "oriole-normal_over_expat-normal": 3.188485500204773,
+        "oriole-pgo_over_expat-pgo": 2.9776246417390535
+      }
+    },
+    {
+      "name": "vulkan",
+      "namespaces": true,
+      "chunk": 65536,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7549270629874986,
+        "expat-pgo_over_expat-normal": 0.8297886331477605,
+        "oriole-normal_over_expat-normal": 3.2604490057815125,
+        "oriole-pgo_over_expat-pgo": 2.9560040236548586
+      }
+    },
+    {
+      "name": "wayland",
+      "namespaces": false,
+      "chunk": 4096,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.8261550845904418,
+        "expat-pgo_over_expat-normal": 0.8807490299179651,
+        "oriole-normal_over_expat-normal": 1.837637353066826,
+        "oriole-pgo_over_expat-pgo": 1.7267409340673596
+      }
+    },
+    {
+      "name": "wayland",
+      "namespaces": false,
+      "chunk": 65536,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.8357880770122472,
+        "expat-pgo_over_expat-normal": 0.8805485206525824,
+        "oriole-normal_over_expat-normal": 1.8646778426638722,
+        "oriole-pgo_over_expat-pgo": 1.7764849966090692
+      }
+    },
+    {
+      "name": "wayland",
+      "namespaces": true,
+      "chunk": 4096,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.8123032208917025,
+        "expat-pgo_over_expat-normal": 0.8927498983025774,
+        "oriole-normal_over_expat-normal": 1.970499063969682,
+        "oriole-pgo_over_expat-pgo": 1.8040515350536541
+      }
+    },
+    {
+      "name": "wayland",
+      "namespaces": true,
+      "chunk": 65536,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7995388364467432,
+        "expat-pgo_over_expat-normal": 0.872970879091575,
+        "oriole-normal_over_expat-normal": 2.021842318744029,
+        "oriole-pgo_over_expat-pgo": 1.8472778603380426
+      }
+    },
+    {
+      "name": "maven",
+      "namespaces": false,
+      "chunk": 4096,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7743105545350742,
+        "expat-pgo_over_expat-normal": 0.8150630380720699,
+        "oriole-normal_over_expat-normal": 3.4597386753363897,
+        "oriole-pgo_over_expat-pgo": 3.2006123351215106
+      }
+    },
+    {
+      "name": "maven",
+      "namespaces": false,
+      "chunk": 65536,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7616108431093962,
+        "expat-pgo_over_expat-normal": 0.805955004381406,
+        "oriole-normal_over_expat-normal": 3.7544558713930645,
+        "oriole-pgo_over_expat-pgo": 3.630033169810106
+      }
+    },
+    {
+      "name": "maven",
+      "namespaces": true,
+      "chunk": 4096,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7342422999836472,
+        "expat-pgo_over_expat-normal": 0.8759629116915467,
+        "oriole-normal_over_expat-normal": 3.414372252103622,
+        "oriole-pgo_over_expat-pgo": 2.862061634776198
+      }
+    },
+    {
+      "name": "maven",
+      "namespaces": true,
+      "chunk": 65536,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7345835454315797,
+        "expat-pgo_over_expat-normal": 0.8344308846074502,
+        "oriole-normal_over_expat-normal": 3.692017175953665,
+        "oriole-pgo_over_expat-pgo": 3.2433423580426157
+      }
+    },
+    {
+      "name": "batik",
+      "namespaces": false,
+      "chunk": 4096,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7952528614335578,
+        "expat-pgo_over_expat-normal": 0.9327039824037613,
+        "oriole-normal_over_expat-normal": 1.1424044919809737,
+        "oriole-pgo_over_expat-pgo": 0.9722584233947871
+      }
+    },
+    {
+      "name": "batik",
+      "namespaces": false,
+      "chunk": 65536,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7901651405073767,
+        "expat-pgo_over_expat-normal": 0.9604928071953598,
+        "oriole-normal_over_expat-normal": 1.29931735829981,
+        "oriole-pgo_over_expat-pgo": 1.0765485855298453
+      }
+    },
+    {
+      "name": "batik",
+      "namespaces": true,
+      "chunk": 4096,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.783713220289709,
+        "expat-pgo_over_expat-normal": 0.9327241604814298,
+        "oriole-normal_over_expat-normal": 1.2955695101648166,
+        "oriole-pgo_over_expat-pgo": 1.0706365862855705
+      }
+    },
+    {
+      "name": "batik",
+      "namespaces": true,
+      "chunk": 65536,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7743674517422771,
+        "expat-pgo_over_expat-normal": 0.9487666955206251,
+        "oriole-normal_over_expat-normal": 1.4278622703491908,
+        "oriole-pgo_over_expat-pgo": 1.167831988949334
+      }
+    },
+    {
+      "name": "gtk",
+      "namespaces": false,
+      "chunk": 4096,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.787989085036476,
+        "expat-pgo_over_expat-normal": 0.8404303065036215,
+        "oriole-normal_over_expat-normal": 3.117803289144003,
+        "oriole-pgo_over_expat-pgo": 2.9215967458750915
+      }
+    },
+    {
+      "name": "gtk",
+      "namespaces": false,
+      "chunk": 65536,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7768965016044095,
+        "expat-pgo_over_expat-normal": 0.8185491763590848,
+        "oriole-normal_over_expat-normal": 3.4882823828944094,
+        "oriole-pgo_over_expat-pgo": 3.3256420925218446
+      }
+    },
+    {
+      "name": "gtk",
+      "namespaces": true,
+      "chunk": 4096,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7755254029577212,
+        "expat-pgo_over_expat-normal": 0.8399611040128449,
+        "oriole-normal_over_expat-normal": 3.3388863170125087,
+        "oriole-pgo_over_expat-pgo": 3.032205316638471
+      }
+    },
+    {
+      "name": "gtk",
+      "namespaces": true,
+      "chunk": 65536,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7619878027259753,
+        "expat-pgo_over_expat-normal": 0.8204869266294853,
+        "oriole-normal_over_expat-normal": 3.6686204061748318,
+        "oriole-pgo_over_expat-pgo": 3.403934786454502
+      }
+    },
+    {
+      "name": "docbook",
+      "namespaces": false,
+      "chunk": 4096,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7402489554203712,
+        "expat-pgo_over_expat-normal": 0.8832822700909181,
+        "oriole-normal_over_expat-normal": 2.4307908698070424,
+        "oriole-pgo_over_expat-pgo": 2.032070459277697
+      }
+    },
+    {
+      "name": "docbook",
+      "namespaces": false,
+      "chunk": 65536,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7409925422893345,
+        "expat-pgo_over_expat-normal": 0.8626554809650115,
+        "oriole-normal_over_expat-normal": 2.6411158054194783,
+        "oriole-pgo_over_expat-pgo": 2.240735299028283
+      }
+    },
+    {
+      "name": "docbook",
+      "namespaces": true,
+      "chunk": 4096,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7367134261129461,
+        "expat-pgo_over_expat-normal": 0.9051116934284865,
+        "oriole-normal_over_expat-normal": 2.6151752624634277,
+        "oriole-pgo_over_expat-pgo": 2.1633714485293
+      }
+    },
+    {
+      "name": "docbook",
+      "namespaces": true,
+      "chunk": 65536,
+      "median_ratios": {
+        "oriole-pgo_over_oriole-normal": 0.7575240940217923,
+        "expat-pgo_over_expat-normal": 0.9105121550871663,
+        "oriole-normal_over_expat-normal": 2.796159062412037,
+        "oriole-pgo_over_expat-pgo": 2.3296424892846463
+      }
+    }
+  ],
+  "ratios": "Numerator time divided by denominator time, lower favors numerator. A condition is median of7same-cohort ratios of process medians. Geomeans equally weight24conditions, or four conditions per project. They are not workload-weighted speedups or confidence intervals; do not divide/multiply medians of different ratios.",
+  "fair_comparison": {
+    "pgo_oriole_over_pgo_expat": {
+      "geomean": 2.229267110607637,
+      "min": 0.9722584233947871,
+      "max": 3.630033169810106,
+      "cells_below_one": 1
+    },
+    "sole_faster_condition": [
+      {
+        "name": "batik",
+        "namespaces": false,
+        "chunk": 4096,
+        "median_ratios": {
+          "oriole-pgo_over_oriole-normal": 0.7952528614335578,
+          "expat-pgo_over_expat-normal": 0.9327039824037613,
+          "oriole-normal_over_expat-normal": 1.1424044919809737,
+          "oriole-pgo_over_expat-pgo": 0.9722584233947871
+        }
+      }
+    ]
+  },
+  "sample_count_scope": "136976measured parses plus672discarded native warmups=137648native samples.96ctypes semantic preflights are separate. No process-startup timing or full-project application work.",
+  "timing_scope": "CLOCK_MONOTONIC encloses parser create, handler registration, input parsing, native callback hashing and parser destruction. Input file read, dlopen, process startup, sample JSON printing and final file free/dlclose are excluded. Repeated parses use7/64/128/512/256/256measured iterations per process for Vulkan/Wayland/Maven/Batik/GTK/DocBook; one warmup discarded.",
+  "reference_scope": {
+    "final_position_differing_conditions": 0,
+    "raw_event_differing_conditions": {
+      "oriole-normal_vs_oriole-pgo": 0,
+      "expat-normal_vs_expat-pgo": 0,
+      "oriole-normal_vs_expat-normal": 24
+    },
+    "limitations": "Per-callback coordinates, raw context, allDTD callbacks, error behavior and externalDTD loading are not measured. Batik externalDTD deliberately unloaded."
+  },
+  "provenance": {
+    "runtime_commit": "4b11ace3d89fe6b7bf66ca55290eb23444f11de2",
+    "source_snapshot_files": 358,
+    "matched_build_inputs": 62,
+    "normal_shared": "5974e2718f50690a27e48f91e1e1648aa5c4ef81ac17187a582957c8653208f3",
+    "optimized_shared": "4584afbf7361732cf506f762cf25885cded19ecc36ee6b03053ae674bf809505",
+    "normal_reference": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "optimized_reference": "12d33ad26315e8b46a02e598df8581679d0561fb2d98a3d4744e483a573fbdd0",
+    "normal_control_scope": "5974matched explicit-host normal build; not the ac6a production-default release used by the separate consumer correctness gate.",
+    "pgo_manifest": "72ae88d148f276eacfe854d548c3f91c8a21c589d408a44a94d60b078a87a5f9",
+    "compiler_scope": "Within-engine source/compiler/baseflags controlled; cross-engine RustOhmLLVM22ThinLTO/cgu1 versus CExpatGCC13.3-O3/noLTO differs. Expat control/profile/training reused unchanged from the separately reviewed earlier study."
+  },
+  "concurrent_load": {
+    "recorded_utc": "2026-09-10T18:51:04.059749+00:00",
+    "source": "Root coordination message; independent campaign process list not inspected",
+    "root_statement": "Starting six sustained ASan600-second campaigns onCPUs1-4, firstwavefour thensecondwavetwo, frozen4bsource; expected~20minutes. CPU0exclusivelyreservedforconsumer/nativebenchmarks. OthercorrectnessworkCPU6/7; builds/preflightsCPU5.",
+    "native_status_at_notice": "passed",
+    "native_complete_cohorts_at_notice": 168,
+    "native_total_cohorts": 168,
+    "effect": "Concurrent host memory/cache/thermal load can affect absolute timings and paired ratios; retained as a limitation, no attempt to subtract it. First native campaign may overlap only part of the sanitizer campaign; subsequent consumer phases may overlap more.",
+    "observed_unix": 1789066582.459843,
+    "observed_utc": "2026-09-10T18:56:22.459844+00:00",
+    "matching_processes": [],
+    "native_completed_mtime_utc": "2026-09-10T18:48:35.719000+00:00",
+    "native_first_timed_output_mtime_utc": "2026-09-10T18:46:47.910000+00:00",
+    "clock_ticks_per_second": 100,
+    "boot_time_line": "btime 1788817521",
+    "proc_observation_limit": "The recorded zero matching_processes is sandbox-local visibility only: each exec call has its own PID namespace. It cannot establish that other tool sessions have exited. Final sequential controller uses explicit child wait rather than this lookup."
+  },
+  "limitations": [
+    "One shared-host screening campaign; frequency/cache/thermal/memory bandwidth uncontrolled. Retained root notice says native report already passed with168cohorts when sustainedASan jobs onCPUs1-4were announced; no independent process timeline was captured, so partial overlap cannot be excluded or quantified. No adjustment or subtraction applied.",
+    "PGO improved each engine versus its matched normal in all24condition medians. FairPGO-versusPGO comparison still favors Expat in23/24conditions; no broad faster-than-Expat claim.",
+    "Exact callback transcripts and finite sample checks establish these measured positive fixtures only, not full compatibility/security/production suitability.",
+    "Consumer benchmarks are a distinct campaign and are not represented by these native callback-driver numbers."
+  ],
+  "file_sha256": {
+    "/tmp/oriole-pgo-version-final/screen/preflight.json": "ea79ef67bf653ccd90bb06959486ab88f09913711a57c63319b2b8ffa7f4ea86",
+    "/tmp/oriole-pgo-version-final/screen/results.json": "e8cb94674ce3846522075731489ceec07060011bab83c89ae37172fd6c176932",
+    "/tmp/oriole-pgo-version-final/native-summary.json": "285af60298be1a5c01bfc179fd85e00937a778dcabe61dd71aa220d6e9448690",
+    "/tmp/oriole-pgo-version-final/screen.py": "59cf3f654b13ed9861172bdc653ad9979510893828f0d496febe779717558bae",
+    "/tmp/oriole-pgo-version-final/source.json": "d44520891b0cfe761cc982c9b0b77e95d768583562b6a88eb8a2fcface62faec",
+    "/tmp/oriole-pgo-version-final/control-build.json": "a6ebfd85fab4eb90219599506ab622cbd4926f55c0f5e21adfce6d2e2cba1a51",
+    "/tmp/oriole-pgo-version-final/build/runs/run-bbbfyfik/manifest.json": "72ae88d148f276eacfe854d548c3f91c8a21c589d408a44a94d60b078a87a5f9",
+    "/tmp/oriole-pgo-version-final/concurrent-load.json": "ae49ef32a7d475f97ce89654e6ed061f07aadd806812546e23177082aba26645",
+    "/tmp/oriole-pgo-version-final/screen/support/native_driver.c": "3ee1dd4de79d12f8fed9224d5b1e88a3724ba7c2582b1b959c56ea4c5b1a6ee1",
+    "/tmp/oriole-pgo-version-final/screen/support/projects.py": "8ddf797ff9195ed8859747fe8b5e2f6e77acc29b8bf77790d37b84fd98fdd435",
+    "/tmp/oriole-pgo-version-final/screen/support/xml_abi.py": "db7247b6254b6345dc025095a3ea1cbbc63fe077f6ddfe5637bfd76ea8a56901",
+    "/tmp/oriole-pgo-version-final-native-independent-audit.py": "32f8c04ad8b2e0cfcb00d5cfa20c57ea0a717e868df0defc6e82aa4c143fddff"
+  },
+  "verified_raw_record_hash_map_sha256": "048be36dc020463ac51171f1333118448a1da6f5c066e415f4be901cb1f6e75e",
+  "review_postprocessing": "Only an aggregate-group wording count was corrected after the saved-data audit; arithmetic/results unchanged. Initial review/generator retained outside study."
+}

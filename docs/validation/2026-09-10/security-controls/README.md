@@ -1,0 +1,15 @@
+# Combined Expat security controls
+
+This release runtime combines consumed-byte entity amplification and caller hash salts with the name-throughput and input-context layers. Its shared library is `7d3c1aac8f17c4a392eebe66cf71cae6df8ef7104e1b6c247d387c4f87df1ecb`; the static archive is `ffdec6d0fbae7f54c8f99ab6a1d375145fd0d6405a34ffcfdccf98aa19304230`. The [isolated amplification](../entity-amplification/README.md) and [hash-salt](../hash-salt/README.md) reports retain the independent development reviews and failure probes.
+
+All **268 Rust checks**, formatting and strict affected-package Clippy pass. Six C ASan/UBSan runs cover shared/static integration, callback lifecycle and all 332 injected allocation failures per linkage. Rust is uninstrumented in those C runs; leak detection is disabled, with explicit selected-allocation live counts checked.
+
+The unchanged 4,740-configuration upstream API suite completes with **3,871 passes and 869 failures**, no crashes or timeouts, and verified library origin. This is 118 fewer failures than the initial 3,753/987 checkpoint. Compared with the isolated amplification runtime, the integrated build fixes 96 configurations and regresses none: 12 hash-salt configurations and 84 allocation-retry configurations. The latter pass with the original ceilings as allocation counts fall. The initial checkpoint comparison retains 40 allocation-schedule/ceiling regressions previously introduced by input-context support; those are recorded individually. No upstream assertion or retry limit was changed for this run. There are 0 changed adapted test files compared with the initial matrix.
+
+Of the remaining failures, 596 belong to allocation-count/failure-injection tests and 273 to other API tests. These counts do not establish that every remaining difference is acceptable; diagnostics, encodings, limits, callback behavior and identity remain under review.
+
+The integrated amplification grids run 5,544 and 14,480 comparisons with zero acceptance differences. Their 12 and 4 remaining observations reject at different nested parser levels, matching the reviewed isolated candidate. The previously recorded external-value lifecycle acceptance difference remains a separate open issue and is not included in these grid claims.
+
+Caller salts retain secret randomized keys, and table replacement is transactional on allocation failure. Child lifetime/reset checks and existing-child independent hash states are documented in the C interface README. Relative controls remain independent of absolute input, work, nesting, output and allocation caps. Paired six-project screening records roughly 3–10% overhead from these controls; further performance work is required.
+
+[evidence.tar.gz](evidence.tar.gz) contains exact source/build metadata, raw upstream and grid observations, C logs and matched performance samples. ELF binaries and static archives are excluded; their hashes remain recorded. [files.json](files.json) verifies every archive member; [summary.json](summary.json) contains compact counts. Archive SHA256: `a5660a8f6921058762b15376e3926c6b868e734268d2299dab9ef1ffe728002b`.

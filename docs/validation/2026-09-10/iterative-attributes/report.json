@@ -1,0 +1,58 @@
+{
+  "source_commit": "ae92fbc1e26c67d1fb0dcc7c32591d0e428fe877",
+  "base_commit": "daeb7f9",
+  "shared_sha256": "43ec6226a75bfa917621077db34dcaa341e8904682071c358ff074b52a03a6e7",
+  "static_sha256": "644a3acdf3e7714ec8a23cf6436ae0afc3cfc51bcaa0101986b25e2b210d2535",
+  "checks": {
+    "rust_tests": 288,
+    "final_allocation_tests": 5,
+    "strict_clippy": "passed",
+    "native_suites": 6,
+    "allocation_scenarios_per_linkage": 333,
+    "native_scope": "C ASan/UBSan with uninstrumented release Rust; leak sanitizer disabled.",
+    "ordinary_exact_differential_cases": 3918
+  },
+  "upstream": {
+    "before": {
+      "passed": 4065,
+      "failed": 675
+    },
+    "after": {
+      "passed": 4065,
+      "failed": 675
+    },
+    "changes": [],
+    "identical_adapted_sources": true
+  },
+  "attribute_oracle": {
+    "conditions": 5796,
+    "baseline_changes": 0,
+    "reference_acceptance": 0,
+    "reference_errors": 252,
+    "reference_events": 732,
+    "reference_positions": 2460
+  },
+  "attribute_oracle_disposition": "All 5796 results are identical to the shared-state baseline, including positions. All 252 reference error differences are existing NDATA error16 versus15, and all 732 event differences are existing replacement CRLF folding.",
+  "alias_oracle": {
+    "conditions": 132,
+    "baseline_changes": 0,
+    "reference_differences": 30,
+    "disposition": "Existing CDATA replacement CRLF folding; the other 102 cases match Expat."
+  },
+  "independent_review": {
+    "scope": "Read-only iterative lexical composition against daeb7f9 in API worktree",
+    "verdict": "No blocker found",
+    "analysis": "Each parent Frame retains a lexical Slice derived from the current Slice, preserving converted alias provenance across child returns. Decoded temporary names only serve lookup; active/frame names borrow stable map keys. Parser borrow is immutable and no callbacks or map mutations occur during expansion. Active insertion/frame push are fallible, errors drop local state, and accounting/recursive/depth checks retain prior ordering. Recycled output reserves before clearing and partial error output never escapes. append_lexical_attribute preserves raw_ascii distinctions and existing per-literal normalization; the semantic normalization correction remains separate.",
+    "execution": "No independent tests run",
+    "files": {
+      "crates/oriole/src/lib.rs": "3041e23f3d9aec8b1f4fa1b629bdbf6b9488562d0218e040aac59ce9c4431826",
+      "crates/oriole/src/dtd.rs": "b62b825e62bdeb15342cca7d6149648048743cbde09d1050d3a67103cbe1bd89"
+    }
+  },
+  "limits": "No limit changes. The 60,000-level growing-prefix test opts into increased entity count/depth on a 256 KiB thread stack. The wide diamond still stops at its configured 4,096-byte expansion cap. Selected-allocator fail-point coverage includes explicit stack/active-set growth.",
+  "separate_work": "Attribute replacement whitespace and NDATA diagnostics remain a separate semantic layer. No production speed claim is made from these correctness tests.",
+  "artifacts": {
+    "files": 173,
+    "archive_sha256": "af8189006d3fad07563ce2bc06560c4d87187bbc844f28b95b981ecccdd2d41d"
+  }
+}

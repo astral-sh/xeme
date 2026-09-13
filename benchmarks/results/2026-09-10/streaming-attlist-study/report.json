@@ -1,0 +1,10 @@
+{
+  "original_manifest_sha256": "b6ce4458a6511afba5f3a1d84c6cc2964895fd0be0cbd9d231d39f85e10417d3",
+  "work_repair_manifest_sha256": "d6fda804a74f513f700f30769796876636f93ce9dda2e4960dad4cfe054ee280",
+  "final_patch_sha256": "21d1342d8544eefdd638d18d248db3eae43c1591ad4ef7888113aec93f56072f",
+  "findings": [
+    "repeated-name work bypass fixed before integration",
+    "1356 byte-index corrections verified against actual Expat"
+  ],
+  "limitation": "The source and timing phases in this archive precede the current event-output composition."
+}

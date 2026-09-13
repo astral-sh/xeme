@@ -1,0 +1,71 @@
+{
+  "conclusion": "Final release improves the same-bound recent baseline by166 passing contexts with zero pass-to-fail regressions; full Expat API compatibility is not achieved.",
+  "library_sha256": "f7e602e300daebedfc08854ed32adebeb656165cddc019dcc0b0226063f9f569",
+  "frozen_source_manifest": "/tmp/oriole-values-final-source/source.json",
+  "frozen_source_manifest_sha256": "cc0f008866bc6b76c1a7cba72cb7b245d2a4eb26275a8928ead7dbd723afdd3b",
+  "default_bounds": {
+    "address_space_mib": 1024,
+    "rss_mib": 768,
+    "per_test_seconds": 3,
+    "candidate_pass": 3621,
+    "candidate_fail": 1119,
+    "recent_baseline_pass": 3455,
+    "recent_baseline_fail": 1285,
+    "regressions": 0,
+    "improvements": 166
+  },
+  "matched_raised_bounds": {
+    "address_space_mib": 4096,
+    "rss_mib": 768,
+    "per_test_seconds": 15,
+    "reference_pass": 4740,
+    "reference_fail": 0,
+    "candidate_pass": 3621,
+    "candidate_fail": 1119,
+    "candidate_same_exact_outcomes_as_default_bounds": true
+  },
+  "diagnostics": {
+    "candidate_failed_test_names": 101,
+    "candidate_assertion_exit100": 1119,
+    "candidate_signal_or_timeout": 0,
+    "unwaived_groups": {
+      "allocation-focused test groups": 630,
+      "DTD/namespace grammar and callback tests": 168,
+      "encoding and XML-name tests": 138,
+      "large-input/resource-limit API tests": 86,
+      "position/input-buffer callback tests": 60,
+      "identity/hash-salt API tests": 24,
+      "reparse deferral/allocation heuristic tests": 13
+    },
+    "grouping_caveat": "Groups identify test subject areas, not a claim of a proven root cause for each assertion. All1119 failures remain failures; allocation tests may expose behavior beyond differing allocation counts."
+  },
+  "reference_default_bound_note": "A fresh reference run at1GiB/3s had14 runner-induced failures (12 GetBuffer1GiB assertions and2 input2GiB deadlines); a focused24-context replay and the complete4740-case replay at4GiB/15s pass. Both original and raised runs are preserved.",
+  "harness_scope": "Pinned clean Expat2.8.4 public API bodies; 12 private tests excluded explicitly; test-only allocator tail bug patched; callbacks assert via isolated child exit rather than longjmp over Rust. Chunks0..5 \u00d7 deferral0/1,395 public tests. No waivers.",
+  "artifacts_sha256": {
+    "/tmp/oriole-upstream-final-values/manifest.json": "81c65cf6e3eb22883b9fe6be0e1248465038706603deb8a8e5cef6506a4812bd",
+    "/tmp/oriole-upstream-final-values/results.json": "a0ac37fc97fc8907b838d455e80ab0eb739ebabfc2eb70459a7f69d3a00bdb30",
+    "/tmp/oriole-upstream-final-values/failure-diagnostics.json": "8b368cc75d16941695bb8be7e2149383742deda6fbb967cac2ff3dc8c05f3fdb",
+    "/tmp/oriole-upstream-final-values/compare-complete-api-results.json": "f8a0717246911ae95b679edf31c873a8603d188d4079877d69579bc70e21ba81",
+    "/tmp/oriole-upstream-final-values-raised/manifest.json": "d6e06207ad6b0baa87808c2c651f1665594f7b131f05fd25e7703ac2a1cee651",
+    "/tmp/oriole-upstream-final-values-raised/results.json": "a0ac37fc97fc8907b838d455e80ab0eb739ebabfc2eb70459a7f69d3a00bdb30",
+    "/tmp/oriole-upstream-final-reference-raised/manifest.json": "6c00ae69e280d8d2b2323358c596588452a0833fd504382177833139b7c814cd",
+    "/tmp/oriole-upstream-final-reference-raised/results.json": "eefe98535ecc0142589a4aa7c5b90d60f071db4a69b7228101662bed55acea58"
+  },
+  "newly_passing_contexts_by_test": {
+    "test_nsalloc_realloc_long_ge_name": 2,
+    "test_alloc_parse_xdecl": 12,
+    "test_no_indirectly_recursive_entity_refs": 12,
+    "test_external_bom_consumed": 12,
+    "test_ext_entity_not_standalone": 12,
+    "test_ext_entity_value_abort": 12,
+    "test_skipped_parameter_entity": 12,
+    "test_recursive_external_parameter_entity_2": 12,
+    "test_skipped_external_entity": 12,
+    "test_skipped_null_loaded_ext_entity": 12,
+    "test_skipped_unloaded_ext_entity": 12,
+    "test_pool_integrity_with_unfinished_attr": 12,
+    "test_empty_ext_param_entity_in_value": 12,
+    "test_alloc_parse_xdecl_2": 10,
+    "test_alloc_realloc_nested_groups": 10
+  }
+}

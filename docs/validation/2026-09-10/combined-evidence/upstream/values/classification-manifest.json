@@ -1,0 +1,24 @@
+{
+  "scope": "Frozen release f7e602e3 first-failing-assertion classification. Independent foreign continuation fix is separately owned in /tmp/oriole-foreign-dtd, not reflected in original matrix counts.",
+  "artifacts": {
+    "failure-classification.json": "52495e99e0432ed78924767206e047f9c8949628d1002e26b0c692e823157c65",
+    "failure-classification.md": "dfbdfe67a53690bb361ab29cdbf8f0086dbf65196429dc628a49dec2feecb30d",
+    "classify_failures.py": "66e1d7e443383ee5a4eed79eae7ee28b0ce1450ef04b451e8162315b2e7c3927",
+    "foreign-expanded.json": "a016def43f5f8dd269297af52c075db360fe67f7e514527b161a1e6fc0c262ab",
+    "foreign_expanded.py": "b1caad0273e4cf34b7a97cfae95a892301de5b80c5e23271e0923b9549f2c358",
+    "foreign-probe.json": "89145d7358272f7df8de3b3a8fe46b08b9ed96c92b3e827abe3b92166887eb6d",
+    "foreign_probe.py": "c2ab89066c43e2740a41da25358e035b68d6ebb9908eafb53911a41780ac0bbe",
+    "create-encoding-probe.json": "b02d7ee690a341e25cb72f5603dbf6980fb9ed244012e6a72ed522b59f131f4d",
+    "create_encoding_probe.py": "927a2a8f4639c9ae910d4845347e3c601b529f5f9e0159abe7286e958579dc14",
+    "namespace-separator-probe.json": "53e729af2f0b40759572ad52e5ef89c629222ea9eef30b111604d9fa5eee98ef",
+    "allocation-raised512/results.json": "c5f78eb0af2530581c53f33055615923e3c8526934b9573a15b0f9f879ca906b",
+    "allocation-raised512/replay.py": "58ca418b0b102707b35bbb94869218e5f9620cab4799feca29236cb7e4af911c",
+    "allocation-raised512/tests.log": "16cf5602f0e510ccdf5917a3d8299f56fe0c3018058f83bdcdb07ac4ecfb3169",
+    "allocation-raised512/retry-ceilings.patch.gz": "74721b418ff6f7abd5706f089c3ce3e5aa115f5940a2b500feb5b78bcbb8a7ad",
+    "allocation-raised512/audit-manifest.json.gz": "f8d368b93185b6dfd04c6e6d8c51c24ebddff52742bb5fa82c995670ffe71e22",
+    "encoding-classification/oriole-encoding-classification-review.json": "ff66628962d0d502ffea289bedf9b731f4cd721944e7ab4505bc9c9e38d70416",
+    "encoding-classification/oriole-encoding-classification.json": "3c2530aa908109b0ff0bfc8d6eade2ccae627422f59c22386fa1197dcbc6dc1f",
+    "encoding-classification/oriole-encoding-classification.py": "cac2143a9cc5bcc47c74f3dfbb83e36c5f56652beba97a7d7e0c028034bf5eb3",
+    "encoding-classification/oriole-encoding-classification.log": "73986a4303f8d29adfe47ba9db9721949906a8af607eadcf5d6d262b98a45ff8"
+  }
+}

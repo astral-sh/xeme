@@ -1,0 +1,69 @@
+{
+  "candidate_sha256": "ed792f3023e72efb83797799e4698e297bfb25c5c3cb409d4bdcfde6a177029e",
+  "reports": {
+    "diagnostics.patch.gz": {
+      "sha256": "174369a0c404cf50a48dd27b43a5a61aafb1e8599649e697d04cda62f76f5d3f",
+      "uncompressed_sha256": "46044064bf6bcad96b91a1d89e1098ce832f1918b89fb12fa8fbfe6c45a1bd0b"
+    },
+    "source.json.gz": {
+      "sha256": "17c95d9a02560f26a7ad7d4d7efab8a97bdd5250cc9c2910b961130cca226b85",
+      "uncompressed_sha256": "153b8609138a0e4e88e80a8aabd77fa2f5e567abcda79c8ae61cfa4b643d3481"
+    },
+    "summary.json.gz": {
+      "sha256": "e8199c3a725b74ea1aa2baf4e6c802a3d5ac1c6d893bfded5499a384cce91617",
+      "uncompressed_sha256": "381b7a4753162c3745d1769ccb5312099533183deadf18f29386b94e58ace9cc"
+    },
+    "lexical-probe.json.gz": {
+      "sha256": "3d8d1739e16858754d868ef5219dfcabb2871b2772e239a87a378b5b5162782f",
+      "uncompressed_sha256": "0ae27295def7bbba5863f7fc446a1c9b95b1c55d951fb0c7f8e475b2ec9b18c7"
+    },
+    "review-probe.py.gz": {
+      "sha256": "ba95e8a18a2b4a6a5701d5ad2fd70549b7ac83497fc2a658c4750ba942497f5d",
+      "uncompressed_sha256": "612722cc5c632210c426c61ce73113fbbf29219129680f4b918cbd58c2173208"
+    },
+    "review-results.json.gz": {
+      "sha256": "f0a500ea338c589fc80e5706e72eecd47b0fda7539237bd9bddea3d2459c1bdb",
+      "uncompressed_sha256": "05ee8df0ce7be2588ea9eeea6d2b48cce95c8e19a396ed27647b21e4a45f37d1"
+    },
+    "review-baseline-probe.py.gz": {
+      "sha256": "21bc061f9aef33afd5eb5cf9a967fe1951960240eb6d6fa4c4ddc514ea94abe9",
+      "uncompressed_sha256": "47a3d0d2c1a86015f91a4ac0f188f5795baccf9febd7d210b4cc5b9fe8618719"
+    },
+    "review-baseline-results.json.gz": {
+      "sha256": "61cc8153cc24332432768f17703d15123fa19986f7a9d3696101d9242bcdd54e",
+      "uncompressed_sha256": "e041228308e8de646a35022e71c18b52a47d315308b669cbe94e312cc2b631f3"
+    },
+    "review-baseline-comparison.json.gz": {
+      "sha256": "b791b31fd982c4284b2c552c89fe501eba37b137b3edac58faf66cc3180a79a9",
+      "uncompressed_sha256": "3655b4555810aff23f7ee78cebdd9cff088e1711c22de2892661a0a3853e3490"
+    },
+    "review-review.json.gz": {
+      "sha256": "d7ca6ab1a5259d0fb87a49d06c09b14d13b78fb0252823c2c1ce32235daae577",
+      "uncompressed_sha256": "b981282e77ed556bbe84cecfc3d140e2a74221bf9c7f7a3bd0634d127e70583f"
+    },
+    "review-nul-name-table-probe.json.gz": {
+      "sha256": "294b68748db0aa3110e1ac36fe8c2d6a91d3a9f628034ffdfafab74cf0676205",
+      "uncompressed_sha256": "928ba67e3974f17f9457cb9232739cc95753a88183ae3a15be9d32f420f0aa1c"
+    },
+    "expanded-summary.json.gz": {
+      "sha256": "e5d53592bb4b42401d968a271c4bb053ab5c11b288430ba9481eb82b0bf58fff",
+      "uncompressed_sha256": "abb29e8f7b1c8d0a3ce3306008b8b580380856c43b20d9c4010c86b33fe99f43"
+    },
+    "expanded-corpus.json.gz": {
+      "sha256": "49d5755a3fae53fe07a83c969e747c43e9a97e08dc40fad9a911153a0ed08c73",
+      "uncompressed_sha256": "a006b0d6cd081ee2ea084d58abfd441c99d1e72c07a65925f0d1867b02466636"
+    }
+  },
+  "expanded_worker_artifacts": {
+    "reference.json": {
+      "path": "/home/dev-user/.cache/oriole/differential-diagnostic-expanded/reference.json",
+      "sha256": "dc47047ec2f7fa595500573ae721e5aab11b3f36616b07007a25558d6143ede8",
+      "bytes": 229591300
+    },
+    "oriole.json": {
+      "path": "/home/dev-user/.cache/oriole/differential-diagnostic-expanded/oriole.json",
+      "sha256": "b9bf02a48623df0ff7ed3ec2ffa4059f4fa617901fd62b251868ca58dfd930f9",
+      "bytes": 229611581
+    }
+  }
+}

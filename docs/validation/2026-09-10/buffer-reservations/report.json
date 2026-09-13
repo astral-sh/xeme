@@ -1,0 +1,852 @@
+{
+  "runtime_commit": "fcf28132429e8fb617da6e7c519498066d0e4cfe",
+  "source": {
+    "commit": "fcf28132429e8fb617da6e7c519498066d0e4cfe",
+    "source_sha256": {
+      "Cargo.lock": "f4ea894233794496a995af269c8e25e4a2f0883ecfdfd288e2dcea18bb4a7f2c",
+      "Cargo.toml": "bc83cd58b6b099db2c14e163f47bcaaffaafb4add9ce5cf0a6da97015667fbe9",
+      "crates/oriole/Cargo.toml": "7f5a8b09ce7936682ce60ca18c4c208b91cacf11a574094b61a669b8e264b9d5",
+      "crates/oriole/src/accounting.rs": "7169710f95e487d88a8a6fca9feab6bff4799973e73a784fa0923cf12030c441",
+      "crates/oriole/src/active.rs": "de402225be109e6385f0fd7f5159285029ac532fcb1bef5b5e16389bbbf528ca",
+      "crates/oriole/src/dtd/attlist.rs": "00d317bb9cf261f223000ecf59cfd43d343cb0727f54069c97f7e6f21060e055",
+      "crates/oriole/src/dtd/composition.rs": "e83214c16960ba6813f878057d9fb42036f4de77da5a4552a933d4edae385557",
+      "crates/oriole/src/dtd/grammar.rs": "bb92d1b1227d347a68712d48af58634bb4535414b5ae0ecbdf58c960045590ad",
+      "crates/oriole/src/dtd/semantic.rs": "956867a7d3e3932284243f21221cd5df47e592236ec8af6e475e267f841f9381",
+      "crates/oriole/src/dtd.rs": "74c145bc1d79e047097691370ee55bded92e616919f41eed2b769aa86397cc02",
+      "crates/oriole/src/dtd_tables.rs": "3ae11444bcd5fee85d740f731e6c40a0982984f641fad767e08102d111b30ab3",
+      "crates/oriole/src/encoding.rs": "45afb0d5945f731a52c0c2b017ebf2a413e6b16151f794a61f912cb8c3eed75c",
+      "crates/oriole/src/lexical.rs": "397ced901b220557d0384c67f4acc9b61b1b6ae1bc0dda65db3720b709ce4ff0",
+      "crates/oriole/src/lib.rs": "72d16ac5240835ad854019e9be946f31ced1278a9f12a9263bd43bc52732cff7",
+      "crates/oriole/src/names.rs": "4514e938d2556886d35599e62e3f5c1488e8adca2d705cd504692821eac506c6",
+      "crates/oriole/src/recycling.rs": "3004012a3f8700d196301c8d18d2d4149f3c0db9bb67f58c59033cd1cf9f61de",
+      "crates/oriole/src/value.rs": "10db353fe7a2d9d134692b0a4505c7cfda542cffc2fc34b3058a93fef0dd6a1f",
+      "crates/oriole/src/value_lexer.rs": "859c2d7d468aca9062dda8e0dac82c300bb4aadfadcea2e11fa5e2b3af4f5767",
+      "crates/oriole/tests/allocation.rs": "7983a3f8f434a4625a270401da588701f2d3ceae3f02046cac40f11bb337b253",
+      "crates/oriole/tests/amplification.rs": "29075bd9ab5a2fcffd43a4f31ff0b512f434e05c907b9e5d1e5478c59f156ceb",
+      "crates/oriole/tests/attribute_entities.rs": "3c89f8b08f649e2a5b1ad46681efb4f321fe40094a513bdaeff1a74f4d17c6bb",
+      "crates/oriole/tests/conditional.rs": "ab51046976caa8eb315022b65198cbfd28c9cf220d983e177a13b5b4290eecbb",
+      "crates/oriole/tests/declaration_tokens.rs": "ba05dd5a4604ea4f776ad8e6b9c313c7336debc37e279c291283cd419b0137bd",
+      "crates/oriole/tests/diagnostics.rs": "6ea5df60e64fe16077c6e1a72a414d999f220e114617b36e5f171f1323a6f816",
+      "crates/oriole/tests/encodings.rs": "b452c223984f828c08469d67c3ffc60aa5c15631e3f221f87c8cb16b8cacd32b",
+      "crates/oriole/tests/entity_depth.rs": "f61fa671ea58d4b55255a5dbb0dae270ca08d6bc69c0af9bf45689508a9c389e",
+      "crates/oriole/tests/event_output.rs": "05564387414f821ec4264f0f1b37351180b2b2c825e1fa4cd5dbbd0f459ac847",
+      "crates/oriole/tests/external_grammar.rs": "5304e0fa552b1d990a43aa426a4f7af65546605a1e959ede570154d3b9b1ec0c",
+      "crates/oriole/tests/external_headers.rs": "37fe9747abe3e3c871ceb7c4f298918f56e0ca2b61627a9204a6ec731acd086d",
+      "crates/oriole/tests/external_limits.rs": "77ae194e6094feb63209321bbdf1dc7b55d2b53bbb61a02be07ae0759a1a9ef5",
+      "crates/oriole/tests/external_values.rs": "3863f74f3cb93ac1c4fd88e5325428983cd89df813ab1bcb05e265d916ae6c37",
+      "crates/oriole/tests/foreign_dtd.rs": "e8308aa2dcb36bf97aec6329d8a837acfea57f63ccee77dc6efc184cb49a7e99",
+      "crates/oriole/tests/malformed_dtd.rs": "1786635f19d97bd128dba25efcf65403f6a7b3590678496a6edef8882999247a",
+      "crates/oriole/tests/missing_parameters.rs": "3038876c244d3959c67f9a76fdb57f616d197e895fd7500c6e15ff5fd9824096",
+      "crates/oriole/tests/multibyte.rs": "372208d18623871002ec7c59988eeb30000d382f2a98638e0bfd5c0a41c24152",
+      "crates/oriole/tests/name_rules.rs": "6c433434852a1e520f63e9484540797c47c7c57b93eab77aa3715a4532c9b018",
+      "crates/oriole/tests/parameter_values.rs": "d76f7e5b47b56fdede165a56f19f9f7a982bf75611f76ee74692bfd9cc9cb503",
+      "crates/oriole/tests/parser.rs": "e346202e0c762ae0c8ddc07eae6536941296b8f25076d4d46de1c42ac9722491",
+      "crates/oriole/tests/positions.rs": "330f2849aa2f33dfcbb155df5a74aeaad80b9eb68f827c887634fae763789c4d",
+      "crates/oriole/tests/prolog.rs": "bfd55c9767fabfbeaf26472c1514eed5f6cf9d9648082cf637e7cf2f833c2c63",
+      "crates/oriole/tests/raw_tokens.rs": "3675681faa7b5e5c8e80a4ebc82914ca57c72a819542dc5b81bbd3c0fac06b7e",
+      "crates/oriole/tests/recycling.rs": "12132edd1e33b8fb0568b234bbf7d48e5de38873cc27d331436a4ca6c2b5fb15",
+      "crates/oriole/tests/text_coalescing.rs": "955fba3e810fd0fabf564d3504c89106bec68f6c137c9d4da2766ec60913666f",
+      "crates/oriole_cli/Cargo.toml": "f51a77480b35fef0c59a7f3b06194d1692f3984d7d87468445974c6836804c5d",
+      "crates/oriole_cli/src/main.rs": "b1556990da5da6a3b91ed66e857e79d26ba4084f503be240649a10cea3ed6083",
+      "crates/oriole_expat/Cargo.toml": "8ec06203f4a6ec67f6eebac4ef6e1d34de34e933c8fc057f9e23d3df3f3bd215",
+      "crates/oriole_expat/src/content_model.rs": "0dd9baea94af469fc3e702b6504c5a976a256f2db38e96ee3eab8d2cd6f066f2",
+      "crates/oriole_expat/src/lib.rs": "4d5d31959d88d40719743d603e11ce7f6d76df225edb5b5a59271986be36d054",
+      "crates/oriole_expat/src/tests.rs": "842490fe627fb3bec1893a815ee2ed29ed48cf1d5855ce1e963cb70399bca632",
+      "crates/oriole_expat/tests/memory.rs": "9cc50db9746bd5f8d975883a7e39653469fce08f7ca92b9f0b14f19a0c9366d6",
+      "crates/oriole_storage/Cargo.toml": "d009126c142efea7ad1b1017ff13c071330e885a43cc5e39b9f84a5168fd51d6",
+      "crates/oriole_storage/src/allocator.rs": "d57613751504f6881ba6118dc795e8b5b731d7fd244ac46ba319ce9205fcaf3b",
+      "crates/oriole_storage/src/hashing.rs": "f97040ee70e3a6147edf896778748aad7845c12f873b3b2688e2ad84989c4e80",
+      "crates/oriole_storage/src/lib.rs": "bef77200e81d340776f2e858cf679d01aa8986c27da208bc48a9afec3e069c2c",
+      "crates/oriole_storage/src/queue.rs": "944ae27c4cc1d453b77ce34c505b4b194ad37b42568d3fe24ebb0c5cece784a7",
+      "crates/oriole_storage/src/shared.rs": "52def3c62ee0563c71c051cfe4c759aaddc16b378f413969592af80cf2fdf13b",
+      "crates/oriole_storage/src/string.rs": "539771cdd0f24996d42598d002df7fc34090a4b38b3d33792777d2a3dff1dbaa",
+      "crates/oriole_storage/src/tests.rs": "561ab8d0ece0e6d3f4b2e075798e0d6990a48b43b065ec3dd254473c99dd445f",
+      "crates/oriole_storage/src/tracking.rs": "c6f53efa24a5c31dad71d597c42612748c3209796507a2b2eafb7368a1b69cc6",
+      "crates/oriole_storage/src/try_lock.rs": "e08e75c6b2a1410d74d3fda3667e7f031dfade5eb26e0d5db5b98f6233ce6fde",
+      "include/expat.h": "572864443d8c3c105017e50a2421881d4afaf5e3276a1741b68a5a9c26967d49",
+      "tests/c/adversarial.c": "abc52bb8d44d0bb5f9914e594b6ca2e0a7d8e6c5c9c293699a73e00dfa53793d",
+      "tests/c/allocations.c": "1ccf833e2d8d4ec75daf1524547dd7671592c7283e5a0d45b849cacbdb662f59",
+      "tests/c/integration.c": "9e96615c8a3a3ee0b58ab1a72a070ca98962c360498461471c8da8036f68ebad"
+    },
+    "library_sha256": {
+      "liboriole_expat.so": "9cc87e9bc5c22dfc33eba7bf074908421dd7b1c303920f9c8021eab887793213",
+      "liboriole_expat.a": "b803db7dc365b54ef4f1070b9057d0f284fdbd76f3c6549f94eb431be85f60eb"
+    },
+    "commands": [
+      {
+        "label": "build",
+        "command": [
+          "taskset",
+          "-c",
+          "3,4",
+          "cargo",
+          "+ohm",
+          "build",
+          "--release",
+          "-p",
+          "oriole_expat"
+        ],
+        "exit_code": 0,
+        "seconds": 0.09721732139587402,
+        "log_sha256": "90c8a1a69c0155761cff4bfe0e61bbee007961d2b96729d2127c2e0c291489dd"
+      },
+      {
+        "label": "test",
+        "command": [
+          "taskset",
+          "-c",
+          "3,4",
+          "cargo",
+          "+ohm",
+          "-Zohm-defaults=no",
+          "test",
+          "--workspace",
+          "--all-targets"
+        ],
+        "exit_code": 0,
+        "seconds": 126.78239941596985,
+        "log_sha256": "0d532b3fca9d7cd1ef4d442ce811eeeed075a51a69b449d3058619570eaa2351"
+      },
+      {
+        "label": "clippy",
+        "command": [
+          "taskset",
+          "-c",
+          "3,4",
+          "cargo",
+          "+ohm",
+          "-Zohm-defaults=no",
+          "clippy",
+          "--workspace",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit_code": 0,
+        "seconds": 6.029815912246704,
+        "log_sha256": "3855c4fca8697417b6a41f08bcf4ed19af4e253e60a4b0b5217d459147f0c165"
+      },
+      {
+        "label": "fmt",
+        "command": [
+          "taskset",
+          "-c",
+          "3,4",
+          "cargo",
+          "+ohm",
+          "fmt",
+          "--all",
+          "--",
+          "--check"
+        ],
+        "exit_code": 0,
+        "seconds": 0.36180639266967773,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "profile": "release; repository defaults; Ohm local defaults",
+    "rustc": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+    "rust_checks": {
+      "workspace_all_targets_passed": 367,
+      "commands": "commands.json",
+      "validation_toolchain": "cargo +ohm -Zohm-defaults=no for test/clippy; normal Ohm defaults for release/fmt",
+      "initial_failures": [
+        "sandbox read-only error",
+        "Ohm cached No space left on device; ample free space verified; no files deleted"
+      ],
+      "workspace_documentation_passed": 1,
+      "workspace_total_passed": 368
+    }
+  },
+  "author_validation": {
+    "decision": "Validated isolated candidate for root integration; this handoff does not perform integration.",
+    "problem": "Streaming ATTLIST type capture grew geometrically even though the complete enumeration was already available, consuming reallocation retries and causing 20 previously passing upstream configurations to fail when composed with buffer work.",
+    "change": "Reserve a checked bound once from the current valid enumeration suffix when its first member is captured. Keep handler-sensitive capture, lexical provenance, source positions, stored defaults and work charges unchanged.",
+    "source_files": 64,
+    "changed_files": [
+      "crates/oriole/src/dtd/attlist.rs"
+    ],
+    "source_sha256": "e66cc6a001d18eff9c24e81420cf4c77d8b86f596db822030cbd977c43e2e51e",
+    "patch_sha256": "059e5cf4556b4f114f0534cb405c8bca28220801f4a1cb6c3054a7639da3390a",
+    "library_sha256": "9cc87e9bc5c22dfc33eba7bf074908421dd7b1c303920f9c8021eab887793213",
+    "static_sha256": "b803db7dc365b54ef4f1070b9057d0f284fdbd76f3c6549f94eb431be85f60eb",
+    "scoped_checks": 338,
+    "original_targeted_configurations": 36,
+    "api": {
+      "passed": 4323,
+      "failed": 417,
+      "timed_out": false,
+      "comparisons": [
+        {
+          "baseline": "composed8d",
+          "baseline_file": "/tmp/oriole-buffers-composed/upstream-api/results.json",
+          "baseline_sha256": "c4bc6259d7e963ab8ec7e5f430ee9c726fa72a9896e6bb501f3a0a4139eaf3d4",
+          "passed": 4303,
+          "failed": 437,
+          "improved": 20,
+          "regressed": 0,
+          "changed_records": 20,
+          "regressed_test_counts": {}
+        },
+        {
+          "baseline": "buffers9f",
+          "baseline_file": "/tmp/oriole-buffer-minimum/upstream-api/results.json",
+          "baseline_sha256": "af668830144348c0a3c62b112928bfc97523be63d5c27dca9010c315dee7e2a1",
+          "passed": 4311,
+          "failed": 429,
+          "improved": 12,
+          "regressed": 0,
+          "changed_records": 12,
+          "regressed_test_counts": {}
+        },
+        {
+          "baseline": "attlist0546",
+          "baseline_file": "/tmp/oriole-attlist-9074/upstream-api/results.json",
+          "baseline_sha256": "1da47e097366828998bf33a4e3e5f3a9ceac5fd360d3909669230233fe7def45",
+          "passed": 4115,
+          "failed": 625,
+          "improved": 220,
+          "regressed": 12,
+          "changed_records": 232,
+          "regressed_test_counts": {
+            "test_nsalloc_realloc_binding_uri": 12
+          }
+        }
+      ]
+    },
+    "independent_callbacks": {
+      "candidate_vs_control_cases": 3764,
+      "full_record_differences": 0,
+      "additional_reference_cases": 108,
+      "full_final_and_nondefault_differences": 0,
+      "engine_cases": 7636
+    },
+    "native_programs": 6,
+    "native_scenarios_per_linkage": 327,
+    "memory_cases": 16,
+    "memory_candidate_peak_delta_bytes": [
+      -1,
+      1
+    ],
+    "captured_selected_block_bytes": [
+      56,
+      62
+    ],
+    "allocator_calls_saved_per_memory_case": 2,
+    "reallocations_saved_per_memory_case": 2,
+    "omitted_binary_hashes": [
+      {
+        "path": "/tmp/oriole-attlist-capture-reserve/upstream-api/liboriole_expat.so",
+        "sha256": "9cc87e9bc5c22dfc33eba7bf074908421dd7b1c303920f9c8021eab887793213"
+      },
+      {
+        "path": "/tmp/oriole-attlist-capture-reserve/upstream-api/runtests",
+        "sha256": "8a423d9e734f6064951bba5be857bba70ba8d18995b087609c26e6e89c20b650"
+      },
+      {
+        "path": "/tmp/oriole-attlist-capture-reserve/native/allocations-static",
+        "sha256": "cb38778c1da2b4d40f1f0a5824f0f67125eeea31f2618b7b54bcb4bb6cf8501d"
+      },
+      {
+        "path": "/tmp/oriole-attlist-capture-reserve/native/integration-static",
+        "sha256": "9f5f5f4c55052d82cd3b53d587d3735ee01cc2978d04ca585b3c73c6158a340c"
+      },
+      {
+        "path": "/tmp/oriole-attlist-capture-reserve/native/adversarial-shared",
+        "sha256": "d369c64f5a8881ef439a91d3d975d5aace474820f671a59ad991769425cfb31c"
+      },
+      {
+        "path": "/tmp/oriole-attlist-capture-reserve/native/adversarial-static",
+        "sha256": "a46c6d8d9597195542eb9b66be10ff879f8ed35c2458d350cb1f840edbfa9996"
+      },
+      {
+        "path": "/tmp/oriole-attlist-capture-reserve/native/integration-shared",
+        "sha256": "5313291836ee755569bf2289142c6ebba9ce7b6292d3bc75ad65672a69563748"
+      },
+      {
+        "path": "/tmp/oriole-attlist-capture-reserve/native/allocations-shared",
+        "sha256": "9abc40a429709e29f455ea7e4b05fecb620f937e8ef7597ba4c4ad1fa0cea292"
+      },
+      {
+        "path": "/tmp/oriole-attlist-buffer-allocation/runtests-attlist",
+        "sha256": "1acb8831def7ffb183f257744f879dbc20ca5bc87e06ef14dc8cc82115ac2cac"
+      },
+      {
+        "path": "/tmp/oriole-attlist-buffer-allocation/runtests-combined",
+        "sha256": "3980dc5c5b38d2325512e78294fb4f6a82f64a2b17f8984857325ec816b12249"
+      },
+      {
+        "path": "/tmp/oriole-attlist-buffer-allocation/runtests-buffers",
+        "sha256": "c4f2b0c17c418a54a278bf0fa9f74d9e6a3bfcd470dd0d50460ea1bd7ded85a0"
+      },
+      {
+        "path": "/tmp/oriole-attlist-capture-reserve/liboriole_expat.a",
+        "sha256": "b803db7dc365b54ef4f1070b9057d0f284fdbd76f3c6549f94eb431be85f60eb"
+      },
+      {
+        "path": "/tmp/oriole-attlist-capture-reserve/liboriole_expat.so",
+        "sha256": "9cc87e9bc5c22dfc33eba7bf074908421dd7b1c303920f9c8021eab887793213"
+      },
+      {
+        "path": "/tmp/oriole-attlist-capture-reserve/runtests",
+        "sha256": "c88db9b54bb0b80e56d0e8e6c018bb537ffb27cb53bd68bd9e5207e655108bb5"
+      }
+    ],
+    "limitations": [
+      "For valid enums, capacity counts only current remaining enum without raw XML whitespace or later defaults; raw alias representatives conservatively bound decoded bytes.",
+      "A malformed no-close suffix can reserve before its later Syntax error; selected NoMemory may therefore occur earlier. Early reservation can also allocate for remaining members before a handler is later disabled. Existing selected allocation limits still apply.",
+      "Only actual emitted/stored payloads retain their prior logical work accounting; reservation adds no expansion charge and changes no configured caps.",
+      "417 original API failures remain. Twelve historical regressions versus 0546 are inherited from buffer work (namespace binding URI reallocation schedule); no regression versus immediate 8d or buffers-only 9f.",
+      "No throughput claim or new benchmark belongs to this allocation change."
+    ],
+    "source_history": "The reconstructed pre-test patch exactly matches original dd1f36d5. An early review recorded source-file hash f9f7d145 while test/format additions were in progress; those exact intermediate bytes were not separately archived. They are not presented as reconstructed evidence. Final review and all transferred runtime evidence bind to e66cc6 plus unchanged 9cc87.",
+    "harness_history": "The diagnostic tracing script initially named /tmp/oriole-buffer-minimum/liboriole_expat.so; linker failure was reported in session. It was corrected to /tmp/oriole-buffer-minimum/combined/liboriole_expat.so. Original script preserved; successful rerun overwrote the failed build log, so no original failure log is claimed."
+  },
+  "source_identity_verified": true,
+  "root_validation_commands": [
+    {
+      "label": "oracle",
+      "command": [
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3",
+        "-I",
+        "-S",
+        "/tmp/oriole-buffers-final/oracle.py",
+        "/tmp/oriole-buffers-final/liboriole_expat.so",
+        "/tmp/oriole-buffers-final/oracle.json"
+      ],
+      "exit_code": 0,
+      "seconds": 5.267495393753052
+    },
+    {
+      "label": "alias",
+      "command": [
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3",
+        "-I",
+        "-S",
+        "/tmp/oriole-buffers-final/alias_oracle.py",
+        "/tmp/oriole-buffers-final/liboriole_expat.so",
+        "/tmp/oriole-buffers-final/alias.json"
+      ],
+      "exit_code": 0,
+      "seconds": 0.5122826099395752
+    },
+    {
+      "label": "alias-baseline",
+      "command": [
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3",
+        "-I",
+        "-S",
+        "/tmp/oriole-buffers-final/alias_oracle.py",
+        "/tmp/oriole-buffers-final/control.so",
+        "/tmp/oriole-buffers-final/alias-baseline.json"
+      ],
+      "exit_code": 0,
+      "seconds": 0.5060231685638428
+    },
+    {
+      "label": "differential",
+      "command": [
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3",
+        "tools/differential.py",
+        "--library",
+        "/tmp/oriole-buffers-final/liboriole_expat.so",
+        "--reference",
+        "/tmp/oriole-buffers-final/control.so",
+        "--output",
+        "/tmp/oriole-buffers-final/differential",
+        "--generated",
+        "100",
+        "--chunks",
+        "1",
+        "2",
+        "3",
+        "7",
+        "64",
+        "4096",
+        "--strict"
+      ],
+      "exit_code": 0,
+      "seconds": 10.809402704238892
+    },
+    {
+      "label": "malformed",
+      "command": [
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3",
+        "-I",
+        "-S",
+        "/tmp/oriole-buffers-final/malformed_oracle.py",
+        "/tmp/oriole-buffers-final/liboriole_expat.so",
+        "/tmp/oriole-buffers-final/malformed.json"
+      ],
+      "exit_code": 0,
+      "seconds": 0.41796278953552246
+    },
+    {
+      "label": "malformed-text",
+      "command": [
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3",
+        "-I",
+        "-S",
+        "/tmp/oriole-buffers-final/malformed_probe.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.5915627479553223
+    },
+    {
+      "label": "streaming",
+      "command": [
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3",
+        "-I",
+        "-S",
+        "/tmp/oriole-buffers-final/streaming_probe.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.9083142280578613
+    },
+    {
+      "label": "custom",
+      "command": [
+        "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3",
+        "-I",
+        "-S",
+        "/tmp/oriole-buffers-final/alias_probes.py"
+      ],
+      "exit_code": 0,
+      "seconds": 18.759946584701538
+    }
+  ],
+  "root_custom_encoding": {
+    "control_sha256": "8d2ab7be6545e44f47fc3d7866ac32e3977d018629d6357333b873f3d323ed5b",
+    "candidate_sha256": "9cc87e9bc5c22dfc33eba7bf074908421dd7b1c303920f9c8021eab887793213",
+    "rows": [
+      {
+        "case": "full-events",
+        "comparisons": 28812,
+        "all_differences": 0,
+        "script_sha256": "0af3d2174d7acfa3cd98725b3ecd9986338b242f106511e25519b902e7976437"
+      },
+      {
+        "case": "external-semantic-compare",
+        "comparisons": 7644,
+        "all_differences": 0,
+        "script_sha256": "fa517fb726fc9ff42dec383291541c384aeac64534486513887ddb59532df517"
+      }
+    ]
+  },
+  "root_differential": {
+    "status": "passed",
+    "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39",
+    "seed": 20260910,
+    "cases": 1518,
+    "scope": "Full-document status, error code, callback stream, and final location. Adjacent text callbacks are coalesced only in the separately reported semantic comparison. No differences are waived.",
+    "capture_callbacks": true,
+    "libraries": {
+      "reference": {
+        "path": "/tmp/oriole-buffers-final/control.so",
+        "sha256_before": "8d2ab7be6545e44f47fc3d7866ac32e3977d018629d6357333b873f3d323ed5b",
+        "command": [
+          "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3",
+          "/home/dev-user/code/oss/oriole/tools/differential.py",
+          "--library",
+          "/tmp/oriole-buffers-final/control.so",
+          "--worker",
+          "/tmp/oriole-buffers-final/differential/corpus.json",
+          "--output",
+          "/tmp/oriole-buffers-final/differential/reference.json"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "sha256_after": "8d2ab7be6545e44f47fc3d7866ac32e3977d018629d6357333b873f3d323ed5b"
+      },
+      "oriole": {
+        "path": "/tmp/oriole-buffers-final/liboriole_expat.so",
+        "sha256_before": "9cc87e9bc5c22dfc33eba7bf074908421dd7b1c303920f9c8021eab887793213",
+        "command": [
+          "/home/dev-user/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3",
+          "/home/dev-user/code/oss/oriole/tools/differential.py",
+          "--library",
+          "/tmp/oriole-buffers-final/liboriole_expat.so",
+          "--worker",
+          "/tmp/oriole-buffers-final/differential/corpus.json",
+          "--output",
+          "/tmp/oriole-buffers-final/differential/oriole.json"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "sha256_after": "9cc87e9bc5c22dfc33eba7bf074908421dd7b1c303920f9c8021eab887793213"
+      }
+    },
+    "differences": [],
+    "versions": {
+      "reference": "oriole_0.0.1",
+      "oriole": "oriole_0.0.1"
+    },
+    "difference_counts": {
+      "status": 0,
+      "error": 0,
+      "normalized_events": 0,
+      "events": 0,
+      "position": 0,
+      "callback_errors": 0
+    },
+    "semantic_pass": true,
+    "exact_pass": true
+  },
+  "native_projects": {
+    "project_geomean_speedup": 1.0010076962935435,
+    "project_geomean_oriole_over_expat": 2.515471001288624,
+    "positive": 12,
+    "rows": [
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9885466973651216,
+        "oriole_over_expat": 1.1509569037249154,
+        "milliseconds": {
+          "control": 0.15177799999999997,
+          "candidate": 0.1536675,
+          "expat": 0.133399
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 0.9865195210591765,
+        "oriole_over_expat": 1.2859609239281962,
+        "milliseconds": {
+          "control": 0.1769755,
+          "candidate": 0.1788335,
+          "expat": 0.13961099999999999
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9893054710083461,
+        "oriole_over_expat": 1.2924466232342127,
+        "milliseconds": {
+          "control": 0.148793,
+          "candidate": 0.15049099999999999,
+          "expat": 0.11627250000000001
+        }
+      },
+      {
+        "workload": "batik",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.9948143311982836,
+        "oriole_over_expat": 1.4163713417820745,
+        "milliseconds": {
+          "control": 0.172943,
+          "candidate": 0.1734545,
+          "expat": 0.12246400000000003
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.004148035643525,
+        "oriole_over_expat": 2.381256710603698,
+        "milliseconds": {
+          "control": 0.4548645,
+          "candidate": 0.4529855,
+          "expat": 0.185857
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.005252205375358,
+        "oriole_over_expat": 2.5769581767028393,
+        "milliseconds": {
+          "control": 0.555693,
+          "candidate": 0.5575260000000001,
+          "expat": 0.217396
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9846080433884419,
+        "oriole_over_expat": 2.6073479073606527,
+        "milliseconds": {
+          "control": 0.4269475,
+          "candidate": 0.4296075,
+          "expat": 0.1666015
+        }
+      },
+      {
+        "workload": "docbook",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.9897451912891658,
+        "oriole_over_expat": 2.8672633078616756,
+        "milliseconds": {
+          "control": 0.547097,
+          "candidate": 0.5540149999999999,
+          "expat": 0.1943085
+        }
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9892326377296061,
+        "oriole_over_expat": 7.1701732505772595,
+        "milliseconds": {
+          "control": 15.2633635,
+          "candidate": 15.4294985,
+          "expat": 2.1612915
+        }
+      },
+      {
+        "workload": "generated-entities",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9727593517773745,
+        "oriole_over_expat": 7.137418169694698,
+        "milliseconds": {
+          "control": 14.788917,
+          "candidate": 15.1570355,
+          "expat": 2.1699425
+        }
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9886836723013649,
+        "oriole_over_expat": 5.144200840110949,
+        "milliseconds": {
+          "control": 11.43109,
+          "candidate": 11.537408499999998,
+          "expat": 2.264449
+        }
+      },
+      {
+        "workload": "generated-rare-declarations",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.004144801541304,
+        "oriole_over_expat": 5.004273464963556,
+        "milliseconds": {
+          "control": 11.82149,
+          "candidate": 11.7461595,
+          "expat": 2.348942
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9870033739710039,
+        "oriole_over_expat": 3.187579882450694,
+        "milliseconds": {
+          "control": 0.676974,
+          "candidate": 0.6771105000000001,
+          "expat": 0.2128675
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0102543018570287,
+        "oriole_over_expat": 3.380168084239974,
+        "milliseconds": {
+          "control": 0.7501455,
+          "candidate": 0.734617,
+          "expat": 0.216244
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.979788991422033,
+        "oriole_over_expat": 3.5554863301787587,
+        "milliseconds": {
+          "control": 0.6570075,
+          "candidate": 0.6759425000000001,
+          "expat": 0.189885
+        }
+      },
+      {
+        "workload": "gtk",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.9932354859937953,
+        "oriole_over_expat": 3.692761684921612,
+        "milliseconds": {
+          "control": 0.709264,
+          "candidate": 0.7166690000000001,
+          "expat": 0.19350649999999997
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 0.9802928622265565,
+        "oriole_over_expat": 3.4547223698490037,
+        "milliseconds": {
+          "control": 1.56606,
+          "candidate": 1.585166,
+          "expat": 0.45430299999999996
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0170149852424226,
+        "oriole_over_expat": 3.393745780784928,
+        "milliseconds": {
+          "control": 1.8210455,
+          "candidate": 1.7947765,
+          "expat": 0.527926
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.039097303139027,
+        "oriole_over_expat": 3.876962126604904,
+        "milliseconds": {
+          "control": 1.5857115,
+          "candidate": 1.538789,
+          "expat": 0.384914
+        }
+      },
+      {
+        "workload": "maven",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0216457208029015,
+        "oriole_over_expat": 3.5633801959154336,
+        "milliseconds": {
+          "control": 1.799966,
+          "candidate": 1.7717484999999997,
+          "expat": 0.49424799999999997
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0017196940767648,
+        "oriole_over_expat": 3.093284146375231,
+        "milliseconds": {
+          "control": 89.433951,
+          "candidate": 89.987415,
+          "expat": 29.108258000000003
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0214587137028408,
+        "oriole_over_expat": 3.2464769935190865,
+        "milliseconds": {
+          "control": 96.775404,
+          "candidate": 96.335191,
+          "expat": 29.17373
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 1.0138431218286552,
+        "oriole_over_expat": 3.0697311022898592,
+        "milliseconds": {
+          "control": 88.984952,
+          "candidate": 87.769942,
+          "expat": 28.968397
+        }
+      },
+      {
+        "workload": "vulkan",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 1.0187663778377554,
+        "oriole_over_expat": 3.2534259588345025,
+        "milliseconds": {
+          "control": 95.877776,
+          "candidate": 93.186549,
+          "expat": 28.639782
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": false,
+        "speedup": 1.0086946831199606,
+        "oriole_over_expat": 1.8672644121739965,
+        "milliseconds": {
+          "control": 2.000351,
+          "candidate": 1.9831084999999997,
+          "expat": 1.0696780000000001
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 4096,
+        "namespaces": true,
+        "speedup": 1.0092326480183873,
+        "oriole_over_expat": 1.9923838466396007,
+        "milliseconds": {
+          "control": 2.1388545,
+          "candidate": 2.128114,
+          "expat": 1.0707895
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": false,
+        "speedup": 0.9935025928740094,
+        "oriole_over_expat": 1.88903897409379,
+        "milliseconds": {
+          "control": 1.954075,
+          "candidate": 1.966032,
+          "expat": 1.0370515
+        }
+      },
+      {
+        "workload": "wayland",
+        "chunk": 65536,
+        "namespaces": true,
+        "speedup": 0.9884548679440278,
+        "oriole_over_expat": 2.052191225491609,
+        "milliseconds": {
+          "control": 2.0908,
+          "candidate": 2.1152205,
+          "expat": 1.030284
+        }
+      }
+    ],
+    "processes": 420,
+    "iterations": {
+      "vulkan": 7,
+      "wayland": 64,
+      "maven": 128,
+      "batik": 512,
+      "gtk": 256,
+      "docbook": 256,
+      "generated-rare-declarations": 32,
+      "generated-entities": 32
+    }
+  },
+  "previous_composition": "benchmarks/results/2026-09-10/buffer-initial-composition/",
+  "limitation": "Actual consumer timing, W3C, sustained fuzz and PBS reports identify separate runtime/builds; no newer results are claimed by this report."
+}

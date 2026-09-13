@@ -1,0 +1,15 @@
+{
+  "files": {
+    "README.md": "63b36032d77e5456315a85294f06ce9dc7c260e3e6110b91849141eb9d8fd723",
+    "build.json": "9ef5f101bb822dc4c1c6078e5b3b24c912b2c3199b078469bea62bd3ab3f75e4",
+    "build.log": "91de42cf4ff5081b97a7e4f6a1e31d39c98fe386b0646a558aab59ac7a65928a",
+    "default-observations.tar.gz": "a8ea87c5cc6ea31d452db4c273753b1b51684105a2abe5de2f18200701baeb07",
+    "default-summary.json.gz": "6de70e818ae6c73d3c759b2dea9c8de88ac7165daeae4446a737f23bdfb6c029",
+    "namespaces-observations.tar.gz": "6a8bc14c74add0ee5e41570d5682bc0c41335cad17914194229f67d1b8a86807",
+    "namespaces-summary.json.gz": "3cdb471abaae4e1fa475f6c99cb5c7e582cceaa143c54951e905888ac92677d8",
+    "source.json": "49b9211b8ff211920ac913825fa232804b4710914525dfe952a3db099f2fcc06",
+    "source.tar.gz": "b38652bffc8c6595821125ccfb212fcc11eefcab755ae75e51b50873f704f384"
+  },
+  "library_sha256": "7864db1e17ab8cab81b3565ee75f715c8d35796fbf2cfba825b1e943923da989",
+  "baseline_revision": "a276f7f"
+}

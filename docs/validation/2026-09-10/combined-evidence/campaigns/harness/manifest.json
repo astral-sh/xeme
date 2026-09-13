@@ -1,0 +1,15 @@
+{
+  "README.md": "aee538dd62d156e0e1442a28f3ff569e840dacf58c2d2d64733b0d96eb400483",
+  "clippy.log": "0b31df8243315f2a1ab510d051ce3d6d9be0a9aa3f0a0110cbab65e98fab582e",
+  "final-asan-build.log": "88258b443a81e5a1c302ac83f7eeb71d911c0d81ee01b8d3cea440a54a596602",
+  "final-clippy.log": "1625c2c9403e4faf108f0bda49f075fa7500f68a624c741266bbf706d8411a4d",
+  "final-ffi-family-build.log": "c936866dd7d8086c25058ccb8f340e34e5d8c3541541f873b7e20ee83a01511f",
+  "final-fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "final-multibyte-build.log": "ae8298d9ca5bc331a82d117cb26c9dda762120974cbc6256df9b41e3ce53d982",
+  "independent-review.json": "b70095a4ff18faf1883409127315616bc7ccc4b991630aefedd1604176a0fb88",
+  "seed-manifest.json": "832cb383dd734a71ed4dbfd8d9f5ef53fd10ee99b3dff0877375cabc9c962712",
+  "seeds.tar.gz": "ea40ff901e76e6f9ee4ad0a5b112d651812ddecb54ac5ffaa682f4059f376295",
+  "source-manifest.json": "eaec47e7889e97a91b7d28d73cc0e02b74f93f75683f92c6382f7bb2f08078e1",
+  "validation.json": "957dc0ae1f5d9fd4526a6bebfb10ae3bfb2745737677a1df875b617e25dee87e",
+  "value-family.patch": "0ee7d8e7269f6f7a3b0204bda60603b2c49f9289a4a750b4a6363bb9e3d18a9f"
+}

@@ -1,0 +1,1759 @@
+{
+  "libraries": {
+    "/home/dev-user/.cache/oriole/expat-build/libexpat.so": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "/tmp/oriole-values-final-source/liboriole_expat.so": "f7e602e300daebedfc08854ed32adebeb656165cddc019dcc0b0226063f9f569"
+  },
+  "cases": 61,
+  "rows": [
+    {
+      "name": "latin1-le-bom",
+      "input_hex": "fffe4c20",
+      "protocol": "iso-8859-1",
+      "width": 0,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u00ff\u00feL ",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 19,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "latin1-le-bom",
+      "input_hex": "fffe4c20",
+      "protocol": "iso-8859-1",
+      "width": 1,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u00ff\u00feL ",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 19,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "latin1-le-bom",
+      "input_hex": "fffe4c20",
+      "protocol": "iso-8859-1",
+      "width": 2,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u00ff\u00feL ",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 19,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "latin1-le-bom",
+      "input_hex": "fffe4c20",
+      "protocol": "iso-8859-1",
+      "width": 3,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u00ff\u00feL ",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 19,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "latin1-be-bom",
+      "input_hex": "feff204c",
+      "protocol": "iso-8859-1",
+      "width": 0,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u00fe\u00ff L",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 19,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "latin1-be-bom",
+      "input_hex": "feff204c",
+      "protocol": "iso-8859-1",
+      "width": 1,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u00fe\u00ff L",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 19,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "latin1-be-bom",
+      "input_hex": "feff204c",
+      "protocol": "iso-8859-1",
+      "width": 2,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u00fe\u00ff L",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 19,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "latin1-be-bom",
+      "input_hex": "feff204c",
+      "protocol": "iso-8859-1",
+      "width": 3,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u00fe\u00ff L",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 19,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "latin1-utf8-bom",
+      "input_hex": "efbbbf58",
+      "protocol": "iso-8859-1",
+      "width": 0,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u00ef\u00bb\u00bfX",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 19,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "latin1-utf8-bom",
+      "input_hex": "efbbbf58",
+      "protocol": "iso-8859-1",
+      "width": 1,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u00ef\u00bb\u00bfX",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 19,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "latin1-utf8-bom",
+      "input_hex": "efbbbf58",
+      "protocol": "iso-8859-1",
+      "width": 2,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u00ef\u00bb\u00bfX",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 19,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "latin1-utf8-bom",
+      "input_hex": "efbbbf58",
+      "protocol": "iso-8859-1",
+      "width": 3,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "\u00ef\u00bb\u00bfX",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 19,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-le-ascii",
+      "input_hex": "610062006300",
+      "protocol": null,
+      "width": 0,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 0,
+        "error": 4,
+        "text": "a",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-le-ascii",
+      "input_hex": "610062006300",
+      "protocol": null,
+      "width": 1,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 0,
+        "error": 4,
+        "text": "a",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-le-ascii",
+      "input_hex": "610062006300",
+      "protocol": null,
+      "width": 2,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 0,
+        "error": 4,
+        "text": "a",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-le-ascii",
+      "input_hex": "610062006300",
+      "protocol": null,
+      "width": 3,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 0,
+        "error": 4,
+        "text": "a",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-be-ascii",
+      "input_hex": "006100620063",
+      "protocol": null,
+      "width": 0,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-be-ascii",
+      "input_hex": "006100620063",
+      "protocol": null,
+      "width": 1,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-be-ascii",
+      "input_hex": "006100620063",
+      "protocol": null,
+      "width": 2,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-be-ascii",
+      "input_hex": "006100620063",
+      "protocol": null,
+      "width": 3,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-le-markup",
+      "input_hex": "3c0072002f003e00",
+      "protocol": null,
+      "width": 0,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-le-markup",
+      "input_hex": "3c0072002f003e00",
+      "protocol": null,
+      "width": 1,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-le-markup",
+      "input_hex": "3c0072002f003e00",
+      "protocol": null,
+      "width": 2,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-le-markup",
+      "input_hex": "3c0072002f003e00",
+      "protocol": null,
+      "width": 3,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-be-markup",
+      "input_hex": "003c0072002f003e",
+      "protocol": null,
+      "width": 0,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-be-markup",
+      "input_hex": "003c0072002f003e",
+      "protocol": null,
+      "width": 1,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-be-markup",
+      "input_hex": "003c0072002f003e",
+      "protocol": null,
+      "width": 2,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-be-markup",
+      "input_hex": "003c0072002f003e",
+      "protocol": null,
+      "width": 3,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "r"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-le-bom",
+      "input_hex": "fffe610062006300",
+      "protocol": null,
+      "width": 0,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-le-bom",
+      "input_hex": "fffe610062006300",
+      "protocol": null,
+      "width": 1,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-le-bom",
+      "input_hex": "fffe610062006300",
+      "protocol": null,
+      "width": 2,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "auto-le-bom",
+      "input_hex": "fffe610062006300",
+      "protocol": null,
+      "width": 3,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "explicit-le-ascii",
+      "input_hex": "610062006300",
+      "protocol": "UTF-16LE",
+      "width": 0,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "explicit-le-ascii",
+      "input_hex": "610062006300",
+      "protocol": "UTF-16LE",
+      "width": 1,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "explicit-le-ascii",
+      "input_hex": "610062006300",
+      "protocol": "UTF-16LE",
+      "width": 2,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "explicit-le-ascii",
+      "input_hex": "610062006300",
+      "protocol": "UTF-16LE",
+      "width": 3,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "abc",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "explicit-utf8-ascii-nul",
+      "input_hex": "610062006300",
+      "protocol": "UTF-8",
+      "width": 0,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 0,
+        "error": 4,
+        "text": "a",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 4,
+        "text": "a",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "explicit-utf8-ascii-nul",
+      "input_hex": "610062006300",
+      "protocol": "UTF-8",
+      "width": 1,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 0,
+        "error": 4,
+        "text": "a",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 4,
+        "text": "a",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "explicit-utf8-ascii-nul",
+      "input_hex": "610062006300",
+      "protocol": "UTF-8",
+      "width": 2,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 0,
+        "error": 4,
+        "text": "a",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 4,
+        "text": "a",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "explicit-utf8-ascii-nul",
+      "input_hex": "610062006300",
+      "protocol": "UTF-8",
+      "width": 3,
+      "child": true,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 0,
+        "error": 4,
+        "text": "a",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 0,
+        "error": 4,
+        "text": "a",
+        "starts": [],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "prefix-success",
+      "input_hex": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d277072656669782d636f6e76273f3e0a3c8164806f633e48656c6c6f2c20776f726c643c2f8164806f633e",
+      "protocol": null,
+      "width": 0,
+      "child": false,
+      "unknown_handler": true,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "Hello, world",
+        "starts": [
+          "eoc"
+        ],
+        "converter_results": [
+          101,
+          101,
+          111,
+          111,
+          101,
+          111,
+          101,
+          101,
+          111,
+          111
+        ]
+      },
+      "candidate": {
+        "status": 0,
+        "error": 4,
+        "text": "",
+        "starts": [],
+        "converter_results": [
+          101
+        ]
+      }
+    },
+    {
+      "name": "prefix-success",
+      "input_hex": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d277072656669782d636f6e76273f3e0a3c8164806f633e48656c6c6f2c20776f726c643c2f8164806f633e",
+      "protocol": null,
+      "width": 1,
+      "child": false,
+      "unknown_handler": true,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "Hello, world",
+        "starts": [
+          "eoc"
+        ],
+        "converter_results": [
+          101,
+          101,
+          101,
+          101,
+          101,
+          101,
+          111,
+          111,
+          101,
+          101,
+          111,
+          111,
+          101,
+          101,
+          111,
+          111,
+          101,
+          111,
+          101,
+          101,
+          101,
+          101,
+          101,
+          101,
+          111,
+          111,
+          101,
+          101,
+          111,
+          111,
+          101,
+          101,
+          111,
+          111
+        ]
+      },
+      "candidate": {
+        "status": 0,
+        "error": 4,
+        "text": "",
+        "starts": [],
+        "converter_results": [
+          101
+        ]
+      }
+    },
+    {
+      "name": "prefix-success",
+      "input_hex": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d277072656669782d636f6e76273f3e0a3c8164806f633e48656c6c6f2c20776f726c643c2f8164806f633e",
+      "protocol": null,
+      "width": 3,
+      "child": false,
+      "unknown_handler": true,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "Hello, world",
+        "starts": [
+          "eoc"
+        ],
+        "converter_results": [
+          101,
+          101,
+          101,
+          101,
+          111,
+          111,
+          101,
+          101,
+          111,
+          111,
+          101,
+          111,
+          101,
+          101,
+          101,
+          101,
+          111,
+          111
+        ]
+      },
+      "candidate": {
+        "status": 0,
+        "error": 4,
+        "text": "",
+        "starts": [],
+        "converter_results": [
+          101
+        ]
+      }
+    },
+    {
+      "name": "prefix-long-name-1",
+      "input_hex": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d277072656669782d636f6e76273f3e0a3c616263646566676861626364656667686162636465666768696a6b6c806d806e806f80703e48693c2f616263646566676861626364656667686162636465666768696a6b6c806d806e806f80703e",
+      "protocol": null,
+      "width": 0,
+      "child": false,
+      "unknown_handler": true,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "Hi",
+        "starts": [
+          "abcdefghabcdefghabcdefghijklmnop"
+        ],
+        "converter_results": [
+          109,
+          109,
+          110,
+          110,
+          111,
+          111,
+          112,
+          112,
+          109,
+          110,
+          111,
+          112,
+          112,
+          109,
+          109,
+          110,
+          110,
+          111,
+          111,
+          112,
+          112
+        ]
+      },
+      "candidate": {
+        "status": 0,
+        "error": 4,
+        "text": "",
+        "starts": [],
+        "converter_results": [
+          109
+        ]
+      }
+    },
+    {
+      "name": "prefix-long-name-1",
+      "input_hex": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d277072656669782d636f6e76273f3e0a3c616263646566676861626364656667686162636465666768696a6b6c806d806e806f80703e48693c2f616263646566676861626364656667686162636465666768696a6b6c806d806e806f80703e",
+      "protocol": null,
+      "width": 1,
+      "child": false,
+      "unknown_handler": true,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "Hi",
+        "starts": [
+          "abcdefghabcdefghabcdefghijklmnop"
+        ],
+        "converter_results": [
+          109,
+          109,
+          109,
+          109,
+          109,
+          109,
+          110,
+          110,
+          109,
+          109,
+          110,
+          110,
+          109,
+          109,
+          110,
+          110,
+          111,
+          111,
+          109,
+          109,
+          110,
+          110,
+          111,
+          111,
+          109,
+          109,
+          110,
+          110,
+          111,
+          111,
+          112,
+          112,
+          109,
+          109,
+          110,
+          110,
+          111,
+          111,
+          112,
+          112,
+          109,
+          110,
+          111,
+          112,
+          112,
+          109,
+          109,
+          109,
+          109,
+          109,
+          109,
+          110,
+          110,
+          109,
+          109,
+          110,
+          110,
+          109,
+          109,
+          110,
+          110,
+          111,
+          111,
+          109,
+          109,
+          110,
+          110,
+          111,
+          111,
+          109,
+          109,
+          110,
+          110,
+          111,
+          111,
+          112,
+          112,
+          109,
+          109,
+          110,
+          110,
+          111,
+          111,
+          112,
+          112
+        ]
+      },
+      "candidate": {
+        "status": 0,
+        "error": 4,
+        "text": "",
+        "starts": [],
+        "converter_results": [
+          109
+        ]
+      }
+    },
+    {
+      "name": "prefix-long-name-1",
+      "input_hex": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d277072656669782d636f6e76273f3e0a3c616263646566676861626364656667686162636465666768696a6b6c806d806e806f80703e48693c2f616263646566676861626364656667686162636465666768696a6b6c806d806e806f80703e",
+      "protocol": null,
+      "width": 3,
+      "child": false,
+      "unknown_handler": true,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "Hi",
+        "starts": [
+          "abcdefghabcdefghabcdefghijklmnop"
+        ],
+        "converter_results": [
+          109,
+          109,
+          110,
+          110,
+          109,
+          109,
+          110,
+          110,
+          111,
+          111,
+          109,
+          109,
+          110,
+          110,
+          111,
+          111,
+          112,
+          112,
+          109,
+          110,
+          111,
+          112,
+          112,
+          109,
+          109,
+          109,
+          109,
+          110,
+          110,
+          109,
+          109,
+          110,
+          110,
+          111,
+          111,
+          112,
+          112,
+          109,
+          109,
+          110,
+          110,
+          111,
+          111,
+          112,
+          112
+        ]
+      },
+      "candidate": {
+        "status": 0,
+        "error": 4,
+        "text": "",
+        "starts": [],
+        "converter_results": [
+          109
+        ]
+      }
+    },
+    {
+      "name": "prefix-long-name-2",
+      "input_hex": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d277072656669782d636f6e76273f3e0a3c616263646566676861626364656667686162636465666768696a6b6c6d6e6f703e48693c2f616263646566676861626364656667686162636465666768696a6b6c6d6e6f703e",
+      "protocol": null,
+      "width": 0,
+      "child": false,
+      "unknown_handler": true,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "Hi",
+        "starts": [
+          "abcdefghabcdefghabcdefghijklmnop"
+        ],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "Hi",
+        "starts": [
+          "abcdefghabcdefghabcdefghijklmnop"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "prefix-long-name-2",
+      "input_hex": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d277072656669782d636f6e76273f3e0a3c616263646566676861626364656667686162636465666768696a6b6c6d6e6f703e48693c2f616263646566676861626364656667686162636465666768696a6b6c6d6e6f703e",
+      "protocol": null,
+      "width": 1,
+      "child": false,
+      "unknown_handler": true,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "Hi",
+        "starts": [
+          "abcdefghabcdefghabcdefghijklmnop"
+        ],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "Hi",
+        "starts": [
+          "abcdefghabcdefghabcdefghijklmnop"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "prefix-long-name-2",
+      "input_hex": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d277072656669782d636f6e76273f3e0a3c616263646566676861626364656667686162636465666768696a6b6c6d6e6f703e48693c2f616263646566676861626364656667686162636465666768696a6b6c6d6e6f703e",
+      "protocol": null,
+      "width": 3,
+      "child": false,
+      "unknown_handler": true,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "Hi",
+        "starts": [
+          "abcdefghabcdefghabcdefghijklmnop"
+        ],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "Hi",
+        "starts": [
+          "abcdefghabcdefghabcdefghijklmnop"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "prefix-nonascii",
+      "input_hex": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d277072656669782d636f6e76273f3e0a3cc17f2f3e",
+      "protocol": null,
+      "width": 0,
+      "child": false,
+      "unknown_handler": true,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "\u00c0"
+        ],
+        "converter_results": [
+          192,
+          192,
+          192
+        ]
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "\u00c0"
+        ],
+        "converter_results": [
+          192
+        ]
+      }
+    },
+    {
+      "name": "prefix-nonascii",
+      "input_hex": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d277072656669782d636f6e76273f3e0a3cc17f2f3e",
+      "protocol": null,
+      "width": 1,
+      "child": false,
+      "unknown_handler": true,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "\u00c0"
+        ],
+        "converter_results": [
+          192,
+          192,
+          192,
+          192,
+          192,
+          192,
+          192
+        ]
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "\u00c0"
+        ],
+        "converter_results": [
+          192
+        ]
+      }
+    },
+    {
+      "name": "prefix-nonascii",
+      "input_hex": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d277072656669782d636f6e76273f3e0a3cc17f2f3e",
+      "protocol": null,
+      "width": 3,
+      "child": false,
+      "unknown_handler": true,
+      "final": true,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "\u00c0"
+        ],
+        "converter_results": [
+          192,
+          192,
+          192,
+          192,
+          192
+        ]
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "\u00c0"
+        ],
+        "converter_results": [
+          192
+        ]
+      }
+    },
+    {
+      "name": "supplementary-name",
+      "input_hex": "3c646ff09080802f3e",
+      "protocol": null,
+      "width": 0,
+      "child": false,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 0,
+        "error": 4,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "do\ud800\udc00"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "supplementary-name",
+      "input_hex": "3c646ff09080802f3e",
+      "protocol": null,
+      "width": 1,
+      "child": false,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 0,
+        "error": 4,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "do\ud800\udc00"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "supplementary-name",
+      "input_hex": "3c646ff09080802f3e",
+      "protocol": null,
+      "width": 3,
+      "child": false,
+      "unknown_handler": false,
+      "final": true,
+      "reference": {
+        "status": 0,
+        "error": 4,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "do\ud800\udc00"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "name-case19-start",
+      "input_hex": "3ce0a4813e3c212d2d",
+      "protocol": null,
+      "width": 0,
+      "child": false,
+      "unknown_handler": false,
+      "final": false,
+      "reference": {
+        "status": 0,
+        "error": 4,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "\u0901"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "name-case19-start",
+      "input_hex": "3ce0a4813e3c212d2d",
+      "protocol": null,
+      "width": 1,
+      "child": false,
+      "unknown_handler": false,
+      "final": false,
+      "reference": {
+        "status": 0,
+        "error": 4,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "\u0901"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "name-case19-start",
+      "input_hex": "3ce0a4813e3c212d2d",
+      "protocol": null,
+      "width": 3,
+      "child": false,
+      "unknown_handler": false,
+      "final": false,
+      "reference": {
+        "status": 0,
+        "error": 4,
+        "text": "",
+        "starts": [],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "\u0901"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "name-case19-mid",
+      "input_hex": "3c61e0a4813e3c212d2d",
+      "protocol": null,
+      "width": 0,
+      "child": false,
+      "unknown_handler": false,
+      "final": false,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "a\u0901"
+        ],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "a\u0901"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "name-case19-mid",
+      "input_hex": "3c61e0a4813e3c212d2d",
+      "protocol": null,
+      "width": 1,
+      "child": false,
+      "unknown_handler": false,
+      "final": false,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "a\u0901"
+        ],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "a\u0901"
+        ],
+        "converter_results": []
+      }
+    },
+    {
+      "name": "name-case19-mid",
+      "input_hex": "3c61e0a4813e3c212d2d",
+      "protocol": null,
+      "width": 3,
+      "child": false,
+      "unknown_handler": false,
+      "final": false,
+      "reference": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "a\u0901"
+        ],
+        "converter_results": []
+      },
+      "candidate": {
+        "status": 1,
+        "error": 0,
+        "text": "",
+        "starts": [
+          "a\u0901"
+        ],
+        "converter_results": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "files": {
+    "oriole-prolog-all-tests.log.gz": {
+      "sha256": "ac07cdd59e08b74b858e3f9ed065ee1d6d86fa88520d6062c247e9fd8f6f7edc",
+      "original_sha256": "981ad2b735c1b78fef56a5f3d7ebeedb975d4534116ea2e975b48bb43ed22295"
+    },
+    "oriole-prolog-clippy.log.gz": {
+      "sha256": "053a3537748c4d932ae18ebc40e7218ab1d4bb4976e92a51af74ee340ddc1892",
+      "original_sha256": "17b2e6944f0c96002a7134af8bbc09e651349edccd2c5b54f582df12bc2e0403"
+    },
+    "oriole-prolog-final-build.log.gz": {
+      "sha256": "d9151c22c3f43a538c32bcb9401f3963fac69c64b3822fe3048738f45ce67e22",
+      "original_sha256": "f2066ca264b9a8598ecd436c70919e1efe1acea4098ad2a13b5d82d67bc049ec"
+    },
+    "oriole-prolog-focused-corpus.json.gz": {
+      "sha256": "c8897ef4b747a70159291be1f48b161a916150acc9219b2cbaa68dc0c3eb9809",
+      "original_sha256": "05b4c47fe13d18b5892c1b5b37f2b8dcbe9d541d42f8ce898eae418a196eddfd"
+    },
+    "oriole-prolog-oracle.json.gz": {
+      "sha256": "c212f9246863ac6d9bf2563c9f605f6b47ae9b8378868141076b20f8b548e03b",
+      "original_sha256": "1975712380e1b8bb4e2f9d4719b6baf1dd6f0ac7e7053294990371a19fd12ec4"
+    },
+    "oriole-prolog-probe.py.gz": {
+      "sha256": "a3b55d8fd850578eb8f1cc1e197fb2a61a9496b7320c2956d803009e83c40d27",
+      "original_sha256": "f81747ac7de535d5722c05e7758a24fc2ada551020af5b2643db4cf17c482a49"
+    },
+    "oriole-prolog-selected.json.gz": {
+      "sha256": "93b208676302298dc4644de9f773a924f0378c0637fafea6960fb187df31d2b6",
+      "original_sha256": "eff167e58dc14086bbd545176f181aac0acf8f3a36acb59f1e9c0dc4366ca33d"
+    },
+    "oriole-text-minimized.json.gz": {
+      "sha256": "2d3184d0e0bff82c4cc91ff27961b36b7b0c0a57908c059d03c3b56b267b7254",
+      "original_sha256": "096427b1fe60d21bfdff7605ed3cd72ac7bca1bbf8319153186e93670de9d342"
+    },
+    "prolog.patch.gz": {
+      "sha256": "ce87e90cd2f599e41aa538ac44ddff9ea5606e351159d04149a6cbbf5c9623ad",
+      "original_sha256": "fccc725e3b49419e5c31c81d53f99272d733fb9842e6f1d54bc9d11ee39d5d36"
+    },
+    "review.json.gz": {
+      "sha256": "c31d482e5df4e7e013864a0df6315b026110201c2cad2fa7117bdbb22e87c817",
+      "original_sha256": "4f5e10b8e7dff8728b816ab101670f9378ef483b264f515121c1ae2dbc64f3f4"
+    },
+    "source.json.gz": {
+      "sha256": "2fa01df56d7205510ad2b172119d67e87e51e81f8d3e4633961b4b253545c47c",
+      "original_sha256": "73290dfd3b9a1fcc83250968868b8862bca6e9ef058cc6be066f7aa77fe2e7d0"
+    },
+    "validate.py.gz": {
+      "sha256": "0a6b87a18021325a6b3783857135ff081276494531c28a56f14ed2ecb15bb852",
+      "original_sha256": "4022d2010995f532a5c1bae1b4f8a48b163f1916395208e726db720fe7eb59b5"
+    },
+    "validation.json.gz": {
+      "sha256": "9a1088797c9e600dc237bd27411c0959d919cb88a5fd40d4512c50e319e3781f",
+      "original_sha256": "f76ccca6aa563c1b7d981e1005e230f27909b7ffc662ab073c1fa8e36799eaba"
+    },
+    "validation.log.gz": {
+      "sha256": "3345ad5e1640f1fbf50bec2fab60ccf4c6ab7d7bd99ccf67dea4b0e0fcdccce3",
+      "original_sha256": "4f8dd5cd8fc3a5b05f260a5a4afd8bff0ab8f486e958d6ce78ede1fb9bd83c5c"
+    },
+    "expanded-summary.json.gz": {
+      "sha256": "dd51bb7e1ad32f5ec4075f035f544fbc378731f261864b1bcb62976946bc2cc0",
+      "original_sha256": "70526ddfbd663efcf826d51a2aa7fc305cfb60efa88290b1af1c7933d56feefb"
+    },
+    "expanded-compare.py.gz": {
+      "sha256": "990c165c04587312c6a6cd98374ee498496897408ec043d4820999ea0561f2c9",
+      "original_sha256": "b8a9918175f6bc68ab010342b0e1a27a1d4a3eeca77e9d5e1e5c04fa6c233cee"
+    }
+  },
+  "expanded_corpus": "../reference-diagnostics/expanded-corpus.json.gz",
+  "source_base": "../reference-diagnostics/",
+  "source_manifest": "source.json.gz",
+  "source_patch": "prolog.patch.gz",
+  "full_outputs": "Local paths and hashes are retained in expanded-summary.json.gz."
+}

@@ -1,0 +1,57 @@
+{
+  "reference": {
+    "/home/dev-user/.cache/oriole/expat-build/libexpat.so": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "/tmp/oriole-values-final-source/liboriole_expat.so": "f7e602e300daebedfc08854ed32adebeb656165cddc019dcc0b0226063f9f569"
+  },
+  "cases": 61,
+  "outcome_mismatches": 28,
+  "classifications": [
+    {
+      "tests": [
+        "test_ext_entity_latin1_utf16le_bom",
+        "test_ext_entity_latin1_utf16be_bom",
+        "test_ext_entity_latin1_utf16le_bom2",
+        "test_ext_entity_latin1_utf16be_bom2"
+      ],
+      "classification": "Concrete external-general-entity encoding compatibility gap",
+      "finding": "Explicit ISO-8859-1 child treats FF FE, FE FF, and EF BB BF as ordinary Latin1 characters in Expat; Oriole returns IncorrectEncoding19. All widths0/1/2/3 reproduce.",
+      "source": "Oriole encoding.rs266-275 rejects every sniffed/requested BOM conflict. Pinned Expat xmltok.c1571,1581,1595,1608 bypass BOM recognition for Latin1 in XML_CONTENT_STATE.",
+      "bounded_followup": "Introduce correct external-content initialization context rather than globally weakening document/DTD BOM checks; preserve explicit UTF16 and custom encoding contracts."
+    },
+    {
+      "tests": [
+        "test_ext_entity_utf16_unknown"
+      ],
+      "classification": "Concrete pre-existing external-general-entity UTF16LE autodetection gap",
+      "finding": "With no protocol, a\\0b\\0c\\0 fails InvalidToken4 in Expat but Oriole accepts abc at all widths0/1/2/3. Leading-NUL BE, LE markup beginning<\\0, BOM-labelled LE, and explicitUTF16LE all match. ExplicitUTF8 preserves InvalidToken4 in both.",
+      "source": "Oriole encoding.rs244 sniffs UTF16LE from any NUL second byte. Expat xmltok.c1636 explicitly declines that inference in XML_CONTENT_STATE while retaining it in document prolog state; first-byteNUL BE inference remains supported.",
+      "bounded_followup": "Context-sensitive LE sniffing; do not disable BE sniffing or <NUL detection."
+    },
+    {
+      "tests": [
+        "test_unknown_encoding_success",
+        "test_unknown_encoding_long_name_1"
+      ],
+      "classification": "Documented intentional custom-encoding boundary",
+      "finding": "Pinned MiscEncodingHandler prefix-conv returns ASCII101(e),111(o),109(m),110(n),112(p) through two-byte callbacks. Oriole rejects the first ASCII result4 as documented. Ordinary ASCII map-only long-name2 and nonASCII converter result192 pass in both.",
+      "source": "handlers.c349 prefix_converter; basic_tests.c4770/4805. Oriole encoding.rs459-463 rejects converter ASCII; C README57-63 and97ff documents restriction.",
+      "bounded_followup": "No defect fix in this layer; retaining alternate byte-form lexical provenance would be a separate design change."
+    },
+    {
+      "tests": [
+        "test_long_utf8_character",
+        "test_utf8_in_start_tags case19"
+      ],
+      "classification": "Documented intentional XMLName repertoire difference",
+      "finding": "Expat rejects U+10000 in name and U+0901 at name start. Oriole accepts both under XML1.0 FifthEdition; U+0901 after ASCII name starter succeeds in both. All widths0/1/3 match classification.",
+      "source": "basic_tests.c442 and case19 of test_utf8_in_start_tags (U+0901). Oriole names.rs NameStartChar ranges include U+037F..U+1FFF andU+10000..U+EFFFF.",
+      "bounded_followup": "Keep current documented FifthEdition behavior."
+    }
+  ],
+  "artifacts": {
+    "oriole-encoding-classification.py": "cac2143a9cc5bcc47c74f3dfbb83e36c5f56652beba97a7d7e0c028034bf5eb3",
+    "oriole-encoding-classification.json": "3c2530aa908109b0ff0bfc8d6eade2ccae627422f59c22386fa1197dcbc6dc1f",
+    "oriole-encoding-classification.log": "73986a4303f8d29adfe47ba9db9721949906a8af607eadcf5d6d262b98a45ff8"
+  },
+  "scope": "Read-only source inspection and direct public C API probes. No source edits or builds; callback invocation counts were recorded but excluded from semantic equivalence."
+}

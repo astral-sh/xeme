@@ -1,0 +1,80 @@
+{
+  "commands": [
+    [
+      "cargo",
+      "+ohm",
+      "build",
+      "--release",
+      "--locked",
+      "--offline",
+      "--manifest-path",
+      "benchmarks/inprocess/Cargo.toml"
+    ],
+    [
+      "cargo",
+      "+ohm",
+      "build",
+      "--release",
+      "--locked",
+      "--offline",
+      "--manifest-path",
+      "benchmarks/inprocess/Cargo.toml",
+      "--features",
+      "jemalloc"
+    ],
+    [
+      "cargo",
+      "+ohm",
+      "build",
+      "--release",
+      "--locked",
+      "--offline",
+      "--manifest-path",
+      "benchmarks/inprocess/Cargo.toml",
+      "--features",
+      "mimalloc"
+    ],
+    [
+      "cargo",
+      "+ohm",
+      "build",
+      "--release",
+      "--locked",
+      "--offline",
+      "--manifest-path",
+      "benchmarks/inprocess/Cargo.toml",
+      "--features",
+      "allocation-counts"
+    ]
+  ],
+  "environment": {
+    "CARGO_HOME": "/home/dev-user/.cache/toucan/cargo",
+    "CARGO_TARGET_DIR": "/home/dev-user/.cache/oriole/benchmark-target",
+    "CARGO_BUILD_BUILD_DIR": "/home/dev-user/.cache/ohm/build",
+    "CARGO_UNSTABLE_OHM_PROC_MACRO_TRUST": "all",
+    "CARGO_UNSTABLE_OHM_NATIVE_TOOL_TRUST": "all"
+  },
+  "source": "/tmp/oriole-hardening-snapshot",
+  "source_manifest_sha256": "d7aca518522066e99d52d3328faf6c2e281f8cefcb9196a1493cd3ebb1c9b60d",
+  "binaries": {
+    "liboriole_expat.a": "89ccad4e496af0ec0464c93a43c42dfd16471d46c18c039b49ac0f0058400d60",
+    "liboriole_expat.so": "2a78b6914cc8f747d57a9f59095a0beced17558952a09edf0864384589a2c77e",
+    "bench-system": "f659e982797a8cc25270d83f376a91e83df24601c5954a18c29835fc743d6f3d",
+    "bench-mimalloc": "219255377f78a869537ec0cdce6bc9042ed795aae755000417899198cb415dbe",
+    "bench-jemalloc": "7e49d43aee606e33ce469ce066e8da746adee8fe705ef1a64560ea04c3e01bf9",
+    "bench-counts": "d483ba47e8027058cb3e33da7a196470a42ea1f76a3c2917761fcc5b826b1d44"
+  },
+  "rustc": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+  "c_api_build_command": [
+    "cargo",
+    "+ohm",
+    "build",
+    "--release",
+    "--locked",
+    "--offline",
+    "-p",
+    "oriole_expat"
+  ],
+  "c_api_target_dir": "/home/dev-user/.cache/oriole/target",
+  "note": "Supplemental manifest assembled after the initial timings from the retained immutable source and executable artifacts; initial reports remain unchanged."
+}

@@ -1,0 +1,21 @@
+{
+  "scope": "Independent root review of isolated patch, then merged over namespace and XML version fixes",
+  "runtime_files": [
+    "crates/oriole/src/lib.rs",
+    "crates/oriole/src/dtd.rs",
+    "crates/oriole_expat/src/lib.rs"
+  ],
+  "findings": [
+    "No new unsafe runtime code; state is owned and uses existing selected-allocator shared read marker.",
+    "Acknowledgement only after actual external event delivery; precedes queued EndDoctype/root.",
+    "Absent-handler path explicitly differs from declined/read callbacks; unknown entity policy restores previous state.",
+    "Nested read-marker reset initially questioned, then confirmed by independent480-case exact oracle.",
+    "Combined workspace tests and strict workspace Clippy pass; repeated4632-case oracle retains identical420 prior diagnostic/Default differences and zero outcome differences."
+  ],
+  "library_sha256": "c0fd0b0c5340aaa4fb34b4c3771f683d849e7f5d9d81ca3fd4f111590c0562ba",
+  "files": {
+    "crates/oriole/src/lib.rs": "7a53de2cbd49b7facadaa9ffeedf095558f86f5fc17cc25c6dd0842e056a587b",
+    "crates/oriole/src/dtd.rs": "e6ecfdd620a0a7092faf5e4d9e397353048c684ed548d9517b385fe5fb28601d",
+    "crates/oriole_expat/src/lib.rs": "444b1dd0f9cd065d35d1ec7d54bc9d71db2808105a750dbcd5d6ca73e0b05af6"
+  }
+}

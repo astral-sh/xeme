@@ -1,0 +1,13 @@
+{
+  "base_commit": "a21cedc",
+  "workspace_tests": 208,
+  "strict_clippy": "pass",
+  "reviewed_debug_library_sha256": "be396376256ad04cc5d666def50ea123497cfc21397d2789af58ba8de635cfa1",
+  "release_libraries": {
+    "liboriole_expat.a": "eeeb554fed0e40d3ac2d6c96ecbb3736a30d64fdeeddeeaa9e9888ed7005a0df",
+    "liboriole_expat.so": "f7e602e300daebedfc08854ed32adebeb656165cddc019dcc0b0226063f9f569"
+  },
+  "source_manifest_sha256": "cc0f008866bc6b76c1a7cba72cb7b245d2a4eb26275a8928ead7dbd723afdd3b",
+  "release_build": "cargo +ohm build -p oriole_expat --release --locked --offline",
+  "matrix_scope": "Integrated matrices have no outcome or successful callback differences; malformed-input differences reproduce earlier Default baseline. Source formatting and two root regression tests followed the reviewed debug build."
+}

@@ -1,0 +1,226 @@
+{
+  "runtime_source": {
+    "Cargo.lock": "91042527c001a8d9c68acdb4c1df61f3dd6ada05ab6782e7eb65ad9b586fcf11",
+    "Cargo.toml": "bc83cd58b6b099db2c14e163f47bcaaffaafb4add9ce5cf0a6da97015667fbe9",
+    "crates/oriole/Cargo.toml": "42ccb4177f5974bb7539cfa188ba731eaeb1f427d72ed2e1cad1cc3b88ea95f8",
+    "crates/oriole/src/accounting.rs": "7169710f95e487d88a8a6fca9feab6bff4799973e73a784fa0923cf12030c441",
+    "crates/oriole/src/dtd.rs": "34744cfde640224e9f6f6966bc0171977719110165876f7598659fda72941264",
+    "crates/oriole/src/dtd/composition.rs": "5cc6d9a77d6fe73373899b7e132a7b3362ef2bcc24159da55fdb4359b1261d96",
+    "crates/oriole/src/dtd/grammar.rs": "4d179a00ada2ae1d7de40ece74d9ad9484971f8b44ac6364b5289395201c2c7a",
+    "crates/oriole/src/dtd/semantic.rs": "4f82dea2433219d2d6c40a6dee36f3f554c094b39d7d5298ce7b33d1d35c2a47",
+    "crates/oriole/src/encoding.rs": "5bded892c0b30b1ccec205cfdb70f51a46bf05adc3dbca3f6779a7bc0dc80567",
+    "crates/oriole/src/lib.rs": "99d04cef3d157149cb70e1b696dabc27b3db4ae2e53e5f4504be72b369d4a009",
+    "crates/oriole/src/names.rs": "029dd065e89ee502e753d2e41fbf4dedf7c293c1db1fd241fa5f4b941ce193ae",
+    "crates/oriole/src/recycling.rs": "0a8e1130b87d650699af6fc19595d98a2e62c00c07780c7695fd2d02b26814f1",
+    "crates/oriole/src/value.rs": "c9d43fcbec163acb1b1fc7906e95a35f01b1925441b8b26696b22e3968e51421",
+    "crates/oriole/src/value_lexer.rs": "33d8e447e61e81605f5c76f059932c5eb4601b544fb9acc2609ee648160bc69d",
+    "crates/oriole/tests/allocation.rs": "6612f923304775b087a28d42ef331c9dfa01e8138be19833dbcca16a6a833c64",
+    "crates/oriole/tests/amplification.rs": "29075bd9ab5a2fcffd43a4f31ff0b512f434e05c907b9e5d1e5478c59f156ceb",
+    "crates/oriole/tests/conditional.rs": "ab51046976caa8eb315022b65198cbfd28c9cf220d983e177a13b5b4290eecbb",
+    "crates/oriole/tests/declaration_tokens.rs": "ba05dd5a4604ea4f776ad8e6b9c313c7336debc37e279c291283cd419b0137bd",
+    "crates/oriole/tests/diagnostics.rs": "6ea5df60e64fe16077c6e1a72a414d999f220e114617b36e5f171f1323a6f816",
+    "crates/oriole/tests/encodings.rs": "1498f031792f51ba457e7c2b67217dc3413bacfe609e8c945d78914d10dc83ae",
+    "crates/oriole/tests/external_grammar.rs": "5304e0fa552b1d990a43aa426a4f7af65546605a1e959ede570154d3b9b1ec0c",
+    "crates/oriole/tests/external_headers.rs": "a08d06dcf7a84a4368379885d0addf7ceee6c7e56bc3a18ce2dcecd931ca6ee8",
+    "crates/oriole/tests/external_limits.rs": "77ae194e6094feb63209321bbdf1dc7b55d2b53bbb61a02be07ae0759a1a9ef5",
+    "crates/oriole/tests/external_values.rs": "3863f74f3cb93ac1c4fd88e5325428983cd89df813ab1bcb05e265d916ae6c37",
+    "crates/oriole/tests/foreign_dtd.rs": "e8308aa2dcb36bf97aec6329d8a837acfea57f63ccee77dc6efc184cb49a7e99",
+    "crates/oriole/tests/malformed_dtd.rs": "1786635f19d97bd128dba25efcf65403f6a7b3590678496a6edef8882999247a",
+    "crates/oriole/tests/multibyte.rs": "e064b20b03d7f54727ced926f80fec592d730a5229a0eb1d1c5b8bf2e1ce9aaf",
+    "crates/oriole/tests/parameter_values.rs": "d76f7e5b47b56fdede165a56f19f9f7a982bf75611f76ee74692bfd9cc9cb503",
+    "crates/oriole/tests/parser.rs": "5b79c68307d96224d53491f74cde6a3246e5c21159885bc08f7cb0d18e1af11b",
+    "crates/oriole/tests/prolog.rs": "bfd55c9767fabfbeaf26472c1514eed5f6cf9d9648082cf637e7cf2f833c2c63",
+    "crates/oriole/tests/raw_tokens.rs": "3675681faa7b5e5c8e80a4ebc82914ca57c72a819542dc5b81bbd3c0fac06b7e",
+    "crates/oriole/tests/recycling.rs": "12132edd1e33b8fb0568b234bbf7d48e5de38873cc27d331436a4ca6c2b5fb15",
+    "crates/oriole/tests/text_coalescing.rs": "955fba3e810fd0fabf564d3504c89106bec68f6c137c9d4da2766ec60913666f",
+    "crates/oriole_cli/Cargo.toml": "f51a77480b35fef0c59a7f3b06194d1692f3984d7d87468445974c6836804c5d",
+    "crates/oriole_cli/src/main.rs": "b1556990da5da6a3b91ed66e857e79d26ba4084f503be240649a10cea3ed6083",
+    "crates/oriole_expat/Cargo.toml": "8ec06203f4a6ec67f6eebac4ef6e1d34de34e933c8fc057f9e23d3df3f3bd215",
+    "crates/oriole_expat/README.md": "ddd4c2f9464f8938e2817ddd7e3e421e37ee8e6384b3a431676cd79bda4a291b",
+    "crates/oriole_expat/src/content_model.rs": "0dd9baea94af469fc3e702b6504c5a976a256f2db38e96ee3eab8d2cd6f066f2",
+    "crates/oriole_expat/src/lib.rs": "029b999adc44e6f64ec21a77354f591dc625b6e815bbc6eeea1de0a6dbf18f9f",
+    "crates/oriole_expat/src/tests.rs": "b24aca3f5b3fe0d3da3a5f1daabdf94f4419109719d85911dfbab82a35991846",
+    "crates/oriole_expat/tests/memory.rs": "4e996b9332aeb6d9f03ef69c35fa669e3903268977cfb767762b4e81a1332f09",
+    "crates/oriole_storage/Cargo.toml": "d009126c142efea7ad1b1017ff13c071330e885a43cc5e39b9f84a5168fd51d6",
+    "crates/oriole_storage/src/allocator.rs": "d57613751504f6881ba6118dc795e8b5b731d7fd244ac46ba319ce9205fcaf3b",
+    "crates/oriole_storage/src/hashing.rs": "f97040ee70e3a6147edf896778748aad7845c12f873b3b2688e2ad84989c4e80",
+    "crates/oriole_storage/src/lib.rs": "bef77200e81d340776f2e858cf679d01aa8986c27da208bc48a9afec3e069c2c",
+    "crates/oriole_storage/src/queue.rs": "944ae27c4cc1d453b77ce34c505b4b194ad37b42568d3fe24ebb0c5cece784a7",
+    "crates/oriole_storage/src/shared.rs": "52def3c62ee0563c71c051cfe4c759aaddc16b378f413969592af80cf2fdf13b",
+    "crates/oriole_storage/src/string.rs": "539771cdd0f24996d42598d002df7fc34090a4b38b3d33792777d2a3dff1dbaa",
+    "crates/oriole_storage/src/tests.rs": "561ab8d0ece0e6d3f4b2e075798e0d6990a48b43b065ec3dd254473c99dd445f",
+    "crates/oriole_storage/src/tracking.rs": "c6f53efa24a5c31dad71d597c42612748c3209796507a2b2eafb7368a1b69cc6",
+    "crates/oriole_storage/src/try_lock.rs": "e08e75c6b2a1410d74d3fda3667e7f031dfade5eb26e0d5db5b98f6233ce6fde",
+    "include/expat.h": "572864443d8c3c105017e50a2421881d4afaf5e3276a1741b68a5a9c26967d49",
+    "tests/c/adversarial.c": "abc52bb8d44d0bb5f9914e594b6ca2e0a7d8e6c5c9c293699a73e00dfa53793d",
+    "tests/c/allocations.c": "1ccf833e2d8d4ec75daf1524547dd7671592c7283e5a0d45b849cacbdb662f59",
+    "tests/c/integration.c": "3fc5c8f76797c88e10fa98936a7ca7b7376bc7ea9d85e9f27a63bd848a9faa3c"
+  },
+  "ci_source_sha256": {
+    ".github/workflows/ci.yml": "a7134e2ced72e1b7ae5d7f57a3b3487a6f95b2daa15d33bc9fdce821fa9b1d3a",
+    "tools/cpython/run.py": "b04bfdf2f6c8e4ae9ee3fa5ccebc7078f40f042fb6433e37ad1bb3656179d017",
+    "tools/cpython/text_fragmentation.py": "97b76ae05228951f85fab5887ed9727cb2d218016cd049a898080d2e0d6fc4b4",
+    "tools/cpython/test_run.py": "8dc454eec0e9ce515f02c9c1d3a4bcb218a37d4f7e39b0938f67a111970da40a",
+    "tools/cpython/README.md": "f703f7a8f42026238e3fb22fb5502e98522d33157219181b1bc0e0deb84d9665"
+  },
+  "rust_tests": 258,
+  "differential": {
+    "cases": 1518,
+    "difference_counts": {
+      "status": 0,
+      "error": 0,
+      "normalized_events": 0,
+      "events": 6,
+      "position": 0,
+      "callback_errors": 0
+    },
+    "semantic_pass": true,
+    "exact_pass": false
+  },
+  "malformed_cases": 2392,
+  "streaming_cases": 32,
+  "native_c_suites": 6,
+  "allocation_cases_per_linkage": 333,
+  "cpython": {
+    "original_tests": 803,
+    "original_failures": 2,
+    "original_skips": 31,
+    "additional_semantic_tests": 2,
+    "gate_exit_code": 0
+  },
+  "screen": [
+    {
+      "project": "vulkan",
+      "namespaces": false,
+      "median_seconds": {
+        "control": 0.107282197,
+        "candidate": 0.097337953,
+        "expat": 0.028876605
+      },
+      "speedup": 1.1021620415625546,
+      "expat_over_oriole": 0.29666336829581774
+    },
+    {
+      "project": "wayland",
+      "namespaces": false,
+      "median_seconds": {
+        "control": 0.003802693,
+        "candidate": 0.002488928,
+        "expat": 0.001087261
+      },
+      "speedup": 1.5278437142416332,
+      "expat_over_oriole": 0.4368390728859975
+    },
+    {
+      "project": "maven",
+      "namespaces": false,
+      "median_seconds": {
+        "control": 0.001988895,
+        "candidate": 0.001752443,
+        "expat": 0.000493772
+      },
+      "speedup": 1.1349270703811765,
+      "expat_over_oriole": 0.2817620886956095
+    },
+    {
+      "project": "batik",
+      "namespaces": false,
+      "median_seconds": {
+        "control": 0.000359983,
+        "candidate": 0.000350414,
+        "expat": 0.000145172
+      },
+      "speedup": 1.0273076988933092,
+      "expat_over_oriole": 0.41428710040123967
+    },
+    {
+      "project": "gtk",
+      "namespaces": false,
+      "median_seconds": {
+        "control": 0.000870255,
+        "candidate": 0.000774346,
+        "expat": 0.000220452
+      },
+      "speedup": 1.123858068615322,
+      "expat_over_oriole": 0.28469443892006935
+    },
+    {
+      "project": "docbook",
+      "namespaces": false,
+      "median_seconds": {
+        "control": 0.000627652,
+        "candidate": 0.000548946,
+        "expat": 0.000205394
+      },
+      "speedup": 1.1433765798457407,
+      "expat_over_oriole": 0.37416066425477185
+    },
+    {
+      "project": "vulkan",
+      "namespaces": true,
+      "median_seconds": {
+        "control": 0.110201961,
+        "candidate": 0.103230099,
+        "expat": 0.02902983
+      },
+      "speedup": 1.0675371046578188,
+      "expat_over_oriole": 0.2812147840718432
+    },
+    {
+      "project": "wayland",
+      "namespaces": true,
+      "median_seconds": {
+        "control": 0.00386037,
+        "candidate": 0.002562396,
+        "expat": 0.001085126
+      },
+      "speedup": 1.5065469974196024,
+      "expat_over_oriole": 0.42348099200904155
+    },
+    {
+      "project": "maven",
+      "namespaces": true,
+      "median_seconds": {
+        "control": 0.00221662,
+        "candidate": 0.001990307,
+        "expat": 0.000574653
+      },
+      "speedup": 1.1137075838049104,
+      "expat_over_oriole": 0.28872580963640276
+    },
+    {
+      "project": "batik",
+      "namespaces": true,
+      "median_seconds": {
+        "control": 0.000401529,
+        "candidate": 0.000369942,
+        "expat": 0.000146363
+      },
+      "speedup": 1.0853836547350666,
+      "expat_over_oriole": 0.39563769455752523
+    },
+    {
+      "project": "gtk",
+      "namespaces": true,
+      "median_seconds": {
+        "control": 0.000911082,
+        "candidate": 0.000812097,
+        "expat": 0.000250027
+      },
+      "speedup": 1.1218881488295118,
+      "expat_over_oriole": 0.30787824607159
+    },
+    {
+      "project": "docbook",
+      "namespaces": true,
+      "median_seconds": {
+        "control": 0.00072789,
+        "candidate": 0.000702533,
+        "expat": 0.000230531
+      },
+      "speedup": 1.0360936781617376,
+      "expat_over_oriole": 0.32814259258995665
+    }
+  ],
+  "scope": "Integrated runtime and explicit semantic CI gate; original upstream failures retained. Full Expat API matrix belongs to isolated coalescing source; no integrated full matrix/PBS campaign claimed."
+}

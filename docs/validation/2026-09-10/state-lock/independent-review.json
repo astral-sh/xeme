@@ -1,0 +1,45 @@
+{
+  "conclusion": "No blocker found in reviewed source and supported positive matrix; explicitly documented acceptance and callback-order limitations remain.",
+  "library": "/home/dev-user/.cache/oriole/external-values-target/debug/liboriole_expat.so",
+  "library_sha256": "a55b41c90c5ba9448311b0640e6e1fdc37bac3605d6c5fdceb0578ad752052a0",
+  "source_sha256": {
+    "crates/oriole/src/value.rs": "b9177850802b83d292f3ea68e9452eb7c1a5e654c51b775e8dea7f990f68a03e",
+    "crates/oriole/src/value_lexer.rs": "33d8e447e61e81605f5c76f059932c5eb4601b544fb9acc2609ee648160bc69d",
+    "crates/oriole/src/lib.rs": "4071df39cce90176e90d607d89ba0224c84ae04121058a533931efe24eabfd1f",
+    "crates/oriole/src/dtd.rs": "be8f3ddf7b3b25a0a1593abf775fd64341253b7fb2d4e65b1717a381e5c2a0d3",
+    "crates/oriole_storage/src/try_lock.rs": "e08e75c6b2a1410d74d3fda3667e7f031dfade5eb26e0d5db5b98f6233ce6fde",
+    "crates/oriole_storage/src/lib.rs": "6a6c073dd28af4d47abc52b86257dc8cc71495883e142646e6f7fccf4f8e669c",
+    "crates/oriole_expat/src/lib.rs": "6c7d35b534c14651b7d5285c5f77d56c11dfc95a0ae84bf391e4d6ae87e26587",
+    "crates/oriole_expat/README.md": "676d597a24bfce57ba85684e4d879cfba880bd073d481b58160fca1b0b22e97c"
+  },
+  "artifacts_sha256": {
+    "independent_matrix.py": "96ac5c9f3703fd2cefcdd385a602ec89cd0ae0eb210a9488c6b1c8e684308c58",
+    "independent-final.json": "1751b7b95b65a05f9ef41878ba994e0d72b86fd0f19579ec04b2da29b506b41e",
+    "independent-final.cases.json.gz": "a33f23285b1c17f4c684f23d796bf6bbbc3836d152922932926157eee19de5bf",
+    "late_encoding_final.py": "407e5e48570a06f62024624ace0e3d1536615f65e5fd6c84a6b6f9f545176b50",
+    "late-encoding-custom-final.json": "63afce5c104b5f3f181d20d2327fee8a07f2543f9b8d5c2496f8ed977cb8252f"
+  },
+  "independent_validation": {
+    "positive_cases": 18468,
+    "outcome_differences": 0,
+    "normalized_event_differences": 0,
+    "scope": "UTF8/UTF16LE/UTF16BE child every byte width, modes0/1/2, standalone absent/yes, EntityDecl handler absent/present; ordinary/missing-before-external/duplicate entities; Unicode, quoted references/CR, nested external value, standalone child and comment-prefixed first XMLdecl without encoding switch.",
+    "normalization": "Remove byte positions and parent NotStandalone timing; coalesce consecutive Default fragments per parser."
+  },
+  "source_review": [
+    "TryLock Acquire CAS provides one exclusive guard, Release drop publishes writes, UnsafeCell access guarded; Sync bound T:Send and PhantomData<&mut T> prevent unsound shared Cell guards; no blocking, poisoning or allocation.",
+    "Each parser retains owned value lexical frames; shared output contains only owned string/standalone/skip state. No parser input borrow or output guard survives explicit user callback yields.",
+    "Unknown protocol encoding preserves pending state for handler recovery. Decoder/preflight buffer is not consumed while scanner offsets refer to the entire append-only source.",
+    "Continuation frames retain internal/declaration/inherited external recursion names and depth contributions; source-normalized CR differs from numeric-reference-produced CR as required. Work/metadata/string copies are charged before retention.",
+    "Duplicate continuation uses marker for both raw prefix and raw suffix, matching the Default peer variant; missing/unread closing > remains unconditional.",
+    "Storage/TryLock and value layer source changes were reviewed read-only."
+  ],
+  "known_limits": [
+    "Prefixed first XMLdecl switching Latin1/custom encoding: 24 acceptance differences in the 54-case final supplemental oracle; first-position encoding requirement documented and deferred by root.",
+    "Leading custom declaration Default/UnknownEncoding ordering: six successful supplemental cases; documented by peer.",
+    "Nine malformed UTF8 supplemental cases omit partial parent EntityDecl after child failure, consistent with the separately approved failure-dispatch limitation.",
+    "Peer primary matrix retains 279 failed-input partial-parent callbacks, 12 unfinished XMLdecl callback timing differences, and one pre-existing X-NUL one-byte autodetection difference.",
+    "Pinned Expat external value internal-PE deferred-processing truncation behavior is intentionally reproduced; arbitrary declaration fragments/external declaration tokens remain separate scope."
+  ],
+  "peer_reported_checks": "201 storage/core/FFI tests including allocator fault sweeps and guard !Sync compile-fail, fmt and strict clippy pass."
+}

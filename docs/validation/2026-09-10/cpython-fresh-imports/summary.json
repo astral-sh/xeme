@@ -1,0 +1,31 @@
+{
+  "scope": "Harness-only fresh import correction; no runtime/header/upstream test edits and no failure override. Candidate runtime runs listed in controller are separate, not included as evidence of baseline success.",
+  "source_base": "4b11ace3d89fe6b7bf66ca55290eb23444f11de2",
+  "baseline": {
+    "library_sha256": "ac6a0a6adcabba65ef338d362f438c588ad4a01a9821989bae28f445ba7778ac",
+    "tests": 802,
+    "skipped": 14,
+    "failures": 2,
+    "exit_code": 2
+  },
+  "reference": {
+    "library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "tests": 802,
+    "skipped": 14,
+    "failures": 0,
+    "exit_code": 0
+  },
+  "skip_count_scope": "14 reported skips are 5 whole methods, 8 subtests, and 1 class setup; do not describe them as 14 skipped methods.",
+  "negative_checks": {
+    "optimized_python_exit": 1,
+    "old_initial_only_loader_exit": 1
+  },
+  "checks": {
+    "ruff": "passed",
+    "ty": "passed",
+    "existing_gate_unit_tests": 2,
+    "initial_unit_launcher": "-I -S omitted required local search path; failed before tests, retained; explicit path bootstrap passed"
+  },
+  "independent_review": "52ff7f237ee4a2bb01e8b1e33d872ab91cf0fda2e7c2df63745d3297b858f109",
+  "archive_members": 25
+}

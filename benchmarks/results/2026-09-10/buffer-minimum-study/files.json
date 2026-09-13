@@ -1,0 +1,1901 @@
+{
+  "archive_sha256": "06bb3601eef13b61240e487f3b4f2c133f3426fab72da98ff81b3a5a2d4ad8e3",
+  "members": {
+    "study/README.md": {
+      "bytes": 10696,
+      "sha256": "3b03a003c8d66fab32c5a027a8db3a2fe108405195e8f7405e9305f098d5ec9a"
+    },
+    "study/alias-probes.log": {
+      "bytes": 319,
+      "sha256": "c1b9d185a90852d7b0cfb498f32891eaae8d86ed29e117a46a405a07218886fa"
+    },
+    "study/alias_probes.py": {
+      "bytes": 2100,
+      "sha256": "ef1e5c747f9c1b0d8d816f51ea4699cd01b3391b270e3a774c150e7717a75ff3"
+    },
+    "study/aliases/external-semantic-compare.log": {
+      "bytes": 67,
+      "sha256": "b5d4e9d48edf8c37f82915e919125f85eb7e847d12872cd674ffb90f5f07c51f"
+    },
+    "study/aliases/external-semantic-compare.py": {
+      "bytes": 5033,
+      "sha256": "03b465785791a3174959c1885983175f6f9d04f05726cba522b66bc3dc9bf41a"
+    },
+    "study/aliases/external-semantic-comparison.json.gz": {
+      "bytes": 711,
+      "sha256": "aef1e4e5d8538fcfb39aca411d3fbf261b737c3834c03882b6014a1f5c8c3d99"
+    },
+    "study/aliases/external-source.py": {
+      "bytes": 7914,
+      "sha256": "14575093d3467770a74619f41f7942a5135aa6d7e2e4fbecee354144550a11b6"
+    },
+    "study/aliases/full-events-comparison.json.gz": {
+      "bytes": 170,
+      "sha256": "664984917ea551698e7a0c0c0e9cdc89ada1b195d5a50c7d3381f7a24a773d04"
+    },
+    "study/aliases/full-events-source.py": {
+      "bytes": 6667,
+      "sha256": "882f68de290e1994b10075c7ff029b8d65c3e0d16a23720da8b2f99370a9c4c8"
+    },
+    "study/aliases/full-events.log": {
+      "bytes": 68,
+      "sha256": "5afc1751855fb0dfbb749cc3a0699112d260990f19077898057b14a45046d4c1"
+    },
+    "study/aliases/full-events.py": {
+      "bytes": 5174,
+      "sha256": "0c63bf34a841c64309dcf4bbac0b476ea9dc39128b712eba80fb8e24e60439e8"
+    },
+    "study/aliases/probe.py": {
+      "bytes": 5816,
+      "sha256": "19fc856a5c94a9f9332f132fa04d7200dced658f5ae11db66e4645a347d8daf3"
+    },
+    "study/aliases/summary.json": {
+      "bytes": 586,
+      "sha256": "c70cf88502e9a9b5be18322226832a1353eb02c21956e0320f06f9845bbb700a"
+    },
+    "study/allocation-investigation/child-full-profile/expat-minimal-long-namespace-1024-0.jsonl": {
+      "bytes": 18046,
+      "sha256": "363b93d5cb5455db932d39118b01821aa48f7ac2da1acf5257e0dae9fcb14aab"
+    },
+    "study/allocation-investigation/child-full-profile/expat-minimal-long-namespace-1024-1.jsonl": {
+      "bytes": 17346,
+      "sha256": "d641bb7727ba7282e5e8eaaeda85feebb79d006698bcb6841de0b48a47e23b91"
+    },
+    "study/allocation-investigation/child-full-profile/expat-minimal-long-namespace-2048-0.jsonl": {
+      "bytes": 19228,
+      "sha256": "d2d759f345fbb63b8f34e7a3f7b80c2d61b3a94ea5d4e0f81a5a200c7c8dc697"
+    },
+    "study/allocation-investigation/child-full-profile/expat-minimal-long-namespace-2048-1.jsonl": {
+      "bytes": 19150,
+      "sha256": "0c278b1c45fd74336e329a3ca95ae4138baa1efaa645e83f3cc4efabd33a52a7"
+    },
+    "study/allocation-investigation/child-full-profile/expat-minimal-long-namespace-256-0.jsonl": {
+      "bytes": 15650,
+      "sha256": "66a38eb560f61cc2e91fc9155000b09112e02bd72a3b3ce8dca8902939e80a6e"
+    },
+    "study/allocation-investigation/child-full-profile/expat-minimal-long-namespace-256-1.jsonl": {
+      "bytes": 15134,
+      "sha256": "c0603ad971eaff8a22f2fd0c253ef4e21362c6d5e9f60edd5c77c98a7af2ed71"
+    },
+    "study/allocation-investigation/child-full-profile/expat-minimal-long-namespace-64-0.jsonl": {
+      "bytes": 15649,
+      "sha256": "71e02894bd662dccc6555f5689938b1df704eb3197780c6d40ad7ca1461b5e53"
+    },
+    "study/allocation-investigation/child-full-profile/expat-minimal-long-namespace-64-1.jsonl": {
+      "bytes": 15110,
+      "sha256": "6d4d28b942de1914d850f21dcb5cee6654a72cfa8812ceca651ee43465f0a18e"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_alloc_long_entity_value-0.jsonl": {
+      "bytes": 34056,
+      "sha256": "a1a12655f870972114bfbe894faf1020422f16f89ced8c62f75bc15553243f22"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_alloc_long_entity_value-1.jsonl": {
+      "bytes": 34125,
+      "sha256": "18d4a6151c9504eb57c6d25358b737c6ebe78428a26c0b91c8efb023ea1c8ab1"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_alloc_long_notation-0.jsonl": {
+      "bytes": 34713,
+      "sha256": "0bc85b2971855b512228e579c01119adf17e270f688d072d31f296ec1c123d78"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_alloc_long_notation-1.jsonl": {
+      "bytes": 35489,
+      "sha256": "9b26190739ecf9fb88e56184bfc739be4ca4d417661f10a04461571b728f1f93"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_alloc_realloc_default_attribute-0.jsonl": {
+      "bytes": 13319,
+      "sha256": "f646f423d9dd945e72cb56e2bd957a4b7d8fe29f680409fc54791f65e7524bb1"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_alloc_realloc_default_attribute-1.jsonl": {
+      "bytes": 13336,
+      "sha256": "a9373d47d0d2ed85d6747c1668415ca749873e14b4608e925d36da5ffa3e06a8"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_alloc_realloc_group_choice-0.jsonl": {
+      "bytes": 19170,
+      "sha256": "0c297bf66909af32d0a068086ce42baf3f73bcd01d7ebdb14a764d4ff0a6d32c"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_alloc_realloc_group_choice-1.jsonl": {
+      "bytes": 18053,
+      "sha256": "0f82b68a1117abc55ed1c53e5102759346e896cbcc6139f765c097313b199696"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_alloc_realloc_implied_attribute-0.jsonl": {
+      "bytes": 13319,
+      "sha256": "a500f78d0b05e36829297a2d2267ff3633e4be635644ff4cd6e933656271f7ad"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_alloc_realloc_implied_attribute-1.jsonl": {
+      "bytes": 13248,
+      "sha256": "14922dcc975198400f6a9b6a02aad405810434d171a05ce62409b6e1893b720c"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_alloc_realloc_many_attributes-0.jsonl": {
+      "bytes": 43875,
+      "sha256": "998684ebfcdcc28a6c6e120082a64c2a2cf70b2cb17e9de596a08535bed9c8cc"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_alloc_realloc_many_attributes-1.jsonl": {
+      "bytes": 42036,
+      "sha256": "a4fbf1df0864777c8f1fbdd33b8af231a610b87cf7eb4fd16702de27c4513b9e"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_alloc_realloc_nested_groups-0.jsonl": {
+      "bytes": 13138,
+      "sha256": "4a7ff0e08409aece897490a4f93987f84f694af4e5b14ad4c35f30b8bbb4c625"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_alloc_realloc_nested_groups-1.jsonl": {
+      "bytes": 12554,
+      "sha256": "65331d2be5a0d25a0284e5170743d38b0d022c89ed5f8540e2a0c1152caad546"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_nsalloc_realloc_long_context-0.jsonl": {
+      "bytes": 55889,
+      "sha256": "626390b1925c68965b0c5163ee679933cee754a30d1cbfd00c64c250ea753755"
+    },
+    "study/allocation-investigation/child-full-profile/expat-test_nsalloc_realloc_long_context-1.jsonl": {
+      "bytes": 53262,
+      "sha256": "1d7dbe53ee22b8ca7bb4d40a7a714d92a83cd3e584f76f2fa9b607fad818f992"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-minimal-long-namespace-1024-0.jsonl": {
+      "bytes": 26964,
+      "sha256": "9cd6ab011d981f12e38ffdd970ac47ff218204c4c32e1e182cc3fc0cdcda2891"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-minimal-long-namespace-1024-1.jsonl": {
+      "bytes": 42831,
+      "sha256": "9d28004aed6db25828033e1603af6c21b2d2248c4b4a2edbf8a498a0e49ece3a"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-minimal-long-namespace-2048-0.jsonl": {
+      "bytes": 26964,
+      "sha256": "3e454e064e3d2200839cd3e677fdaf8e7c39c03677758357b18faecf5ef0020e"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-minimal-long-namespace-2048-1.jsonl": {
+      "bytes": 44751,
+      "sha256": "be25c53971f31e5d6d57e78cd5ca1b2b167251ba12ecb3d670c3e37c695c730f"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-minimal-long-namespace-256-0.jsonl": {
+      "bytes": 26979,
+      "sha256": "423b769b2f8b6b478d213d57006bfa8c9caa47339bbf3571167f4d7fc89b5523"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-minimal-long-namespace-256-1.jsonl": {
+      "bytes": 38851,
+      "sha256": "6d88b4e2508447105fe83924130bf3fd8f43e85bf15eba6ead46aeb12dd1f701"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-minimal-long-namespace-64-0.jsonl": {
+      "bytes": 26978,
+      "sha256": "5437bd9ff4fb5e6d6c34bacaa130627e0c0e4b5be3175d7e55b75566f0e63b20"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-minimal-long-namespace-64-1.jsonl": {
+      "bytes": 34882,
+      "sha256": "6196586f2ed79356072803705d707218ed6d31b24bcc5e3d86e6c7971ba3635e"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_alloc_long_entity_value-0.jsonl": {
+      "bytes": 83288,
+      "sha256": "5e7507c2f69a66b6df1b19c5d3407aa9e4937a4763a563588e69494b99e8b0f1"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_alloc_long_entity_value-1.jsonl": {
+      "bytes": 99148,
+      "sha256": "bb713a1cfde57d755ccd964de3f5173526fc1423365e7a0732d81ce57c2dcf63"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_alloc_long_notation-0.jsonl": {
+      "bytes": 95404,
+      "sha256": "400844a72ea088c8579e7e8bf11894e0b9522ef9538d898af5d0e760c4d3d439"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_alloc_long_notation-1.jsonl": {
+      "bytes": 113371,
+      "sha256": "0a37e5606ae8e0ac7fa3ab2fc0b9416cbb9b1b6f338781eaa919dff1e94b9056"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_alloc_realloc_default_attribute-0.jsonl": {
+      "bytes": 57836,
+      "sha256": "85011df5ec21a468f8715c2779f2d6cbf83e320871b259409c4902d415666301"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_alloc_realloc_default_attribute-1.jsonl": {
+      "bytes": 73780,
+      "sha256": "284e9f8f1c2e165033a18c0e8546cc748fa8cba7bec9a7790b1501a75647ca12"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_alloc_realloc_group_choice-0.jsonl": {
+      "bytes": 39241,
+      "sha256": "2905081d5fe95ab657c574260df15201d1a3e1667b4055c342a548e44f1756e1"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_alloc_realloc_group_choice-1.jsonl": {
+      "bytes": 49154,
+      "sha256": "911be4273fe5aa616801478a1282dccd69521bc6fcc4135c15807ddee3ed8c93"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_alloc_realloc_implied_attribute-0.jsonl": {
+      "bytes": 51171,
+      "sha256": "6cb3ff5bf4832713635fe091c39bfaa6e96b76840d9a38a26dc0fdfb9948fb4b"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_alloc_realloc_implied_attribute-1.jsonl": {
+      "bytes": 67051,
+      "sha256": "138bcf297af352c34faec410e4ff0482e225d9ea069e53f758f6a5ec15af487c"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_alloc_realloc_many_attributes-0.jsonl": {
+      "bytes": 150364,
+      "sha256": "959f274139cc52a93e2adb8b0a9f82ecf66c531596c2bafea5ca5bcd4e3fc072"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_alloc_realloc_many_attributes-1.jsonl": {
+      "bytes": 162511,
+      "sha256": "71c8d528ab0015844015f7ea254419f63fd1e463b9e542985dba7123074a7f86"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_alloc_realloc_nested_groups-0.jsonl": {
+      "bytes": 38091,
+      "sha256": "61569e0ee5de1cad41fe9aed2b949ca16a2c89e48aaba93f1e831188df52b3a3"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_alloc_realloc_nested_groups-1.jsonl": {
+      "bytes": 47947,
+      "sha256": "889250c3d16299f4a9b5036c10403cdb8d12c7602f101fe209e0d3a081fe94e1"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_nsalloc_realloc_long_context-0.jsonl": {
+      "bytes": 132393,
+      "sha256": "27d40cabf03fd53956a534cab9222d1387d97c26ef2acca682cbedf20bb0f29d"
+    },
+    "study/allocation-investigation/child-full-profile/oriole-test_nsalloc_realloc_long_context-1.jsonl": {
+      "bytes": 148385,
+      "sha256": "77452af0cc6752002254b74db372afd6e489481a65c741ca1b5c8428ff1e54db"
+    },
+    "study/allocation-investigation/child-full-profile/profile-summary.json": {
+      "bytes": 246470,
+      "sha256": "4c436045a9c8a912b68b008bd03cf778c7bd05f2bbd6caecf49ad7f21a097d55"
+    },
+    "study/allocation-investigation/child-full-profile/profile.c": {
+      "bytes": 4462,
+      "sha256": "16371f63916e32341597dbcc95b46063ca56062824de6f22cb565f3ff82c4c07"
+    },
+    "study/allocation-investigation/child-full-profile/profile.log": {
+      "bytes": 2143,
+      "sha256": "0f68919fc83e982e6d7e7e82e80ccb2abe9eeda339e5efb4106e4b4ac3b8cc1b"
+    },
+    "study/allocation-investigation/debug-expat.jsonl": {
+      "bytes": 26199,
+      "sha256": "77adf740e405702b264e7252b082e643d2589c6060049812c3e52c447dc12194"
+    },
+    "study/allocation-investigation/expat-minimal-long-namespace-1024-0.jsonl": {
+      "bytes": 18026,
+      "sha256": "d66bef29cafeda88c56831c3dee7be2ea1604b855c592b8bd67f09ecce55d2ad"
+    },
+    "study/allocation-investigation/expat-minimal-long-namespace-1024-1.jsonl": {
+      "bytes": 17366,
+      "sha256": "9eada30f5cfb79401e43b0bfcc95580bd198991354ff65c7c8ba2845e0b844b8"
+    },
+    "study/allocation-investigation/expat-minimal-long-namespace-2048-0.jsonl": {
+      "bytes": 19250,
+      "sha256": "aa5544c6331f1f3ca6ae28f34ec69b5d740fdbae83abc2be112f27365367e85d"
+    },
+    "study/allocation-investigation/expat-minimal-long-namespace-2048-1.jsonl": {
+      "bytes": 19150,
+      "sha256": "de012309f7172afa7a6d0d4116c3f781b3cba14d42193e315b2b07e3745cf845"
+    },
+    "study/allocation-investigation/expat-minimal-long-namespace-256-0.jsonl": {
+      "bytes": 15633,
+      "sha256": "bd281861a2746b144af3941a4da8976c83e37b13c2c29363e386683caad6fd9d"
+    },
+    "study/allocation-investigation/expat-minimal-long-namespace-256-1.jsonl": {
+      "bytes": 15134,
+      "sha256": "9869f00b44edecc2b4bf8eab5d22474419f777a6db1fc974a8eaff50cc5bc9ce"
+    },
+    "study/allocation-investigation/expat-minimal-long-namespace-64-0.jsonl": {
+      "bytes": 15649,
+      "sha256": "1e8829483124b89154eb82d1879b0b5e421cb97abd4b6117dc67c70da49f8d11"
+    },
+    "study/allocation-investigation/expat-minimal-long-namespace-64-1.jsonl": {
+      "bytes": 15127,
+      "sha256": "7203d713becc32a986827aa6a92d8c749cacf572adb34cb3e702cf9e45fc9bcf"
+    },
+    "study/allocation-investigation/expat-test_alloc_long_entity_value-0.jsonl": {
+      "bytes": 34056,
+      "sha256": "41ba9f8f24a5860715600eb14e780d9177f86fdec7eae1bca003d98c7b5cdfe0"
+    },
+    "study/allocation-investigation/expat-test_alloc_long_entity_value-1.jsonl": {
+      "bytes": 33685,
+      "sha256": "b48ce80467219600fe8d90563c0041a4619649ee4db31b18a669278643accd67"
+    },
+    "study/allocation-investigation/expat-test_alloc_long_notation-0.jsonl": {
+      "bytes": 34713,
+      "sha256": "31cb2d661c0a4647b6e77cf7c6920ef9d0cb967b003d49d4184a8bd0e0e560ab"
+    },
+    "study/allocation-investigation/expat-test_alloc_long_notation-1.jsonl": {
+      "bytes": 35489,
+      "sha256": "0bfb30e18dbd01ddb022f6cd75443b8f6297bd62e50d3c0bac2c30fc34d7e7b5"
+    },
+    "study/allocation-investigation/expat-test_alloc_realloc_default_attribute-0.jsonl": {
+      "bytes": 13305,
+      "sha256": "38c33f9cc675c21db759edaebbc7a7e8982a98114a849428e782d32c2f9e7279"
+    },
+    "study/allocation-investigation/expat-test_alloc_realloc_default_attribute-1.jsonl": {
+      "bytes": 13336,
+      "sha256": "025a08a2fd25f8bd09262373e061b39a05bdd67ebb11390e34f09ed30db8c9f6"
+    },
+    "study/allocation-investigation/expat-test_alloc_realloc_group_choice-0.jsonl": {
+      "bytes": 19170,
+      "sha256": "8a7b75a36ea4b6ce7799ec1edb086688f6972d46b24112aba2c7b67dbeb83847"
+    },
+    "study/allocation-investigation/expat-test_alloc_realloc_group_choice-1.jsonl": {
+      "bytes": 18053,
+      "sha256": "aa8de042a5c2c2241421eb434144a40ede796ce01c8f0c8c58a273628652a715"
+    },
+    "study/allocation-investigation/expat-test_alloc_realloc_implied_attribute-0.jsonl": {
+      "bytes": 13305,
+      "sha256": "0a9364fe604a3f237fb3fef62be94b299905ac2c00ef693d9f5437e9639db8e6"
+    },
+    "study/allocation-investigation/expat-test_alloc_realloc_implied_attribute-1.jsonl": {
+      "bytes": 13234,
+      "sha256": "561745b23608addd23ffeafeef2d0db1781b3e39a0c723e6f3e204d715d05f63"
+    },
+    "study/allocation-investigation/expat-test_alloc_realloc_many_attributes-0.jsonl": {
+      "bytes": 43875,
+      "sha256": "6bdc01c6852101f339aa430360acc8685cfda281deb1f82be9b55a2b4517fa32"
+    },
+    "study/allocation-investigation/expat-test_alloc_realloc_many_attributes-1.jsonl": {
+      "bytes": 42036,
+      "sha256": "61479327610f03c3ef49cc13ee8a4aa0566faa7c2aa146d15a480970885c3cdb"
+    },
+    "study/allocation-investigation/expat-test_alloc_realloc_nested_groups-0.jsonl": {
+      "bytes": 13153,
+      "sha256": "11a3a0b96b8508f3cd8af14de809320edac17085b776f3d696125d20aea2739e"
+    },
+    "study/allocation-investigation/expat-test_alloc_realloc_nested_groups-1.jsonl": {
+      "bytes": 12554,
+      "sha256": "6b85abd1ca863210557839fa40554d342fc63bfdc873c6f3588f338ad583dcbd"
+    },
+    "study/allocation-investigation/expat-test_nsalloc_realloc_long_context-0.jsonl": {
+      "bytes": 55889,
+      "sha256": "a862e1e62429f053139034c20356e3ff7d23e06cc2afd7bf81b9593b7b9e5981"
+    },
+    "study/allocation-investigation/expat-test_nsalloc_realloc_long_context-1.jsonl": {
+      "bytes": 53262,
+      "sha256": "a265e3783be2bba0402aa996850e7511219526ae67631f5ae56fbb8524bf7331"
+    },
+    "study/allocation-investigation/failure-classification.json": {
+      "bytes": 16964,
+      "sha256": "8277156c693c7a34542453a3f7e1b88293c8e3fd2c792a735d0111c90c0b916c"
+    },
+    "study/allocation-investigation/fixtures.json": {
+      "bytes": 3732,
+      "sha256": "b8cd3a2bdf638aa477cbd8d60ca2afa406ffb7d8c2137d6f317c18e12c9f3027"
+    },
+    "study/allocation-investigation/minimal-long-namespace-1024.xml": {
+      "bytes": 1057,
+      "sha256": "15ddaf9db1f1035b856a455f28d93afc36aebaf4651b52db7ee08be8a5efcc06"
+    },
+    "study/allocation-investigation/minimal-long-namespace-2048.xml": {
+      "bytes": 2081,
+      "sha256": "6c32eea9a61574cf343bdf796f24833a5d314fb6eecf0878133c2ab870302831"
+    },
+    "study/allocation-investigation/minimal-long-namespace-256.xml": {
+      "bytes": 289,
+      "sha256": "d1564e26d4d38dfd52e79320f6124f8e5c708fc2a08d8756a0513e113bf8d3c7"
+    },
+    "study/allocation-investigation/minimal-long-namespace-64.xml": {
+      "bytes": 97,
+      "sha256": "91214cad80ce8253a4e2fd3fade9caef02ed5562e3d9f976bac35139a1cbbd67"
+    },
+    "study/allocation-investigation/oriole-minimal-long-namespace-1024-0.jsonl": {
+      "bytes": 26989,
+      "sha256": "6fe0ce6b3722b817f4e5f462d360532d2124a9c6734b6b2aff5e1b6c50119e51"
+    },
+    "study/allocation-investigation/oriole-minimal-long-namespace-1024-1.jsonl": {
+      "bytes": 42831,
+      "sha256": "f3ff0c8fbdb4a98f8fadb4efcae46354270ce154df0326c23a881106728bcfc8"
+    },
+    "study/allocation-investigation/oriole-minimal-long-namespace-2048-0.jsonl": {
+      "bytes": 26989,
+      "sha256": "9d3d7f53fd7865b06436d789724aa120e110804d001fa484baf61d48b817ae56"
+    },
+    "study/allocation-investigation/oriole-minimal-long-namespace-2048-1.jsonl": {
+      "bytes": 44751,
+      "sha256": "971275ae465259543eb02375eca4128ca136f535b533cf7b538e1d0f6ff503f7"
+    },
+    "study/allocation-investigation/oriole-minimal-long-namespace-256-0.jsonl": {
+      "bytes": 26954,
+      "sha256": "a490837fa941330ee6728a0ad0f2846b664651ce4d2d12fd08a71cfa654b4136"
+    },
+    "study/allocation-investigation/oriole-minimal-long-namespace-256-1.jsonl": {
+      "bytes": 38851,
+      "sha256": "cc377daa8962f90e897312124ed2c0f6510284287f951f6c999fda5e67ec6ee4"
+    },
+    "study/allocation-investigation/oriole-minimal-long-namespace-64-0.jsonl": {
+      "bytes": 26953,
+      "sha256": "9b38d21d3b4d95fe2bf4e191c636c3a61b1c70a806fabea6fe7892756b30e146"
+    },
+    "study/allocation-investigation/oriole-minimal-long-namespace-64-1.jsonl": {
+      "bytes": 34882,
+      "sha256": "92bfc05339c2ecb2e967543adb75dd8e1f8a15084cb57eb26a6063a7b4acb429"
+    },
+    "study/allocation-investigation/oriole-test_alloc_long_entity_value-0.jsonl": {
+      "bytes": 83221,
+      "sha256": "6a14d38b14a5e1c88b59c811cf985257217eabca684d6a1424f898c6c6372c36"
+    },
+    "study/allocation-investigation/oriole-test_alloc_long_entity_value-1.jsonl": {
+      "bytes": 99247,
+      "sha256": "6a7ac96a285808df6631a211ccde2187a8ae81ec1f4d3d00e808f2b11b8b7d1e"
+    },
+    "study/allocation-investigation/oriole-test_alloc_long_notation-0.jsonl": {
+      "bytes": 95404,
+      "sha256": "b3fb5913edeec340802f2d962a2f3eded5738d5b74cb9c038a1744ca03691eb5"
+    },
+    "study/allocation-investigation/oriole-test_alloc_long_notation-1.jsonl": {
+      "bytes": 113371,
+      "sha256": "ed5068391292ee191494530615f611ef68c64f7a4a8a1e1941a0cd428edd57fe"
+    },
+    "study/allocation-investigation/oriole-test_alloc_realloc_default_attribute-0.jsonl": {
+      "bytes": 57836,
+      "sha256": "1122f541d711ec1f010d85257f9616c7bf80b1612dab306610814eb473b570b2"
+    },
+    "study/allocation-investigation/oriole-test_alloc_realloc_default_attribute-1.jsonl": {
+      "bytes": 73780,
+      "sha256": "6984d77e55d98deca00a7be79cf5ce049445ced32187aaa9c39c046d644416cc"
+    },
+    "study/allocation-investigation/oriole-test_alloc_realloc_group_choice-0.jsonl": {
+      "bytes": 39204,
+      "sha256": "56245321f2d5861e179c96c9e0c9baba1922c44e1886194e8d25b0aacb3c09b7"
+    },
+    "study/allocation-investigation/oriole-test_alloc_realloc_group_choice-1.jsonl": {
+      "bytes": 49097,
+      "sha256": "e81cfd22b7b19b7cf1439152cb05852d6784bd4632d9f5a2047574ca17dad4f3"
+    },
+    "study/allocation-investigation/oriole-test_alloc_realloc_implied_attribute-0.jsonl": {
+      "bytes": 51171,
+      "sha256": "d3757336d74c473757f12ea38b4d5ddae2a34b7baeb2365b6c761d6010cd6a9d"
+    },
+    "study/allocation-investigation/oriole-test_alloc_realloc_implied_attribute-1.jsonl": {
+      "bytes": 66975,
+      "sha256": "92e20766b85403b08c7fad488d380dc14770b8f60008d58071c326de5c2cfbb0"
+    },
+    "study/allocation-investigation/oriole-test_alloc_realloc_many_attributes-0.jsonl": {
+      "bytes": 150486,
+      "sha256": "b8188907d42aa0a3d08268a8a75f098924da74000a1a8e6fbd5b02af0e6a442f"
+    },
+    "study/allocation-investigation/oriole-test_alloc_realloc_many_attributes-1.jsonl": {
+      "bytes": 162511,
+      "sha256": "a09a4a14d58b223c2cd9d420758992ba8983b621dc5f7783a6e371e8e4fe335d"
+    },
+    "study/allocation-investigation/oriole-test_alloc_realloc_nested_groups-0.jsonl": {
+      "bytes": 38091,
+      "sha256": "12ec66ca370290862c8ccfedbb1c16f88c524dd2792e9200e1114e275c401b89"
+    },
+    "study/allocation-investigation/oriole-test_alloc_realloc_nested_groups-1.jsonl": {
+      "bytes": 48002,
+      "sha256": "3479edf902f367917a27eea977e7c5565132348689012882147fa6ca1924bbff"
+    },
+    "study/allocation-investigation/oriole-test_nsalloc_realloc_long_context-0.jsonl": {
+      "bytes": 132393,
+      "sha256": "31cdb85d9cc8b3e9355b4e4e4aa8d2d2fc1558188c4c6e74c720082066ed27a5"
+    },
+    "study/allocation-investigation/oriole-test_nsalloc_realloc_long_context-1.jsonl": {
+      "bytes": 154159,
+      "sha256": "ad69abade4b4851af38b881178df0754c5105ca9c0a2279b079fde1f81d3e1c7"
+    },
+    "study/allocation-investigation/profile-before-memory.c": {
+      "bytes": 4724,
+      "sha256": "be37b6a2b9f7e1e445a13dd022bdcd493e5094cda72b43e45f66eb2545f94516"
+    },
+    "study/allocation-investigation/profile-summary.json": {
+      "bytes": 252649,
+      "sha256": "08c113ff579c610d8722bd335d4b97363b5b30574166c71c09fd50321eba46cb"
+    },
+    "study/allocation-investigation/profile.c": {
+      "bytes": 5594,
+      "sha256": "bf073d288f48a6fc558a50ef7cb3a91df8b91063d431bf5b7b0ab159ddb71c0b"
+    },
+    "study/allocation-investigation/profile.log": {
+      "bytes": 2143,
+      "sha256": "01b1ddc653d9d0c8280ffb4d9159865f038b7a0cc34f2d1ec9c0be7c2cee640d"
+    },
+    "study/allocation-investigation/run_profiles.py": {
+      "bytes": 2093,
+      "sha256": "91c4f1b3956ddfecdd38e9697cd3ecd707b8a43d5791a2d0ff28b9bd461a2838"
+    },
+    "study/allocation-investigation/test_alloc_long_entity_value.xml": {
+      "bytes": 1104,
+      "sha256": "dee27fe317ba2628c91269a9a97188b78a3f988a3b89709d222e4f9cb8d799cb"
+    },
+    "study/allocation-investigation/test_alloc_long_notation.xml": {
+      "bytes": 2174,
+      "sha256": "bbfb8cd3e188ebf60659a71a5f7674d9d80f7f4da9c89e82850816532dcdf461"
+    },
+    "study/allocation-investigation/test_alloc_realloc_default_attribute.xml": {
+      "bytes": 1153,
+      "sha256": "7b8a25d42388fdbebd45db68729545c55e36945f97a1f459a86f37a3ec83a4df"
+    },
+    "study/allocation-investigation/test_alloc_realloc_group_choice.xml": {
+      "bytes": 199,
+      "sha256": "e69eb891e0a47572911f8f24ea1df48803e8f284f98dc6b5bb868b2f58f73c5e"
+    },
+    "study/allocation-investigation/test_alloc_realloc_implied_attribute.xml": {
+      "bytes": 1096,
+      "sha256": "55086d280fbbf96663f4dedd157bb99038e2d905e04062eebe8dcaeebd201e6d"
+    },
+    "study/allocation-investigation/test_alloc_realloc_many_attributes.xml": {
+      "bytes": 311,
+      "sha256": "9abec7b7afebc14f2e3a4b3325d31d8ce793aaf985342c3c89bc0cd6e55653a6"
+    },
+    "study/allocation-investigation/test_alloc_realloc_nested_groups.xml": {
+      "bytes": 226,
+      "sha256": "bf09bebd50957e156bdae492bcf3b70001e1fa3bb12bffc5ee34f8ef4a88354b"
+    },
+    "study/allocation-investigation/test_nsalloc_realloc_long_context.xml": {
+      "bytes": 1108,
+      "sha256": "90cf94fa6125cf626d74cc50a44bcbf6a8cbad1c94739fdfc3148af8be1b51ef"
+    },
+    "study/allocation-profiles/bom-only.xml": {
+      "bytes": 3,
+      "sha256": "f1945cd6c19e56b3c1c78943ef5ec18116907a4ca1efc40a57d48ab1db7adfc5"
+    },
+    "study/allocation-profiles/combined-bom-only-0.jsonl": {
+      "bytes": 7501,
+      "sha256": "f1c655ead80248262440c505c6a71aee6eed2c848ce492b6d98d851aff28b969"
+    },
+    "study/allocation-profiles/combined-bom-only-1.jsonl": {
+      "bytes": 7501,
+      "sha256": "428295729decbdbc2b7088581705f47c577fe244f5e57900576c5817f1adcf98"
+    },
+    "study/allocation-profiles/combined-empty-0.jsonl": {
+      "bytes": 5349,
+      "sha256": "831f54c0297fc9d654a1ab592c0901e531ffc22875b60972cd88ba2cb5d5cf57"
+    },
+    "study/allocation-profiles/combined-empty-1.jsonl": {
+      "bytes": 5355,
+      "sha256": "8a73f90c210fc28411d1e17805e8b408c387aebbb32865b93618ac826aa12d29"
+    },
+    "study/allocation-profiles/combined-invalid-prefix-0.jsonl": {
+      "bytes": 7493,
+      "sha256": "45305b2da4f2d57235e269ddeb86c683e26d043b9c0d10ac5deb0eaba941307f"
+    },
+    "study/allocation-profiles/combined-invalid-prefix-1.jsonl": {
+      "bytes": 7501,
+      "sha256": "8b950a95973c77078b0c57e7e3418ad2d286e79071a2e3fc93a68fc196fe7bd2"
+    },
+    "study/allocation-profiles/combined-minimal-long-namespace-1024-0.jsonl": {
+      "bytes": 31465,
+      "sha256": "01a63b0111107c93b9f7e442f729da4dd4c1c1d632bb5fced029174736bd7765"
+    },
+    "study/allocation-profiles/combined-minimal-long-namespace-1024-1.jsonl": {
+      "bytes": 33739,
+      "sha256": "1141a643d5938453018cd06e5e39ee0fcf25c48d5947a7d1573deb9d535a478d"
+    },
+    "study/allocation-profiles/combined-minimal-long-namespace-2048-0.jsonl": {
+      "bytes": 31440,
+      "sha256": "b7f108c99ca6589826be424064167baa1069aa4e4633d0552d0fe1ad68453706"
+    },
+    "study/allocation-profiles/combined-minimal-long-namespace-2048-1.jsonl": {
+      "bytes": 36034,
+      "sha256": "f15f69b4c871ed0c0ba778c745981efbed440fb3d1fe25e2928a7df6ca723091"
+    },
+    "study/allocation-profiles/combined-minimal-long-namespace-256-0.jsonl": {
+      "bytes": 31432,
+      "sha256": "140b72cff8e197951c2194e74fac01e9fa446cd57fd267d25c31d092d69baa70"
+    },
+    "study/allocation-profiles/combined-minimal-long-namespace-256-1.jsonl": {
+      "bytes": 31457,
+      "sha256": "04c697881e7bae1e17c8e2d078846b48f0f4cc397935c0624fecfb42a4a59de3"
+    },
+    "study/allocation-profiles/combined-minimal-long-namespace-64-0.jsonl": {
+      "bytes": 31431,
+      "sha256": "d543895361d755bee8e51a026c229c0369e2bf21c2ba269fa885581a7afba432"
+    },
+    "study/allocation-profiles/combined-minimal-long-namespace-64-1.jsonl": {
+      "bytes": 31468,
+      "sha256": "ea59ae557734722cbaa0dffdfd41dbb2efeff5de3e91e70d41e153fe9cfe7699"
+    },
+    "study/allocation-profiles/combined-test_alloc_long_entity_value-0.jsonl": {
+      "bytes": 98235,
+      "sha256": "f827c77d77e4b72abef42abc93a609115bd3db5b17902608c04c8caefc38f987"
+    },
+    "study/allocation-profiles/combined-test_alloc_long_entity_value-1.jsonl": {
+      "bytes": 100722,
+      "sha256": "6988cadf4be7facd71789de9d1bc2d4d9020a40a3f15dec779e7d71e53eea323"
+    },
+    "study/allocation-profiles/combined-test_alloc_long_notation-0.jsonl": {
+      "bytes": 112660,
+      "sha256": "fa0632dc3ec9d15e3f29067fb966ef338d8e7d780bf19c54a91655d1f12927e4"
+    },
+    "study/allocation-profiles/combined-test_alloc_long_notation-1.jsonl": {
+      "bytes": 117373,
+      "sha256": "1f2aeb662d929a7cf697f0e9f424f6e3ad2fbf8a05c66c0dd1403143f30346ad"
+    },
+    "study/allocation-profiles/combined-test_alloc_realloc_default_attribute-0.jsonl": {
+      "bytes": 68270,
+      "sha256": "367557f4286ea497764be54df443605cc76285930c957b1571e4c2785174806e"
+    },
+    "study/allocation-profiles/combined-test_alloc_realloc_default_attribute-1.jsonl": {
+      "bytes": 70626,
+      "sha256": "b90478452f29bfcbed37da743063b6c2ec2405f138633334a4b3808b9830a45e"
+    },
+    "study/allocation-profiles/combined-test_alloc_realloc_group_choice-0.jsonl": {
+      "bytes": 45981,
+      "sha256": "46dbb9c49f337f6d0ce3a54fb94db1c184c72b71488e50a207069eb1de02ee13"
+    },
+    "study/allocation-profiles/combined-test_alloc_realloc_group_choice-1.jsonl": {
+      "bytes": 46061,
+      "sha256": "8ad29e4bfa2c9566f090288db4f2a7d498d390125caa8fd969ac11fd3a0af6ea"
+    },
+    "study/allocation-profiles/combined-test_alloc_realloc_implied_attribute-0.jsonl": {
+      "bytes": 60302,
+      "sha256": "c64f47879cb025254a714008ca1ddfda9f3c81e1acf531241ca899f531f923cb"
+    },
+    "study/allocation-profiles/combined-test_alloc_realloc_implied_attribute-1.jsonl": {
+      "bytes": 62643,
+      "sha256": "3441a2a5cdc2297f05404228f0a97aae94ff95bb171a985ddbf61f510b423f42"
+    },
+    "study/allocation-profiles/combined-test_alloc_realloc_many_attributes-0.jsonl": {
+      "bytes": 178163,
+      "sha256": "71d9e119cbe03a1b13ae3f4f170d2f12245fe21e85863f521cbd3fbf013608ad"
+    },
+    "study/allocation-profiles/combined-test_alloc_realloc_many_attributes-1.jsonl": {
+      "bytes": 178219,
+      "sha256": "6a480c14e742a6f6104457ad89b3746381de6690700fd7594c7df3335c302ba0"
+    },
+    "study/allocation-profiles/combined-test_alloc_realloc_nested_groups-0.jsonl": {
+      "bytes": 44676,
+      "sha256": "ea42a27f8c68ad966b21046a40a889f1a737f2c5c546ecb905194bb4dfd51406"
+    },
+    "study/allocation-profiles/combined-test_alloc_realloc_nested_groups-1.jsonl": {
+      "bytes": 44717,
+      "sha256": "8f84d4a60bbcfb2b1bd7cc2909084b6650b0b9154ec344b3ff61972fa8ac6500"
+    },
+    "study/allocation-profiles/combined-test_nsalloc_realloc_long_context-0.jsonl": {
+      "bytes": 156406,
+      "sha256": "62083552aac092091749a0807d274d88380e94bc34fdfc4bfd42dcbc22acf1ae"
+    },
+    "study/allocation-profiles/combined-test_nsalloc_realloc_long_context-1.jsonl": {
+      "bytes": 158859,
+      "sha256": "d34aadd1f5a3c08cce63b34d7342f6e19843763224a9d40454039ce81eded4ca"
+    },
+    "study/allocation-profiles/combined-tiny-0.jsonl": {
+      "bytes": 16289,
+      "sha256": "bcd1b41c289fda0c69e961e79d15f0bb77628924067994f4e20ca63c936f893a"
+    },
+    "study/allocation-profiles/combined-tiny-1.jsonl": {
+      "bytes": 16289,
+      "sha256": "5e36cbcd35b8ef0e155d4757717a330a1341f56cb4e9cea7164468775e544817"
+    },
+    "study/allocation-profiles/combined-tiny-utf16-0.jsonl": {
+      "bytes": 16288,
+      "sha256": "cc6c1deb44d35073be5a26919fe29e226bc0a02e48951ae9e581873c8c0181ed"
+    },
+    "study/allocation-profiles/combined-tiny-utf16-1.jsonl": {
+      "bytes": 16274,
+      "sha256": "6533f335296e32f9b88b8c1e4d56496fdde78d3e2fa5c9d4654dbce215483f59"
+    },
+    "study/allocation-profiles/context-bom-only-0.jsonl": {
+      "bytes": 7460,
+      "sha256": "50ae887dbbb6171886e32872dde9fbb978b329a05df94225fb29dbf8e3c30b11"
+    },
+    "study/allocation-profiles/context-bom-only-1.jsonl": {
+      "bytes": 7452,
+      "sha256": "a29163a3e5e5f42f09c4aa3b67d0099647367cb179e6567fc7a2b3366b3b1d2c"
+    },
+    "study/allocation-profiles/context-empty-0.jsonl": {
+      "bytes": 5322,
+      "sha256": "77dc1d534e731f43836693f390e6de42d9e9bbea65cd5f73d90d149377694960"
+    },
+    "study/allocation-profiles/context-empty-1.jsonl": {
+      "bytes": 5328,
+      "sha256": "28498ca1742e9543a9da3cfebad0d8d74a050364c7e89e5eb2fa227b0cab1a17"
+    },
+    "study/allocation-profiles/context-invalid-prefix-0.jsonl": {
+      "bytes": 7452,
+      "sha256": "2f76d2aa620df99a5f3fdb9526a6d898752587071eb51040ebba5e122f92be76"
+    },
+    "study/allocation-profiles/context-invalid-prefix-1.jsonl": {
+      "bytes": 7452,
+      "sha256": "f2b11b51066c66c661708fc99ad1b66976e8fadb511fe8f874f76f2ae72a1d19"
+    },
+    "study/allocation-profiles/context-minimal-long-namespace-1024-0.jsonl": {
+      "bytes": 31129,
+      "sha256": "29e89134f549db4244f0182386536959c0c049f40dbe943cbbf017186f24c320"
+    },
+    "study/allocation-profiles/context-minimal-long-namespace-1024-1.jsonl": {
+      "bytes": 42170,
+      "sha256": "0248d4ce2b947f1516d9979e2fb026c537c0b2a837a9e0c03414ee4c42eca914"
+    },
+    "study/allocation-profiles/context-minimal-long-namespace-2048-0.jsonl": {
+      "bytes": 31154,
+      "sha256": "472966f5b1c32de687b318672b4e2a351a5bba8e2a654642a0ff0d54d7cc7c20"
+    },
+    "study/allocation-profiles/context-minimal-long-namespace-2048-1.jsonl": {
+      "bytes": 44375,
+      "sha256": "dc8609cd2272cbdc43e2ce8b6e7ad23ed19496fa3550ec0bd15c0769ecf1d7ad"
+    },
+    "study/allocation-profiles/context-minimal-long-namespace-256-0.jsonl": {
+      "bytes": 31120,
+      "sha256": "a1d73a797e1de3463dac868c2d99606ba02a082282234008e95172bf53597a4d"
+    },
+    "study/allocation-profiles/context-minimal-long-namespace-256-1.jsonl": {
+      "bytes": 38650,
+      "sha256": "fe4ce277b391fabb639ce3c41767fd62851403fd4f47df11ef405af9a99a4908"
+    },
+    "study/allocation-profiles/context-minimal-long-namespace-64-0.jsonl": {
+      "bytes": 31118,
+      "sha256": "346534b464fbab8ca9c416d356800e213eee22b6b3058d2f749647f29a2c5e97"
+    },
+    "study/allocation-profiles/context-minimal-long-namespace-64-1.jsonl": {
+      "bytes": 36139,
+      "sha256": "c1d8963b449d2e8d5e833a75dccb8b60b9cbb1c3a81d88566bc6d31f8ac2ff72"
+    },
+    "study/allocation-profiles/context-test_alloc_long_entity_value-0.jsonl": {
+      "bytes": 97355,
+      "sha256": "eeee266df3dcc36d958cb9643e948a2ca79bb8d5271c2423b17f8d1bde23d5d5"
+    },
+    "study/allocation-profiles/context-test_alloc_long_entity_value-1.jsonl": {
+      "bytes": 108489,
+      "sha256": "c38709568dedce40c29b27ad2d94e6eb8224922b84d8a9b4c8f391de9e76292c"
+    },
+    "study/allocation-profiles/context-test_alloc_long_notation-0.jsonl": {
+      "bytes": 111595,
+      "sha256": "96348fdeb3af8ef61b3a4d8527720607a68c595b02b61e74a6fc0e2701d428fd"
+    },
+    "study/allocation-profiles/context-test_alloc_long_notation-1.jsonl": {
+      "bytes": 124908,
+      "sha256": "e5401c6d78d168e60013a0a540c6fe1b7d7ddef80650239c444a8f340b8c3496"
+    },
+    "study/allocation-profiles/context-test_alloc_realloc_default_attribute-0.jsonl": {
+      "bytes": 67599,
+      "sha256": "1a7d4e5ca6f3d81f53a89eb3c462cc116e749238bfc715c2140f4c6f78e6976b"
+    },
+    "study/allocation-profiles/context-test_alloc_realloc_default_attribute-1.jsonl": {
+      "bytes": 78651,
+      "sha256": "5d2af3f896af00d55de702a92cdd523c964732ac0f7875e56072478ede9123dd"
+    },
+    "study/allocation-profiles/context-test_alloc_realloc_group_choice-0.jsonl": {
+      "bytes": 45546,
+      "sha256": "c4ab78c8b572196d95b8ed7118530bdeb674761b2585427f1dc2d40fa913a6e1"
+    },
+    "study/allocation-profiles/context-test_alloc_realloc_group_choice-1.jsonl": {
+      "bytes": 51811,
+      "sha256": "ca0c454e6968b043ef2500e6f648fce7ecdb9c8bc979ced3670341d6ecee5aa7"
+    },
+    "study/allocation-profiles/context-test_alloc_realloc_implied_attribute-0.jsonl": {
+      "bytes": 59746,
+      "sha256": "8c4f6e9bcecd5b082c93c86ab3a3b2988581ecb827a52a2d404cb8be14fb8e03"
+    },
+    "study/allocation-profiles/context-test_alloc_realloc_implied_attribute-1.jsonl": {
+      "bytes": 70739,
+      "sha256": "f9058e3e92648e7cd15fd7bd325c2b3894e4c2c095578f0084d83905413cf4d4"
+    },
+    "study/allocation-profiles/context-test_alloc_realloc_many_attributes-0.jsonl": {
+      "bytes": 176630,
+      "sha256": "e110d32bba7ea95788fbf984262c55185395c193c2b74f8336d9ccdc63a56a51"
+    },
+    "study/allocation-profiles/context-test_alloc_realloc_many_attributes-1.jsonl": {
+      "bytes": 184155,
+      "sha256": "f76f44a9d44446ad9bbeeb642b4602193e45c67c7244e59c97aa62919255bad6"
+    },
+    "study/allocation-profiles/context-test_alloc_realloc_nested_groups-0.jsonl": {
+      "bytes": 44253,
+      "sha256": "a14dde885d3c324ba3f6db7ab5bfc86e4dad877b7a9e40d64ac82296c73f7d97"
+    },
+    "study/allocation-profiles/context-test_alloc_realloc_nested_groups-1.jsonl": {
+      "bytes": 50526,
+      "sha256": "9fcc2b4c28ecf96dc0c159880a88a9e8d4267e09e0f88f3cb1733c16afc646a0"
+    },
+    "study/allocation-profiles/context-test_nsalloc_realloc_long_context-0.jsonl": {
+      "bytes": 154904,
+      "sha256": "0573fe98163c61f5ae7dbe5176fcfe5e79671ee4c78eefcbed74ce4b0fbd9a46"
+    },
+    "study/allocation-profiles/context-test_nsalloc_realloc_long_context-1.jsonl": {
+      "bytes": 169693,
+      "sha256": "a4625dc4001e8b80364cd57c018080e6eac7158a9de0b591d087fcfeb3919087"
+    },
+    "study/allocation-profiles/context-tiny-0.jsonl": {
+      "bytes": 16093,
+      "sha256": "9e49e0560b3d4cdbf1a442703c9ee6a4f9e75decbb68aac1c2755eff2caeed03"
+    },
+    "study/allocation-profiles/context-tiny-1.jsonl": {
+      "bytes": 16093,
+      "sha256": "3c8976d19d786b9bdb0d36a8f36cdd444b862a8f8be9cf11344fea0ac057fe12"
+    },
+    "study/allocation-profiles/context-tiny-utf16-0.jsonl": {
+      "bytes": 16177,
+      "sha256": "0702fe804596f12ffda1c64f972d39a250dbc49592ff8deb6cb69854ff8e90c6"
+    },
+    "study/allocation-profiles/context-tiny-utf16-1.jsonl": {
+      "bytes": 16163,
+      "sha256": "c34050391abd9a2226844935845d01005aad2c34f6459f69fc0ffc4376a0ad60"
+    },
+    "study/allocation-profiles/control-bom-only-0.jsonl": {
+      "bytes": 6802,
+      "sha256": "c8da71f63e2d8f16c058c49f89cef15966d4b25fc69945b486b34e33d14e9bb0"
+    },
+    "study/allocation-profiles/control-bom-only-1.jsonl": {
+      "bytes": 6794,
+      "sha256": "d19142c5ed86ce27990f6ebcebd7f67eed9b4e26fea02eacf732abc6b8728a7c"
+    },
+    "study/allocation-profiles/control-empty-0.jsonl": {
+      "bytes": 4890,
+      "sha256": "01a55039f44f1cb48d5c7a099a42522d98a11c504439be55c41f370f959b0186"
+    },
+    "study/allocation-profiles/control-empty-1.jsonl": {
+      "bytes": 4896,
+      "sha256": "c71ea85a1e8eb58df3673f97a80ed545642cb2c444acc3a6ffacd13152d605e3"
+    },
+    "study/allocation-profiles/control-invalid-prefix-0.jsonl": {
+      "bytes": 6802,
+      "sha256": "e4e76a2730058498dc27460a150d4353c319b7f5fbdb2fb70a30d33aaeb99973"
+    },
+    "study/allocation-profiles/control-invalid-prefix-1.jsonl": {
+      "bytes": 6802,
+      "sha256": "d20302c981080c6776447bd5cba975f557e55bce1b267aeb2b5249fda419a167"
+    },
+    "study/allocation-profiles/control-minimal-long-namespace-1024-0.jsonl": {
+      "bytes": 27522,
+      "sha256": "a868da9060135fc3655c8248172803285ffb3d0181327723c241ba9499852d48"
+    },
+    "study/allocation-profiles/control-minimal-long-namespace-1024-1.jsonl": {
+      "bytes": 43604,
+      "sha256": "6655bd8f3ed5a3f43af3120286778a740fc49f047d671c2c2da0154bfb2d2b93"
+    },
+    "study/allocation-profiles/control-minimal-long-namespace-2048-0.jsonl": {
+      "bytes": 27522,
+      "sha256": "f8097b415147b45f1d823a96ed62cb6e53594633e196fea73b44839b63cd095f"
+    },
+    "study/allocation-profiles/control-minimal-long-namespace-2048-1.jsonl": {
+      "bytes": 45615,
+      "sha256": "d6a1c3b35abe666934c8969add267fd755720ece280f6acac5fcc5ce42b412db"
+    },
+    "study/allocation-profiles/control-minimal-long-namespace-256-0.jsonl": {
+      "bytes": 27512,
+      "sha256": "645d1093ea584077d9f2eb6a59cb2f0f03d8d4c774c6abc1f0d7cad5fb6817ad"
+    },
+    "study/allocation-profiles/control-minimal-long-namespace-256-1.jsonl": {
+      "bytes": 39564,
+      "sha256": "3313464bd32e6acc33d1d81cf80b05905e1f4d35fe44680d161076654294acc1"
+    },
+    "study/allocation-profiles/control-minimal-long-namespace-64-0.jsonl": {
+      "bytes": 27509,
+      "sha256": "3d70b70688c8c84811559ef44741dc0f59f2a903c981e1b384d5d35c4f171ffd"
+    },
+    "study/allocation-profiles/control-minimal-long-namespace-64-1.jsonl": {
+      "bytes": 35533,
+      "sha256": "6f6d0d912c6f20e60e266211893dbbb3e067a9a4a16c32675c8db46590a37ccf"
+    },
+    "study/allocation-profiles/control-test_alloc_long_entity_value-0.jsonl": {
+      "bytes": 84921,
+      "sha256": "5cb5c5121f1c563bbe5791b051c1aef0240d0a9d521a265b870acd8a74f06792"
+    },
+    "study/allocation-profiles/control-test_alloc_long_entity_value-1.jsonl": {
+      "bytes": 101120,
+      "sha256": "1e32432c25a34066e9fd04c37daafb62046a4de84e50ee108d37bd059c22668d"
+    },
+    "study/allocation-profiles/control-test_alloc_long_notation-0.jsonl": {
+      "bytes": 97273,
+      "sha256": "50073e92c924eca220383caffe22faede5963dc1e9bd15830badfe5f7a42c745"
+    },
+    "study/allocation-profiles/control-test_alloc_long_notation-1.jsonl": {
+      "bytes": 115510,
+      "sha256": "361f3b05791011df50edb1dd8fa2c0139e57de7439bcb29c7128314876d8a1a6"
+    },
+    "study/allocation-profiles/control-test_alloc_realloc_default_attribute-0.jsonl": {
+      "bytes": 59040,
+      "sha256": "6d9f069e7fc3066bdd313a89936a06dcb93b29a3d4e7655e12b7240847b62978"
+    },
+    "study/allocation-profiles/control-test_alloc_realloc_default_attribute-1.jsonl": {
+      "bytes": 75175,
+      "sha256": "504c04ef7312fb21591f855ee704a13b7df5a8dab8f31ab9a0e3a8b6524b2e8e"
+    },
+    "study/allocation-profiles/control-test_alloc_realloc_group_choice-0.jsonl": {
+      "bytes": 40014,
+      "sha256": "9e990b12c86cd31707af58097de62fe9016e6bba750ffb4bd8c08a746016ccd4"
+    },
+    "study/allocation-profiles/control-test_alloc_realloc_group_choice-1.jsonl": {
+      "bytes": 50077,
+      "sha256": "bf456083df632cbe9a0475d26a0f98007a958e1421890dd4b891f576bcd88d66"
+    },
+    "study/allocation-profiles/control-test_alloc_realloc_implied_attribute-0.jsonl": {
+      "bytes": 52194,
+      "sha256": "96b09cdc35882a914aa08dbf7f95c8f1a57de9aa9dcb41de01a50046e8e0cf62"
+    },
+    "study/allocation-profiles/control-test_alloc_realloc_implied_attribute-1.jsonl": {
+      "bytes": 68314,
+      "sha256": "ebe6bedd790c6523c6ce2d3642e99a8ebe5c4be7ebced7f01d0f0d8c107fce0e"
+    },
+    "study/allocation-profiles/control-test_alloc_realloc_many_attributes-0.jsonl": {
+      "bytes": 153461,
+      "sha256": "0f23b3cce940e7aadfa5e711e63aa5f69d5defafb2d4cf421bcec30c94c55602"
+    },
+    "study/allocation-profiles/control-test_alloc_realloc_many_attributes-1.jsonl": {
+      "bytes": 165666,
+      "sha256": "32934effb96c39f09ab11e60b922ed948542c6bed8994401c1950a5d4dc733d8"
+    },
+    "study/allocation-profiles/control-test_alloc_realloc_nested_groups-0.jsonl": {
+      "bytes": 38844,
+      "sha256": "fa12e0656a297dfeea31132b07ee405cfc46d7397eb1e2047af9a1e76a3838ab"
+    },
+    "study/allocation-profiles/control-test_alloc_realloc_nested_groups-1.jsonl": {
+      "bytes": 48905,
+      "sha256": "519d001ae5315bd02961ee5651d1eba38a70170c7e9cd6951f069c20b84c9c70"
+    },
+    "study/allocation-profiles/control-test_nsalloc_realloc_long_context-0.jsonl": {
+      "bytes": 134964,
+      "sha256": "44049c2d05b0d9478a371b7523b443cef872525b2a2de9490133d712119be474"
+    },
+    "study/allocation-profiles/control-test_nsalloc_realloc_long_context-1.jsonl": {
+      "bytes": 157078,
+      "sha256": "308945e194437ad73ca78e6729de41e4d1ad76d8d876d2a793ece8e49c4fc78c"
+    },
+    "study/allocation-profiles/control-tiny-0.jsonl": {
+      "bytes": 14317,
+      "sha256": "6a7f3fc5ba06cdba8a66c768ddefbec0321cee48cd039c93924b688107e27365"
+    },
+    "study/allocation-profiles/control-tiny-1.jsonl": {
+      "bytes": 14317,
+      "sha256": "a1d764cfe1d2fd6e4884591fa676907e67c2eaade8714f7a3176d665c238dd4f"
+    },
+    "study/allocation-profiles/control-tiny-utf16-0.jsonl": {
+      "bytes": 14399,
+      "sha256": "aaaa73c2fcb97718fdda03de3baa1d28aabfd8b510b4de793dfa544876fde9d3"
+    },
+    "study/allocation-profiles/control-tiny-utf16-1.jsonl": {
+      "bytes": 15283,
+      "sha256": "0a970cb23f729efc085e9674c5dd95785417739d5c91c77699cfe93bb662afd2"
+    },
+    "study/allocation-profiles/decoded-bom-only-0.jsonl": {
+      "bytes": 7450,
+      "sha256": "8b527b9b36a43ad8ddeaf7d8bfb8b8f503e6a2e8be43eef065eb26f8c453f2ee"
+    },
+    "study/allocation-profiles/decoded-bom-only-1.jsonl": {
+      "bytes": 7450,
+      "sha256": "e7bdeb82fc3364403699fc8a6b9144c51569251e14762e68e75424c127fdcc79"
+    },
+    "study/allocation-profiles/decoded-empty-0.jsonl": {
+      "bytes": 5328,
+      "sha256": "4a431225345d26a6de1ba561e0716de7ac7cc198a909cd9ef4aa35cc8607d7c3"
+    },
+    "study/allocation-profiles/decoded-empty-1.jsonl": {
+      "bytes": 5322,
+      "sha256": "780def106445914ddf89c5e7cc8f50a51e4bf9e741ed721cdf50bcded6ebaec7"
+    },
+    "study/allocation-profiles/decoded-invalid-prefix-0.jsonl": {
+      "bytes": 7458,
+      "sha256": "4b505e4baadc38b3f12a7f3b234c97bacf09984286def9cc80c43396bc973ef2"
+    },
+    "study/allocation-profiles/decoded-invalid-prefix-1.jsonl": {
+      "bytes": 7458,
+      "sha256": "1062da3f91f3882be94385f316f6448f7fd7c20fbcd17b5e4060bd095f98d314"
+    },
+    "study/allocation-profiles/decoded-minimal-long-namespace-1024-0.jsonl": {
+      "bytes": 31212,
+      "sha256": "53c18c5270745d520e059d321e9f923db986a23e22d0c8f1690bc111851aa460"
+    },
+    "study/allocation-profiles/decoded-minimal-long-namespace-1024-1.jsonl": {
+      "bytes": 40510,
+      "sha256": "04c190e838ec23408889d14370dd9de351aa21784cb4d09ac522ae8ef8305b36"
+    },
+    "study/allocation-profiles/decoded-minimal-long-namespace-2048-0.jsonl": {
+      "bytes": 31237,
+      "sha256": "f0cc02123723d6c31c0c59323dca7e9b4e7135b11bfb71eb91c78007a6b05854"
+    },
+    "study/allocation-profiles/decoded-minimal-long-namespace-2048-1.jsonl": {
+      "bytes": 42762,
+      "sha256": "f7a60fb4d4c0ac4e011fadec8015dc924bbea1ef0b5bc7e4ca98a21c8723058d"
+    },
+    "study/allocation-profiles/decoded-minimal-long-namespace-256-0.jsonl": {
+      "bytes": 31203,
+      "sha256": "f0ef0990ab71613ee40f98446abbf403601deedd7291ec6d4a17331e570beb14"
+    },
+    "study/allocation-profiles/decoded-minimal-long-namespace-256-1.jsonl": {
+      "bytes": 37202,
+      "sha256": "40387992dacac7e97266c3c5bb9f4d64c21345ded3cde5c1a629a4b66c823587"
+    },
+    "study/allocation-profiles/decoded-minimal-long-namespace-64-0.jsonl": {
+      "bytes": 31226,
+      "sha256": "9840e26013598d6c1a83ee2e74679856fe8c4e177c426537945f49fb367b7004"
+    },
+    "study/allocation-profiles/decoded-minimal-long-namespace-64-1.jsonl": {
+      "bytes": 35226,
+      "sha256": "bb6c69a652407907fe42d345a0f10d793e51f5af62161d552517837dfa7fe0c1"
+    },
+    "study/allocation-profiles/decoded-test_alloc_long_entity_value-0.jsonl": {
+      "bytes": 97521,
+      "sha256": "34c4cac8ce8ec10add425bc437f72bab1c33207b659f60ce29b4fc39d3b2e68c"
+    },
+    "study/allocation-profiles/decoded-test_alloc_long_entity_value-1.jsonl": {
+      "bytes": 106827,
+      "sha256": "acbbe0bb636be20839764de1b88b870ecb6539bf0f8992f1fff39ecffbb225e0"
+    },
+    "study/allocation-profiles/decoded-test_alloc_long_notation-0.jsonl": {
+      "bytes": 111761,
+      "sha256": "49fe047dc613cdbb6c13945b8f715fe42ef1b7bc2cfee7a89aab14d0be7a8e1a"
+    },
+    "study/allocation-profiles/decoded-test_alloc_long_notation-1.jsonl": {
+      "bytes": 123331,
+      "sha256": "071b47098aabbcab41ad30a5e82d05406df71ff6289ae6f2f7644700991908de"
+    },
+    "study/allocation-profiles/decoded-test_alloc_realloc_default_attribute-0.jsonl": {
+      "bytes": 67682,
+      "sha256": "7463053da23f4f7b1692e975cfc546ab9269db955510f232665fcd8502185fcf"
+    },
+    "study/allocation-profiles/decoded-test_alloc_realloc_default_attribute-1.jsonl": {
+      "bytes": 77058,
+      "sha256": "9a269f205221282dc35b927d195fda4ef294098f59eb17793547b704b4a0a02d"
+    },
+    "study/allocation-profiles/decoded-test_alloc_realloc_group_choice-0.jsonl": {
+      "bytes": 45629,
+      "sha256": "1d1e721dd69b66563af9f99c9a2376e39019ad97a638af3bca36994836b848bf"
+    },
+    "study/allocation-profiles/decoded-test_alloc_realloc_group_choice-1.jsonl": {
+      "bytes": 50696,
+      "sha256": "b8644583e2a3a1a49b065147ccf60c6ea37dd5902df3fff572c37e068b0cf957"
+    },
+    "study/allocation-profiles/decoded-test_alloc_realloc_implied_attribute-0.jsonl": {
+      "bytes": 59829,
+      "sha256": "1361a4d5d100f7fc1ea6682e29428a282ffa14f25485c39799d43ece1b24ea2e"
+    },
+    "study/allocation-profiles/decoded-test_alloc_realloc_implied_attribute-1.jsonl": {
+      "bytes": 69141,
+      "sha256": "b0af5bcb905e1c4f788f6c10716b8f368b86ab0352b820659757776e4dc1fdbf"
+    },
+    "study/allocation-profiles/decoded-test_alloc_realloc_many_attributes-0.jsonl": {
+      "bytes": 176713,
+      "sha256": "214e30fa91ad9c745c355c90a66fa3bd072448f75a981c5239a83b59d0eafaa3"
+    },
+    "study/allocation-profiles/decoded-test_alloc_realloc_many_attributes-1.jsonl": {
+      "bytes": 182878,
+      "sha256": "bec17fccbbceadfaa45a3ca141316963c65d3a1fd2fff0b2d717420670e7e108"
+    },
+    "study/allocation-profiles/decoded-test_alloc_realloc_nested_groups-0.jsonl": {
+      "bytes": 44336,
+      "sha256": "a795bafe9d91d781a3bb177a7a060e640f9ef377dd6911986c8af7238bc79a9e"
+    },
+    "study/allocation-profiles/decoded-test_alloc_realloc_nested_groups-1.jsonl": {
+      "bytes": 49364,
+      "sha256": "9085ef8d56594f554f3c625c5d7e57b751a85184c40e56aed9f77b54d31e24a2"
+    },
+    "study/allocation-profiles/decoded-test_nsalloc_realloc_long_context-0.jsonl": {
+      "bytes": 155049,
+      "sha256": "cf5efa09661839a81fd924ac3ab0b75eff7706b90e6314f00677f9b141d49cf5"
+    },
+    "study/allocation-profiles/decoded-test_nsalloc_realloc_long_context-1.jsonl": {
+      "bytes": 167575,
+      "sha256": "e4dfb93b57d115921dbcea1e1e258da8be9eeb2c27f85e8645b32f593ac4872a"
+    },
+    "study/allocation-profiles/decoded-tiny-0.jsonl": {
+      "bytes": 16176,
+      "sha256": "a8a56d98adb44ff00b569f32b7deb72cfd050377e196eee7b7e2bb93ac4347ae"
+    },
+    "study/allocation-profiles/decoded-tiny-1.jsonl": {
+      "bytes": 16176,
+      "sha256": "f89274bcf8470560f0efbb3c0f2bac75028c8c218b753d3585b37137f63c600a"
+    },
+    "study/allocation-profiles/decoded-tiny-utf16-0.jsonl": {
+      "bytes": 16175,
+      "sha256": "da4737e5aa23fa3451bf8fb2fddeac111d8815226649b1876645a1645121cafe"
+    },
+    "study/allocation-profiles/decoded-tiny-utf16-1.jsonl": {
+      "bytes": 17155,
+      "sha256": "94cb8ae2fdbb91f12dc8da297c46d45e7a645eb500837af0701e92d1ca5419f2"
+    },
+    "study/allocation-profiles/empty.xml": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "study/allocation-profiles/expat-bom-only-0.jsonl": {
+      "bytes": 3396,
+      "sha256": "92130ab56d57281fa3f8e260d5e9c7a03ca1ee507b67467b39584f402d1db433"
+    },
+    "study/allocation-profiles/expat-bom-only-1.jsonl": {
+      "bytes": 3396,
+      "sha256": "45811f90c66cd918840e63603e9097c26ab96bae0621932ffba52b0709f28f3b"
+    },
+    "study/allocation-profiles/expat-empty-0.jsonl": {
+      "bytes": 3391,
+      "sha256": "ed25cfe819c2bea22b78aae31de97da97f28ba0be8b9156b4d44f7cbe26cffc9"
+    },
+    "study/allocation-profiles/expat-empty-1.jsonl": {
+      "bytes": 3391,
+      "sha256": "27214394471719c2213013bab9d3267bed751c9cbfa4445fd523439c71f94d8d"
+    },
+    "study/allocation-profiles/expat-invalid-prefix-0.jsonl": {
+      "bytes": 3391,
+      "sha256": "432aae4e7057cd145ba51294826b83648bb5dc3c380e823dcc249d5d1c69f799"
+    },
+    "study/allocation-profiles/expat-invalid-prefix-1.jsonl": {
+      "bytes": 3396,
+      "sha256": "e25850353408051bf7c359c9ce4490a1f0230c517160c39a37244273492be97b"
+    },
+    "study/allocation-profiles/expat-minimal-long-namespace-1024-0.jsonl": {
+      "bytes": 18125,
+      "sha256": "29ac6667ac8085969ea8a53186531385aa33159f630f18b278ad13210d24f9a6"
+    },
+    "study/allocation-profiles/expat-minimal-long-namespace-1024-1.jsonl": {
+      "bytes": 17425,
+      "sha256": "db1107fbd698d55cbde919a4e11ff6ee7e0fa43e8ca4d7904555799497a5a0b9"
+    },
+    "study/allocation-profiles/expat-minimal-long-namespace-2048-0.jsonl": {
+      "bytes": 19329,
+      "sha256": "59c955389175f1b40d4a9aecaab8cab78f408893772e7f1f3ae97891817af807"
+    },
+    "study/allocation-profiles/expat-minimal-long-namespace-2048-1.jsonl": {
+      "bytes": 19229,
+      "sha256": "421a5615f11d986c0b5506fab83dcd1ae0659a0f0c0e06e33bcc71f45eabd488"
+    },
+    "study/allocation-profiles/expat-minimal-long-namespace-256-0.jsonl": {
+      "bytes": 15710,
+      "sha256": "4a79977d3579bac93f28b631595b061b69e0ae60f78391bf57a1cf49967f314a"
+    },
+    "study/allocation-profiles/expat-minimal-long-namespace-256-1.jsonl": {
+      "bytes": 15194,
+      "sha256": "0b7d33bee148990dccf24abf2be54ac5b9d09f6bb0af5563f0f47f8516b44646"
+    },
+    "study/allocation-profiles/expat-minimal-long-namespace-64-0.jsonl": {
+      "bytes": 15726,
+      "sha256": "258dedd5f294ce111f7e06f3b527ac5b5607c2685774f685ad5e53c0e7815b7d"
+    },
+    "study/allocation-profiles/expat-minimal-long-namespace-64-1.jsonl": {
+      "bytes": 15204,
+      "sha256": "20388abfc96d31d9c00aa548f6cf7381b3c143f4df71eaa432f01616b029e8f2"
+    },
+    "study/allocation-profiles/expat-test_alloc_long_entity_value-0.jsonl": {
+      "bytes": 34134,
+      "sha256": "1f3b09565068cb50af71c5959e614b47e143306e7e6e3806f9dcc9e997a74ccd"
+    },
+    "study/allocation-profiles/expat-test_alloc_long_entity_value-1.jsonl": {
+      "bytes": 33733,
+      "sha256": "72da0f9e471ca11824404c1aef8f69ed8fae6c832514275b4404db2e18c2d457"
+    },
+    "study/allocation-profiles/expat-test_alloc_long_notation-0.jsonl": {
+      "bytes": 34825,
+      "sha256": "afff1bfcd0157d523e5052c6d46ba801759adce97516d25eb6f5ba55594f4835"
+    },
+    "study/allocation-profiles/expat-test_alloc_long_notation-1.jsonl": {
+      "bytes": 35534,
+      "sha256": "22d3952422f1fc03e9ee777e75532d5ac6509a7b494329332e29c974de8e0954"
+    },
+    "study/allocation-profiles/expat-test_alloc_realloc_default_attribute-0.jsonl": {
+      "bytes": 13382,
+      "sha256": "7d317dced5e203242cfc822b14c5506e357d4b534a9012783c92c2732834ca28"
+    },
+    "study/allocation-profiles/expat-test_alloc_realloc_default_attribute-1.jsonl": {
+      "bytes": 13399,
+      "sha256": "aedddf6f1a9539a9bf3a7d18b46ef8d1ba2bd66355a4d16ee2825c8d40ce7a4c"
+    },
+    "study/allocation-profiles/expat-test_alloc_realloc_group_choice-0.jsonl": {
+      "bytes": 19247,
+      "sha256": "834ea809e862ce7f15ec54ca033c3f19a6c61bc25dcbc1b39af7d3f50834c124"
+    },
+    "study/allocation-profiles/expat-test_alloc_realloc_group_choice-1.jsonl": {
+      "bytes": 18130,
+      "sha256": "50c40f7cca3787a1a5703db535366654085a0592a5834ed92f57378a31575d31"
+    },
+    "study/allocation-profiles/expat-test_alloc_realloc_implied_attribute-0.jsonl": {
+      "bytes": 13382,
+      "sha256": "592c80576ddb54093241547db1d01cda7142f6706fbb137e35d5573a0a305390"
+    },
+    "study/allocation-profiles/expat-test_alloc_realloc_implied_attribute-1.jsonl": {
+      "bytes": 13311,
+      "sha256": "34f14b03fd26586856da89f1d05b2ac89e668742a4b58934548c25505f63adaa"
+    },
+    "study/allocation-profiles/expat-test_alloc_realloc_many_attributes-0.jsonl": {
+      "bytes": 43954,
+      "sha256": "3faa036bec0ae0ebf93f7dd834cf5494c4f812804f8d056c7e231fe6935522af"
+    },
+    "study/allocation-profiles/expat-test_alloc_realloc_many_attributes-1.jsonl": {
+      "bytes": 42115,
+      "sha256": "4381b968ffec274c925575c54eccebfaee325fcac29015cb05c6cda582a03cb6"
+    },
+    "study/allocation-profiles/expat-test_alloc_realloc_nested_groups-0.jsonl": {
+      "bytes": 13215,
+      "sha256": "1cd86cd694dc980f8bc75cd3fbe74e8065e20dd00c1741bdc6198d998b316ca0"
+    },
+    "study/allocation-profiles/expat-test_alloc_realloc_nested_groups-1.jsonl": {
+      "bytes": 12631,
+      "sha256": "f6c10e6d17a975aa223d478957f32357bb99395ebc37e2d2a3febbc35b808d4e"
+    },
+    "study/allocation-profiles/expat-test_nsalloc_realloc_long_context-0.jsonl": {
+      "bytes": 56019,
+      "sha256": "c20b06de8170c078f266f23ad0e2195edd2b017f22e070bc01b1a10cb38e6c16"
+    },
+    "study/allocation-profiles/expat-test_nsalloc_realloc_long_context-1.jsonl": {
+      "bytes": 53392,
+      "sha256": "d8aa8a9499076e72f5a20684dec87a5372addbd2863b9104641aa4cf431cfd59"
+    },
+    "study/allocation-profiles/expat-tiny-0.jsonl": {
+      "bytes": 8144,
+      "sha256": "2182bdde7659a3f24bfef2a8500caaf65ff9af49cb5c93d070fc6afd0b350061"
+    },
+    "study/allocation-profiles/expat-tiny-1.jsonl": {
+      "bytes": 7801,
+      "sha256": "d92f5d8630475aedf65af2afd57881681e5c289530b32d895081b21f910ab6fb"
+    },
+    "study/allocation-profiles/expat-tiny-utf16-0.jsonl": {
+      "bytes": 8154,
+      "sha256": "d237f7bc1a7d238876b797b512128c332728bc5d91f0ae72f49e9ebf85aae6ed"
+    },
+    "study/allocation-profiles/expat-tiny-utf16-1.jsonl": {
+      "bytes": 7802,
+      "sha256": "a8b51b6cb190b80b56d0954340cf45aef21403ccd7e89e3fdce6721f5d1055c3"
+    },
+    "study/allocation-profiles/invalid-prefix.xml": {
+      "bytes": 5,
+      "sha256": "072cfd709d272156d37ea2b893fce70efe3a370f43fbf092226a0121f26fe44a"
+    },
+    "study/allocation-profiles/tiny-utf16.xml": {
+      "bytes": 10,
+      "sha256": "e92a783e348a70ad6f67b77bd92156ca8ec61a76b4533c6cc4c4b34ac08f2570"
+    },
+    "study/allocation-profiles/tiny.xml": {
+      "bytes": 4,
+      "sha256": "5382511e672645156e2889ebc21c72a0e59377fcbe774abaa703e0a42b3d2006"
+    },
+    "study/allocation-variants.json": {
+      "bytes": 146510,
+      "sha256": "461c5f43292ae792039912d5afa526d02ab6647b6f3a21bb5caf00453dc1630e"
+    },
+    "study/allocation-variants.log": {
+      "bytes": 3192,
+      "sha256": "f5ae132316263f43b183d1830ca568ca0255d07c6317ad1a04237e68a3a8f160"
+    },
+    "study/baseline.json": {
+      "bytes": 608,
+      "sha256": "54ee631faf9ba444d7c40425e0cc5337d03e10fddde1788115d3b5c42328d9c3"
+    },
+    "study/clippy-final.log": {
+      "bytes": 204,
+      "sha256": "a33cb574c22a2bf486d5ac8cde07485cd71f76a65b82ab384fb58a38d881e715"
+    },
+    "study/clippy.log": {
+      "bytes": 747,
+      "sha256": "de52ee467953e977986c9928aa003547dbff320d854c44c008d317950b7e52ce"
+    },
+    "study/combined/native/adversarial.c": {
+      "bytes": 3332,
+      "sha256": "abc52bb8d44d0bb5f9914e594b6ca2e0a7d8e6c5c9c293699a73e00dfa53793d"
+    },
+    "study/combined/native/allocations.c": {
+      "bytes": 7552,
+      "sha256": "1ccf833e2d8d4ec75daf1524547dd7671592c7283e5a0d45b849cacbdb662f59"
+    },
+    "study/combined/native/expat.h": {
+      "bytes": 46308,
+      "sha256": "572864443d8c3c105017e50a2421881d4afaf5e3276a1741b68a5a9c26967d49"
+    },
+    "study/combined/native/integration.c": {
+      "bytes": 10220,
+      "sha256": "9e96615c8a3a3ee0b58ab1a72a070ca98962c360498461471c8da8036f68ebad"
+    },
+    "study/combined/native/report.json": {
+      "bytes": 5734,
+      "sha256": "bc7c2a7ce9eb0fffd8cd80160284ddcf8cf1ad94dab62f4b30e1d9c92bf224ac"
+    },
+    "study/combined/source.json": {
+      "bytes": 7100,
+      "sha256": "d2bb2565f1c1ab94edd8bc3a07f193a6e89e4764d9cbf18fe7b480f5730734bc"
+    },
+    "study/combined/source.tar.gz": {
+      "bytes": 240611,
+      "sha256": "550a098250d22980f7d96efe5afbd810b06f13218d52f6b1257919b6cda59ffc"
+    },
+    "study/combined-build.log": {
+      "bytes": 204,
+      "sha256": "9a4014d17987950c14f05e0b0ede7717165b02ca4cebbc8dfbaf42bc60d07666"
+    },
+    "study/combined-with-tests.patch": {
+      "bytes": 4946,
+      "sha256": "fcdb971277ac9ce2be5d717168aad49f70d19b2dc716496aec7e83e0fe8f0180"
+    },
+    "study/combined.patch": {
+      "bytes": 2322,
+      "sha256": "d8e2fecf9079aae3a899e6c30ad95a5ce89213fc5c1da716fdff45ab50ba744b"
+    },
+    "study/context/source.json": {
+      "bytes": 7104,
+      "sha256": "0c8b3da9d7924500884746092b22a73fae5fc6b4066e3d2f0fb2d51be8c88cc0"
+    },
+    "study/context/source.tar.gz": {
+      "bytes": 240467,
+      "sha256": "de7fa42dba7cd80abfd76fc9e14717ca0baf574d3c099184ebae514156876c28"
+    },
+    "study/context-build.log": {
+      "bytes": 204,
+      "sha256": "2a00b7d48c8d4c97a10c2762bde11e8bc28a67065072dcf10f293e17e3a7886c"
+    },
+    "study/context-candidate.rs": {
+      "bytes": 95084,
+      "sha256": "e6ca93f3bd538bfa40900e4d059616cf70110c47079af1900eebb991e92267ae"
+    },
+    "study/context-minimum.patch": {
+      "bytes": 525,
+      "sha256": "08befe95c84d480c9140d98e0b81d0bab70ba6c750340faa283efcceab563bf9"
+    },
+    "study/decoded/context-allocation-profile.jsonl": {
+      "bytes": 167496,
+      "sha256": "80e97bf18b5d2a53f642d383c0a0df8c5253f8d3b187ea68dd55bd8fb2a9e1d4"
+    },
+    "study/decoded/source.json": {
+      "bytes": 7104,
+      "sha256": "9491daab0041d501e3360ae409470f2a537d515416e751312636f684e940e224"
+    },
+    "study/decoded/source.tar.gz": {
+      "bytes": 240545,
+      "sha256": "b0f592a527ffdf50d288eeed5781bb0c5d79e3b4735eab7e920e9d64f46bdede"
+    },
+    "study/decoded-build-final.log": {
+      "bytes": 760,
+      "sha256": "3223a8bfdea58585f55e0ab82d7dfaec2e065f78dc10eeae727e0e1a8f68b8f2"
+    },
+    "study/decoded-build-frozen.log": {
+      "bytes": 204,
+      "sha256": "f907ac9b8399df1ea563ff1186fb3afe6ac5fceefc4c0c276621651e6ddeaf8e"
+    },
+    "study/decoded-build.log": {
+      "bytes": 1140,
+      "sha256": "7ebf9be683da4c173f98dae0ca7dded4694b2692ada9e3c93dad1b6c69117e80"
+    },
+    "study/decoded-minimum.patch": {
+      "bytes": 1797,
+      "sha256": "39e9411aa8adb6438407556aa0f7138286b2311af7f0af3829d0324e4484265f"
+    },
+    "study/differential/corpus.json": {
+      "bytes": 591937,
+      "sha256": "f5382e0e4c03ec7bbcad6f137aec823dc46909cc32b74ab01668130cfc7bc312"
+    },
+    "study/differential/oriole.json": {
+      "bytes": 4682821,
+      "sha256": "6c61cf94989f522c7d8bb3827fb0b09b2f57ff423fc2f9e13b45bdb9968d7deb"
+    },
+    "study/differential/oriole.progress.json": {
+      "bytes": 44,
+      "sha256": "63f17f0d2e6ff2870efd5a35a35b73c004464243200dd613ea9a0a946c34c23d"
+    },
+    "study/differential/reference.json": {
+      "bytes": 4682821,
+      "sha256": "6c61cf94989f522c7d8bb3827fb0b09b2f57ff423fc2f9e13b45bdb9968d7deb"
+    },
+    "study/differential/reference.progress.json": {
+      "bytes": 44,
+      "sha256": "63f17f0d2e6ff2870efd5a35a35b73c004464243200dd613ea9a0a946c34c23d"
+    },
+    "study/differential/summary.json": {
+      "bytes": 2093,
+      "sha256": "950c3f0781cf25c03faeaf0d705b05c51983858a8f79cb2a972f4ec5f5c01634"
+    },
+    "study/differential.log": {
+      "bytes": 639,
+      "sha256": "5aeff3ef4116bf61cb47e794f94fb83cc46153f19f8d0d45c7ea0636523f7388"
+    },
+    "study/encoding-before.rs": {
+      "bytes": 49759,
+      "sha256": "597e14041ac90d7e9d3595952b4b209d7157b3d27a28cb0ef5e3e00008d83102"
+    },
+    "study/ffi-before.rs": {
+      "bytes": 94864,
+      "sha256": "5359fdac114ac45f5816e18b7ef409da0fd52eaadd02bb298559e7d963cd014f"
+    },
+    "study/final-source.json": {
+      "bytes": 7968,
+      "sha256": "3545ebe3f4705114bd0ac843cdb2cdd906639026c4945f9f6eb53375ffbf9933"
+    },
+    "study/final-source.tar.gz": {
+      "bytes": 240993,
+      "sha256": "c759793b28c4d4921bbcf521f8bdeb98921cfc77ba11324c38175718cbd408de"
+    },
+    "study/fmt-final.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "study/fmt.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "study/handoff.json": {
+      "bytes": 4051,
+      "sha256": "1eac73d40e03d89b89d49c2805931a7732046309a78b7ac8f1184b914c70803d"
+    },
+    "study/identity-notes.json": {
+      "bytes": 1186,
+      "sha256": "296a6ca301de7d7febc38d89fe31981b9969dbd388d9e2d6bb357dc10d6ffc0c"
+    },
+    "study/independent-review/binding-regression/artifact-manifest.json": {
+      "bytes": 2665,
+      "sha256": "6c8319dc4730a5e2890a1cc567bf4547ec22bdfbdce3aa1a7cd941b8533c4f4c"
+    },
+    "study/independent-review/binding-regression/asan-summary.json": {
+      "bytes": 433,
+      "sha256": "6129a91e6b84ad0ca6277d23f88bad6cdca117a647805fe0026f2213ac147f84"
+    },
+    "study/independent-review/binding-regression/asan.json.gz": {
+      "bytes": 11269,
+      "sha256": "9da1799653580b95b1402e123717e9193c6f4f325722d9e07f02be7a952a8018"
+    },
+    "study/independent-review/binding-regression/asan.log": {
+      "bytes": 409,
+      "sha256": "adbf8d9924378b9d6123a89123d6df56a6b42f93a18b09eaed8506083b0c83ee"
+    },
+    "study/independent-review/binding-regression/asan.py": {
+      "bytes": 1418,
+      "sha256": "c20d4b950f23da08e2c31262f06fa321fe76a9b6f0ef127dcfb54576796da824"
+    },
+    "study/independent-review/binding-regression/build-asan.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "study/independent-review/binding-regression/build.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "study/independent-review/binding-regression/finalization-note.json": {
+      "bytes": 508,
+      "sha256": "bcda1f4f57e4609836d7257a43dbc532b91eb41b6fdde3e0d467086609ac4fb5"
+    },
+    "study/independent-review/binding-regression/finalize.py": {
+      "bytes": 9105,
+      "sha256": "4dd362336b1ef5256c44875dca1c36840a89cdbafc07bececc16fa834c94a9d0"
+    },
+    "study/independent-review/binding-regression/initial-asan-summary.json": {
+      "bytes": 434,
+      "sha256": "3913d4a2f271aa5978b87811d67d1e2c218828f594e08e4d02d78ac678edfa0b"
+    },
+    "study/independent-review/binding-regression/initial-asan.json.gz": {
+      "bytes": 9743,
+      "sha256": "7e92b6002cbc9e747b469b07c2924984ac9aa1b954ddbacccb52c887f8ad7d4f"
+    },
+    "study/independent-review/binding-regression/initial-asan.log": {
+      "bytes": 5693,
+      "sha256": "6089ecb296634cb02d9cec484c8f56ebd37aefff1a478935983f91603173d3ff"
+    },
+    "study/independent-review/binding-regression/initial-asan.py": {
+      "bytes": 1418,
+      "sha256": "cdf09f17b91bf5ee31470f3a936c40c1316b15d36d159d79a69684382688edd7"
+    },
+    "study/independent-review/binding-regression/initial-build.log": {
+      "bytes": 731,
+      "sha256": "6d1c4b177b668d918faf7416d1535d995bed67abc0df1d6425117c3b1bbd0c4f"
+    },
+    "study/independent-review/binding-regression/initial-probe.c": {
+      "bytes": 6589,
+      "sha256": "116f729c1d39b39ebef759eecccb2e6d1d48f32ead4c8c6b135f5b06be1fa78b"
+    },
+    "study/independent-review/binding-regression/lsan-environment-note.json": {
+      "bytes": 515,
+      "sha256": "3cddf55337f59804a41d3ca59094e50cc6b122777445f80f6ce438614d86fa5d"
+    },
+    "study/independent-review/binding-regression/observations.jsonl.gz": {
+      "bytes": 201734,
+      "sha256": "0916494a5a6d77ce138ecf905f584f82acd685a2160d4a76e969a67278f662f4"
+    },
+    "study/independent-review/binding-regression/probe.c": {
+      "bytes": 6646,
+      "sha256": "8878d92d50788ae87df0113c506dbf2758a01b3c510bab5e263379a77d9e2be6"
+    },
+    "study/independent-review/binding-regression/results.json": {
+      "bytes": 293377,
+      "sha256": "4bdf1d5635fd4a81a2e586ee390cfcb9070cea017ce7fd8b03b2fa20f29b9fdc"
+    },
+    "study/independent-review/binding-regression/review.json": {
+      "bytes": 12999,
+      "sha256": "4f31cdfd3dd16c0476fdd30fb8c19d6b0411a7591378a3f189c227a9a13c4167"
+    },
+    "study/independent-review/binding-regression/run.log": {
+      "bytes": 424,
+      "sha256": "8fccf13adcd2a7661a588cd1deb5566b12ae105fd1cf71db8eb4b562376e2e47"
+    },
+    "study/independent-review/binding-regression/run.py": {
+      "bytes": 2861,
+      "sha256": "e2ba1b222ca559f925697dbb31a3a47fa26095b0d57a92924a9e48fc11fe7453"
+    },
+    "study/independent-review/binding-regression/selected-stacks.json": {
+      "bytes": 6007,
+      "sha256": "824cdfa32c964d761598096e0ed1051df9c02d7f60089281fd612772d3ae56d6"
+    },
+    "study/independent-review/binding-regression/stacks.py": {
+      "bytes": 1605,
+      "sha256": "72ab642b6880843466408afd62918fbb08d7bfd33205a48460baabebb0f444c5"
+    },
+    "study/independent-review/binding-regression/upstream-baseline.log": {
+      "bytes": 1880,
+      "sha256": "75e2abc81965cd5510199c21f161c7e7bfca255e5cbced6852eb40236d35e3dc"
+    },
+    "study/independent-review/binding-regression/upstream-original-test.c": {
+      "bytes": 1551,
+      "sha256": "4cf0b3b5d2df2f1e07cd2d78f3ad48ff6b224bca3d46dad2617623d291e440d5"
+    },
+    "study/independent-review/binding-regression/upstream-reproduction.log": {
+      "bytes": 3897,
+      "sha256": "6d68a612ea12343d58b181fcd7c6c7e3d021f9a80fcf889cd1cd5da4d7297d34"
+    },
+    "study/independent-review/binding-regression-review.json": {
+      "bytes": 12999,
+      "sha256": "4f31cdfd3dd16c0476fdd30fb8c19d6b0411a7591378a3f189c227a9a13c4167"
+    },
+    "study/independent-review/source-review.json": {
+      "bytes": 7607,
+      "sha256": "695cfcab977b7568eb5ad00ec82a561726464a9ee6d9dde642723b67836100c0"
+    },
+    "study/lexical-before.rs": {
+      "bytes": 14580,
+      "sha256": "d05bba27318dec90986fcc14e43c505d54bb651dd663db4c732f4f04bb59f8bc"
+    },
+    "study/manifest.json": {
+      "bytes": 62650,
+      "sha256": "ce19be5e1a362dff8a877e9d45d342fec8e97a804f4fb62f15b40ec0988305ae"
+    },
+    "study/native.log": {
+      "bytes": 431,
+      "sha256": "e804ec4d283849b06819606498ef46377ff2a878bbb9926febca4765e86d2436"
+    },
+    "study/native_probe.py": {
+      "bytes": 2200,
+      "sha256": "22639f287504df397dca046390fde89f36ad6a77eb3e678d149cd4ed5b3d82c4"
+    },
+    "study/patch-check.json": {
+      "bytes": 242,
+      "sha256": "59db660c65b6e9bc9229929137ec68fe90cad5f587488fa568ead68d7711a8e3"
+    },
+    "study/profile_variants.py": {
+      "bytes": 2285,
+      "sha256": "d883c2520709f8374779db330bb058698bf7d0b9be08b231fdfbd19c39d8ee6e"
+    },
+    "study/rare-declarations.xml": {
+      "bytes": 158690,
+      "sha256": "1a1beb69a6a29bc1314d6a95ee96e87eafd8cbaa832a66b2f6e35d60513b8eb0"
+    },
+    "study/remaining-api-failures.json": {
+      "bytes": 32194,
+      "sha256": "b2e07586d93c5a62b25f9f992810be0f07f1569c69e34abcb37eb9b5cfb19b35"
+    },
+    "study/screening-summary.json": {
+      "bytes": 42622,
+      "sha256": "270ec398bdbc7bacff8d86b8ad167f5e240e84b0f4226b5e353957d3630dc3ba"
+    },
+    "study/screening-summary.log": {
+      "bytes": 6297,
+      "sha256": "b4a5a2aed71d6c42fee119aed1c6cd3df6f20caee1a51262cf179aa1e9fe11ac"
+    },
+    "study/screening.json": {
+      "bytes": 13314369,
+      "sha256": "6084534970911019edf2e0916e3ca10a89aa2ecedb5004fad2164c4aaec1ea84"
+    },
+    "study/screening.log": {
+      "bytes": 2144,
+      "sha256": "6fe37de171f392284f8cf4d52a302821e6ea987c9f9b4a95d384fda3edd76bb6"
+    },
+    "study/screening.py": {
+      "bytes": 3497,
+      "sha256": "fe1b38c496eaadd434382b4a72bd911c2c967895492eb8abe2e1d8c18b6c52b4"
+    },
+    "study/streaming-probe.json": {
+      "bytes": 19548,
+      "sha256": "aa971f46858c8085d90b7c58c98b3defa84280d65c17b864510752facb71be00"
+    },
+    "study/streaming.log": {
+      "bytes": 10,
+      "sha256": "e77f4f4af04571a32d85cbb16bafe094692efc105b2820841a466acff46276ac"
+    },
+    "study/streaming_probe.py": {
+      "bytes": 3786,
+      "sha256": "2acac28ee354117a0dcfa91c982a3f8acf7304a5ecaac96895a44c4df03eb268"
+    },
+    "study/summarize_screen.py": {
+      "bytes": 1977,
+      "sha256": "bf27b6ac343ed015f4e7f4c96180a9c2025220bc834515d0ade6149be2791cb8"
+    },
+    "study/tests.log": {
+      "bytes": 34075,
+      "sha256": "853cf24ba8099d2a5ecd7c9c3704870077ddf8c6afb1d16d74f0e05cbea7ece5"
+    },
+    "study/upstream-api/adapted/acc_tests.c": {
+      "bytes": 8548,
+      "sha256": "9c7af0ac02920777515a52ebe4f11cf3e397fc3ede28ce3795d97520b2e61a51"
+    },
+    "study/upstream-api/adapted/acc_tests.h": {
+      "bytes": 2550,
+      "sha256": "f787bc207e0719d5088daa55f2f32f17c6bd00881fc9da3b08305d30d86e0b04"
+    },
+    "study/upstream-api/adapted/alloc_tests.c": {
+      "bytes": 101124,
+      "sha256": "9ab0a92a26a12f05d3c3ab73689050d16857c2ae36f8632ec52a47bae5dac1ca"
+    },
+    "study/upstream-api/adapted/alloc_tests.h": {
+      "bytes": 2551,
+      "sha256": "92d435f6ab90c173f4628a08d940b3fb10dff2e05126c7e0825f271048b1f3e4"
+    },
+    "study/upstream-api/adapted/basic_tests.c": {
+      "bytes": 278897,
+      "sha256": "7b296d5d7efdb0cace491a8abc77a6ad669b07a3474dfcb94e393b5575d01ea3"
+    },
+    "study/upstream-api/adapted/basic_tests.h": {
+      "bytes": 2546,
+      "sha256": "47107d93f75a16ad6e50dc51df2d653b5edf4fabee3bc7304fc7c8ff087d69ec"
+    },
+    "study/upstream-api/adapted/bridge.c": {
+      "bytes": 2671,
+      "sha256": "c1874350ea38df2f8f6b311f16c9cacd18bf23532d60204c96bbd8fa5cbd8efd"
+    },
+    "study/upstream-api/adapted/bridge.h": {
+      "bytes": 1076,
+      "sha256": "67d7de62f074336e3fed424da3d80fc67b31bdb750b7aa5dc1a8e613ea0eeec9"
+    },
+    "study/upstream-api/adapted/chardata.c": {
+      "bytes": 3459,
+      "sha256": "6b5d04284b0d7f65718b12790219e0a1f74209428bee95cbb960ba3fa89c6318"
+    },
+    "study/upstream-api/adapted/chardata.h": {
+      "bytes": 2317,
+      "sha256": "c86ebd6f4ead5c03d7bb5a1c5e8b78c53be2b63e917d5bc9f138d90777487119"
+    },
+    "study/upstream-api/adapted/common.c": {
+      "bytes": 13499,
+      "sha256": "8e56f74514a55f3e6d0d93d3d48619041e3248dd6e417ab892b62a86414ae46e"
+    },
+    "study/upstream-api/adapted/common.h": {
+      "bytes": 5869,
+      "sha256": "4264acc1be4cab6dc437a41dfdff63409d73d1e6bb1070773d06e17405d05820"
+    },
+    "study/upstream-api/adapted/dummy.c": {
+      "bytes": 8623,
+      "sha256": "a4ac1d830f0f1fe6ae2da3a15481051cde900f6bf12c6c1fe9198ef5e94ee4fb"
+    },
+    "study/upstream-api/adapted/dummy.h": {
+      "bytes": 7028,
+      "sha256": "9c3c35f61509f2cb37aa324bafe65863716f8fe6779b9dabe884919f603b53e1"
+    },
+    "study/upstream-api/adapted/expat.h": {
+      "bytes": 45257,
+      "sha256": "0e912e25375e213b6e4ff90d554e0a0e037e6f0c20dfa734d366e5bdff289f20"
+    },
+    "study/upstream-api/adapted/expat_config.h": {
+      "bytes": 3354,
+      "sha256": "ec397da0c61b6bab207c7aba9f830b5e69f79c8462e58d97c6e6891c87c44a4d"
+    },
+    "study/upstream-api/adapted/expat_external.h": {
+      "bytes": 6246,
+      "sha256": "f24009bc2a8914caeb0480d1ce0765e98ba4845d2e3b03029b09304130715231"
+    },
+    "study/upstream-api/adapted/handlers.c": {
+      "bytes": 68459,
+      "sha256": "82d1fc40333e27bf43208c62f03275c08982c9904b866acf8eb0e262893b26a9"
+    },
+    "study/upstream-api/adapted/handlers.h": {
+      "bytes": 29004,
+      "sha256": "b630c09e7a7f799e7b4651ccc2c4d2d6a1af8853069be908ac701b95bb6c8054"
+    },
+    "study/upstream-api/adapted/internal.h": {
+      "bytes": 7034,
+      "sha256": "beb7211c800d827743bd3d6ddb86538302d6c51180be6d3b61a1c315e061762d"
+    },
+    "study/upstream-api/adapted/memcheck.c": {
+      "bytes": 5556,
+      "sha256": "bb86a55dbc91e3745476fece353e3a6f84be95e4aa377a9417be3998a4e4b199"
+    },
+    "study/upstream-api/adapted/memcheck.h": {
+      "bytes": 2222,
+      "sha256": "311e40287503c95adb2bc20533f7d91c13ba7af19fe17076e094d9d6dbfdc7d5"
+    },
+    "study/upstream-api/adapted/minicheck.c": {
+      "bytes": 9803,
+      "sha256": "c7291a2c81241b963eb39a71c82d0a8b09d15d588246ff6036956b3ff3ab9a2d"
+    },
+    "study/upstream-api/adapted/minicheck.h": {
+      "bytes": 5691,
+      "sha256": "b878e902b81d2e33d2f43352a1cc196aec2e5840a0b557372b5ae4096676e7e6"
+    },
+    "study/upstream-api/adapted/misc_tests.c": {
+      "bytes": 36860,
+      "sha256": "ee1cf0c22e2b3ef36603d897ba25a64c818f94ab7b12f33d5c7c43f979b12f75"
+    },
+    "study/upstream-api/adapted/misc_tests.h": {
+      "bytes": 2559,
+      "sha256": "29280394394226a11101fcf35a5d73407f1fafd22b74b651c3a8a4a98ec22b96"
+    },
+    "study/upstream-api/adapted/ns_tests.c": {
+      "bytes": 34426,
+      "sha256": "7c3c2272517e65c0a083cb903f64f2e6ebfd0aa499ec023904458b4a2e20a409"
+    },
+    "study/upstream-api/adapted/ns_tests.h": {
+      "bytes": 2545,
+      "sha256": "c39fee6f46ebe7da79bc7e4b0e6f4635a18321124feebe7423117c6d1d4dc33a"
+    },
+    "study/upstream-api/adapted/nsalloc_tests.c": {
+      "bytes": 80766,
+      "sha256": "9d407db0402cc0668a651b0cf5c7340a2e9d3c22d546c3ecfee64e4d0eaae16a"
+    },
+    "study/upstream-api/adapted/nsalloc_tests.h": {
+      "bytes": 2569,
+      "sha256": "83db6de18003bf4cb5ed401febc8d503ee872a4b39f3cd270fc796f519bb7865"
+    },
+    "study/upstream-api/adapted/runtests.c": {
+      "bytes": 4313,
+      "sha256": "fc648cf6adc5ba51de2cca67529d386e59c1d56c85182c7690b48648279534a0"
+    },
+    "study/upstream-api/adapted/siphash.h": {
+      "bytes": 13078,
+      "sha256": "12ecc9915bccb793ea8bb543cc7d002e226f4e4d6b97ec9839dca41cbe4e2e27"
+    },
+    "study/upstream-api/adapted/structdata.c": {
+      "bytes": 5016,
+      "sha256": "0b1fad1bd6988628b8c42eaf000181ad6a6a7af81a5b4b2683c4ac44bb92766f"
+    },
+    "study/upstream-api/adapted/structdata.h": {
+      "bytes": 2435,
+      "sha256": "d623ace30e322246877b8e9a78e55e7da808c2550430f889d14f8110eca56097"
+    },
+    "study/upstream-api/build.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "study/upstream-api/lib/.gitignore": {
+      "bytes": 188,
+      "sha256": "b907f24d7726d2b5228ff00807cd8545a32e17f3378b3e98feacc227acf667c4"
+    },
+    "study/upstream-api/lib/Makefile.am": {
+      "bytes": 3639,
+      "sha256": "5cbcb626cccead898d8268f874417cc9c80cca203bb33210ff87e6c96148c117"
+    },
+    "study/upstream-api/lib/ascii.h": {
+      "bytes": 3715,
+      "sha256": "5ce49460794894b78f97060f634c129d13f2e9cc9b8dacd829f4be2dbc6e0649"
+    },
+    "study/upstream-api/lib/asciitab.h": {
+      "bytes": 3553,
+      "sha256": "5792cb56f285c8876b988d875a70d49019bc7e6d5ebcd0f8224b24e695301832"
+    },
+    "study/upstream-api/lib/expat.h": {
+      "bytes": 45257,
+      "sha256": "0e912e25375e213b6e4ff90d554e0a0e037e6f0c20dfa734d366e5bdff289f20"
+    },
+    "study/upstream-api/lib/expat_external.h": {
+      "bytes": 6246,
+      "sha256": "f24009bc2a8914caeb0480d1ce0765e98ba4845d2e3b03029b09304130715231"
+    },
+    "study/upstream-api/lib/fallthrough.h": {
+      "bytes": 2094,
+      "sha256": "5e42477487bca7e7caac6b832ab940f39a1a20b8765c945374e4f6c2670f55b6"
+    },
+    "study/upstream-api/lib/iasciitab.h": {
+      "bytes": 3623,
+      "sha256": "a9cd6f2cf5199ae3c29d22ee4913736fcd984f62132146a0352c88549700e83f"
+    },
+    "study/upstream-api/lib/internal.h": {
+      "bytes": 7034,
+      "sha256": "beb7211c800d827743bd3d6ddb86538302d6c51180be6d3b61a1c315e061762d"
+    },
+    "study/upstream-api/lib/latin1tab.h": {
+      "bytes": 3606,
+      "sha256": "b0daf8a75c690e895421f765ddb2ae2fbc1ba14694e06a3215dba84f1ff3427d"
+    },
+    "study/upstream-api/lib/libexpat.def.cmake": {
+      "bytes": 2692,
+      "sha256": "3be6f98774580420c8563a9aee487ecf13b35f418144c3659fcce5d877199bb5"
+    },
+    "study/upstream-api/lib/libexpat.map.in": {
+      "bytes": 2702,
+      "sha256": "d6a82f557e605a876ed47c68128763b5b930d8dedaf3917a2051727e49a72668"
+    },
+    "study/upstream-api/lib/memory_sanitizer.h": {
+      "bytes": 2185,
+      "sha256": "377ca054fdc531360f42a5cb7c522bcbf88b6c67aebc2e29544c37d14e836bde"
+    },
+    "study/upstream-api/lib/nametab.h": {
+      "bytes": 9077,
+      "sha256": "8f78e64f11e2b23df8b32cb5528cfeda6215acd6abf6bcf1ad59fdc7b1ffd105"
+    },
+    "study/upstream-api/lib/random_arc4random.c": {
+      "bytes": 2266,
+      "sha256": "33b936335d0bbe1bb36b0da65d82e2d656fef9cf2e49660101c74a3f4f9d5c37"
+    },
+    "study/upstream-api/lib/random_arc4random.h": {
+      "bytes": 1776,
+      "sha256": "dd1a23b22604b61e1942e9fccdefe4d876cdf55477cd2e61904e50af162c15bf"
+    },
+    "study/upstream-api/lib/random_arc4random_buf.c": {
+      "bytes": 2034,
+      "sha256": "e9a72469deea3c7faed0fd45e3ac7d81e8ce4e63b52ef7bb647baf71f3d0fd78"
+    },
+    "study/upstream-api/lib/random_arc4random_buf.h": {
+      "bytes": 1792,
+      "sha256": "fccc4650a76f0b4df0b1123abeb248087a22d4eba9acbd1188cd44e21de4377b"
+    },
+    "study/upstream-api/lib/random_dev_urandom.c": {
+      "bytes": 2704,
+      "sha256": "4d2a204c94285b0c459397619acfca5a8f5d690fbd8f419ac45879074e6afebd"
+    },
+    "study/upstream-api/lib/random_dev_urandom.h": {
+      "bytes": 1803,
+      "sha256": "65a0bf3666927824029dd52dc4b6af3218719999ab9f45db8d8406645960f5ab"
+    },
+    "study/upstream-api/lib/random_getentropy.c": {
+      "bytes": 2394,
+      "sha256": "ba99df7b694ff0b62d2871cc13b87e75d1a715af6045102ee7aff120ec1ae332"
+    },
+    "study/upstream-api/lib/random_getentropy.h": {
+      "bytes": 1799,
+      "sha256": "8a122afb95decf1fcf960cf92004d0305d7c9154f84c1ac739e67ef554e02e59"
+    },
+    "study/upstream-api/lib/random_getrandom.c": {
+      "bytes": 3551,
+      "sha256": "7d813973f1b021bd6576820180df180d3b07e5c47072ce083b7cb2029bcaed6d"
+    },
+    "study/upstream-api/lib/random_getrandom.h": {
+      "bytes": 1804,
+      "sha256": "06738fafa3ec5b0148a699efeaa55aa80b8956b78a95bf5f78fcd9e0be998c48"
+    },
+    "study/upstream-api/lib/random_rand_s.c": {
+      "bytes": 3553,
+      "sha256": "39ae3d8d337517ae2db5935a501cc9d6f55cc12e8ba552c03ea78eda6bdc2200"
+    },
+    "study/upstream-api/lib/random_rand_s.h": {
+      "bytes": 1845,
+      "sha256": "941134a3796e544bf44c428cd1e1553506c9f344a5c0c4479a8a819745a0c0ff"
+    },
+    "study/upstream-api/lib/siphash.h": {
+      "bytes": 13078,
+      "sha256": "12ecc9915bccb793ea8bb543cc7d002e226f4e4d6b97ec9839dca41cbe4e2e27"
+    },
+    "study/upstream-api/lib/utf8tab.h": {
+      "bytes": 3555,
+      "sha256": "3fa349a3a19143366e80a58d9aa950152ef9cd7903f557f971051410b47f335c"
+    },
+    "study/upstream-api/lib/winconfig.h": {
+      "bytes": 2071,
+      "sha256": "0ab6446eb98abc492ae341ef7607b535e44dedf52633fdc7c6e1a1361aec3922"
+    },
+    "study/upstream-api/lib/xcsinc.c": {
+      "bytes": 1961,
+      "sha256": "1210979a688301412f46e058d0497fa3c1c63c296c2e015834cda0f0b314875d"
+    },
+    "study/upstream-api/lib/xmlparse.c": {
+      "bytes": 319854,
+      "sha256": "a0f45238a4f29fe188f38256edc04e8fd0eb3a43cc03de38cdb9640778089a92"
+    },
+    "study/upstream-api/lib/xmlrole.c": {
+      "bytes": 35545,
+      "sha256": "db4004fa2cabc811fc493b5b04b44cd336d19434bc653725f090131e43a89406"
+    },
+    "study/upstream-api/lib/xmlrole.h": {
+      "bytes": 4490,
+      "sha256": "486faffdfcd0c1668406648220c6638c98ddfe044d04d66551999ab8e02564fa"
+    },
+    "study/upstream-api/lib/xmltok.c": {
+      "bytes": 54964,
+      "sha256": "f2732a8e91fd901d75431d35edc421e1ff3893a275c4de1cc855b3d4deadfd37"
+    },
+    "study/upstream-api/lib/xmltok.h": {
+      "bytes": 13192,
+      "sha256": "41a6cef659ef1da9ee732304332c4134afe4b63571442de77eaf9918abf9e5df"
+    },
+    "study/upstream-api/lib/xmltok_impl.c": {
+      "bytes": 53812,
+      "sha256": "c7b197b596192ad3f8c872ae9c0524e7dd85da10cb4bfdf29d630e12782dfbf7"
+    },
+    "study/upstream-api/lib/xmltok_impl.h": {
+      "bytes": 3463,
+      "sha256": "a5053c69219d12788088de9bd670537e1c784302766c331afe6b253460d0417d"
+    },
+    "study/upstream-api/lib/xmltok_ns.c": {
+      "bytes": 4744,
+      "sha256": "3c0c930dfdd484f98c6a32bd397919f3d2ee3701e6023effb463512af1849499"
+    },
+    "study/upstream-api/manifest.json": {
+      "bytes": 24642,
+      "sha256": "addd147440d0d3469422b500ac09ef387bf4569adb5dd66d28d13ba863eb56ed"
+    },
+    "study/upstream-api/results.json": {
+      "bytes": 683058,
+      "sha256": "af668830144348c0a3c62b112928bfc97523be63d5c27dca9010c315dee7e2a1"
+    },
+    "study/upstream-api/tests.log": {
+      "bytes": 730466,
+      "sha256": "99ab261ef2b7972a6463d5832829a73c25de67db4d31dc1d2d729565c58f9192"
+    },
+    "study/upstream-api.log": {
+      "bytes": 130,
+      "sha256": "93091ff28617e8b4a5c30068a51de13d316f3c063fda5f14db32d3ce1419d1de"
+    },
+    "study/upstream-comparison.json": {
+      "bytes": 48884,
+      "sha256": "40eb612af834e6e506fa11ba705b629a499a47a7bb2ddda6a809e0cfa7990bfd"
+    }
+  }
+}

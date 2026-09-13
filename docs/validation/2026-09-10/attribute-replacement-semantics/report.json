@@ -1,0 +1,65 @@
+{
+  "source_commit": "49b297fc7556527b1f16a08d639597886f17e241",
+  "base_commit": "37fdd00",
+  "shared_sha256": "b2a958bbeac2b343e2126ae19d5689a2ef6eff36e8c467c44c26d7d763190615",
+  "static_sha256": "59f92a994b3d2d5784360e481133febfad52f3afe2322d86043cc919816e4c17",
+  "checks": {
+    "rust_tests": 291,
+    "strict_clippy": "passed",
+    "native_suites": 6,
+    "allocation_scenarios_per_linkage": 333,
+    "native_scope": "C ASan/UBSan with uninstrumented release Rust; leak sanitizer disabled.",
+    "ordinary_exact_differential_cases": 3918
+  },
+  "upstream": {
+    "before": {
+      "passed": 4065,
+      "failed": 675
+    },
+    "after": {
+      "passed": 4065,
+      "failed": 675
+    },
+    "changes": [],
+    "identical_adapted_sources": true
+  },
+  "attribute_oracle": {
+    "conditions": 6468,
+    "baseline_changes": 1200,
+    "reference_acceptance": 0,
+    "reference_errors": 0,
+    "reference_events": 0,
+    "reference_positions": 2580
+  },
+  "attribute_oracle_disposition": "All 6468 conditions match Expat acceptance, error codes, attribute/default callbacks and child outcomes; 1200 conditions corrected versus iterative baseline. Remaining 2580 position differences are pre-existing and counted separately.",
+  "alias_oracle": {
+    "conditions": 372,
+    "baseline_differences": 84,
+    "candidate_differences": 0,
+    "scope": "CDATA and NMTOKENS, namespace modes, whole/1/2-byte feeds, direct/default/entity/default-PE/internal attributes, mixed physical and converted CR/LF, numeric references."
+  },
+  "malformed_oracle": {
+    "counts": {
+      "conditions": 384,
+      "baseline_changes": 12,
+      "reference_result_differences": 0
+    },
+    "disposition": "All baseline status/error results unchanged. The 12 changes are accepted parameter defaults with ignored missing references, correcting replacement CRLF to two spaces; complete candidate results match Expat."
+  },
+  "independent_review": {
+    "scope": "Read-only semantic attribute composition against 37fdd00; no independent execution",
+    "verdict": "No blocker found",
+    "findings": [],
+    "analysis": "Physical line-ending normalization applies only when frames.is_empty(); parent Slice/rest restoration preserves original provenance, and nested replacements retain independent CR/LF. The fast copy guard excludes raw CR/LF/tab and aliases, so it cannot skip relevant normalization. Removing the default prepass preserves converted alias metadata and removes one allocation; raw whitespace remains invalid within malformed named/numeric references before and after, while complete DTD XML-character validation still precedes expansion. NDATA classification retains earlier recursion/depth/origin precedence and only separates unparsed from parsed external entities. Existing origin fallback semantics were reviewed separately.",
+    "files": {
+      "crates/oriole/src/lib.rs": "c5b2aa521ab18baf3d4d4d40aa2975b7fe8accd1cb7d5a2927a80c9da700a971",
+      "crates/oriole/src/dtd.rs": "b25a6650a7a05c395810748688ddf1a63c9b14726a3a1936dd6f48238a5f7159"
+    }
+  },
+  "limits": "No changes to absolute limits, relative accounting operations, allocator ownership, or frame lifetimes. Removed the redundant default prepass so lexical provenance stays attached.",
+  "scope": "No zero-failure API or production speed claim. Benchmarks and remaining API gaps are handled in other layers.",
+  "artifacts": {
+    "files": 177,
+    "archive_sha256": "111a36c8464b0015e299904b26a3ff29cbc605bab42744460cda189c1198a6f7"
+  }
+}

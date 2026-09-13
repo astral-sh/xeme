@@ -1,0 +1,46 @@
+{
+  "scope": "Every captured seed byte reconstructed from all recorded named-seed, prior archive or transformed differential origins.",
+  "differential_corpus_sha256": "f5382e0e4c03ec7bbcad6f137aec823dc46909cc32b74ab01668130cfc7bc312",
+  "differential_unique_documents": 250,
+  "archives": {
+    "/tmp/oriole-final-grammar-campaign-handoff/ffi_family/initial-corpus.tar.gz": "dee15050f5969797b51b159f80d88fb45b33dc64e81b80bf4f0301c6f0bc23f0",
+    "/tmp/oriole-final-grammar-campaign-handoff/ffi_family/corpus.tar.gz": "befc9086ea8b1cfab77c4244e6c06dd427bec0acd01dd22ac87d23aab021222a",
+    "/tmp/oriole-final-grammar-campaign-handoff/multibyte/initial-corpus.tar.gz": "3e5ed476b8640fdc94741a6df612455459b7a4a876f6c25df246858b5904a072",
+    "/tmp/oriole-final-grammar-campaign-handoff/multibyte/corpus.tar.gz": "66010e778d4babc1e50bdca672eb30cd619e4d04e50bdc4c57f9df5839dfab81",
+    "/tmp/oriole-final-grammar-campaign-handoff/value_family/initial-corpus.tar.gz": "13ffce8172d060eaba08c05a18a74a57b8b366f1d374106d8618df05f5ade6f2",
+    "/tmp/oriole-final-grammar-campaign-handoff/value_family/corpus.tar.gz": "574b8ed6ec6b8ed004b673442b22400e8711a69af92bc64ccbdb8a08e3fc6c76"
+  },
+  "targets": [
+    {
+      "target": "parse",
+      "captured_seed_files": 250,
+      "verified_origin_records": 250
+    },
+    {
+      "target": "streaming",
+      "captured_seed_files": 5000,
+      "verified_origin_records": 5000
+    },
+    {
+      "target": "ffi",
+      "captured_seed_files": 1001,
+      "verified_origin_records": 1001
+    },
+    {
+      "target": "ffi_family",
+      "captured_seed_files": 8189,
+      "verified_origin_records": 8253
+    },
+    {
+      "target": "multibyte",
+      "captured_seed_files": 9484,
+      "verified_origin_records": 9508
+    },
+    {
+      "target": "value_family",
+      "captured_seed_files": 2765,
+      "verified_origin_records": 2925
+    }
+  ],
+  "passed": true
+}

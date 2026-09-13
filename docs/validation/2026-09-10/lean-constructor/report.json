@@ -1,0 +1,86 @@
+{
+  "base_revision": "7c0d8b35c079c00da3012628ca56d7b35d2c5cd4",
+  "runtime_change": "Initialize the built-in xml namespace binding only when namespace_separator is Some. The selected-allocator map and its hasher remain present.",
+  "patch_sha256": "dab4a4f46d313df6d5bbc484200a959a9d22af62c2ccf068c274eb7215a94854",
+  "release_sha256": "3608eb5291cfa8dce56325cbb157a11c5f0a597c80b46cf57117a6c1531065ba",
+  "tests": {
+    "core_and_ffi_passed": 286,
+    "strict_clippy": true,
+    "native_allocation_scenarios_per_linkage": 330,
+    "native_linkages": [
+      "shared",
+      "static"
+    ],
+    "native_sanitizer_scope": "C ASan/UBSan only; linked release Rust is uninstrumented; leak sanitizer disabled.",
+    "counted_public_api_observations": 237,
+    "all_counted_live_after_free_zero": true,
+    "accepted_custom_encoding_release_exactly_once": true
+  },
+  "allocation_changes": {
+    "root_no_encoding": {
+      "baseline_malloc": 9,
+      "candidate_malloc": 6,
+      "baseline_requested_bytes": 5460,
+      "candidate_requested_bytes": 4802
+    },
+    "root_ascii_encoding": {
+      "baseline_malloc": 10,
+      "candidate_malloc": 7
+    },
+    "namespace_enabled": "No allocation change:9 without encoding,10 with us-ascii.",
+    "empty_parameter_child": {
+      "baseline_malloc": 10,
+      "candidate_malloc": 5,
+      "baseline_requested_bytes": 5452,
+      "candidate_requested_bytes": 4659
+    }
+  },
+  "local_test_minimum": {
+    "initial_failure": "Generic allocation helper required >100 calls; small shared-open-value workload measures93 after the optimization.",
+    "final": "Require nonempty allocations; sweep every measured index with unchanged semantic/OOM/terminal/leak/routing assertions.",
+    "upstream_assertions": "Unchanged. No retry ceilings adjusted."
+  },
+  "upstream_release": {
+    "baseline_pass": 4065,
+    "baseline_fail": 675,
+    "candidate_pass": 4077,
+    "candidate_fail": 663,
+    "regressions": 0,
+    "signals": 0,
+    "timeouts": 0,
+    "fixed_test": "test_misc_alloc_create_parser_with_encoding, all12 original contexts",
+    "limits": "Same1GiB address-space,768MiB RSS,3s pertest,240s overall bounds."
+  },
+  "upstream_debug": "Initial debug run also has4077 passes,661assertionfailures,and2timeouts in 2GiB-input tests. Retained separately; final release comparison resolves these profile-dependent timeouts.",
+  "context_oracle": {
+    "cases": 144,
+    "cases_with_actual_callback_context": 72,
+    "manual_context_robustness_cases": 72,
+    "baseline_changes": 0,
+    "normalized_reference_differences": 36,
+    "remaining": "24manual-shadow and12namespace-enabled manual-empty results. Raw reference differences additionally include opaque active-entity context ordering. All observations retained."
+  },
+  "lifecycle_robustness": {
+    "cases": 108,
+    "baseline_changes": 0,
+    "reference_process_aborts": 20,
+    "scope": "Manual child creation before any ExternalEntityRefHandler call violates the pinned Expat header precondition; retained-child/free-parent results are Oriole robustness checks, not Expat conformance/security assertions. No baseline/candidate signals."
+  },
+  "benchmark": {
+    "passed": true,
+    "full_callback_preflights": 12,
+    "timed_processes": 168,
+    "paired_processes_per_configuration": 7,
+    "nonnamespace_tiny_candidate_over_baseline": [
+      0.919,
+      0.928,
+      0.923
+    ],
+    "interpretation": "Small creation/parse benefit on this host; no broad project throughput claim. Namespace controls and project measurements expose shared-host noise. Full samples, commands, library/source/input hashes retained."
+  },
+  "limitations": [
+    "663 original upstream failures remain.",
+    "No full Rust sanitizer campaign rerun for this minimal constructor-only layer.",
+    "Benchmark library builds use local Ohm release defaults; deployment CI is a separate parent gate."
+  ]
+}

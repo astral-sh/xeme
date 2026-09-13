@@ -1,0 +1,11 @@
+{
+  "readme_sha256": "cf288b3d6f3d83d0014940415b19bbf32100289ff0fa2be0328a3eed361f1851",
+  "review_sha256": "5f1e856b45f08645347e1eead5db1e4eb0966d4bba76d9e4cd12f4d5351a8cfd",
+  "recommendations_applied": [
+    "Equal-weight geometric aggregation of per-condition median paired ratios",
+    "Exact native timed/untimed scope",
+    "No external DTD loading in native or Python workloads",
+    "Rust/LLVM22 ThinLTO vs GCC13.3 O3/noLTO compiler context"
+  ],
+  "scope": "Prose clarifications after independent numeric/link audit; no runtime, benchmark protocol, or observation changed."
+}

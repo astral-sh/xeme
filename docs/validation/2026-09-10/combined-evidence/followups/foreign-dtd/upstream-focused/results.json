@@ -1,0 +1,748 @@
+{
+  "library": "/home/dev-user/.cache/oriole/foreign-dtd-target/debug/liboriole_expat.so",
+  "library_sha256": "f8c07e08bd7b5960942ef2e5140d24209d3343eb0293e64a7dae7a6a83f407b2",
+  "runner": "/tmp/oriole-upstream-final-values/runtests",
+  "runner_sha256": "0186dfa6fbaafe7454a114120e41ba97b817f417f95605a7d7bd69e609ce278e",
+  "unchanged_upstream_adapter_manifest": "/tmp/oriole-upstream-final-values/manifest.json",
+  "selected_names": [
+    "test_alloc_set_foreign_dtd",
+    "test_empty_foreign_dtd",
+    "test_ext_entity_not_standalone",
+    "test_foreign_dtd_not_standalone",
+    "test_foreign_dtd_with_doctype",
+    "test_foreign_dtd_without_external_subset",
+    "test_invalid_foreign_dtd",
+    "test_not_standalone_handler_accept",
+    "test_not_standalone_handler_reject",
+    "test_set_foreign_dtd"
+  ],
+  "selection_complete": true,
+  "library_origins": [
+    "/home/dev-user/.cache/oriole/foreign-dtd-target/debug/liboriole_expat.so"
+  ],
+  "returncode": 1,
+  "passed": 96,
+  "failed": 24,
+  "results": [
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_not_standalone_handler_reject",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_not_standalone_handler_accept",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_foreign_dtd_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_invalid_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_foreign_dtd_with_doctype",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_foreign_dtd_without_external_subset",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_empty_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=0",
+      "test": "test_ext_entity_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_not_standalone_handler_reject",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_not_standalone_handler_accept",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_foreign_dtd_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_invalid_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_foreign_dtd_with_doctype",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_foreign_dtd_without_external_subset",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_empty_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=0 deferral=1",
+      "test": "test_ext_entity_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_not_standalone_handler_reject",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_not_standalone_handler_accept",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_foreign_dtd_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_invalid_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_foreign_dtd_with_doctype",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_foreign_dtd_without_external_subset",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_empty_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=0",
+      "test": "test_ext_entity_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_not_standalone_handler_reject",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_not_standalone_handler_accept",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_foreign_dtd_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_invalid_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_foreign_dtd_with_doctype",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_foreign_dtd_without_external_subset",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_empty_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=1 deferral=1",
+      "test": "test_ext_entity_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_not_standalone_handler_reject",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_not_standalone_handler_accept",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_foreign_dtd_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_invalid_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_foreign_dtd_with_doctype",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_foreign_dtd_without_external_subset",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_empty_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=0",
+      "test": "test_ext_entity_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_not_standalone_handler_reject",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_not_standalone_handler_accept",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_foreign_dtd_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_invalid_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_foreign_dtd_with_doctype",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_foreign_dtd_without_external_subset",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_empty_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=2 deferral=1",
+      "test": "test_ext_entity_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_not_standalone_handler_reject",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_not_standalone_handler_accept",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_foreign_dtd_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_invalid_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_foreign_dtd_with_doctype",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_foreign_dtd_without_external_subset",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_empty_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=0",
+      "test": "test_ext_entity_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_not_standalone_handler_reject",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_not_standalone_handler_accept",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_foreign_dtd_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_invalid_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_foreign_dtd_with_doctype",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_foreign_dtd_without_external_subset",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_empty_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=3 deferral=1",
+      "test": "test_ext_entity_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_not_standalone_handler_reject",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_not_standalone_handler_accept",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_foreign_dtd_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_invalid_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_foreign_dtd_with_doctype",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_foreign_dtd_without_external_subset",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_empty_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=0",
+      "test": "test_ext_entity_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_not_standalone_handler_reject",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_not_standalone_handler_accept",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_foreign_dtd_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_invalid_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_foreign_dtd_with_doctype",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_foreign_dtd_without_external_subset",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_empty_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=4 deferral=1",
+      "test": "test_ext_entity_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_not_standalone_handler_reject",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_not_standalone_handler_accept",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_foreign_dtd_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_invalid_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_foreign_dtd_with_doctype",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_foreign_dtd_without_external_subset",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_empty_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=0",
+      "test": "test_ext_entity_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_alloc_set_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_not_standalone_handler_reject",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_not_standalone_handler_accept",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_set_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_foreign_dtd_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_invalid_foreign_dtd",
+      "outcome": "fail",
+      "code": 100
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_foreign_dtd_with_doctype",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_foreign_dtd_without_external_subset",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_empty_foreign_dtd",
+      "outcome": "pass",
+      "code": 0
+    },
+    {
+      "context": "chunksize=5 deferral=1",
+      "test": "test_ext_entity_not_standalone",
+      "outcome": "pass",
+      "code": 0
+    }
+  ]
+}

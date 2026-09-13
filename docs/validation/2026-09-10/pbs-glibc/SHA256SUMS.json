@@ -1,0 +1,16 @@
+{
+  "tls-manifest.json.gz": "f49d56f9919a225cf64323d715960c6cd44f78df13065b221182fd94d244e7fc",
+  "release-archive-weak-reference.json": "5c9748c4c1a9e7f9667927ae3ec8015c928c0ed109955b2fd2c60a2b8017bf30",
+  "build.json": "4e52a0dae021ce3388fa85468f12ef54ede061da016c64679d8e99980c7300db",
+  "README.md": "7702483dcc330492b0f73f104dc63a59c71f4542f287d4a8831b326d8cc5d20a",
+  "pbs-validator-build.log.gz": "075fa3f1f89fa35b612eec8bf24f70d2724b657da2c26a605e8dd232f4812b43",
+  "pbs-validate.log.gz": "966e095e1187118e9432b4d212b80b636207135cb54b75651726f2e943729059",
+  "oriole-bundle-manifest.json.gz": "e1185ebc29bad1de84a0e596ded39291586db78c395bf503a6cba7f497098696",
+  "independent-review.json": "3947630964c0c025a15275e97ad314d5a4bf00607c93c81dcf3b824ef62c9da0",
+  "tls-native-symbols.txt.gz": "98ce77ae22325338a35eb501b1b8c7ba86cbed1bc364eccb41dc56201abbeee3",
+  "fixture-validation.log": "ce1901fc30715deae1c492488cc24c866aa363c29dd80517f3e205452f3d7cff",
+  "pbs-build.log.gz": "75fc5d41444241a49b71371d5e4857700161d1e74482b287861fd99a6028e6c2",
+  "tls-shared-symbols.txt.gz": "52b8100e6395845db876432da0844597b21857f1903fda066737ec36f28034a7",
+  "tls-fallback-symbols.txt.gz": "c7d103147a23e181085b840f20933e9e63b0631dda79a9b8dc95f2c6af24a281",
+  "oriole-bundle-build.log.gz": "3585cbbec32d2271139a23eb39df9a73efb34bbbf029581423277cc5ab2d9e40"
+}

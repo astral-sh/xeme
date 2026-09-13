@@ -1,0 +1,411 @@
+{
+  "status": "passed",
+  "reviewer": "/root/ffi/conditional_review",
+  "method": "Independent read-only artifact audit; no driver or parser executions were rerun.",
+  "report_sha256": "f8622c4c2e02ae8b5ef42c0c41be2e22b66cba983e41aeca1690b7006a614a77",
+  "initial_report_sha256": "bd302422f774255d8d13b14266016e6483ad23324b4ff6bdda88eaccf6723eef",
+  "initial_runner_sha256": "0cbaa34cac55f2adb3b5eb3b8b3913729d73ddb71015343e1fbcd069175e4a78",
+  "generator_sha256": "c34c225d8551ab0cee071f9ab1a8fd760ef57eb4423b26d0aeb963532fed7ea5",
+  "verified_before_after_current_hashes": 20,
+  "unique_processes_returned_zero": 60,
+  "stdout_stderr_hashes_verified": 120,
+  "stderr_nonempty": 0,
+  "retained_samples_fnv1a_recomputed": 120,
+  "matching_pairs": [
+    {
+      "input": "closing-pe-0064.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "closing-pe-0064.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "closing-pe-0256.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "closing-pe-0256.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "closing-pe-1024.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "closing-pe-1024.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "empty-external-0064.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "empty-external-0064.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "empty-external-0256.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "empty-external-0256.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "empty-external-1024.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "empty-external-1024.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "empty-internal-0064.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "empty-internal-0064.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "empty-internal-0256.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "empty-internal-0256.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "empty-internal-1024.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "empty-internal-1024.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "header-pe-0064.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "header-pe-0064.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "header-pe-0256.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "header-pe-0256.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "header-pe-1024.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "header-pe-1024.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "literal-0064.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "literal-0064.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "literal-0256.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "literal-0256.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "literal-1024.dtd",
+      "chunk": 1,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    },
+    {
+      "input": "literal-1024.dtd",
+      "chunk": 4096,
+      "equal": true,
+      "samples": 2,
+      "fields": [
+        "trace",
+        "hash",
+        "declarations",
+        "external_calls"
+      ]
+    }
+  ],
+  "source_library_driver_hashes": {
+    "/tmp/oriole-dtd-scaling/final-native-driver-asan": "ba2db6326dbde4a73398bdc3ca6f7215a5e5885164865928ddd42c6c16434577",
+    "/tmp/oriole-grammar-combined-source/liboriole_expat.so": "ff5d86621114e464a0b20f108b6308fe155d9e8c87bd764bc00872cf124750f8",
+    "/home/dev-user/.cache/oriole/expat-build/libexpat.so.1.12.4": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "/tmp/oriole-grammar-dtd-inputs/closing-pe-0064.dtd": "e77d713eca3d979a88a2b8b32a563ce5efd734b5f1c2e7466a741b34f4ecf65f",
+    "/tmp/oriole-grammar-dtd-inputs/closing-pe-0256.dtd": "77798c85a535fe160b3cbffa1832cf642868b896f65f1ef83f6a51874abdf8d9",
+    "/tmp/oriole-grammar-dtd-inputs/closing-pe-1024.dtd": "1a2d1763cbfbd44d9ecfa436f73a2be7f68d17e11344db01849a75d0e3b9b0d2",
+    "/tmp/oriole-grammar-dtd-inputs/empty-external-0064.dtd": "7f975662bab673b88cf760d3f125cc233d8c4ec71b10e46d73c2791973ee0811",
+    "/tmp/oriole-grammar-dtd-inputs/empty-external-0256.dtd": "5151b762dc2a2ebc04b6bead8056d3866d3ae19c80fe287b4457e1f281f4122c",
+    "/tmp/oriole-grammar-dtd-inputs/empty-external-1024.dtd": "f8254f60bef46827a7787b154508fc143403ac0f714a7e25865f8a448ff3964f",
+    "/tmp/oriole-grammar-dtd-inputs/empty-internal-0064.dtd": "0a2a0cffbffcfca0d6425bbde88ff8fb71b8fb17775454ce947de37204031792",
+    "/tmp/oriole-grammar-dtd-inputs/empty-internal-0256.dtd": "07fc6fa1c1faa38efb4c93512cea5f8deeb44c11b2c936b8455b69a68a9b24f7",
+    "/tmp/oriole-grammar-dtd-inputs/empty-internal-1024.dtd": "75c65e215b794033300094206cace46b947d5f35d3108cc493b068ca74f34569",
+    "/tmp/oriole-grammar-dtd-inputs/header-pe-0064.dtd": "df8d347a76ff1e21db09b364c23e984cb5c6ab7cd654067fc8d611e6e0b804be",
+    "/tmp/oriole-grammar-dtd-inputs/header-pe-0256.dtd": "a30cb7e0fd1fdd4fcdbd824b05cfa955592739b65d64fa2ba879ed0c2cdb9447",
+    "/tmp/oriole-grammar-dtd-inputs/header-pe-1024.dtd": "89264502254f213844a7ec478605d85f91b24cf52d3928757081213958d5a149",
+    "/tmp/oriole-grammar-dtd-inputs/literal-0064.dtd": "179cad6fb81efae42716dae0a1d3357d8e27c4a6379644f714a0b3ed4aa74bec",
+    "/tmp/oriole-grammar-dtd-inputs/literal-0256.dtd": "a01680e12bcec4cf589345f90b7a312b4418d95137699a47b3aa275a86119fc8",
+    "/tmp/oriole-grammar-dtd-inputs/literal-1024.dtd": "00006d5f99879449742706b27a6ed9b419516d731e508de8bf1fbc1fe6c27e15",
+    "/home/dev-user/code/oss/oriole/benchmarks/native_dtd_driver.c": "efee092114037b8c8c296e7f323c64b8a6d1120642e299356a0f7d00ba4c2b9f",
+    "/home/dev-user/code/oss/oriole/include/expat.h": "88733615539e563af7a5d4481912e821e02814e8ef29dcd762ad7d4ef8b749e6"
+  },
+  "conclusions": [
+    "All 60 processes succeeded, every stdout/stderr hash verifies, and all 20 recorded input/source/library/driver hashes remain unchanged.",
+    "All 120 retained sample traces independently reproduce the reported FNV-1a hashes. Warmup and measured samples agree on trace/hash/declarations/external_calls.",
+    "All 30 input/chunk pairs match exactly between libraries for both retained samples.",
+    "The initial complete-JSON comparison mistake is preserved. Process rows and their exact outputs are identical in the initial and corrected reports; only metadata postprocessing changed."
+  ],
+  "scope": [
+    "C benchmark driver has AddressSanitizer and UndefinedBehaviorSanitizer symbols and the recorded build flags. The linked Rust release library is uninstrumented in this check.",
+    "LeakSanitizer is disabled. This is separate from the three instrumented Rust fuzz campaigns.",
+    "Timing and engine version are intentionally excluded from cross-library metadata equality; they are retained in raw outputs.",
+    "No benchmark speed or full parser compatibility claim follows from this driver artifact audit."
+  ],
+  "issues": []
+}

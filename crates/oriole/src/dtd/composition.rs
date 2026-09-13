@@ -576,6 +576,7 @@ impl Parser {
                                 + size_of::<semantic::Request>()
                                 + size_of::<crate::PendingEvent>(),
                         )?;
+                        let base = self.copy_external_base(entity.base.as_ref())?;
                         let system_id = entity.system_id.try_clone()?;
                         let public_id = entity.public_id.try_clone()?;
                         let mut source_name = string("%", self.allocator)?;
@@ -583,6 +584,7 @@ impl Parser {
                         let position = self.source().position(end + 1);
                         self.consume(end + 1)?;
                         state.request = Some(semantic::Request {
+                            base,
                             source_name,
                             system_id,
                             public_id,

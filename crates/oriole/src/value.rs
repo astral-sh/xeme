@@ -46,6 +46,7 @@ struct Output {
 
 #[derive(Debug)]
 struct Request {
+    base: Option<Vec<u8>>,
     name: String,
     system_id: Option<String>,
     public_id: Option<String>,
@@ -177,6 +178,7 @@ impl Parser {
         self.charge_expansion(size_of::<Request>() + name.len())?;
         self.charge_external_identifiers(entity)?;
         Ok(Request {
+            base: self.copy_external_base(entity.base.as_ref())?,
             name: string(name, self.allocator)?,
             system_id: entity.system_id.try_clone()?,
             public_id: entity.public_id.try_clone()?,
@@ -388,6 +390,7 @@ impl Parser {
                 self.emit(
                     EventKind::ExternalEntityReference(oriole_storage::try_box(
                         crate::ExternalEntityReference {
+                            base: request.base.take(),
                             context: None,
                             system_id: request.system_id.try_clone()?,
                             public_id: request.public_id.try_clone()?,
@@ -575,6 +578,7 @@ impl Parser {
                 declarations,
                 declaration.name.try_clone()?,
                 Entity {
+                    base: None,
                     value: Some(value.try_clone()?),
                     system_id: None,
                     public_id: None,

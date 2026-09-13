@@ -1347,7 +1347,8 @@ fn foreign_dtd_requests_have_null_identifiers() {
         EventKind::ExternalEntityReference(declaration) if matches!(declaration.as_ref(), oriole::ExternalEntityReference {
             context: None,
             system_id: None,
-            public_id: None
+            public_id: None,
+            ..
         }
     )));
     while parser.next_event().unwrap().is_some() {}
@@ -1662,4 +1663,18 @@ fn raw_attribute_validation_precedes_value_and_namespace_processing() {
             assert_eq!(starts[0], "r");
         }
     }
+}
+
+#[test]
+fn internal_doctype_does_not_copy_or_charge_the_base_uri() {
+    let mut parser = Parser::new(Config {
+        limits: Limits {
+            max_entity_expansion_bytes: 1024,
+            ..Limits::default()
+        },
+        ..Config::default()
+    });
+    parser.set_base(Some(&[b'x'; 8192])).unwrap();
+    parser.feed(b"<!DOCTYPE r><r/>", true).unwrap();
+    while parser.next_event().unwrap().is_some() {}
 }

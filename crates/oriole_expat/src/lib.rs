@@ -592,12 +592,18 @@ unsafe fn dispatch(
     kind: EventKind,
     recycling: RecyclingToken,
 ) -> Result<(), AllocError> {
-    let needs_base = matches!(
+    // A foreign DTD has no declared external identifier. Expat uses the current
+    // base when requesting it, including changes in an earlier doctype callback.
+    let foreign_dtd = matches!(
         &kind,
-        EventKind::ExternalEntityReference(_)
-            | EventKind::EntityDeclaration(_)
-            | EventKind::NotationDeclaration(_)
+        EventKind::ExternalEntityReference(reference)
+            if reference.context.is_none() && reference.system_id.is_none()
     );
+    let needs_base = foreign_dtd
+        || matches!(
+            &kind,
+            EventKind::EntityDeclaration(_) | EventKind::NotationDeclaration(_)
+        );
     // SAFETY: Parser is pinned by the busy flag until the outer parse exits.
     // Copies and owned strings are the only values retained across callbacks.
     let (h, arg, base_bytes) = unsafe {
@@ -647,7 +653,8 @@ unsafe fn dispatch(
         } => version.len() + optional_len(encoding),
         EventKind::TextDeclaration { version, encoding } => optional_len(version) + encoding.len(),
         EventKind::ExternalEntityReference(reference) => {
-            optional_len(&reference.context)
+            reference.base.as_ref().map_or(0, |base| base.len())
+                + optional_len(&reference.context)
                 + optional_len(&reference.system_id)
                 + optional_len(&reference.public_id)
         }
@@ -859,11 +866,21 @@ unsafe fn dispatch(
             }
             EventKind::ExternalEntityReference(declaration) => {
                 let oriole::ExternalEntityReference {
+                    base: mut declaration_base,
                     context,
                     system_id,
                     public_id,
                 } = XmlBox::into_inner(declaration);
                 if let Some(callback) = h.external {
+                    let base = if foreign_dtd {
+                        cptr(&base)
+                    } else if let Some(base) = &mut declaration_base {
+                        base.try_reserve(1)?;
+                        base.push(0);
+                        base.as_ptr().cast()
+                    } else {
+                        ptr::null()
+                    };
                     let handler_arg = if (*parser).external_arg.is_null() {
                         parser
                     } else {
@@ -872,7 +889,7 @@ unsafe fn dispatch(
                     if callback(
                         handler_arg,
                         cptr(&optional_cstring(context)?),
-                        cptr(&base),
+                        base,
                         cptr(&optional_cstring(system_id)?),
                         cptr(&optional_cstring(public_id)?),
                     ) == 0
@@ -2152,6 +2169,10 @@ pub unsafe extern "C" fn XML_SetBase(parser: XML_Parser, base: *const c_char) ->
                         (*parser).allocator,
                     )?)
                 };
+                (*parser)
+                    .core
+                    .set_base(base.as_ref().map(|base| base.as_c_str().to_bytes()))
+                    .map_err(|_| AllocError::OutOfMemory)?;
                 (*parser).base = base;
             }
             Ok(OK)

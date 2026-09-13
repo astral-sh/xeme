@@ -216,6 +216,8 @@ pub struct Event {
 /// An external entity request with owned callback metadata.
 #[derive(Debug, Eq, PartialEq)]
 pub struct ExternalEntityReference {
+    /// Opaque base URI bytes captured when the external identifier was declared.
+    pub base: Option<Vec<u8>>,
     pub context: Option<String>,
     pub system_id: Option<String>,
     pub public_id: Option<String>,
@@ -367,6 +369,8 @@ impl ElementName {
 
 #[derive(Debug)]
 struct Entity {
+    // Share immutable bases across declarations and DTD snapshots.
+    base: Option<Shared<Vec<u8>>>,
     value: Option<String>,
     system_id: Option<String>,
     public_id: Option<String>,
@@ -488,6 +492,7 @@ impl Entity {
     ) -> Result<Self, AllocError> {
         if !parameter_context && self.value.is_none() && self.system_id.is_none() {
             Ok(Self {
+                base: None,
                 value: Some(String::new_in(allocator)),
                 system_id: None,
                 public_id: None,
@@ -510,6 +515,7 @@ impl Entity {
 impl TryClone for Entity {
     fn try_clone(&self) -> Result<Self, AllocError> {
         Ok(Self {
+            base: self.base.clone(),
             value: self.value.try_clone()?,
             system_id: self.system_id.try_clone()?,
             public_id: self.public_id.try_clone()?,
@@ -557,6 +563,7 @@ pub struct Parser {
     config: Config,
     allocator: Allocator,
     decoder: Decoder,
+    base: Option<Shared<Vec<u8>>>,
     input_context: Option<InputContext>,
     sources: Vec<Source>,
     pending: Queue<PendingEvent>,
@@ -577,7 +584,7 @@ pub struct Parser {
     conditional: dtd::ConditionalState,
     value_state: Option<oriole_storage::Box<value::State>>,
     declarations_skipped: bool,
-    doctype_external: Option<(Option<String>, Option<String>)>,
+    doctype_external: Option<ExternalEntityReference>,
     seen_root: bool,
     closed_root: bool,
     seen_doctype: bool,
@@ -743,6 +750,7 @@ impl Parser {
             allocator,
             decoder,
             input_context: None,
+            base: None,
             sources,
             namespaces,
             default_namespace: None,
@@ -1004,6 +1012,7 @@ impl Parser {
         let mut child =
             Self::try_new_with_encoding_in(self.config.clone(), encoding, self.allocator)?;
         child.set_hash_salt_inner(self.hash_salt())?;
+        child.base = self.base.clone();
         child
             .decoder
             .inherit_map(&self.decoder, &mut child.sources[0])?;
@@ -3138,6 +3147,7 @@ impl Parser {
             self.charge_external_identifiers(entity)?;
             // A name reserved by an unfinished DTD declaration has no system
             // identifier yet; Expat still requests this entity with a null ID.
+            let base = self.copy_external_base(entity.base.as_ref())?;
             let system_id = entity.system_id.try_clone()?;
             let public_id = entity.public_id.try_clone()?;
             let mut context = String::new_in(self.allocator);
@@ -3178,6 +3188,7 @@ impl Parser {
             self.emit(
                 EventKind::ExternalEntityReference(oriole_storage::try_box(
                     crate::ExternalEntityReference {
+                        base,
                         context: Some(context),
                         system_id,
                         public_id,
@@ -4093,6 +4104,28 @@ impl Parser {
             result.try_push_str(prefix)?;
         }
         Ok(result)
+    }
+
+    /// Set the base URI captured by subsequent external entity declarations.
+    /// Existing declarations retain their original base, including a missing base.
+    pub fn set_base(&mut self, base: Option<&[u8]>) -> Result<(), Error> {
+        let base = base
+            .map(|base| {
+                let mut bytes = Vec::new_in(self.allocator);
+                oriole_storage::try_extend_from_slice(&mut bytes, base)?;
+                Shared::try_new_in(bytes, self.allocator)
+            })
+            .transpose()?;
+        self.base = base;
+        Ok(())
+    }
+
+    fn copy_external_base(&self, base: Option<&Shared<Vec<u8>>>) -> Result<Option<Vec<u8>>, Error> {
+        base.map(|base| {
+            self.charge_expansion(base.len())?;
+            Ok((**base).try_clone()?)
+        })
+        .transpose()
     }
 
     fn charge_external_identifiers(&self, entity: &Entity) -> Result<(), Error> {

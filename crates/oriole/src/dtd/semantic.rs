@@ -5,6 +5,7 @@ use super::*;
 
 #[derive(Debug)]
 pub(super) struct Request {
+    pub(super) base: Option<Vec<u8>>,
     pub(super) source_name: String,
     pub(super) system_id: Option<String>,
     pub(super) public_id: Option<String>,
@@ -170,6 +171,7 @@ impl Parser {
                     self.emit(
                         EventKind::ExternalEntityReference(oriole_storage::try_box(
                             crate::ExternalEntityReference {
+                                base: request.base,
                                 context: None,
                                 system_id: request.system_id,
                                 public_id: request.public_id,
@@ -276,6 +278,7 @@ impl Parser {
                 entity.public_id = Some(value);
             } else {
                 entity.system_id = Some(value);
+                entity.base = self.base.clone();
             }
         }
         Ok(())
@@ -370,6 +373,7 @@ impl Parser {
             table,
             name.try_clone()?,
             Entity {
+                base: None,
                 value: None,
                 system_id: None,
                 public_id: None,

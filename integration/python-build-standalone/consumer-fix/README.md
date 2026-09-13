@@ -28,9 +28,7 @@ python3 tools/cpython/run.py \
 
 The harness verifies the pinned source and patch hashes, applies the patch without
 fuzzy matching to a temporary copy, and verifies the resulting source hash. Results
-identify the consumer adaptation separately from Oriole's library hash. The shared
-and static builds each passed all 803 selected CPython XML tests, with 31 skips.
-See `validation.json` and the compressed result summaries.
+identify the consumer adaptation separately from Oriole's library hash.
 
 ## Fault injection
 
@@ -48,9 +46,10 @@ python3 integration/python-build-standalone/consumer-fix/run.py \
   --output /absolute/fault-probe
 ```
 
-Both original consumers crash during cleanup. Both fixed consumers raise
-`MemoryError` and preserve the parent reference count. The probe retains extra
-parent references and exits without interpreter teardown after reporting, so a
+The probe checks that the original consumers crash during cleanup and the fixed
+consumers raise `MemoryError` while preserving the parent reference count. The
+probe retains extra parent references and exits without interpreter teardown
+after reporting, so a
 refcount mismatch cannot cause an unrelated shutdown failure. Original crashes
 remain recorded as crashes in the manifest.
 

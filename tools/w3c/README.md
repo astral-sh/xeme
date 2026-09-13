@@ -6,14 +6,13 @@ valid and invalid documents as required accepts, not-well-formed documents as
 required rejects, and `error` cases as optional observations. XML 1.1 and
 older-edition-only cases remain listed with their selection reasons.
 
-The [recorded run](../../docs/validation/2026-09-10/w3c/) uses the
-[2013 suite](https://www.w3.org/XML/Test/) from the
+Use the [2013 suite](https://www.w3.org/XML/Test/) from the
 [pinned mirror](https://github.com/lddubeau/xml-conformance-suite/tree/3fb4516daedd0ac736249a383733883b95fcdbb2).
 Fetch that revision and pass `packages/test-data/xmlconf`, including its original
 `xmlconf.xml`. The harness records the original catalog's known `xml:base` typo
 and correction; it does not consume the mirror's cleaned catalog. Mirror data
-carries MIT AND W3C-19980720 licensing; see its license and the retained source
-archive. We have not verified the mirror against the official release tarball.
+carries MIT AND W3C-19980720 licensing; see the mirror's license.
+We have not verified the mirror against the official release tarball.
 
 ```console
 python3 tools/w3c/run.py --suite /path/to/xmlconf \

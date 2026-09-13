@@ -23,9 +23,14 @@ A streaming XML parser and Expat C interface, written in Rust.
 | GTK UI | 0.248 ms | 0.212 ms | 1.165× |
 | DocBook XSL | 0.225 ms | 0.189 ms | 1.192× |
 
-The [normal-build measurements](docs/validation/2026-09-12/native-start-end-namespace-declaration/) use six pinned XML projects, 4 KiB chunks and namespaces disabled on a shared Linux host. Times are medians of seven process medians; ratios are medians of paired ratios. Across the 24 real-project conditions in confirmation, the selected runtime takes **1.1841× Expat’s native time and 1.0558× its CPython time**. Both aggregates meet the current 20% target in two epochs; individual outliers and generated-workload regressions remain in the report.
+These [measurements](https://github.com/astral-sh/oriole/tree/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/docs/validation/2026-09-12/native-start-end-namespace-declaration)
+use six pinned XML projects, 4 KiB chunks, and namespaces disabled on a shared
+Linux host. Times are medians of seven process medians; ratios are medians of
+paired ratios. See the [benchmark guide](benchmarks/README.md) to measure a new build.
 
-The exact tested source `5d983f7e` passes 483 Rust tests and preserves **4,349 API passes, 391 failures and no timeouts**, six passing C consumers, and two strict CPython grouping failures. Separate semantic and allocation diagnostics, six Rust ASan/fuzz harnesses and current-source CI pass. W3C acceptance matches Expat, with 960 shared catalog failures retained. The installed PBS trial retains the same two grouping failures. This runtime is selected for a **controlled, opt-in Linux CPython 3.12.13 trial**; the [compatibility guide](docs/compatibility.md) records its experimental status and known differences.
+Validation combines Rust and C tests, differential XML checks, Expat API and
+CPython suites, and fuzzing; the [compatibility guide](docs/compatibility.md)
+describes remaining gaps.
 
 ## Installation
 
@@ -67,7 +72,7 @@ The parser performs no filesystem or network I/O; applications supply input and
 resolve external entities. The CLI does not fetch external resources.
 
 See [contributing](CONTRIBUTING.md) for development and acceptance criteria, and the
-[stack review guide](docs/review.md) for implementation and validation evidence.
+[review guide](docs/review.md) for implementation and test entry points.
 
 ## License
 

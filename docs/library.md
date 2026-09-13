@@ -53,9 +53,9 @@ and custom allocation. Its documentation defines ownership and callback lifetime
 supported encoding modes, and remaining compatibility gaps.
 
 The [python-build-standalone integration](../integration/python-build-standalone/)
-links Oriole into CPython 3.12.13. The recipe is opt-in and currently validated for
-Linux x86-64, including the glibc 2.17 baseline. Validation reports identify the
-exact runtime tested; earlier distribution results do not certify later changes.
+links Oriole into CPython 3.12.13. The recipe is opt-in and targets Linux x86-64.
+It includes checks for the glibc 2.17 baseline; see the
+[compatibility guide](compatibility.md) for remaining consumer differences.
 
 ## Workspace
 
@@ -68,4 +68,4 @@ exact runtime tested; earlier distribution results do not certify later changes.
 
 See [contributing](../CONTRIBUTING.md) for development commands and acceptance
 criteria, [fuzzing](../fuzz/README.md) for the adversarial harnesses, and the
-[stack review guide](review.md) for implementation and evidence layers.
+[review guide](review.md) for implementation and test entry points.

@@ -39,11 +39,19 @@ Both ElementTree and pyexpat use namespaces. Seven randomized pairs each measure
 
 ## Complete Wayland commands
 
-The [baseline evidence](../results/2026-09-10/real-project-baseline/README.md) archive includes the pinned, unmodified `wayland-scanner-source` directory and its source manifest. Extract it to a temporary directory. The builder checks every source hash and compiles two scanners with the same flags; optional libxml DTD validation is disabled for both.
+The pinned, unmodified Wayland scanner sources and their manifest are available in Git history. Extract only `wayland-scanner-source` to a temporary directory. The builder checks every source hash and compiles two scanners with the same flags; optional libxml DTD validation is disabled for both.
+
+For a shallow clone missing this commit, first run `git fetch origin fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f`.
 
 ```console
+wayland_source_root="$(mktemp -d)"
+git show fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f:benchmarks/results/2026-09-10/real-project-baseline/evidence.tar.gz \
+  > "$wayland_source_root/evidence.tar.gz"
+tar -xzf "$wayland_source_root/evidence.tar.gz" -C "$wayland_source_root" \
+  wayland-scanner-source
+
 python3 benchmarks/build_wayland_project.py \
-  --source /absolute/wayland-scanner-source \
+  --source "$wayland_source_root/wayland-scanner-source" \
   --consumers /tmp/oriole-project-consumers/build.json \
   --header include --output /tmp/oriole-wayland-build
 

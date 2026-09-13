@@ -11,11 +11,11 @@ The corpus covers six XML uses selected before timing: code-generation registrie
 | GTK | `gtk/ui/gtkfilechooserwidget.ui` | 26,739 | LGPL-2.1-or-later |
 | DocBook XSL | `xsl/fo/docbook.xsl` | 17,433 | DocBook permissive license |
 
-The Wayland repository is a GitHub mirror of the upstream GitLab project. GTK's initially selected file chooser dialog was a 1,245-byte wrapper; its main file chooser widget replaced it before any parsing or timing. The wrapper, initial manifest and initial failed license-path fetches remain recorded. Corpus selection did not use performance results.
+The Wayland repository is a GitHub mirror of the upstream GitLab project.
 
 ## Native parser measurement
 
-`benchmarks/projects.py` uses the existing reviewed native C driver. Both libraries receive the same immutable byte stream, 4/64 KiB chunks and element/text handlers, with namespace processing independently disabled and enabled. Creation, callback registration, parsing, callback hashing and freeing are timed. Library loading, process startup and file I/O are excluded.
+`benchmarks/projects.py` uses the native C driver. Both libraries receive the same immutable byte stream, 4/64 KiB chunks and element/text handlers, with namespace processing independently disabled and enabled. Creation, callback registration, parsing, callback hashing and freeing are timed. Library loading, process startup and file I/O are excluded.
 
 Every condition first compares complete normalized callbacks from the independent ctypes probe. Text fragments are coalesced; all other captured callback types remain exact. The complete callbacks independently derive the C driver's expected FNV-1a hash, element count and text-byte count. Every timed sample must match that result. Callback output, process failures and source/input/library hashes are retained.
 
@@ -36,7 +36,7 @@ Creation, feeds, finalization, callbacks and result destruction are timed. Proce
 
 The native and Python measurements use real project inputs and realistic XML consumers. They exclude later project processing, such as Vulkan code generation, SVG rendering or XSLT transformation. The separate Wayland measurement below runs complete code-generation commands. External entity resolution is disabled; Batik's external DTD is skipped by both libraries. XML stylesheet includes remain data. No runtime network or external file loading occurs.
 
-The Linux shared host has uncontrolled CPU frequency, host load and memory bandwidth. Timings are pinned to CPU 0 and execute sequentially. Other agents may build or profile on other CPUs. These conditions, exact commands, all raw samples, preflights and unchanged source/input/binary hashes are recorded in the reports. No workload is removed after seeing a timing result.
+Reserve a CPU and execute timings sequentially. CPU affinity does not isolate frequency, host load or memory bandwidth on a shared host. Record host conditions alongside the commands, samples, preflights and source/input/binary hashes. Keep every workload in the results, including regressions.
 
 ## Actual Wayland code generation
 
@@ -44,6 +44,4 @@ The Linux shared host has uncontrolled CPU frequency, host load and memory bandw
 
 This measurement includes process startup, library loading, input I/O, XML parsing, protocol semantic processing, code generation, output file writes and process exit. It excludes hashing the generated output. Seven randomized pairs each contain ten independent process runs; one initial warmup per engine/mode is discarded. This is a complete project command, covering more than the XML parser microbenchmarks, although it still represents one protocol file and two code-generation modes.
 
-The [baseline evidence archive](../results/2026-09-10/real-project-baseline/README.md) includes `usage-evidence.json`, which records that Vulkan's pinned registry loader uses the same standard-library ElementTree API exercised by the Python consumer benchmark. `consumer-origin-audit.json` separately checks the actual function pointers in `pyexpat.expat_CAPI` and confirms ElementTree uses the loaded native accelerator; all parser, creation and destruction pointers resolve to the intended frozen parser library.
-
-See the [baseline results](../results/2026-09-10/real-project-baseline/README.md) and [reproduction commands](RERUN.md). Initial selection/fetch records and consumer-origin audits are retained in the evidence archive.
+See the [reproduction commands](RERUN.md).

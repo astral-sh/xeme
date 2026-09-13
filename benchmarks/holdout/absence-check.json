@@ -1,0 +1,18 @@
+{
+  "checked_at": "2026-09-13T12:17:33.990811+00:00",
+  "checkout": "/home/dev-user/code/oss/oriole",
+  "commit": "fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f",
+  "selected_input_sha256": {
+    "365962d824b1941bb692caefca292d5d5e9e6ed5a73e6d13d0630de18e0c8989": "libreoffice",
+    "f46774b63c3fe11cdbb9c3d8fa99c079c210aa01c818d4d351ee146459ce9042": "dotnet",
+    "617cbecb2c0677fe8ce73101d31b20e8ce74fd496b8d9c4d648fe5ea3f9ca42b": "hadoop",
+    "82528f18432ac5b0967b522fbd0f1e597b1544ec481648e316406963bdd1499d": "qt",
+    "fdd9e4a1043665a4aaed90d48dbf82d6931f118e79aa42590a99c87f2c564e12": "musescore"
+  },
+  "tracked_evidence_records_scanned": 1756,
+  "decompressed_evidence_bytes": 346973025,
+  "recorded_hash_matches": [],
+  "tracked_corpus_and_seed_files_hashed": 266,
+  "whole_file_hash_matches": [],
+  "limits": "Checks whole original-file identity and tracked evidence on this checkout. Does not assert no shared byte fragments or related schemas. No parser/timing execution. Compressed tar archives and unrecorded local experiments are not searched."
+}

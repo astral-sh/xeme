@@ -5,7 +5,7 @@ candidate, its baseline and Expat in each randomized round, using the existing
 native C callback driver and unmodified CPython consumers. It does not use PGO or
 change allocators.
 
-The real corpus is the six pinned, original XML files in
+The **tuning corpus** is the six pinned, original XML files in
 [projects/corpus-manifest.json](projects/corpus-manifest.json). Native conditions
 cover namespaces on/off and 4/64 KiB feeds; Python covers ElementTree and pyexpat at
 both feed sizes. Each consumer has **24 real conditions**. The four deterministic
@@ -14,14 +14,16 @@ These generated controls differ from some historical studies' smaller subsets.
 This recipe also fixes one iteration count per consumer; historical studies used
 other schedules, including per-condition counts. Compare new baseline and candidate
 runs together; this entrypoint does not reproduce historical timings exactly.
+These files have informed many optimization decisions. Repeating them in another
+epoch tests repeatability, not performance on unseen input. The separate
+[reserved holdout](holdout/README.md) is for final evaluation after code selection.
 
 ## 1. Freeze the baseline and candidate
 
 Prerequisites: Rust 1.96 or later, Cargo, Python, uv, a C compiler, CMake, Git,
 `taskset` and `readelf`. Run from the repository root. Keep one stable Cargo target
 directory per worktree. Choose a new
-study directory; build and measurement commands refuse to overwrite existing
-outputs.
+study directory; build and measurement commands refuse to overwrite existing outputs.
 
 ```sh
 benchmark_root="$PWD/../oriole-bench"
@@ -171,3 +173,43 @@ not replace compatibility, allocation, sanitizer or callback-lifetime review.
 
 For lower-level controls and complete Wayland code generation, see
 [projects/RERUN.md](projects/RERUN.md).
+
+## Final evaluation on unseen projects
+
+The reserved holdout contains original pinned LibreOffice, .NET, Hadoop, Qt and
+MuseScore files, selected independently by document role before parsing or
+timing. They are different projects from the tuning corpus. Their input bytes,
+licenses, acquisition records and pre-measurement freeze are in
+[`holdout/`](holdout/README.md). No performance result was used to select them.
+
+First finish candidate selection and correctness review using the tuning corpus.
+Freeze the selected source/libraries and write a short decision note identifying
+that choice and why it was selected. Then, before any holdout parser execution:
+
+```sh
+python3 -I -S benchmarks/hillclimb.py verify-holdout
+# Write $study/selection.md with the decision already made above.
+python3 -I -S benchmarks/hillclimb.py run --mode holdout --cpu 0 \
+  --selection-note "$study/selection.md" \
+  --baseline "$study/baseline/liboriole_expat.so" \
+  --candidate "$study/candidate/liboriole_expat.so" --expat "$expat" \
+  --python "$python312" --consumers "$study/consumers/build.json" \
+  --baseline-build "$study/baseline/build.json" \
+  --candidate-build "$study/candidate/build.json" \
+  --build-manifest "$benchmark_root/expat-build/CMakeCache.txt" \
+  --output "$study/holdout"
+```
+
+Verification checks original file hashes and notices without parsing. The holdout
+run uses the same seven-round confirmation protocol, canonical preflights and
+measurement boundaries, with 20 native and 20 Python project conditions instead
+of 24. Reports identify `native-holdout` and `python-holdout` separately from
+tuning results; the 16 generated native controls remain a separate group. The
+selection note and frozen source/library records are retained with their hashes.
+Keep every failure and adverse condition. Do not replace an input after seeing
+its result, or pool these measurements with the tuning aggregate.
+
+Evaluate this corpus only after the implementation choice has been made. Once
+results are observed, it becomes a regression corpus, not an unseen holdout for
+further optimization. The tool records the decision but cannot enforce this
+research discipline. A later independent claim needs newly reserved inputs.

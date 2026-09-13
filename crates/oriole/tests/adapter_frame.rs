@@ -391,9 +391,17 @@ fn namespace_plans_preserve_errors_and_owned_expansions() {
         "<r><warm a='v'/><:n a='v'/></r>",
         "<r><warm a='v'/><n: a='v'/></r>",
         "<r><warm a='v'/><p::n a='v'/></r>",
+        "<r><warm a='v'/><p:1n a='v'></p:1n></r>",
+        "<r><warm a='v'/><p:-n a='v'></p:-n></r>",
+        "<r><warm a='v'/><p:.n a='v'></p:.n></r>",
+        "<r><warm a='v'/><p:\u{0300}n a='v'></p:\u{0300}n></r>",
         "<r><warm a='v'/><n :a='v'/></r>",
         "<r><warm a='v'/><n a:='v'/></r>",
         "<r><warm a='v'/><n a:b:c='v'/></r>",
+        "<r><warm a='v'/><n p:1a='v'></n></r>",
+        "<r><warm a='v'/><n p:-a='v'></n></r>",
+        "<r><warm a='v'/><n p:.a='v'></n></r>",
+        "<r><warm a='v'/><n p:\u{0300}a='v'></n></r>",
         "<r><warm a='v'/><n a='v' a='duplicate'/></r>",
         "<r><warm a='v'/><p::n a='v' b='unterminated",
         "<r><warm a='v'/><n a:b:c='v' b='&missing;'/></r>",
@@ -401,18 +409,24 @@ fn namespace_plans_preserve_errors_and_owned_expansions() {
         "<r><xmlns:n a='v' a='duplicate'/></r>",
         "<r xmlns:p='u'><p:n></p:m></r>",
     ] {
-        for separator in ['|', '\0', 'x'] {
+        for separator in [None, Some('|'), Some('\0'), Some('x')] {
             for triplets in [false, true] {
                 for chunk in 1..=input.len() {
                     let config = Config {
-                        namespace_separator: Some(separator),
+                        namespace_separator: separator,
                         namespace_triplets: triplets,
                         ..Config::default()
                     };
+                    let owned = collect(input.as_bytes(), chunk, config.clone(), false);
+                    let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
+                    let c_context = collect_mode(input.as_bytes(), chunk, config, true, true);
                     assert_eq!(
-                        collect(input.as_bytes(), chunk, config.clone(), true).0,
-                        collect(input.as_bytes(), chunk, config, false).0,
+                        adapter.0, owned.0,
                         "{input:?} {separator:?} {triplets} {chunk}"
+                    );
+                    assert_eq!(
+                        c_context.0, owned.0,
+                        "C context {input:?} {separator:?} {triplets} {chunk}"
                     );
                 }
             }
@@ -433,6 +447,16 @@ fn expanded_element_frames_preserve_packed_names_and_literal_attributes() {
             "<r xmlns:p='urn:example'><p:node><p:node><p:node><p:élong a='v'/></p:node></p:node></p:node><p:node/></r>",
             5,
         ),
+        // Reused callback storage must follow URI shadowing and restoration,
+        // including common prefixes and equal-length bindings with different bytes.
+        (
+            "<r xmlns:p='urn:alpha'><p:n>text<!--gap--><plain/><p:n/></p:n><s xmlns:p='urn:a'><p:n/></s><p:n/><s xmlns:p='urn:alphabet'><p:n/></s><p:n/><s xmlns:p='urn:omega'><p:n/></s><p:n/></r>",
+            9,
+        ),
+        (
+            "<r xmlns='urn:alpha'><n/><s xmlns='urn:a'><n/></s><n/><s xmlns=''><plain>text<!--gap--><plain/></plain></s><n/><s xmlns='urn:alphabet'><n/></s><n/><s xmlns='urn:omega'><n/></s><n/></r>",
+            10,
+        ),
     ] {
         for separator in ['|', '\0', ':', 'λ'] {
             for triplets in [false, true] {
@@ -448,7 +472,8 @@ fn expanded_element_frames_preserve_packed_names_and_literal_attributes() {
                             ..Config::default()
                         };
                         let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
-                        let owned = collect(input.as_bytes(), chunk, config, false);
+                        let owned = collect(input.as_bytes(), chunk, config.clone(), false);
+                        let c_context = collect_mode(input.as_bytes(), chunk, config, true, true);
                         assert_eq!(
                             adapter.0, owned.0,
                             "{input:?} {separator:?} {triplets} {chunk}"
@@ -457,6 +482,11 @@ fn expanded_element_frames_preserve_packed_names_and_literal_attributes() {
                             adapter.1, expected_frames,
                             "{input:?} {separator:?} {triplets} {chunk}"
                         );
+                        assert_eq!(
+                            c_context.0, owned.0,
+                            "C context {input:?} {separator:?} {triplets} {chunk}"
+                        );
+                        assert_eq!(c_context.1, expected_frames);
                     }
                 }
             }
@@ -468,64 +498,92 @@ fn expanded_element_frames_preserve_packed_names_and_literal_attributes() {
             .collect::<std::string::String>();
         // The planner records only into existing capacity; the first wide tag
         // warms it through the owned path before the valid/duplicate pair.
-        let input = format!("<r xmlns='u'><warm{attrs}/><n{attrs}/><n{attrs} a0='duplicate'/></r>");
-        for chunk in [1, 4096, input.len()] {
-            let config = Config {
-                namespace_separator: Some('|'),
-                ..Config::default()
-            };
-            let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
-            let owned = collect(input.as_bytes(), chunk, config, false);
-            assert_eq!(adapter.0, owned.0, "{count} {chunk}");
-            assert_eq!(adapter.1, usize::from(count <= 128), "{count} {chunk}");
-            assert!(adapter.0.last().unwrap().contains("DuplicateAttribute"));
+        for close in ["/>", "></n>"] {
+            let input = format!(
+                "<r xmlns='u'><warm{attrs}/><n{attrs}{close}<n{attrs} a0='duplicate'{close}</r>"
+            );
+            for chunk in [1, 4096, input.len()] {
+                let config = Config {
+                    namespace_separator: Some('|'),
+                    ..Config::default()
+                };
+                let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
+                let owned = collect(input.as_bytes(), chunk, config.clone(), false);
+                let c_context = collect_mode(input.as_bytes(), chunk, config, true, true);
+                assert_eq!(adapter.0, owned.0, "{count} {close:?} {chunk}");
+                assert_eq!(c_context.0, owned.0, "C context {count} {close:?} {chunk}");
+                assert_eq!(
+                    adapter.1,
+                    usize::from(count <= 128),
+                    "{count} {close:?} {chunk}"
+                );
+                assert_eq!(
+                    c_context.1, adapter.1,
+                    "C context {count} {close:?} {chunk}"
+                );
+                assert!(adapter.0.last().unwrap().contains("DuplicateAttribute"));
+            }
         }
     }
 }
 
 #[test]
 fn expanded_element_frames_keep_uri_work_and_arena_limits() {
-    let tag = "<p:n a='v'/>";
-    for separator in ['|', '\0', 'λ'] {
-        let separator_bytes = if separator == '\0' {
-            0
-        } else {
-            2 * separator.len_utf8()
-        };
-        for triplets in [false, true] {
-            for extra in [0, 1, 2] {
-                let uri = "u".repeat(4096 - tag.len() - separator_bytes - 1 + extra);
-                let input = format!("<r xmlns:p='{uri}'>{tag}{tag}</r>");
-                for chunk in [1, 4096, input.len()] {
-                    let config = Config {
-                        namespace_separator: Some(separator),
-                        namespace_triplets: triplets,
-                        ..Config::default()
-                    };
-                    let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
-                    let owned = collect(input.as_bytes(), chunk, config, false);
-                    assert_eq!(
-                        adapter.0, owned.0,
-                        "{separator:?} {triplets} {extra} {chunk}"
-                    );
-                    assert_eq!(adapter.1, if extra == 2 { 0 } else { 2 });
+    for (tag, close) in [("<p:n a='v'/>", ""), ("<p:n a='v'>", "</p:n>")] {
+        for separator in ['|', '\0', 'λ'] {
+            let separator_bytes = if separator == '\0' {
+                0
+            } else {
+                2 * separator.len_utf8()
+            };
+            for triplets in [false, true] {
+                for extra in [0, 1, 2] {
+                    let uri = "u".repeat(4096 - tag.len() - separator_bytes - 1 + extra);
+                    let input = format!("<r xmlns:p='{uri}'>{tag}{close}{tag}{close}</r>");
+                    for chunk in [1, 4096, input.len()] {
+                        let config = Config {
+                            namespace_separator: Some(separator),
+                            namespace_triplets: triplets,
+                            ..Config::default()
+                        };
+                        let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
+                        let owned = collect(input.as_bytes(), chunk, config.clone(), false);
+                        let c_context = collect_mode(input.as_bytes(), chunk, config, true, true);
+                        assert_eq!(
+                            adapter.0, owned.0,
+                            "{tag:?} {separator:?} {triplets} {extra} {chunk}"
+                        );
+                        assert_eq!(
+                            c_context.0, owned.0,
+                            "C context {tag:?} {separator:?} {triplets} {extra} {chunk}"
+                        );
+                        assert_eq!(adapter.1, if extra == 2 { 0 } else { 2 });
+                        assert_eq!(c_context.1, adapter.1);
+                    }
                 }
             }
         }
     }
-    let input = "<r xmlns:p='urn:long'><p:n a='v'/><p:n/><p:n/></r>";
-    for limit in 0..=3 * "urn:long".len() {
-        let mut config = Config {
-            namespace_separator: Some('|'),
-            ..Config::default()
-        };
-        config.limits.max_entity_expansion_bytes = limit;
-        for chunk in [1, 7, input.len()] {
-            assert_eq!(
-                collect(input.as_bytes(), chunk, config.clone(), true).0,
-                collect(input.as_bytes(), chunk, config.clone(), false).0,
-                "URI work limit {limit}, chunk {chunk}"
-            );
+    for input in [
+        "<r xmlns:p='urn:long'><p:n a='v'/><p:n/><p:n/></r>",
+        "<r xmlns:p='urn:long'><p:n a='v'></p:n><p:n></p:n><p:n></p:n></r>",
+    ] {
+        for limit in 0..=3 * "urn:long".len() {
+            let mut config = Config {
+                namespace_separator: Some('|'),
+                ..Config::default()
+            };
+            config.limits.max_entity_expansion_bytes = limit;
+            for chunk in [1, 7, input.len()] {
+                let owned = collect(input.as_bytes(), chunk, config.clone(), false);
+                let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
+                let c_context = collect_mode(input.as_bytes(), chunk, config.clone(), true, true);
+                assert_eq!(adapter.0, owned.0, "URI work limit {limit}, chunk {chunk}");
+                assert_eq!(
+                    c_context.0, owned.0,
+                    "C context URI work limit {limit}, chunk {chunk}"
+                );
+            }
         }
     }
 }

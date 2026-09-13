@@ -649,7 +649,7 @@ impl IdentityStartState<'_> {
             });
         }
         self.event_recycling
-            .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
+            .reserve_adapter(&frame.generation, frame.reservation_bytes());
         frame.prepare(raw_attrs.len())?;
         let literal_span = !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);
         let mut names = (raw_attrs.len() > 8)
@@ -3810,8 +3810,15 @@ impl Parser {
         if raw_attrs.len() > self.config.limits.max_attributes {
             return Err(self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded"));
         }
+        // Expansion may grow its separate name buffer. Later identity/text
+        // frames reserve only the capacity actually retained by that buffer.
+        let reservation = if EXPAND_ELEMENT {
+            arena::RETAINED_ARENA_BYTES + arena::MAX_ARENA_BYTES
+        } else {
+            frame.reservation_bytes()
+        };
         self.event_recycling
-            .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
+            .reserve_adapter(&frame.generation, reservation);
         frame.prepare(raw_attrs.len())?;
         let literal_span =
             !EXPAND_ELEMENT && !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);
@@ -3841,40 +3848,43 @@ impl Parser {
             frame.push_literal_attributes(rest, &raw_attrs)?;
         }
         self.id_attribute_index = None;
-        let expanded_name = if EXPAND_ELEMENT {
-            let reusable = self.event_recycling.take_name();
-            Some(self.expand_name(name, false, self.config.namespace_triplets, reusable)?)
-        } else {
-            frame.set_name(name)?;
-            None
-        };
-        self.seen_root = true;
-        self.declaration_allowed = false;
-        let stack_name = if let Some(mut value) = expanded_name {
-            // Detach callback bytes before extending the stack's packed owner.
-            // Matching and End delivery keep the same raw/expanded slices.
-            frame.set_name(&value)?;
-            let expanded_end = value.len();
-            let shared_suffix = value.ends_with(name);
-            let additional = if shared_suffix { 0 } else { name.len() };
+        let stack_name = if EXPAND_ELEMENT {
+            let separator = self
+                .config
+                .namespace_separator
+                .expect("expanded frame has namespaces enabled");
+            let (prefix, local, uri) = match name.split_once(':') {
+                Some((prefix, local)) => (Some(prefix), local, self.namespaces.get(prefix)),
+                None => (None, name, self.default_namespace.as_ref()),
+            };
+            let uri = uri.expect("expanded frame eligibility checked the binding");
+            // URI reuse still consumes the same expansion-work budget on every tag.
+            self.charge_expansion(uri.len())?;
+            frame.set_expanded_name(
+                uri,
+                local,
+                prefix,
+                separator,
+                self.config.namespace_triplets,
+            )?;
+            self.seen_root = true;
+            self.declaration_allowed = false;
+            let expanded = frame.prepared_expanded_name();
+            let expanded_end = expanded.len();
+            let shared_suffix = expanded.ends_with(name);
             let capacity = expanded_end
-                .checked_add(additional)
-                .and_then(|length| length.checked_add(1))
+                .checked_add(if shared_suffix { 0 } else { name.len() })
+                .and_then(|len| len.checked_add(1))
                 .ok_or(AllocError::CapacityOverflow)?;
-            if value.capacity() < capacity {
-                // Keep the expansion scratch reusable when a nested name needs
-                // a larger packed owner. Suffixes with spare capacity still move.
-                let mut packed = self
-                    .event_recycling
-                    .take_name()
-                    .unwrap_or_else(|| String::new_in(self.allocator));
-                packed.clear();
-                packed.try_reserve(capacity)?;
-                packed.try_push_str(&value)?;
-                self.event_recycling
-                    .recycle_end(self.event_recycling.token(), value);
-                value = packed;
-            }
+            // The callback buffer already contains the complete spelling. Make
+            // one final stack owner, including raw matching bytes when needed.
+            let mut value = self
+                .event_recycling
+                .take_name()
+                .unwrap_or_else(|| String::new_in(self.allocator));
+            value.clear();
+            value.try_reserve(capacity)?;
+            value.try_push_str(expanded)?;
             let raw_start = if shared_suffix {
                 expanded_end - name.len()
             } else {
@@ -3887,6 +3897,9 @@ impl Parser {
                 expanded_end,
             }
         } else {
+            frame.set_name(name)?;
+            self.seen_root = true;
+            self.declaration_allowed = false;
             let reusable = self.event_recycling.take_name();
             let value = recycling::copy_name(name, reusable, self.allocator)?;
             ElementName {
@@ -4137,7 +4150,7 @@ impl Parser {
         {
             if count > arena::INLINE_TEXT_BYTES {
                 self.event_recycling
-                    .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
+                    .reserve_adapter(&frame.generation, frame.reservation_bytes());
             }
             if c_text_context
                 && count > 0

@@ -21,6 +21,7 @@ struct ArenaAttribute {
 #[derive(Debug)]
 enum Payload {
     Start,
+    NamespaceStart,
     InlineText,
     HeapText,
     End(String),
@@ -39,6 +40,8 @@ pub struct AdapterFrame {
     bytes: Vec<u8>,
     attributes: Vec<ArenaAttribute>,
     name: Range<usize>,
+    namespace_name: String,
+    namespace_uri_len: usize,
     position: Position,
     callback_bytes: usize,
     inline: [u8; INLINE_TEXT_BYTES],
@@ -50,6 +53,7 @@ impl AdapterFrame {
     pub(crate) fn finish(self) -> RecyclingToken {
         drop(self.bytes);
         drop(self.attributes);
+        drop(self.namespace_name);
         self.generation
     }
 
@@ -59,6 +63,8 @@ impl AdapterFrame {
             bytes: Vec::new_in(allocator),
             attributes: Vec::new_in(allocator),
             name: 0..0,
+            namespace_name: String::new_in(allocator),
+            namespace_uri_len: 0,
             position: Position::default(),
             callback_bytes: 0,
             inline: [0; INLINE_TEXT_BYTES],
@@ -79,6 +85,17 @@ impl AdapterFrame {
             self.bytes.clear();
         }
         self.attributes.clear();
+        // Keep a validated URI prefix across intervening Start/End/Text frames.
+        // The separate name buffer shares the aggregate recycling reservation.
+        if self.namespace_name.capacity() > MAX_ARENA_BYTES {
+            self.namespace_name = String::new_in(self.namespace_name.allocator());
+            self.namespace_uri_len = 0;
+        }
+    }
+
+    /// Reserve the common arena ceiling together with any retained namespace cache.
+    pub(crate) fn reservation_bytes(&self) -> usize {
+        RETAINED_ARENA_BYTES + self.namespace_name.capacity()
     }
 
     pub(crate) fn prepare(&mut self, count: usize) -> Result<(), AllocError> {
@@ -203,6 +220,82 @@ impl AdapterFrame {
         Ok(())
     }
 
+    /// Build a namespaced callback spelling while retaining a reusable URI prefix.
+    /// This buffer remains owned by the frame throughout callback delivery.
+    pub(crate) fn set_expanded_name(
+        &mut self,
+        uri: &str,
+        local: &str,
+        prefix: Option<&str>,
+        separator: char,
+        triplets: bool,
+    ) -> Result<(), AllocError> {
+        debug_assert!(!self.active && matches!(self.payload, Payload::Start));
+        debug_assert!(!uri.as_bytes().contains(&0) && !local.as_bytes().contains(&0));
+        let mut encoded_separator = [0; 4];
+        let separator = if separator == '\0' {
+            ""
+        } else {
+            separator.encode_utf8(&mut encoded_separator)
+        };
+        let prefix = prefix.filter(|_| triplets && !separator.is_empty());
+        let name_len = uri
+            .len()
+            .checked_add(separator.len())
+            .and_then(|len| len.checked_add(local.len()))
+            .and_then(|len| {
+                len.checked_add(prefix.map_or(0, |prefix| separator.len() + prefix.len()))
+            })
+            .ok_or(AllocError::CapacityOverflow)?;
+        let required = name_len
+            .checked_add(1)
+            .ok_or(AllocError::CapacityOverflow)?;
+        if required > MAX_ARENA_BYTES {
+            return Err(AllocError::CapacityOverflow);
+        }
+        let count = self
+            .callback_bytes
+            .checked_add(name_len)
+            .ok_or(AllocError::CapacityOverflow)?;
+        let same_uri = self.namespace_uri_len == uri.len()
+            && self.namespace_name.as_bytes().get(..uri.len()) == Some(uri.as_bytes());
+        if same_uri {
+            self.namespace_name.truncate(uri.len());
+        } else {
+            self.namespace_name.clear();
+            self.namespace_uri_len = 0;
+        }
+        let additional = required - self.namespace_name.len();
+        if required > self.namespace_name.capacity()
+            && self.namespace_name.capacity() > MAX_ARENA_BYTES / 2
+        {
+            self.namespace_name
+                .try_reserve_exact(MAX_ARENA_BYTES - self.namespace_name.len())?;
+        } else {
+            self.namespace_name.try_reserve(additional)?;
+        }
+        if !same_uri {
+            self.namespace_name.try_push_str(uri)?;
+            self.namespace_uri_len = uri.len();
+        }
+        self.namespace_name.try_push_str(separator)?;
+        self.namespace_name.try_push_str(local)?;
+        if let Some(prefix) = prefix {
+            self.namespace_name.try_push_str(separator)?;
+            self.namespace_name.try_push_str(prefix)?;
+        }
+        self.namespace_name.try_push('\0')?;
+        self.callback_bytes = count;
+        self.payload = Payload::NamespaceStart;
+        Ok(())
+    }
+
+    /// Borrow the prepared UTF-8 name while constructing its retained stack owner.
+    pub(crate) fn prepared_expanded_name(&self) -> &str {
+        debug_assert!(matches!(self.payload, Payload::NamespaceStart));
+        &self.namespace_name[..self.namespace_name.len() - 1]
+    }
+
     /// Detach the opening element's name without displacing the reusable arena.
     pub(crate) fn prepare_end(&mut self, name: String) {
         debug_assert!(!self.active && self.attributes.is_empty());
@@ -262,7 +355,7 @@ impl AdapterFrame {
             return None;
         }
         match self.payload {
-            Payload::Start | Payload::End(_) => None,
+            Payload::Start | Payload::NamespaceStart | Payload::End(_) => None,
             Payload::InlineText => Some(&self.inline[..self.callback_bytes]),
             Payload::HeapText => Some(self.bytes.as_slice()),
             Payload::NativeText { .. } => panic!("C-context Text requires the host range resolver"),
@@ -290,7 +383,11 @@ impl AdapterFrame {
             !matches!(self.payload, Payload::NativeText { .. }),
             "C-context Text has no name bytes"
         );
-        &self.bytes.as_slice()[self.name.clone()]
+        if matches!(self.payload, Payload::NamespaceStart) {
+            self.namespace_name.as_bytes()
+        } else {
+            &self.bytes.as_slice()[self.name.clone()]
+        }
     }
 
     /// Attribute name/value bytes including each final NUL, in source order.
@@ -317,6 +414,83 @@ impl AdapterFrame {
 mod tests {
     use super::*;
     use crate::{Config, Parser};
+
+    #[test]
+    fn namespace_name_cache_survives_other_payloads_and_bounds_growth() {
+        let mut parser = Parser::new(Config::default());
+        let mut frame = parser.adapter_frame();
+        assert_eq!(frame.reservation_bytes(), RETAINED_ARENA_BYTES);
+        // Start with an odd capacity above half the bound to exercise capped growth.
+        frame.namespace_name.try_reserve_exact(3001).unwrap();
+        for separator in ['\0', '|', ':', 'λ'] {
+            for triplets in [false, true] {
+                for uri in ["urn:a", "urn:ab", "urn:ac", "urn:a", "urn:π"] {
+                    for local in ["long_local_name", "n", "é"] {
+                        frame.clear();
+                        frame.prepare(1).unwrap();
+                        frame.push_attribute("a", "value").unwrap();
+                        let pointer = frame.namespace_name.as_bytes().as_ptr();
+                        frame
+                            .set_expanded_name(uri, local, Some("p"), separator, triplets)
+                            .unwrap();
+                        let mut expected = uri.to_owned();
+                        if separator != '\0' {
+                            expected.push(separator);
+                        }
+                        expected.push_str(local);
+                        if triplets && separator != '\0' {
+                            expected.push(separator);
+                            expected.push('p');
+                        }
+                        assert_eq!(frame.prepared_expanded_name(), expected);
+                        assert_eq!(frame.callback_bytes(), expected.len() + 6);
+                        expected.push('\0');
+                        assert_eq!(frame.name_bytes(), expected.as_bytes());
+                        assert_eq!(frame.namespace_name.as_bytes().as_ptr(), pointer);
+                        assert_eq!(frame.namespace_uri_len, uri.len());
+                        assert_eq!(frame.namespace_name.capacity(), 3001);
+                        assert!(!frame.is_active());
+                        frame.publish(Position::default());
+                        assert_eq!(frame.text_bytes(), None);
+                        frame.clear();
+                        frame.prepare_text("text").unwrap();
+                        frame.publish(Position::default());
+                        assert_eq!(frame.text_bytes(), Some(b"text".as_slice()));
+                        frame.clear();
+                        frame.prepare(0).unwrap();
+                        frame.set_name("plain").unwrap();
+                        assert_eq!(frame.name_bytes(), b"plain\0");
+                        assert_eq!(frame.namespace_name.as_bytes(), expected.as_bytes());
+                    }
+                }
+            }
+        }
+        for length in [3002, 4093, 4094] {
+            frame.clear();
+            frame
+                .set_expanded_name("u", &"n".repeat(length), None, '\0', false)
+                .unwrap();
+            assert!(frame.namespace_name.capacity() <= MAX_ARENA_BYTES);
+            assert_eq!(frame.prepared_expanded_name().len(), length + 1);
+            assert_eq!(
+                frame.reservation_bytes(),
+                RETAINED_ARENA_BYTES + frame.namespace_name.capacity()
+            );
+        }
+        frame.clear();
+        assert!(matches!(
+            frame.set_expanded_name("u", &"n".repeat(4095), None, '\0', false),
+            Err(AllocError::CapacityOverflow)
+        ));
+        assert!(!frame.is_active());
+        assert_eq!(frame.name_bytes(), b"");
+        frame.clear();
+        frame
+            .set_expanded_name("u", "last", None, '|', false)
+            .unwrap();
+        assert_eq!(frame.name_bytes(), b"u|last\0");
+        parser.finish_adapter_frame(frame);
+    }
 
     #[test]
     fn warmed_literal_spans_keep_byte_ranges_and_capacity() {
@@ -562,9 +736,10 @@ mod tests {
                 (b"b\0".as_slice(), b"more\0".as_slice()),
             ]
         );
-        let retained =
-            frame.bytes.capacity() + frame.attributes.capacity() * size_of::<ArenaAttribute>();
-        assert!(retained <= RETAINED_ARENA_BYTES);
+        let retained = frame.bytes.capacity()
+            + frame.namespace_name.capacity()
+            + frame.attributes.capacity() * size_of::<ArenaAttribute>();
+        assert!(retained <= frame.reservation_bytes());
         parser.feed(text.as_bytes(), false).unwrap();
         parser
             .next_event_for_c_text_context_into(&mut event, &mut frame)
@@ -620,11 +795,13 @@ mod tests {
         assert_eq!(frame.name_bytes(), b"n\0");
         assert_eq!(frame.bytes.len(), 3476);
         assert_eq!(frame.attributes.len(), MAX_ARENA_ATTRIBUTES);
-        let retained =
-            frame.bytes.capacity() + frame.attributes.capacity() * size_of::<ArenaAttribute>();
+        let retained = frame.bytes.capacity()
+            + frame.namespace_name.capacity()
+            + frame.attributes.capacity() * size_of::<ArenaAttribute>();
         assert!(
-            retained <= RETAINED_ARENA_BYTES,
-            "active frame retains {retained} bytes against its {RETAINED_ARENA_BYTES}-byte reservation"
+            retained <= frame.reservation_bytes(),
+            "active frame retains {retained} bytes against its {}-byte reservation",
+            frame.reservation_bytes()
         );
         parser.finish_adapter_frame(frame);
     }

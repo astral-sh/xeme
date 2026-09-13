@@ -4127,6 +4127,7 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
         parser: XML_Parser,
         starts: usize,
         name: &'static [u8],
+        triplets_after_first: Option<bool>,
         raw: Vec<String>,
         ends: Vec<String>,
     }
@@ -4168,13 +4169,23 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
             let context = XML_GetInputContext(parser, &mut offset, &mut size);
             assert!(!context.is_null());
             let context = std::slice::from_raw_parts(context.cast::<u8>(), size as usize);
-            assert!(context[offset as usize..].starts_with(b"<n a="));
+            assert!(
+                context[offset as usize..].starts_with((*state).raw.last().unwrap().as_bytes())
+            );
             assert_eq!(XML_SetBase(parser, c"changed".as_ptr()), OK);
             XML_ParserFree(parser);
             assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
             assert_eq!(XML_Parse(parser, c"<reenter/>".as_ptr(), 10, 1), ERROR);
             assert_eq!(CStr::from_ptr(name).to_bytes(), (*state).name);
             assert_eq!(CStr::from_ptr(*attrs.add(1)).to_bytes(), value);
+            if (*state).starts == 1
+                && let Some(enabled) = (*state).triplets_after_first
+            {
+                // The C setter ignores changes once parsing has begun. The
+                // current callback and later cached names keep the initial mode.
+                XML_SetReturnNSTriplet(parser, c_int::from(enabled));
+                assert_eq!(CStr::from_ptr(name).to_bytes(), (*state).name);
+            }
             if (*state).starts == 2 {
                 assert_eq!(XML_GetSpecifiedAttributeCount(parser), 4);
                 assert_eq!(CStr::from_ptr(*attrs.add(3)).to_bytes(), b"more");
@@ -4186,34 +4197,78 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
     }
     // SAFETY: Each parser and state stays live through its callbacks and resumes.
     unsafe {
-        for (input, namespace, name, expected_ends, second_raw) in [
+        for (input, namespace, name, triplets_after_first, expected_ends, first_raw, second_raw) in [
             (
                 b"<r><n a='first'/><n a='second' b='more'/></r>".as_slice(),
                 false,
                 b"n".as_slice(),
+                None,
                 ["n", "r"],
+                "<n a='first'/>",
                 "<n a='second' b='more'/>",
             ),
             (
                 b"<r><n a='first'/><n a='second' b='more'></n></r>".as_slice(),
                 false,
                 b"n".as_slice(),
+                None,
                 ["n", "r"],
+                "<n a='first'/>",
                 "<n a='second' b='more'>",
             ),
             (
                 b"<r><n a='first'/><n a='second' b='more'></n></r>".as_slice(),
                 true,
                 b"n".as_slice(),
+                None,
                 ["n", "r"],
+                "<n a='first'/>",
                 "<n a='second' b='more'>",
             ),
             (
                 b"<r xmlns='urn'><n a='first'/><n a='second' b='more'/></r>".as_slice(),
                 true,
                 b"urn|n".as_slice(),
+                None,
                 ["urn|n", "urn|r"],
+                "<n a='first'/>",
                 "<n a='second' b='more'/>",
+            ),
+            (
+                b"<r xmlns='urn'><n a='first'/><n a='second' b='more'></n></r>".as_slice(),
+                true,
+                b"urn|n".as_slice(),
+                None,
+                ["urn|n", "urn|r"],
+                "<n a='first'/>",
+                "<n a='second' b='more'>",
+            ),
+            (
+                b"<r xmlns:p='urn'><p:n a='first'/><p:n a='second' b='more'></p:n></r>".as_slice(),
+                true,
+                b"urn|n".as_slice(),
+                None,
+                ["urn|n", "r"],
+                "<p:n a='first'/>",
+                "<p:n a='second' b='more'>",
+            ),
+            (
+                b"<r xmlns:p='urn'><p:n a='first'/><p:n a='second' b='more'></p:n></r>".as_slice(),
+                true,
+                b"urn|n".as_slice(),
+                Some(true),
+                ["urn|n", "r"],
+                "<p:n a='first'/>",
+                "<p:n a='second' b='more'>",
+            ),
+            (
+                b"<r xmlns:p='urn'><p:n a='first'/><p:n a='second' b='more'></p:n></r>".as_slice(),
+                true,
+                b"urn|n|p".as_slice(),
+                Some(false),
+                ["urn|n|p", "r"],
+                "<p:n a='first'/>",
+                "<p:n a='second' b='more'>",
             ),
         ] {
             for width in [1, 7, input.len()] {
@@ -4225,8 +4280,12 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
                 let mut state = ArenaState {
                     parser,
                     name,
+                    triplets_after_first,
                     ..ArenaState::default()
                 };
+                if let Some(enabled) = triplets_after_first {
+                    XML_SetReturnNSTriplet(parser, c_int::from(!enabled));
+                }
                 XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
                 XML_SetStartElementHandler(parser, Some(start));
                 XML_SetDefaultHandler(parser, Some(raw));
@@ -4242,8 +4301,8 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
                         assert_eq!(
                             XML_GetCurrentByteIndex(parser) as usize,
                             input
-                                .windows(b"<n a='second'".len())
-                                .position(|value| value == b"<n a='second'")
+                                .windows(second_raw.len())
+                                .position(|value| value == second_raw.as_bytes())
                                 .unwrap()
                         );
                         let raw_count = state.raw.len();
@@ -4261,7 +4320,7 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
                         .iter()
                         .filter(|value| !value.is_empty())
                         .collect::<Vec<_>>(),
-                    [&"<n a='first'/>".to_owned(), &second_raw.to_owned()]
+                    [&first_raw.to_owned(), &second_raw.to_owned()]
                 );
                 assert_eq!(state.ends, expected_ends);
                 XML_ParserFree(parser);

@@ -149,7 +149,7 @@ jobs:
           docker run --rm --network=none \
             -v "$RUNNER_TEMP/pbs-extracted/python:/python:ro" \
             -v "$GITHUB_WORKSPACE/integration/python-build-standalone:/checks:ro" \
-            -v "$GITHUB_WORKSPACE/tools/cpython:/checks/cpython:ro" \
+            -v "$GITHUB_WORKSPACE/tools/cpython:/cpython-checks:ro" \
             -v "$RUNNER_TEMP/pbs-glibc-evidence:/evidence:rw" \
             docker.io/library/centos@sha256:dead07b4d8ed7e29e98de0f4504d87e8880d4347859d839686a31da35a3b532f \
             /python/install/bin/python3.12 -I /checks/test-old-glibc.py \

@@ -1,0 +1,865 @@
+{
+  "schema_version": 1,
+  "label": "frame",
+  "pr": 240,
+  "pr_url": "https://github.com/astral-sh/xeme/pull/240",
+  "status": "complete",
+  "builds": {
+    "candidate": {
+      "receipt": {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/committed-build/build.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "ee0531c746f54fa588a2481acaf8ce3c50e1bbc263f81c466b2c8843644291c6",
+        "archive_member": "study/frame/committed-build/build.json",
+        "archive_membership": "under study root"
+      },
+      "status": "passed",
+      "revision": "49352b61dd688a16fd3252b6cba2d68225a94363",
+      "checkout": "/home/dev-user/.codex/worktrees/xeme-perf-frame",
+      "compiler": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+      "target": "x86_64-unknown-linux-gnu",
+      "command": [
+        "cargo",
+        "+ohm",
+        "-Zohm-defaults=no",
+        "rustc",
+        "--locked",
+        "--release",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--manifest-path",
+        "/home/dev-user/.codex/worktrees/xeme-perf-frame/Cargo.toml",
+        "--target-dir",
+        "/home/dev-user/.cache/xeme-targets/perf-frame",
+        "--config",
+        "profile.release.opt-level=3",
+        "--config",
+        "profile.release.lto=\"thin\"",
+        "--config",
+        "profile.release.codegen-units=1",
+        "-p",
+        "xeme_expat",
+        "--crate-type",
+        "cdylib,staticlib",
+        "--message-format=json-render-diagnostics",
+        "-vv"
+      ],
+      "rustflags": "-Ctarget-cpu=x86-64",
+      "library": "/tmp/xeme-perf-prs-20260913/frame/committed-build/libxeme_expat.so",
+      "library_sha256": "fa0c0c74d06f5fe9097e51517a1445027db9efbd5f5ed5434f749dcf66fb263f",
+      "builder_sha256": "cbe1e9cacbcc16a5ed3336369932152ea092ad77c8d4f8c6ab9e6a94989e450a",
+      "cargo_messages_sha256": "d2df779ba1ad2c247d22c2fded78eba7af5357777ec0d1d9eac6da5fbd89f0c8",
+      "source_files_recorded": 78
+    },
+    "baseline": {
+      "receipt": {
+        "path": "/tmp/xeme-perf-prs-20260913/baseline/build.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "add3fe7e4b9ff29bbd38df41c56e803acd926c2cf815108fa122da43769476c3",
+        "archive_member": "study/baseline/build.json",
+        "archive_membership": "under study root"
+      },
+      "status": "passed",
+      "revision": "377e2d6fdc4e7d22cf1043277089f1df0c2e3df6",
+      "checkout": "/home/dev-user/.codex/worktrees/443e/oriole",
+      "compiler": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+      "target": "x86_64-unknown-linux-gnu",
+      "command": [
+        "cargo",
+        "+ohm",
+        "-Zohm-defaults=no",
+        "rustc",
+        "--locked",
+        "--release",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--manifest-path",
+        "/home/dev-user/.codex/worktrees/443e/oriole/Cargo.toml",
+        "--target-dir",
+        "/home/dev-user/.cache/xeme-targets/443e-oriole",
+        "--config",
+        "profile.release.opt-level=3",
+        "--config",
+        "profile.release.lto=\"thin\"",
+        "--config",
+        "profile.release.codegen-units=1",
+        "-p",
+        "xeme_expat",
+        "--crate-type",
+        "cdylib,staticlib",
+        "--message-format=json-render-diagnostics",
+        "-vv"
+      ],
+      "rustflags": "-Ctarget-cpu=x86-64",
+      "library": "/tmp/xeme-perf-prs-20260913/baseline/libxeme_expat.so",
+      "library_sha256": "8b845689276e805fe29578d6163b60ca30e5f4e9cd3968a3adb1ea668ccff584",
+      "builder_sha256": "cbe1e9cacbcc16a5ed3336369932152ea092ad77c8d4f8c6ab9e6a94989e450a",
+      "cargo_messages_sha256": "383f8940a411196a5c294efb62847d47fa6f9c2887ae776c1fbc3498fd197695",
+      "source_files_recorded": 78
+    }
+  },
+  "expat": {
+    "receipt": {
+      "path": "/tmp/oriole-pgo-study/expat-control-build.json",
+      "path_role": "original local provenance",
+      "exists": true,
+      "sha256": "88445a98ce2f5c8bb9825c89f24078b8c1f04032723266e4b0211e45646cf319",
+      "archive_member": "control/expat/build.json",
+      "archive_membership": "explicit packaging mapping; original path retained as provenance"
+    },
+    "status": "passed",
+    "library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+    "compiler_target": "x86_64-linux-gnu",
+    "method": "Keep pinned Expat2.8.4 normal GCC13.3 -O3/NDEBUG/shared/no-LTO feature context; GCC13 native instrumentation data, not LLVM profdata. Profiles use relative build paths via -fprofile-prefix-path. Compare within engine before cross-engine normal/PGO comparison.",
+    "source_manifest_sha256": "92133e7fbd744a78af56dcea0465ace63b9cd84e198386515106e85b1d1e68db",
+    "normal_config_sha256": "ec397da0c61b6bab207c7aba9f830b5e69f79c8462e58d97c6e6891c87c44a4d",
+    "generated_config_sha256": "ec397da0c61b6bab207c7aba9f830b5e69f79c8462e58d97c6e6891c87c44a4d"
+  },
+  "consumers": {
+    "receipt": {
+      "path": "/tmp/xeme-perf-prs-20260913/frame/consumers/build.json",
+      "path_role": "original local provenance",
+      "exists": true,
+      "sha256": "190add7e979042c617db4648dd0575ccbe6e00b71b9b943f7b31cba7f3f0756a",
+      "archive_member": "study/frame/consumers/build.json",
+      "archive_membership": "under study root"
+    },
+    "status": "passed",
+    "cpython_revision": "3bb231a6a5dc02b95658877318bf61501a7209e9",
+    "python": "3.12.13 (main, Aug  7 2026, 02:25:39) [Clang 22.1.3 ]",
+    "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+    "adaptations": null,
+    "method": "All engines compile identical unmodified CPython 3.12.13 pyexpat.c and _elementtree.c with identical -O2 flags and the same narrow Expat-compatible header. Only the linked parser library and its rpath differ. No source adaptation, alternate allocator, LTO or PGO is applied."
+  },
+  "validation": {
+    "source": {
+      "path": "/tmp/xeme-perf-prs-20260913/frame/validation-summary.json",
+      "path_role": "original local provenance",
+      "exists": true,
+      "sha256": "aa08b79f0983200e646882ce0022adaa974786b35f76d5c58afbf8cd7915afd6",
+      "archive_member": "study/frame/validation-summary.json",
+      "archive_membership": "under study root"
+    },
+    "suites": {
+      "api": {
+        "suite": "api",
+        "passed": true,
+        "library_sha256": {
+          "xeme": "fa0c0c74d06f5fe9097e51517a1445027db9efbd5f5ed5434f749dcf66fb263f",
+          "reference": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+        },
+        "baseline_sha256": "08a1d748395f594ce4751bd4390dbfe2f972a30150028f6b0b1fbe7cba1ea5c2",
+        "engines": {
+          "xeme": {
+            "passed": true,
+            "configurations": 4740,
+            "known_failures": 509,
+            "regressions": [],
+            "improvements": []
+          },
+          "reference": {
+            "passed": true,
+            "configurations": 4740,
+            "known_failures": 0,
+            "regressions": [],
+            "improvements": []
+          }
+        }
+      },
+      "w3c": {
+        "suite": "w3c",
+        "passed": true,
+        "library_sha256": {
+          "xeme": "fa0c0c74d06f5fe9097e51517a1445027db9efbd5f5ed5434f749dcf66fb263f",
+          "reference": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+        },
+        "baseline_sha256": "08a1d748395f594ce4751bd4390dbfe2f972a30150028f6b0b1fbe7cba1ea5c2",
+        "rows_per_engine": 6003,
+        "conformance_failures": {
+          "reference": 960,
+          "xeme": 960
+        },
+        "differences": [],
+        "improvements": {
+          "reference": [],
+          "xeme": []
+        }
+      },
+      "differential": {
+        "suite": "differential",
+        "passed": true,
+        "library_sha256": {
+          "xeme": "fa0c0c74d06f5fe9097e51517a1445027db9efbd5f5ed5434f749dcf66fb263f",
+          "reference": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+        },
+        "baseline_sha256": "08a1d748395f594ce4751bd4390dbfe2f972a30150028f6b0b1fbe7cba1ea5c2"
+      },
+      "cpython": {
+        "cpython_revision": "3bb231a6a5dc02b95658877318bf61501a7209e9",
+        "python": "3.12.13 (main, Aug  7 2026, 02:25:39) [Clang 22.1.3 ]",
+        "linkage": "shared",
+        "library_sha256": "fa0c0c74d06f5fe9097e51517a1445027db9efbd5f5ed5434f749dcf66fb263f",
+        "probe_exit_code": 0,
+        "origin_exit_code": 0,
+        "tests_exit_code": 2,
+        "gate_exit_code": 0,
+        "text_fragmentation": {
+          "allowed_assertions": [
+            "test1 (test.test_pyexpat.BufferTextTest.test1)",
+            "test_handlers (test.test_sax.CDATAHandlerTest.test_handlers)"
+          ],
+          "semantic_exit_code": 0,
+          "inventory_case_count": 803,
+          "inventory_complete": true
+        }
+      }
+    },
+    "workspace": [
+      {
+        "log": "workspace-tests.log",
+        "passed": 522,
+        "groups": 37,
+        "failed": 0
+      },
+      {
+        "log": "targeted-tests.log",
+        "passed": 2,
+        "groups": 2,
+        "failed": 0
+      }
+    ]
+  },
+  "epochs": [
+    {
+      "epoch": 1,
+      "reported_status": "passed",
+      "raw_directory": "/tmp/xeme-perf-prs-20260913/frame/epoch-1",
+      "report": {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/epoch-1/report.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "df80974813d1c48fab7980ac6e4c4e99bd82064abd7c9ede110a1dbfffc37e41",
+        "archive_member": "study/frame/epoch-1/report.json",
+        "archive_membership": "under study root"
+      },
+      "conditions_csv": {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/epoch-1/conditions.csv",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "e2dcb59c57eb548a62823cdbb27abafd37b3450ec8575b23034d3afb89604e3b",
+        "archive_member": "study/frame/epoch-1/conditions.csv",
+        "archive_membership": "under study root"
+      },
+      "groups": {
+        "native-tuning": {
+          "expected_conditions": 24,
+          "observed_conditions": 24,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9803123286381705,
+            "candidate_over_expat": 1.176186175948387,
+            "conditions": 24
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 5,
+          "candidate_over_baseline": 0.9803123286381705,
+          "candidate_over_expat": 1.176186175948387,
+          "status": "passed"
+        },
+        "native-holdout": {
+          "expected_conditions": 20,
+          "observed_conditions": 20,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9810142375151316,
+            "candidate_over_expat": 1.7643153459296288,
+            "conditions": 20
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 5,
+          "candidate_over_baseline": 0.9810142375151316,
+          "candidate_over_expat": 1.7643153459296288,
+          "status": "passed"
+        },
+        "native-generated": {
+          "expected_conditions": 16,
+          "observed_conditions": 16,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 1.002714979227783,
+            "candidate_over_expat": 1.4723064705432105,
+            "conditions": 16
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 7,
+          "candidate_over_baseline": 1.002714979227783,
+          "candidate_over_expat": 1.4723064705432105,
+          "status": "passed"
+        },
+        "python-tuning": {
+          "expected_conditions": 24,
+          "observed_conditions": 24,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.995051049716335,
+            "candidate_over_expat": 1.0468664043545348,
+            "conditions": 24
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 11,
+          "candidate_over_baseline": 0.995051049716335,
+          "candidate_over_expat": 1.0468664043545348,
+          "status": "passed"
+        },
+        "python-holdout": {
+          "expected_conditions": 20,
+          "observed_conditions": 20,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9962610440997071,
+            "candidate_over_expat": 1.2316247292258358,
+            "conditions": 20
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 7,
+          "candidate_over_baseline": 0.9962610440997071,
+          "candidate_over_expat": 1.2316247292258358,
+          "status": "passed"
+        }
+      },
+      "issues": [],
+      "method": {
+        "pairs": 7,
+        "native_iterations": 20,
+        "python_iterations": 10,
+        "cpu": 0,
+        "evaluation": "Known tuning and observed holdout regression corpora, reported separately; no independent holdout claim."
+      },
+      "status": "passed",
+      "raw_directory_role": "original local provenance",
+      "raw_archive_directory": "study/frame/epoch-1"
+    },
+    {
+      "epoch": 2,
+      "reported_status": "passed",
+      "raw_directory": "/tmp/xeme-perf-prs-20260913/frame/epoch-2",
+      "report": {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/epoch-2/report.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "63035dfd02dd6cb18b98d81f14fc446319bc31a2838e7441b26235a9e0484274",
+        "archive_member": "study/frame/epoch-2/report.json",
+        "archive_membership": "under study root"
+      },
+      "conditions_csv": {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/epoch-2/conditions.csv",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "f522be526805a67efe99c20686ab6f6605a5a93a35c5cf02669258ff8e187c5a",
+        "archive_member": "study/frame/epoch-2/conditions.csv",
+        "archive_membership": "under study root"
+      },
+      "groups": {
+        "native-tuning": {
+          "expected_conditions": 24,
+          "observed_conditions": 24,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9819370556344905,
+            "candidate_over_expat": 1.17115100771538,
+            "conditions": 24
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 5,
+          "candidate_over_baseline": 0.9819370556344905,
+          "candidate_over_expat": 1.17115100771538,
+          "status": "passed"
+        },
+        "native-holdout": {
+          "expected_conditions": 20,
+          "observed_conditions": 20,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9774234625745685,
+            "candidate_over_expat": 1.771106257114942,
+            "conditions": 20
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 3,
+          "candidate_over_baseline": 0.9774234625745685,
+          "candidate_over_expat": 1.771106257114942,
+          "status": "passed"
+        },
+        "native-generated": {
+          "expected_conditions": 16,
+          "observed_conditions": 16,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9971440157493019,
+            "candidate_over_expat": 1.4842937117911807,
+            "conditions": 16
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 7,
+          "candidate_over_baseline": 0.9971440157493019,
+          "candidate_over_expat": 1.4842937117911807,
+          "status": "passed"
+        },
+        "python-tuning": {
+          "expected_conditions": 24,
+          "observed_conditions": 24,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9922546636051306,
+            "candidate_over_expat": 1.0488998476331597,
+            "conditions": 24
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 4,
+          "candidate_over_baseline": 0.9922546636051306,
+          "candidate_over_expat": 1.0488998476331597,
+          "status": "passed"
+        },
+        "python-holdout": {
+          "expected_conditions": 20,
+          "observed_conditions": 20,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9943166609465799,
+            "candidate_over_expat": 1.2218343026927936,
+            "conditions": 20
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 7,
+          "candidate_over_baseline": 0.9943166609465799,
+          "candidate_over_expat": 1.2218343026927936,
+          "status": "passed"
+        }
+      },
+      "issues": [],
+      "method": {
+        "pairs": 7,
+        "native_iterations": 20,
+        "python_iterations": 10,
+        "cpu": 0,
+        "evaluation": "Known tuning and observed holdout regression corpora, reported separately; no independent holdout claim."
+      },
+      "status": "passed",
+      "raw_directory_role": "original local provenance",
+      "raw_archive_directory": "study/frame/epoch-2"
+    }
+  ],
+  "targeted_slices": [
+    {
+      "epoch": 1,
+      "name": "Qt / native",
+      "conditions": 4,
+      "candidate_over_baseline": 1.0029524880693694,
+      "candidate_over_expat": 3.1056816344132736
+    },
+    {
+      "epoch": 1,
+      "name": "LibreOffice / native",
+      "conditions": 4,
+      "candidate_over_baseline": 1.0053695851140505,
+      "candidate_over_expat": 2.6617871361498224
+    },
+    {
+      "epoch": 1,
+      "name": "Qt / ElementTree",
+      "conditions": 2,
+      "candidate_over_baseline": 1.0147999907736793,
+      "candidate_over_expat": 1.9346823895101384
+    },
+    {
+      "epoch": 1,
+      "name": "LibreOffice / ElementTree",
+      "conditions": 2,
+      "candidate_over_baseline": 1.0123567995406706,
+      "candidate_over_expat": 1.8601238974802758
+    },
+    {
+      "epoch": 1,
+      "name": "Generated namespaces / namespaces on",
+      "conditions": 2,
+      "candidate_over_baseline": 1.0219295172271783,
+      "candidate_over_expat": 3.152430080495265
+    },
+    {
+      "epoch": 1,
+      "name": "Generated references",
+      "conditions": 4,
+      "candidate_over_baseline": 0.9926765195609104,
+      "candidate_over_expat": 2.3706835514939595
+    },
+    {
+      "epoch": 1,
+      "name": "Generated elements",
+      "conditions": 4,
+      "candidate_over_baseline": 1.0110794104819012,
+      "candidate_over_expat": 1.7059184562259
+    },
+    {
+      "epoch": 1,
+      "name": "Generated plain text",
+      "conditions": 4,
+      "candidate_over_baseline": 0.9791808237199232,
+      "candidate_over_expat": 0.5120556290569277
+    },
+    {
+      "epoch": 1,
+      "name": "Tuning / native namespaces on",
+      "conditions": 12,
+      "candidate_over_baseline": 0.9815055681066279,
+      "candidate_over_expat": 1.227544022126036
+    },
+    {
+      "epoch": 1,
+      "name": "Observed holdout / native namespaces on",
+      "conditions": 10,
+      "candidate_over_baseline": 0.9794715447948409,
+      "candidate_over_expat": 1.7880101235591948
+    },
+    {
+      "epoch": 2,
+      "name": "Qt / native",
+      "conditions": 4,
+      "candidate_over_baseline": 1.0025693447106783,
+      "candidate_over_expat": 3.153688450909479
+    },
+    {
+      "epoch": 2,
+      "name": "LibreOffice / native",
+      "conditions": 4,
+      "candidate_over_baseline": 0.9886451497458073,
+      "candidate_over_expat": 2.631065786708062
+    },
+    {
+      "epoch": 2,
+      "name": "Qt / ElementTree",
+      "conditions": 2,
+      "candidate_over_baseline": 1.0032897174125581,
+      "candidate_over_expat": 1.911601238781961
+    },
+    {
+      "epoch": 2,
+      "name": "LibreOffice / ElementTree",
+      "conditions": 2,
+      "candidate_over_baseline": 1.0051164835513575,
+      "candidate_over_expat": 1.8391114619568032
+    },
+    {
+      "epoch": 2,
+      "name": "Generated namespaces / namespaces on",
+      "conditions": 2,
+      "candidate_over_baseline": 1.015762588552526,
+      "candidate_over_expat": 3.1751246300219425
+    },
+    {
+      "epoch": 2,
+      "name": "Generated references",
+      "conditions": 4,
+      "candidate_over_baseline": 0.9848886297089273,
+      "candidate_over_expat": 2.3741028151463865
+    },
+    {
+      "epoch": 2,
+      "name": "Generated elements",
+      "conditions": 4,
+      "candidate_over_baseline": 1.0037542488264346,
+      "candidate_over_expat": 1.7476758445203169
+    },
+    {
+      "epoch": 2,
+      "name": "Generated plain text",
+      "conditions": 4,
+      "candidate_over_baseline": 0.9784402726961817,
+      "candidate_over_expat": 0.5130428926271425
+    },
+    {
+      "epoch": 2,
+      "name": "Tuning / native namespaces on",
+      "conditions": 12,
+      "candidate_over_baseline": 0.9845903364680294,
+      "candidate_over_expat": 1.2224444431730515
+    },
+    {
+      "epoch": 2,
+      "name": "Observed holdout / native namespaces on",
+      "conditions": 10,
+      "candidate_over_baseline": 0.9782463432475373,
+      "candidate_over_expat": 1.7971811973292668
+    }
+  ],
+  "interpretation_notes": [],
+  "repeated_regressions": [
+    {
+      "group": "native-generated",
+      "condition": "namespaces/65536/namespaces-0",
+      "epoch_1_percent": 3.519492437965588,
+      "epoch_2_percent": 3.907843733663996
+    },
+    {
+      "group": "native-generated",
+      "condition": "namespaces/4096/namespaces-0",
+      "epoch_1_percent": 3.550538407664572,
+      "epoch_2_percent": 1.7883501861174933
+    },
+    {
+      "group": "native-generated",
+      "condition": "namespaces/4096/namespaces-1",
+      "epoch_1_percent": 1.673497108977684,
+      "epoch_2_percent": 1.6156713529887679
+    },
+    {
+      "group": "native-generated",
+      "condition": "namespaces/65536/namespaces-1",
+      "epoch_1_percent": 2.7150602541790025,
+      "epoch_2_percent": 1.5368616439870975
+    },
+    {
+      "group": "native-generated",
+      "condition": "elements/65536/namespaces-1",
+      "epoch_1_percent": 1.896972095364191,
+      "epoch_2_percent": 1.3540969526453672
+    },
+    {
+      "group": "python-holdout",
+      "condition": "qt/65536/elementtree",
+      "epoch_1_percent": 1.370019145501633,
+      "epoch_2_percent": 0.9897867280863171
+    },
+    {
+      "group": "native-tuning",
+      "condition": "batik/65536/namespaces-0",
+      "epoch_1_percent": 0.7108713833027691,
+      "epoch_2_percent": 0.6990241576235512
+    },
+    {
+      "group": "python-tuning",
+      "condition": "batik/65536/elementtree",
+      "epoch_1_percent": 1.7466301709445853,
+      "epoch_2_percent": 0.4519720055556897
+    },
+    {
+      "group": "python-holdout",
+      "condition": "libreoffice/4096/elementtree",
+      "epoch_1_percent": 2.587022713855891,
+      "epoch_2_percent": 0.40308558509474235
+    },
+    {
+      "group": "native-tuning",
+      "condition": "gtk/65536/namespaces-0",
+      "epoch_1_percent": 0.9150300151859803,
+      "epoch_2_percent": 0.30442993800550155
+    },
+    {
+      "group": "python-tuning",
+      "condition": "gtk/65536/elementtree",
+      "epoch_1_percent": 0.30073165942405833,
+      "epoch_2_percent": 1.301537097446559
+    },
+    {
+      "group": "python-tuning",
+      "condition": "docbook/65536/elementtree",
+      "epoch_1_percent": 0.1442552549789866,
+      "epoch_2_percent": 3.020228882596454
+    },
+    {
+      "group": "python-holdout",
+      "condition": "hadoop/65536/elementtree",
+      "epoch_1_percent": 0.48863090126296527,
+      "epoch_2_percent": 0.10139831845836778
+    },
+    {
+      "group": "native-tuning",
+      "condition": "wayland/65536/namespaces-1",
+      "epoch_1_percent": 0.0909338962520101,
+      "epoch_2_percent": 0.3344298118969524
+    },
+    {
+      "group": "native-generated",
+      "condition": "elements/65536/namespaces-0",
+      "epoch_1_percent": 0.9598615416158918,
+      "epoch_2_percent": 0.04592080309107072
+    },
+    {
+      "group": "native-holdout",
+      "condition": "qt/4096/namespaces-0",
+      "epoch_1_percent": 0.0328898172882619,
+      "epoch_2_percent": 0.5642922524232707
+    },
+    {
+      "group": "native-holdout",
+      "condition": "qt/65536/namespaces-0",
+      "epoch_1_percent": 2.2166564348500506,
+      "epoch_2_percent": 0.02264023896865197
+    }
+  ],
+  "allocations": {
+    "base_engine": "baseline",
+    "raw_directory": "/tmp/xeme-perf-prs-20260913/frame/allocations",
+    "artifacts": [
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/README.md",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "956e7dbb5f3bb0faba90cfbd5a23b9cccdd9ca9e3bb7927a55018809811f9c46",
+        "archive_member": "study/frame/allocations/README.md",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/results.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "243a93976e219134dda4ff2e9b03fb3b1ae6a671a29ec2071ad8f76a0b59f3c5",
+        "archive_member": "study/frame/allocations/results.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/summary.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "1d6b4d77fb1892837d25f122dccfedcef54dff634371c92127449f583ba88b0d",
+        "archive_member": "study/frame/allocations/summary.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/libraries.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "5604dd5f9fdaa446ffdd95605c878b0522afddfe6dc0cdcbfb6adc877809d174",
+        "archive_member": "study/frame/allocations/libraries.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/inputs.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "58bdbbd5ba710128340641b36a268b16be19d7eea7ff3f27b0821fabb72c3cb1",
+        "archive_member": "study/frame/allocations/inputs.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/artifact-hashes.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "347d08346898a9a3bdc86096b7475b72f09e9dbaf288cd9a2f01e07c84dce0d6",
+        "archive_member": "study/frame/allocations/artifact-hashes.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/allocation_driver.c",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "c4c26922ad2a4c783012e54e503b3ced4afdb4f9c975c1ec77e98d96c1dd187f",
+        "archive_member": "study/frame/allocations/allocation_driver.c",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/compile.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "31fdf40b9c10dc9d4cb23f0f80b6dee6bd4f71329840b3c79e523301056d4e78",
+        "archive_member": "study/frame/allocations/compile.json",
+        "archive_membership": "under study root"
+      }
+    ],
+    "summaries": [
+      {
+        "corpus": "tuning",
+        "chunk": 4096,
+        "conditions": 12,
+        "expected_conditions": 12,
+        "missing": [],
+        "requests_geomean_ratio": 0.6930109579276146,
+        "fewer": 12,
+        "equal": 0,
+        "more": 0,
+        "baseline_requested_bytes_total": 3484976,
+        "candidate_requested_bytes_total": 1599880,
+        "peak_requested_bytes_delta_min": 239,
+        "peak_requested_bytes_delta_max": 685
+      },
+      {
+        "corpus": "tuning",
+        "chunk": 65536,
+        "conditions": 12,
+        "expected_conditions": 12,
+        "missing": [],
+        "requests_geomean_ratio": 0.9674186694853039,
+        "fewer": 4,
+        "equal": 8,
+        "more": 0,
+        "baseline_requested_bytes_total": 2638552,
+        "candidate_requested_bytes_total": 2456846,
+        "peak_requested_bytes_delta_min": 175,
+        "peak_requested_bytes_delta_max": 256
+      },
+      {
+        "corpus": "holdout",
+        "chunk": 4096,
+        "conditions": 10,
+        "expected_conditions": 10,
+        "missing": [],
+        "requests_geomean_ratio": 0.5337779742423259,
+        "fewer": 10,
+        "equal": 0,
+        "more": 0,
+        "baseline_requested_bytes_total": 1860390,
+        "candidate_requested_bytes_total": 1473656,
+        "peak_requested_bytes_delta_min": 256,
+        "peak_requested_bytes_delta_max": 434
+      },
+      {
+        "corpus": "holdout",
+        "chunk": 65536,
+        "conditions": 10,
+        "expected_conditions": 10,
+        "missing": [],
+        "requests_geomean_ratio": 0.9300616369354356,
+        "fewer": 10,
+        "equal": 0,
+        "more": 0,
+        "baseline_requested_bytes_total": 3092582,
+        "candidate_requested_bytes_total": 3057204,
+        "peak_requested_bytes_delta_min": 256,
+        "peak_requested_bytes_delta_max": 330
+      }
+    ],
+    "scope": "Separate selected-C-allocator instrumentation; requests and requested bytes are not timing samples, unique allocated bytes, or RSS. No allocator change in timing.",
+    "raw_directory_role": "original local provenance",
+    "raw_archive_directory": "study/frame/allocations"
+  },
+  "condition_rows": 208,
+  "conditions_csv": "2026-09-13-frame-performance.csv",
+  "conditions_csv_original_path": "/tmp/xeme-perf-prs-20260913/frame/conditions.csv",
+  "publication": {
+    "files": {
+      "md": "2026-09-13-frame-performance.md",
+      "json": "2026-09-13-frame-performance.json",
+      "csv": "2026-09-13-frame-performance.csv"
+    },
+    "local_path_scope": "Absolute paths are original provenance, not public URLs."
+  },
+  "archive": {
+    "url": "https://github.com/astral-sh/xeme/releases/download/performance-2026-09-13/xeme-performance-2026-09-13.tar.zst",
+    "sha256": "fea3ce48d58394664dc19823118e86fd2ee1bdb5816dffee727deb1a31dce680",
+    "member_prefix": "study"
+  },
+  "issues": [],
+  "scope": "Known tuning and observed holdout corpora; separate epochs. All condition rows retained, including regressions. No cross-PR additive-gain claim. Input/report/build manifest hashes bind raw evidence; library hashes are copied from frozen build receipts, not recomputed by this reporting script."
+}

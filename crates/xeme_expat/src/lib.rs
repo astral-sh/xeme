@@ -155,6 +155,7 @@ pub struct XML_ParserStruct {
     allocator: Allocator,
     tracker: Shared<AllocationTracker>,
     core: Parser,
+    adapter_frame: Option<xeme::AdapterFrame>,
     config: Config,
     handlers: Handlers,
     handler_arg_is_parser: bool,
@@ -338,6 +339,7 @@ unsafe fn create(
                     allocator,
                     tracker: Shared::clone(&tracker),
                     core,
+                    adapter_frame: None,
                     config,
                     handlers: Handlers::default(),
                     handler_arg_is_parser: false,
@@ -562,6 +564,9 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                 (*parser).lifetime = lifetime;
                 core.set_notation_handler_enabled(false);
                 core.set_attlist_handler_enabled(false);
+                if let Some(frame) = (*parser).adapter_frame.take() {
+                    (*parser).core.finish_adapter_frame(frame);
+                }
                 (*parser).core = core;
                 (*parser).position = (*parser).core.position();
                 let unknown_encoding = (*parser).handlers.unknown_encoding;
@@ -1365,9 +1370,14 @@ unsafe fn run_events(parser: XML_Parser) -> c_int {
         if (*parser).destroying {
             return ERROR;
         }
-        let mut frame = (*parser).core.adapter_frame();
+        let mut frame = (*parser)
+            .adapter_frame
+            .take()
+            .unwrap_or_else(|| (*parser).core.adapter_frame());
         let result = run_events_with_frame(parser, &mut frame);
-        (*parser).core.finish_adapter_frame(frame);
+        // Keep the bounded arena and its recycling-budget reservation between
+        // feeds. The frame remains detached throughout all foreign callbacks.
+        (*parser).adapter_frame = Some(frame);
         result
     }
 }
@@ -1630,6 +1640,11 @@ unsafe fn finish_operation(
             fail_parse(parser, UNEXPECTED_STATE);
             ERROR
         });
+        if ((*parser).parse_error != 0 || (*parser).state == 2)
+            && let Some(frame) = (*parser).adapter_frame.take()
+        {
+            (*parser).core.finish_adapter_frame(frame);
+        }
         (*parser).input_context_active = false;
         (*parser).busy = false;
         result
@@ -2393,6 +2408,7 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                         allocator,
                         tracker: Shared::clone(&(*parser).tracker),
                         core,
+                        adapter_frame: None,
                         config: (*parser).config.clone(),
                         handlers: (*parser).handlers,
                         handler_arg_is_parser: (*parser).handler_arg_is_parser,

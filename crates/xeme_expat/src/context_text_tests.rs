@@ -239,6 +239,131 @@ unsafe fn parse(parser: XML_Parser, bytes: &[u8], final_input: bool, buffered: b
     }
 }
 
+#[derive(Default)]
+struct FrameState {
+    parser: XML_Parser,
+    starts: usize,
+    suspend: bool,
+}
+
+unsafe extern "C" fn retained_start(
+    data: *mut c_void,
+    name: *const c_char,
+    attributes: *const *const c_char,
+) {
+    // SAFETY: Test-owned state and independently owned frame bytes remain live
+    // through the callback. No parser or state borrow crosses the nested APIs.
+    unsafe {
+        let state = data.cast::<FrameState>();
+        let parser = (*state).parser;
+        assert!((*parser).adapter_frame.is_none());
+        if CStr::from_ptr(name) != c"n" {
+            return;
+        }
+        (*state).starts += 1;
+        XML_SetReparseDeferralEnabled(parser, 0);
+        XML_SetUserData(parser, data);
+        assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
+        XML_ParserFree(parser);
+        if (*state).suspend {
+            (*state).suspend = false;
+            assert_eq!(XML_StopParser(parser, 1), OK);
+        }
+        assert_eq!(CStr::from_ptr(name), c"n");
+        assert_eq!(CStr::from_ptr(*attributes), c"a");
+        assert_eq!(CStr::from_ptr(*attributes.add(1)), c"value");
+        assert!((*attributes.add(2)).is_null());
+    }
+}
+
+#[test]
+fn retained_frame_avoids_allocations_across_feeds_and_suspension() {
+    // SAFETY: The MM suite, parser and callback state outlive synchronous calls.
+    unsafe {
+        for buffered in [false, true] {
+            let parser = make_parser();
+            let mut state = FrameState {
+                parser,
+                ..FrameState::default()
+            };
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+            XML_SetStartElementHandler(parser, Some(retained_start));
+            REENTRY.set(parser);
+            assert_eq!(
+                parse(
+                    parser,
+                    b"<r><n a='value'></n><n a='value'></n>",
+                    false,
+                    buffered
+                ),
+                OK
+            );
+            assert!((*parser).adapter_frame.is_some());
+            clear_requests(1);
+            for suspend in [false, true, false] {
+                state.suspend = suspend;
+                XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                assert_eq!(
+                    parse(parser, b"<n a='value'></n>", false, buffered),
+                    if suspend { SUSPENDED } else { OK }
+                );
+                assert!((*parser).adapter_frame.is_some());
+                if suspend {
+                    assert_eq!(XML_ResumeParser(parser), OK);
+                }
+            }
+            assert!(REQUESTS.with(|calls| calls.borrow().is_empty()));
+            assert_eq!(state.starts, 5);
+            clear_requests(0);
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+            assert_eq!(parse(parser, b"</r>", true, buffered), OK);
+            assert!((*parser).adapter_frame.is_none());
+            REENTRY.set(ptr::null_mut());
+            XML_ParserFree(parser);
+            assert_eq!(LIVE.get(), 0);
+        }
+    }
+}
+
+#[test]
+fn retained_frame_is_released_on_reset_and_terminal_failures() {
+    // SAFETY: The MM suite owns every parser allocation until the matching Free.
+    unsafe {
+        for allocation_failure in [false, true] {
+            let parser = make_parser();
+            let warmup = b"<r><n a='value'></n><n a='value'></n>";
+            assert_eq!(parse(parser, warmup, false, false), OK);
+            assert!((*parser).adapter_frame.is_some());
+            let live = LIVE.get();
+            clear_requests(1);
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 0);
+            assert!((*parser).adapter_frame.is_some());
+            assert_eq!(LIVE.get(), live);
+            clear_requests(0);
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            assert!((*parser).adapter_frame.is_none());
+            assert_eq!(parse(parser, warmup, false, false), OK);
+            assert!((*parser).adapter_frame.is_some());
+            if allocation_failure {
+                // Fail input growth before run_events can take the cached frame.
+                let input = vec![b'x'; 8192];
+                clear_requests(1);
+                assert_eq!(parse(parser, &input, false, false), ERROR);
+                assert_eq!(XML_GetErrorCode(parser), 1);
+            } else {
+                assert_eq!(parse(parser, b"</wrong>", true, false), ERROR);
+                assert_eq!(XML_GetErrorCode(parser), 7);
+            }
+            assert!((*parser).adapter_frame.is_none());
+            clear_requests(0);
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            assert_eq!(parse(parser, b"<fresh/>", true, false), OK);
+            XML_ParserFree(parser);
+            assert_eq!(LIVE.get(), 0);
+        }
+    }
+}
+
 #[test]
 fn context_text_pointer_survives_reentry_suspend_and_abort() {
     // SAFETY: All allocations, callbacks and raw state pointers are test-owned.

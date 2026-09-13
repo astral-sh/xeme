@@ -131,6 +131,8 @@ impl Detection {
                 .windows(2)
                 .position(|window| window == b"?>")
                 .map(|end| end + start);
+            #[cfg(test)]
+            crate::large_token_tests::inspect(end.map_or(content.len(), |end| end + 2) - start);
             self.declaration_checked = content.len().saturating_sub(1);
             // Enforce the complete token bound before inspecting or copying an
             // encoding name, including when the closing delimiter just arrived.
@@ -1166,6 +1168,8 @@ impl Source {
         let quote = text.as_bytes()[0];
         let start = self.scan.checked.max(1);
         for (relative, character) in text[start..].char_indices() {
+            #[cfg(test)]
+            crate::large_token_tests::inspect(character.len_utf8());
             let index = start + relative;
             if index >= limit {
                 return Err((ErrorKind::LimitExceeded, 0));
@@ -1196,6 +1200,8 @@ impl Source {
         let digits_start = if hexadecimal { 3 } else { 2 };
         let start = self.scan.checked.max(1);
         for (relative, character) in text[start..].char_indices() {
+            #[cfg(test)]
+            crate::large_token_tests::inspect(character.len_utf8());
             let index = start + relative;
             if index >= limit {
                 return Err((ErrorKind::LimitExceeded, 0));
@@ -1337,6 +1343,8 @@ impl Source {
                 let mut after_name =
                     start > 2 && matches!(bytes[start - 1], b' ' | b'\t' | b'\r' | b'\n');
                 for (relative, character) in self.text[self.cursor + start..].char_indices() {
+                    #[cfg(test)]
+                    crate::large_token_tests::inspect(character.len_utf8());
                     let index = start + relative;
                     if index + character.len_utf8() > limit {
                         return Err((ErrorKind::LimitExceeded, index));
@@ -1370,17 +1378,23 @@ impl Source {
                         .position(|part| part == terminator)
                 {
                     let end = start + relative + terminator.len();
+                    #[cfg(test)]
+                    crate::large_token_tests::inspect(end - start);
                     return if end <= limit {
                         Ok(Some(end))
                     } else {
                         Err((ErrorKind::LimitExceeded, limit))
                     };
                 }
+                #[cfg(test)]
+                crate::large_token_tests::inspect(bytes.len().saturating_sub(start));
                 scan.checked = bytes.len().saturating_sub(terminator.len() - 1);
             }
             ScanMode::Tag | ScanMode::Doctype | ScanMode::DtdDeclaration => {
                 let mut index = scan.checked;
                 while index < bytes.len() {
+                    #[cfg(test)]
+                    crate::large_token_tests::inspect(1);
                     if index >= limit {
                         return Err((ErrorKind::LimitExceeded, limit));
                     }
@@ -1469,6 +1483,8 @@ fn scan_element_tag(
     // Short tags avoid setting up a byte search. Resume the bulk scan only
     // after this fixed prefix, including when a tag spans input chunks.
     while index < bytes.len().min(64) {
+        #[cfg(test)]
+        crate::large_token_tests::inspect(1);
         let byte = bytes[index];
         if byte == b'<' {
             return Err((ErrorKind::InvalidToken, index));
@@ -1504,6 +1520,8 @@ fn scan_element_tag(
             let syntax = memchr::memchr3(b'>', b'\'', b'"', text);
             memchr::memchr(b'<', &text[..syntax.unwrap_or(text.len())]).or(syntax)
         };
+        #[cfg(test)]
+        crate::large_token_tests::inspect(2 * next.map_or(text.len(), |next| next + 1));
         let Some(next) = next else {
             if end > limit {
                 return Err((ErrorKind::LimitExceeded, limit));

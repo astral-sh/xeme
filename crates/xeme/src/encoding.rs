@@ -1229,6 +1229,7 @@ impl Source {
             Ok(None)
         }
     }
+    #[inline]
     pub(crate) fn accounting_bytes(&self, count: usize) -> usize {
         (self.raw_index + self.raw_len(0, count)).saturating_sub(self.accounted_raw)
     }
@@ -1798,7 +1799,7 @@ mod tests {
                 };
                 let mut original = make_source();
                 let mut planned = make_source();
-                let plan = crate::text::TextPlan::scan(&text).unwrap();
+                let plan = crate::text::TextPlan::scan(&text, true).unwrap();
                 original.consume(plan.end);
                 planned.consume_text(plan);
                 assert_eq!(planned.position(0), original.position(0));

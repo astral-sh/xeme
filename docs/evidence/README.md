@@ -4,6 +4,16 @@ Current behavior is documented in the [compatibility guide](../compatibility.md)
 Evidence below identifies the source it tested. Historical results do not qualify
 later code, and passing a regression gate does not erase strict upstream failures.
 
+## CPython line-break callbacks
+
+The [CPython grouping check](2026-09-13-cpython-grouping.md) records strict passes
+of all six pinned XML suites with shared and static parser libraries after fixing
+the two line-break callback assertions. It identifies the tested source and local
+artifacts; installed PBS distributions require separate qualification. The
+[performance follow-up](2026-09-13-cpython-grouping-performance.md) records strict
+consumer passes and confirmed reductions in the correction's overhead, while
+disclosing the remaining cost compared with pre-fix Xeme and its validation scope.
+
 ## API baseline after rebase
 
 The [rebase comparison](2026-09-13-rebase.md) records identical full API outcomes

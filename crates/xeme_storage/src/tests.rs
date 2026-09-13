@@ -242,6 +242,23 @@ fn shared_owner_drops_value_once_and_can_cross_threads() {
 }
 
 #[test]
+fn shared_mutation_requires_the_last_owner() {
+    let mut owner = Shared::try_new_in(AtomicUsize::new(1), Allocator::System).unwrap();
+    *owner.get_mut().unwrap().get_mut() = 2;
+    let sibling = owner.clone();
+    assert!(owner.get_mut().is_none());
+    std::thread::spawn(move || {
+        sibling.store(3, std::sync::atomic::Ordering::Relaxed);
+        drop(sibling);
+    })
+    .join()
+    .unwrap();
+    assert_eq!(*owner.get_mut().unwrap().get_mut(), 3);
+    *owner.get_mut().unwrap().get_mut() = 4;
+    assert_eq!(owner.load(std::sync::atomic::Ordering::Relaxed), 4);
+}
+
+#[test]
 fn queue_compaction_and_utf8_edits_keep_invariants() {
     let alloc = allocator(usize::MAX);
     {

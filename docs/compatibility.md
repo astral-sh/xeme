@@ -32,7 +32,7 @@ Like the pinned Expat build, Xeme accepts some external XML 1.1 declarations
 and UTF-8 BOM/ISO-8859-1 combinations that the W3C catalog rejects.
 
 The pinned CPython consumer needs the explicit [allocation-cleanup backport](../tools/cpython/consumer-fix/README.md).
-It changes consumer ownership handling; it does not resolve callback fragmentation.
+It changes consumer ownership handling and is separate from callback fragmentation.
 
 ## Streaming resource limits
 
@@ -111,19 +111,23 @@ python3 tools/compatibility.py differential --library /absolute/libxeme_expat.so
 ## CPython and distribution checks
 
 [`tools/cpython`](../tools/cpython/README.md) pins CPython 3.12.13, builds its real
-`pyexpat` and `_elementtree` extensions, and verifies loaded module origins. Its
-unchanged upstream tests retain two failures: `BufferTextTest.test1` and
-`CDATAHandlerTest.test_handlers`. The separate regression gate checks the exact
-assertions, pinned fixture hashes, complete discovered/executed inventory and
-semantic checks on those inputs. An arbitrary failure in the same method is fatal.
+`pyexpat` and `_elementtree` extensions, and verifies loaded module origins. All six
+unchanged upstream XML suites must pass. The C interface preserves line-break
+callback boundaries used by `BufferTextTest.test1` and
+`CDATAHandlerTest.test_handlers`; the [focused evidence](evidence/2026-09-13-cpython-grouping.md)
+records their resolution. The regression gate also checks pinned fixture hashes,
+the complete discovered/executed inventory and semantic checks on those inputs.
+The historical text-fragmentation allowance remains available only as an explicit
+diagnostic option; CI and installed-distribution checks accept no test failures.
 The disclosed allocation-cleanup backport remains separate from upstream tests;
 benchmark extensions use unmodified consumer sources.
 
 Distribution packaging requires separate validation of archive structure,
 installed parser identity, native dependencies, and the target's libc baseline
 and threaded parsing behavior. Installed XML tests and application benchmarks
-must exercise the packaged interpreter. Packaging and installed performance
-require their own evidence for each supported target.
+must exercise the packaged interpreter, and the XML suites must pass the same
+strict regression gate. Packaging and installed performance require their own
+evidence for each supported target.
 
 ## Safety and release criteria
 

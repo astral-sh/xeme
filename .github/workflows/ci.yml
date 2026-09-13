@@ -338,7 +338,7 @@ jobs:
         run: >-
           uv run --no-project --python 3.12.13 python tools/cpython/run.py
           --source .cache/cpython --library target/release/libxeme_expat.so
-          --output /tmp/xeme-cpython-shared --allow-text-fragmentation
+          --output /tmp/xeme-cpython-shared
       - name: Run actual static-library consumers
         if: matrix.linkage == 'static'
         run: >-
@@ -346,7 +346,7 @@ jobs:
           --source .cache/cpython --library target/release/libxeme_expat.a
           --native-library gcc_s --native-library util --native-library rt
           --native-library pthread --native-library m --native-library dl
-          --native-library c --output /tmp/xeme-cpython-static --allow-text-fragmentation
+          --native-library c --output /tmp/xeme-cpython-static
       - name: Show consumer test results
         if: always()
         run: cat /tmp/xeme-cpython-*/probe.log /tmp/xeme-cpython-*/tests.log
@@ -355,13 +355,13 @@ jobs:
           if [ '${{ matrix.linkage }}' = shared ]; then
             uv run --no-project --python 3.12.13 python tools/cpython/run.py \
               --source .cache/cpython --library target/release/libxeme_expat.so \
-              --output /tmp/xeme-cpython-fixed --consumer-fix --allow-text-fragmentation
+              --output /tmp/xeme-cpython-fixed --consumer-fix
           else
             uv run --no-project --python 3.12.13 python tools/cpython/run.py \
               --source .cache/cpython --library target/release/libxeme_expat.a \
               --native-library gcc_s --native-library util --native-library rt \
               --native-library pthread --native-library m --native-library dl \
-              --native-library c --output /tmp/xeme-cpython-fixed --consumer-fix --allow-text-fragmentation
+              --native-library c --output /tmp/xeme-cpython-fixed --consumer-fix
           fi
       - name: Check CPython cleanup under child allocation failure
         run: |

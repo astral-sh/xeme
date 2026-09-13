@@ -1,4 +1,4 @@
-"""Validate the actual installed Xeme CPython with the same narrow exception.
+"""Require the actual installed Xeme CPython to pass the upstream XML suites.
 
 Run under the installed interpreter with -I. No extension loading override or
 consumer patch is applied. Distribution structure and threaded parsing need
@@ -87,14 +87,11 @@ def main() -> int:
     complete = total is not None and gate["complete_inventory"](
         log, cases, int(total[1])
     )
-    known = gate["only_text_fragmentation"](
-        log, result.returncode, len(gate["TESTS"]), cases, test_directory
-    )
     semantic_script = Path(__file__).with_name("text_fragmentation.py")
     semantic_command = [sys.executable, "-I", str(semantic_script), "--installed"]
     semantic = execute("text-fragmentation", semantic_command, 120)
-    accepted = (
-        complete and semantic.returncode == 0 and (result.returncode == 0 or known)
+    accepted = semantic.returncode == 0 and gate["successful_test_run"](
+        log, result.returncode, len(gate["TESTS"]), cases
     )
     report = {
         "schema_version": 1,
@@ -104,7 +101,7 @@ def main() -> int:
         "test_command": command,
         "tests_exit_code": result.returncode,
         "gate_exit_code": 0 if accepted else 1,
-        "accepted_upstream_failures": bool(accepted and known),
+        "accepted_upstream_failures": False,
         "inventory_command": inventory_command,
         "inventory_case_count": len(cases),
         "inventory_sha256": gate["TEST_INVENTORY_SHA256"],

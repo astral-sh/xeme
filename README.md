@@ -31,10 +31,11 @@ on a shared Linux host. Later revisions need fresh measurements; see the
 [benchmark guide](benchmarks/HILLCLIMB.md).
 
 The [compatibility guide](docs/compatibility.md) defines the current contract and
-regression gates. Known strict failures remain: 509 Expat API configurations, two
-CPython text-grouping assertions and 960 shared W3C catalog rows. These are
-documented differences. [Qualification evidence](docs/evidence/README.md) identifies
-the tested source and scope of the opt-in Linux CPython 3.12.13 trial.
+regression gates. Known strict failures remain: 509 Expat API configurations and
+960 shared W3C catalog rows. These are documented differences. The six pinned
+[CPython XML suites](docs/evidence/2026-09-13-cpython-grouping.md) pass with both
+shared and static parser libraries. [Qualification evidence](docs/evidence/README.md)
+identifies the tested source and scope of these CPython consumer checks.
 
 ## Installation
 

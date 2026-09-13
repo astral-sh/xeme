@@ -5546,18 +5546,15 @@ fn arena_text_keeps_bytes_raw_context_and_handlers_live_through_suspension() {
                 XML_Parse(parser, input.as_ptr().cast(), input.len() as c_int, 1),
                 SUSPENDED
             );
-            assert_eq!(
-                XML_GetCurrentByteIndex(parser),
-                (3 + content.len()) as c_long
-            );
+            assert_eq!(XML_GetCurrentByteIndex(parser), (3 + value.len()) as c_long);
             assert_eq!(XML_GetCurrentByteCount(parser), 0);
-            assert_eq!((*parser).core.current_raw(), Some(content.as_str()));
+            assert_eq!((*parser).core.current_raw(), Some(value));
             let raw_count = state.raw.len();
             XML_DefaultCurrent(parser);
             assert_eq!(state.raw.len(), raw_count);
             assert_eq!(XML_ResumeParser(parser), OK);
-            assert_eq!((state.first, state.later), (1, 2));
-            assert!(state.raw.iter().any(|raw| raw == &content));
+            assert_eq!((state.first, state.later), (1, 4));
+            assert!(state.raw.iter().any(|raw| raw == value));
             XML_ParserFree(parser);
         }
     }
@@ -5776,5 +5773,174 @@ fn builtin_protocol_detection_preserves_external_content_exceptions() {
                 );
             }
         }
+    }
+}
+
+#[test]
+fn text_line_boundaries_keep_raw_positions_handlers_and_suspension() {
+    #[derive(Default)]
+    struct Trace {
+        parser: XML_Parser,
+        text: Vec<(String, usize, usize, usize, usize, bool)>,
+        raw: Vec<String>,
+        inside_text: bool,
+        suspended: bool,
+    }
+    unsafe extern "C" fn default(data: *mut c_void, text: *const c_char, len: c_int) {
+        // SAFETY: Test data and callback bytes remain live for this invocation.
+        unsafe {
+            let trace = data.cast::<Trace>();
+            if (*trace).inside_text {
+                let value = std::slice::from_raw_parts(text.cast(), len as usize);
+                (*trace)
+                    .raw
+                    .push(std::str::from_utf8(value).unwrap().to_owned());
+            }
+        }
+    }
+    unsafe fn record(data: *mut c_void, text: *const c_char, len: c_int, replacement: bool) {
+        // SAFETY: Only owned text and scalar state survive reentrant API calls;
+        // no Trace reference crosses the nested default callback.
+        unsafe {
+            let trace = data.cast::<Trace>();
+            let parser = (*trace).parser;
+            let value = std::str::from_utf8(std::slice::from_raw_parts(text.cast(), len as usize))
+                .unwrap()
+                .to_owned();
+            let suspend = value == "\n" && !(*trace).suspended;
+            (*trace).text.push((
+                value,
+                XML_GetCurrentByteIndex(parser) as usize,
+                XML_GetCurrentLineNumber(parser) as usize,
+                XML_GetCurrentColumnNumber(parser) as usize,
+                XML_GetCurrentByteCount(parser) as usize,
+                replacement,
+            ));
+            (*trace).inside_text = true;
+            XML_DefaultCurrent(parser);
+            (*trace).inside_text = false;
+            XML_SetCharacterDataHandler(parser, Some(second));
+            if suspend {
+                (*trace).suspended = true;
+                assert_eq!(XML_StopParser(parser, 1), OK);
+            }
+        }
+    }
+    unsafe extern "C" fn first(data: *mut c_void, text: *const c_char, len: c_int) {
+        // SAFETY: Forward the unchanged callback contract.
+        unsafe { record(data, text, len, false) }
+    }
+    unsafe extern "C" fn second(data: *mut c_void, text: *const c_char, len: c_int) {
+        // SAFETY: Forward the unchanged callback contract.
+        unsafe { record(data, text, len, true) }
+    }
+    let xml = "<r>a\r\nb\rc\nd</r>";
+    for utf16 in [false, true] {
+        let input = if utf16 {
+            [
+                vec![0xff, 0xfe],
+                xml.encode_utf16().flat_map(u16::to_le_bytes).collect(),
+            ]
+            .concat()
+        } else {
+            xml.as_bytes().to_vec()
+        };
+        for width in 1..=input.len() {
+            // SAFETY: The parser, input and callback state outlive every API call.
+            unsafe {
+                let parser = XML_ParserCreate(ptr::null());
+                assert!(!parser.is_null());
+                for reset in [false, true] {
+                    if reset {
+                        assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+                    }
+                    let mut trace = Trace {
+                        parser,
+                        ..Trace::default()
+                    };
+                    XML_SetUserData(parser, (&raw mut trace).cast());
+                    XML_SetDefaultHandlerExpand(parser, Some(default));
+                    XML_SetCharacterDataHandler(parser, Some(first));
+                    for (index, chunk) in input.chunks(width).enumerate() {
+                        let status = XML_Parse(
+                            parser,
+                            chunk.as_ptr().cast(),
+                            chunk.len() as c_int,
+                            c_int::from((index + 1) * width >= input.len()),
+                        );
+                        assert_eq!(
+                            if status == SUSPENDED {
+                                XML_ResumeParser(parser)
+                            } else {
+                                status
+                            },
+                            OK
+                        );
+                    }
+                    let expected = [
+                        ("a", 3, 1, 3, 1),
+                        ("\n", 4, 1, 4, 2),
+                        ("b", 6, 2, 0, 1),
+                        ("\n", 7, 2, 1, 1),
+                        ("c", 8, 3, 0, 1),
+                        ("\n", 9, 3, 1, 1),
+                        ("d", 10, 4, 0, 1),
+                    ];
+                    assert_eq!(
+                        trace.text,
+                        expected
+                            .into_iter()
+                            .enumerate()
+                            .map(|(index, (text, byte, line, column, count))| (
+                                text.to_owned(),
+                                if utf16 { 2 + byte * 2 } else { byte },
+                                line,
+                                column + usize::from(utf16 && line == 1),
+                                if utf16 { count * 2 } else { count },
+                                index > 0
+                            ))
+                            .collect::<Vec<_>>()
+                    );
+                    assert_eq!(trace.raw, ["a", "\r\n", "b", "\r", "c", "\n", "d"]);
+                    assert!(trace.suspended);
+                }
+                XML_ParserFree(parser);
+            }
+        }
+    }
+}
+
+#[test]
+fn text_line_boundaries_preserve_external_and_internal_entity_tokens() {
+    // SAFETY: Each parser, its input and callback state outlive synchronous calls.
+    unsafe {
+        let mut state = State::default();
+        let parent = configured(&mut state);
+        let child = XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null());
+        assert!(!child.is_null());
+        let input = b"a\r\nb\rc\nd";
+        assert_eq!(
+            XML_Parse(child, input.as_ptr().cast(), input.len() as c_int, 1),
+            OK
+        );
+        assert_eq!(
+            state.events,
+            [
+                "text:a", "text:\n", "text:b", "text:\n", "text:c", "text:\n", "text:d"
+            ]
+        );
+        XML_ParserFree(child);
+        state.events.clear();
+        XML_SetUserData(parent, ptr::from_mut(&mut state).cast());
+        let input = b"<!DOCTYPE r [<!ENTITY e 'a&#13;b&#10;c'>]><r>&e;</r>";
+        assert_eq!(
+            XML_Parse(parent, input.as_ptr().cast(), input.len() as c_int, 1),
+            OK
+        );
+        assert_eq!(
+            state.events,
+            ["start:r", "text:a\rb", "text:\n", "text:c", "end:r"]
+        );
+        XML_ParserFree(parent);
     }
 }

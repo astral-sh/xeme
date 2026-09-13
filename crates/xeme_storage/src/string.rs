@@ -6,7 +6,7 @@ use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::ops::{Deref, RangeBounds};
 
-use crate::{AllocError, Allocator, Vec, try_extend_from_slice};
+use crate::{AllocError, Allocator, Vec, try_extend_from_slice, try_push};
 
 pub struct String {
     bytes: Vec<u8>,
@@ -201,13 +201,14 @@ impl CString {
         try_extend_from_slice(&mut bytes, text.to_bytes_with_nul())?;
         Ok(Self { bytes })
     }
+    /// Reuse a UTF-8 string's buffer and append its NUL terminator.
+    /// Reject embedded NULs; grow the buffer only if it has no spare capacity.
     pub fn try_from_string(text: String) -> Result<Self, AllocError> {
         if text.as_bytes().contains(&0) {
             return Err(AllocError::InteriorNul);
         }
         let mut bytes = text.into_bytes();
-        bytes.try_reserve(1)?;
-        bytes.push(0);
+        try_push(&mut bytes, 0)?;
         Ok(Self { bytes })
     }
     pub fn try_from_str_in(text: &str, allocator: Allocator) -> Result<Self, AllocError> {

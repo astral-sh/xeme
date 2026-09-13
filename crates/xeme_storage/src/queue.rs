@@ -1,6 +1,6 @@
 //! An amortized constant-time queue using allocator-aware storage.
 
-use crate::{AllocError, Allocator, TryClone, Vec};
+use crate::{AllocError, Allocator, TryClone, Vec, try_push};
 
 #[derive(Debug)]
 pub struct Queue<T> {
@@ -15,14 +15,14 @@ impl<T> Queue<T> {
             head: 0,
         }
     }
+    /// Append a value, periodically compacting consumed slots to reuse capacity.
+    /// Allocation failure leaves the live values intact.
     pub fn try_push_back(&mut self, value: T) -> Result<(), AllocError> {
         if self.head > 0 && self.head >= self.items.len() / 2 {
             self.items.drain(..self.head);
             self.head = 0;
         }
-        self.items.try_reserve(1)?;
-        self.items.push(Some(value));
-        Ok(())
+        try_push(&mut self.items, Some(value))
     }
     pub fn push_back(&mut self, value: T) -> Result<(), AllocError> {
         self.try_push_back(value)

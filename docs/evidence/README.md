@@ -20,6 +20,12 @@ The [rebase comparison](2026-09-13-rebase.md) records identical full API outcome
 on main and the review runtime, the update to 509 known allocation/API failures,
 and separate raised-retry diagnostics. Original failures remain visible.
 
+The [allocation-behavior check](2026-09-13-allocation-behavior.md) runs the full
+public allocation suites with allocation-count assumptions relaxed, retaining
+semantic assertions and adding ownership checks. Both engines passed all 1,008
+reported configurations. This separate gate leaves the original 509 API failures
+intact and documents the limits of its fault-injection coverage.
+
 ## Pre-rebase evaluation (2026-09-13)
 
 The [2026-09-13 review report](2026-09-13-review.md) records pre-rebase runtime `ec4d068` compatibility

@@ -96,6 +96,81 @@ def check_api(result: dict, log: str, baseline: dict, reference: bool) -> dict:
     }
 
 
+def allocation_tests(baseline: dict) -> list[str]:
+    """Select the complete public allocation suites and the deferral fixture."""
+    extra = {
+        "test_mem_api_cycle",
+        "test_mem_api_unlimited",
+        "test_bypass_heuristic_when_close_to_bufsize",
+    }
+    return [
+        name
+        for name in baseline["tests"]
+        if name.startswith(("test_alloc_", "test_nsalloc_")) or name in extra
+    ]
+
+
+def check_allocation(result: dict, log: str, baseline: dict) -> dict:
+    """Require every adapted test and its ownership report without failure waivers."""
+    report = check_api(
+        result,
+        log,
+        {**baseline, "tests": allocation_tests(baseline), "failures": {}},
+        reference=True,
+    )
+    if result.get("allocation_behavior") is not True:
+        raise ValueError("allocation behavior adapters were not enabled")
+    audits = {}
+    current = None
+    for line in log.splitlines():
+        if line.startswith("XEME_BEGIN\t"):
+            _, context, name = line.split("\t")
+            current = (context, name)
+        elif line.startswith("XEME_ALLOCATION_AUDIT\t"):
+            if current is None or current in audits:
+                raise ValueError("duplicate or unattributed allocation report")
+            counters = json.loads(line.split("\t", 1)[1])
+            expected = {
+                "malloc_calls",
+                "realloc_calls",
+                "free_calls",
+                "injected_malloc_failures",
+                "injected_realloc_failures",
+                "system_failures",
+                "live_blocks",
+                "peak_live_blocks",
+                "peak_live_bytes",
+            }
+            if set(counters) != expected or any(
+                type(value) is not int or value < 0 for value in counters.values()
+            ):
+                raise ValueError("invalid allocation counters")
+            if counters["live_blocks"] or counters["system_failures"]:
+                raise ValueError(
+                    "allocation leak or unexpected system allocation failure"
+                )
+            if (
+                current[1] != "test_bypass_heuristic_when_close_to_bufsize"
+                and not counters["malloc_calls"]
+            ):
+                raise ValueError(
+                    "allocation tracker did not observe the test allocator"
+                )
+            audits[current] = counters
+    completed = {
+        (row["context"], row["test"])
+        for row in result["results"]
+        if row["outcome"] == "pass"
+    }
+    if audits.keys() != completed:
+        raise ValueError("completed allocation tests lack matching ownership reports")
+    report["allocation_audits"] = [
+        {"context": context, "test": name, **counters}
+        for (context, name), counters in audits.items()
+    ]
+    return report
+
+
 def check_w3c(directory: Path, baseline: dict) -> dict:
     """Compare complete acceptance and child outcomes without waiving conformance."""
     summary = json.loads((directory / "summary.json").read_text())
@@ -217,17 +292,17 @@ def run(command: list[str], output: Path, accepted: tuple[int, ...]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("suite", choices=("api", "w3c", "differential"))
+    parser.add_argument("suite", choices=("api", "allocation", "w3c", "differential"))
     parser.add_argument("--library", type=Path, required=True)
     parser.add_argument("--reference", type=Path, required=True)
     parser.add_argument("--source", type=Path)
     parser.add_argument("--config", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    if args.suite in ("api", "w3c") and args.source is None:
-        parser.error("--source is required for API and W3C suites")
-    if args.suite == "api" and args.config is None:
-        parser.error("--config is required for the API suite")
+    if args.suite in ("api", "allocation", "w3c") and args.source is None:
+        parser.error("--source is required for API, allocation and W3C suites")
+    if args.suite in ("api", "allocation") and args.config is None:
+        parser.error("--config is required for API and allocation suites")
     args.output = args.output.resolve()
     args.output.mkdir(parents=True, exist_ok=False)
     baseline = json.loads(BASELINE.read_text())
@@ -247,7 +322,7 @@ def main() -> int:
         "commands": [],
     }
     try:
-        if args.suite == "api":
+        if args.suite in ("api", "allocation"):
             report["engines"] = {}
             for label, library in libraries.items():
                 directory = args.output / label
@@ -265,7 +340,9 @@ def main() -> int:
                     "--output",
                     str(directory),
                 ]
-                if label == "reference":
+                if args.suite == "allocation":
+                    command.append("--allocation-behavior")
+                elif label == "reference":
                     # Upstream reserves a 1 GiB buffer and streams over 2 GiB.
                     # Keep the RSS cap, but allow these reference tests to finish.
                     command.extend(["--memory-mib", "4096", "--test-timeout", "30"])
@@ -273,13 +350,14 @@ def main() -> int:
                 run(
                     command,
                     args.output / f"{label}.log",
-                    (0,) if label == "reference" else (0, 1),
+                    (0,) if label == "reference" and args.suite == "api" else (0, 1),
                 )
-                report["engines"][label] = check_api(
-                    json.loads((directory / "results.json").read_text()),
-                    (directory / "tests.log").read_text(),
-                    baseline["api"],
-                    label == "reference",
+                result = json.loads((directory / "results.json").read_text())
+                log = (directory / "tests.log").read_text()
+                report["engines"][label] = (
+                    check_allocation(result, log, baseline["api"])
+                    if args.suite == "allocation"
+                    else check_api(result, log, baseline["api"], label == "reference")
                 )
             report["passed"] = all(
                 result["passed"] for result in report["engines"].values()

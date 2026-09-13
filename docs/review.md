@@ -25,10 +25,11 @@ allocator state, and may outlive a reset or freed parent.
 
 ## Validation
 
-CI runs the complete pinned API, W3C and differential regression gates through
+CI runs the complete pinned API, allocation-behavior, W3C and differential gates through
 [`tools/compatibility.py`](../tools/compatibility.py). Known strict failures are
 checked against exact assertions and complete inventories; a passing regression
-gate does not turn those upstream failures into passes.
+gate does not turn those upstream failures into passes. The separate allocation
+gate requires all adapted tests and ownership checks to pass without allowances.
 
 Start with the workspace tests, formatting, and Clippy commands in
 [contributing](../CONTRIBUTING.md). Choose additional checks for the affected

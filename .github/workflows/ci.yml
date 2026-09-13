@@ -61,6 +61,7 @@ jobs:
       - run: python3 -m unittest discover -s benchmarks -p test_hillclimb.py
       - run: python3 -m unittest discover -s tools/cpython -p test_run.py
       - run: python3 -m unittest discover -s tools -p test_compatibility.py
+      - run: python3 -m unittest discover -s tools/upstream-expat -p test_allocation.py
       - run: python3 -m unittest discover -s tools -p test_differential.py
       - run: python3 -m unittest discover -s tools -p test_xml_abi.py
       - run: python3 benchmarks/hillclimb.py verify-holdout
@@ -72,7 +73,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [api, w3c, differential]
+        suite: [api, allocation, w3c, differential]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -103,6 +104,13 @@ jobs:
           --source .cache/expat --config .cache/expat-build/expat_config.h
           --library target/release/libxeme_expat.so --reference .cache/expat-build/libexpat.so
           --output "$RUNNER_TEMP/xeme-compat-api"
+      - name: Check allocation behavior independently of allocation schedules
+        if: matrix.suite == 'allocation'
+        run: >-
+          python3 -I -S tools/compatibility.py allocation
+          --source .cache/expat --config .cache/expat-build/expat_config.h
+          --library target/release/libxeme_expat.so --reference .cache/expat-build/libexpat.so
+          --output "$RUNNER_TEMP/xeme-compat-allocation"
       - name: Run the complete pinned W3C catalog
         if: matrix.suite == 'w3c'
         run: >-

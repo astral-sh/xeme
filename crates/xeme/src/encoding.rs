@@ -1312,7 +1312,9 @@ impl Source {
             })
     }
 
-    /// Scan token bytes; a byte limit may fall inside a decoded scalar.
+    /// Resume a token boundary scan, preserving progress across appended input.
+    /// DTD scans also yield at an internal-subset opener or parameter-reference marker.
+    /// A byte limit may fall inside a decoded scalar.
     fn scan_token_bytes(
         &mut self,
         mode: ScanMode,
@@ -1376,16 +1378,8 @@ impl Source {
                 scan.checked = bytes.len().saturating_sub(terminator.len() - 1);
             }
             ScanMode::Tag | ScanMode::Doctype | ScanMode::DtdDeclaration => {
-                let element_markup = mode == ScanMode::Tag
-                    && bytes.first() == Some(&b'<')
-                    && bytes.get(1) != Some(&b'!');
                 let mut index = scan.checked;
                 while index < bytes.len() {
-                    // An element tag cannot contain another literal '<', even
-                    // inside an attribute. DTD entity literals can contain it.
-                    if element_markup && index != 0 && bytes[index] == b'<' {
-                        return Err((ErrorKind::InvalidToken, index));
-                    }
                     if index >= limit {
                         return Err((ErrorKind::LimitExceeded, limit));
                     }

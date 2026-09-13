@@ -72,6 +72,8 @@ impl ValueScanner {
     }
 
     /// Validate newly appended characters, returning errors at token starts.
+    /// A returned XML declaration includes its closing delimiter and advances
+    /// the cursor past it, so the next call resumes with the following token.
     pub(crate) fn scan(
         &mut self,
         text: &str,
@@ -198,29 +200,11 @@ impl ValueScanner {
                 }
                 State::PiBody {
                     declaration,
-                    question,
-                } => {
-                    if question && character == '>' {
-                        self.state = State::Token;
-                        self.cursor = next;
-                        if declaration && !self.declaration_seen {
-                            self.declaration_seen = true;
-                            return Ok(ValueScan::XmlDeclaration {
-                                start: self.token_start,
-                                end: next,
-                            });
-                        }
-                        continue;
-                    }
-                    self.state = State::PiBody {
-                        declaration,
-                        question: character == '?',
-                    };
+                    question: true,
                 }
-                State::PiClose { declaration } => {
-                    if character != '>' {
-                        return Err((ErrorKind::InvalidToken, self.token_start));
-                    }
+                | State::PiClose { declaration }
+                    if character == '>' =>
+                {
                     self.state = State::Token;
                     self.cursor = next;
                     if declaration && !self.declaration_seen {
@@ -231,6 +215,15 @@ impl ValueScanner {
                         });
                     }
                     continue;
+                }
+                State::PiBody { declaration, .. } => {
+                    self.state = State::PiBody {
+                        declaration,
+                        question: character == '?',
+                    };
+                }
+                State::PiClose { .. } => {
+                    return Err((ErrorKind::InvalidToken, self.token_start));
                 }
                 State::Literal(quote) => {
                     if character == quote {

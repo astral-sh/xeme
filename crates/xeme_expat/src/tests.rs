@@ -4423,13 +4423,17 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
                         c_int::from((index + 1) * width >= input.len()),
                     );
                     if status == SUSPENDED {
-                        assert_eq!((*parser).core.current_raw(), Some(second_raw));
+                        // Empty tags finish their end callback before suspension;
+                        // ordinary starts still expose the opening token here.
+                        let empty = second_raw.ends_with("/>");
+                        assert_eq!((*parser).core.current_raw(), (!empty).then_some(second_raw));
                         assert_eq!(
                             XML_GetCurrentByteIndex(parser) as usize,
                             input
                                 .windows(b"<n a='second'".len())
                                 .position(|value| value == b"<n a='second'")
                                 .unwrap()
+                                + if empty { second_raw.len() } else { 0 }
                         );
                         let raw_count = state.raw.len();
                         XML_DefaultCurrent(parser);

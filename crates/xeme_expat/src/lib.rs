@@ -742,6 +742,10 @@ unsafe fn dispatch(
         }
         _ => None,
     };
+    let tag_event = matches!(
+        &kind,
+        EventKind::StartElement { .. } | EventKind::EndElement { .. }
+    );
     let mut handled = true;
     // SAFETY: Handlers were installed by the caller with the corresponding C
     // signature. C strings and attribute arrays live for the whole callback.
@@ -1074,7 +1078,7 @@ unsafe fn dispatch(
     if !handled {
         // SAFETY: The raw fallback uses the same guarded, owned-fragment path.
         unsafe {
-            dispatch_unhandled(parser, split_default, duplicate_default)?;
+            dispatch_unhandled(parser, split_default, duplicate_default, tag_event)?;
         }
     }
     Ok(())
@@ -1084,6 +1088,7 @@ unsafe fn dispatch_unhandled(
     parser: XML_Parser,
     split_default: bool,
     duplicate_default: Option<bool>,
+    tag_event: bool,
 ) -> Result<(), AllocError> {
     // SAFETY: No callback retains parser-owned data. The raw token must be
     // copied since a default callback can change parser configuration.
@@ -1095,6 +1100,10 @@ unsafe fn dispatch_unhandled(
                 .map(|raw| XmlString::try_from_str_in(raw, (*parser).allocator))
                 .transpose()?;
             if let Some(raw) = raw {
+                if tag_event {
+                    dispatch_default_fragment(parser, &raw, true);
+                    return Ok(());
+                }
                 let single_fragment = split_default
                     && duplicate_default.is_none()
                     && DtdFragments(raw.as_str())
@@ -1167,11 +1176,14 @@ impl<'a> Iterator for DtdFragments<'a> {
     }
 }
 
-unsafe fn dispatch_default_fragment(parser: XML_Parser, raw: &str) -> bool {
+unsafe fn dispatch_default_fragment(parser: XML_Parser, raw: &str, tag_event: bool) -> bool {
     // SAFETY: Called only by the guarded parse loop. Each callback can replace
     // handlers or stop; re-read scalar state between fragments.
     unsafe {
-        if (*parser).destroying || (*parser).state == 3 || (*parser).parse_error != 0 {
+        if (*parser).destroying
+            || ((*parser).state == 3 && !tag_event)
+            || ((*parser).parse_error != 0 && !((*parser).parse_error == 35 && tag_event))
+        {
             return false;
         }
         let Some(callback) = (*parser).handlers.default else {
@@ -1201,7 +1213,7 @@ unsafe fn drain_default_fragments(parser: XML_Parser) {
             let Some(fragment) = (*parser).default_pending.pop_front() else {
                 return;
             };
-            if !dispatch_default_fragment(parser, &fragment) {
+            if !dispatch_default_fragment(parser, &fragment, false) {
                 return;
             }
         }
@@ -1250,7 +1262,7 @@ unsafe fn dispatch_start_frame(
             return Ok(());
         }
         // SAFETY: No parser borrow crosses the owned raw-fragment callbacks.
-        return unsafe { dispatch_unhandled(parser, false, None) };
+        return unsafe { dispatch_unhandled(parser, false, None, true) };
     };
     let mut local_pointers = [ptr::null(); 17];
     let mut pointers = XmlVec::new_in(allocator);
@@ -1303,7 +1315,7 @@ unsafe fn dispatch_text_frame(parser: XML_Parser, bytes: &[u8]) -> Result<(), Al
         Ok(())
     } else {
         // SAFETY: The default path uses the core's independently owned raw token.
-        unsafe { dispatch_unhandled(parser, false, None) }
+        unsafe { dispatch_unhandled(parser, false, None, false) }
     }
 }
 
@@ -1336,7 +1348,7 @@ unsafe fn dispatch_context_text(
     };
     let Some(callback) = callback else {
         // SAFETY: Eager raw storage and the default dispatch path are unchanged.
-        return unsafe { dispatch_unhandled(parser, false, None) };
+        return unsafe { dispatch_unhandled(parser, false, None, false) };
     };
     // SAFETY: The core's immutable context borrow ends before the callback.
     // Checked offsets preserve the stable input allocation's provenance.
@@ -1401,11 +1413,14 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut xeme::AdapterFra
             if (*parser).destroying {
                 return ERROR;
             }
-            if (*parser).parse_error != 0 {
+            // Expat completes a tag's namespace and empty-element callbacks
+            // after StopParser. Allocation and processing errors still stop now.
+            let finishing_tag = (*parser).core.has_pending_tag_event();
+            if (*parser).parse_error != 0 && !((*parser).parse_error == 35 && finishing_tag) {
                 (*parser).error = (*parser).parse_error;
                 return ERROR;
             }
-            if (*parser).state == 3 {
+            if (*parser).state == 3 && !finishing_tag {
                 (*parser).error = 0;
                 return SUSPENDED;
             }
@@ -1486,7 +1501,7 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut xeme::AdapterFra
                         }
                         (*parser).core.recycle_end_element(recycling, name);
                         if callback.is_none() {
-                            dispatch_unhandled(parser, false, None)?;
+                            dispatch_unhandled(parser, false, None, true)?;
                         }
                         Ok(())
                     })()
@@ -2835,3 +2850,6 @@ mod context_text_tests;
 
 #[cfg(test)]
 mod declaration_base_tests;
+
+#[cfg(test)]
+mod tag_stop_tests;

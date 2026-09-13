@@ -4068,6 +4068,7 @@ impl Parser {
 
     /// Resolve eligible namespace spellings once, before mutating parser bindings.
     /// Only the detached frame and element-name owner survive this preparation.
+    #[inline(never)]
     fn prepare_namespace_frame(
         &mut self,
         name: &str,

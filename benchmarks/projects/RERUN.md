@@ -39,7 +39,7 @@ Both ElementTree and pyexpat use namespaces. Seven randomized pairs each measure
 
 ## Complete Wayland commands
 
-The [baseline evidence](../results/2026-09-10/real-project-baseline/README.md) archive includes the pinned, unmodified `wayland-scanner-source` directory and its source manifest. Extract it to a temporary directory. The builder checks every source hash and compiles two scanners with the same flags; optional libxml DTD validation is disabled for both.
+The [baseline evidence](https://github.com/astral-sh/oriole/blob/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/benchmarks/results/2026-09-10/real-project-baseline/README.md) archive includes the pinned, unmodified `wayland-scanner-source` directory and its source manifest. Extract it to a temporary directory. The builder checks every source hash and compiles two scanners with the same flags; optional libxml DTD validation is disabled for both.
 
 ```console
 python3 benchmarks/build_wayland_project.py \

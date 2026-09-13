@@ -1,9 +1,0 @@
-{
-  "status": "pass",
-  "archive_sha256": "8e23f3a316717964c0397687a62accb083caca0d3177b124b27ad9ba81ba9345",
-  "canonical_members": 125,
-  "logical_files": 135,
-  "worker_aliases": 1344,
-  "all_origins_byte_equal": true,
-  "scope": "Independent saved archive/source/alias readback. Prior protocol audits unchanged; no targets executed."
-}

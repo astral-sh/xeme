@@ -44,7 +44,7 @@ dependency lint policy. The profile-warning rejection remains enabled.
 
 ## Measured configuration
 
-Keep the release profile's ThinLTO and one codegen unit when evaluating PGO. In the [current Linux study](../../benchmarks/results/2026-09-11/pgo-lto/), a fresh profile reduced native parsing time by 24.8% and CPython consumer time by 15.5% on held-out project XML. Fat LTO without PGO helped less; combining fat LTO with its own fresh profile increased native time by 6.8% and CPython consumer time by 2.6% relative to ThinLTO PGO. These results support ThinLTO for these inputs and compiler.
+Keep the release profile's ThinLTO and one codegen unit when evaluating PGO. In the [historical Linux study](https://github.com/astral-sh/oriole/tree/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/benchmarks/results/2026-09-11/pgo-lto), a fresh profile reduced native parsing time by 24.8% and CPython consumer time by 15.5% on project XML reserved from profile training. Fat LTO without PGO helped less; combining fat LTO with its own fresh profile increased native time by 6.8% and CPython consumer time by 2.6% relative to ThinLTO PGO. These results support ThinLTO for these inputs and compiler.
 
 The study's Oriole builds used local Ohm with experimental defaults disabled, an explicit host target, and verified final `cdylib,staticlib` compiler invocations. Deployment builds should use the project's normal toolchain and fresh profiles, then repeat application tests and benchmarks. Changing LTO settings also requires retraining; a ThinLTO profile is not the fat-LTO control.
 

@@ -1,8 +1,0 @@
-campaign,consumer,project,chunk_bytes,namespace_or_mode,candidate_over_control,candidate_over_expat,control_over_expat,adverse
-buffered-delivery-initial-native,native,generated-rare-declarations,4096,false,1.039062785944936,4.844806022658475,4.6971791761289134,True
-buffered-delivery-initial-native,native,generated-rare-declarations,65536,false,1.0342274913763776,4.860396364879541,4.768906982513101,True
-buffered-delivery-initial-python,python,wayland,4096,elementtree,1.0002726649939324,0.8747468441104097,0.8806569639947848,True
-buffered-delivery-initial-python,python,batik,65536,pyexpat-events,1.0046664241734342,1.1798614262543183,1.1793089762433324,True
-buffered-delivery-confirmation-native,native,generated-rare-declarations,4096,false,1.024077024502802,4.790850724915083,4.584461628067646,True
-buffered-delivery-confirmation-native,native,generated-rare-declarations,65536,false,1.0251412378784324,4.830076623870253,4.719924327641311,True
-buffered-delivery-confirmation-python,python,vulkan,4096,pyexpat-events,1.0100817131678728,1.103334084237856,1.1240374202715775,True

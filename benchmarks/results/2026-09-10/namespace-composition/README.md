@@ -1,9 +1,0 @@
-# Namespace and attribute composition experiment
-
-This is an unselected runtime (`8ecacf2`, shared library `54aaf413…`). Attribute batching and namespace name reuse were combined on the C entity-limit/shared-DTD baseline. All 326 core/adapter Rust checks pass. The full upstream matrix remains 4,113 passing and 627 failing, with every row unchanged. Existing callback, malformed, custom-encoding, entity-accounting and publication probes pass, together with six native sanitizer executions and 336 allocation scenarios per linkage. C is instrumented with ASan/UBSan; Rust is not, and leak sanitizer is disabled.
-
-The combined native screen is 1.081× faster than its baseline across 24 project conditions, driven by Batik's 1.53–1.66× gains. It still takes 2.61× Expat's time. Actual unmodified CPython 3.12.13 consumers take 1.86× Expat's time in ElementTree and 1.48× in pyexpat on average; Wayland through pyexpat takes 1.068×. All 24 native and 24 CPython preflights match their expected normalized output and loaded library identity.
-
-A separate paired attribution removes only the namespace commit from the same source. Adding namespace reuse then has a 0.9915× project speedup, with seven of 24 conditions improving. The name cache reduces allocation calls but does not deliver an overall throughput improvement on this current base; we rejected it. Earlier positive namespace screens used an older source composition and remain available separately. Attribute batching proceeds independently.
-
-The root branch retains the rejected source at `charlie/codex-oriole-namespace-attribution`. Frozen source maps, original API observations, all raw native/CPython samples and the attribution control identify each build. Timing uses CPU 0 on a shared host; load and CPU frequency are uncontrolled. No new full W3C, sustained fuzzing or PBS campaign is claimed for this experiment.

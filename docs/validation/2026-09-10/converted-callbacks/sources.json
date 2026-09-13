@@ -1,5 +1,0 @@
-{
-  "crates/oriole/src/lib.rs": "3b527fa1f8fd900800957047c7d3014d7074ca2a79a7509a8a53033107fcd08f",
-  "crates/oriole/src/dtd.rs": "835facd18799b2455f23f24bff394bb34880fb4b773dcc5555f099187975b21e",
-  "crates/oriole/tests/parser.rs": "67f2bcaf6cdfc2a8b8f69eb3285b4fb0f3a971b99b38f930390d65c92f75cfa9"
-}

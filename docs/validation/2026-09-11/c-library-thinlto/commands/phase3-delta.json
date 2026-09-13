@@ -1,9 +1,0 @@
-{
-  "phase2_manifest_sha256": "d25414b15c035e1f3ac1ce04517655cdf6eb857efd0651ea78802ad3703cad85",
-  "phase3_manifest_sha256": "bc3d40467ba389139baed90deed02ee8ea03c2d6a63729ef4d2da99f18a47e04",
-  "changed_files": [
-    "integration/python-build-standalone/prepare.py"
-  ],
-  "pgo_source_and_tool_unchanged": true,
-  "phase2_passed_pgo_launch_sha256": "079a3a9bd77fde29a41b484ad604c0e845ff12eccf2a061e03a44573ee7ca7b0"
-}

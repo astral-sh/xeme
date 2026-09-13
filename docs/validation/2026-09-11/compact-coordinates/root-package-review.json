@@ -1,9 +1,0 @@
-{
-  "status": "passed",
-  "scope": "Root byte-for-byte verification of all archive members against index and original files plus excluded artifact identities; no parser/compiler/benchmark execution.",
-  "members": 1840,
-  "member_bytes": 81834483,
-  "excluded_pins": 19,
-  "archive_sha256": "18b8106be4d30b30dbbb727d2ab1c4ce67a74a7e0181536674a798f2fdf2ef72",
-  "index_sha256": "74175c7d5aa5fb8957ef4084f64a31a541afbcd1aa548a92ee583ecf7f36b69c"
-}

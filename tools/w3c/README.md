@@ -6,7 +6,7 @@ valid and invalid documents as required accepts, not-well-formed documents as
 required rejects, and `error` cases as optional observations. XML 1.1 and
 older-edition-only cases remain listed with their selection reasons.
 
-The [recorded run](../../docs/validation/2026-09-10/w3c/) uses the
+The [recorded run](https://github.com/astral-sh/oriole/tree/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/docs/validation/2026-09-10/w3c) uses the
 [2013 suite](https://www.w3.org/XML/Test/) from the
 [pinned mirror](https://github.com/lddubeau/xml-conformance-suite/tree/3fb4516daedd0ac736249a383733883b95fcdbb2).
 Fetch that revision and pass `packages/test-data/xmlconf`, including its original

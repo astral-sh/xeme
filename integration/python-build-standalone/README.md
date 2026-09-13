@@ -143,11 +143,11 @@ PBS pull requests use the normal build, including branches whose names contain
 Manual dispatch requires the workflow to be present on the repository's default
 branch.
 
-The [recorded local PGO bundle](../../docs/validation/2026-09-11/pbs-pgo-bundle/)
-passed its fresh Ohm build and both C consumers. The [normal stable PBS baseline](../../docs/validation/2026-09-11/pbs-independent-checks/)
+The [recorded local PGO bundle](https://github.com/astral-sh/oriole/tree/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/docs/validation/2026-09-11/pbs-pgo-bundle)
+passed its fresh Ohm build and both C consumers. The [normal stable PBS baseline](https://github.com/astral-sh/oriole/tree/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/docs/validation/2026-09-11/pbs-independent-checks)
 passed the archive validator and actual glibc 2.17 threaded parsing, while retaining
 the two known strict XML callback assertions. The selected reference-frame stable
-PGO distribution is recorded in [its validation packet](../../docs/validation/2026-09-11/reference-validation/pbs/).
+PGO distribution is recorded in [its validation packet](https://github.com/astral-sh/oriole/tree/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/docs/validation/2026-09-11/reference-validation/pbs).
 The explicit v3 PBS distribution trial remains pending.
 
 The archive is built for the GNU target, but target compatibility remains a PBS
@@ -162,7 +162,7 @@ wrapper. This selects Rust's existing pthread-key fallback instead of acquiring
 a glibc 2.18 version requirement from the Jessie sysroot. No glibc implementation
 is replaced. `validate-tls.py` checks real destructors on C-created threads and
 verifies the resulting ELF symbols. This workaround is scoped to the pinned
-CPython overlay; see the [full failure and correction report](../../docs/validation/2026-09-10/pbs-glibc/).
+CPython overlay; see the [full failure and correction report](https://github.com/astral-sh/oriole/tree/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/docs/validation/2026-09-10/pbs-glibc).
 
 
 ## Apply and run
@@ -210,7 +210,7 @@ license directory, and its extension metadata references Oriole's notices.
 
 ### Current normal generic validation
 
-The [current normal installed result](../../docs/validation/2026-09-12/pbs-current-normal/)
+The [historical normal installed result](https://github.com/astral-sh/oriole/tree/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/docs/validation/2026-09-12/pbs-current-normal)
 for selected runtime `6320d7b7` is recorded from
 [PR164 attempt 1](https://github.com/astral-sh/oriole/actions/runs/34697381695/attempts/1).
 Archive validation and custom checks pass; the installed parser identifies Oriole
@@ -246,16 +246,16 @@ own measurements beyond this workflow's compatibility checks.
 The runtime at [`1262888`](https://github.com/astral-sh/oriole/commit/1262888)
 includes external DTD declaration grammar, internal declaration composition,
 namespace and encoding corrections, foreign-DTD read policy, and completed-parser
-API behavior. Its [complete distribution validation](../../docs/validation/2026-09-10/pbs-final/)
+API behavior. Its [complete distribution validation](https://github.com/astral-sh/oriole/tree/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/docs/validation/2026-09-10/pbs-final)
 passes the archive validator, custom checks, installed XML suites, parser identity,
 and the actual glibc 2.17 baseline. Source/header/manifest hashes match the
-[final local validation and benchmarks](../../docs/validation/2026-09-10/final-runtime/);
+[final local validation and benchmarks](https://github.com/astral-sh/oriole/tree/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/docs/validation/2026-09-10/final-runtime);
 the PBS stable-toolchain bundle has its own binary and distribution hashes.
 
 The combined runtime at [`b68bdca`](https://github.com/astral-sh/oriole/commit/b68bdca)
 includes the reviewed external-value continuations, declaration Default callbacks,
 allocation-free shared state, and inline character data. Its
-[frozen validation report](../../docs/validation/2026-09-10/external-values/)
+[frozen validation report](https://github.com/astral-sh/oriole/tree/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/docs/validation/2026-09-10/external-values)
 identifies the source and local release libraries. The PBS distribution gate
 rebuilds that source with its own pinned toolchain and records separate bundle and
 distribution hashes. Local library results do not substitute for that full build
@@ -289,7 +289,7 @@ retain archive hashes and glibc/native-library results. Re-run allocator failure
 callback lifecycle, differential, and sanitizer gates on the same Oriole source.
 The CPython static-extension harness in `tools/cpython/` is a separate local gate.
 
-The [completed Linux x86-64 validation](../../docs/validation/2026-09-10/pbs-final/)
+The [completed Linux x86-64 validation](https://github.com/astral-sh/oriole/tree/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/docs/validation/2026-09-10/pbs-final)
 identifies runtime `1262888`, matching the final consumer, benchmark and sustained
 fuzz source. The experimental archive is retained as a seven-day CI artifact;
 permanent hashes, metadata, complete compressed logs and independent audits are

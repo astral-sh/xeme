@@ -96,7 +96,7 @@ UTF-8 input does not allocate provenance records.
 
 This support does not imply exact callback or diagnostic compatibility. External
 DTD default-handler prefixes and some malformed-input errors, callback prefixes,
-and positions still differ. The [custom-encoding validation](../../docs/validation/2026-09-10/custom-encoding-provenance/)
+and positions still differ. The [custom-encoding validation](https://github.com/astral-sh/oriole/tree/fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f/docs/validation/2026-09-10/custom-encoding-provenance)
 retains those differences alongside the complete upstream API matrix. Invalid
 maps, supplementary converted characters, and forbidden XML characters remain
 errors; the external value-child declaration restrictions below also apply.
@@ -188,10 +188,10 @@ allocation. Allocation headers retain their tracker through reallocation and thr
 A separate 512 MiB ceiling on parser-owned live backing allocations remains active even when
 relative amplification checks are disabled.
 
-A parser family shares a 256 MiB raw-input budget and an 8 MiB entity-expansion
-budget. The C interface also caps aggregate event payloads at 64 MiB, including
-DTD identifiers, namespace metadata, and repeated base strings. It limits child
-creation to 1,024 parsers and external-child ancestry to 32 levels.
+The [streaming resource policy](../../docs/compatibility.md#streaming-resource-limits)
+defines the current input, work, event-payload and parser-family limits. Long
+incremental streams are allowed; indirect work and event payload have separate
+input-relative budgets. External children share their originating family's budget.
 
 These remaining boundaries prevent claiming complete Expat compatibility.
 Unmodified CPython can use its standard custom allocator suite; the actual consumer

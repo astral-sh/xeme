@@ -1,3 +1,0 @@
-Verified 34 API symbol origins: /tmp/oriole-pgo-study/expat-use-liboriole_expat.so
-C ABI full integration passed (expat_2.8.4)
-Phase-relative OOM passed: successful_declarations=2 child_error=1 parent_error=21 rejected_allocations=1 live_allocations=0

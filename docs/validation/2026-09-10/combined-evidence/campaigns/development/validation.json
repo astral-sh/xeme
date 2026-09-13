@@ -1,9 +1,0 @@
-{
-  "scope": "Pre-merge reviewed external-value runtime only; superseded by final combined runtime campaign",
-  "binary_sha256": "834866fbc8d3cacbc318d5cb4b6cf9bd4d33fb6d1c0ef70f86029357471b9204",
-  "original_seed_replay_exit": 0,
-  "original_seed_count": 44,
-  "all_seed_replay_exit": 77,
-  "all_seed_count": 60,
-  "failure": "Expected missing-Default PE-supplied quote panic identified by integration review; root fixed in final source"
-}

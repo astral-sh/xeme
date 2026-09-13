@@ -13,4 +13,4 @@ XML_ExternalEntityParserCreate(XML_Parser parser, const XML_Char *context,
   return NULL;
 }
 
-unsigned int oriole_forced_child_failures(void) { return calls; }
+unsigned int xeme_forced_child_failures(void) { return calls; }

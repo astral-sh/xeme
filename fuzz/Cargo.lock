@@ -97,33 +97,33 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 
 [[package]]
-name = "oriole"
+name = "xeme"
 version = "0.0.1"
 dependencies = [
  "memchr",
- "oriole_storage",
+ "xeme_storage",
  "wide",
 ]
 
 [[package]]
-name = "oriole-fuzz"
+name = "xeme-fuzz"
 version = "0.0.0"
 dependencies = [
  "libfuzzer-sys",
- "oriole",
- "oriole_expat",
+ "xeme",
+ "xeme_expat",
 ]
 
 [[package]]
-name = "oriole_expat"
+name = "xeme_expat"
 version = "0.0.1"
 dependencies = [
- "oriole",
- "oriole_storage",
+ "xeme",
+ "xeme_storage",
 ]
 
 [[package]]
-name = "oriole_storage"
+name = "xeme_storage"
 version = "0.0.1"
 dependencies = [
  "allocator-api2",

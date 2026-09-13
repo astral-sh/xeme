@@ -15,7 +15,7 @@
 +
 +# Keep the optional overlay's host, target, and generated Make versions aligned
 +# with the reviewed CPython consumer backport. The normal PBS source is unchanged.
-+if os.environ.get("PYBUILD_ORIOLE_BUNDLE"):
++if os.environ.get("PYBUILD_XEME_BUNDLE"):
 +    DOWNLOADS["cpython-3.12"] = {
 +        **DOWNLOADS["cpython-3.12"],
 +        "url": "https://www.python.org/ftp/python/3.12.13/Python-3.12.13.tar.xz",
@@ -37,11 +37,11 @@
      return bi
  
  
-+def install_oriole_overlay(
++def install_xeme_overlay(
 +    build_env, host_platform, target_triple, python_version, build_options
 +):
 +    """Install an explicitly selected archive only in this CPython build container."""
-+    location = os.environ.get("PYBUILD_ORIOLE_BUNDLE")
++    location = os.environ.get("PYBUILD_XEME_BUNDLE")
 +    if not location:
 +        return
 +    cpu_targets = {"x86_64-unknown-linux-gnu": None, "x86_64_v3-unknown-linux-gnu": "x86-64-v3"}
@@ -54,7 +54,7 @@
 +        or not build_env.is_isolated
 +    ):
 +        raise ValueError(
-+            "Oriole overlay requires Linux x86_64 Docker, CPython 3.12.13, and a shared Python build"
++            "Xeme overlay requires Linux x86_64 Docker, CPython 3.12.13, and a shared Python build"
 +        )
 +    bundle = pathlib.Path(location).resolve()
 +    manifest = json.loads((bundle / "manifest.json").read_text())
@@ -71,27 +71,27 @@
 +        or manifest.get("rustflags") != rustflags
 +        or manifest.get("pbs_revision") != "a4553880293fe9d1bb62747d34ab0e5121d3554f"
 +    ):
-+        raise ValueError("Oriole bundle target or recipe revision does not match")
++        raise ValueError("Xeme bundle target or recipe revision does not match")
 +    destinations = {
 +        "libexpat.a": ("/tools/deps/lib", "libexpat.a"),
 +        "expat.h": ("/tools/deps/include", "expat.h"),
 +        "expat.pc": ("/tools/deps/lib/pkgconfig", "expat.pc"),
-+        "native-static-libs.txt": ("/tools/deps/lib", "oriole-native-static-libs.txt"),
-+        "LICENSE.oriole.txt": ("/build", "LICENSE.oriole.txt"),
-+        "cpython-external-parser.patch": ("/tools/deps/share/oriole", "cpython-external-parser.patch"),
++        "native-static-libs.txt": ("/tools/deps/lib", "xeme-native-static-libs.txt"),
++        "LICENSE.xeme.txt": ("/build", "LICENSE.xeme.txt"),
++        "cpython-external-parser.patch": ("/tools/deps/share/xeme", "cpython-external-parser.patch"),
 +    }
 +    for name in destinations:
 +        if (
 +            hashlib.sha256((bundle / name).read_bytes()).hexdigest()
 +            != manifest["files"][name]
 +        ):
-+            raise ValueError(f"Oriole bundle checksum mismatch: {name}")
++            raise ValueError(f"Xeme bundle checksum mismatch: {name}")
 +    native = (bundle / "native-static-libs.txt").read_text().split()
 +    if not native or any(
 +        re.fullmatch(r"-l[A-Za-z0-9_]+", flag) is None for flag in native
 +    ):
-+        raise ValueError("Oriole native linker flags require review")
-+    build_env.run(["mkdir", "-p", "/tools/deps/include", "/tools/deps/lib/pkgconfig", "/tools/deps/share/oriole"])
++        raise ValueError("Xeme native linker flags require review")
++    build_env.run(["mkdir", "-p", "/tools/deps/include", "/tools/deps/lib/pkgconfig", "/tools/deps/share/xeme"])
 +    for name, (directory, installed_name) in destinations.items():
 +        build_env.copy_file(
 +            bundle / name, dest_path=directory, dest_name=installed_name
@@ -100,12 +100,12 @@
 +    build_env.copy_file(
 +        bundle / "manifest.json",
 +        dest_path="/build",
-+        dest_name="LICENSE.oriole-build.txt",
++        dest_name="LICENSE.xeme-build.txt",
 +    )
 +    DOWNLOADS["expat"] = {
 +        **DOWNLOADS["expat"],
 +        "licenses": ["MIT", "Apache-2.0"],
-+        "license_file": "LICENSE.oriole.txt",
++        "license_file": "LICENSE.xeme.txt",
 +    }
 +
 +
@@ -117,7 +117,7 @@
          for p in sorted(packages):
              build_env.install_artifact_archive(BUILD, p, target_triple, build_options)
 +
-+        install_oriole_overlay(
++        install_xeme_overlay(
 +            build_env,
 +            host_platform,
 +            target_triple,
@@ -134,8 +134,8 @@
  # definition allows multiple Python versions to be built using the same Makefile
  # invocation.
 +# An explicit overlay must rebuild CPython even if a prior archive is cached.
-+.PHONY: oriole-cpython-overlay
-+oriole-cpython-overlay:
++.PHONY: xeme-cpython-overlay
++xeme-cpython-overlay:
 +
  define python_version_template
  PYTHON_DEPENDS_$(1) := \
@@ -144,7 +144,7 @@
      $$(NULL)
  
  ALL_PYTHON_DEPENDS_$(1) = \
-+    $$(if $$(PYBUILD_ORIOLE_BUNDLE),oriole-cpython-overlay) \
++    $$(if $$(PYBUILD_XEME_BUNDLE),xeme-cpython-overlay) \
      $$(PYTHON_DEP_DEPENDS) \
      $$(HERE)/build-cpython.sh \
      $$(PYTHON_DEPENDS_$(1)) \
@@ -156,14 +156,14 @@
      fi
 +fi
 +
-+# Oriole's optional overlay supplies the complete static Rust link dependencies.
++# Xeme's optional overlay supplies the complete static Rust link dependencies.
 +# CPython 3.12 uses these configure variables directly, without pkg-config.
-+if [[ -f "${TOOLS_PATH}/deps/lib/oriole-native-static-libs.txt" ]]; then
-+    read -r oriole_native_libs < "${TOOLS_PATH}/deps/lib/oriole-native-static-libs.txt"
++if [[ -f "${TOOLS_PATH}/deps/lib/xeme-native-static-libs.txt" ]]; then
++    read -r xeme_native_libs < "${TOOLS_PATH}/deps/lib/xeme-native-static-libs.txt"
 +    export LIBEXPAT_CFLAGS="-I${TOOLS_PATH}/deps/include"
 +    # The Jessie sysroot exports glibc 2.18's optional TLS destructor hook.
 +    # Select Rust's existing pthread fallback to preserve the glibc 2.17 floor.
-+    export LIBEXPAT_LDFLAGS="-L${TOOLS_PATH}/deps/lib -lexpat ${oriole_native_libs} -Wl,--wrap=__cxa_thread_atexit_impl"
++    export LIBEXPAT_LDFLAGS="-L${TOOLS_PATH}/deps/lib -lexpat ${xeme_native_libs} -Wl,--wrap=__cxa_thread_atexit_impl"
  fi
  
  # configure somehow has problems locating llvm-profdata even though it is in
@@ -172,12 +172,12 @@
  
  pushd "Python-${PYTHON_VERSION}"
 +
-+# Oriole's bounded allocations can reach a known CPython child-cleanup bug.
++# Xeme's bounded allocations can reach a known CPython child-cleanup bug.
 +# Backport upstream gh-144992 only for the explicitly staged, pinned overlay.
-+if [[ -f "${TOOLS_PATH}/deps/share/oriole/cpython-external-parser.patch" ]]; then
++if [[ -f "${TOOLS_PATH}/deps/share/xeme/cpython-external-parser.patch" ]]; then
 +    [[ "${PYTHON_VERSION}" = "3.12.13" ]]
 +    echo "fd679a16f36304444af11953ad276d4493f2044f904a39b8fdf028c6f7def8a0  Modules/pyexpat.c" | sha256sum --check --status
-+    patch --batch --fuzz=0 -p1 -i "${TOOLS_PATH}/deps/share/oriole/cpython-external-parser.patch"
++    patch --batch --fuzz=0 -p1 -i "${TOOLS_PATH}/deps/share/xeme/cpython-external-parser.patch"
 +    echo "1c3cf2ee6dfa568cf833742ad786880f4816042705689a116a4f308b7a9d95f2  Modules/pyexpat.c" | sha256sum --check --status
 +fi
  

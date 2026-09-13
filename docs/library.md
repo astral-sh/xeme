@@ -1,17 +1,17 @@
 # Rust library
 
-Oriole provides incremental XML parsing with owned events. The parser core forbids
+Xeme provides incremental XML parsing with owned events. The parser core forbids
 unsafe Rust and has no XML parser dependency. It performs no filesystem or network
 I/O; applications provide input and resolve external entities themselves.
 
 ## Parse incrementally
 
-Use `crates/oriole` as a Cargo path dependency. Feed a chunk, then drain its events:
+Use `crates/xeme` as a Cargo path dependency. Feed a chunk, then drain its events:
 
 ```rust
-use oriole::{Config, Parser};
+use xeme::{Config, Parser};
 
-fn main() -> Result<(), oriole::Error> {
+fn main() -> Result<(), xeme::Error> {
     let mut parser = Parser::new(Config::default());
     parser.feed(b"<message>Hello &amp; goodbye</message>", true)?;
     while let Some(event) = parser.next_event()? {
@@ -47,13 +47,13 @@ Library crates leave global allocator selection to the embedding application.
 
 ## Expat consumers
 
-The [C interface](../crates/oriole_expat/) exports shared and static libraries with
+The [C interface](../crates/xeme_expat/) exports shared and static libraries with
 Expat's narrow-character ABI, callbacks, parser reset, suspension, buffer input,
 and custom allocation. Its documentation defines ownership and callback lifetimes,
 supported encoding modes, and remaining compatibility gaps.
 
 The [python-build-standalone integration](../integration/python-build-standalone/)
-links Oriole into CPython 3.12.13. The recipe is opt-in and targets Linux x86-64.
+links Xeme into CPython 3.12.13. The recipe is opt-in and targets Linux x86-64.
 It includes checks for the glibc 2.17 baseline; see the
 [compatibility guide](compatibility.md) for remaining consumer differences.
 
@@ -61,10 +61,10 @@ It includes checks for the glibc 2.17 baseline; see the
 
 | Crate | Responsibility |
 | --- | --- |
-| [`oriole`](../crates/oriole) | Streaming XML parser and owned events |
-| [`oriole_storage`](../crates/oriole_storage) | Fallible storage, allocator ownership, and resource accounting |
-| [`oriole_expat`](../crates/oriole_expat) | Expat C interface and callback integration |
-| [`oriole_cli`](../crates/oriole_cli) | Command-line XML checker |
+| [`xeme`](../crates/xeme) | Streaming XML parser and owned events |
+| [`xeme_storage`](../crates/xeme_storage) | Fallible storage, allocator ownership, and resource accounting |
+| [`xeme_expat`](../crates/xeme_expat) | Expat C interface and callback integration |
+| [`xeme_cli`](../crates/xeme_cli) | Command-line XML checker |
 
 See [contributing](../CONTRIBUTING.md) for development commands and acceptance
 criteria, [fuzzing](../fuzz/README.md) for the adversarial harnesses, and the

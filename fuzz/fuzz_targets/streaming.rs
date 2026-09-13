@@ -1,7 +1,7 @@
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;
-use oriole::{Config, EventKind, Limits, NameRules, Parser};
+use xeme::{Config, EventKind, Limits, NameRules, Parser};
 
 fn parse(
     data: &[u8],
@@ -42,7 +42,7 @@ fn flush_text(
     pending: &mut Option<String>,
 ) -> Result<(), ()> {
     if let Some(text) = pending.take() {
-        let text = oriole::Text::try_from_str_in(&text, parser.allocator()).map_err(|_| ())?;
+        let text = xeme::Text::try_from_str_in(&text, parser.allocator()).map_err(|_| ())?;
         events.push(EventKind::Text(text));
     }
     Ok(())

@@ -1,0 +1,15 @@
+[package]
+name = "xeme_storage"
+description = "Fallible allocator-aware storage for Xeme"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+allocator-api2 = "0.2.21"
+hashbrown = { version = "0.16.1", default-features = false, features = ["allocator-api2", "inline-more"] }
+
+[lints]
+workspace = true

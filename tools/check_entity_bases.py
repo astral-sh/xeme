@@ -11,7 +11,7 @@ from xml_abi import Expat, I, P, S
 EXTERNAL = c.CFUNCTYPE(I, P, S, S, S, S)
 DOCTYPE = c.CFUNCTYPE(None, P, S, S, S, I)
 DATA = (
-    Path(__file__).resolve().parents[1] / "crates/oriole_expat/tests/data/entity-base"
+    Path(__file__).resolve().parents[1] / "crates/xeme_expat/tests/data/entity-base"
 )
 
 

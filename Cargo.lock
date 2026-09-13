@@ -70,33 +70,33 @@ dependencies = [
 ]
 
 [[package]]
-name = "oriole"
+name = "xeme"
 version = "0.0.1"
 dependencies = [
  "memchr",
- "oriole_storage",
+ "xeme_storage",
  "wide",
 ]
 
 [[package]]
-name = "oriole_cli"
+name = "xeme_cli"
 version = "0.0.1"
 dependencies = [
  "mimalloc",
- "oriole",
+ "xeme",
  "tikv-jemallocator",
 ]
 
 [[package]]
-name = "oriole_expat"
+name = "xeme_expat"
 version = "0.0.1"
 dependencies = [
- "oriole",
- "oriole_storage",
+ "xeme",
+ "xeme_storage",
 ]
 
 [[package]]
-name = "oriole_storage"
+name = "xeme_storage"
 version = "0.0.1"
 dependencies = [
  "allocator-api2",

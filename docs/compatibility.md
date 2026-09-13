@@ -1,6 +1,6 @@
 # Compatibility and release gates
 
-Oriole is experimental. The C interface targets Expat 2.8.4's narrow-character
+Xeme is experimental. The C interface targets Expat 2.8.4's narrow-character
 ABI, with an opt-in Linux x86-64 CPython 3.12.13 integration. It is not a complete
 production replacement for Expat.
 
@@ -14,17 +14,17 @@ production replacement for Expat.
 - The C interface uses XML 1.0 Fourth Edition name rules, matching the pinned
   Expat reference. The Rust API defaults to Fifth Edition. This affects W3C
   corpus fixtures that require Fifth Edition names.
-- Like the reference Expat build, Oriole can accept external entities declaring
+- Like the reference Expat build, Xeme can accept external entities declaring
   XML 1.1 and documents combining a UTF-8 BOM with an ISO-8859-1 declaration,
   although the W3C catalog marks those cases as not well formed.
 - Allocation schedules, resource ceilings, and reparse-deferral allocation growth
   differ from Expat. Upstream tests that assume its allocation counts or retry
   schedule can fail before reaching later semantic assertions.
-- `XML_ExpatVersion()` identifies Oriole and its Expat API target, so literal Expat
+- `XML_ExpatVersion()` identifies Xeme and its Expat API target, so literal Expat
   version-string checks fail.
 - Wide-character and `XML_LARGE_SIZE` builds are unsupported. Namespace separators
   must be ASCII. External value children have encoding-declaration restrictions
-  described in the [C interface guide](../crates/oriole_expat/README.md).
+  described in the [C interface guide](../crates/xeme_expat/README.md).
 
 CPython's external-parser allocation cleanup needs the explicit
 [upstream backport](../integration/python-build-standalone/consumer-fix/README.md)
@@ -34,18 +34,17 @@ it does not resolve the callback differences above.
 ## Release gates
 
 Production substitution requires XML conformance, Expat API and callback
-compatibility, CPython XML consumers, bounded resource use, sanitizer and fuzz
-coverage, and installed-distribution checks on every supported platform. Passing
-local tests or coalesced callback comparisons does not establish all of these
-contracts. Retain failing outcomes when comparing a change with its parent;
+compatibility, unmodified CPython XML tests, bounded resource use, sanitizer and
+fuzz coverage, and installed-distribution checks on every supported platform.
+Retain failing outcomes when comparing a change with its parent;
 allocation diagnostics with altered retry ceilings must remain separate from the
 unmodified upstream tests.
 
 ## Differential testing
 
 ```console
-python3 tools/differential.py --library /absolute/path/liboriole_expat.so \
-  --output /tmp/oriole-differential
+python3 tools/differential.py --library /absolute/path/libxeme_expat.so \
+  --output /tmp/xeme-differential
 ```
 
 The reference is the host's `libexpat`, whose version is recorded. Override it with
@@ -57,10 +56,8 @@ corpus. Use `--generated 1000` for a longer run.
 
 The semantic gate compares acceptance, exact error codes, and callbacks with only
 adjacent text fragments coalesced. The exact gate (`--strict`) also compares text
-fragmentation and final locations. Every difference remains in the report; neither
-gate silently accepts mismatches. Coalescing is a useful semantic comparison but
-cannot establish compatibility for consumers sensitive to callback boundaries.
-No expected-failure list is used to turn uncovered behavior into a passing test.
+fragmentation and final locations. Both modes fail on any mismatch in their
+comparison.
 
 The named corpus covers declarations, comments, processing instructions, CDATA,
 XML names, attributes, newline normalization, references, entities, DTD attribute
@@ -68,7 +65,7 @@ defaults, namespaces, UTF-8, UTF-16, and Latin-1. Invalid documents cover malfor
 names, UTF-8, numeric references, attribute syntax, entity recursion, reserved
 namespaces, truncation, and misplaced markup. Resource exhaustion and callback
 lifecycle probes are additional tests, not ordinary differential assertions:
-Oriole's documented resource ceilings intentionally differ from Expat's defaults.
+Xeme's documented resource ceilings intentionally differ from Expat's defaults.
 
 Custom-encoding probes additionally distinguish converted ASCII from raw markup,
 reference syntax, name spellings, namespace separators, whitespace, and DTD
@@ -132,7 +129,7 @@ resume calls fail without poisoning the outer parse. Separate guards protect
 recursive encoding-release callbacks and allocator callbacks.
 
 Compile the same integration source against both libraries. A reference run must
-pass before its assertions are used to judge Oriole. These C allocation counts
+pass before its assertions are used to judge Xeme. These C allocation counts
 validate public ownership. Separate Rust tests inject failure at each allocation,
 detect allocations escaping the supplied suite, force reallocations to move
 across alignment offsets, and exercise
@@ -144,10 +141,6 @@ parser family, independently of its configured amplification factor and threshol
 Crossing this ceiling returns `XML_ERROR_NO_MEMORY`.
 
 ## CPython integration
-
-CPython must execute its actual extension and XML test suites against the candidate
-library. Replacing the Python-level module with a simulation would bypass the
-consumer's callback, ownership, capsule, and error-location contracts.
 
 The [CPython 3.12.13 consumer](https://github.com/python/cpython/blob/v3.12.13/Modules/pyexpat.c)
 requires more than `XML_Parse`:
@@ -174,7 +167,7 @@ on `PYTHONPATH`.
 
 ```console
 python3.12 tools/cpython/run.py --source /path/to/cpython-3.12.13 \
-  --library /path/to/liboriole_expat.so --output /tmp/oriole-cpython
+  --library /path/to/libxeme_expat.so --output /tmp/xeme-cpython
 ```
 
 The source checkout must be clean and the interpreter must be exactly 3.12.13.
@@ -190,13 +183,6 @@ At the integration's pinned revision
 PBS builds Expat as a static, position-independent library for the target toolchain
 and installs it under `/tools/deps`. Replacing this dependency therefore requires
 cross-compilable Rust static archives, matching headers and native link metadata,
-and the platform's existing deployment-target requirements. A local shared-library
-probe alone does not satisfy that packaging gate.
-
-Before a production substitution, retain evidence for the PBS-built interpreters
-on every supported platform and architecture, including static linking, extension
-loading, shared allocator ownership, and the complete XML consumer suites. Also
-run upstream Expat compatibility tests, sanitizer-backed C callback probes, parser
-fuzzing, independent adversarial review, and reproducible benchmarks. Passing a
-bounded local corpus is evidence of the behaviors tested, not a full replacement
-claim.
+and the platform's existing deployment-target requirements. Follow the
+[integration guide](../integration/python-build-standalone/README.md) for bundling
+and installed-interpreter validation.

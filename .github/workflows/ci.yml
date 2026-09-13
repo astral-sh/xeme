@@ -89,7 +89,7 @@ jobs:
           cargo miri setup
       - name: Verify regression selection
         run: |
-          cargo miri test --locked -p oriole_storage --lib -- --list > "$RUNNER_TEMP/allocator-miri-tests"
+          cargo miri test --locked -p xeme_storage --lib -- --list > "$RUNNER_TEMP/allocator-miri-tests"
           python3 - <<'PYTHON'
           import os
           from pathlib import Path
@@ -106,7 +106,7 @@ jobs:
           assert {f"allocator::tests::{name}" for name in names} <= actual, actual
           PYTHON
       - name: Check allocation ownership and containers
-        run: cargo miri test --locked -p oriole_storage --lib
+        run: cargo miri test --locked -p xeme_storage --lib
   miri:
     name: C callback aliasing (${{ matrix.model }})
     runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
@@ -134,11 +134,11 @@ jobs:
           cargo miri setup
       - name: Verify focused test selection
         run: |
-          cargo miri test --locked -p oriole --lib context_text_ -- --list > "$RUNNER_TEMP/miri-core-tests"
-          cargo miri test --locked -p oriole_expat --lib context_text_ -- --list > "$RUNNER_TEMP/miri-c-tests"
-          cargo miri test --locked -p oriole --lib native_raw_context_tests::matched_native_end_raw_keeps_owned_names_and_mode_boundaries -- --exact --list > "$RUNNER_TEMP/miri-end-core-tests"
-          cargo miri test --locked -p oriole --test allocation native_raw_context_views_survive_every_feed_allocation_failure -- --exact --list > "$RUNNER_TEMP/miri-end-allocation-tests"
-          cargo miri test --locked -p oriole_expat --lib tests::detached_end_owner_survives_default_current_children_stop_and_reset_rejection -- --exact --list > "$RUNNER_TEMP/miri-end-c-tests"
+          cargo miri test --locked -p xeme --lib context_text_ -- --list > "$RUNNER_TEMP/miri-core-tests"
+          cargo miri test --locked -p xeme_expat --lib context_text_ -- --list > "$RUNNER_TEMP/miri-c-tests"
+          cargo miri test --locked -p xeme --lib native_raw_context_tests::matched_native_end_raw_keeps_owned_names_and_mode_boundaries -- --exact --list > "$RUNNER_TEMP/miri-end-core-tests"
+          cargo miri test --locked -p xeme --test allocation native_raw_context_views_survive_every_feed_allocation_failure -- --exact --list > "$RUNNER_TEMP/miri-end-allocation-tests"
+          cargo miri test --locked -p xeme_expat --lib tests::detached_end_owner_survives_default_current_children_stop_and_reset_rejection -- --exact --list > "$RUNNER_TEMP/miri-end-c-tests"
           python3 - <<'PY'
           import os
           from pathlib import Path
@@ -177,15 +177,15 @@ jobs:
               assert actual == {name}, (target, actual)
           PY
       - name: Check core frame protocol
-        run: cargo miri test --locked -p oriole --lib context_text_
+        run: cargo miri test --locked -p xeme --lib context_text_
       - name: Check callback pointers and re-entry
-        run: cargo miri test --locked -p oriole_expat --lib context_text_
+        run: cargo miri test --locked -p xeme_expat --lib context_text_
       - name: Check matched End raw ownership and mode boundaries
-        run: cargo miri test --locked -p oriole --lib native_raw_context_tests::matched_native_end_raw_keeps_owned_names_and_mode_boundaries -- --exact
+        run: cargo miri test --locked -p xeme --lib native_raw_context_tests::matched_native_end_raw_keeps_owned_names_and_mode_boundaries -- --exact
       - name: Check native raw feed allocation failures
-        run: cargo miri test --locked -p oriole --test allocation native_raw_context_views_survive_every_feed_allocation_failure -- --exact
+        run: cargo miri test --locked -p xeme --test allocation native_raw_context_views_survive_every_feed_allocation_failure -- --exact
       - name: Check detached End callback lifetime
-        run: cargo miri test --locked -p oriole_expat --lib tests::detached_end_owner_survives_default_current_children_stop_and_reset_rejection -- --exact
+        run: cargo miri test --locked -p xeme_expat --lib tests::detached_end_owner_survives_default_current_children_stop_and_reset_rejection -- --exact
   native:
     name: C ABI and callback safety
     runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-aarch64-4' || 'ubuntu-24.04-arm' }}
@@ -196,19 +196,19 @@ jobs:
         with:
           toolchain: stable
       - run: sudo apt-get update && sudo apt-get install -y libexpat1-dev pkg-config
-      - run: cargo rustc --release --locked -p oriole_expat --lib --crate-type cdylib,staticlib
+      - run: cargo rustc --release --locked -p xeme_expat --lib --crate-type cdylib,staticlib
       - name: Reference C consumer
         run: |
           cc -std=c11 -O2 -Wall -Wextra -Werror tests/c/integration.c $(pkg-config --cflags --libs expat) -o /tmp/reference-c
           /tmp/reference-c
-      - name: Oriole C consumer and adversarial callbacks
+      - name: Xeme C consumer and adversarial callbacks
         run: |
-          cc -std=c11 -O2 -Wall -Wextra -Werror -I include tests/c/integration.c -L target/release -loriole_expat -o /tmp/oriole-c
-          cc -std=c11 -O2 -Wall -Wextra -Werror -I include tests/c/adversarial.c -L target/release -loriole_expat -o /tmp/oriole-adversarial
-          LD_LIBRARY_PATH=target/release /tmp/oriole-c
-          LD_LIBRARY_PATH=target/release /tmp/oriole-adversarial
-          cc -std=c11 -O2 -Wall -Wextra -Werror -I include tests/c/allocations.c -L target/release -loriole_expat -o /tmp/oriole-allocations
-          LD_LIBRARY_PATH=target/release /tmp/oriole-allocations
+          cc -std=c11 -O2 -Wall -Wextra -Werror -I include tests/c/integration.c -L target/release -lxeme_expat -o /tmp/xeme-c
+          cc -std=c11 -O2 -Wall -Wextra -Werror -I include tests/c/adversarial.c -L target/release -lxeme_expat -o /tmp/xeme-adversarial
+          LD_LIBRARY_PATH=target/release /tmp/xeme-c
+          LD_LIBRARY_PATH=target/release /tmp/xeme-adversarial
+          cc -std=c11 -O2 -Wall -Wextra -Werror -I include tests/c/allocations.c -L target/release -lxeme_expat -o /tmp/xeme-allocations
+          LD_LIBRARY_PATH=target/release /tmp/xeme-allocations
   fuzz:
     name: Sanitized parser fuzz smoke
     runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-aarch64-4' || 'ubuntu-24.04-arm' }}
@@ -246,46 +246,46 @@ jobs:
           toolchain: stable
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
       - run: uv python install 3.12.13
-      - run: cargo rustc --release --locked -p oriole_expat --lib --crate-type cdylib,staticlib
+      - run: cargo rustc --release --locked -p xeme_expat --lib --crate-type cdylib,staticlib
       - name: Run actual shared-library consumers
         if: matrix.linkage == 'shared'
         run: >-
           uv run --no-project --python 3.12.13 python tools/cpython/run.py
-          --source .cache/cpython --library target/release/liboriole_expat.so
-          --output /tmp/oriole-cpython-shared --allow-text-fragmentation
+          --source .cache/cpython --library target/release/libxeme_expat.so
+          --output /tmp/xeme-cpython-shared --allow-text-fragmentation
       - name: Run actual static-library consumers
         if: matrix.linkage == 'static'
         run: >-
           uv run --no-project --python 3.12.13 python tools/cpython/run.py
-          --source .cache/cpython --library target/release/liboriole_expat.a
+          --source .cache/cpython --library target/release/libxeme_expat.a
           --native-library gcc_s --native-library util --native-library rt
           --native-library pthread --native-library m --native-library dl
-          --native-library c --output /tmp/oriole-cpython-static --allow-text-fragmentation
+          --native-library c --output /tmp/xeme-cpython-static --allow-text-fragmentation
       - name: Show consumer test results
         if: always()
-        run: cat /tmp/oriole-cpython-*/probe.log /tmp/oriole-cpython-*/tests.log
+        run: cat /tmp/xeme-cpython-*/probe.log /tmp/xeme-cpython-*/tests.log
       - name: Run consumers with upstream cleanup backport
         run: |
           if [ '${{ matrix.linkage }}' = shared ]; then
             uv run --no-project --python 3.12.13 python tools/cpython/run.py \
-              --source .cache/cpython --library target/release/liboriole_expat.so \
-              --output /tmp/oriole-cpython-fixed --consumer-fix --allow-text-fragmentation
+              --source .cache/cpython --library target/release/libxeme_expat.so \
+              --output /tmp/xeme-cpython-fixed --consumer-fix --allow-text-fragmentation
           else
             uv run --no-project --python 3.12.13 python tools/cpython/run.py \
-              --source .cache/cpython --library target/release/liboriole_expat.a \
+              --source .cache/cpython --library target/release/libxeme_expat.a \
               --native-library gcc_s --native-library util --native-library rt \
               --native-library pthread --native-library m --native-library dl \
-              --native-library c --output /tmp/oriole-cpython-fixed --consumer-fix --allow-text-fragmentation
+              --native-library c --output /tmp/xeme-cpython-fixed --consumer-fix --allow-text-fragmentation
           fi
       - name: Check CPython cleanup under child allocation failure
         run: |
           uv run --no-project --python 3.12.13 python integration/python-build-standalone/consumer-fix/run.py \
-            --original-extension /tmp/oriole-cpython-${{ matrix.linkage }}/pyexpat*.so \
-            --fixed-extension /tmp/oriole-cpython-fixed/pyexpat*.so \
-            --output /tmp/oriole-cpython-fault
+            --original-extension /tmp/xeme-cpython-${{ matrix.linkage }}/pyexpat*.so \
+            --fixed-extension /tmp/xeme-cpython-fixed/pyexpat*.so \
+            --output /tmp/xeme-cpython-fault
       - name: Show patched consumer results
         if: always()
-        run: cat /tmp/oriole-cpython-*/probe.log /tmp/oriole-cpython-*/tests.log
+        run: cat /tmp/xeme-cpython-*/probe.log /tmp/xeme-cpython-*/tests.log
 
   pbs-recipe:
     name: PBS integration recipe
@@ -309,7 +309,7 @@ jobs:
           toolchain: stable
           components: rust-docs
       - name: Build the PBS static library bundle
-        run: python3 integration/python-build-standalone/prepare.py --output "$RUNNER_TEMP/oriole-pbs-bundle"
+        run: python3 integration/python-build-standalone/prepare.py --output "$RUNNER_TEMP/xeme-pbs-bundle"
 
   pgo:
     name: Profile-guided library
@@ -327,45 +327,45 @@ jobs:
         run: |
           host=$(rustc -vV | sed -n 's/^host: //p')
           sysroot=$(rustc --print sysroot)
-          cargo rustc --release --locked --target "$host" -p oriole_expat --lib --crate-type cdylib,staticlib
+          cargo rustc --release --locked --target "$host" -p xeme_expat --lib --crate-type cdylib,staticlib
           uv run --offline tools/pgo/build.py \
             --source "$GITHUB_WORKSPACE" \
-            --output "$RUNNER_TEMP/oriole-pgo" \
+            --output "$RUNNER_TEMP/xeme-pgo" \
             --llvm-profdata "$sysroot/lib/rustlib/$host/bin/llvm-profdata"
           python3 - <<'PY'
           import hashlib, json, os, pathlib
-          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'oriole-pgo'
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'xeme-pgo'
           latest = json.loads((root / 'latest.json').read_text())
           manifest = pathlib.Path(latest['manifest'])
           assert hashlib.sha256(manifest.read_bytes()).hexdigest() == latest['sha256']
           data = json.loads(manifest.read_text())
           assert data['status'] == 'passed'
-          library = manifest.parent / 'use/liboriole_expat.so'
-          assert hashlib.sha256(library.read_bytes()).hexdigest() == data['libraries_sha256']['use/liboriole_expat.so']
+          library = manifest.parent / 'use/libxeme_expat.so'
+          assert hashlib.sha256(library.read_bytes()).hexdigest() == data['libraries_sha256']['use/libxeme_expat.so']
           with open(os.environ['GITHUB_ENV'], 'a') as stream:
-              stream.write(f'ORIOLE_PGO_LIBRARY={library}\n')
-              stream.write(f'ORIOLE_NORMAL_LIBRARY={os.environ["GITHUB_WORKSPACE"]}/target/{data["host"]}/release/liboriole_expat.so\n')
+              stream.write(f'XEME_PGO_LIBRARY={library}\n')
+              stream.write(f'XEME_NORMAL_LIBRARY={os.environ["GITHUB_WORKSPACE"]}/target/{data["host"]}/release/libxeme_expat.so\n')
           PY
       - name: Compare optimized callbacks with the normal build
         run: >-
-          python3 tools/differential.py --library "$ORIOLE_PGO_LIBRARY"
-          --reference "$ORIOLE_NORMAL_LIBRARY" --strict
-          --output "$RUNNER_TEMP/oriole-pgo-differential" --generated 100
+          python3 tools/differential.py --library "$XEME_PGO_LIBRARY"
+          --reference "$XEME_NORMAL_LIBRARY" --strict
+          --output "$RUNNER_TEMP/xeme-pgo-differential" --generated 100
       - name: Exercise optimized C callbacks and allocation failures
         run: |
           for source in integration adversarial allocations; do
             cc -std=c11 -O2 -Wall -Wextra -Werror -I include \
-              "tests/c/$source.c" "$ORIOLE_PGO_LIBRARY" \
-              -Wl,-rpath,"$(dirname "$ORIOLE_PGO_LIBRARY")" -o "$RUNNER_TEMP/oriole-pgo-$source"
-            "$RUNNER_TEMP/oriole-pgo-$source"
+              "tests/c/$source.c" "$XEME_PGO_LIBRARY" \
+              -Wl,-rpath,"$(dirname "$XEME_PGO_LIBRARY")" -o "$RUNNER_TEMP/xeme-pgo-$source"
+            "$RUNNER_TEMP/xeme-pgo-$source"
           done
       - name: Retain profile build and comparison evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: oriole-pgo-validation
+          name: xeme-pgo-validation
           path: |
-            ${{ runner.temp }}/oriole-pgo/latest.json
-            ${{ runner.temp }}/oriole-pgo/runs/
-            ${{ runner.temp }}/oriole-pgo-differential/
+            ${{ runner.temp }}/xeme-pgo/latest.json
+            ${{ runner.temp }}/xeme-pgo/runs/
+            ${{ runner.temp }}/xeme-pgo-differential/
           retention-days: 14

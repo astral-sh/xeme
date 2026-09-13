@@ -21,28 +21,19 @@ not silently accept malformed XML.
 ## Review and performance
 
 The [review guide](docs/review.md) maps the implementation and validation tools.
+See the [compatibility guide](docs/compatibility.md) for known differences and
+release gates.
 
-Keep parser behavior, C integration, validation, and optimizations in separately
-reviewable changes. Review input limits and callback reentry independently of the
-feature implementation. Record unresolved findings as release blockers.
-
-Measure optimizations against their parent on the same input, with equivalent
-callbacks and chunk sizes. Include raw samples, compiler and allocator
-configuration, and output comparisons with the pull request. Measure allocation
-requests separately from elapsed time and peak process memory. Report regressions.
+Measure optimizations against a fresh parent build on the same input, with
+equivalent compilers, allocators, callbacks, and chunk sizes. Include raw samples,
+compiler and allocator configuration, and output comparisons with the pull
+request. Measure allocation requests separately from elapsed time and peak process
+memory. Report regressions.
 A new dependency or data structure needs a demonstrated benefit that justifies
 its complexity.
 
 The performance target is within roughly 20% of Expat on representative,
-held-out project XML, measured both through the C interface and through CPython.
+held-out project XML, measured separately through the C interface and CPython.
 Report individual workload results alongside aggregates, and keep generated
 stress workloads separate. Compiler and allocator experiments must meet the
 same compatibility and safety requirements as the default build.
-
-## Acceptance
-
-Production replacement requires XML conformance, Expat API and callback
-compatibility, unmodified CPython XML tests, bounded adversarial input processing,
-sanitizer and fuzz coverage, native platform validation, and an opt-in
-python-build-standalone integration. Passing a subset does not establish the full
-replacement contract.

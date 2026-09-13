@@ -3,7 +3,7 @@
 use std::hint::black_box;
 use std::time::Instant;
 
-use oriole::{Config, EventKind, Parser};
+use xeme::{Config, EventKind, Parser};
 
 #[cfg(all(feature = "jemalloc", feature = "mimalloc"))]
 compile_error!("select at most one allocator");
@@ -78,7 +78,7 @@ fn hash_bytes(hash: &mut u64, bytes: &[u8]) {
     }
 }
 
-fn parse(input: &[u8], chunk_size: usize) -> Result<(u64, usize, usize), oriole::Error> {
+fn parse(input: &[u8], chunk_size: usize) -> Result<(u64, usize, usize), xeme::Error> {
     let mut parser = Parser::new(Config::default());
     let mut hash = 14_695_981_039_346_656_037;
     let mut elements = 0;

@@ -1,0 +1,16 @@
+[package]
+name = "xeme"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "A safe, streaming XML parser"
+
+[dependencies]
+memchr = "2.8.3"
+wide = { version = "=1.7.0", default-features = false }
+xeme_storage = { path = "../xeme_storage" }
+
+[lints]
+workspace = true

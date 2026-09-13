@@ -1,0 +1,964 @@
+{
+  "schema_version": 1,
+  "label": "doctype",
+  "pr": 237,
+  "pr_url": "https://github.com/astral-sh/xeme/pull/237",
+  "status": "complete",
+  "builds": {
+    "candidate": {
+      "receipt": {
+        "path": "/tmp/xeme-perf-prs-20260913/doctype/build/build.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "8b12ebdbc69729459ef7ed39ed0bbe39693994d88787192cebeecd882d743e61",
+        "archive_member": "study/doctype/build/build.json",
+        "archive_membership": "under study root"
+      },
+      "status": "passed",
+      "revision": "86868a706465dc389d8b6bb536da7bff6c01c66b",
+      "checkout": "/home/dev-user/.codex/worktrees/xeme-perf-doctype",
+      "compiler": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+      "target": "x86_64-unknown-linux-gnu",
+      "command": [
+        "cargo",
+        "+ohm",
+        "-Zohm-defaults=no",
+        "rustc",
+        "--locked",
+        "--release",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--manifest-path",
+        "/home/dev-user/.codex/worktrees/xeme-perf-doctype/Cargo.toml",
+        "--target-dir",
+        "/home/dev-user/.cache/xeme-targets/perf-doctype",
+        "--config",
+        "profile.release.opt-level=3",
+        "--config",
+        "profile.release.lto=\"thin\"",
+        "--config",
+        "profile.release.codegen-units=1",
+        "-p",
+        "xeme_expat",
+        "--crate-type",
+        "cdylib,staticlib",
+        "--message-format=json-render-diagnostics",
+        "-vv"
+      ],
+      "rustflags": "-Ctarget-cpu=x86-64",
+      "library": "/tmp/xeme-perf-prs-20260913/doctype/build/libxeme_expat.so",
+      "library_sha256": "b6087607479279233401b85e8a14e1c53cca6d989edc72622d311389898fbcf6",
+      "builder_sha256": "cbe1e9cacbcc16a5ed3336369932152ea092ad77c8d4f8c6ab9e6a94989e450a",
+      "cargo_messages_sha256": "9233e8eebc3669cadf3108794c32e397351f827302655afbe78d390ad7698f9b",
+      "source_files_recorded": 78
+    },
+    "baseline": {
+      "receipt": {
+        "path": "/tmp/xeme-perf-prs-20260913/baseline/build.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "add3fe7e4b9ff29bbd38df41c56e803acd926c2cf815108fa122da43769476c3",
+        "archive_member": "study/baseline/build.json",
+        "archive_membership": "under study root"
+      },
+      "status": "passed",
+      "revision": "377e2d6fdc4e7d22cf1043277089f1df0c2e3df6",
+      "checkout": "/home/dev-user/.codex/worktrees/443e/oriole",
+      "compiler": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+      "target": "x86_64-unknown-linux-gnu",
+      "command": [
+        "cargo",
+        "+ohm",
+        "-Zohm-defaults=no",
+        "rustc",
+        "--locked",
+        "--release",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--manifest-path",
+        "/home/dev-user/.codex/worktrees/443e/oriole/Cargo.toml",
+        "--target-dir",
+        "/home/dev-user/.cache/xeme-targets/443e-oriole",
+        "--config",
+        "profile.release.opt-level=3",
+        "--config",
+        "profile.release.lto=\"thin\"",
+        "--config",
+        "profile.release.codegen-units=1",
+        "-p",
+        "xeme_expat",
+        "--crate-type",
+        "cdylib,staticlib",
+        "--message-format=json-render-diagnostics",
+        "-vv"
+      ],
+      "rustflags": "-Ctarget-cpu=x86-64",
+      "library": "/tmp/xeme-perf-prs-20260913/baseline/libxeme_expat.so",
+      "library_sha256": "8b845689276e805fe29578d6163b60ca30e5f4e9cd3968a3adb1ea668ccff584",
+      "builder_sha256": "cbe1e9cacbcc16a5ed3336369932152ea092ad77c8d4f8c6ab9e6a94989e450a",
+      "cargo_messages_sha256": "383f8940a411196a5c294efb62847d47fa6f9c2887ae776c1fbc3498fd197695",
+      "source_files_recorded": 78
+    }
+  },
+  "expat": {
+    "receipt": {
+      "path": "/tmp/oriole-pgo-study/expat-control-build.json",
+      "path_role": "original local provenance",
+      "exists": true,
+      "sha256": "88445a98ce2f5c8bb9825c89f24078b8c1f04032723266e4b0211e45646cf319",
+      "archive_member": "control/expat/build.json",
+      "archive_membership": "explicit packaging mapping; original path retained as provenance"
+    },
+    "status": "passed",
+    "library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+    "compiler_target": "x86_64-linux-gnu",
+    "method": "Keep pinned Expat2.8.4 normal GCC13.3 -O3/NDEBUG/shared/no-LTO feature context; GCC13 native instrumentation data, not LLVM profdata. Profiles use relative build paths via -fprofile-prefix-path. Compare within engine before cross-engine normal/PGO comparison.",
+    "source_manifest_sha256": "92133e7fbd744a78af56dcea0465ace63b9cd84e198386515106e85b1d1e68db",
+    "normal_config_sha256": "ec397da0c61b6bab207c7aba9f830b5e69f79c8462e58d97c6e6891c87c44a4d",
+    "generated_config_sha256": "ec397da0c61b6bab207c7aba9f830b5e69f79c8462e58d97c6e6891c87c44a4d"
+  },
+  "consumers": {
+    "receipt": {
+      "path": "/tmp/xeme-perf-prs-20260913/doctype/consumers/build.json",
+      "path_role": "original local provenance",
+      "exists": true,
+      "sha256": "5dc67259926b8e00514444adf65eb2fa35e6cdfad2e77458ffa1cb1a25a12879",
+      "archive_member": "study/doctype/consumers/build.json",
+      "archive_membership": "under study root"
+    },
+    "status": "passed",
+    "cpython_revision": "3bb231a6a5dc02b95658877318bf61501a7209e9",
+    "python": "3.12.13 (main, Aug  7 2026, 02:25:39) [Clang 22.1.3 ]",
+    "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+    "adaptations": null,
+    "method": "All engines compile identical unmodified CPython 3.12.13 pyexpat.c and _elementtree.c with identical -O2 flags and the same narrow Expat-compatible header. Only the linked parser library and its rpath differ. No source adaptation, alternate allocator, LTO or PGO is applied."
+  },
+  "validation": {
+    "source": {
+      "path": "/tmp/xeme-perf-prs-20260913/doctype/validation-summary.json",
+      "path_role": "original local provenance",
+      "exists": true,
+      "sha256": "04e888a7a3f3b583cceab0e355388fb634c278df93b43c2792ad91d660d9e4af",
+      "archive_member": "study/doctype/validation-summary.json",
+      "archive_membership": "under study root"
+    },
+    "suites": {
+      "api": {
+        "suite": "api",
+        "passed": true,
+        "library_sha256": {
+          "xeme": "b6087607479279233401b85e8a14e1c53cca6d989edc72622d311389898fbcf6",
+          "reference": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+        },
+        "baseline_sha256": "08a1d748395f594ce4751bd4390dbfe2f972a30150028f6b0b1fbe7cba1ea5c2",
+        "engines": {
+          "xeme": {
+            "passed": true,
+            "configurations": 4740,
+            "known_failures": 507,
+            "regressions": [],
+            "improvements": [
+              {
+                "context": "chunksize=0 deferral=0",
+                "test": "test_alloc_realloc_subst_public_entity_value",
+                "outcome": "pass",
+                "code": 0
+              },
+              {
+                "context": "chunksize=0 deferral=1",
+                "test": "test_alloc_realloc_subst_public_entity_value",
+                "outcome": "pass",
+                "code": 0
+              }
+            ]
+          },
+          "reference": {
+            "passed": true,
+            "configurations": 4740,
+            "known_failures": 0,
+            "regressions": [],
+            "improvements": []
+          }
+        }
+      },
+      "w3c": {
+        "suite": "w3c",
+        "passed": true,
+        "library_sha256": {
+          "xeme": "b6087607479279233401b85e8a14e1c53cca6d989edc72622d311389898fbcf6",
+          "reference": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+        },
+        "baseline_sha256": "08a1d748395f594ce4751bd4390dbfe2f972a30150028f6b0b1fbe7cba1ea5c2",
+        "rows_per_engine": 6003,
+        "conformance_failures": {
+          "reference": 960,
+          "xeme": 960
+        },
+        "differences": [],
+        "improvements": {
+          "reference": [],
+          "xeme": []
+        }
+      },
+      "differential": {
+        "suite": "differential",
+        "passed": true,
+        "library_sha256": {
+          "xeme": "b6087607479279233401b85e8a14e1c53cca6d989edc72622d311389898fbcf6",
+          "reference": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+        },
+        "baseline_sha256": "08a1d748395f594ce4751bd4390dbfe2f972a30150028f6b0b1fbe7cba1ea5c2"
+      },
+      "cpython": {
+        "cpython_revision": "3bb231a6a5dc02b95658877318bf61501a7209e9",
+        "python": "3.12.13 (main, Aug  7 2026, 02:25:39) [Clang 22.1.3 ]",
+        "linkage": "shared",
+        "library_sha256": "b6087607479279233401b85e8a14e1c53cca6d989edc72622d311389898fbcf6",
+        "probe_exit_code": 0,
+        "origin_exit_code": 0,
+        "tests_exit_code": 2,
+        "gate_exit_code": 0,
+        "text_fragmentation": {
+          "allowed_assertions": [
+            "test1 (test.test_pyexpat.BufferTextTest.test1)",
+            "test_handlers (test.test_sax.CDATAHandlerTest.test_handlers)"
+          ],
+          "semantic_exit_code": 0,
+          "inventory_case_count": 803,
+          "inventory_complete": true
+        }
+      }
+    },
+    "workspace": [
+      {
+        "log": "doctype-adapter-tests.log",
+        "passed": 0,
+        "groups": 0,
+        "failed": 0
+      },
+      {
+        "log": "doctype-workspace-tests.log",
+        "passed": 522,
+        "groups": 37,
+        "failed": 0
+      }
+    ]
+  },
+  "epochs": [
+    {
+      "epoch": 1,
+      "reported_status": "passed",
+      "raw_directory": "/tmp/xeme-perf-prs-20260913/doctype/epoch-1",
+      "report": {
+        "path": "/tmp/xeme-perf-prs-20260913/doctype/epoch-1/report.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "0aa255843ed514fe2d483e4e119bc528fb35233036fe2345c665f6bee774aa87",
+        "archive_member": "study/doctype/epoch-1/report.json",
+        "archive_membership": "under study root"
+      },
+      "conditions_csv": {
+        "path": "/tmp/xeme-perf-prs-20260913/doctype/epoch-1/conditions.csv",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "1200a672d419bffdb965bb881d6c3cbef8f220b394f964824fd7e8230d8b9d91",
+        "archive_member": "study/doctype/epoch-1/conditions.csv",
+        "archive_membership": "under study root"
+      },
+      "groups": {
+        "native-tuning": {
+          "expected_conditions": 24,
+          "observed_conditions": 24,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9651029183509751,
+            "candidate_over_expat": 1.1506721516924103,
+            "conditions": 24
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 8,
+          "candidate_over_baseline": 0.9651029183509751,
+          "candidate_over_expat": 1.1506721516924103,
+          "status": "passed"
+        },
+        "native-holdout": {
+          "expected_conditions": 20,
+          "observed_conditions": 20,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.7900998667284101,
+            "candidate_over_expat": 1.4285710895154646,
+            "conditions": 20
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 2,
+          "candidate_over_baseline": 0.7900998667284101,
+          "candidate_over_expat": 1.4285710895154646,
+          "status": "passed"
+        },
+        "native-generated": {
+          "expected_conditions": 16,
+          "observed_conditions": 16,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 1.0196757589864347,
+            "candidate_over_expat": 1.5099234339450376,
+            "conditions": 16
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 15,
+          "candidate_over_baseline": 1.0196757589864347,
+          "candidate_over_expat": 1.5099234339450376,
+          "status": "passed"
+        },
+        "python-tuning": {
+          "expected_conditions": 24,
+          "observed_conditions": 24,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9924893092075342,
+            "candidate_over_expat": 1.0434650063454454,
+            "conditions": 24
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 13,
+          "candidate_over_baseline": 0.9924893092075342,
+          "candidate_over_expat": 1.0434650063454454,
+          "status": "passed"
+        },
+        "python-holdout": {
+          "expected_conditions": 20,
+          "observed_conditions": 20,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9051301977514512,
+            "candidate_over_expat": 1.1841180999867846,
+            "conditions": 20
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 3,
+          "candidate_over_baseline": 0.9051301977514512,
+          "candidate_over_expat": 1.1841180999867846,
+          "status": "passed"
+        }
+      },
+      "issues": [],
+      "method": {
+        "pairs": 7,
+        "native_iterations": 20,
+        "python_iterations": 10,
+        "cpu": 0,
+        "evaluation": "Known tuning and observed holdout regression corpora, reported separately; no independent holdout claim."
+      },
+      "status": "passed",
+      "raw_directory_role": "original local provenance",
+      "raw_archive_directory": "study/doctype/epoch-1"
+    },
+    {
+      "epoch": 2,
+      "reported_status": "passed",
+      "raw_directory": "/tmp/xeme-perf-prs-20260913/doctype/epoch-2",
+      "report": {
+        "path": "/tmp/xeme-perf-prs-20260913/doctype/epoch-2/report.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "a3017f1e45c929ef1c2346fd45a82b33855796d55d1f079f1098df3c442df373",
+        "archive_member": "study/doctype/epoch-2/report.json",
+        "archive_membership": "under study root"
+      },
+      "conditions_csv": {
+        "path": "/tmp/xeme-perf-prs-20260913/doctype/epoch-2/conditions.csv",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "d33c120e7de7f95c5fcca2650e3db01a5c7175c738b4e10dd4e4c904c8ff2a75",
+        "archive_member": "study/doctype/epoch-2/conditions.csv",
+        "archive_membership": "under study root"
+      },
+      "groups": {
+        "native-tuning": {
+          "expected_conditions": 24,
+          "observed_conditions": 24,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9702089589983097,
+            "candidate_over_expat": 1.1557816136009207,
+            "conditions": 24
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 9,
+          "candidate_over_baseline": 0.9702089589983097,
+          "candidate_over_expat": 1.1557816136009207,
+          "status": "passed"
+        },
+        "native-holdout": {
+          "expected_conditions": 20,
+          "observed_conditions": 20,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.7915361494934309,
+            "candidate_over_expat": 1.4304208746539047,
+            "conditions": 20
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 3,
+          "candidate_over_baseline": 0.7915361494934309,
+          "candidate_over_expat": 1.4304208746539047,
+          "status": "passed"
+        },
+        "native-generated": {
+          "expected_conditions": 16,
+          "observed_conditions": 16,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 1.0187985427975421,
+            "candidate_over_expat": 1.5130281025555834,
+            "conditions": 16
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 16,
+          "candidate_over_baseline": 1.0187985427975421,
+          "candidate_over_expat": 1.5130281025555834,
+          "status": "passed"
+        },
+        "python-tuning": {
+          "expected_conditions": 24,
+          "observed_conditions": 24,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9878595248584492,
+            "candidate_over_expat": 1.0405194131977398,
+            "conditions": 24
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 9,
+          "candidate_over_baseline": 0.9878595248584492,
+          "candidate_over_expat": 1.0405194131977398,
+          "status": "passed"
+        },
+        "python-holdout": {
+          "expected_conditions": 20,
+          "observed_conditions": 20,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.8805052379834873,
+            "candidate_over_expat": 1.0880057018764284,
+            "conditions": 20
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 2,
+          "candidate_over_baseline": 0.8805052379834873,
+          "candidate_over_expat": 1.0880057018764284,
+          "status": "passed"
+        }
+      },
+      "issues": [],
+      "method": {
+        "pairs": 7,
+        "native_iterations": 20,
+        "python_iterations": 10,
+        "cpu": 0,
+        "evaluation": "Known tuning and observed holdout regression corpora, reported separately; no independent holdout claim."
+      },
+      "status": "passed",
+      "raw_directory_role": "original local provenance",
+      "raw_archive_directory": "study/doctype/epoch-2"
+    }
+  ],
+  "targeted_slices": [
+    {
+      "epoch": 1,
+      "name": "Qt / native",
+      "conditions": 4,
+      "candidate_over_baseline": 0.514039885389685,
+      "candidate_over_expat": 1.6106876113023136
+    },
+    {
+      "epoch": 1,
+      "name": "LibreOffice / native",
+      "conditions": 4,
+      "candidate_over_baseline": 0.6271322688096679,
+      "candidate_over_expat": 1.6622760012500613
+    },
+    {
+      "epoch": 1,
+      "name": "Qt / ElementTree",
+      "conditions": 2,
+      "candidate_over_baseline": 0.6350375547295696,
+      "candidate_over_expat": 1.0878456885065024
+    },
+    {
+      "epoch": 1,
+      "name": "LibreOffice / ElementTree",
+      "conditions": 2,
+      "candidate_over_baseline": 0.8791502841757448,
+      "candidate_over_expat": 3.2464148600747094
+    },
+    {
+      "epoch": 1,
+      "name": "Generated namespaces / namespaces on",
+      "conditions": 2,
+      "candidate_over_baseline": 1.0087307975280828,
+      "candidate_over_expat": 3.1760973269732196
+    },
+    {
+      "epoch": 1,
+      "name": "Generated references",
+      "conditions": 4,
+      "candidate_over_baseline": 1.032312221216135,
+      "candidate_over_expat": 2.4898058722813996
+    },
+    {
+      "epoch": 1,
+      "name": "Generated elements",
+      "conditions": 4,
+      "candidate_over_baseline": 1.0314877875338508,
+      "candidate_over_expat": 1.7493015480544225
+    },
+    {
+      "epoch": 1,
+      "name": "Generated plain text",
+      "conditions": 4,
+      "candidate_over_baseline": 1.0062252481511103,
+      "candidate_over_expat": 0.5260816112095559
+    },
+    {
+      "epoch": 1,
+      "name": "Tuning / native namespaces on",
+      "conditions": 12,
+      "candidate_over_baseline": 0.9700512675568964,
+      "candidate_over_expat": 1.2026892717209285
+    },
+    {
+      "epoch": 1,
+      "name": "Observed holdout / native namespaces on",
+      "conditions": 10,
+      "candidate_over_baseline": 0.8035624792283473,
+      "candidate_over_expat": 1.475752905931312
+    },
+    {
+      "epoch": 2,
+      "name": "Qt / native",
+      "conditions": 4,
+      "candidate_over_baseline": 0.5143332085855379,
+      "candidate_over_expat": 1.620295451909302
+    },
+    {
+      "epoch": 2,
+      "name": "LibreOffice / native",
+      "conditions": 4,
+      "candidate_over_baseline": 0.6269082447100878,
+      "candidate_over_expat": 1.6586259803152315
+    },
+    {
+      "epoch": 2,
+      "name": "Qt / ElementTree",
+      "conditions": 2,
+      "candidate_over_baseline": 0.6232833721773217,
+      "candidate_over_expat": 1.1880882994365607
+    },
+    {
+      "epoch": 2,
+      "name": "LibreOffice / ElementTree",
+      "conditions": 2,
+      "candidate_over_baseline": 0.7534821182413886,
+      "candidate_over_expat": 1.4024569455435794
+    },
+    {
+      "epoch": 2,
+      "name": "Generated namespaces / namespaces on",
+      "conditions": 2,
+      "candidate_over_baseline": 1.01451119793368,
+      "candidate_over_expat": 3.165184627216372
+    },
+    {
+      "epoch": 2,
+      "name": "Generated references",
+      "conditions": 4,
+      "candidate_over_baseline": 1.0275255178100213,
+      "candidate_over_expat": 2.4625392234188648
+    },
+    {
+      "epoch": 2,
+      "name": "Generated elements",
+      "conditions": 4,
+      "candidate_over_baseline": 1.0248566424802328,
+      "candidate_over_expat": 1.7841411645471612
+    },
+    {
+      "epoch": 2,
+      "name": "Generated plain text",
+      "conditions": 4,
+      "candidate_over_baseline": 1.0101422610916384,
+      "candidate_over_expat": 0.5272938250579557
+    },
+    {
+      "epoch": 2,
+      "name": "Tuning / native namespaces on",
+      "conditions": 12,
+      "candidate_over_baseline": 0.9752462380451454,
+      "candidate_over_expat": 1.208391100138589
+    },
+    {
+      "epoch": 2,
+      "name": "Observed holdout / native namespaces on",
+      "conditions": 10,
+      "candidate_over_baseline": 0.8040317818999606,
+      "candidate_over_expat": 1.470058516588658
+    }
+  ],
+  "interpretation_notes": [
+    "LibreOffice ElementTree varies materially between epochs: candidate/Expat is 3.2464\u00d7 in epoch 1 and 1.4025\u00d7 in epoch 2. All observations are retained. The Python holdout aggregate includes this variation; neither epoch establishes a stable LibreOffice ElementTree ratio against Expat."
+  ],
+  "repeated_regressions": [
+    {
+      "group": "native-generated",
+      "condition": "elements/65536/namespaces-0",
+      "epoch_1_percent": 4.274334154013615,
+      "epoch_2_percent": 3.6368178324365896
+    },
+    {
+      "group": "native-generated",
+      "condition": "entities/65536/namespaces-1",
+      "epoch_1_percent": 2.927201358924214,
+      "epoch_2_percent": 3.3317543850687414
+    },
+    {
+      "group": "native-generated",
+      "condition": "entities/65536/namespaces-0",
+      "epoch_1_percent": 3.030968844785753,
+      "epoch_2_percent": 2.7511208232023243
+    },
+    {
+      "group": "python-tuning",
+      "condition": "gtk/65536/elementtree",
+      "epoch_1_percent": 2.519085484009631,
+      "epoch_2_percent": 2.7468792551944343
+    },
+    {
+      "group": "native-generated",
+      "condition": "elements/65536/namespaces-1",
+      "epoch_1_percent": 2.342227418716525,
+      "epoch_2_percent": 2.560707589255151
+    },
+    {
+      "group": "native-generated",
+      "condition": "elements/4096/namespaces-0",
+      "epoch_1_percent": 3.8580138708549816,
+      "epoch_2_percent": 2.330406878752034
+    },
+    {
+      "group": "native-generated",
+      "condition": "entities/4096/namespaces-0",
+      "epoch_1_percent": 4.896402342984385,
+      "epoch_2_percent": 2.286443785914205
+    },
+    {
+      "group": "native-generated",
+      "condition": "entities/4096/namespaces-1",
+      "epoch_1_percent": 2.090594791825473,
+      "epoch_2_percent": 2.643632635944271
+    },
+    {
+      "group": "python-tuning",
+      "condition": "vulkan/4096/pyexpat-events",
+      "epoch_1_percent": 2.277271457120178,
+      "epoch_2_percent": 1.9344714506012384
+    },
+    {
+      "group": "python-tuning",
+      "condition": "vulkan/4096/elementtree",
+      "epoch_1_percent": 2.2671427405243305,
+      "epoch_2_percent": 1.7218347101854992
+    },
+    {
+      "group": "native-generated",
+      "condition": "elements/4096/namespaces-1",
+      "epoch_1_percent": 2.137225994770442,
+      "epoch_2_percent": 1.4267949632936539
+    },
+    {
+      "group": "native-generated",
+      "condition": "namespaces/65536/namespaces-1",
+      "epoch_1_percent": 1.407956989938608,
+      "epoch_2_percent": 1.9250314042272398
+    },
+    {
+      "group": "native-generated",
+      "condition": "text/4096/namespaces-0",
+      "epoch_1_percent": 1.547938733373777,
+      "epoch_2_percent": 1.3765082880710322
+    },
+    {
+      "group": "native-tuning",
+      "condition": "gtk/4096/namespaces-0",
+      "epoch_1_percent": 1.6107555944194996,
+      "epoch_2_percent": 1.352823518558166
+    },
+    {
+      "group": "python-tuning",
+      "condition": "docbook/65536/elementtree",
+      "epoch_1_percent": 4.2610153275957074,
+      "epoch_2_percent": 1.144569058227085
+    },
+    {
+      "group": "native-generated",
+      "condition": "namespaces/65536/namespaces-0",
+      "epoch_1_percent": 1.5117178442122903,
+      "epoch_2_percent": 1.000253801416795
+    },
+    {
+      "group": "native-generated",
+      "condition": "text/65536/namespaces-1",
+      "epoch_1_percent": 0.9252390724550086,
+      "epoch_2_percent": 0.945332569206303
+    },
+    {
+      "group": "native-tuning",
+      "condition": "wayland/65536/namespaces-0",
+      "epoch_1_percent": 0.8447936551960078,
+      "epoch_2_percent": 1.1598913987034276
+    },
+    {
+      "group": "native-tuning",
+      "condition": "gtk/65536/namespaces-1",
+      "epoch_1_percent": 0.6871105476552009,
+      "epoch_2_percent": 1.916077862381349
+    },
+    {
+      "group": "python-tuning",
+      "condition": "wayland/65536/elementtree",
+      "epoch_1_percent": 0.6179026051186698,
+      "epoch_2_percent": 1.6735285441276337
+    },
+    {
+      "group": "python-tuning",
+      "condition": "wayland/4096/elementtree",
+      "epoch_1_percent": 0.589563037649321,
+      "epoch_2_percent": 1.2467899492264678
+    },
+    {
+      "group": "native-tuning",
+      "condition": "wayland/4096/namespaces-0",
+      "epoch_1_percent": 0.4631459758491774,
+      "epoch_2_percent": 0.8095832599321673
+    },
+    {
+      "group": "native-generated",
+      "condition": "namespaces/4096/namespaces-1",
+      "epoch_1_percent": 0.3410237307708508,
+      "epoch_2_percent": 0.9794116865137426
+    },
+    {
+      "group": "python-holdout",
+      "condition": "hadoop/65536/pyexpat-events",
+      "epoch_1_percent": 0.33529414197919216,
+      "epoch_2_percent": 0.7454344656735445
+    },
+    {
+      "group": "native-generated",
+      "condition": "namespaces/4096/namespaces-0",
+      "epoch_1_percent": 0.33334706551493287,
+      "epoch_2_percent": 1.2100821630396164
+    },
+    {
+      "group": "native-tuning",
+      "condition": "wayland/65536/namespaces-1",
+      "epoch_1_percent": 0.1844909092478586,
+      "epoch_2_percent": 0.5613043953331287
+    },
+    {
+      "group": "native-holdout",
+      "condition": "dotnet/65536/namespaces-1",
+      "epoch_1_percent": 1.1562466825362883,
+      "epoch_2_percent": 0.13643448027811367
+    },
+    {
+      "group": "native-tuning",
+      "condition": "wayland/4096/namespaces-1",
+      "epoch_1_percent": 0.11034451346474405,
+      "epoch_2_percent": 1.2713756542847898
+    },
+    {
+      "group": "native-generated",
+      "condition": "text/4096/namespaces-1",
+      "epoch_1_percent": 0.06906188265904945,
+      "epoch_2_percent": 0.4563513045819034
+    },
+    {
+      "group": "native-holdout",
+      "condition": "dotnet/4096/namespaces-0",
+      "epoch_1_percent": 0.01617369660720236,
+      "epoch_2_percent": 0.3990664939634625
+    },
+    {
+      "group": "python-tuning",
+      "condition": "docbook/4096/pyexpat-events",
+      "epoch_1_percent": 0.01612000803832281,
+      "epoch_2_percent": 0.3461266242297478
+    }
+  ],
+  "allocations": {
+    "base_engine": "baseline",
+    "raw_directory": "/tmp/xeme-perf-prs-20260913/frame/allocations",
+    "artifacts": [
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/README.md",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "956e7dbb5f3bb0faba90cfbd5a23b9cccdd9ca9e3bb7927a55018809811f9c46",
+        "archive_member": "study/frame/allocations/README.md",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/results.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "243a93976e219134dda4ff2e9b03fb3b1ae6a671a29ec2071ad8f76a0b59f3c5",
+        "archive_member": "study/frame/allocations/results.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/summary.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "1d6b4d77fb1892837d25f122dccfedcef54dff634371c92127449f583ba88b0d",
+        "archive_member": "study/frame/allocations/summary.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/libraries.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "5604dd5f9fdaa446ffdd95605c878b0522afddfe6dc0cdcbfb6adc877809d174",
+        "archive_member": "study/frame/allocations/libraries.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/inputs.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "58bdbbd5ba710128340641b36a268b16be19d7eea7ff3f27b0821fabb72c3cb1",
+        "archive_member": "study/frame/allocations/inputs.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/artifact-hashes.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "347d08346898a9a3bdc86096b7475b72f09e9dbaf288cd9a2f01e07c84dce0d6",
+        "archive_member": "study/frame/allocations/artifact-hashes.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/allocation_driver.c",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "c4c26922ad2a4c783012e54e503b3ced4afdb4f9c975c1ec77e98d96c1dd187f",
+        "archive_member": "study/frame/allocations/allocation_driver.c",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/compile.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "31fdf40b9c10dc9d4cb23f0f80b6dee6bd4f71329840b3c79e523301056d4e78",
+        "archive_member": "study/frame/allocations/compile.json",
+        "archive_membership": "under study root"
+      }
+    ],
+    "summaries": [
+      {
+        "corpus": "tuning",
+        "chunk": 4096,
+        "conditions": 12,
+        "expected_conditions": 12,
+        "missing": [],
+        "requests_geomean_ratio": 0.9494080052324101,
+        "fewer": 2,
+        "equal": 10,
+        "more": 0,
+        "baseline_requested_bytes_total": 3484976,
+        "candidate_requested_bytes_total": 3491819,
+        "peak_requested_bytes_delta_min": 0,
+        "peak_requested_bytes_delta_max": 1652
+      },
+      {
+        "corpus": "tuning",
+        "chunk": 65536,
+        "conditions": 12,
+        "expected_conditions": 12,
+        "missing": [],
+        "requests_geomean_ratio": 0.9334760433020766,
+        "fewer": 2,
+        "equal": 10,
+        "more": 0,
+        "baseline_requested_bytes_total": 2638552,
+        "candidate_requested_bytes_total": 2642119,
+        "peak_requested_bytes_delta_min": 0,
+        "peak_requested_bytes_delta_max": 1684
+      },
+      {
+        "corpus": "holdout",
+        "chunk": 4096,
+        "conditions": 10,
+        "expected_conditions": 10,
+        "missing": [],
+        "requests_geomean_ratio": 0.645853588574972,
+        "fewer": 4,
+        "equal": 6,
+        "more": 0,
+        "baseline_requested_bytes_total": 1860390,
+        "candidate_requested_bytes_total": 1421976,
+        "peak_requested_bytes_delta_min": -85,
+        "peak_requested_bytes_delta_max": 510
+      },
+      {
+        "corpus": "holdout",
+        "chunk": 65536,
+        "conditions": 10,
+        "expected_conditions": 10,
+        "missing": [],
+        "requests_geomean_ratio": 0.5671847313726461,
+        "fewer": 4,
+        "equal": 6,
+        "more": 0,
+        "baseline_requested_bytes_total": 3092582,
+        "candidate_requested_bytes_total": 2638680,
+        "peak_requested_bytes_delta_min": -89,
+        "peak_requested_bytes_delta_max": 488
+      }
+    ],
+    "scope": "Separate selected-C-allocator instrumentation; requests and requested bytes are not timing samples, unique allocated bytes, or RSS. No allocator change in timing.",
+    "raw_directory_role": "original local provenance",
+    "raw_archive_directory": "study/frame/allocations"
+  },
+  "condition_rows": 208,
+  "conditions_csv": "2026-09-13-doctype-performance.csv",
+  "conditions_csv_original_path": "/tmp/xeme-perf-prs-20260913/doctype/conditions.csv",
+  "publication": {
+    "files": {
+      "md": "2026-09-13-doctype-performance.md",
+      "json": "2026-09-13-doctype-performance.json",
+      "csv": "2026-09-13-doctype-performance.csv"
+    },
+    "local_path_scope": "Absolute paths are original provenance, not public URLs."
+  },
+  "archive": {
+    "url": "https://github.com/astral-sh/xeme/releases/download/performance-2026-09-13/xeme-performance-2026-09-13.tar.zst",
+    "sha256": "fea3ce48d58394664dc19823118e86fd2ee1bdb5816dffee727deb1a31dce680",
+    "member_prefix": "study"
+  },
+  "issues": [],
+  "scope": "Known tuning and observed holdout corpora; separate epochs. All condition rows retained, including regressions. No cross-PR additive-gain claim. Input/report/build manifest hashes bind raw evidence; library hashes are copied from frozen build receipts, not recomputed by this reporting script."
+}

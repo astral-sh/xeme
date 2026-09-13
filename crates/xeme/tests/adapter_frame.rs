@@ -178,6 +178,93 @@ fn owned_frames_preserve_events_positions_raw_and_error_order_at_every_chunk_siz
 }
 
 #[test]
+fn doctype_frames_preserve_raw_positions_and_attribute_declarations() {
+    for (doctype, framed) in [
+        ("<!DOCTYPE r>", true),
+        ("<!DOCTYPE r SYSTEM 'unused.dtd'>", true),
+        ("<!DOCTYPE r [<!ELEMENT r ANY>]>", true),
+        ("<!DOCTYPE r [<!ENTITY e 'text'>]>", true),
+        ("<!DOCTYPE r [<!ATTLIST n a CDATA #IMPLIED>]>", false),
+        ("<!DOCTYPE r [<!ATTLIST n a NMTOKENS #IMPLIED>]>", false),
+        ("<!DOCTYPE r [<!ATTLIST n a ID #IMPLIED>]>", false),
+        ("<!DOCTYPE r [<!ATTLIST n b CDATA 'default'>]>", false),
+    ] {
+        for body in [
+            "<r><n a=' x  y '/><n a='literal'>text</n></r>",
+            "<r><n a='first'/><n a='duplicate' a='value'/></r>",
+            "<r><n a='first'/><n a='incomplete",
+        ] {
+            let input = format!("{doctype}{body}");
+            for namespace_separator in [None, Some('|')] {
+                for chunk in 1..=input.len() {
+                    let config = Config {
+                        namespace_separator,
+                        ..Config::default()
+                    };
+                    let owned = collect(input.as_bytes(), chunk, config.clone(), false);
+                    for c_context in [false, true] {
+                        let adapter =
+                            collect_mode(input.as_bytes(), chunk, config.clone(), true, c_context);
+                        assert_eq!(adapter.0, owned.0, "{input:?} {chunk} {c_context}");
+                        assert_eq!(adapter.1 > 0, framed, "{input:?} {chunk} {c_context}");
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn declarations_published_after_a_frame_disable_literal_start_lowering() {
+    for c_context in [false, true] {
+        let mut parser = Parser::new(Config::default());
+        if c_context {
+            parser.enable_input_context();
+        }
+        let mut frame = parser.adapter_frame();
+        let mut event = None;
+        parser.feed(b"<r>", false).unwrap();
+        let next =
+            |parser: &mut Parser, event: &mut Option<Event>, frame: &mut xeme::AdapterFrame| {
+                if c_context {
+                    parser.next_event_for_c_text_context_into(event, frame)
+                } else {
+                    parser.next_event_for_adapter_into(event, frame)
+                }
+            };
+        assert!(next(&mut parser, &mut event, &mut frame).unwrap().is_some());
+        assert!(frame.is_active());
+        assert_eq!(frame.name_bytes(), b"r\0");
+
+        let mut child = parser.external_child(None, None).unwrap();
+        child
+            .feed(
+                b"<!ATTLIST n id ID #IMPLIED words NMTOKENS #IMPLIED added CDATA 'default'>",
+                true,
+            )
+            .unwrap();
+        while child.next_event().unwrap().is_some() {}
+        drop(child);
+
+        parser
+            .feed(b"<n id='item' words=' one  two '/></r>", true)
+            .unwrap();
+        assert!(next(&mut parser, &mut event, &mut frame).unwrap().is_some());
+        assert!(!frame.is_active());
+        let EventKind::StartElement { name, attributes } = &event.as_ref().unwrap().kind else {
+            panic!("expected the attributed element");
+        };
+        assert_eq!(name.as_str(), "n");
+        assert_eq!(parser.id_attribute_index(), Some(0));
+        assert_eq!(attributes[1].value.as_str(), "one two");
+        assert_eq!(attributes[2].value.as_str(), "default");
+        assert!(!attributes[2].specified);
+        while next(&mut parser, &mut event, &mut frame).unwrap().is_some() {}
+        parser.finish_adapter_frame(frame);
+    }
+}
+
+#[test]
 fn literal_frames_keep_duplicate_checks_and_selected_name_rules() {
     for count in [8, 9] {
         let attributes = (0..count)
@@ -598,7 +685,7 @@ fn detached_end_frames_keep_native_and_namespace_undo_boundaries() {
             "<r xmlns:p='one'><p:n xmlns:p='two'><p:c></p:c></p:n><p:c></p:c></r>",
             vec!["two|c", "one|c"],
         ),
-        ("<!DOCTYPE r><r><n></n></r>", vec![]),
+        ("<!DOCTYPE r><r><n></n></r>", vec!["n", "r"]),
     ] {
         for utf16 in [false, true] {
             let input = if utf16 {
@@ -648,7 +735,7 @@ fn detached_end_frames_keep_native_and_namespace_undo_boundaries() {
 }
 
 #[test]
-fn detached_end_frames_recheck_child_publication_and_generation() {
+fn detached_end_frames_survive_child_publication_and_recheck_generation() {
     let mut parser = Parser::new(Config::default());
     let mut frame = parser.adapter_frame();
     parser.feed(b"<r><n></n></r>", true).unwrap();
@@ -666,8 +753,10 @@ fn detached_end_frames_recheck_child_publication_and_generation() {
         .next_event_for_adapter_into(&mut event, &mut frame)
         .unwrap()
         .unwrap();
-    assert!(!frame.is_active());
-    assert!(matches!(event.unwrap().kind, EventKind::EndElement { .. }));
+    assert!(frame.is_active());
+    assert!(event.is_none());
+    assert_eq!(frame.take_end_name().unwrap().as_str(), "n");
+    assert_eq!(parser.current_raw(), Some("</n>"));
     parser.finish_adapter_frame(frame);
 
     let mut first = Parser::new(Config::default());

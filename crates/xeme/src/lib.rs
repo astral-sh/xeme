@@ -2734,9 +2734,11 @@ impl Parser {
             };
             let planned = if mode == ScanMode::Tag
                 && !self.source().remaining().starts_with("</")
-                && !self.seen_doctype
+                // The active table scope includes declarations published by
+                // external children. Types and IDs also require owned lowering,
+                // even when no declaration supplies a default value.
+                && self.tables.defaults.is_empty()
                 && !self.foreign_dtd
-                && self.shared_tables.get().is_none()
                 && !self.fragment
                 && self.sources.len() == 1
                 && let Some(source_index) = self.source().native_utf8_byte_index()
@@ -2789,9 +2791,7 @@ impl Parser {
             if matched_end.is_some()
                 && output.c_text_context
                 && self.input_context.is_some()
-                && !self.seen_doctype
                 && !self.foreign_dtd
-                && self.shared_tables.get().is_none()
                 && self
                     .stack
                     .last()
@@ -2894,9 +2894,7 @@ impl Parser {
                         ScanMode::Pi => self.parse_pi(token.view(), position)?,
                         ScanMode::Doctype => self.parse_doctype(token.view(), position)?,
                         ScanMode::Tag if matched_end.is_some() => {
-                            if !self.seen_doctype
-                                && !self.foreign_dtd
-                                && self.shared_tables.get().is_none()
+                            if !self.foreign_dtd
                                 && self
                                     .stack
                                     .last()

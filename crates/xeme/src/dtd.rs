@@ -166,7 +166,9 @@ impl Parser {
         Ok(())
     }
 
-    fn conditional_raw(&mut self, count: usize) -> Result<(), Error> {
+    /// Account for raw DTD input and queue its default event before consuming it.
+    /// Any such input also closes the window for an XML or text declaration.
+    fn consume_dtd_raw(&mut self, count: usize) -> Result<(), Error> {
         self.account_source(count)?;
         if self.default_events {
             let position = self.source().position(count);
@@ -176,10 +178,6 @@ impl Parser {
         self.declaration_allowed = false;
         self.consume(count)?;
         Ok(())
-    }
-
-    fn start_conditional_section(&mut self) -> Result<bool, Error> {
-        self.start_header_composition()
     }
 
     fn parse_ignored_section(&mut self) -> Result<bool, Error> {
@@ -235,7 +233,7 @@ impl Parser {
         }
         self.conditional.ignored_depth = depth;
         self.conditional.ignored_bytes += offset;
-        self.conditional_raw(offset)?;
+        self.consume_dtd_raw(offset)?;
         Ok(true)
     }
 }
@@ -461,14 +459,7 @@ impl Parser {
             .find(|(_, character)| !whitespace(*character))
             .map_or(text.len(), |(index, _)| index);
         if whitespace_len > 0 {
-            self.account_source(whitespace_len)?;
-            if self.default_events {
-                let position = self.source().position(whitespace_len);
-                self.save_current_raw(whitespace_len)?;
-                self.emit(EventKind::Default, position)?;
-            }
-            self.declaration_allowed = false;
-            self.consume(whitespace_len)?;
+            self.consume_dtd_raw(whitespace_len)?;
             return Ok(true);
         }
         if text
@@ -479,7 +470,7 @@ impl Parser {
             return Err(self.err(ErrorKind::InvalidToken, "invalid XML character in DTD"));
         }
         if text.starts_with("<![") {
-            return self.start_conditional_section();
+            return self.start_header_composition();
         }
         if self.external_subset && text.starts_with(']') {
             if "]]>".starts_with(text) && text.len() < 3 && !self.is_source_final() {
@@ -492,7 +483,7 @@ impl Parser {
                 ));
             }
             self.conditional.included_sources.pop();
-            self.conditional_raw(3)?;
+            self.consume_dtd_raw(3)?;
             return Ok(true);
         }
         if text.starts_with("<!")
@@ -2135,13 +2126,7 @@ fn external_id(
             ));
         }
         let public = cursor.lexical.for_slice(public).decoded(allocator)?;
-        let mut normalized = String::new_in(allocator);
-        for part in public.split_ascii_whitespace() {
-            if !normalized.is_empty() {
-                normalized.push(' ')?;
-            }
-            normalized.push_str(part)?;
-        }
+        let normalized = normalize_public_id(&public, allocator)?;
         let spaced = cursor.space();
         if public_only && !cursor.starts("\"") && !cursor.starts("'") {
             return Ok((None, Some(normalized)));
@@ -2160,6 +2145,22 @@ fn external_id(
     } else {
         Err(syntax("external identifier requires SYSTEM or PUBLIC"))
     }
+}
+
+/// Trim a decoded public identifier and collapse ASCII whitespace runs to spaces.
+/// Callers validate its characters before normalization.
+fn normalize_public_id(
+    value: &str,
+    allocator: Allocator,
+) -> Result<String, xeme_storage::AllocError> {
+    let mut normalized = String::new_in(allocator);
+    for part in value.split_ascii_whitespace() {
+        if !normalized.is_empty() {
+            normalized.push(' ')?;
+        }
+        normalized.push_str(part)?;
+    }
+    Ok(normalized)
 }
 
 fn enumeration(cursor: &mut Cursor<'_>, names: bool) -> Result<(), &'static str> {

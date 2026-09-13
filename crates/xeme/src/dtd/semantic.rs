@@ -243,14 +243,7 @@ impl Parser {
                 .for_slice(&declaration.expansion.text[start + 1..end - 1]);
             let value = if is_public {
                 let value = value.decoded(self.allocator)?;
-                let mut normalized = String::new_in(self.allocator);
-                for part in value.split_ascii_whitespace() {
-                    if !normalized.is_empty() {
-                        normalized.push(' ')?;
-                    }
-                    normalized.push_str(part)?;
-                }
-                normalized
+                normalize_public_id(&value, self.allocator)?
             } else {
                 let index = declaration
                     .expansion

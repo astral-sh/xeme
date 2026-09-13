@@ -87,6 +87,57 @@ fn detached_end_uses_the_selected_owner_and_default_failure_stays_terminal() {
     }
 }
 
+#[test]
+fn empty_end_completes_without_allocating_after_start_suspension() {
+    unsafe extern "C" fn suspend(parser: *mut c_void, _: *const c_char, _: *const *const c_char) {
+        FAIL_NEXT.set(true);
+        // SAFETY: Parser-as-handler-arg supplies the live parser handle.
+        unsafe { assert_eq!(XML_StopParser(parser.cast(), 1), 1) };
+    }
+    unsafe extern "C" fn end(_: *mut c_void, _: *const c_char) {
+        END_CALLS.set(END_CALLS.get() + 1);
+    }
+    let suite = XML_Memory_Handling_Suite {
+        malloc_fcn: Some(custom_malloc),
+        realloc_fcn: Some(custom_realloc),
+        free_fcn: Some(custom_free),
+    };
+    ESCAPES.set(0);
+    END_CALLS.set(0);
+    OBSERVE.set(true);
+    // SAFETY: The selected suite and static input outlive the parser; the
+    // callback suspends while the independently owned End name remains live.
+    unsafe {
+        let parser = XML_ParserCreate_MM(ptr::null(), &suite, ptr::null());
+        assert!(!parser.is_null());
+        CALLBACK_PARSER.set(parser);
+        // An ordinary first tag warms the resumable attribute records, as in
+        // documents containing repeated empty elements.
+        let prefix = c"<root a='warm'>";
+        assert_eq!(
+            XML_Parse(parser, prefix.as_ptr(), prefix.to_bytes().len() as i32, 0),
+            1
+        );
+        XML_UseParserAsHandlerArg(parser);
+        XML_SetElementHandler(parser, Some(suspend), Some(end));
+        let input = c"<empty a='value'/>";
+        assert_eq!(
+            XML_Parse(parser, input.as_ptr(), input.to_bytes().len() as i32, 0),
+            2
+        );
+        assert_eq!(END_CALLS.get(), 1);
+        assert!(FAIL_NEXT.get(), "empty End attempted an allocation");
+        FAIL_NEXT.set(false);
+        assert_eq!(XML_ResumeParser(parser), 1);
+        XML_SetElementHandler(parser, None, None);
+        assert_eq!(XML_Parse(parser, c"</root>".as_ptr(), 7, 1), 1);
+        CALLBACK_PARSER.set(ptr::null_mut());
+        XML_ParserFree(parser);
+    }
+    OBSERVE.set(false);
+    assert_eq!(ESCAPES.get(), 0);
+}
+
 struct Global;
 
 fn observe() {

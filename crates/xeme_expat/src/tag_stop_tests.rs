@@ -8,6 +8,8 @@ struct State {
     resumable: u8,
     default_current: bool,
     replace_end: bool,
+    end_default_current: bool,
+    positions: std::vec::Vec<(c_long, c_int, c_ulong, c_ulong)>,
 }
 
 unsafe fn record(arg: *mut c_void, event: String) {
@@ -16,6 +18,12 @@ unsafe fn record(arg: *mut c_void, event: String) {
     unsafe {
         let state = arg.cast::<State>();
         (*state).events.push(event);
+        (*state).positions.push((
+            XML_GetCurrentByteIndex((*state).parser),
+            XML_GetCurrentByteCount((*state).parser),
+            XML_GetCurrentLineNumber((*state).parser),
+            XML_GetCurrentColumnNumber((*state).parser),
+        ));
         if (*state).events.len() == (*state).stop_at {
             assert_eq!(XML_StopParser((*state).parser, (*state).resumable), OK);
             if (*state).replace_end {
@@ -54,8 +62,92 @@ unsafe extern "C" fn replaced_end(arg: *mut c_void, name: *const c_char) {
         record(
             arg,
             format!("replaced:{}", CStr::from_ptr(name).to_str().unwrap()),
-        )
+        );
+        if (*arg.cast::<State>()).end_default_current {
+            XML_DefaultCurrent((*arg.cast::<State>()).parser);
+        }
     };
+}
+
+#[test]
+fn identity_empty_tags_finish_replaced_end_with_committed_positions() {
+    // SAFETY: Each state, parser and input buffer outlives all callbacks. Input
+    // is chunked at every width, including inside the UTF-8/UTF-16 name and CRLF.
+    unsafe {
+        for xml in ["<n/>", "<n a='v'/>", "<é\r\n/>", "<é\r\n a='v'/>"] {
+            for utf16 in [false, true] {
+                let input = if utf16 {
+                    [0xff, 0xfe]
+                        .into_iter()
+                        .chain(xml.encode_utf16().flat_map(u16::to_le_bytes))
+                        .collect::<std::vec::Vec<_>>()
+                } else {
+                    xml.as_bytes().to_vec()
+                };
+                for width in 1..=input.len() {
+                    for resumable in [0, 1] {
+                        for namespaces in [false, true] {
+                            let parser = if namespaces {
+                                XML_ParserCreateNS(ptr::null(), b'|' as c_char)
+                            } else {
+                                XML_ParserCreate(ptr::null())
+                            };
+                            let mut state = State {
+                                parser,
+                                stop_at: 1,
+                                resumable,
+                                replace_end: true,
+                                end_default_current: true,
+                                ..State::default()
+                            };
+                            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                            XML_SetElementHandler(parser, Some(start), Some(end));
+                            XML_SetDefaultHandler(parser, Some(default));
+                            for (index, chunk) in input.chunks(width).enumerate() {
+                                let final_input = (index + 1) * width >= input.len();
+                                assert_eq!(
+                                    XML_Parse(
+                                        parser,
+                                        chunk.as_ptr().cast(),
+                                        chunk.len() as c_int,
+                                        final_input.into()
+                                    ),
+                                    if final_input {
+                                        if resumable == 1 { SUSPENDED } else { ERROR }
+                                    } else {
+                                        OK
+                                    }
+                                );
+                            }
+                            let name = if xml.contains('é') { "é" } else { "n" };
+                            assert_eq!(
+                                state.events,
+                                [format!("start:{name}"), format!("replaced:{name}")]
+                            );
+                            let (line, column) = if xml.contains('\n') {
+                                (2, xml.rsplit('\n').next().unwrap().len() as c_ulong)
+                            } else {
+                                (1, xml.len() as c_ulong + c_ulong::from(utf16))
+                            };
+                            assert_eq!(
+                                state.positions[1],
+                                (input.len() as c_long, 0, line, column)
+                            );
+                            assert_eq!(
+                                XML_GetErrorCode(parser),
+                                if resumable == 1 { 0 } else { 35 }
+                            );
+                            if resumable == 1 {
+                                assert_eq!(XML_ResumeParser(parser), OK);
+                                assert_eq!(state.events.len(), 2);
+                            }
+                            XML_ParserFree(parser);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 unsafe extern "C" fn start_ns(arg: *mut c_void, prefix: *const c_char, _: *const c_char) {

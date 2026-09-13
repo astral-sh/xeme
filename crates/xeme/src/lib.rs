@@ -666,6 +666,9 @@ pub struct Parser {
     input_context: Option<InputContext>,
     sources: Vec<Source>,
     pending: Queue<PendingEvent>,
+    // A native identity empty tag has no open element or namespace undo scope.
+    // Its detached End name survives switching between adapter and owned delivery.
+    pending_empty_end: Option<String>,
     stack: Vec<Element>,
     // Nonempty undo blocks correspond in order to the declaring elements in
     // `stack`. Elements without declarations leave their ancestors' blocks alone.
@@ -728,7 +731,7 @@ pub struct Parser {
     id_attribute_index: Option<usize>,
 }
 
-/// Borrow only the fields changed by a nonempty identity Start.
+/// Borrow only the fields changed by an identity Start.
 /// Source stays in the parser, and every borrow ends before event delivery.
 struct IdentityStartState<'a> {
     source: &'a Source,
@@ -738,6 +741,8 @@ struct IdentityStartState<'a> {
     raw_attributes: &'a mut Vec<RawAttribute>,
     event_recycling: &'a mut EventRecycling,
     stack: &'a mut Vec<Element>,
+    pending_empty_end: &'a mut Option<String>,
+    closed_root: &'a mut bool,
     id_attribute_index: &'a mut Option<usize>,
     seen_root: &'a mut bool,
     declaration_allowed: &'a mut bool,
@@ -751,6 +756,7 @@ impl IdentityStartState<'_> {
         rest: &str,
         position: Position,
         frame: &mut AdapterFrame,
+        empty: bool,
     ) -> Result<(), Error> {
         let mut raw_attrs = std::mem::replace(self.raw_attributes, Vec::new_in(self.allocator));
         if raw_attrs.len() > self.limits.max_attributes {
@@ -791,18 +797,26 @@ impl IdentityStartState<'_> {
         *self.declaration_allowed = false;
         let reusable = self.event_recycling.take_name();
         let value = recycling::copy_name(name, reusable, self.allocator)?;
-        try_push(
-            self.stack,
-            Element {
-                name: ElementName {
-                    raw_start: 0,
-                    expanded_end: value.len(),
-                    value,
+        if empty {
+            debug_assert!(self.pending_empty_end.is_none());
+            *self.pending_empty_end = Some(value);
+            if self.stack.is_empty() {
+                *self.closed_root = true;
+            }
+        } else {
+            try_push(
+                self.stack,
+                Element {
+                    name: ElementName {
+                        raw_start: 0,
+                        expanded_end: value.len(),
+                        value,
+                    },
+                    raw_encoding: None,
+                    namespace_scope: None,
                 },
-                raw_encoding: None,
-                namespace_scope: None,
-            },
-        )?;
+            )?;
+        }
         if raw_attrs.capacity() <= 128 {
             raw_attrs.clear();
             *self.raw_attributes = raw_attrs;
@@ -854,6 +868,7 @@ impl Parser {
             namespaces,
             default_namespace: None,
             pending: Queue::new_in(allocator),
+            pending_empty_end: None,
             stack: Vec::new_in(allocator),
             namespace_scopes: Vec::new_in(allocator),
             tables,
@@ -1341,6 +1356,7 @@ impl Parser {
         if let Err(error) = result {
             self.error = Some(error);
             self.pending.clear();
+            self.pending_empty_end = None;
         }
         result
     }
@@ -1932,15 +1948,16 @@ impl Parser {
     /// C hosts finish these callbacks before honoring suspension or abortion.
     #[doc(hidden)]
     pub fn has_pending_tag_event(&self) -> bool {
-        self.pending.front().is_some_and(|pending| {
-            matches!(
-                pending.event.kind,
-                EventKind::StartElement { .. }
-                    | EventKind::EndElement { .. }
-                    | EventKind::StartNamespace { .. }
-                    | EventKind::EndNamespace { .. }
-            )
-        })
+        self.pending_empty_end.is_some()
+            || self.pending.front().is_some_and(|pending| {
+                matches!(
+                    pending.event.kind,
+                    EventKind::StartElement { .. }
+                        | EventKind::EndElement { .. }
+                        | EventKind::StartNamespace { .. }
+                        | EventKind::EndNamespace { .. }
+                )
+            })
     }
 
     /// Position for a C host between successful or suspended parsing calls.
@@ -1971,6 +1988,12 @@ impl Parser {
         frame.clear();
         if !self.event_recycling.accepts(&frame.generation) {
             return self.next_event_for_recycling_into(event);
+        }
+        if let Some((name, position)) = self.take_empty_end() {
+            frame.prepare_end(name);
+            frame.publish(position);
+            self.last_position = position;
+            return Ok(Some(self.event_recycling.token()));
         }
         let mut output = EventOutput {
             event,
@@ -2074,6 +2097,7 @@ impl Parser {
         {
             self.error = Some(error);
             self.pending.clear();
+            self.pending_empty_end = None;
             return Err(error);
         }
         self.with_dtd_tables(|parser| parser.next_event_scoped(output))
@@ -2164,6 +2188,7 @@ impl Parser {
         }
         if error.kind == ErrorKind::NoMemory {
             self.pending.clear();
+            self.pending_empty_end = None;
             return Err(error);
         }
         let cleanup = (|| -> Result<(), Error> {
@@ -2182,6 +2207,7 @@ impl Parser {
             output.clear_frame();
             self.error = Some(error);
             self.pending.clear();
+            self.pending_empty_end = None;
             return Err(error);
         }
         if text_prefix {
@@ -2379,6 +2405,12 @@ impl Parser {
     }
     #[inline(always)]
     fn pop_event(&mut self) -> Option<Event> {
+        if let Some((name, position)) = self.take_empty_end() {
+            return Some(Event {
+                kind: EventKind::EndElement { name },
+                position,
+            });
+        }
         let pending = self.pending.pop_front()?;
         if matches!(
             &pending.event.kind,
@@ -2402,6 +2434,16 @@ impl Parser {
             }
         }
         Some(pending.event)
+    }
+
+    /// The start path already consumed the complete tag and committed its
+    /// coordinates. Its End callback has no separate original-input spelling.
+    fn take_empty_end(&mut self) -> Option<(String, Position)> {
+        let name = self.pending_empty_end.take()?;
+        debug_assert!(self.pending.is_empty());
+        self.current_raw.clear();
+        self.native_raw = None;
+        Some((name, self.source().position(0)))
     }
 
     fn save_current_raw(&mut self, count: usize) -> Result<(), Error> {
@@ -2820,9 +2862,8 @@ impl Parser {
                 && self.raw_attributes.len() <= arena::MAX_ARENA_ATTRIBUTES
             {
                 let token = &self.source().remaining()[..end];
-                (!token.ends_with("/>")
-                    && self.identity_frame_names(&token[1..name_end], &token[name_end..end - 1]))
-                .then_some(name_end)
+                self.identity_frame_names(&token[1..name_end], &token[name_end..end - 1])
+                    .then_some(name_end)
             } else {
                 None
             };
@@ -2833,11 +2874,13 @@ impl Parser {
                 let state = self.identity_start_state();
                 let source = state.source;
                 let token = &source.remaining()[..end];
+                let empty = token.ends_with("/>");
                 let parsed = state.lower(
                     &token[1..name_end],
-                    &token[name_end..end - 1],
+                    &token[name_end..end - if empty { 2 } else { 1 }],
                     position,
                     frame,
+                    empty,
                 );
                 // Lowering has released every source/field borrow. Publish the
                 // complete token before either its frame or terminal error.
@@ -4051,6 +4094,8 @@ impl Parser {
             raw_attributes: &mut self.raw_attributes,
             event_recycling: &mut self.event_recycling,
             stack: &mut self.stack,
+            pending_empty_end: &mut self.pending_empty_end,
+            closed_root: &mut self.closed_root,
             id_attribute_index: &mut self.id_attribute_index,
             seen_root: &mut self.seen_root,
             declaration_allowed: &mut self.declaration_allowed,
@@ -4136,10 +4181,14 @@ impl Parser {
         debug_assert!(self.tables.defaults.is_empty());
         debug_assert!(!self.source().has_conversions());
         debug_assert!(!self.fragment && self.sources.len() == 1);
-        if !EXPAND_NAMES && !token.ends_with("/>") {
-            return self
-                .identity_start_state()
-                .lower(name, rest, position, frame);
+        if !EXPAND_NAMES {
+            return self.identity_start_state().lower(
+                name,
+                rest,
+                position,
+                frame,
+                token.ends_with("/>"),
+            );
         }
         let mut raw_attrs =
             std::mem::replace(&mut self.raw_attributes, Vec::new_in(self.allocator));
@@ -6064,7 +6113,7 @@ mod native_raw_context_tests {
                 true,
                 true,
                 false,
-                false,
+                true,
             ),
             (
                 "<r><w a='v'/>",
@@ -6143,7 +6192,16 @@ mod native_raw_context_tests {
                     parser.current_raw().unwrap().as_ptr(),
                     context[raw.start - start..].as_ptr()
                 );
-                parser.feed(b"</n></r>", true).unwrap();
+                parser
+                    .feed(
+                        if tag.ends_with("/>") {
+                            b"</r>"
+                        } else {
+                            b"</n></r>"
+                        },
+                        true,
+                    )
+                    .unwrap();
                 assert_eq!(parser.current_raw(), Some(tag));
                 while parser.next_event().unwrap().is_some() {
                     assert!(parser.native_raw.is_none());

@@ -779,7 +779,7 @@ fn foreign_and_reset_frames_cannot_be_filled_by_another_generation() {
 #[test]
 fn detached_end_frames_keep_native_and_namespace_undo_boundaries() {
     for (xml, expected) in [
-        ("<r><n></n><e/></r>", vec!["n", "r"]),
+        ("<r><n></n><e/></r>", vec!["n", "e", "r"]),
         ("<r><n></n ></r >", vec![]),
         ("<r xmlns:p='u'><p:n></p:n></r>", vec!["u|n"]),
         ("<r xmlns='u'><n></n></r>", vec!["u|n"]),
@@ -822,7 +822,12 @@ fn detached_end_frames_keep_native_and_namespace_undo_boundaries() {
                         if let Some(name) = frame.take_end_name() {
                             assert!(event.is_none());
                             assert_eq!(frame.callback_bytes(), name.len());
-                            assert!(parser.current_raw().unwrap().starts_with("</"));
+                            if name.as_str() == "e" {
+                                assert_eq!(parser.current_raw(), None);
+                                assert_eq!(frame.position().byte_count, 0);
+                            } else {
+                                assert!(parser.current_raw().unwrap().starts_with("</"));
+                            }
                             names.push(name.as_str().to_owned());
                             parser.recycle_end_element(token, name);
                         }
@@ -832,6 +837,66 @@ fn detached_end_frames_keep_native_and_namespace_undo_boundaries() {
                 assert_eq!(names, if utf16 { vec![] } else { expected.clone() });
                 parser.finish_adapter_frame(frame);
             }
+        }
+    }
+}
+
+#[test]
+fn empty_end_survives_switching_delivery_modes_and_frames() {
+    for c_context in [false, true] {
+        for owned_end in [false, true] {
+            let mut parser = Parser::new(Config::default());
+            if c_context {
+                parser.enable_input_context();
+            }
+            let prefix = "<r a='warm'>";
+            parser.feed(prefix.as_bytes(), false).unwrap();
+            parser.next_event().unwrap().unwrap();
+            let input = "<é\r\n a='v'/>";
+            parser.feed(input.as_bytes(), false).unwrap();
+            let mut frame = parser.adapter_frame();
+            let mut event = None;
+            if c_context {
+                parser.next_event_for_c_text_context_into(&mut event, &mut frame)
+            } else {
+                parser.next_event_for_adapter_into(&mut event, &mut frame)
+            }
+            .unwrap();
+            assert!(frame.is_active() && event.is_none());
+            assert_eq!(parser.current_raw(), Some(input));
+            assert!(parser.has_pending_tag_event());
+            parser.finish_adapter_frame(frame);
+            let (name, position) = if owned_end {
+                let event = parser.next_event().unwrap().unwrap();
+                let EventKind::EndElement { name } = event.kind else {
+                    panic!("pending empty end was lost");
+                };
+                (name, event.position)
+            } else {
+                let mut frame = parser.adapter_frame();
+                parser
+                    .next_event_for_adapter_into(&mut event, &mut frame)
+                    .unwrap();
+                assert!(event.is_none());
+                let result = (frame.take_end_name().unwrap(), frame.position());
+                parser.finish_adapter_frame(frame);
+                result
+            };
+            assert_eq!(name.as_str(), "é");
+            assert_eq!(position.byte_index, prefix.len() + input.len());
+            assert_eq!(
+                (position.line, position.column, position.byte_count),
+                (2, 8, 0)
+            );
+            assert_eq!(parser.current_raw(), None);
+            assert!(!parser.has_pending_tag_event());
+            parser.feed(b"</r>", true).unwrap();
+            assert!(matches!(
+                parser.next_event().unwrap().unwrap().kind,
+                EventKind::EndElement { .. }
+            ));
+            assert!(parser.next_event().unwrap().is_none());
+            assert!(parser.is_finished());
         }
     }
 }

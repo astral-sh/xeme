@@ -66,6 +66,7 @@ class FreshBuildTests(unittest.TestCase):
             checkout=checkout,
             output=directory / f"{name}-build",
             target_dir=directory / f"{name}-target",
+            toolchain=None,
         )
 
     def compiler_log(self, stream, checkout: Path, intermediates: Path):
@@ -76,10 +77,29 @@ class FreshBuildTests(unittest.TestCase):
                 "--crate-name",
                 crate,
                 f"crates/{crate}/src/lib.rs",
+                "--target",
+                hillclimb.TARGET,
                 "--out-dir",
-                str(intermediates / "release/deps"),
+                str(intermediates / hillclimb.TARGET / "release/deps"),
             ]
             stream.write(f"Running `{shlex.join(command)}`\n")
+
+    def artifact_message(self, stream, checkout, library, *, fresh=False):
+        stream.write(
+            json.dumps(
+                {
+                    "reason": "compiler-artifact",
+                    "manifest_path": str(checkout / "crates/oriole_expat/Cargo.toml"),
+                    "target": {
+                        "name": "oriole_expat",
+                        "src_path": str(checkout / "crates/oriole_expat/src/lib.rs"),
+                    },
+                    "fresh": fresh,
+                    "filenames": [str(library)],
+                }
+            )
+            + "\n"
+        )
 
     def test_multiline_dependency_metadata_is_not_parsed_as_a_workspace_command(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -111,9 +131,10 @@ class FreshBuildTests(unittest.TestCase):
             baseline = self.checkout(directory, "baseline")
             candidate = self.checkout(directory, "candidate")
 
-            def compiler(command, *, cwd, env, stdout, **kwargs):
+            def compiler(command, *, cwd, env, stdout, stderr, **kwargs):
                 target = (
                     Path(command[command.index("--target-dir") + 1])
+                    / hillclimb.TARGET
                     / "release/liboriole_expat.so"
                 )
                 target.parent.mkdir(parents=True, exist_ok=True)
@@ -121,14 +142,15 @@ class FreshBuildTests(unittest.TestCase):
                 self.assertNotIn("CARGO_BUILD_RUSTC", env)
                 intermediate = Path(env["CARGO_BUILD_BUILD_DIR"])
                 if intermediate == shared:
-                    stdout.write(
+                    stderr.write(
                         "Fresh oriole_storage\nFresh oriole\nFresh oriole_expat\n"
                     )
                     target.write_bytes(cached.read_bytes())
                 else:
                     self.assertEqual(list(intermediate.iterdir()), [])
-                    self.compiler_log(stdout, cwd, intermediate)
+                    self.compiler_log(stderr, cwd, intermediate)
                     target.write_bytes((cwd / "crates/oriole/src/lib.rs").read_bytes())
+                self.artifact_message(stdout, cwd, target)
 
             with (
                 patch.dict(
@@ -165,14 +187,14 @@ class FreshBuildTests(unittest.TestCase):
             with self.subTest(mode=mode), tempfile.TemporaryDirectory() as temporary:
                 args = self.checkout(Path(temporary), "candidate")
 
-                def compiler(command, *, cwd, env, stdout, mode=mode, **kwargs):
+                def compiler(command, *, cwd, env, stderr, mode=mode, **kwargs):
                     if mode == "cached":
-                        stdout.write(
+                        stderr.write(
                             "Fresh oriole_storage\nFresh oriole\nFresh oriole_expat\n"
                         )
                     else:
                         self.compiler_log(
-                            stdout,
+                            stderr,
                             cwd.parent / "another-checkout",
                             Path(env["CARGO_BUILD_BUILD_DIR"]),
                         )
@@ -190,6 +212,92 @@ class FreshBuildTests(unittest.TestCase):
                     "failed",
                 )
                 self.assertFalse((args.output / "liboriole_expat.so").exists())
+
+    def test_configured_target_cannot_publish_old_host_artifact(self):
+        for toolchain in [None, "ohm"]:
+            with (
+                self.subTest(toolchain=toolchain),
+                tempfile.TemporaryDirectory() as temporary,
+            ):
+                args = self.checkout(Path(temporary), "candidate")
+                args.toolchain = toolchain
+                config = args.checkout / ".cargo/config.toml"
+                config.parent.mkdir()
+                config.write_text('[build]\ntarget = "aarch64-unknown-linux-gnu"\n')
+                stale = args.target_dir / "release/liboriole_expat.so"
+                stale.parent.mkdir(parents=True)
+                stale.write_bytes(b"old baseline")
+                fresh = (
+                    args.target_dir / hillclimb.TARGET / "release/liboriole_expat.so"
+                )
+
+                def compiler(
+                    command,
+                    *,
+                    cwd,
+                    env,
+                    stdout,
+                    stderr,
+                    toolchain=toolchain,
+                    fresh=fresh,
+                    **kwargs,
+                ):
+                    self.assertEqual(
+                        command[command.index("--target") + 1], hillclimb.TARGET
+                    )
+                    self.assertIn("--message-format=json-render-diagnostics", command)
+                    if toolchain == "ohm":
+                        self.assertEqual(
+                            command[:3], ["cargo", "+ohm", "-Zohm-defaults=no"]
+                        )
+                    else:
+                        self.assertEqual(command[:2], ["cargo", "rustc"])
+                    self.compiler_log(stderr, cwd, Path(env["CARGO_BUILD_BUILD_DIR"]))
+                    fresh.parent.mkdir(parents=True)
+                    fresh.write_bytes(b"fresh candidate")
+                    self.artifact_message(stdout, cwd, fresh)
+
+                with (
+                    patch.object(
+                        hillclimb.subprocess, "check_output", return_value="test"
+                    ),
+                    patch.object(hillclimb.subprocess, "run", side_effect=compiler),
+                ):
+                    hillclimb.build(args)
+                report = json.loads((args.output / "build.json").read_text())
+                self.assertEqual(report["status"], "passed")
+                self.assertEqual(report["emitted_library"], str(fresh))
+                self.assertEqual(
+                    (args.output / "liboriole_expat.so").read_bytes(),
+                    b"fresh candidate",
+                )
+                self.assertEqual(stale.read_bytes(), b"old baseline")
+
+    def test_only_current_uncached_emitted_library_is_accepted(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            args = self.checkout(Path(temporary), "candidate")
+            library = args.target_dir / hillclimb.TARGET / "release/liboriole_expat.so"
+            library.parent.mkdir(parents=True)
+            library.write_bytes(b"candidate")
+            stream = io.StringIO()
+            self.artifact_message(stream, args.checkout, library)
+            message = json.loads(stream.getvalue())
+            variants = [[], [message, message]]
+            for key, value in [
+                ("fresh", True),
+                ("manifest_path", str(args.checkout / "foreign/Cargo.toml")),
+                ("filenames", []),
+            ]:
+                changed = copy.deepcopy(message)
+                changed[key] = value
+                variants.append([changed])
+            for messages in variants:
+                with self.subTest(messages=messages), self.assertRaises(ValueError):
+                    hillclimb.library_artifact(
+                        "\n".join(json.dumps(item) for item in messages),
+                        args.checkout,
+                        args.target_dir,
+                    )
 
 
 class BuildBindingTests(unittest.TestCase):

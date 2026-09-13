@@ -17,9 +17,9 @@ runs together; this entrypoint does not reproduce historical timings exactly.
 
 ## 1. Freeze the baseline and candidate
 
-Prerequisites: the Ohm Rust toolchain, Python, uv, a C compiler, CMake, Git, `taskset`
-and `readelf`. Run from the repository root. Keep one stable Cargo target directory
-per worktree and the existing shared Ohm build directory separate. Choose a new
+Prerequisites: Rust 1.96 or later, Cargo, Python, uv, a C compiler, CMake, Git,
+`taskset` and `readelf`. Run from the repository root. Keep one stable Cargo target
+directory per worktree. Choose a new
 study directory; build and measurement commands refuse to overwrite existing
 outputs.
 
@@ -27,10 +27,7 @@ outputs.
 benchmark_root="$PWD/../oriole-bench"
 study="$benchmark_root/study-001"
 mkdir -p "$study"
-export CARGO_BUILD_BUILD_DIR="$benchmark_root/shared-build"
-
-cargo +ohm worktree add -b bench-baseline "$benchmark_root/baseline" main \
-  --target-dir "$benchmark_root/baseline-target"
+git worktree add -b bench-baseline "$benchmark_root/baseline" main
 
 python3 -I -S benchmarks/hillclimb.py build \
   --checkout "$benchmark_root/baseline" \
@@ -40,11 +37,19 @@ python3 -I -S benchmarks/hillclimb.py build \
   --output "$study/candidate"
 ```
 
-The builder uses `cargo +ohm -Zohm-defaults=no rustc`, ordinary O3, ThinLTO, one
-codegen unit and generic x86-64. It selects only the C library crate types so
-ThinLTO takes effect. Each output contains a frozen shared library, compiler/source
-hashes and verbose compiler commands in `build.log`. Build both revisions with the
-same compiler.
+The builder uses the checkout's configured Rust toolchain, ordinary O3, ThinLTO,
+one codegen unit and generic x86-64. Set `--toolchain stable`, or another rustup
+toolchain name, to choose one explicitly. Local Ohm users must pass
+`--toolchain ohm`; this adds `+ohm -Zohm-defaults=no` to Cargo commands. Ohm is
+optional and is not required for CI or reproduction.
+
+The build explicitly targets `x86_64-unknown-linux-gnu` and selects only the C
+library crate types so ThinLTO takes effect. It freezes the exact shared library
+named in Cargo's fresh `compiler-artifact` message, verifying its source,
+manifest and target path. An old library at `target/release` cannot satisfy this
+check. Each output retains compiler/source hashes, verbose compiler commands in
+`build.log`, and Cargo's emitted artifact records in `cargo-messages.jsonl`.
+Build both revisions with the same compiler.
 
 Controlled benchmark builds use a **fresh `output/intermediates` directory** for
 the subprocess's `CARGO_BUILD_BUILD_DIR`, while keeping each worktree's stable

@@ -426,3 +426,232 @@ mod tests {
         assert_eq!(text(&mut parent, b"<!DOCTYPE r SYSTEM 'd'><r>&e;</r>"), "E");
     }
 }
+
+#[cfg(test)]
+mod import_tests {
+    use super::*;
+    use crate::{Config, ErrorKind, Limits};
+
+    fn donor(xml: &str) -> Parser {
+        let root = Parser::new(Config::default());
+        let mut donor = root.external_child(None, None).unwrap();
+        donor.feed(xml.as_bytes(), true).unwrap();
+        while donor.next_event().unwrap().is_some() {}
+        donor
+    }
+
+    #[test]
+    fn unrelated_imports_charge_new_storage_and_preserve_existing_definitions() {
+        for xml in [
+            "<!ENTITY e 'value'>",
+            "<!ENTITY % e 'value'>",
+            "<!ATTLIST r a CDATA 'value'>",
+        ] {
+            let donor = donor(xml);
+            let mut recipient = Parser::new(Config {
+                limits: Limits {
+                    max_entity_expansion_bytes: 0,
+                    ..Limits::default()
+                },
+                ..Config::default()
+            });
+            let error = recipient.merge_external_subset(&donor).unwrap_err();
+            assert_eq!(error.kind, ErrorKind::LimitExceeded);
+            assert_eq!(recipient.next_event().unwrap_err(), error);
+            recipient
+                .with_dtd_tables(|parser| {
+                    assert!(parser.tables.is_empty());
+                    Ok(())
+                })
+                .unwrap();
+        }
+
+        let first = donor("<!ATTLIST r a CDATA 'first'>");
+        let duplicate = donor("<!ATTLIST r a CDATA 'second'>");
+        let additional = donor("<!ATTLIST s a CDATA 'new'>");
+        let mut recipient = Parser::new(Config::default());
+        recipient.merge_external_subset(&first).unwrap();
+        let charged = recipient
+            .expanded
+            .expanded
+            .load(std::sync::atomic::Ordering::Relaxed);
+        assert!(charged > "first".len());
+        recipient
+            .set_limits(Limits {
+                max_entity_expansion_bytes: charged,
+                ..Limits::default()
+            })
+            .unwrap();
+        recipient.merge_external_subset(&duplicate).unwrap();
+        recipient
+            .with_dtd_tables(|parser| {
+                assert_eq!(
+                    parser
+                        .tables
+                        .defaults
+                        .get("r")
+                        .unwrap()
+                        .get("a")
+                        .unwrap()
+                        .value
+                        .as_deref(),
+                    Some("first")
+                );
+                Ok(())
+            })
+            .unwrap();
+        assert_eq!(
+            recipient
+                .merge_external_subset(&additional)
+                .unwrap_err()
+                .kind,
+            ErrorKind::LimitExceeded
+        );
+    }
+
+    #[test]
+    fn unrelated_import_strings_use_the_recipient_allocator() {
+        let donor = donor(
+            "<!ENTITY e 'value'><!ENTITY % p 'parameter'><!ENTITY external PUBLIC 'public' 'system'><!ATTLIST r a CDATA 'default'>",
+        );
+        let mut recipient =
+            Parser::try_new_in(Config::default(), Allocator::TrackedSystem).unwrap();
+        recipient.merge_external_subset(&donor).unwrap();
+        recipient
+            .with_dtd_tables(|parser| {
+                let check =
+                    |value: &String| assert!(matches!(value.allocator(), Allocator::TrackedSystem));
+                for (name, entity) in parser
+                    .tables
+                    .entities
+                    .iter()
+                    .chain(&parser.tables.parameter_entities)
+                {
+                    check(name);
+                    for value in [
+                        &entity.value,
+                        &entity.system_id,
+                        &entity.public_id,
+                        &entity.notation,
+                    ]
+                    .into_iter()
+                    .flatten()
+                    {
+                        check(value);
+                    }
+                }
+                for (name, attributes) in &parser.tables.defaults {
+                    check(name);
+                    for attribute in &attributes.ordered {
+                        check(&attribute.name);
+                        check(&attribute.attribute_type);
+                        check(attribute.value.as_ref().unwrap());
+                    }
+                    for name in attributes.by_name.keys() {
+                        check(name);
+                    }
+                }
+                Ok(())
+            })
+            .unwrap();
+        drop(donor);
+        recipient
+            .feed(b"<!DOCTYPE r SYSTEM 'd'><r>&e;</r>", true)
+            .unwrap();
+        while recipient.next_event().unwrap().is_some() {}
+        assert!(recipient.is_finished());
+    }
+
+    #[test]
+    fn unrelated_imports_copy_and_charge_declaration_bases() {
+        let mut base = vec![b'x'; 4096];
+        base[0] = 0xff;
+        let root = Parser::new(Config::default());
+        let mut donor = root.external_child(None, None).unwrap();
+        donor.set_base(Some(&base)).unwrap();
+        donor
+            .feed(
+                b"<!ENTITY e SYSTEM 'system'><!ENTITY % p SYSTEM 'parameter'>",
+                true,
+            )
+            .unwrap();
+        while donor.next_event().unwrap().is_some() {}
+
+        let mut limited = Parser::new(Config {
+            limits: Limits {
+                max_entity_expansion_bytes: 1024,
+                ..Limits::default()
+            },
+            ..Config::default()
+        });
+        assert_eq!(
+            limited.merge_external_subset(&donor).unwrap_err().kind,
+            ErrorKind::LimitExceeded
+        );
+        limited
+            .with_dtd_tables(|parser| {
+                assert!(parser.tables.is_empty());
+                Ok(())
+            })
+            .unwrap();
+
+        let donor_owners = donor
+            .with_dtd_tables(|parser| {
+                Ok(parser.tables.entities["e"]
+                    .base
+                    .as_ref()
+                    .unwrap()
+                    .strong_count())
+            })
+            .unwrap();
+        let mut recipient =
+            Parser::try_new_in(Config::default(), Allocator::TrackedSystem).unwrap();
+        recipient.set_base(Some(b"/recipient/current")).unwrap();
+        recipient.merge_external_subset(&donor).unwrap();
+        recipient
+            .with_dtd_tables(|parser| {
+                for entity in parser
+                    .tables
+                    .entities
+                    .values()
+                    .chain(parser.tables.parameter_entities.values())
+                {
+                    let imported = entity.base.as_ref().unwrap();
+                    assert_eq!(imported.as_slice(), base);
+                    assert!(matches!(imported.allocator(), Allocator::TrackedSystem));
+                }
+                Ok(())
+            })
+            .unwrap();
+        donor
+            .with_dtd_tables(|parser| {
+                assert_eq!(
+                    parser.tables.entities["e"]
+                        .base
+                        .as_ref()
+                        .unwrap()
+                        .strong_count(),
+                    donor_owners
+                );
+                Ok(())
+            })
+            .unwrap();
+        drop(donor);
+        drop(root);
+
+        recipient
+            .feed(b"<!DOCTYPE r SYSTEM 'd'><r>&e;</r>", true)
+            .unwrap();
+        let mut requested = false;
+        while let Some(event) = recipient.next_event().unwrap() {
+            if let crate::EventKind::ExternalEntityReference(reference) = event.kind {
+                assert_eq!(reference.system_id.as_deref(), Some("system"));
+                let retained = reference.base.as_ref().unwrap();
+                assert_eq!(retained.as_slice(), base);
+                assert!(matches!(retained.allocator(), Allocator::TrackedSystem));
+                requested = true;
+            }
+        }
+        assert!(requested);
+    }
+}

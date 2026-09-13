@@ -229,6 +229,11 @@ jobs:
                   "context_text_invalid_host_range_fails_closed",
                   "context_text_warmed_reservations_do_not_allocate",
                   "context_text_late_handler_after_suspension_uses_eager_raw",
+                  "ignored_comments_preserve_split_encoding_errors_and_positions",
+                  "comment_interest_tracks_callbacks_partial_tokens_suspension_children_and_reset",
+                  "ignored_comment_allocation_failures_keep_error_contracts_and_cleanup",
+                  "comment_handlers_keep_prefixes_before_entity_limit_errors",
+                  "ignored_comments_release_previous_native_context_ranges",
               },
           }
           for target, names in expected.items():

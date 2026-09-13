@@ -1,10 +1,16 @@
-# Reserved project XML holdout
+# Project XML holdout
+
+**Evaluated on 2026-09-13.** The [first evaluation](../../docs/evidence/2026-09-13-review.md#performance)
+used runtime `ec4d068` after recording its selection, and retained every input
+and condition. Both real aggregates missed the 1.20× Expat goal. These inputs are
+now a regression corpus; they cannot support another claim of unseen performance.
+The acquisition and freeze records below preserve their original, pre-evaluation
+state.
 
 These five projects were selected by production document role before any XML
-parsing or timing. The complete upstream blobs are reserved for one final
-evaluation after code selection. Do not use this corpus to select or tune a
-candidate change. Once results have been observed, this corpus is no longer an
-unseen holdout for subsequent changes.
+parsing or timing. The complete upstream blobs were reserved for one final
+evaluation after code selection. Their first evaluation did not select or tune a
+candidate change.
 
 | Project | Original input | Bytes | Role |
 | --- | --- | ---: | --- |

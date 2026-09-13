@@ -11,6 +11,27 @@ fn header_implementation_version_matches_package_version() {
 }
 
 #[test]
+fn feature_metadata_and_null_attribute_count_match_expat() {
+    // SAFETY: The feature table is static and terminated by XML_FEATURE_END.
+    unsafe {
+        assert_eq!(XML_GetSpecifiedAttributeCount(ptr::null_mut()), -1);
+        let mut features = XML_GetFeatureList();
+        let mut enabled = Vec::new();
+        while (*features).feature != 0 {
+            enabled.push((
+                (*features).feature,
+                CStr::from_ptr((*features).name),
+                (*features).value,
+            ));
+            features = features.add(1);
+        }
+        assert!(enabled.contains(&(3, c"XML_DTD", 0)));
+        assert!(enabled.contains(&(13, c"XML_GE", 0)));
+        assert!(!enabled.iter().any(|(feature, _, _)| *feature == 10));
+    }
+}
+
+#[test]
 fn entity_amplification_controls_apply_after_suspension_and_reset_to_defaults() {
     unsafe extern "C" fn suspend(data: *mut c_void, _: *const c_char, _: *const *const c_char) {
         // SAFETY: Parser-as-handler-argument supplies the active test parser.

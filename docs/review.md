@@ -44,7 +44,5 @@ some consumers even when acceptance and coalesced text agree. The
 [compatibility guide](compatibility.md) describes known differences and resource
 limits.
 
-Measure performance changes against a fresh parent build with equivalent inputs,
-callbacks, chunk sizes, compilers, and allocators. Report workload regressions
-alongside aggregate results. Keep generated stress inputs separate from project
-XML and native timings separate from CPython consumer timings.
+See [contributing](../CONTRIBUTING.md#review-and-performance) for performance
+comparison requirements.

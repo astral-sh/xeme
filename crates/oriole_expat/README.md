@@ -5,10 +5,9 @@ archive. [The public header](../../include/expat.h) describes that ABI; its Expa
 version macros, `XML_ExpatVersionInfo()`, and the `oriole_compat_2.8.4` string from
 `XML_ExpatVersion()` identify the same targeted API revision. The separate
 `ORIOLE_VERSION` header macro and Cargo package version identify the Oriole
-implementation, currently `0.0.1`. Reporting an API target does not establish
-complete feature, behavioral, or security equivalence with Expat. Consumers that
-require Expat's literal version string still distinguish Oriole. The header
-retains the upstream Expat authors' MIT notice.
+implementation, currently `0.0.1`. Consumers that require Expat's literal version
+string still distinguish Oriole. The header retains the upstream Expat authors'
+MIT notice.
 
 ## Build the C libraries
 
@@ -33,7 +32,8 @@ selection for both training and optimized compilation.
 ## Ownership and callbacks
 
 Each parser and its external-entity family require serialized access, as with
-Expat's synchronous external DTD processing. Event strings and attribute
+Expat's synchronous external DTD processing. Parent reset and destruction must
+also be serialized with operations on its children. Event strings and attribute
 arrays remain valid only for their callback. No Rust reference to the parser crosses
 a callback: handlers receive owned event data, and handler changes take effect for
 subsequent events.
@@ -94,11 +94,10 @@ callbacks and semantic lookups receive decoded strings. Sparse provenance uses
 the selected parser allocator and existing memory and work budgets; ordinary
 UTF-8 input does not allocate provenance records.
 
-This support does not imply exact callback or diagnostic compatibility. External
-DTD default-handler prefixes and some malformed-input errors, callback prefixes,
-and positions still differ. Invalid maps, supplementary converted characters,
-and forbidden XML characters remain errors; the external value-child declaration
-restrictions below also apply.
+External DTD default-handler prefixes and some malformed-input errors, callback
+prefixes, and positions still differ. Invalid maps, supplementary converted
+characters, and forbidden XML characters remain errors; the external value-child
+declaration restrictions below also apply.
 
 The C interface uses XML 1.0 Fourth Edition name rules to match the pinned
 Expat 2.8.4 reference, including in DTDs, references, and custom-encoding byte
@@ -187,13 +186,6 @@ with consumed root input. See [streaming resource limits](../../docs/compatibili
 for the limits and accounting rules. A parser family permits at most 1,024 child
 creations and 32 levels of external-child ancestry.
 
-These remaining boundaries prevent claiming complete Expat compatibility.
-Unmodified CPython can use its standard custom allocator suite; the actual consumer
-tests and their remaining failures are recorded separately from allocation-failure
-tests. See [the release gates](../../docs/compatibility.md) for the integration plan.
-
-Parent lifetime tokens use an inline atomic pointer. This avoids the hidden
-allocation performed by the standard library's pthread-backed mutex on macOS,
-keeping lifetime storage within the selected memory suite. The token detects a
-parent reset or destruction; callers still serialize related-parser operations
-while a child uses its parent. It does not make concurrent parent destruction safe.
+CPython can use its standard custom allocator suite. See the
+[compatibility guide](../../docs/compatibility.md) for remaining consumer
+differences.

@@ -35,8 +35,8 @@ impl<'a> Reader<'a> {
         }
     }
 
+    /// Consume a quantifier only when it immediately follows a name or closing parenthesis.
     fn quant(&mut self) -> i32 {
-        // Quantifiers must immediately follow the name/closing parenthesis.
         let quant = match self.text.as_bytes().first() {
             Some(b'?') => 1,
             Some(b'*') => 2,
@@ -47,12 +47,12 @@ impl<'a> Reader<'a> {
         quant
     }
 
+    /// Read one content-model particle, bounding nesting and total node count.
     fn node(&mut self, depth: usize) -> Result<Model<'a>, i32> {
         if depth > 128 || self.nodes >= 10_000 {
             return Err(43);
         }
         self.nodes += 1;
-        self.trim();
         if self.take("(") {
             if self.take("#PCDATA") {
                 let mut children = Vec::new_in(self.allocator);
@@ -68,9 +68,8 @@ impl<'a> Reader<'a> {
                     return Err(2);
                 }
                 let quant = self.quant();
-                if (children.is_empty() && quant != 0 && quant != 2)
-                    || (!children.is_empty() && quant != 2)
-                {
+                // Mixed content requires `*`, except that bare `(#PCDATA)` is legal.
+                if quant != 2 && (quant != 0 || !children.is_empty()) {
                     return Err(2);
                 }
                 return Ok(Model {
@@ -137,14 +136,8 @@ fn count(model: &Model<'_>) -> (usize, usize) {
 pub(super) fn allocate(text: &str, allocator: Allocator) -> Result<*mut XML_Content, i32> {
     let text = text.trim();
     let model = match text {
-        "EMPTY" => Model {
-            kind: 1,
-            quant: 0,
-            name: None,
-            children: Vec::new_in(allocator),
-        },
-        "ANY" => Model {
-            kind: 2,
+        "EMPTY" | "ANY" => Model {
+            kind: if text == "EMPTY" { 1 } else { 2 },
             quant: 0,
             name: None,
             children: Vec::new_in(allocator),

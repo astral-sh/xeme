@@ -2302,6 +2302,100 @@ fn arena_start_enforces_exact_callback_budget_with_default_fallback() {
 }
 
 #[test]
+fn empty_element_default_fallback_respects_either_element_handler() {
+    unsafe extern "C" fn element_start(
+        data: *mut c_void,
+        name: *const c_char,
+        _: *const *const c_char,
+    ) {
+        // SAFETY: The test owns the callback state and Expat lends the name.
+        unsafe {
+            (*data.cast::<State>())
+                .events
+                .push(format!("start:{}", CStr::from_ptr(name).to_str().unwrap()));
+        }
+    }
+    for xml in ["<r/>", "<r a='&amp;'/>", "<r xmlns:p='u'/>", "<r></r>"] {
+        for utf16 in [false, true] {
+            let bytes = if utf16 {
+                [0xff, 0xfe]
+                    .into_iter()
+                    .chain(xml.encode_utf16().flat_map(u16::to_le_bytes))
+                    .collect::<Vec<_>>()
+            } else {
+                xml.as_bytes().to_vec()
+            };
+            for width in [1, bytes.len()] {
+                for buffered in [false, true] {
+                    for expand in [false, true] {
+                        for handlers in 0..4 {
+                            // SAFETY: State, parser, callback arguments and input
+                            // remain live through every synchronous parse call.
+                            unsafe {
+                                let parser = XML_ParserCreateNS(ptr::null(), b'|' as c_char);
+                                assert!(!parser.is_null());
+                                let mut state = State::default();
+                                XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                                XML_SetElementHandler(
+                                    parser,
+                                    (handlers & 1 != 0).then_some(element_start),
+                                    (handlers & 2 != 0).then_some(end),
+                                );
+                                if expand {
+                                    XML_SetDefaultHandlerExpand(parser, Some(text));
+                                } else {
+                                    XML_SetDefaultHandler(parser, Some(text));
+                                }
+                                let mut chunks = bytes.chunks(width).peekable();
+                                while let Some(chunk) = chunks.next() {
+                                    let final_input = c_int::from(chunks.peek().is_none());
+                                    let status = if buffered {
+                                        let buffer = XML_GetBuffer(parser, chunk.len() as c_int);
+                                        assert!(!buffer.is_null());
+                                        ptr::copy_nonoverlapping(
+                                            chunk.as_ptr(),
+                                            buffer.cast(),
+                                            chunk.len(),
+                                        );
+                                        XML_ParseBuffer(parser, chunk.len() as c_int, final_input)
+                                    } else {
+                                        XML_Parse(
+                                            parser,
+                                            chunk.as_ptr().cast(),
+                                            chunk.len() as c_int,
+                                            final_input,
+                                        )
+                                    };
+                                    assert_eq!(status, OK);
+                                }
+                                let mut expected = Vec::new();
+                                if handlers & 1 != 0 {
+                                    expected.push("start:r".to_owned());
+                                } else if !xml.ends_with("/>") {
+                                    expected.push("text:<r>".to_owned());
+                                } else if handlers & 2 == 0 {
+                                    expected.push(format!("text:{xml}"));
+                                }
+                                if handlers & 2 != 0 {
+                                    expected.push("end:r".to_owned());
+                                } else if !xml.ends_with("/>") {
+                                    expected.push("text:</r>".to_owned());
+                                }
+                                assert_eq!(
+                                    state.events, expected,
+                                    "{xml}, handlers={handlers}, utf16={utf16}, width={width}, buffered={buffered}, expand={expand}"
+                                );
+                                XML_ParserFree(parser);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn detached_end_charges_the_name_before_handlers_or_default_fallback() {
     for end_handler in [false, true] {
         for default_handler in [false, true] {
@@ -5523,6 +5617,86 @@ fn external_entity_references_retain_declaration_bases() {
                     assert_eq!(state.calls, expected, "mode={mode}, buffered={buffered}");
                     XML_ParserFree(parser);
                 }
+            }
+        }
+    }
+}
+
+#[test]
+fn builtin_protocol_detection_preserves_external_content_exceptions() {
+    // The mode distinguishes root, external DTD and external general content.
+    for (input, protocol, mode, expected) in [
+        (
+            b"\xef\xbb\xbf<r>\xc3\xa9</r>".as_slice(),
+            c"ISO-8859-1",
+            0,
+            "é",
+        ),
+        (b"<\0r\0>\0\xe9\0<\0/\0r\0>\0", c"UTF-8", 0, "é"),
+        (b"\xef\xbb\xbf<!ELEMENT r ANY>", c"UTF-16", 1, ""),
+        (b"<\0r\0>\0\xe9\0<\0/\0r\0>\0", c"ISO-8859-1", 2, "é"),
+        (b"\xff\xfeL ", c"ISO-8859-1", 2, "ÿþL "),
+        (b"\xef\xbb\xbfX", c"ISO-8859-1", 2, "ï»¿X"),
+        (b"\xef\xbb\xbf\0", c"UTF-16", 2, "\u{efbb}\u{bf00}"),
+        (b"\xef\xbb\xbf\0", c"UTF-16LE", 2, "믯¿"),
+        (b"<\0", c"UTF-16BE", 2, "㰀"),
+        (b"\0<", c"UTF-16LE", 2, "㰀"),
+        (b"a\0b\0c\0", c"UTF-16", 2, "愀戀挀"),
+    ] {
+        for setter in [false, true] {
+            for split in 0..=input.len() {
+                let mut state = State::default();
+                // SAFETY: Parsers, input and callback state remain live until
+                // all feeds complete; every encoded byte span is length-delimited.
+                unsafe {
+                    let requested = if setter {
+                        ptr::null()
+                    } else {
+                        protocol.as_ptr()
+                    };
+                    let parent = XML_ParserCreate(if mode == 0 { requested } else { ptr::null() });
+                    assert!(!parent.is_null());
+                    let parser = if mode == 0 {
+                        parent
+                    } else {
+                        XML_ExternalEntityParserCreate(
+                            parent,
+                            if mode == 1 { ptr::null() } else { c"".as_ptr() },
+                            requested,
+                        )
+                    };
+                    assert!(!parser.is_null());
+                    if setter {
+                        assert_eq!(XML_SetEncoding(parser, protocol.as_ptr()), 1);
+                    }
+                    XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                    XML_SetCharacterDataHandler(parser, Some(text));
+                    for (part, final_input) in [(&input[..split], 0), (&input[split..], 1)] {
+                        assert_eq!(
+                            XML_Parse(
+                                parser,
+                                part.as_ptr().cast(),
+                                part.len() as c_int,
+                                final_input
+                            ),
+                            OK,
+                            "input={input:?}, protocol={protocol:?}, mode={mode}, setter={setter}, split={split}"
+                        );
+                    }
+                    assert_eq!(XML_GetCurrentByteIndex(parser), input.len() as c_long);
+                    XML_ParserFree(parser);
+                    if mode != 0 {
+                        XML_ParserFree(parent);
+                    }
+                }
+                assert_eq!(
+                    state
+                        .events
+                        .iter()
+                        .filter_map(|event| event.strip_prefix("text:"))
+                        .collect::<String>(),
+                    expected
+                );
             }
         }
     }

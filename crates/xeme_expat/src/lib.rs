@@ -792,7 +792,13 @@ unsafe fn dispatch(
                     }
                     callback(arg, name.as_ptr().cast(), output.as_ptr());
                 } else {
-                    handled = false;
+                    // Expat routes an empty tag through its element handlers
+                    // when either handler is installed, including end-only use.
+                    handled = h.end_element.is_some()
+                        && (*parser)
+                            .core
+                            .current_raw()
+                            .is_some_and(|raw| raw.ends_with("/>"));
                 }
                 // The callback and pointer-array borrow have ended. The busy
                 // guard still pins the parser, including after Stop or ignored
@@ -1244,6 +1250,17 @@ unsafe fn dispatch_start_frame(
         )
     };
     let Some(callback) = callback else {
+        // SAFETY: The guarded parser is borrowed only to inspect current state;
+        // the empty tag's queued end callback will consume this token.
+        if unsafe {
+            (*parser).handlers.end_element.is_some()
+                && (*parser)
+                    .core
+                    .current_raw()
+                    .is_some_and(|raw| raw.ends_with("/>"))
+        } {
+            return Ok(());
+        }
         // SAFETY: No parser borrow crosses the owned raw-fragment callbacks.
         return unsafe { dispatch_unhandled(parser, false, None, true) };
     };

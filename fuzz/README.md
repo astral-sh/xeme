@@ -1,6 +1,8 @@
 # Fuzzing
 
-The `parse` target checks arbitrary bytes against bounded parser limits. The
+The `parse` target checks arbitrary bytes with both a 64 KiB token limit and a
+small token limit selected by the first input byte. This exercises token errors
+independently of the total-input limit. The
 `streaming` target compares acceptance and owned events for whole-input and
 incremental parsing; it coalesces adjacent character-data fragments because XML
 callback fragmentation may vary by input chunking. Its first byte selects chunk
@@ -11,6 +13,8 @@ input, reset, suspension, callback changes, callback-time deletion, and rejected
 reentry. It retains and frees content models and injects failure into a custom
 allocator, checking that every successful allocation is released. It does not
 pass invalid pointers or deliberately use already-freed handles.
+Bits 1–3 of the second control byte select a built-in protocol encoding.
+Named Unicode-signature seeds exercise detection with a conflicting protocol.
 
 The `ffi_family` target creates bounded external-parser families with a custom
 allocator, then varies child input, allocation failures, buffer requests, parent

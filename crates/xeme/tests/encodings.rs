@@ -241,7 +241,7 @@ fn external_content_retains_explicit_encodings_and_utf16_signatures() {
         (&b"\0<\0r\0/\0>"[..], None, ""),
         (&b"\xff\xfea\0b\0c\0"[..], None, "abc"),
         (&b"a\0b\0c\0"[..], Some("UTF-16LE"), "abc"),
-        (&b"a\0b\0c\0"[..], Some("UTF-16"), "abc"),
+        (&b"a\0b\0c\0"[..], Some("UTF-16"), "愀戀挀"),
     ] {
         for width in 1..=input.len() {
             let parent = Parser::new(Config::default());
@@ -366,6 +366,63 @@ fn declaration_limits_precede_encoding_detection_across_chunk_boundaries() {
                         assert_eq!(
                             parser.next_event().unwrap_err().kind,
                             ErrorKind::LimitExceeded
+                        );
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn unicode_signatures_override_builtin_protocol_encodings() {
+    for protocol in [
+        "UTF-8",
+        "UTF-16",
+        "UTF-16LE",
+        "UTF-16BE",
+        "ISO-8859-1",
+        "US-ASCII",
+    ] {
+        for encoding in [0, 1, 2] {
+            for bom in [false, true] {
+                if encoding == 0 && !bom {
+                    continue;
+                }
+                for dtd in [false, true] {
+                    let xml = if dtd { "<!ELEMENT r ANY>" } else { "<r>é</r>" };
+                    let mut bytes = match (encoding, bom) {
+                        (_, false) => Vec::new(),
+                        (0, true) => vec![0xef, 0xbb, 0xbf],
+                        (1, true) => vec![0xff, 0xfe],
+                        _ => vec![0xfe, 0xff],
+                    };
+                    if encoding == 0 {
+                        bytes.extend_from_slice(xml.as_bytes());
+                    } else {
+                        bytes.extend(xml.encode_utf16().flat_map(|unit| {
+                            if encoding == 1 {
+                                unit.to_le_bytes()
+                            } else {
+                                unit.to_be_bytes()
+                            }
+                        }));
+                    }
+                    for width in [1, 3, bytes.len()] {
+                        let config = Config {
+                            encoding: Some(protocol.into()),
+                            ..Config::default()
+                        };
+                        let mut parser = Parser::new(config);
+                        if dtd {
+                            parser = parser
+                                .external_child_with_encoding(None, Some(protocol))
+                                .unwrap();
+                        }
+                        assert_eq!(
+                            encoded_content(&mut parser, &bytes, width),
+                            Ok(if dtd { "" } else { "é" }.into()),
+                            "protocol={protocol}, encoding={encoding}, bom={bom}, dtd={dtd}, width={width}",
                         );
                     }
                 }

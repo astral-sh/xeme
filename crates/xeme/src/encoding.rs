@@ -55,10 +55,11 @@ impl Detection {
         external_content: bool,
         declaration_context: DeclarationContext,
     ) -> Result<Option<(Encoding, usize)>, Error> {
-        // An explicitly labelled external text entity can begin with ordinary
-        // Latin-1 bytes that happen to spell a Unicode byte-order mark.
+        // Latin-1 content can commit ordinary bytes immediately; only a leading
+        // zero or markup opener can still select a UTF-16 signature.
         if external_content
             && self.requested.as_deref().and_then(Encoding::named) == Some(Encoding::Latin1)
+            && bytes.first().is_some_and(|byte| !matches!(byte, 0 | b'<'))
         {
             return Ok(Some((Encoding::Latin1, 0)));
         }
@@ -72,53 +73,51 @@ impl Detection {
         {
             return Ok(None);
         }
-        let (sniffed, skip) = if bytes.starts_with(&[0xef, 0xbb, 0xbf]) {
-            (Encoding::Utf8, 3)
-        } else if bytes.starts_with(&[0xff, 0xfe]) {
-            (Encoding::Utf16Le, 2)
-        } else if bytes.starts_with(&[0xfe, 0xff]) {
-            (Encoding::Utf16Be, 2)
-        } else if bytes.first() == Some(&0) && bytes.len() >= 2 {
-            (Encoding::Utf16Be, 0)
-        } else if bytes.get(1) == Some(&0)
-            && (!external_content || self.requested.is_some() || bytes[0] == b'<')
-        {
-            // In external content, a plain ASCII character can be complete
-            // before the next byte arrives. Only a markup opener selects
-            // unlabelled little-endian UTF-16; document/DTD detection differs.
-            (Encoding::Utf16Le, 0)
-        } else {
-            (Encoding::Utf8, 0)
-        };
-        if let Some(requested) = &self.requested {
-            let requested = if requested.eq_ignore_ascii_case("UTF-16") {
-                match sniffed {
-                    Encoding::Utf16Le | Encoding::Utf16Be => sniffed,
-                    _ => {
-                        return Err(Error::bare(
-                            ErrorKind::IncorrectEncoding,
-                            "UTF-16 input requires a byte order mark or declaration",
-                        ));
-                    }
-                }
+        let requested = self.requested.as_deref().map(|name| {
+            // Expat uses big-endian UTF-16 until a signature selects its order.
+            if name.eq_ignore_ascii_case("UTF-16") {
+                Some(Encoding::Utf16Be)
             } else {
-                let Some(encoding) = Encoding::named(requested) else {
-                    self.unknown_name = Some(requested.try_clone()?);
-                    return Err(Error::bare(
-                        ErrorKind::UnknownEncoding,
-                        "unsupported input encoding",
-                    ));
-                };
-                encoding
-            };
-            if skip > 0 && sniffed != requested {
-                return Err(Error::bare(
-                    ErrorKind::IncorrectEncoding,
-                    "byte order mark conflicts with the requested encoding",
-                ));
+                Encoding::named(name)
             }
-            return Ok(Some((requested, skip)));
+        });
+        if requested == Some(None) {
+            self.unknown_name = self.requested.as_ref().map(String::try_clone).transpose()?;
+            return Err(Error::bare(
+                ErrorKind::UnknownEncoding,
+                "unsupported input encoding",
+            ));
         }
+        let requested = requested.flatten();
+        let content_latin1 = external_content && requested == Some(Encoding::Latin1);
+        let content_utf16 =
+            external_content && matches!(requested, Some(Encoding::Utf16Le | Encoding::Utf16Be));
+        // Unicode signatures select the initial decoder even with a built-in
+        // protocol encoding. External content preserves signatures that can be
+        // ordinary data in its explicitly selected Latin-1 or UTF-16 encoding.
+        let (detected, skip) =
+            if bytes.starts_with(&[0xef, 0xbb, 0xbf]) && !content_latin1 && !content_utf16 {
+                (Some(Encoding::Utf8), 3)
+            } else if bytes.starts_with(&[0xff, 0xfe]) && !content_latin1 {
+                (Some(Encoding::Utf16Le), 2)
+            } else if bytes.starts_with(&[0xfe, 0xff]) && !content_latin1 {
+                (Some(Encoding::Utf16Be), 2)
+            } else if bytes.first() == Some(&0)
+                && bytes.len() >= 2
+                && !(external_content && requested == Some(Encoding::Utf16Le))
+            {
+                (Some(Encoding::Utf16Be), 0)
+            } else if bytes.get(1) == Some(&0)
+                && (!external_content || (bytes[0] == b'<' && requested != Some(Encoding::Utf16Be)))
+            {
+                (Some(Encoding::Utf16Le), 0)
+            } else {
+                (None, 0)
+            };
+        if let Some(requested) = requested {
+            return Ok(Some((detected.unwrap_or(requested), skip)));
+        }
+        let sniffed = detected.unwrap_or(Encoding::Utf8);
         if sniffed != Encoding::Utf8 {
             return Ok(Some((sniffed, skip)));
         }
@@ -283,7 +282,19 @@ impl Decoder {
             return 0;
         }
         if bytes.starts_with(&[0xef, 0xbb, 0xbf]) {
-            3
+            if external_content
+                && self.detection.requested.as_deref().is_some_and(|name| {
+                    name.eq_ignore_ascii_case("UTF-16")
+                        || matches!(
+                            Encoding::named(name),
+                            Some(Encoding::Utf16Le | Encoding::Utf16Be)
+                        )
+                })
+            {
+                0
+            } else {
+                3
+            }
         } else if bytes.starts_with(&[0xff, 0xfe]) || bytes.starts_with(&[0xfe, 0xff]) {
             2
         } else {
@@ -1283,7 +1294,26 @@ impl Source {
             self.cursor = 0;
         }
     }
+    /// Report an exceeded byte bound at the character containing that boundary,
+    /// so original-byte position projection always receives a complete UTF-8 span.
     pub(crate) fn scan_token(
+        &mut self,
+        mode: ScanMode,
+        limit: usize,
+    ) -> Result<Option<usize>, (ErrorKind, usize)> {
+        self.scan_token_bytes(mode, limit)
+            .map_err(|(kind, offset)| {
+                let offset = if kind == ErrorKind::LimitExceeded {
+                    self.remaining().floor_char_boundary(offset)
+                } else {
+                    offset
+                };
+                (kind, offset)
+            })
+    }
+
+    /// Scan token bytes; a byte limit may fall inside a decoded scalar.
+    fn scan_token_bytes(
         &mut self,
         mode: ScanMode,
         limit: usize,

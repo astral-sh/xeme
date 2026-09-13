@@ -38,7 +38,7 @@ subprocess.run(
     [
         sys.executable,
         "-I",
-        "/checks/cpython/installed.py",
+        "/cpython-checks/installed.py",
         "--output",
         "/evidence/glibc217-xml",
     ],

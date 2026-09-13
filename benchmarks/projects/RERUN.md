@@ -1,5 +1,10 @@
 # Run the real-project benchmarks
 
+For baseline/candidate/Expat comparisons and repeatable optimization work, use the
+[performance iteration guide](../HILLCLIMB.md). These commands expose the underlying
+two-engine runners; `--baseline` optionally adds a third engine to the native
+runner and matched consumer builder.
+
 Run these Linux commands from the repository root, with absolute paths to the candidate and reference shared libraries. Keep the corpus, executables and source unchanged during measurement. Reserve one CPU for timing; use a new output directory for every run.
 
 ```console

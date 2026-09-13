@@ -1,0 +1,2867 @@
+{
+  "status": "passed",
+  "counts": {
+    "preflight_workers": 84,
+    "timed_workers": 588,
+    "preflight_samples": 168,
+    "timed_warmups": 588,
+    "measured_samples": 105420,
+    "all_workers": 672,
+    "all_samples": 106176,
+    "cohorts": 196,
+    "conditions": 28
+  },
+  "groups": {
+    "real": {
+      "conditions": 24,
+      "geomean_ratios": {
+        "candidate_over_control": 0.9927973072623429,
+        "candidate_over_expat": 1.1739207870000308,
+        "control_over_expat": 1.1817456726967188
+      },
+      "candidate_faster_than_control": 14,
+      "adverse": [
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 7
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0068671135848746,
+              1.0073017139497813,
+              1.0002804564321688,
+              1.0231802368225569,
+              1.0788336906594995,
+              1.0065512942636634,
+              1.008906163099115
+            ],
+            "candidate_over_expat": [
+              1.2775457647146882,
+              1.1879622080614087,
+              1.2857493199719092,
+              1.2881501564700142,
+              1.4545558118060236,
+              1.24536037203801,
+              1.2171975920203189
+            ],
+            "control_over_expat": [
+              1.2688325474908826,
+              1.179350924960934,
+              1.285388824408266,
+              1.258967003184415,
+              1.3482669519866795,
+              1.237254752078031,
+              1.2064527272599694
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0073017139497813,
+            "candidate_over_expat": 1.2775457647146882,
+            "control_over_expat": 1.258967003184415
+          }
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 64
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              0.992523927623794,
+              1.0103890394412698,
+              1.0042548889094847,
+              0.9883756006530611,
+              1.015948452881453,
+              1.0433392676179782,
+              1.0155072089263832
+            ],
+            "candidate_over_expat": [
+              0.8354663847378253,
+              0.8347216853010786,
+              0.8365204030165416,
+              0.8323982899087897,
+              0.8451411049341111,
+              0.8515230389426219,
+              0.8562643348029552
+            ],
+            "control_over_expat": [
+              0.8417594392288549,
+              0.826138895729379,
+              0.8329761818983176,
+              0.8421882221280952,
+              0.8318740016160321,
+              0.8161516252395187,
+              0.8431888294601245
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0103890394412698,
+            "candidate_over_expat": 0.8365204030165416,
+            "control_over_expat": 0.8329761818983176
+          }
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 64
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0268084275472669,
+              1.0338789199043152,
+              1.0066607396909442,
+              1.0139892574071565,
+              1.0005111114038439,
+              1.025627434463313,
+              1.0072477709067085
+            ],
+            "candidate_over_expat": [
+              0.8735988112982352,
+              0.8787298486584615,
+              0.8564547829100542,
+              0.8809486474250194,
+              0.8564121252905194,
+              0.8652008885396657,
+              0.8647510264850592
+            ],
+            "control_over_expat": [
+              0.8507904569745276,
+              0.8499349698896921,
+              0.8507879061350848,
+              0.8687948525980131,
+              0.8559746268973111,
+              0.8435820449678253,
+              0.8585286078187337
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0139892574071565,
+            "candidate_over_expat": 0.8652008885396657,
+            "control_over_expat": 0.8507904569745276
+          }
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 512
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0262473606397768,
+              1.367905694841828,
+              1.0189400721791828,
+              1.00286789963558,
+              1.0255181798300679,
+              1.0018561373059494,
+              1.0062772456836444
+            ],
+            "candidate_over_expat": [
+              0.9537707640577463,
+              1.2435469768330407,
+              0.9262217110284037,
+              0.9296274063109384,
+              0.9396273743659391,
+              0.9329836350167241,
+              0.9403646601521223
+            ],
+            "control_over_expat": [
+              0.929377068958455,
+              0.9090882372390687,
+              0.9090050890309137,
+              0.9269689523901847,
+              0.9162464331170013,
+              0.9312550976885489,
+              0.9344985829558905
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0189400721791828,
+            "candidate_over_expat": 0.9396273743659391,
+            "control_over_expat": 0.9269689523901847
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0149562075330898,
+              1.0003908663612118,
+              1.0126920731107483,
+              0.9930872387775731,
+              0.9671089293308501,
+              1.0120171317716133,
+              1.0142451859788169
+            ],
+            "candidate_over_expat": [
+              1.1822933704223062,
+              1.163121364994698,
+              1.1843748058528325,
+              1.060579316912581,
+              1.2147100131236617,
+              1.1906357857549592,
+              1.1943803295505546
+            ],
+            "control_over_expat": [
+              1.1648713133110826,
+              1.1626669176073114,
+              1.169531032483266,
+              1.0679618824002677,
+              1.2560219188174888,
+              1.1764976583653879,
+              1.177605125527803
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0120171317716133,
+            "candidate_over_expat": 1.1843748058528325,
+            "control_over_expat": 1.169531032483266
+          }
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 64
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              0.9869088753923569,
+              1.0130877497027604,
+              1.0027274089443459,
+              1.0021036456461687,
+              0.984087391856408,
+              1.0418073444208245,
+              1.0067008781195403
+            ],
+            "candidate_over_expat": [
+              0.8291479781606739,
+              0.8387949317993408,
+              0.8414507786940516,
+              0.8398806292249553,
+              0.8181184765038886,
+              0.7823617301090234,
+              0.87337292172196
+            ],
+            "control_over_expat": [
+              0.8401464398939938,
+              0.8279588140765132,
+              0.8391620406386582,
+              0.8381175269384334,
+              0.8313473816187895,
+              0.7509658424840194,
+              0.8675595111761208
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0027274089443459,
+            "candidate_over_expat": 0.8387949317993408,
+            "control_over_expat": 0.8381175269384334
+          }
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 512
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0009675858732463,
+              1.005956092631217,
+              1.0210046910827355,
+              1.0186661604657048,
+              0.978222215999776,
+              0.9926322466419913,
+              0.9974209035410778
+            ],
+            "candidate_over_expat": [
+              1.1115806524040155,
+              1.1405214550684832,
+              0.8337690001803747,
+              1.1874559491222607,
+              1.1326983869660372,
+              1.1646942397500595,
+              1.1443249113747669
+            ],
+            "control_over_expat": [
+              1.110506142348526,
+              1.133768624120852,
+              0.8166162285661933,
+              1.1656968643970562,
+              1.15791521439572,
+              1.1733391129395023,
+              1.1472838671338703
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0009675858732463,
+            "candidate_over_expat": 1.1405214550684832,
+            "control_over_expat": 1.1472838671338703
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0002091807088902,
+              1.0121414318443362,
+              1.0131099949795086,
+              1.007908714912557,
+              1.009081278398938,
+              0.9980996881486041,
+              1.011469757245912
+            ],
+            "candidate_over_expat": [
+              1.2297696458307896,
+              1.2470082312663247,
+              1.3137264515847853,
+              1.264861717459406,
+              1.2002110174380358,
+              1.2520056309429737,
+              1.2558287144178077
+            ],
+            "control_over_expat": [
+              1.2295124555437495,
+              1.232049387597948,
+              1.2967263753146143,
+              1.2549367802312745,
+              1.1894096572105217,
+              1.2543893619136832,
+              1.241588001441833
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.009081278398938,
+            "candidate_over_expat": 1.2520056309429737,
+            "control_over_expat": 1.241588001441833
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              0.9871228600868921,
+              1.0100545306068713,
+              1.0146933620623562,
+              0.9969850850622279,
+              1.202466120758376,
+              1.0191687270408056,
+              1.023472582149891
+            ],
+            "candidate_over_expat": [
+              1.2834724017706742,
+              1.2627084211933879,
+              1.3114467271783825,
+              1.2861995432694813,
+              1.519739641815227,
+              1.289733316213022,
+              1.2691873603673318
+            ],
+            "control_over_expat": [
+              1.300215458142359,
+              1.2501388617451321,
+              1.2924562002779612,
+              1.2900890520234831,
+              1.2638523577335814,
+              1.265475756853147,
+              1.2400794926047711
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0146933620623562,
+            "candidate_over_expat": 1.2861995432694813,
+            "control_over_expat": 1.265475756853147
+          }
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              0.9929747682088657,
+              1.01213982875484,
+              0.9952938049609803,
+              1.0008935141385473,
+              0.9887529099808715,
+              1.017772856253028,
+              1.015155504436715
+            ],
+            "candidate_over_expat": [
+              1.2848117697966248,
+              1.245362551311103,
+              1.2748638241923367,
+              1.3063535713859626,
+              1.318502997220056,
+              1.3193554754086596,
+              1.3045865623488138
+            ],
+            "control_over_expat": [
+              1.2939017293603308,
+              1.2304253976875703,
+              1.2808919515401953,
+              1.3051873680191841,
+              1.333501003041866,
+              1.296316233335128,
+              1.2851100709666121
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0008935141385473,
+            "candidate_over_expat": 1.3045865623488138,
+            "control_over_expat": 1.2939017293603308
+          }
+        }
+      ]
+    },
+    "generated": {
+      "conditions": 4,
+      "geomean_ratios": {
+        "candidate_over_control": 0.9490946953034597,
+        "candidate_over_expat": 3.322566486449919,
+        "control_over_expat": 3.508915127251525
+      },
+      "candidate_faster_than_control": 4,
+      "adverse": []
+    },
+    "real_namespaces_off": {
+      "conditions": 12,
+      "geomean_ratios": {
+        "candidate_over_control": 0.9966131213665469,
+        "candidate_over_expat": 1.1283212268070346,
+        "control_over_expat": 1.1312045852084798
+      },
+      "candidate_faster_than_control": 7,
+      "adverse": [
+        {
+          "condition": {
+            "name": "vulkan",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 7
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0068671135848746,
+              1.0073017139497813,
+              1.0002804564321688,
+              1.0231802368225569,
+              1.0788336906594995,
+              1.0065512942636634,
+              1.008906163099115
+            ],
+            "candidate_over_expat": [
+              1.2775457647146882,
+              1.1879622080614087,
+              1.2857493199719092,
+              1.2881501564700142,
+              1.4545558118060236,
+              1.24536037203801,
+              1.2171975920203189
+            ],
+            "control_over_expat": [
+              1.2688325474908826,
+              1.179350924960934,
+              1.285388824408266,
+              1.258967003184415,
+              1.3482669519866795,
+              1.237254752078031,
+              1.2064527272599694
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0073017139497813,
+            "candidate_over_expat": 1.2775457647146882,
+            "control_over_expat": 1.258967003184415
+          }
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 64
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              0.992523927623794,
+              1.0103890394412698,
+              1.0042548889094847,
+              0.9883756006530611,
+              1.015948452881453,
+              1.0433392676179782,
+              1.0155072089263832
+            ],
+            "candidate_over_expat": [
+              0.8354663847378253,
+              0.8347216853010786,
+              0.8365204030165416,
+              0.8323982899087897,
+              0.8451411049341111,
+              0.8515230389426219,
+              0.8562643348029552
+            ],
+            "control_over_expat": [
+              0.8417594392288549,
+              0.826138895729379,
+              0.8329761818983176,
+              0.8421882221280952,
+              0.8318740016160321,
+              0.8161516252395187,
+              0.8431888294601245
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0103890394412698,
+            "candidate_over_expat": 0.8365204030165416,
+            "control_over_expat": 0.8329761818983176
+          }
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 4096,
+            "namespaces": false,
+            "iterations": 512
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0262473606397768,
+              1.367905694841828,
+              1.0189400721791828,
+              1.00286789963558,
+              1.0255181798300679,
+              1.0018561373059494,
+              1.0062772456836444
+            ],
+            "candidate_over_expat": [
+              0.9537707640577463,
+              1.2435469768330407,
+              0.9262217110284037,
+              0.9296274063109384,
+              0.9396273743659391,
+              0.9329836350167241,
+              0.9403646601521223
+            ],
+            "control_over_expat": [
+              0.929377068958455,
+              0.9090882372390687,
+              0.9090050890309137,
+              0.9269689523901847,
+              0.9162464331170013,
+              0.9312550976885489,
+              0.9344985829558905
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0189400721791828,
+            "candidate_over_expat": 0.9396273743659391,
+            "control_over_expat": 0.9269689523901847
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0002091807088902,
+              1.0121414318443362,
+              1.0131099949795086,
+              1.007908714912557,
+              1.009081278398938,
+              0.9980996881486041,
+              1.011469757245912
+            ],
+            "candidate_over_expat": [
+              1.2297696458307896,
+              1.2470082312663247,
+              1.3137264515847853,
+              1.264861717459406,
+              1.2002110174380358,
+              1.2520056309429737,
+              1.2558287144178077
+            ],
+            "control_over_expat": [
+              1.2295124555437495,
+              1.232049387597948,
+              1.2967263753146143,
+              1.2549367802312745,
+              1.1894096572105217,
+              1.2543893619136832,
+              1.241588001441833
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.009081278398938,
+            "candidate_over_expat": 1.2520056309429737,
+            "control_over_expat": 1.241588001441833
+          }
+        },
+        {
+          "condition": {
+            "name": "docbook",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+            "chunk": 65536,
+            "namespaces": false,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              0.9929747682088657,
+              1.01213982875484,
+              0.9952938049609803,
+              1.0008935141385473,
+              0.9887529099808715,
+              1.017772856253028,
+              1.015155504436715
+            ],
+            "candidate_over_expat": [
+              1.2848117697966248,
+              1.245362551311103,
+              1.2748638241923367,
+              1.3063535713859626,
+              1.318502997220056,
+              1.3193554754086596,
+              1.3045865623488138
+            ],
+            "control_over_expat": [
+              1.2939017293603308,
+              1.2304253976875703,
+              1.2808919515401953,
+              1.3051873680191841,
+              1.333501003041866,
+              1.296316233335128,
+              1.2851100709666121
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0008935141385473,
+            "candidate_over_expat": 1.3045865623488138,
+            "control_over_expat": 1.2939017293603308
+          }
+        }
+      ]
+    },
+    "real_namespaces_on": {
+      "conditions": 12,
+      "geomean_ratios": {
+        "candidate_over_control": 0.9889961030774402,
+        "candidate_over_expat": 1.22136319109279,
+        "control_over_expat": 1.2345448853357
+      },
+      "candidate_faster_than_control": 7,
+      "adverse": [
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 64
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0268084275472669,
+              1.0338789199043152,
+              1.0066607396909442,
+              1.0139892574071565,
+              1.0005111114038439,
+              1.025627434463313,
+              1.0072477709067085
+            ],
+            "candidate_over_expat": [
+              0.8735988112982352,
+              0.8787298486584615,
+              0.8564547829100542,
+              0.8809486474250194,
+              0.8564121252905194,
+              0.8652008885396657,
+              0.8647510264850592
+            ],
+            "control_over_expat": [
+              0.8507904569745276,
+              0.8499349698896921,
+              0.8507879061350848,
+              0.8687948525980131,
+              0.8559746268973111,
+              0.8435820449678253,
+              0.8585286078187337
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0139892574071565,
+            "candidate_over_expat": 0.8652008885396657,
+            "control_over_expat": 0.8507904569745276
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 4096,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0149562075330898,
+              1.0003908663612118,
+              1.0126920731107483,
+              0.9930872387775731,
+              0.9671089293308501,
+              1.0120171317716133,
+              1.0142451859788169
+            ],
+            "candidate_over_expat": [
+              1.1822933704223062,
+              1.163121364994698,
+              1.1843748058528325,
+              1.060579316912581,
+              1.2147100131236617,
+              1.1906357857549592,
+              1.1943803295505546
+            ],
+            "control_over_expat": [
+              1.1648713133110826,
+              1.1626669176073114,
+              1.169531032483266,
+              1.0679618824002677,
+              1.2560219188174888,
+              1.1764976583653879,
+              1.177605125527803
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0120171317716133,
+            "candidate_over_expat": 1.1843748058528325,
+            "control_over_expat": 1.169531032483266
+          }
+        },
+        {
+          "condition": {
+            "name": "wayland",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 64
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              0.9869088753923569,
+              1.0130877497027604,
+              1.0027274089443459,
+              1.0021036456461687,
+              0.984087391856408,
+              1.0418073444208245,
+              1.0067008781195403
+            ],
+            "candidate_over_expat": [
+              0.8291479781606739,
+              0.8387949317993408,
+              0.8414507786940516,
+              0.8398806292249553,
+              0.8181184765038886,
+              0.7823617301090234,
+              0.87337292172196
+            ],
+            "control_over_expat": [
+              0.8401464398939938,
+              0.8279588140765132,
+              0.8391620406386582,
+              0.8381175269384334,
+              0.8313473816187895,
+              0.7509658424840194,
+              0.8675595111761208
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0027274089443459,
+            "candidate_over_expat": 0.8387949317993408,
+            "control_over_expat": 0.8381175269384334
+          }
+        },
+        {
+          "condition": {
+            "name": "batik",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 512
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              1.0009675858732463,
+              1.005956092631217,
+              1.0210046910827355,
+              1.0186661604657048,
+              0.978222215999776,
+              0.9926322466419913,
+              0.9974209035410778
+            ],
+            "candidate_over_expat": [
+              1.1115806524040155,
+              1.1405214550684832,
+              0.8337690001803747,
+              1.1874559491222607,
+              1.1326983869660372,
+              1.1646942397500595,
+              1.1443249113747669
+            ],
+            "control_over_expat": [
+              1.110506142348526,
+              1.133768624120852,
+              0.8166162285661933,
+              1.1656968643970562,
+              1.15791521439572,
+              1.1733391129395023,
+              1.1472838671338703
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0009675858732463,
+            "candidate_over_expat": 1.1405214550684832,
+            "control_over_expat": 1.1472838671338703
+          }
+        },
+        {
+          "condition": {
+            "name": "gtk",
+            "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+            "chunk": 65536,
+            "namespaces": true,
+            "iterations": 256
+          },
+          "paired_ratios": {
+            "candidate_over_control": [
+              0.9871228600868921,
+              1.0100545306068713,
+              1.0146933620623562,
+              0.9969850850622279,
+              1.202466120758376,
+              1.0191687270408056,
+              1.023472582149891
+            ],
+            "candidate_over_expat": [
+              1.2834724017706742,
+              1.2627084211933879,
+              1.3114467271783825,
+              1.2861995432694813,
+              1.519739641815227,
+              1.289733316213022,
+              1.2691873603673318
+            ],
+            "control_over_expat": [
+              1.300215458142359,
+              1.2501388617451321,
+              1.2924562002779612,
+              1.2900890520234831,
+              1.2638523577335814,
+              1.265475756853147,
+              1.2400794926047711
+            ]
+          },
+          "median_ratios": {
+            "candidate_over_control": 1.0146933620623562,
+            "candidate_over_expat": 1.2861995432694813,
+            "control_over_expat": 1.265475756853147
+          }
+        }
+      ]
+    }
+  },
+  "all_conditions": [
+    {
+      "condition": {
+        "name": "vulkan",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 7
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0068671135848746,
+          1.0073017139497813,
+          1.0002804564321688,
+          1.0231802368225569,
+          1.0788336906594995,
+          1.0065512942636634,
+          1.008906163099115
+        ],
+        "candidate_over_expat": [
+          1.2775457647146882,
+          1.1879622080614087,
+          1.2857493199719092,
+          1.2881501564700142,
+          1.4545558118060236,
+          1.24536037203801,
+          1.2171975920203189
+        ],
+        "control_over_expat": [
+          1.2688325474908826,
+          1.179350924960934,
+          1.285388824408266,
+          1.258967003184415,
+          1.3482669519866795,
+          1.237254752078031,
+          1.2064527272599694
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0073017139497813,
+        "candidate_over_expat": 1.2775457647146882,
+        "control_over_expat": 1.258967003184415
+      }
+    },
+    {
+      "condition": {
+        "name": "vulkan",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 7
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9865387499624519,
+          0.9921633981381677,
+          0.9705670659783833,
+          0.9943214412792007,
+          1.1886893619086452,
+          1.047060198523533,
+          0.9787422067965933
+        ],
+        "candidate_over_expat": [
+          1.2567403496813345,
+          1.278722376793874,
+          1.2753961182618392,
+          1.2737891527877012,
+          1.517454761861738,
+          1.3798589154171828,
+          1.282025600128652
+        ],
+        "control_over_expat": [
+          1.2738884810446287,
+          1.288822364535363,
+          1.3140731464818167,
+          1.281063748508695,
+          1.276578061929656,
+          1.317841053802763,
+          1.3098705575645913
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9921633981381677,
+        "candidate_over_expat": 1.278722376793874,
+        "control_over_expat": 1.288822364535363
+      }
+    },
+    {
+      "condition": {
+        "name": "wayland",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 64
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.992523927623794,
+          1.0103890394412698,
+          1.0042548889094847,
+          0.9883756006530611,
+          1.015948452881453,
+          1.0433392676179782,
+          1.0155072089263832
+        ],
+        "candidate_over_expat": [
+          0.8354663847378253,
+          0.8347216853010786,
+          0.8365204030165416,
+          0.8323982899087897,
+          0.8451411049341111,
+          0.8515230389426219,
+          0.8562643348029552
+        ],
+        "control_over_expat": [
+          0.8417594392288549,
+          0.826138895729379,
+          0.8329761818983176,
+          0.8421882221280952,
+          0.8318740016160321,
+          0.8161516252395187,
+          0.8431888294601245
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0103890394412698,
+        "candidate_over_expat": 0.8365204030165416,
+        "control_over_expat": 0.8329761818983176
+      }
+    },
+    {
+      "condition": {
+        "name": "wayland",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 64
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0268084275472669,
+          1.0338789199043152,
+          1.0066607396909442,
+          1.0139892574071565,
+          1.0005111114038439,
+          1.025627434463313,
+          1.0072477709067085
+        ],
+        "candidate_over_expat": [
+          0.8735988112982352,
+          0.8787298486584615,
+          0.8564547829100542,
+          0.8809486474250194,
+          0.8564121252905194,
+          0.8652008885396657,
+          0.8647510264850592
+        ],
+        "control_over_expat": [
+          0.8507904569745276,
+          0.8499349698896921,
+          0.8507879061350848,
+          0.8687948525980131,
+          0.8559746268973111,
+          0.8435820449678253,
+          0.8585286078187337
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0139892574071565,
+        "candidate_over_expat": 0.8652008885396657,
+        "control_over_expat": 0.8507904569745276
+      }
+    },
+    {
+      "condition": {
+        "name": "maven",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 128
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9741000929918,
+          0.9777509851103137,
+          1.0091469360191367,
+          0.9182641888498243,
+          0.9590105332598857,
+          0.9778566742692821,
+          0.9722532367669777
+        ],
+        "candidate_over_expat": [
+          1.3153446969005134,
+          1.102942145603018,
+          1.3390094610917824,
+          1.3083236296644878,
+          1.2836375819824142,
+          1.3180860702540917,
+          1.3185578744994064
+        ],
+        "control_over_expat": [
+          1.3503178024145677,
+          1.1280399226379503,
+          1.326872641930501,
+          1.424779105567902,
+          1.3385020679794313,
+          1.3479338076196608,
+          1.356187693325652
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9741000929918,
+        "candidate_over_expat": 1.3153446969005134,
+        "control_over_expat": 1.3479338076196608
+      }
+    },
+    {
+      "condition": {
+        "name": "maven",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 128
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9511719821974889,
+          0.7609991827036048,
+          0.9580726274031126,
+          0.9469582871463684,
+          0.9945578005064688,
+          0.9592644347632078,
+          0.9582746483141138
+        ],
+        "candidate_over_expat": [
+          1.4691802775875356,
+          1.4822215434796469,
+          1.4914898347372842,
+          1.384374000938842,
+          1.4895017178168737,
+          1.4754682758778035,
+          1.4162191355813187
+        ],
+        "control_over_expat": [
+          1.5446000356247815,
+          1.94773079547044,
+          1.5567607215540815,
+          1.461916559292821,
+          1.4976522400793193,
+          1.5381246530233548,
+          1.477884381135266
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9580726274031126,
+        "candidate_over_expat": 1.4754682758778035,
+        "control_over_expat": 1.5381246530233548
+      }
+    },
+    {
+      "condition": {
+        "name": "batik",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 512
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0262473606397768,
+          1.367905694841828,
+          1.0189400721791828,
+          1.00286789963558,
+          1.0255181798300679,
+          1.0018561373059494,
+          1.0062772456836444
+        ],
+        "candidate_over_expat": [
+          0.9537707640577463,
+          1.2435469768330407,
+          0.9262217110284037,
+          0.9296274063109384,
+          0.9396273743659391,
+          0.9329836350167241,
+          0.9403646601521223
+        ],
+        "control_over_expat": [
+          0.929377068958455,
+          0.9090882372390687,
+          0.9090050890309137,
+          0.9269689523901847,
+          0.9162464331170013,
+          0.9312550976885489,
+          0.9344985829558905
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0189400721791828,
+        "candidate_over_expat": 0.9396273743659391,
+        "control_over_expat": 0.9269689523901847
+      }
+    },
+    {
+      "condition": {
+        "name": "batik",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 512
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9868979618667375,
+          1.0200235612929702,
+          1.0007804526625443,
+          0.9869504454872198,
+          0.9899204502709705,
+          0.996586912214549,
+          0.9987732297705589
+        ],
+        "candidate_over_expat": [
+          1.0267585253655271,
+          1.030755315954298,
+          1.0086668683597018,
+          0.9985397508316297,
+          1.013287224371201,
+          1.0216848085315413,
+          1.0209308158073878
+        ],
+        "control_over_expat": [
+          1.0403897515639737,
+          1.0105210850695687,
+          1.0078802655229486,
+          1.0117425402636995,
+          1.0236046988359866,
+          1.0251838510112696,
+          1.0221848016910895
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.996586912214549,
+        "candidate_over_expat": 1.0209308158073878,
+        "control_over_expat": 1.0221848016910895
+      }
+    },
+    {
+      "condition": {
+        "name": "gtk",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.977976537380417,
+          1.004874529015102,
+          1.0254844342060816,
+          0.9984183607511068,
+          0.992855372675125,
+          1.0028837420984056,
+          0.9989484837781925
+        ],
+        "candidate_over_expat": [
+          1.1444956097108323,
+          1.1578104201209687,
+          1.2232576769025367,
+          1.153600911168111,
+          1.1420827085269556,
+          1.1671529716161964,
+          1.146748838664087
+        ],
+        "control_over_expat": [
+          1.1702689849558652,
+          1.1521940169542981,
+          1.1928583565966744,
+          1.1554283820464406,
+          1.1503011817821525,
+          1.1637968815548634,
+          1.1479559329495037
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9989484837781925,
+        "candidate_over_expat": 1.153600911168111,
+        "control_over_expat": 1.1554283820464406
+      }
+    },
+    {
+      "condition": {
+        "name": "gtk",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0149562075330898,
+          1.0003908663612118,
+          1.0126920731107483,
+          0.9930872387775731,
+          0.9671089293308501,
+          1.0120171317716133,
+          1.0142451859788169
+        ],
+        "candidate_over_expat": [
+          1.1822933704223062,
+          1.163121364994698,
+          1.1843748058528325,
+          1.060579316912581,
+          1.2147100131236617,
+          1.1906357857549592,
+          1.1943803295505546
+        ],
+        "control_over_expat": [
+          1.1648713133110826,
+          1.1626669176073114,
+          1.169531032483266,
+          1.0679618824002677,
+          1.2560219188174888,
+          1.1764976583653879,
+          1.177605125527803
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0120171317716133,
+        "candidate_over_expat": 1.1843748058528325,
+        "control_over_expat": 1.169531032483266
+      }
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9944490259193246,
+          0.9959116160039948,
+          1.0157983908882047,
+          1.070989093879227,
+          0.9801794278769013,
+          1.052954114120506,
+          0.9790240001063422
+        ],
+        "candidate_over_expat": [
+          1.195944450813269,
+          1.192393306109376,
+          1.2264243391371634,
+          1.3061679404271997,
+          1.1469751617936716,
+          1.2315647528655154,
+          1.1958601354697467
+        ],
+        "control_over_expat": [
+          1.2026201641734937,
+          1.1972882803533775,
+          1.2073501495358634,
+          1.2195903281294227,
+          1.1701685723786868,
+          1.1696281313209895,
+          1.2214819405242892
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9959116160039948,
+        "candidate_over_expat": 1.195944450813269,
+        "control_over_expat": 1.2026201641734937
+      }
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 4096,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9621606346321684,
+          1.012216140891297,
+          0.969297190220184,
+          0.9094135953252125,
+          0.951888199690934,
+          0.9708781514819833,
+          0.9575017732597052
+        ],
+        "candidate_over_expat": [
+          1.450285227475972,
+          1.5591882750845547,
+          1.4562472303206997,
+          1.4305993980325944,
+          1.5532105834559082,
+          1.474478059301222,
+          1.4599489508652077
+        ],
+        "control_over_expat": [
+          1.5073213092223552,
+          1.5403708873004403,
+          1.5023743440233237,
+          1.573100958009103,
+          1.6317153463612806,
+          1.518705572939844,
+          1.5247480387372845
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9621606346321684,
+        "candidate_over_expat": 1.4599489508652077,
+        "control_over_expat": 1.5247480387372845
+      }
+    },
+    {
+      "condition": {
+        "name": "generated-rare-declarations",
+        "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9868543722602764,
+          1.1307179590207574,
+          0.9886222837786464,
+          1.0952191468295613,
+          0.8606346645753247,
+          1.0036701780027955,
+          0.9932684343650064
+        ],
+        "candidate_over_expat": [
+          4.541587021485687,
+          4.462030934791089,
+          4.581050632625225,
+          4.814983429929659,
+          4.0148583635006,
+          4.559038430562831,
+          4.5098460729644625
+        ],
+        "control_over_expat": [
+          4.60208430863381,
+          3.9461926815555035,
+          4.633772379796901,
+          4.3963652789198076,
+          4.664997273241031,
+          4.54236713462471,
+          4.5404101418440765
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9932684343650064,
+        "candidate_over_expat": 4.541587021485687,
+        "control_over_expat": 4.54236713462471
+      }
+    },
+    {
+      "condition": {
+        "name": "generated-entities",
+        "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+        "chunk": 4096,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9001672302844125,
+          0.9056880115725082,
+          0.918143606493117,
+          0.9116240259671391,
+          0.9157704346470025,
+          0.8925113238903589,
+          0.8991725036138966
+        ],
+        "candidate_over_expat": [
+          2.42952485165473,
+          2.441902501877103,
+          2.4202130045611003,
+          2.4388502404212953,
+          2.416793747267002,
+          2.4192805975760026,
+          2.4121032157345974
+        ],
+        "control_over_expat": [
+          2.6989705578230274,
+          2.696185077725971,
+          2.635985250504757,
+          2.675280785665918,
+          2.6390825209361464,
+          2.7106441485029276,
+          2.6825811577200445
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9056880115725082,
+        "candidate_over_expat": 2.4202130045611003,
+        "control_over_expat": 2.6825811577200445
+      }
+    },
+    {
+      "condition": {
+        "name": "vulkan",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 7
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9769446659365661,
+          0.993972268580839,
+          0.9933156290791052,
+          0.9815599809089877,
+          1.005309209282421,
+          0.9772802773376706,
+          0.9856868434803232
+        ],
+        "candidate_over_expat": [
+          1.168616763109694,
+          1.2205776166320608,
+          1.215683755743687,
+          1.2336407206585256,
+          1.246099623912661,
+          1.2249122198561102,
+          1.2383305746666697
+        ],
+        "control_over_expat": [
+          1.1961954487866289,
+          1.2279795475328115,
+          1.223864520153315,
+          1.2568164398023796,
+          1.2395187594094694,
+          1.2533888673094316,
+          1.2563123702598045
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9856868434803232,
+        "candidate_over_expat": 1.2249122198561102,
+        "control_over_expat": 1.2395187594094694
+      }
+    },
+    {
+      "condition": {
+        "name": "vulkan",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 7
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9925153734396985,
+          0.9954002962036878,
+          0.9975545394482216,
+          1.0012144076274,
+          0.9757091858942292,
+          0.9872505408893011,
+          1.0057982086085255
+        ],
+        "candidate_over_expat": [
+          1.247663726898047,
+          1.2223444145191054,
+          1.2527170024867167,
+          1.22953171853985,
+          1.2084566679178466,
+          1.2552251290716168,
+          1.27916997091146
+        ],
+        "control_over_expat": [
+          1.257072444705916,
+          1.22799281774473,
+          1.2557879824592182,
+          1.2280403769393393,
+          1.238541857951564,
+          1.2714352406846272,
+          1.2717958333621724
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9954002962036878,
+        "candidate_over_expat": 1.247663726898047,
+        "control_over_expat": 1.2557879824592182
+      }
+    },
+    {
+      "condition": {
+        "name": "wayland",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 64
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9860301051644482,
+          0.9987961677614435,
+          0.980839684245427,
+          0.9642025010116321,
+          1.0182533505659896,
+          1.0338592049775805,
+          0.9881675331544342
+        ],
+        "candidate_over_expat": [
+          0.7952300969683717,
+          0.8003079728440249,
+          0.8003264670993019,
+          0.8005082527174885,
+          0.8241595415067682,
+          0.8115896755047054,
+          0.8063175154877859
+        ],
+        "control_over_expat": [
+          0.8064967720592513,
+          0.8012725705963798,
+          0.8159605284680174,
+          0.8302283512826433,
+          0.8093855434393262,
+          0.7850098655573753,
+          0.8159724828378588
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9881675331544342,
+        "candidate_over_expat": 0.8005082527174885,
+        "control_over_expat": 0.8093855434393262
+      }
+    },
+    {
+      "condition": {
+        "name": "wayland",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 64
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9869088753923569,
+          1.0130877497027604,
+          1.0027274089443459,
+          1.0021036456461687,
+          0.984087391856408,
+          1.0418073444208245,
+          1.0067008781195403
+        ],
+        "candidate_over_expat": [
+          0.8291479781606739,
+          0.8387949317993408,
+          0.8414507786940516,
+          0.8398806292249553,
+          0.8181184765038886,
+          0.7823617301090234,
+          0.87337292172196
+        ],
+        "control_over_expat": [
+          0.8401464398939938,
+          0.8279588140765132,
+          0.8391620406386582,
+          0.8381175269384334,
+          0.8313473816187895,
+          0.7509658424840194,
+          0.8675595111761208
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0027274089443459,
+        "candidate_over_expat": 0.8387949317993408,
+        "control_over_expat": 0.8381175269384334
+      }
+    },
+    {
+      "condition": {
+        "name": "maven",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 128
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.815013717609991,
+          0.9989274694711225,
+          0.9696513497496254,
+          0.9783097434496144,
+          0.9734662350261517,
+          0.9807053559377058,
+          0.974257477836141
+        ],
+        "candidate_over_expat": [
+          1.3982348962917655,
+          1.4054819514318768,
+          1.3686832191025824,
+          1.405245909888603,
+          1.321020145816887,
+          1.440342057527857,
+          1.429858045584999
+        ],
+        "control_over_expat": [
+          1.7155967636864535,
+          1.4069909922248935,
+          1.4115209755093843,
+          1.4364018341814428,
+          1.3570271862396939,
+          1.4686797097693705,
+          1.4676387691278103
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.974257477836141,
+        "candidate_over_expat": 1.405245909888603,
+        "control_over_expat": 1.4364018341814428
+      }
+    },
+    {
+      "condition": {
+        "name": "maven",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 128
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9451970758456391,
+          0.9692666053228168,
+          0.9516358718806637,
+          0.9408547367900378,
+          0.9605360557259073,
+          0.9662866131190597,
+          0.9508964043876964
+        ],
+        "candidate_over_expat": [
+          1.6021746196140072,
+          1.611606502822878,
+          1.4970195712229095,
+          1.5759841084404231,
+          1.6365236648286876,
+          1.5883836465721648,
+          1.5678834958656236
+        ],
+        "control_over_expat": [
+          1.695069378182947,
+          1.662707137512623,
+          1.5731012411968404,
+          1.6750557198843348,
+          1.7037607855250319,
+          1.6438017716555637,
+          1.6488478541205747
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9516358718806637,
+        "candidate_over_expat": 1.5883836465721648,
+        "control_over_expat": 1.662707137512623
+      }
+    },
+    {
+      "condition": {
+        "name": "batik",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 512
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9894814832809026,
+          0.9967760187902746,
+          0.9906632258697761,
+          0.9764717312628025,
+          0.9978215656777397,
+          1.0101249355685917,
+          1.0010688529692406
+        ],
+        "candidate_over_expat": [
+          1.051550250845474,
+          1.038187908081065,
+          1.0314018198152932,
+          1.0332139675142211,
+          1.0367529616754498,
+          1.051810800909873,
+          1.044395168698223
+        ],
+        "control_over_expat": [
+          1.0627285791733718,
+          1.0415458322733824,
+          1.041122545867946,
+          1.0581094510314577,
+          1.0390163906422158,
+          1.0412680292045424,
+          1.0432800557129245
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9967760187902746,
+        "candidate_over_expat": 1.038187908081065,
+        "control_over_expat": 1.0415458322733824
+      }
+    },
+    {
+      "condition": {
+        "name": "batik",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 512
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0009675858732463,
+          1.005956092631217,
+          1.0210046910827355,
+          1.0186661604657048,
+          0.978222215999776,
+          0.9926322466419913,
+          0.9974209035410778
+        ],
+        "candidate_over_expat": [
+          1.1115806524040155,
+          1.1405214550684832,
+          0.8337690001803747,
+          1.1874559491222607,
+          1.1326983869660372,
+          1.1646942397500595,
+          1.1443249113747669
+        ],
+        "control_over_expat": [
+          1.110506142348526,
+          1.133768624120852,
+          0.8166162285661933,
+          1.1656968643970562,
+          1.15791521439572,
+          1.1733391129395023,
+          1.1472838671338703
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0009675858732463,
+        "candidate_over_expat": 1.1405214550684832,
+        "control_over_expat": 1.1472838671338703
+      }
+    },
+    {
+      "condition": {
+        "name": "gtk",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          1.0002091807088902,
+          1.0121414318443362,
+          1.0131099949795086,
+          1.007908714912557,
+          1.009081278398938,
+          0.9980996881486041,
+          1.011469757245912
+        ],
+        "candidate_over_expat": [
+          1.2297696458307896,
+          1.2470082312663247,
+          1.3137264515847853,
+          1.264861717459406,
+          1.2002110174380358,
+          1.2520056309429737,
+          1.2558287144178077
+        ],
+        "control_over_expat": [
+          1.2295124555437495,
+          1.232049387597948,
+          1.2967263753146143,
+          1.2549367802312745,
+          1.1894096572105217,
+          1.2543893619136832,
+          1.241588001441833
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.009081278398938,
+        "candidate_over_expat": 1.2520056309429737,
+        "control_over_expat": 1.241588001441833
+      }
+    },
+    {
+      "condition": {
+        "name": "gtk",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9871228600868921,
+          1.0100545306068713,
+          1.0146933620623562,
+          0.9969850850622279,
+          1.202466120758376,
+          1.0191687270408056,
+          1.023472582149891
+        ],
+        "candidate_over_expat": [
+          1.2834724017706742,
+          1.2627084211933879,
+          1.3114467271783825,
+          1.2861995432694813,
+          1.519739641815227,
+          1.289733316213022,
+          1.2691873603673318
+        ],
+        "control_over_expat": [
+          1.300215458142359,
+          1.2501388617451321,
+          1.2924562002779612,
+          1.2900890520234831,
+          1.2638523577335814,
+          1.265475756853147,
+          1.2400794926047711
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0146933620623562,
+        "candidate_over_expat": 1.2861995432694813,
+        "control_over_expat": 1.265475756853147
+      }
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9929747682088657,
+          1.01213982875484,
+          0.9952938049609803,
+          1.0008935141385473,
+          0.9887529099808715,
+          1.017772856253028,
+          1.015155504436715
+        ],
+        "candidate_over_expat": [
+          1.2848117697966248,
+          1.245362551311103,
+          1.2748638241923367,
+          1.3063535713859626,
+          1.318502997220056,
+          1.3193554754086596,
+          1.3045865623488138
+        ],
+        "control_over_expat": [
+          1.2939017293603308,
+          1.2304253976875703,
+          1.2808919515401953,
+          1.3051873680191841,
+          1.333501003041866,
+          1.296316233335128,
+          1.2851100709666121
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 1.0008935141385473,
+        "candidate_over_expat": 1.3045865623488138,
+        "control_over_expat": 1.2939017293603308
+      }
+    },
+    {
+      "condition": {
+        "name": "docbook",
+        "input": "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl",
+        "chunk": 65536,
+        "namespaces": true,
+        "iterations": 256
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9774331891005403,
+          0.963100764556275,
+          0.9768081761006291,
+          0.9630465421951954,
+          0.9704274184471143,
+          0.9633987739631936,
+          0.9712094115550578
+        ],
+        "candidate_over_expat": [
+          1.568090491564498,
+          1.5844313097730165,
+          1.6024504272126392,
+          1.5025102162837929,
+          1.5732588682193653,
+          1.545795872496935,
+          1.5584300529511186
+        ],
+        "control_over_expat": [
+          1.6042942976056458,
+          1.6451355539137218,
+          1.6404965339351925,
+          1.5601636581955103,
+          1.6212019964737876,
+          1.6045233959950957,
+          1.6046282443410727
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9704274184471143,
+        "candidate_over_expat": 1.568090491564498,
+        "control_over_expat": 1.6046282443410727
+      }
+    },
+    {
+      "condition": {
+        "name": "generated-rare-declarations",
+        "input": "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9796075581188134,
+          0.9910167409352082,
+          0.9888176592705812,
+          1.0021833231550834,
+          0.9805212214736355,
+          0.9684741749141368,
+          1.0011159603411703
+        ],
+        "candidate_over_expat": [
+          4.446741091819413,
+          4.530079524316244,
+          4.6262399744657925,
+          4.650989797776563,
+          4.580046312973673,
+          4.531932200172218,
+          4.607103043812766
+        ],
+        "control_over_expat": [
+          4.5393086802624305,
+          4.571143288700929,
+          4.678557195143966,
+          4.640857306559713,
+          4.671032316965332,
+          4.679455908645174,
+          4.601967430668782
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9888176592705812,
+        "candidate_over_expat": 4.580046312973673,
+        "control_over_expat": 4.640857306559713
+      }
+    },
+    {
+      "condition": {
+        "name": "generated-entities",
+        "input": "/tmp/oriole-grammar-bench-plain/entities.xml",
+        "chunk": 65536,
+        "namespaces": false,
+        "iterations": 32
+      },
+      "paired_ratios": {
+        "candidate_over_control": [
+          0.9121719583149187,
+          0.9233910741124411,
+          0.8942950834522582,
+          0.9181422810148205,
+          0.8939364445101053,
+          0.8888233697640348,
+          0.9154076959751576
+        ],
+        "candidate_over_expat": [
+          2.4453152375679434,
+          2.4251734303319603,
+          2.4427408291630535,
+          2.420826254904808,
+          2.4033904876688323,
+          2.40634847038859,
+          2.419118196042184
+        ],
+        "control_over_expat": [
+          2.68076124822478,
+          2.626377380421426,
+          2.7314707129254376,
+          2.6366569811261433,
+          2.688547382119472,
+          2.707341584669886,
+          2.6426675312852455
+        ]
+      },
+      "median_ratios": {
+        "candidate_over_control": 0.9121719583149187,
+        "candidate_over_expat": 2.420826254904808,
+        "control_over_expat": 2.68076124822478
+      }
+    }
+  ],
+  "libraries": {
+    "control": {
+      "path": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025"
+    },
+    "candidate": {
+      "path": "/tmp/oriole-namespace-qname-only-study/normal/liboriole_expat.so",
+      "sha256": "24a7d8262675977fd358c20fde32b346d248e0495d59124bbe39cc74717b352e"
+    },
+    "expat": {
+      "path": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+    }
+  },
+  "raw_schedule_process_medians_ratios_callback_equality_exact": true,
+  "reader_sha256": "9c6382b60b6129e3b706ca674cfc1f4227dd2b71e83aa46ffcd4b99364c74f33",
+  "conditions_csv_sha256": "360f8751cbbec8e33cd663478064028e265e49babaa1323b08d77731e17feed4",
+  "limitations": [
+    "All 28 conditions and adverse results retained. Median of seven paired process-median ratios, equally weighted geometric mean across conditions.",
+    "Shared host and CPU affinity do not establish isolation or whole-application performance.",
+    "Native callback hashes merge adjacent text fragments and do not establish exact callback fragmentation compatibility."
+  ],
+  "inputs": {
+    "/tmp/oriole-namespace-qname-only-confirmation/binding.json": "8529411451e7f9e8a583a9619036337b5e849ce6bcf1b131717916ed686d37f3",
+    "/tmp/oriole-namespace-qname-only-confirmation/preparation.json": "a8c43ed0a1c1480c58fbe58fa77751e54a470dd14b071bd967d1fe0a6970ab88",
+    "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025",
+    "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "/tmp/oriole-grammar-bench-plain/native-driver": "e9478cd0f8572b08ab513377795a07754086a9cdf2c06748183db3c69d232e23",
+    "/tmp/oriole-native-start-end-namespace-declaration-confirmation/native/native-screen/protocol.json": "2a4e8c5aac3d2763b0be6701ad80169bed145f8287c378e8e10e0676a3774a17",
+    "/tmp/oriole-namespace-qname-only-benchmark/commands.json": "2dd523a669c7c4ef0b0a4d476b61f66f13b553c0e0a7fbc38219336207837744",
+    "/tmp/oriole-namespace-qname-only-benchmark/README.md": "3e573ed7664681d81bc39f04d2686991c3905c449aa84f3c79a6e61f45aa330e",
+    "/tmp/oriole-namespace-qname-only-benchmark/observe-host.py": "a0df67eb5c89a0ffbf30ee377dd0302aff64ca2336fedef9f4af1655710a2cb7",
+    "/tmp/oriole-namespace-qname-only-benchmark/commands.json.patch": "fe5735b0f37a23bc74fae7242a807f584b43b1f1d6e0767d467da355b65a8271",
+    "/tmp/oriole-namespace-qname-only-benchmark/monitor-host.py": "bcfd3b9bba19053d43663b9cb79a74cfbf0d6124039b40a72bd9f232bdea4cc4",
+    "/tmp/oriole-namespace-qname-only-benchmark/bind.py": "24b1fc40db7c2d1a0a4aae6cac13b3e1d602306efebb625927382848d284fe7a",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/build_consumers.py": "4e7c91024b658618547c27023955e34a18fdc7a062764aaf1e26bc6910d3a099",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/elapsed_review.py.patch": "5fa8fc8a58dc4333475a2d2649c59c02371213e782c65d6c0743baf5cf02ffb4",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/python_worker.py": "4bc0ccffedb5048412b9cfc3638d28dcb30f711891c3784f3fbd3c0eb536ab68",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/elapsed_review.py": "d56a78f92b99011ec224d37f5b0b3116d23ea0ad4213629ff70b111298984a45",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/reuse.json": "928d24a72bb369858c3586fe4c44731f5370669b9884e390a581f269923950ef",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/preflight_review.py": "be2f8937f8d3107abff1900a046baf9fdc18b9aeb5c657e761396474c90e28ac",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/consumer_screen.py": "1ceb2e83dabdea48fbdaefd00e294c1769fa9e8ba9f7b966c3eb198fb5e140cf",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/run.py": "6b56b00f60a8743921c0df6ff7d0c1aedc58d1b4c5631a6117d720801fb0197f",
+    "/tmp/oriole-namespace-qname-only-benchmark/python/preflight_review.py.patch": "3b2a24d0b2320d65d99040397ea569cdae88831505222ecdc6cc2050e320daa3",
+    "/tmp/oriole-namespace-qname-only-benchmark/native/native_screen.py.patch": "7e3321e0b1f2cacbec123a11d27e69944865898e7d353ba2e49abffd8ab85cbb",
+    "/tmp/oriole-namespace-qname-only-benchmark/native/read_results.py": "9c6382b60b6129e3b706ca674cfc1f4227dd2b71e83aa46ffcd4b99364c74f33",
+    "/tmp/oriole-namespace-qname-only-benchmark/native/native_screen.py": "56f413fc120ce81dfdc652519643c80cbb175c7a6dd901ae0e1bb1e534b5b0bf",
+    "/tmp/oriole-namespace-qname-only-benchmark/native/run.py": "70e1822662ed23fb0bad312cd82e3eb63cd4bdcd74606b4d516ffa79da84b81d",
+    "/tmp/oriole-namespace-qname-only-study/build.json": "f6811b36bf90db23677b2cb33b0b96a5d11618483ca49e331f89db5c475f8300",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/protocol.json": "a0864910259cb4ea7af2ae11e1375b73cc1de68f9a6dd15f65888a6ff531e8e6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/preflight.json": "4e6492426b874e0c13f362a0ba23e9b277449e18a6e7b4d659abb323570ab30e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/results.json": "a795cb80eb8e34398bdc1ccaa870cbbb896e824ad991f2767380bebfbb1bb0c6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/controller.json": "3838c367859c3f27c2d3fd4e22420a0dd8730d3dd63b3e29fa9de6d739574b0d",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus-manifest.json": "c725b079ba4f0b19912880f53c6f0ac83758711071151abc8765d1e06491ff42",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native_screen.py": "e4ef9f068e818d386a9943c9ea815dce527082d15011ecc8f09ec8a031660ab9",
+    "/tmp/oriole-namespace-qname-only-study/normal/liboriole_expat.so": "24a7d8262675977fd358c20fde32b346d248e0495d59124bbe39cc74717b352e",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/vulkan/vk.xml": "cf31c965cf6e788697139601da0c7e02a75a9b6c7ac764e7641f5521ffd9da06",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/wayland/wayland.xml": "7eb8569529235c85e16d15612fc367da4538b7d515b13e32ec48ba0742c42610",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/maven/pom.xml": "5dbb69898d881458df5735b8c50c5166d21aa2d69659d21eea4d888a295b3b3f",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/batik/batikLogo.svg": "15ab08890f4e57be784d687d3522ef8799486e725826f8abeec29c6cde38050f",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/gtk/gtkfilechooserwidget.ui": "2620a2b6553ce99cc564eb3d359eb9cb9c7b8f259e0ccc1aa49bb3534a38101d",
+    "/home/dev-user/code/oss/oriole/benchmarks/projects/corpus/docbook/docbook.xsl": "7f13c5f4977faa028462910cf6d3fdeeeab64d87553f1fff12f0afa8f1c49818",
+    "/tmp/oriole-text-frame-prototype/text/screen/rare-declarations.xml": "1a1beb69a6a29bc1314d6a95ee96e87eafd8cbaa832a66b2f6e35d60513b8eb0",
+    "/tmp/oriole-grammar-bench-plain/entities.xml": "886867572522d64996e8396ae12a85c634966b960c47dbcf548a62659e1eb333",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/run.py": "70e1822662ed23fb0bad312cd82e3eb63cd4bdcd74606b4d516ffa79da84b81d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/preflight-controller.log": "b514c66a8fae0860bcecd1c5478504062b76d71191fd52a9868a2a042c215c8d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/time-controller.log": "abcba8d6dadae90cd567f89dd193523d4648d6c53b208b35829e91c753f4f601",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0000.json": "226d24342603184533970f5bfab5c06a85ae01d1a9d20bd52a645db7e6141103",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0001.json": "317b6f0f45f99bbf7d892830f85c208a9b8f141f6321b9db45fcd5d39af02ed1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0002.json": "6135f24c1a8243d9af783452fdba52be8ca2867906d0ec2debfe02bf50cf55e5",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0003.json": "e6eb0944b4bfe40f9d6aaf53d4c0400f872a48b14cdd68429f103bfbccbec83b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0004.json": "49dad34d30126e93497e121b0ae181324c425b915fe320207ee4cb0dd01c8ade",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0005.json": "51185e8a3f333f622f23984aa8ee05d250a773739b0a6a86b3ffa816fd8583d3",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0006.json": "fc54294564413b0c9d86d203d2f41fc63a482e6e78e3053def0c10f93dde9485",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0007.json": "43febf9acb9d7dd365593b155b109195f2d23ad1652b6b7caecc091628537a02",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0008.json": "a630689d81f547755260974de7f4671caeacfe6843c67ae5b294a3b8661902f6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0009.json": "a0c2c0f7b40488696bc3112a9dc6e83e27bb53aaf9f1ddbb72f4a2476a057fda",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0010.json": "8ed0103c5e2aee8caa3630b59d101ea9fc172154e91ebc2b2eaade846cd931c8",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0011.json": "d55420323ebf7dd73fedcd1d1d27219a0975a3bad4ed305fe8c25eab58c1d757",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0012.json": "8a720aa252bbad4b2b6482be096eb042a1ed2f071c2092b50237cae28fa42aaf",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0013.json": "baa90af3f4809385913e5899f30ecb0f9df6251c626be1e07dd9a4362f975c66",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0014.json": "ffc656d57d7afb750409fafcfaa0c4c9a6afab5a20a18739840113101b2bf9a4",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0015.json": "f2e54c0c56ef18f7a749182016781f218be4fc2b9fb9ef314170050bd45cef20",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0016.json": "2ac71a62bf426392b8a380e383234934f00743e62fd26da989aae93b4096e5bb",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0017.json": "bdf9a2b5d8b5b0ffdaa36066160863a6eeac2efd4faf4ffad0d3d2629a9b2645",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0018.json": "631b82a5cb4b5f3dd1349e7711b7bb63171ffbd5cd8671c2c526012e9a116617",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0019.json": "af7614fa57b95f301c1d97b911d21793d19c0355b8fa3f05d496a1db5cc79acf",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0020.json": "9e6b58368731a3a529ae227d1c085930abb8a54f6d09ee864ddf1f4e9e9a3bdc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0021.json": "29eaf30772e09bda624883e639a34f4f098b2b427cebad2992db1d708408e055",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0022.json": "27300d478dfa00a44679086a3285c4cdd22b4c25de2c84d8cf4daff77869b704",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0023.json": "f6ca6ceefdf1aa506176e2b910ec621691c37a8b597d9edcfff386ba86b1f2b8",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0024.json": "8f7cf20c32661b92d1c27260dc1ca3f5232de967c07b7c1d374aaca37b2c79d5",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0025.json": "2565f945f7bccf4588cf630fe367e5eeb603fcdeb44eec2d28783efc3510b35f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0026.json": "eae7ef47622d13b9c629e8d9d55d35dc47a322ff2409a5a20ff71313d1d519e9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0027.json": "d131e2dd2333e6d95d4c053cae44472f117f41e9e769d99e026db4d2792f8548",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0028.json": "799c6af23e92d802eec82e3d02efbb9a684b4b107e0f7d9cc63f7b8fb02723b8",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0029.json": "3d637c231389e09ab5387f9910e1e08d289dadb3ac3d2410a280ea12bde52efc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0030.json": "61231181c9403663cae55cd17aa47d01aad201287a208b2bf778d5d8833cc169",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0031.json": "c3f06d3ede809146ff859399a9140f6d16d531dffab49bfc3be90dff747e1e6d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0032.json": "a3f184700cdf66ec85b7a1222ed330cd5a8d01a7a8215d4b608608ad5dd1e8e0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0033.json": "97d9f878b397b59a75fa6fd2ba5eafa274157bf8a8714a436e210625d36b84ef",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0034.json": "ac02a89b6cddafaee420fe95082a436a6cd7dff78b7947178d355cd7b8dc65ce",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0035.json": "421fdaa8f9d6e8207a6888d58892a5a9455e1d3143002db6d642945bef5d1a13",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0036.json": "8b59cc0247660f5f55215b8518d75b776520d9f142281a6948b5100f93a98c5c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0037.json": "27d3364ee0ce9be89db8594747f681be4bb6cd782dcab29f51f831177103f856",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0038.json": "8a204001b8cb45ec13d8f79ec963169e885ac2959f39e357960dd3fd44ceb2cd",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0039.json": "52f7339ce8d9d2dae58cbafc207886a6b1eb634aadadfe94e2ecd545612b807d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0040.json": "f7b73900ecf5e23535011aed59168bc8dcf3986d2d887af3d26ca580830bca75",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0041.json": "b8b47e734cdd9e76a8ab109c9919be4539015cd1c7c0feb869ee39d962c68d29",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0042.json": "d9bcb8fb484b8d82c241456a8bf3d73f6960ab37398b70624278eb521c136b2c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0043.json": "af06f9f2627f6fc58c50922c7f39f4632a90eb9570fdff2e9be4d5c5f8b70a59",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0044.json": "a00c1babbba390e51fd4e0c3f2fabc59461408c568db5a38464c7ef77940ec32",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0045.json": "df0b9a13de5904431c062a86ebe39c92c2f490354582322db9c1789d54ce15b4",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0046.json": "aef1d8e413f88dc7254378cc12f02674182e009311dbf0595c5653c97aaf8381",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0047.json": "3f7eba31263db2840bd5d723a2ca44cdfa4ce0ab96ac4b18aa41d3cc893b21a5",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0048.json": "edb97c1d95567204c3585020b37202a06c3f3efdd49aea60e99cd95e9ac81bba",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0049.json": "a8160a6c2e672318c11dcdac03a456427c76bb0fe1da3043d182b6ac0b4dcac6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0050.json": "68e686f6615ec6f0e66fa10b1d01895565ba93ed17c9b22d45d5507215e839c6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0051.json": "f01e80f8031497d51b8142960b7a120e192d7af4a1eb267b29b42e411e8dda7f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0052.json": "a3707966c3e7b4faed25b0e387eecb1108b1f8ee24b80a0765aabd6fc6c0fd4e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0053.json": "4f61d8aacb155cbcbca1784ff23e57602e5843de3ad393d724c57863300cdeec",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0054.json": "95307609c0a42e4228024f625713fb8aadc7d060fc13aa7feb1d5db302ea56ce",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0055.json": "491055c95febdff59a330dd7e8b2173dfa6642ef6f0e6a6d4208136181bb7fb6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0056.json": "ca3c4d77def61a19f37cfbe62e5522477060f702b56108ad1f78a019784633ea",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0057.json": "91af41e313f4777e85898fd2bb0fc0491307d08d468a145a89c916d58487929f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0058.json": "ed09d49e17c273b9630bd83ea01c8340dc9cc49da2f4143a126216a692d48a17",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0059.json": "a9f2fd351fe18e90a060ad0f96f15fb969023497be31e803015cfa6596bf2587",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0060.json": "95a8d445f995ceb736567ba759bfbab63d44ef9c95daf6b2301f48e1c44724ac",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0061.json": "f5ee938b9bb07e57b3b82ba777f33ad0b4dc30b4757c1c9ce7a73464d6d955a8",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0062.json": "6f89560848560020bdc924be7c46239bf5f2824eb1e1756800f217da760dce3c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0063.json": "35aff5d3d3e8851c3a82ffa491ca27805c751c491aa5ea5f1c3cc17ee5b260d3",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0064.json": "61059a069ed826646f467a46980d289de0b26de1c736a313d60df6bd26dc1efd",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0065.json": "cb871ac13b6d43662ba63ce394da398b1d5b4fd558e3f1600951e585a4f3ec51",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0066.json": "8a8f483812692ddd404ba51ff65132599a85aa10cf09871ca42b457a408d98e8",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0067.json": "db118990efe1a1ca25224d335020ce1d79e4461bca766641a238878b93452802",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0068.json": "f3506efa82abbe655d46221a5e71ca40f9e29bdf9ade1e3e6108bca0d1ca36f0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0069.json": "9676ab031de2acede76314309001da6fb9b1bc7248e21a57cca58677ada281ab",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0070.json": "cd2100b13b31edf6630cfae9a6d9aa35c2d596a47f82604eb3642f62a7eead44",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0071.json": "9dfc0ed44fad161db1ca1fa4cc4a9e3de9938ae134d957d5986ca1a508054dd4",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0072.json": "d099c22d0b8b84f8afe8d87577b07e23c1001e4c80318adbb70414afac75c2e0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0073.json": "028ad21810a43446b566a19a602b28a74fba9688c0af7dcb9efbf7b54cc0aa25",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0074.json": "e79269d528b3c5afbaa524c03dd8f0d703a1e4e9c9bcf81cab53700388d269b0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0075.json": "24321db05d5bed9e3b0c534dbe55d01f3529f87cc31c60587606f134c5f17cc5",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0076.json": "0887945925a60e2e6d4c4e3818c72aa6bb536a40e170354115a9cccb348afb87",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0077.json": "6ad03185e2ecb13c0c3b484d00d1594fea7d3899f933f694225a6d1374409f68",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0078.json": "b2a09c75dd295cb9d249b4878555deaf8deafd3703681aaa27fc9e2aa5d32edd",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0079.json": "739476a0e55f037c9203632b1ac6cea372d070532a955e03ace81f00ed7706e4",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0080.json": "e294ee8fb233d0bd1ea1cb575b3941b4bf78602b73d8569eb1b07b4ccffdfe46",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0081.json": "cb20949a97307a2bd6d4fa6c8cf26bbe64c70ef97ea0ee4172786a672412de1a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0082.json": "f718e3557d1af5226e2799c760237d3f4a6a73fc3fb49a96409b3168780d25c7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0083.json": "fb9802684d4fb90d59a3bf11fe5b6776fadc8b42e886bd2529751617dd7d749e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0084.json": "27bf02e13b95620a6eaa6bb1f9379b65e88f9fd72e293ecb600e84eb4256fc27",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0085.json": "421dbe5da31129ca052e018d9f240cfcb89bd0c62efb61ad174903d53e943a1a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0086.json": "c88fa21f99bc3bad480997803c9109bcb20f500900f0515a0fb18f632f419216",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0087.json": "7d9c80e06f093b26c0cb5604e87b99f52d828f55d8d84b5e3c4e887f31c98214",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0088.json": "d0d1ff5fe9b20b2d026d382c1228458e98a8b3bf42209a55d0dc1d7ccb47175f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0089.json": "5f482ae50a89043bb8c766a69bd157f3910a8c5e03452666e7c56d0951662226",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0090.json": "4eca86217418567f94863ee5013790862f60bcf70a471db7074d49fabf699941",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0091.json": "785bf7fd768a2c4778389a44d490666c30a6294b9ea074bbd75c2d7bc4303954",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0092.json": "c6eef455dd68994a0020f778a92fe9637c046c7e58a91bba52ec3c5ca3a78940",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0093.json": "fdf64d139344026f255c22a3d3021fbf9877ebf7462a6f0c5039bdc0d269b603",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0094.json": "631e6b320530a96e2f538a49bbc89aed2f49ca95170781182cc9230bedd586d9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0095.json": "4a2fcb1bb681919ccfec35c9a9d4997164eef8ae41d018094487d1c4ff73f3be",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0096.json": "dabd999fb5995ea5df56b71949054936588ca2c6121ff2c6277bc061aa98948b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0097.json": "93bfd487d697ac1562326c64c4ccd602c35f217c004b78265a0f09166bff6748",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0098.json": "0a2809f2eeaa20e827dc97bed87577fffdf957cbb981933ded1f3608cd7cc97b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0099.json": "28fd6e8d842252204daf34dffa0f1fbfe68af6d94c9b2f0c38c49656c25c02bf",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0100.json": "1032c3899190dd7fbb2d064e98aeda3f6c2401cff2905d17f36d891941c47008",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0101.json": "0f2e5838505cb94dafb9ca3c6e63fa33b17e796383ebc058d4485fe20bc794dd",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0102.json": "58ec6114fe5d70a6f9d07e4d3014f09d29dcc56fab313db5661b130c30671a4e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0103.json": "259af254fa87ff16e6b115fc3a2e8ce7d43afe91829470ae057c75d03ddd582f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0104.json": "6ab35e5e8e2a87472bebd1e58e5f24fd40842bf997a55773db1fd3f7c358220d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0105.json": "44b2e6728824a3af959fca27b819c561f0f125ce27fad6bf6c91810ec14f2f4c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0106.json": "a87e666d58a4a9ff9b17cfecc95fe7049820c736ef020a95aee651069da5d5d6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0107.json": "5152d134aa07be602bd74fd325d03dbc792dd367e2d6926376a24937f4dd9380",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0108.json": "3575e02fc33834f25eadad8067f8684cf91ed3a1ee894627583601a5ec14342f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0109.json": "ccd960555605c84d63295112973f005869b72ace6dcfd5b7cf2976fb233189b9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0110.json": "8f89d01f845648bb684003f8657989cd6e619ec3dd912b9c31c858f2a49d099a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0111.json": "5f810af4f0b1bfde4b9adbf08f3947484c491fe0e9721d3b3b4d62ca60b23ef1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0112.json": "610757aa058cc76946ba7edc0a62d47bba2b422788dfb6f5a2817386f08299e2",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0113.json": "dfa1f01cfd09645a54fc56a504d326521830594bc87b0bb5332e02463d6bddcd",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0114.json": "2a231865dc0443ca78091de7c061ffb0afe2d773127026a093e2a55dab3c616f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0115.json": "546d8751ed089786f954943d3de9be9bc330ad8d6bd68a6594a64264d8b2b75b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0116.json": "52b8ba8b11c18775a2be7ce7d664bfa205204aa4b876fd011ebe708b47f95a90",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0117.json": "751ee5aad38774409bdd6c631869492f1227516a16af2bac32a62de72eb60cca",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0118.json": "43b4a577bb3d0168a699f83f9a5d70ba063e783a24362d81f5a432c6d099ef0f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0119.json": "b857aa37be670025dff6daf2d83e43fd7d39d241534f46a8689bd8071a7e41a4",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0120.json": "5c25cc234b46cc795257324d0f5ed773e9ba20f3c86501b46091bc5be91e1dca",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0121.json": "8882d3ca718bea08740bac3ea502419a66121482b84ca9f9afecbe98c157fe80",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0122.json": "3741a42237662196eb2e270c5afa700d97f0e5be1451470a0bc0b6e840ae73f8",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0123.json": "46d8bc6a4566d9c38e628a60acde787def2ad8f3188ff9a83f1807e6fd42cbf1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0124.json": "410f7d1668ee3df40c25c294f928916b9ab4d8c44080ac160db8f16331d6d997",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0125.json": "77b498ed7139c94dd33a406212710fa405d17940a0cc14d85335d765235cd11a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0126.json": "3b5b78b711e04f917a9484ed2e0d40ae7897320a6976cdb7d8c99e2ddc215a4d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0127.json": "3fbe95be63590ac6285d999de9d51fde9455f27b871a0946944e6888e73cf70c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0128.json": "d0c284c82c20c26fa1122afdf505514e5d9e963554f0f03e7a02d7d57030c5e1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0129.json": "9cc3c89dc2da6bc621452fa78fbd4a782ff2f0763fae8e87392066d84d388fb8",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0130.json": "c889c7fe91c5a17a682dad85684b0adc8394b7f18562965fdfbdefc19f9b8deb",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0131.json": "87ff5398035c5c472880f7a50c96460b84faa3d75616e1f59ceeed7bb7f0599c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0132.json": "47b86345cf1aacf58ca594dce96bd553f569a2201b27d74c51684905403c79ad",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0133.json": "b877a52abc27b5d989b62ba34e0ca56d7c6e78bbdb7df0bac8c813a6f2785fea",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0134.json": "05103efbddedb16196d71483b016f226689b65c6f2dcc499eea0719d173f5ef0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0135.json": "e3877c4242a780a51a54fded4eec53157f7be748c1b9ed112f1c22106d18d8b2",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0136.json": "8855801a7291883cf556f0f5323818bebf42a9ad5dc1e7899e406f15394cdd56",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0137.json": "8bdc8a732a3ccbef0dceb1cb7a2683e8bc5d183d6150c39d1faba775171047a1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0138.json": "da400433302801864a3217c31eb4726a718e3d09d0abdb8dd3e8f601a5aa8c26",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0139.json": "a5663fbac7dca01abc09f5590411206ab9e123d101998ea6d13ad2baa9d870bc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0140.json": "1a3d4668df89c8aa90971651b474a90d9e6e105b257627e1110ba27406d62741",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0141.json": "55117107ab81d245fcf222acaf0f98b326ca9e038a1175a14764df22b87e28fd",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0142.json": "6b9a8e0465dc7b04c969705ceb1e519101c66df27fb446ef0e40c5d213e42f1f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0143.json": "ac44988762acfbd06c2dd61bb90e423fd659477f53be2d3df9bedc32d56db736",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0144.json": "7f380e8c46d8e913f895aaa812973c55d42210970b6a836b22ea7f373329d6eb",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0145.json": "c1d0985676d3bd1b2fbb8aa1a6c53fad6b23d6d05447fafd9dd37d1dd46597e6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0146.json": "f47addaf3049090a28c7688a95a9fa2d7d517e3385ca6fadb44831c8ed64e7e0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0147.json": "e162927f064da60affe8c2db99a5e305e671b6c445e547b8ccf8a6c6e08fe07f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0148.json": "5f0680d6ca5629d46b16397aef9697ac6ad58f6ffde9f70bb96448fd5f685c1b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0149.json": "368267d65af473937ea1425b09e563e6e2c9ca1eadce247a8647420f8e388935",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0150.json": "e2c1d0c65968fb086ecb93bb59e048d49ce58fe7496072a4f598b2ac574768db",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0151.json": "328c68ee564b42629b2f5caa480e1e3f1c3f9e3fbbe8929e19be7a9692b70475",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0152.json": "eec3e1efdc22e312b32d7d2709214b2865e09d015c8980d50a5e9dc51f997563",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0153.json": "4fc3c577d5c2150d23bd3875d256ece41eb3a84e6ccea54c8d5a4f7cf99b7670",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0154.json": "6e84b093ab7848369908cda2cf73e3b9dcd5657c8f2aa3290a1650b893d5d604",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0155.json": "5590d3a02aedc7d88d6058fb2b36c2f3adbec73f951e98e5b571b3d2f959da2a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0156.json": "7bf03550dd8a675ab194ec5756cd15a095c7c5561de9377e007ca2431cd84de6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0157.json": "c554699f3826e5b76d5e4dda306aacef2e92d1b00fc28792107b3a315a684bc7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0158.json": "f02405d4836b253caed92982f0fa82088678f024b565436680fd4d74b88affd1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0159.json": "6e5c25d1a928d82635cf5fb9487d2def1c02750b11b0ce357fad058a59c981af",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0160.json": "3fef31defa3e836c11beab8f61f3c88d7d1f9f6b70f024e8193f95710323e4dd",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0161.json": "380c5b1533a249a4cef98cc89946b2e2fa98e5656d50733c7e9bf2a1b6bb8399",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0162.json": "bb0e2aeac23700b001301ec7c7a69182c65a6b8b2195ce265516307cebede8d2",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0163.json": "a800ce6a73af69a1ab7175d6357ec10d89d455c8872280802424e595f43c1fba",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0164.json": "aad90030ecd57366c0c76362a35de160e011a6cda0c205c85919899151756c76",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0165.json": "cdb1a885d7a87f1e5390cc32cc84d951ff1b7460b4db0a322b43ec1240a250ef",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0166.json": "d8a8b30ff04696d8672bc00e16e9f5718832dfa78d456ed94714e882007ffc8e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0167.json": "393c0c5348f0dbf1259f32163fdc094c852bca63d99446db61a7f36c0bcc704e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0168.json": "a26012128f6c1969c191166d418bdb4cea7909a8be7f29002a308c2ecfd24132",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0169.json": "fd01b3c2fd0d978462a1d7eb880b1d308796199e54bc7094c0a78b3dc939cd45",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0170.json": "e58965e4fb68b76830d02f23dc9636241f57af889770ee4b153443bca312e83c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0171.json": "b807e97d80d1ba79c3a4460c15adbb29afe3af43e9f36bd7e6989c9a4c1a4c51",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0172.json": "16b63bd0979bc020838954f4f906f5b9f20b13dc6e7233a8b6a28defd741a63b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0173.json": "d030fb5db083f235e5dc5da9e880cbc5e40707190ec8cfcf3bde22ea1d6ab8ed",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0174.json": "9a7f6ca57495473e0469769b29fab5a9a993040b3c828ac5fc603638a646abfc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0175.json": "d083ff66ad714125ef3a4e18f93d58f98d7fde8aa07fbaeb78a400e23aa92a3c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0176.json": "918185e38629db676b9a3e47e84481575caab2379dbfa85d63edf4bc76ad6edb",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0177.json": "61bd39741f286f8c745de7ada7e4a2f51ed630da17429da2056c6232eb27b016",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0178.json": "e5e0aacc2493f8b8cb885a12eb1163e655e98ea76cf53a39b92eca5408853a36",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0179.json": "0f52f0383c66e89d0effc4c6b0ef0cef66f28521182b9bf8d5bb71ad0774d985",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0180.json": "55829163e6bab7fd25a82a1aedfff8e34dd473313d0bd5f541d49d0cb3829879",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0181.json": "73ae1ee4007b2a11e2cd0c2541d102263f1621280d6f39317ffd9db80f86f21b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0182.json": "a9787c79592d059e596dd98b4a172408c58c7c6cc03410b8a7fed47fdaeedbaf",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0183.json": "9083186d3b4bcbc5b2e6ba38a4c34f59704af7b809ae85aa9093f323b2497d72",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0184.json": "d283fd3b335bd44ac1053be3360e7590397a8d4964d7bf50d42fe8ddd6588305",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0185.json": "c937cb955c29dc103873a4d6895da0a6c239af5f521e7fed3dd634c141c25128",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0186.json": "8db30a1f153b7c0e7310e4578545d4d0f9d795d87c6a9d08ba77d29227ef4a6b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0187.json": "4f8f55d18ebfca486dfdd5ee5cee803197f427252315f72f392b525bd243ea93",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0188.json": "36c4525e93e153918ea60e9793492bd78795d146dd90e52bcecf457d04c033e6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0189.json": "7222a1eb134054dc07ef6acf19e5ee7ba99021861f440ea89b280d2fec9e9459",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0190.json": "fc4504b76b73ab515a063ed8a39eb41339d1ce8d0e25c6394ed0fe5be82be524",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0191.json": "35a87813ebeb8c642d30bc0cb84977f8e5f4692326e81f5e113be8bb1271f150",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0192.json": "7c5e00d01662e96a9c9e490a3fe98079c8b5fc28a5fabfc81eadf5cdfb3cd5e6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0193.json": "c786e69e18c95f79efb2d8f8427e128980d16e9ae4ec8b53fcd3dd3adaea85bc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0194.json": "e83e0b6a52c1fa4e7c46e39fde7284bd1f358a91fb7b937834dd773400c56ea9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0195.json": "148ca08feb362f681bb249b63a35edbda364fe6bef7cb44a17f98d787b7dc2ff",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0196.json": "ccc0b900829bbccac8c1bb8dcc25fb4b8a8f5938c90161eef278c84133876c71",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0197.json": "b82875c825375f16ddaa66025f18a2cfd1efc4d33e96e08fb4be4c22b379e2b6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0198.json": "994d1da0b18a018c4da60a5a59c5b557000e1e2246ee6dfdf0ad5beff0ba0c14",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0199.json": "66748ffea1a12ef02ca0fa2a773f4a0c3c703e6caeb8030c822309fef56437dc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0200.json": "9ab31b6987a8cf68ce0f93b152e7264a8b635192a40b0e13bfded4c749b079ff",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0201.json": "2b959a4c06f96f0eb685803630f1b710f413bd9c08245ac3d6d11197a7d50a32",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0202.json": "c147a1fbec806ac6ebe3b81f5c0238773009c00824b539ce7879b10d457bcb94",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0203.json": "3970abc41dd0bc35fb5aa742bd9da742c9ae0b817e6864a3b62ee900fb6c1ac9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0204.json": "08e150e6022bd9da67e099f3eca28308561a0cd8c654fe4d0be1d02e147b8f68",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0205.json": "c94a16ce5a68bbfe061f0a5b88dbd957e79425623930e94d7a5666d62cd38360",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0206.json": "1667d50c66b607c856c4f58ef683601d78139e81aab30fb921cc0888ea99e18e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0207.json": "fef36e943a3520eb338aecc269c9497be04049f7728a199d56d3f170d5443c4d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0208.json": "6827fca49b61b9e5ad6736e676140145a4baf38fa370ace0f5b8716884c117a3",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0209.json": "11c1275772ce36eb596223e9a8b7a3b607299a0b6dde0e16734031848a92bc3d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0210.json": "39794b3bcd0478e94785ec23997c8c443ddefd41e45abcb8304e5c358d6236e4",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0211.json": "c3c039e3fe1ce65235c8a51b47d113d6043d5528e9e30c507a0f25155344085a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0212.json": "c229dbabe6761d069541447f32790b3a19aefd5aa98102b91c225e32f0e85617",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0213.json": "43a9beab0fb1ab764a6da714717e043209aed7348d8c2d8045864b77fe198e3c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0214.json": "e694cc12919e3c0e1ecfbcf68356fa6399d528bc6cb5a3fee0ffeb2c4814dcfe",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0215.json": "3fad561a37f33e8d89df4c86e39485abe49c07c23ea1310ced97f07b5f888cec",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0216.json": "264677b7b82e428a86e7c8f2ce00fa5e4b6e59e59eef7d5363150391661a8a56",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0217.json": "a372118e02df319f45dd87f7640c5d8477f7df39f50dbc6d2247c6ecbbe81061",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0218.json": "e16d8b4c32820cef53b358f8ae483f1e892734a4f2cd762eb4b179f09bd436de",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0219.json": "4a1ea255a9411d8a76f4faa33af469cb35743eeac937f2e7ec0c1b24bc2af794",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0220.json": "7297b0685cf76ed816e3f3592f58330a357da2776ad067501c7ec95141939d62",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0221.json": "6c483674b1bce2f97d872d4769c5670ec89debfd2558bce7b0ee987db1404f4a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0222.json": "deda56a6bf8db2deffbc486036e87022da89025d8995f3e253fcd1154cc14a93",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0223.json": "3aceb5c401735618e16d1c02a48d2ef146d5f57fec4a1cf54a263ef5b3fbc40b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0224.json": "4e0ed5c6e5fdfbf19aeb0e49a34c581ea3560a1df03aef751682728812b69f94",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0225.json": "84f004ef27f336239b9089038f32d11e1c8c344caaa9374f736b5fe999dd8532",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0226.json": "7f50decdb0451dfb4cb8077cb47a0a63d596607e435c38ae4870d5ca91c2a21b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0227.json": "80546d87ad02f2cc80f708aef3c1acf2ef0224f62f102454946e7a5a73137ce5",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0228.json": "655d86ac9425ea9def2fa1703f36b3714024871ce18ec3069d7734e713f3a3d1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0229.json": "e9173fa19bfff2359a747f5c5ece45be57abe431a4e2ee0a17f174b1ce30e2e2",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0230.json": "f56a16e75e29aac8e99b85a358b0aba78895d65313b3fc1fce930c0a42c54be9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0231.json": "a0052301aad10d2b33f59d757b92731046d7f5c9757a3b789e4d7f3d13bd6b32",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0232.json": "b0a8322d875022cb45f5c91b5531a5ebaed026e085aac9019d85328c9fef7dda",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0233.json": "dd8c3ddea56b3a92ef53ea29a9d5ea0d26cbda5f4e962fd7363ad0a29db2084e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0234.json": "d5a2b7cbe129d41a02e308536b5cefa0f77e5524284f95b0dd222445b123336e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0235.json": "a7f44315c9450f7687be5f8e7870e68f7c724cd7f129a49bd50649ec052d6aa8",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0236.json": "06f4fc1be5090238cb949999cc805da49f009122d682977c468d954a5396e371",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0237.json": "d2e61ad73fadec41597cb105e9cc55593c990cab2b6928df125fa86a95ae472c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0238.json": "239ed5987f4992fee1430b628b67f6a23f083629f94e4395bca255af0e35670d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0239.json": "77263e34ac2843a68f7c616fe82ef9915d6c32970c127e2098253edd3d9b2afe",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0240.json": "3765f8b47777de8923229a317d069468e9866d93ad8d72e8071b2b26a5f1a875",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0241.json": "125aa8a0e8093fe3e0212fad2939b853bc5cf88093fe04f2eb80fc33f514f144",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0242.json": "54122faa12233108c8e3fef72c88058220dd973adcebd933ba710604e6b85b28",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0243.json": "77d54bccdd396a13a251b2d6bcd0cee457d364ab65d3e32e8cde64320d2697cf",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0244.json": "c3c23f1003af10807c6cb9d3f2b383370c3b755c6cef3f8cac13f60652af276e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0245.json": "608818dc04bc9150116234a0580f7680a19f34a99c1f3671ea3b659164f96e12",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0246.json": "746598eda767950c7f44b873b41a668496ce279961f0a99079e1e4232cebdc18",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0247.json": "1f205e104e4c5268e3d09dc12a52b219b3f5a6e99702f7179c8576df246986bc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0248.json": "f06ef58df5282a964c567ee5364278612162963738f9763ffb36c463305bd0d7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0249.json": "2374b6a4a7436d283e2c319374367158c736082b7f7ae11acbb65aebc6ed01ee",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0250.json": "60f2cd69deb023be2ea2a33076d6e9f4bd8621fcdcb6ec9ac9e7050c064f63fb",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0251.json": "470c175c1947cec47332eb544c24fb07b81e281845863e48f47e3799452c4323",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0252.json": "8436a4f4c6215282ab93912006d3b879ab7cb771e44c89c82beb155d62a79638",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0253.json": "9c6c1922272fc8414f48d5ca53cc8543f5a265b15418c654361a10e659047d2d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0254.json": "42b6806182ec99bd405d752ca80c1548f4c1cf7dbcdc8a0b3a7b4507dbe13e33",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0255.json": "91a71d5dcc4751e7dfd0dfb3d608deeb134067faaddc238b2a0b00a0a03d74ac",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0256.json": "2c73d8d5031afaeebba98eaa4125789ee0a62a88bdf63f30c3b4a9ae3a1f262f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0257.json": "fa9b295f8bc792c3c6a795a7d380f2b09f64abeb5be7c401540eff43148a8718",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0258.json": "8e759acd1a94a75dc8b720103ac6d7c1dd4cf266887ffecbcf6fea484162f27c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0259.json": "e1b60e7ef26a08b8d1af2fdd70f07179a643f1443f5076dd3dfa5594bbef3809",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0260.json": "0c80a7d2ba16e57b4baac8e25826b6f9af6df29f13ce0a52285aac7dda246580",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0261.json": "35dc142293dcaddc763f5f08a6dd44b55f3bfb4794c2e30c564157d82734cb55",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0262.json": "d5c6e9b00f35a6d184df02a32556f229d37a52f31fc48eb8e3971fa273264c57",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0263.json": "74fe6760ced3c551c4f8b67721cd5caed27fade3177f27c156a1c733822009f2",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0264.json": "bef0dff6410e407729035bf2263875c5b4052bab1d9376f9af9460009bdcb57c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0265.json": "c437eb0391c68b566d7aa00c0d0cde6b0926643980526757cf79f88cc7638da6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0266.json": "5aa5bc79e828b9900a800877c34236a46e3d7acfcc3bfc70d173116d41c27eb9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0267.json": "e5d1c1801c45e66cafcff415e4ac8dbda8c9bfa9b4ea187d701819ac0a4abaf0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0268.json": "235b6608bab09e209bcb952e1621c5efc684aaff40105c1aa873be795a04c135",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0269.json": "5754807ae271a34e7a3e9ba7acda93f4321c9c27aeb745af207ebf4c85e8ec44",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0270.json": "973181a4d5308c813676690c43d51b6bfca4c973964ba49ca95477977ea537c7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0271.json": "9fcc1dafdb20a022793096bd7545b4819aa583ffda0360b70781155c9df29642",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0272.json": "af8f317eb4b721087afc31f2e915dfb7925af4b41f1c768f38c4ca9c6d8ede16",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0273.json": "42e5310bd981440f826ba48586de85562cf95db6e4ffde2ef6fb2f8714f0992e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0274.json": "f5de25092fee18d12ad80aea8865e08989cf6b4c60e6a4c2343965eba5f25074",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0275.json": "9998e601e98d5a1f605ff1824071c10cec2ee889722cc90f77ae5fdeb71e85d1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0276.json": "78a0f13d89c790e1e3fdc7c00a566f6ecbb23bad835d6e9f70e428fc7b27801b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0277.json": "a1569d73a15a7d35b80844f8325b0071cc4f970c8e3aed48bbc4f6ea69ddb71b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0278.json": "20957b97ac8170f991dc2eff5129a85e277b3f20a1d1c73491d76719741eddb7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0279.json": "eab5a42331d30a563fa8060f1760dbe2330f47e9c42944fb2291600bb386c5dc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0280.json": "5f3103b2843c859139bf9a9380de2063c1c1ddf0e5f3e93bc5c9b0fef8a74324",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0281.json": "cdcc18a3fb2a1fa4d03335e692e24a23c9e87aee0341ec91e7ab08944abfc8c1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0282.json": "cc2fc257d0a3e246982dfb373bdd731fb7bdfd2507af7931be493faf22fe8c01",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0283.json": "56f911ca448a48fa54fab50a193caee93917840bd66ced2cdcef048b672c0358",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0284.json": "ab15c8208899e99472994fc76af085364fcd4a17be2bb8f2db4cfbc26f873f7c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0285.json": "0eeb4f925dfe8448a385b446211b3e2b1757650b90a2d699a3b005392a1164fc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0286.json": "fb39fb31745b45b420c6f78a7ebe359a04716fd72798be2d87d2a1191cddcc91",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0287.json": "653414fb9b8494909d522d83f274c2f6ec77911ee57d04f7a3334c06386df87f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0288.json": "92930284f36ada2f464442745ff27024f1efdb99e611aa04930abf8fc0190ebe",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0289.json": "56aebcacd75b1323b73d589f8fa628c64c7ce8f7dc7ba71da29212240c9f3685",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0290.json": "8e9a39b16ea79faa5dfc2ecc17897869467ec943fa4ad711cda84954f0271f9a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0291.json": "0745da84362e2f3dcfa71ff19089d1b464ddddeadda5a8b4bd54c922e107e1d6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0292.json": "5f3c41bb33ad0a55dffd1f33088255be637771bf581bf2bdf6027b4176e5916e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0293.json": "d74cbad1376e90120192e39f682ea85966a5def92b2bc3d67683e87bf9ba1508",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0294.json": "764c7f6c3498e3e9e94636dfb9a624628c5bdbd4154d22b939cfee6a7328dd08",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0295.json": "ab9e552906c6f268569a0982e5c2bb10c068237d431a4c8c62dfc4a5d153471d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0296.json": "05fb8b9a5bc29920984ee729413a559b033ddfd3723d5fda32034c379c912dd7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0297.json": "d447bb3192ba3907474fc47cc170aede1efade12cfac2c8b34a614bd798669df",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0298.json": "889bc8d0fa1a8521a78235b5eb3e9f2971ed89b6626f646c4ce382be1a3adbf6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0299.json": "be094dd134f467459aacbf08bce833af6201c1f9a7b6222d1699f9f32c6da4aa",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0300.json": "e9cc00337f27babba716f2f9eade63e4c372f31e61fca6edb7894b0ce085beda",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0301.json": "3c73da506525a2e133bd4c69762e94044c95207d34187b1f3cbbaa9fe8046c85",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0302.json": "b016d52b7e95445447858a2ff4edae1a119d080ca447e660af601ac5e8334165",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0303.json": "516666f4d018d525f7e0f940890f790300b0c956a42ce93142637a11416ca39c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0304.json": "4aadba92434d412a597bd681ab43fd11c724f37d2a7c0d3d7efe99166816bb1d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0305.json": "93d9b4d054f8d1879d5895cd64d453e689a939993b853f57082f838cba9187f5",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0306.json": "9ef8753ae978e51bd60a6b799090bc3d49c3c45f5e2bd05e29c9ee3a39b1a415",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0307.json": "8eedf679e63daaf61cdb6c6e61e50d46cee6adfcdcc2ff2a8d3e7e60ca5eb753",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0308.json": "e1555a07d8f006af977ca15e45050b82650c8fcd2abc34d3c2b63c02c5002b76",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0309.json": "32bb66892e23a94c558950165474124e356be36e08cef4110bba943aeacae653",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0310.json": "14ca077abe2bced295605e2ec61b825e0ae373054423500befae5ae2ae23f21c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0311.json": "e81f84792f60a0425884936432292bf68317a9c5fd53ce0920a595abecaa41f4",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0312.json": "0f27ae5292e6f4fac3b0c3f9a1045f2b160fad60cc3b7df84867f6678da5903f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0313.json": "5e761492394ddc09650f339c2df3a96c85286c8fa5ae195567242f8cf3482323",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0314.json": "caab4305186be7dfcd5ed2be46693d099108be31b4118f2d536cc574b3e500dc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0315.json": "ba55580c576ed28f1c23c446f148548192fdf1d8dc40c60a33a25f2ec490ce1b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0316.json": "e915621f35199e3e7973a935beb68917d4bf6698d45b9dc032e84e8587fcac2c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0317.json": "027d8bde6b81336fcf36a1fe6f4719837d85cb250576681605ff64ca8839992e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0318.json": "307b22672d2009dc855d848ef621614facd0a512899bd5383a563b6b75c0ec1d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0319.json": "5b8ff20240638c036355573fe3f36adc5dccf459c2312cf3636686a9ae99e96d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0320.json": "6cc85a98adb34a236aa5c0e6bb48efecc61b28286dae641fe7db5c0906d1654b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0321.json": "49455c014c170843eaf08acdd17f5d2a6d0b4a9d3dcf2291cb6776dad058c34c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0322.json": "087b093a5b1e9fe7fa857bd73d111f08fc801a958fe72fa40f39f4b6b1820f8c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0323.json": "457cb18009558249ece6814ab609fcfed21662f0672422e53d7eb8181d8ab63d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0324.json": "65c752f021c11a723590516191dfd9ec7905da402b88346d9db0147fc13027ef",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0325.json": "1c22dc3359f055edc536563b2dec5f9dfeb5cc3d8f9aceda1888c87e051ef42e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0326.json": "6eed4f2abc2ac0c52e2b482a3e76b1271c3f4f54b5453dd4cc59a9d788c57e51",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0327.json": "ae88634d9d18e53353f1d6919217f236c1ede86b686b60e22d01a199bfcd80ce",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0328.json": "5295dbeef766337c48b3fc3303e1af21f9812f40e0728888048026e54ef05a78",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0329.json": "218588ae6e1b57e64d2f5227e874bdf632339416915bb1419d67dfa907291566",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0330.json": "67babdcea38526873cc7ac21c80e84910f509a0fd0910f3850078bf95375b566",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0331.json": "1db6e6e6cd0a509d307cadb95d9efccc9fe8c33e2963a47f6ebd5226ba952458",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0332.json": "4b4889d7002ac83a9864ff4263fcac2e8bb23c53b93e4f85ad1b5d873bbdb609",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0333.json": "eaffcfca284f1b3ea46bbded9251c3a197d829d0305ada9d83cc3b7a3f86ce20",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0334.json": "2d3a30c23e58430869c22408d1dbe691183c19082478ae9847f984d7dd4428d9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0335.json": "e160e69a4691423cea37b2d723d7c4fd4501f74b13d0788bb0b888dc467bacf8",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0336.json": "4a87dbccc48c504b8a30b55053dd10aecd5878b2a54ed46f5f7f36d06976c8ea",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0337.json": "17ff695035ed40f736d7a01f7f0cac09d9b08445b66880f25f2166e64974c395",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0338.json": "7f0affcba3ba4f6cc705a1ee1ce30e2d4885528a9530813b13933e3c999cb2b1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0339.json": "a5f52d831b312315ae9c225c14d4cafff24cc9000fcd2ddda8502073218183f2",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0340.json": "b150e79994e7128abc25ffc85128a2c9ea65afbc2c566fac5da45e28246d16aa",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0341.json": "60dab73f0f6cfd2b215e1ad6477476f56c32fa21c2507cc8168e445045226909",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0342.json": "15ba1b3099c1984f9136478ffe793fe3029ea66c1d2e4025f963fec07ce3303c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0343.json": "c24de9f7c40b359fbe8ccb5eff6a250022acf927ce15a3fb66606ba8dd68620f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0344.json": "5617d689dcb45581ad0a020c39a12dea340695e3a7278b6ee35eb79d95dd1a3b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0345.json": "9fb754e8d3d96fc708e0746b5b804d63dc2bda66ada768a95db365ca975349c4",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0346.json": "c6821ef5044efbe2a36efc03048c7abc6a31d2505bde27c2d94e306e771aaf1a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0347.json": "891fb80aefed4225c58f9b8c1cae836b50979f6e6fd600ad06c3bb4e748b72e9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0348.json": "0d385db5cde7de7d6bfa13e3de8f85147aa2f102c5302589989f715a6f610013",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0349.json": "c1f111229d0947a7eb7724b2c02fa6183d6603f6f8f7c486763629f605eb31c4",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0350.json": "ca24fc2c39d0bcb495c21d612d6d9e858959bb1133d843b33a48b6ffd8ab6979",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0351.json": "9d8e1262b0d52870623c14a5c2a3d4466202a1ba99c9f0aebbdb107a036f9557",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0352.json": "71b9f26f0b17aed4714c705eff133efd30b4aa8ae7fcf0eabb8076f46184481d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0353.json": "1e8d57ccc09983f2bf8d5ddd76fea518d8f7596c39858e858909890d47ad429b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0354.json": "1eda02f93ffa23ded4101ff95d714377b2d4e656a10c9bf7e490ced63bfe4af3",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0355.json": "8e25ac7c1790209d2834ccafd142ed122f53e06e527d4609fad725261a2c3aff",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0356.json": "7bf1a67fd5921a942f9887b234b4a8af137effb85cfe0caed6b9ac7c2959178c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0357.json": "e551f7c64ff4e68845900e5b6135ff7824d9887bd6991d817e422420e115f810",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0358.json": "9bd085bd016946e42a9d76f4325a65edacc02ee84b76ae0e52aa8b7b2e93c640",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0359.json": "eea90ac2d234d9117bb6045e973cf8bf3f241e70fff73405e3a4e8219243689d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0360.json": "2618e3a403d575ca93d3ee1868d7fdef177f001efbbc15a3c092045e8431b835",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0361.json": "aa21008468e0feef0fe0db8c49025ffe526416b8177c7fb48dd8c76525cbd7cd",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0362.json": "2fbd4fc4f9f195ffe7f310441674049f02ef1e9a88ea1cb95934824aa28448b2",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0363.json": "cc8f6749eb2a744e8078a1bf5d2d95936ed4e20321406f79aa7ecd612e6aafe3",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0364.json": "732e2394cde4d9faff1f64db9e73758d478f9f85964391019d7d75a1394c84c3",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0365.json": "ba61b1fc8d68343229648df37b4506c9723b51ec63d130104f089d0caec5963d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0366.json": "6c1931a07c0128fd3687e4cc6c843ff34915289eb056388063112a7320d62d6e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0367.json": "ef89b599783a9822907d6eae5640ffee5e4bd8c145a473be2f594e6d94f3e041",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0368.json": "d2c823f97628bde89786fab730f6be8538c6785097594f405201c445fe7a264a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0369.json": "9da5e0cd2d642302f0701705a7e9fd3744cbb7b16d910e81bbc942e100c84740",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0370.json": "1d63de149da2bb9f88c1d8be9c6ba1fc80620d9f6a503a25a55d8579d0be271f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0371.json": "91fba37bc4acb57d6bd010daf2c4c8522ab65256d92c422e9b0c1dac3b116f65",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0372.json": "99a99a4fb40f6ea4ba17143f7981806eff9a656e22c0038d5261805356aac799",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0373.json": "324522227e780290130ab82016d8d26620824e3312851bbeea5b933f0f4fbdde",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0374.json": "9e91ee9e035c844802be6c9142a2f8ba581759dd49793c35278a45c2dc86df73",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0375.json": "50691583be6cb4d7cdf001ac9a9847ae3815b3616500c449113b874fad277783",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0376.json": "a703658a5adbd955c0b5a50a67a5a82aa64172858e7a0f08f45c94f4f388b0a2",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0377.json": "55d243c62a5cdba954a7c9619ee416634bd06dc2f34155b0335778e7502142f5",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0378.json": "3e0016029c0426e142e98924a9cd312e82875a6a4215945384661fe7ce931aac",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0379.json": "3eb00e8d04704a52bd3f5e26ff1141343d7a5b70d0e00ef7f022a96c685f7224",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0380.json": "a1c571bb5a0a98a8ee52e1fadb8927af5ea41c1b513fd9fc53a9b60362671181",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0381.json": "eae3936377bda59a858d88ead269d8e22c040f312131b72694a7aa432d849e13",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0382.json": "902d3fb3416140e8f9eb75c8af343fe63a2f32d8fa324963372454f9a4ad3c46",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0383.json": "a54dff31f0ebea198101d13a4a943a9853f3631e92c9bd01eb9abcad289bab4b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0384.json": "f6522ea3b5f0b52b6684b53cea84a1fac64b005b19b3bee85123fcde90c70e29",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0385.json": "fd74a3f3d0114e3a723514b046e0d3465bb2321d060fce358b7152a0ed6e298f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0386.json": "d9756c1cb97cd54b3c3e6ecc0b548969273604c6c2acde0c11458864736cc664",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0387.json": "07b1813dc17f6b9e2705d6d52d8b14f30b01ebf1f46659ef3b65f4985c9d8393",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0388.json": "07677e4b93fbece75c7a859d1e711b013bc9520488cf8853be6eec99a6d35e76",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0389.json": "62d9a07762ae36ea3e97e7a6d7f0b94a47cd77f49f1aa679bad8ce0629770965",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0390.json": "d93c8352f80a554d68fdc8d8f54dc5d733b2e437366c5cff6c2b4946cc4ebd18",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0391.json": "7b3e64c455fe437255296488ea5bb827033c3525941d2364f9dcd2085aad380c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0392.json": "d1153a24f7e1ad4b62bb63b3c8219be1fc69e2e597166b180bc3d1e7862abf63",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0393.json": "2243691c6b4c58690885eda4af209c07b8c7af1495228d9d7df5d9b0430db20a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0394.json": "5798d9443c93b0b7459ddbab8204564a2b3a5e3331d048d1230d0465513dc637",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0395.json": "6d317a74e4eb02f0730af7968f2336df2e89d556ea2e8114089443a4f2a16e28",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0396.json": "21fbeee2e3e10644bd177c5c068f43ed5c03ea9fdd6a1d016bb1741764c0cac0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0397.json": "8d63cfd7ad843258c1884d4a95cee3095932c1437367ab143f9f905e59e5a5c2",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0398.json": "ad0a5559aceea8f41fec6620a223a528eea9fd60535338b2ab0177985068645a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0399.json": "402b7e9bfbed5ff8d010611309e4aff0406f5d19536f03c19e7d7e16e17d8070",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0400.json": "644c30db38d0b2360394972f5fc755275df82016c3e5554e936aaa6dd245b7ca",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0401.json": "a928ae4229c1d594af0cba909043cf8614bf24356927df61db6dfba655ae981e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0402.json": "978d16b284bb051711ce53e006871b145daef2e71e055e9206ffcfd362e80f6e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0403.json": "721867f88a0874ee251e796124006a562f61f9a49ab76b4b6cdfb1648fe1bf04",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0404.json": "76df1b4c9c9df42a592448049100103aa86cf0f39d63553a295bdcff825cdf29",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0405.json": "03252cee87e94978f3861136f776e70ebff1d6a7972e0301d1861cab7b5131e3",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0406.json": "bfe862e150cd86e321d461ffb13e4044e963aa4436f8a44bba6dc0e7c2b9ced5",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0407.json": "3f894edae436baacea3a476cfbf5fe07a9b74ffe6ab5cf41d997b23b443daa86",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0408.json": "3ccf66b64c96785c42fc8f07da18827df72eb5748aa36e879d6330c08834207c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0409.json": "fbe68a9fc9a5758c2da21a6595cded089ed39e0e898194ab404b7bdd32df8896",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0410.json": "c605755bf2adf86554f577370454ae3d4abae00fc9fbbb822f977a50e868c08e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0411.json": "72987149eeb8cdb9a26032a66222e238fa906b987cb522ad07e7d30a93cbae11",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0412.json": "e84c40636e4cbdcb189c389ef6ba4a87e34c45756cdd5f29953614a6651c634d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0413.json": "cae7f952c7a202931d41533b3830e19b44fb7f93b3a25a0778bdec9aa5a8b45f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0414.json": "06ba7f144674a846adbabc46f6ca6d77468357da2436c0915a8017e552650d21",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0415.json": "ee85ea1cb9e31e57bb7a258b1003f203353a571247d1ba51826401018fab092c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0416.json": "d636f4a289ca686ab9e2dc85f5a199c8b018fa0c24b923d7055ea1cba754993f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0417.json": "90b1ede4a9c53da00bbc9576fd63009e657b1b35e62a1cb41866b09bab793e1d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0418.json": "3be88a7e89afda4b151edcc283ff2bca5b4fc90b50d378052de90cd3f074256b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0419.json": "430b7183ee1af951d87fb59f573966bceb21b1ae0baa1f07d3d287e0d45040ee",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0420.json": "337a5eb7e9d2c3197f0d0c7f2eeb4f9f5dd8d89d07f7500573b256a830a7cefc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0421.json": "041df7adcf35902beba7f9033e168246f9cf8c067710241365d93fd9b39cf8df",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0422.json": "c905b94f8bf36cc8195b241afdf7a92e16a62bb20ee5565fe710a69f9d7498cc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0423.json": "7dbcbd098655e1857950ab7c8fe9d21f8e9f8b45bec643782e2b600473061bd7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0424.json": "110ff43f00f12e7c8d912fb0dcad10d76c69eac01aa8637a04be765744fa2e41",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0425.json": "e573921d8faf0512531216cf20906fbdd543bd0b980862b56733749d93e9b69c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0426.json": "b2b829de6411a49b4fcec445fbaa227063223251afa891a76bae10f75b095fa1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0427.json": "66ffc813db44d7af11b381a08fb325de2a9c7f611d4e5f29575a54cde077399b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0428.json": "a43eca92f79ace678e7719c5a79118282512e6870371ed27a571622a109484d3",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0429.json": "86c66e6d115179ca34337f51d2c62ee3e30cc83356e9e6602bd8a9813fed9b1c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0430.json": "7b6f463c484fe5682da7ba8c68a2c31e97870087c2af4ef376db8f0f2523c92e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0431.json": "e5a73ec5706bf14c485a86e5bb6fb30e55a757c04d6db4f1c37c7f7b2e289f9f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0432.json": "e037035f47245124680847170cb7f6fc7dd13bf5c0e421977e3ada1ebae45b39",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0433.json": "06c8c7786cb965489d479cf9e89d869a10c84381685c3d184261b59b1d8c5d6a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0434.json": "bb27f23869cca652f0895eec93e6adcc1fddea3d862729058d452a2e688793a3",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0435.json": "d8fcb92e43d972bab538efd28e5090e38d43c491f178e5779d5b365c9a678aab",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0436.json": "bf64f4c303e9aa498152f6650dde931a798e95b7c5278c1416ceb1df7ff6284c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0437.json": "e65ec71a2fb3a68456ca40e7195b1586d71710b3636d3bdfab33f79384cef5b6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0438.json": "b756fad8e9b9ce0169067f527808fd8b0fabf7e76d8b5be1f5c95471e810a27c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0439.json": "3fb32d954d8e158a3593a056e030c449dd9b30c93d0180ae79f0ce777413abb1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0440.json": "40caafcd2e67bbc0e098105a738a84c3f11e54d8e758e6a29616bdb28745148d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0441.json": "c6664d018a360aca236f952779027759b1dc88d9d127ebefe7f08838d39e72bf",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0442.json": "15b02a90f8a8b4cbfb71adcd5bccae4e7c7565c6f417edc3e1559381ad210f3f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0443.json": "3b87e1203b93f6126b16b1229477e9b9e5410da262efbb5bd2c00f5a8f0d8762",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0444.json": "325ae5aa0479a92c005ffc23279036bba54af07919ce384c440d74e0cc1505b1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0445.json": "ab11ff8c963958ba472ea45e9d3ea3dc674acbdff8b451228a1799eb316e8484",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0446.json": "70e71ccad8f31a2b6c2dbd49d8c2bbcc46207af76c710b66df256501cfb4c867",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0447.json": "98a13f4e324fb26cfb3d0b8e63d2363b39d4d1abcf6063bb5251ce409c790280",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0448.json": "bcc8ab5514a76cb7c3d7f233db77e3fb2204a8c58a99759b6c9e8daea855f358",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0449.json": "0d2b7b081c747e729b843977087e6f90f5bb84cc29fa20e3f8f20667131c54fa",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0450.json": "adcef71291a28e60e36add547d14f286fa22073572017185c2359ad47d63f66e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0451.json": "e1cb79c2737082c16a05193a53750aaa0f3f1f4c9d96b53f92ab9656ce77f2cf",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0452.json": "16fbd59ef88d685f0b9f00f7d617090ab63cadb8dd6655a875e90178efab5614",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0453.json": "5ea24983e93ce2a1e672f9cccd7205e58fefdb2df2c59510df54c850b8258c95",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0454.json": "c80df3893a5733cacef4e3f987053aabc16810b1a238d15fd68df129055655d7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0455.json": "3edbce35963919710a7c6f1075878b6e422ad1b5e897ee3068a433848af35e8d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0456.json": "49e309a93c3edd628db452db8532067eef7afa6b54af247e67545018125953aa",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0457.json": "3c68fe0223886fc76dc3e4eb6310498336b177b124ae96124acbed83ca3c64a2",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0458.json": "367da1d0145772c74cc1e52463967f34cdb4e0ee72d5e71fc7ff5a475c2db007",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0459.json": "dccc3d8e36250b725df713814a8eb100a1c363232b106309dbb9ac7acfd3dec5",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0460.json": "0559f2b8443c2d10c1a796f754bf4538f8298822ffc548dcf84f50a1264b102b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0461.json": "c774e38f9b776c344784dd3257d64ca59cd4a58d29e08f8adb60b85395c34ced",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0462.json": "0bd662ad117815b27ee86e7f48068a24de75f71c6131d1e4efb55ec9677ae172",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0463.json": "9c36f42680a7101e756fa1412d79cb2ed18b86aa9f6fe41d72295e02a3f8aae9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0464.json": "f24edaedb70f86950db4d2e14a0e6fa0344389ac26a70e5adecb95230273b599",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0465.json": "55d64179ffaeb2ac6fc22f6e4d1c5a40bc02380035531907689cafb824a4dfb3",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0466.json": "795e227a0e0da888a0b90a67dbc19480f6178fb807e600024b685fa0f6969ae5",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0467.json": "cd8e1589d2d9393ed7d602c90b31f6f55d20a09a47039e66706374efe3f31825",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0468.json": "6d640d84311de4be1267a666da149938c881f28b50481396c0b186a70a403f29",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0469.json": "197da7b11ee438787d30526a86e0b5897ee7cd088921f29fd7861c34cb6ead7b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0470.json": "5766a6ad58e85e5e8b6f1545a596f2b326d5d4030dbbf5156f5ce82800a63818",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0471.json": "80c6e591c1211ca52933722f19681de99778c1fd17a11600aca4e3811a9f4c3c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0472.json": "e457955ceac0ef5e15d2e232c8b56cb9e21bc6f621881ba4e6a814145cc558bd",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0473.json": "1b04020fbbb1c2b43254f6170f524bf0cdec4b626cb86dec4123788f7df55ea6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0474.json": "bbdae8ebd524a4efb4fe00d634ab2a49b9cc1b80e462085912d4ab8ce0f82196",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0475.json": "7766da346833e5b831e2acc7038f2d45659c501467d8e163f73d3cd6113d0a7e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0476.json": "17afc224fdbd9acc9bb40f3a224615f6cf833ceccf5bab9a65e5eead63d82764",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0477.json": "ac4c4d50563726a0a1bdb6f7005d60e6fcad680c3f5f4c68dfe42abeb5d4d84d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0478.json": "8c044e83175068e43bf849221a47e9d70aa71bec59e2aa2d626e33b002235d86",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0479.json": "64a11c9c258543487d79c057146d42e20f9faf0fa3ac01a6eefdb7d201269a84",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0480.json": "dd2503f1673550cf0f1c621c5b717d3bc27df936f48296d75bbe5bfdd54a8f6a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0481.json": "5a8528f9355e6bbaa66d25ae2b169ab93fc0c5382fd24a9d66fb014bdba54828",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0482.json": "bec646ec4bf1e10cf0a94c49809a830deed21e4271dbca8052386be62474ae76",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0483.json": "22cdb7d05252bc3436df066e845472bbc2c52a317c31c2f3de7233522e060c5e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0484.json": "40b632ab7a80e2bb9b7f63a86a3d5745040feca395c98639c919217e8fca15da",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0485.json": "64fc954539ecda0c7cb1a0f6a5db68e5bc3609b5d3198da20d29d4a0d6aa7e50",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0486.json": "a8c3683fe3f21848204526bf861dc3c20d96a8ab0b20bab4ad71b21292b47b58",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0487.json": "7aeb3f2011529482afc670fe9ed987efc875e5212a005acce62da9123e202906",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0488.json": "4a12f4166510d41fc6ff4f62dcaf678fd40c890fd24b99a4c8f00ce9fab599c4",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0489.json": "0dbd72f5f47946309008d55236e6213a235499e61edad62a3e9f2628dd1d5999",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0490.json": "e0f54b3b7a2de90e5695951dc87e3aeba4eb3f5fc960a89c31dc5f7bc86a29f9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0491.json": "794eeb2008864a483f147e64bf2ab75e8c193ea5b7dfcf1b5e15d6576810903b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0492.json": "a44ad3fe892e83ba5d949a5888c7da4972e8b0e80ac35f868bd128f840debb4b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0493.json": "c11edf88897d4962e810f725af25257083747c0a2577db7f38344f2a027de077",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0494.json": "c170b110a0992df922dc680fdcff98270ce5add98aea84648938b48411a38b2f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0495.json": "a05504fd8d21d38501b26e030a7dfcc51b55d0508014486c9055272c6260b7d8",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0496.json": "c541eb3a2820be81814c75aa61374be38245ae8d509ccfa9d9e773f76c316385",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0497.json": "7308eb13574ca816508eed7fe77cdfdb801dbad61400bc255bc32b06013fb204",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0498.json": "00da56267aadaf50b8f8103619fb35ddf4c95cbdda8d70ad9f1ae033e9713c69",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0499.json": "e56737c139c90a51926fd14d7c37befc70e65a91d1a33b4b844e8d04db54f393",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0500.json": "9fda992f42d4743baf6317c39144bf66a833896e986aa0a0ced33e38278a84d9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0501.json": "71a0142cc2f385ce6ad1495aad78eedaed98e16378643dc17055fc1dd2af8940",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0502.json": "55c2db35dc5113ae2a99585246a9838e668a83f850727276f898dcee742fe9b0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0503.json": "58435395cd58c1da1e2871f5d8c870b845d895b3886993ed49844d8baf0a5b1a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0504.json": "113558425b8e41f41a2906f7e7650c4b2600b8064faea5c0cbfc27e95f6efec7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0505.json": "87689aeeadddba2747f436b471a827ebb135183a03f171f117eed61d4d4d6320",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0506.json": "428f775b511d89c6bdf2c22fbfcc60bcaacdc560d675830928865c3e03bbede1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0507.json": "1750c46da43046c569db34ad5f63bd35311e61a38034acfa6c3884023acc2d08",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0508.json": "b942c337373640f6650968649fa64df87e2c406cc0542276f98123b224ab711a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0509.json": "10c036e769b060d6d8e0b44092919119c66e76b6b00a9abed8e03d7a6e40cb98",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0510.json": "f51a248fa496127f700dadac30c46a83cf3b8fce10e14969ff1c6a860a5f333e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0511.json": "af5b9b19ab3bfe0fa463883dad5f20478e0e1f13314be826e1720081f42e9390",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0512.json": "94037911c92bf3012d280327074c4e0d21f1668d4676b11a6fb581c9cdc2f49d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0513.json": "9e468043dc5250f925a2bd09888cb008d92df1083bcd0c5f291f7ea690988dba",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0514.json": "b7cc781cdb551fb58075b193d19d9b17ce340981e1759eeda1903d85c2fcf16b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0515.json": "83fe3f7340bb808317d60fec8fc30a6c6bd33d16d980c8d93792ecd2d51f6b94",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0516.json": "621e68b0f5497538336e1fd07467c3533c0a720cc80fc9ed26e5582a0969787a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0517.json": "bf8273075f12a57a5c5fe32e1239c6923efb2cdd8ea335c78dc6084e220270af",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0518.json": "70086de78eb4d2d4127dd63ec73ff41ed412a55ce8009130103c3f7879f4213b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0519.json": "0dbaf5c8837a3d88793cde9e6297634ae1640af203df2a8e2c5ea6c227ffb14b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0520.json": "6f99c8086fab6c53fc4eb70c967653c37649ba0ef1706668945c60adbef254e7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0521.json": "50a4a8835876838edff3655bf8d48fb046069047daf7e6612a5244b8e7cdc16d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0522.json": "54882dd98596ccd62d17c872d052ac5d3af12a6f30874fa7a5a3930a1912f7a8",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0523.json": "f7871781490751f027d32d54f0f19dc1d04bebf95f5583375b9aa80df59a1fb7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0524.json": "c98c5e1631152b42936c753327b95b0e351ae39af765a9c9ba6a4c965af5f3a0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0525.json": "eb7cba4653fd796b2937dc8c163effb155e08da4549ec31e51d5e8dd489e5b0b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0526.json": "4cc01d49feaa0ec2309929ccd72a8b3000dc55fc0ffd1ade0b67c2e398a9ae30",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0527.json": "8f3c118745efa8a9da67d685cbfa76a80c1830bf53c927d81b7073007ba1d733",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0528.json": "977f03129f8e6b537dd837b202aa2f45262dffebbdce57bd4f5e52cbb9d51b8c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0529.json": "7e4239c25f2c4d4dd6e975a8e0954d0aaef0ef7483f022e28e071ab6ac8ab847",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0530.json": "43f840d63c9999470e5025549a9c75f09ae058b199c5b53a8376f75d56a77786",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0531.json": "d1e7b4d576ea04b437abd08e7a64a233f3d4ce9e62735e527a0e9ad7c73ff4f3",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0532.json": "199b60a79073d7e06910dcd5646e5e25979f0ec232d61b44b87e2aab7d00478a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0533.json": "e744e28f15b00287c32b9bf4521be5462399b53aeaf909b3ab3f94cc03bbc8e9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0534.json": "aab6fb6943e7a59861954311d5e60350da8670f0054b8619450c388baca71bf9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0535.json": "188ab54c6e6da1a197ee38eaed5a0560bbae71b6bacf41f0c9089bb4b7ff8166",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0536.json": "fcea1398edba133a7ed6101b624e9ef0527a97e95894adf413c77dcc8c9d45bb",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0537.json": "319bf3d6513c8addf99fb18214e319092398444c2186900874c90470ce6313e2",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0538.json": "1e10c9f17f0c75566ae764674daa6ffb50e032319cfd0216b3617d1ef119fc8d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0539.json": "3ec0369e9a65e549d6ff5b35bed3de723a9d2937e50d51323dd8f50e8410055a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0540.json": "53faecc9e5411d19bb78ff3d5ff24790528ec0a3bc220099a1b27ac6dcf83373",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0541.json": "05bc495e3e401ceb4e4c10d9e6e3d2267c367d19272a573fb90979f4ff847e70",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0542.json": "bd37012831b24041a8e9f7ae464fdaa5fb735de5e3432ad43100043f67ae7632",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0543.json": "25e4c3213b0db29610ba49741877b9dc0da89ba2fbb4e4b93a3fc2e2e9507571",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0544.json": "0485a2f570a6df574b242df7b8fd405c2875a62b53098a9ee732aa3f0ab80563",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0545.json": "771688ccfbac4a153073f18e5d9330d038db59a8b490bc9b274c6c3548f0a7f4",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0546.json": "19602d165592e3c8015f0961e0b2de1e45c39b6a58ec1d2c025b4d5537092fe3",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0547.json": "c0b1b837b46db532e261b2ccd7e8d497eb856603a0507a62e7835aea7132b65c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0548.json": "5f822f987b9ee93f22cbe769223918f1acef3a586bf155f83383d117c2f43273",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0549.json": "58e192e415b0d314135566ac10728504d7668620d7180bcbb6151e33ccf9b82c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0550.json": "3d3f24aa3ab5419beda6f6a4cb2bfebf3861aff4a505eaf782b27a24ba4fb601",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0551.json": "d3fffab781366d5b9fe78bda75598a0d6be4cd5828a25d13d8ba90275ed7221a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0552.json": "78743837e801e54b992f6dddea348f6e7983fb3cbcfde779aeb1993841c2c3a2",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0553.json": "39c4a63b3cfd9cc00820b39164163e547b70b736800141dbc0f03147a97adab0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0554.json": "89038cbe8ed4343c850f5f9dc7f0bb474b45d01280f19e4e327f886149b33eb0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0555.json": "23e47613c9286f082c927ad20095f67d32f2f05af3d99b440b14723f5cedae6a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0556.json": "dedd1cf59fc599819c6cb8015919f7f7a8e3b2bcfcf0df5989d763a6ed856188",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0557.json": "d28348a80669b1e0515fac74d637bb62227b0a1ea6e087b8f0abf726ceca55e7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0558.json": "a014205ad425d26f767fee554eae503d26adf27f3b96a751416ca892f0265b1a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0559.json": "8546f2f2e84317778d5a6e57b87d20b194d61cc5268683348ee024083564d5ee",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0560.json": "489c1d6a524cfde506c01d6f882106c2c6c44c00ea5845ae23fafbf2a823f599",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0561.json": "4d9f784badec37b3ad73d9f9510c58ff730f02dd26bb343866d9c09534112561",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0562.json": "6cad7ce29d80aa57428e0b2b77fe9b68f40985577ebefab2b1709d4b25994ebf",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0563.json": "bb25848c0b0d0bec070583ea40d2457a18bd83e7aa0b263d1ef2e9e7f02a8565",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0564.json": "efaa366b99c035bc7928349dd47093e2b088503bc01e6b167e36d5732cdf5f6e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0565.json": "33c35b16cb6320bb22e502aa75db11c68056daee5f82dfabc107b6d778c98740",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0566.json": "482c4fda843384493c23f017955442ccb78029877e09986185cb96d181f07074",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0567.json": "aa8c345f77d21028185ff5f2a6d999c54b72115fe753902363aad50793e58efe",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0568.json": "e9b56da5a452b9c4005f857acf7d0cd9e7ed0fb759d87392e6d9c992cf8ef4f9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0569.json": "940dcbd5a5a7c8a56b7ffdd46bdf2b94698a544cc2e93a16565eb4b9e10cf324",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0570.json": "7a6cc064e3f8bd5058ff2dad45abffdcc0ec88d9021e124cae81930e46c29111",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0571.json": "7f6f28779e0a83f62589cf786a398b96e75fd1f693d3f98f517d64ae594f3742",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0572.json": "c9a7f67f94c7ccd570f3fe838d254ab2121936e37464d924ecce6d37b43d23d7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0573.json": "f97b252f2b603d60c94cd5138c8948db256f35b951e32fb77dbcf57fa0785c04",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0574.json": "ec494acdf866ba6b1508f304701f94728f0714da81849e786e3888fca95e1f62",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0575.json": "dab2b530ff8132e88c2d2ad9f414933961f3a8af79900b0e019ad739368ebc36",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0576.json": "2528b98440c3ebf7de0e38286f0965d039f0953c0814c819dacca86094383cf9",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0577.json": "c44623174a17388a8433ab02d76cea748f3acfcfd3b3365fbff395e56faae53a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0578.json": "be33ce9d40da113789059dbdc15cc669cc9ad4475ea4736b44933a4338c7cffa",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0579.json": "48af001656c5e583b26eca7c5a71fbb6d7d3433479d020b7bb4385124075039d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0580.json": "11eb6614af009729bc7e764adf3c25db6bd328d2c94c7506bc4056190d756e99",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0581.json": "d3348afaf127a57448ee5d67157589c19e8ee28f6db2a698701a06724b3f0f9f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0582.json": "a6db932d748a563c12729ae071e639a437d93f0bb879cc76b3ec1d8344b8c433",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0583.json": "209b75c82ba93db5acb2a91bc0304fb05abd1e6623d5fbf74ab56b721bbe9c09",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0584.json": "15910269e18b6421e2b99e4c7b54873965bcd0a67a22bd7ae1d4cab0efd02ccb",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0585.json": "9530f67b1d6b2110ee026c8f906a4dfc954f207e760585a36e99eb768bb3a7b2",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0586.json": "62b7e4dbeda99110ab07607f44c1554ec8c0243a28540a1f173cfae2056815d3",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0587.json": "20c5982da0183718ac1406ed35e1216d88eecafb4d51b4189faa135e25d2a68c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0588.json": "581de0366b38597e96cb3fb988ce66a0ceaabb59aadfbba05f82d0b2785de552",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0589.json": "b47484fccf8a7dff4cca3cae7e7ca7df6f273f7d830da7130051e87f724a3d1c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0590.json": "6905ee4dcb855815b45586fcd01681c11d6121b1407c6664dd4f3b475751cc5c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0591.json": "9ca0685136e12b7eec1c97ad1e98b994afb8c63a7d4ef1d08d157d7704ec162b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0592.json": "2518acb80fa6b5d9a0bfc747cca1a333d38a6d537c6be45b9624eded98c171dc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0593.json": "19b755d4daa65bb8b1411138ae76c9009c9756ef91e1cae6fc597a5affca66ba",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0594.json": "0909486efd10e9577373528f8768e12894d9416cbea58066a0ca71df34994ed1",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0595.json": "687c1586c9d9b946fb763b29dba3e8ebccedcbbb5e99491ce4c76f06e408ca6f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0596.json": "84fafa254735244b9002ed14cfb91d62dc71c91709bb3f392eacb30296015ab5",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0597.json": "47c00304534932e7a59e921370151a918f159bbf70b107ec51ffc573da7c7b80",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0598.json": "7ed9fd482d63d2d6003492e606e6414ee031b0355a14fccd076256a439d5ad8d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0599.json": "5d45841994803236d3c1cc5c9d783cd98fd29d8f9c148382286614931d70712c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0600.json": "da751febb95ad570c1bf2e7335685a4893c0b99d31b05470148eb5aac9ff7cfb",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0601.json": "3a4aecf1e006ebc1e7ae4663189953a37000075eae67f898656a1ecd4b2b378f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0602.json": "dbfcc49143ff2b981a07d4cf70708dca9709898e6945cd44030b9e46cbeae971",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0603.json": "a22575ab4b75a5e9b04f281be7e58aaf60ce114979c0b1f143f6372413b4b194",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0604.json": "559919387790de4781d1639f8f934d19a28a6fb01426fe2619c1991e614c08c0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0605.json": "eb91d5c94c4e05a0dce3607f21adaafd637f1efbef4d17022e8d1e994078abe6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0606.json": "8e9f307791b151125f7f41c6309a84e06b81466912cb6aee48060367ea3d6685",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0607.json": "dd369554a48c5b6a73a889afdff5bb670eaa9fdf023802ef449ad488c2b8c08b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0608.json": "7bd6d4c6cad9923dcb7e647e9114694366bf89cce525197291ce2c642a84339b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0609.json": "45a73e4e1be1c6dd2a04258ca4c62d4e9f25be1ce0220719fc128b12b03b2098",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0610.json": "3f660e735179d958b3381ec855ea77846b1e000472fc5ab9c75da3e71c168425",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0611.json": "aa714c6d9cdca260d3a2933baa1d7596037e0cd5a5fb2512a9079de337ae8464",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0612.json": "8f170676f341cfe2474ff347deff533e8a0bcd069c74ccacff14d248c66ada73",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0613.json": "140a065978ad2751f5cff2066ee18a9de61c9f01decdff508d316a56be497787",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0614.json": "df246952d0ed83c568aa2774b8e85f121f6e9bb664cecf4d535a0c9936268c1d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0615.json": "f25eb9476f332cf7a260dffc143a4bf3ca02587ecd9d08811459efda70179552",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0616.json": "d623ec7590e2aa5aa172974030631f6062bf3b6fe025f65901fa860bb63f1651",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0617.json": "7060848f0f67d7feb82a8c491add732167dd665a73a720860d1a7db8716c1d07",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0618.json": "0f462f7dae10088293cc288b4e15694d12deac231c7af18578096ec8dc7539dc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0619.json": "fbb788fd1d9b4a37b39a70a3c7f45a7835c891cbf31e3d5eaf717a365eeed753",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0620.json": "10f070a5a7f3c58f6214fe3c0f8763dea81491e5f8454528411c057a7dd25d74",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0621.json": "314df9ef4a0ebd335698244e8c8ab95a8d35bba58c2d18a6b9082a50a18e56dc",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0622.json": "c1b25fc72873890023c549d75639fc67f18d2e4e168ad1d08d83399820fe4045",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0623.json": "1ff1e7274277e3e87d5d368e585b6ac78536c5e6ff4bc5b0cee6664eee1f61fa",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0624.json": "8eb148da81be1cd9bce3fc1a3555d3b6175e72b251f89cadd7f024536cedcd9d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0625.json": "ca81268a95ded9d09555446f08567f44c3e064f84dbb85503b21bd2e66a96fee",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0626.json": "9c56668721c45e33a3132849dbfb115e29e8863b01ba5bf8e25d35f6afcc9735",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0627.json": "ab60f9981fa051f53306a8a6b8985eb9bf2935711733ebd39dafa315de9d1b34",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0628.json": "f8b638b2fca2751f94ff6a76efdc692e1300e4e0fa6e204a5f3618c6df971de4",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0629.json": "771f71ecb5bce6fa325821ebee25400d8fc2bacffcb259a09992a4ae34011f4f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0630.json": "3507ca251901b4725ebc0730d2152ba3b9d7a128a14c2bf68ca7daea91e721e7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0631.json": "c4e7a333f7003def8361cbe2468ddaac48bce0973311d959619862b7f1611e64",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0632.json": "dc5fc93478c61f9d9bdc0e429e21cbe9ca09c153e4e34512c9dffee945bb32d2",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0633.json": "d050d82d44c197785c326cb085b91642fe2c6319dd2abb791035bcce03e6bf1c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0634.json": "2e616815b092b52aa53374f9c5a0769c1834eaf6c496509b62b6fd9be4e5fadf",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0635.json": "9c2c7967f5d76dbc1e0b9c0c7354d07a0148e27ffde1b394e807e599bc7142f0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0636.json": "f34f4147e107bea63c42179b1c33dd1c328f3df720c98cad916b3938d8e2b87a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0637.json": "27326412034592488d99e4d14d30e2a43512366ca10ccf963adcadbedbb96f5f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0638.json": "a78b4538930b474698bdf3d1e5501eb83ac0ed543b3d2ebd96db2c24058d61d3",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0639.json": "46c25a79b1a2940c3c8b13a6b0a75ad2df99dfb25429ce4e71b5f5282e799a73",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0640.json": "cd307dcef00eae99243fa1c3bd61e2b2744237eb7eb4cb036eac27bccc359146",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0641.json": "a7878a4c59d4a3245ca9e07f6deae53b55c386add3c64ad53a15a71fa0b3ae91",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0642.json": "e9a3464b0c7bb3eb9ad76d0c22846d69cd229403928305d24f4845160f297812",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0643.json": "62a0d611d06b92cc2f0bed3b08377811c0ed74a19af2f83c872100c25ec5781a",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0644.json": "f0f365a8da8e82b66389d3ac9865b23d2bf8d31842464f5b8a147aefb01a8438",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0645.json": "f854ff0122d4bf199c0a4b6d1dc355ae8707ee6f23d10abf29e96a58d177e108",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0646.json": "46285b8557469cdd6ba6baff6ac865b5f6a0d1554ee69fdf8ae373810890f405",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0647.json": "5fd67e4d2c5d0d6ba69baff6c94c75631c0fb0a6e31c2a68817f868b7b3f811f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0648.json": "76a15c701a5cb2a5afdd7933135eb08a56e9534fabda63e0f97030c13a9e5ec5",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0649.json": "f8c69750c4a6dfc2c9ad7e01b23db41483b5056dc49b444dfe1a5250797a1e1c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0650.json": "8c15f4ea7415d018bd85ad2ed9bbbae910188aa6a222a48b2aab848dbd2a6937",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0651.json": "18d061259ff453834feeb70b7ccfa2b6f8cfd05cb15bb6c142279961949a837c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0652.json": "960b0bf39a36f3a8f79b4a9ef5bd68941cade06a46ef853590b48b5a0a3d84f0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0653.json": "a2b8874c12a9caabe00802109fd3701c8846f358fc1d041986973935f7a30bfb",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0654.json": "4f0450859aae7dc7270998671724fb38bb96e6f07d0b0de6a08cf9e9ca8d637c",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0655.json": "06ad92f0b4f832d6c397695e0228d5584eb78b43ff743d83ccc39348fe64f2b5",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0656.json": "43925bdd4deca2c07736ba043c72cc06ed628a7f64971022095e24816aee62bf",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0657.json": "288667d9ce1bcd204d0ab83c26e73706656424d6d6b507baba57178028bebac6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0658.json": "955901593df27c5c29d8cbc60a2075e564daae882639efc2e5fe178b2d97e743",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0659.json": "f63050b3005d69e923a0980eafb8fe5697dd0cdc41e0b8f18353b3f36630a4cb",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0660.json": "18f5ce710f0bc18b748abcff51a3dc4c2c2a59c730e2bf5cce336ae50ae4010e",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0661.json": "d86716c7098d696bbf85fe3b89a288b8ad98e949dcde4d152517bd5533a5a045",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0662.json": "8db3a166c95d38acd222c27ade0a1ef903d937feae571dcf616598e31cca6da0",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0663.json": "3335a9c095ada0ecc37d399994f2318d4cd0fb9e45fbbfee49c0426311bb61f7",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0664.json": "c57c803506462d6ac491ace7f096f6fb5c1bbd02cb30dae95366f6854a27652d",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0665.json": "762ee0c5f50528d4eb380e278cac0d1285e1918a9dbb110266d70ba36def0686",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0666.json": "a58f6e907f9f1f6c47b52b184565ab5f9a421f101ce2f16ce18905b23bf1f6ea",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0667.json": "7651b0bd4f797deade06c1c6ecd5698b2451fd8af82f632f2b279f51f4a43fd6",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0668.json": "9cee9e202031c52fa5e4726475398dfb00094f21c6ae14a8d7beecd92644e7bd",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0669.json": "c0086647a33b58becc7dd63f2d761869dd996d6c6de0f8639df82fb89bca0e3f",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0670.json": "8feb2db82bdc897f9f6a62f8ef9c1cdc4300aca9612513d3000fc9da9ef7a396",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/native-screen/worker-0671.json": "60239f0ac2737c4b36a0f73354b3c1c5b99dae67bbe30631366ef28db8723f7b",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/read_results.py": "9c6382b60b6129e3b706ca674cfc1f4227dd2b71e83aa46ffcd4b99364c74f33",
+    "/tmp/oriole-namespace-qname-only-confirmation/native/conditions.csv": "360f8751cbbec8e33cd663478064028e265e49babaa1323b08d77731e17feed4"
+  }
+}

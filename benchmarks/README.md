@@ -1,5 +1,15 @@
 # Benchmarks
 
+Start with the [performance iteration guide](HILLCLIMB.md). Its `hillclimb.py`
+entrypoint freezes ordinary builds and compares baseline, candidate and Expat in
+matched rounds, with separate real-project and generated summaries.
+
+The [QName confirmation](../docs/validation/2026-09-13/qname-confirmation/) records
+the latest merged optimization: two separate epochs improve on the qualified
+runtime, with confirmation at 1.1739× Expat natively and 1.0504× through CPython.
+Use a fresh build of `main` as the baseline for the next experiment. Installed
+distribution qualification remains scoped to the earlier source documented below.
+
 ## Current normal-build results
 
 The [combined Start/End, namespace and declaration report](../docs/validation/2026-09-12/native-start-end-namespace-declaration/) measures exact tested runtime `5d983f7e` against the raw-view baseline `67c704c` and normal Expat 2.8.4. Native real-project time is 0.9314× raw-view baseline / 1.1822× Expat initially and 0.9316× / 1.1841× in confirmation. CPython is 0.9625× / 1.0554× initially and 0.9609× / 1.0558× in confirmation; confirmation ElementTree is 1.0914× and pyexpat 1.0214× Expat. Both native and Python meet the current 20% aggregate target in both epochs.

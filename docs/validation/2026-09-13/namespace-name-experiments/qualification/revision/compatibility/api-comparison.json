@@ -1,0 +1,12 @@
+{
+  "counts": {
+    "passed": 4349,
+    "failed": 391,
+    "timed_out": false
+  },
+  "ordered_row_changes": [],
+  "assertion_and_sequence_changes": [],
+  "manifest_matches": true,
+  "baseline_results_sha256": "3720775bc940c14fdb25706ba791e77da545c48c8d74e923180ef44a8e910543",
+  "candidate_results_sha256": "3720775bc940c14fdb25706ba791e77da545c48c8d74e923180ef44a8e910543"
+}

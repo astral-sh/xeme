@@ -1,0 +1,35 @@
+{
+  "samples": [
+    {
+      "time": 1789265530.6667182,
+      "cpu": {
+        "cpu": {
+          "total": 1426022195,
+          "idle": 1319994993
+        },
+        "cpu0": {
+          "total": 44418440,
+          "idle": 37534379
+        }
+      }
+    },
+    {
+      "time": 1789265540.6762178,
+      "cpu": {
+        "cpu": {
+          "total": 1426054159,
+          "idle": 1320026678
+        },
+        "cpu0": {
+          "total": 44419436,
+          "idle": 37535286
+        }
+      }
+    }
+  ],
+  "idle_plus_iowait_fraction": {
+    "cpu": 0.991271430359154,
+    "cpu0": 0.9106425702811245
+  },
+  "scope": "Root released this observation after all local Oriole parser/compiler processes were reaped. Shared host; CPU counters and affinity do not establish OS isolation."
+}

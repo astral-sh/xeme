@@ -1,0 +1,19 @@
+       Fresh libc v0.2.189
+       Fresh jobserver v0.1.35
+       Fresh allocator-api2 v0.2.21
+       Fresh bytemuck v1.25.2
+       Fresh find-msvc-tools v0.1.11
+       Fresh shlex v2.0.1
+       Fresh cc v1.4.4
+       Fresh safe_arch v1.2.0
+       Fresh hashbrown v0.16.1
+       Fresh oriole_storage v0.0.1 (/home/dev-user/code/oss/oriole-namespace-name-storage/crates/oriole_storage)
+       Fresh wide v1.7.0
+       Fresh memchr v2.8.3
+       Fresh oriole v0.0.1 (/home/dev-user/code/oss/oriole-namespace-name-storage/crates/oriole)
+       Fresh arbitrary v1.4.2
+       Fresh libfuzzer-sys v0.4.13
+       Fresh oriole_expat v0.0.1 (/home/dev-user/code/oss/oriole-namespace-name-storage/crates/oriole_expat)
+   Compiling oriole-fuzz v0.0.0 (/tmp/oriole-namespace-qname-only-asan-study/fuzz-source)
+     Running `/home/dev-user/.rustup/toolchains/ohm/bin/rustc --crate-name multibyte --edition=2024 fuzz_targets/multibyte.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type bin --emit=dep-info,link -C opt-level=3 -C embed-bitcode=no -C debuginfo=line-tables-only --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values())' -C metadata=55dc825a3790f1f4 -C extra-filename=-28ee924c3c5b14a3 --out-dir /home/dev-user/.cache/ohm/verified-build/37/a568e61c8cd389/x86_64-unknown-linux-gnu/release/deps --target x86_64-unknown-linux-gnu -L dependency=/home/dev-user/.cache/ohm/verified-build/37/a568e61c8cd389/x86_64-unknown-linux-gnu/release/deps -L dependency=/home/dev-user/.cache/ohm/verified-build/37/a568e61c8cd389/release/deps --extern libfuzzer_sys=/home/dev-user/.cache/ohm/verified-build/37/a568e61c8cd389/x86_64-unknown-linux-gnu/release/deps/liblibfuzzer_sys-161f0032684ad8f0.rlib --extern oriole=/home/dev-user/.cache/ohm/verified-build/37/a568e61c8cd389/x86_64-unknown-linux-gnu/release/deps/liboriole-cec2e0832e935b74.rlib --extern oriole_expat=/home/dev-user/.cache/ohm/verified-build/37/a568e61c8cd389/x86_64-unknown-linux-gnu/release/deps/liboriole_expat.rlib -Cpasses=sancov-module -Cllvm-args=-sanitizer-coverage-level=4 -Cllvm-args=-sanitizer-coverage-inline-8bit-counters -Cllvm-args=-sanitizer-coverage-pc-table -Cllvm-args=-sanitizer-coverage-trace-compares --cfg fuzzing -Cllvm-args=-simplifycfg-branch-fold-threshold=0 -Zsanitizer=address -Cllvm-args=-sanitizer-coverage-stack-depth -Cdebug-assertions -Ccodegen-units=1 -Zexternal-clangrt -Clinker=clang -Clink-arg=-fsanitize=address -L native=/home/dev-user/.cache/ohm/verified-build/37/a568e61c8cd389/x86_64-unknown-linux-gnu/release/build/libfuzzer-sys-02e103cc5eabf5be/out`
+    Finished `release` profile [optimized + debuginfo] target(s) in 1.17s

@@ -1,0 +1,645 @@
+   Compiling oriole v0.0.1 (/home/dev-user/code/oss/oriole-namespace-name-storage/crates/oriole)
+   Compiling oriole_expat v0.0.1 (/home/dev-user/code/oss/oriole-namespace-name-storage/crates/oriole_expat)
+   Compiling oriole_cli v0.0.1 (/home/dev-user/code/oss/oriole-namespace-name-storage/crates/oriole_cli)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 33.17s
+     Running unittests src/lib.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/oriole-633fd4b2a141065a)
+
+running 101 tests
+test accounting::tests::counters_reject_overflow_even_when_relative_limits_are_disabled ... ok
+test accounting::tests::work_threshold_uses_only_direct_credit_and_saturates ... ok
+test arena::tests::detached_end_keeps_the_warmed_start_arena_and_oversized_owner_separate ... ok
+test arena::tests::direct_start_keeps_the_warmed_text_arena_owner ... ok
+test arena::tests::namespace_name_cache_survives_other_payloads_and_bounds_growth ... ok
+test arena::tests::start_after_text_stays_within_the_reserved_frame_capacity ... ok
+test arena::tests::text_storage_drops_start_terminators_and_stays_within_the_byte_cap ... ok
+test arena::tests::warmed_literal_spans_keep_byte_ranges_and_capacity ... ok
+test arena::tests::warmed_parser_start_uses_the_literal_span ... ok
+test attribute_literal_run_tests::ordinary_runs_match_scalar_whitespace_normalization_at_boundaries ... ok
+test coalesced_text_search_tests::bounded_search_matches_scalar_selector_for_all_short_sequences ... ok
+test coalesced_text_search_tests::markup_and_crlf_keep_precedence_at_the_complete_line_cutoff ... ok
+test context_text_tests::context_text_bounds_and_ordinary_api_reuse ... ok
+test context_text_tests::context_text_excluded_sources_keep_owned_text ... ok
+test context_text_tests::context_text_foreign_generation_uses_owned_events ... ok
+test context_text_tests::context_text_native_prefix_precedes_late_accounting_error ... ok
+test dtd::attlist::native_raw_tests::attlist_fragment_replaces_a_retained_context_raw_view ... ok
+test dtd::attlist::tests::captured_types_do_not_retain_whitespace_or_later_default_capacity ... ok
+test dtd::attlist::tests::committed_prefix_is_published_before_child_updates ... ok
+test dtd::attlist::tests::completed_attributes_keep_only_the_current_events ... ok
+test dtd::attlist::tests::earlier_attribute_precedes_later_grammar_error ... ok
+test dtd::attlist::tests::owned_token_survives_large_feeds_and_source_compaction ... ok
+test dtd::attlist::tests::silent_commits_preserve_positions_and_reused_name_work ... ok
+test dtd::attlist::tests::uncaptured_enumerations_keep_ordinary_repeated_name_work ... ok
+test dtd::grammar::tests::commit_timing_and_ranges_preserve_role_boundaries ... ok
+test dtd::grammar::tests::declarations_resume_at_each_complete_lexical_boundary ... ok
+test dtd::grammar::tests::enumeration_members_are_reported_once_before_the_attribute_commit ... ok
+test dtd::grammar::tests::incomplete_or_invalid_roles_never_finish ... ok
+test dtd::grammar::tests::namespace_and_model_depth_rules_remain_explicit ... ok
+test dtd::grammar::tests::repeated_empty_replacements_and_many_attributes_advance_monotonically ... ok
+test dtd::grammar::tests::stray_quantifiers_differ_from_attached_name_or_mixed_model_tokens ... ok
+test dtd_tables::tests::metadata_caps_cannot_be_raised_by_parameter_children ... ok
+test dtd_tables::tests::ordinary_documents_and_their_general_children_do_not_allocate_an_owner ... ok
+test dtd_tables::tests::parameter_commits_survive_nonfinal_input_error_and_parent_drop ... ok
+test dtd_tables::tests::salt_changes_rehash_family_tables_without_changing_general_snapshots ... ok
+test dtd_tables::tests::scope_publishes_on_error_and_unwind_and_contention_is_nonblocking ... ok
+test dtd_tables::tests::start_doctype_child_initializes_owner_before_internal_declarations ... ok
+test encoding::tests::compaction_and_entity_anchors_keep_bounded_coordinates ... ok
+test encoding::tests::converted_positions_fit_at_the_source_bound ... ok
+test encoding::tests::monotonic_positions_match_source_coordinates_and_anchors ... ok
+test encoding::tests::planned_text_matches_eager_consumption_and_compaction ... ok
+test encoding::tests::proven_ascii_tag_matches_eager_coordinates_and_compaction ... ok
+test encoding::tests::short_position_words_match_scalar_characters_and_cr_state ... ok
+test encoding::tests::tag_limits_preserve_less_than_precedence_across_feeds ... ok
+test encoding::tests::tag_prefix_boundary_preserves_limits_inside_quoted_values ... ok
+test encoding::tests::warmed_utf8_feeds_match_buffered_splits_and_errors ... ok
+test encoding::tests::warmed_utf8_source_failure_retains_pending_without_growth ... ok
+test hash_salt_tests::nonnamespace_parsers_keep_salted_empty_bindings ... ok
+test hash_salt_tests::salt_rebuilds_every_table_and_owned_children ... ok
+test input_bound_tests::adapter_input_owner_covers_first_feed_detection_and_fallback ... ok
+test input_bound_tests::adapter_input_owner_matches_decoded_events_and_positions ... ok
+test input_bound_tests::external_input_allowance_belongs_to_each_source ... ok
+test input_bound_tests::source_limit_rejection_preserves_input_state ... ok
+test lexical::tests::conversion_metadata_does_not_alias_genuine_representatives ... ok
+test lexical::tests::initial_reservation_only_changes_the_first_nonempty_append ... ok
+test lexical::tests::owned_slices_rebase_original_name_spelling ... ok
+test matching_end_tests::matching_end_tags_keep_limits_and_fallback_syntax ... ok
+test matching_end_tests::matching_end_tags_resume_across_every_byte_split ... ok
+test names::tests::xml_character_validation_preserves_byte_offsets_across_words ... ok
+test namespace_scope_tests::large_namespace_scope_metadata_is_released_while_root_stays_open ... ok
+test native_raw_context_tests::direct_start_raw_views_keep_copied_fallbacks_and_owner_handoffs ... ok
+test native_raw_context_tests::matched_native_end_raw_keeps_owned_names_and_mode_boundaries ... ok
+test native_raw_context_tests::native_raw_getters_share_context_and_allow_ordinary_handoffs ... ok
+test native_raw_context_tests::native_raw_overrides_keep_owned_empty_and_failure_publication_order ... ok
+test native_raw_context_tests::native_raw_prefix_and_early_feed_errors_remain_readable ... ok
+test native_raw_context_tests::native_raw_retention_survives_compaction_and_invalid_context_suffixes ... ok
+test parameter_state_tests::lazy_parameter_state_work_is_charged_once_and_limit_failure_keeps_it_uninitialized ... ok
+test parameter_state_tests::ordinary_parsing_and_general_children_leave_parameter_state_unallocated ... ok
+test parameter_state_tests::precreated_parameter_children_share_skip_state_but_general_children_do_not ... ok
+test recycling::tests::arena_and_owned_fallbacks_share_the_retained_capacity_budget ... ok
+test recycling::tests::foreign_and_replaced_parser_generations_cannot_return_storage ... ok
+test recycling::tests::foreign_and_reset_generations_cannot_return_names ... ok
+test recycling::tests::name_capacities_share_the_attribute_retention_budget ... ok
+test recycling::tests::retained_storage_obeys_record_string_and_aggregate_capacity_limits ... ok
+test recycling::tests::returned_attributes_reuse_buffers_without_changing_owned_events ... ok
+test recycling::tests::returned_names_reuse_both_owners_and_retained_events_stay_owned ... ok
+test streaming_work_tests::large_reused_names_and_defaults_still_exhaust_relative_work ... ok
+test streaming_work_tests::linear_namespace_and_default_work_can_outlive_the_initial_allowance ... ok
+test streaming_work_tests::saturated_work_threshold_still_rejects_counter_overflow ... ok
+test tag::tests::accepted_name_characters_are_valid_xml_characters ... ok
+test tag::tests::bare_ascii_position_proof_preserves_plans_across_splits ... ok
+test tag::tests::bare_tag_semantic_error_does_not_consume_source_coordinates ... ok
+test tag::tests::complete_grammar_matches_original_short_alphabet_and_error_prefix ... ok
+test tag::tests::fallback_stays_disabled_until_the_source_advances ... ok
+test tag::tests::fused_plans_preserve_unicode_eligibility_and_special_value_timing ... ok
+test tag::tests::fused_values_preserve_steps_and_eligibility_across_incremental_feeds ... ok
+test tag::tests::literal_values_match_separate_checks_at_word_and_unicode_boundaries ... ok
+test tag::tests::planned_boundaries_and_records_match_original_across_every_split ... ok
+test tag::tests::vector_literal_prefix_matches_byte_oracle_at_every_lane_and_tail ... ok
+test text::tests::every_ascii_byte_and_vector_lane_preserve_the_proof_boundary ... ok
+test text::tests::first_stop_limits_linefeeds_and_preserves_uncertain_byte_order ... ok
+test text::tests::markup_at_the_cutoff_precedes_a_complete_line ... ok
+test text::tests::mixed_specials_preserve_stop_and_position_across_half_blocks ... ok
+test text::tests::outer_whitespace_preserves_first_boundaries_and_uncertain_suffixes ... ok
+test text::tests::unaligned_short_tails_and_newline_positions_remain_exact ... ok
+test text::tests::vector_mask_matches_all_byte_values_in_every_lane ... ok
+test value_lexer::tests::complete_tokens_accept_every_chunk_boundary ... ok
+test value_lexer::tests::first_xml_declaration_is_returned_once_with_original_offsets ... ok
+test value_lexer::tests::invalid_characters_after_brackets_start_a_new_token ... ok
+test value_lexer::tests::lexical_errors_cannot_join_tokens_across_feeds ... ok
+test value_lexer::tests::unfinished_tokens_have_linear_work ... ok
+
+test result: ok. 101 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.48s
+
+     Running tests/adapter_frame.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/adapter_frame-f2276a60c076e6e4)
+
+running 16 tests
+test decoded_reference_frame_owns_bytes_and_waits_for_accounting ... ok
+test detached_end_frames_keep_native_and_namespace_undo_boundaries ... ok
+test detached_end_frames_recheck_child_publication_and_generation ... ok
+test expanded_element_frames_keep_uri_work_and_arena_limits ... ok
+test expanded_element_frames_preserve_packed_names_and_literal_attributes ... ok
+test foreign_and_reset_frames_cannot_be_filled_by_another_generation ... ok
+test literal_frames_keep_duplicate_checks_and_selected_name_rules ... ok
+test namespace_identity_frames_follow_default_binding_scope ... ok
+test namespace_plans_preserve_errors_and_owned_expansions ... ok
+test ordinary_text_precedes_accounting_failure_but_cdata_does_not ... ok
+test owned_frames_preserve_events_positions_raw_and_error_order_at_every_chunk_size ... ok
+test reference_frames_preserve_boundaries_positions_and_error_prefixes ... ok
+test sparse_namespace_scopes_preserve_shadowing_and_event_order ... ok
+test text_frames_match_owned_projection_at_inline_heap_and_fallback_boundaries ... ok
+test utf16_and_low_limits_keep_owned_fallbacks ... ok
+test warmed_literal_spans_preserve_raw_duplicates_and_fallback_boundaries ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.65s
+
+     Running tests/allocation.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/allocation-af0faa0b42f65dee)
+
+running 14 tests
+test detached_end_names_reuse_selected_storage_without_new_allocations ... ok
+test detached_start_frames_use_the_selected_suite_and_clear_on_every_failure ... ok
+test direct_start_lowering_preserves_raw_and_every_selected_allocation_failure ... ok
+test every_allocation_can_fail_and_all_memory_uses_the_selected_suite ... ok
+test foreign_recycling_token_rejects_storage_from_the_same_custom_suite ... ok
+test hash_salt_reconfiguration_is_transactional_at_every_allocation ... ok
+test inherited_attribute_index_survives_parent_drop_rekey_and_every_allocation_failure ... ok
+test malformed_declarations_preserve_every_selected_allocation_failure ... ok
+test native_raw_context_views_survive_every_feed_allocation_failure ... ok
+test output_slots_clear_at_every_selected_allocation_failure ... ok
+test recycled_attributes_reduce_allocations_and_survive_each_failure ... ok
+test shared_dtd_publication_snapshot_rehash_and_retained_siblings_survive_each_failure ... ok
+test shared_open_value_state_survives_every_allocation_failure_and_parent_drop ... ok
+test warmed_utf8_source_growth_preserves_selected_allocator_failures ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.59s
+
+     Running tests/amplification.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/amplification-50e159cc9f784f33)
+
+running 6 tests
+test attribute_and_default_expansion_use_the_shared_relative_limit ... ok
+test byte_order_marks_count_even_without_a_following_text_token ... ok
+test child_counters_share_root_settings_and_outlive_the_parent ... ok
+test explicit_unknown_encoding_is_resolved_before_bom_accounting ... ok
+test relative_controls_do_not_disable_absolute_work_limits ... ok
+test unconsumed_trailing_input_cannot_dilute_entity_amplification ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.57s
+
+     Running tests/attribute_entities.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/attribute_entities-f7b7f50db27ac302)
+
+running 10 tests
+test attribute_entity_cycles_and_depth_preserve_error_precedence ... ok
+test branching_entities_reenter_completed_siblings_and_normalize_at_reference_boundaries ... ok
+test converted_line_endings_keep_their_literal_or_replacement_origin ... ok
+test deep_inherited_context_is_indexed_once_for_many_shallow_attributes ... ok
+test external_context_entity_names_are_active_during_attribute_expansion ... ok
+test inherited_attribute_names_preserve_exact_general_membership_and_error_order ... ok
+test replacement_crlf_is_two_spaces_but_physical_crlf_is_one ... ok
+test sixty_thousand_attribute_entities_use_a_bounded_call_stack ... ok
+test unparsed_entities_report_the_binary_reference_error_in_attributes ... ok
+test wide_diamond_expansion_stops_at_the_existing_work_limit ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.04s
+
+     Running tests/conditional.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/conditional-fda58de560611342)
+
+running 12 tests
+test disabled_header_parameters_charge_callback_storage_to_the_shared_budget ... ok
+test ignored_text_does_not_parse_references_but_checks_xml_characters ... ok
+test included_declarations_and_ignored_markup_across_chunks_and_encodings ... ok
+test incomplete_parameter_sections_and_stray_closings_are_rejected ... ok
+test internal_parameter_entities_select_conditional_keywords_with_shared_limits ... ok
+test internal_subset_rejects_conditional_sections ... ok
+test malformed_headers_preserve_default_prefixes_before_the_error ... ok
+test parameter_header_delimiters_preserve_the_replacement_suffix ... ok
+test section_nesting_and_ignored_bytes_are_bounded ... ok
+test skipped_declarations_parse_structure_without_expanding_literal_values ... ok
+test skipped_header_parameters_preserve_markup_and_suppress_declarations ... ok
+test skipped_header_parameters_still_require_a_complete_keyword ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.48s
+
+     Running tests/declaration_tokens.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/declaration_tokens-17e0722047af11e0)
+
+running 11 tests
+test declaration_grammar_continues_across_complete_lexical_tokens ... ok
+test direct_internal_subset_declaration_references_are_rejected ... ok
+test empty_replacement_work_output_and_callback_storage_are_bounded ... ok
+test grammar_and_value_expansion_share_the_depth_limit ... ok
+test missing_parameters_stop_later_declarations_at_their_grammar_position ... ok
+test nested_delimiter_sources_keep_quotes_and_reference_recursion_separate ... ok
+test parameter_delimiters_close_declarations_and_preserve_following_source_text ... ok
+test quoted_replacement_literals_preserve_numeric_carriage_returns ... ok
+test replacement_attribute_line_endings_are_not_normalized_twice ... ok
+test replacement_tokens_cannot_join_names_or_quoted_literals ... ok
+test skipped_parameter_defaults_preserve_the_unhandled_declaration_suffix ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+
+     Running tests/diagnostics.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/diagnostics-e4bf76b1c82b0b9f)
+
+running 6 tests
+test dtd_entity_literals_and_escaped_attributes_can_contain_less_than ... ok
+test illegal_less_than_in_attributes_is_not_an_unclosed_token ... ok
+test invalid_reference_and_end_tag_prefixes_take_precedence_over_eof ... ok
+test long_unicode_names_and_end_tag_whitespace_resume_across_small_feeds ... ok
+test malformed_prefixes_precede_a_later_decoding_failure ... ok
+test valid_unfinished_reference_and_end_tag_prefixes_remain_unclosed ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests/encodings.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/encodings-c99a5e9b409decf7)
+
+running 13 tests
+test a_declared_custom_encoding_can_follow_a_utf8_bom ... ok
+test an_unknown_declared_encoding_reports_its_value_location ... ok
+test ascii_declarations_of_utf16_report_an_encoding_mismatch ... ok
+test custom_encodings_accept_duplicate_non_markup_characters ... ok
+test custom_encodings_can_leave_ordinary_ascii_punctuation_undefined ... ok
+test custom_encodings_cannot_alias_markup_or_encode_supplementary_characters ... ok
+test dtd_and_value_children_keep_prolog_encoding_detection ... ok
+test external_content_retains_explicit_encodings_and_utf16_signatures ... ok
+test external_latin1_content_preserves_bom_shaped_bytes ... ok
+test incomplete_utf16_unit_and_surrogate_have_distinct_errors ... ok
+test small_input_and_token_limits_still_allow_complete_utf8_and_utf16_tags ... ok
+test unlabelled_external_content_does_not_infer_utf16_from_a_later_nul ... ok
+test utf16_detection_allows_leading_whitespace_without_a_bom ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/entity_depth.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/entity_depth-7a9aa5da9febca29)
+
+running 6 tests
+test changing_hash_salt_preserves_live_source_and_inherited_membership ... ok
+test deep_cycles_and_unbalanced_replacements_remain_terminal ... ok
+test parameter_sources_and_owned_value_continuations_release_completed_names ... ok
+test resolving_unknown_encoding_keeps_inherited_recursion_membership ... ok
+test seventy_thousand_delayed_parameter_values_preserve_output_and_pop_names ... ok
+test sixty_thousand_content_sources_use_a_small_host_stack_and_release_membership ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.15s
+
+     Running tests/event_output.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/event_output-0961d2bab5d945b5)
+
+running 2 tests
+test caller_slots_clear_on_wait_error_and_unknown_encoding_retry ... ok
+test output_slots_preserve_owned_event_traces_and_error_prefixes ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/external_grammar.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/external_grammar-f7bd5ac7641f28c9)
+
+running 10 tests
+test completed_attributes_are_visible_before_the_final_declaration_delimiter ... ok
+test declaration_errors_distinguish_documents_from_external_text ... ok
+test declaration_roles_commit_at_their_last_required_token ... ok
+test empty_grammar_children_share_a_finite_work_budget ... ok
+test enumeration_callback_capture_does_not_change_semantic_defaults ... ok
+test external_grammar_commits_attributes_before_read_or_skip ... ok
+test grammar_tokens_do_not_splice_across_external_entities ... ok
+test partially_declared_ids_are_inherited_with_context_specific_slot_semantics ... ok
+test undefined_default_entities_follow_document_or_external_context ... ok
+test value_child_completes_before_a_later_grammar_child ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+     Running tests/external_headers.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/external_headers-f3ec5fd3eabd4f8b)
+
+running 7 tests
+test a_missing_header_parameter_suppresses_declarations_in_later_children ... ok
+test child_declarations_are_imported_before_the_header_suffix_at_every_chunk_width ... ok
+test external_parameter_recursion_inherits_internal_and_external_ancestors ... ok
+test header_children_are_acknowledged_only_during_the_request_and_outlive_parents ... ok
+test header_continuations_share_expansion_and_nesting_limits ... ok
+test nested_external_read_state_and_missing_child_entities_propagate ... ok
+test parsed_empty_and_unread_children_have_distinct_processing_and_notifications ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/external_limits.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/external_limits-b9ac24aca0a210ec)
+
+running 6 tests
+test context_entity_chain_depth_is_bounded ... ok
+test context_entry_work_is_charged_before_constructor_allocation ... ok
+test inherited_custom_encoding_map_is_charged_before_copying ... ok
+test repeated_empty_external_references_share_constructor_cost ... ok
+test structural_and_index_work_counts_even_for_empty_values ... ok
+test unused_inherited_declarations_are_charged_before_child_allocation ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/external_values.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/external_values-754401d1c58926a3)
+
+running 12 tests
+test child_xml_declaration_changes_standalone_without_disabling_ancestor_mode ... ok
+test external_value_bytes_remain_data_at_every_chunk_width ... ok
+test external_value_internal_references_remain_open_in_the_shared_dtd ... ok
+test external_value_output_and_family_work_have_independent_limits ... ok
+test initialized_unread_and_ignored_error_values_preserve_distinct_results ... ok
+test nested_value_output_and_child_truncation_follow_source_boundaries ... ok
+test newer_versions_in_external_values_preserve_replacement_text ... ok
+test open_value_state_is_shared_by_siblings_but_not_general_entity_copies ... ok
+test unread_values_default_the_gap_before_trailing_grammar ... ok
+test value_channel_survives_custom_encoding_recovery_and_parent_drop ... ok
+test value_children_inherit_active_parameter_names_and_depth ... ok
+test value_continuations_preserve_grammar_and_default_callback_state ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+
+     Running tests/foreign_dtd.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/foreign_dtd-0a992bdb2bc6aa7f)
+
+running 2 tests
+test foreign_dtd_read_acknowledgement_controls_notifications_and_unknown_entities ... ok
+test unread_foreign_dtd_preserves_prior_parameter_references ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/malformed_dtd.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/malformed_dtd-f37713e289568747)
+
+running 2 tests
+test invalid_public_ids_and_forbidden_document_closures_have_specific_errors ... ok
+test malformed_dtd_tokens_have_lexical_errors_in_every_encoding_boundary ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/missing_parameters.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/missing_parameters-ed6290098d83c64e)
+
+running 5 tests
+test child_and_later_sibling_keep_the_skipped_declaration_state ... ok
+test disabled_parameter_defaults_restore_custom_name_aliases ... ok
+test missing_parameter_stops_later_declarations_and_preserves_existing_entities ... ok
+test skipped_declarations_still_validate_names_and_enforce_limits ... ok
+test standalone_requires_a_declaration_only_outside_internal_replacements ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/multibyte.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/multibyte-4e807ef295312c37)
+
+running 12 tests
+test ascii_alias_names_keep_raw_delimiters_keywords_and_references_distinct ... ok
+test ascii_aliases_are_literal_data_in_text_cdata_and_attributes ... ok
+test conversion_requests_preserve_lines_and_columns_across_crlf ... ok
+test converted_attribute_identity_survives_offset_and_hash_paths ... ok
+test converted_newlines_preserve_their_lexical_role ... ok
+test converted_spaces_follow_tokenized_attribute_source_roles ... ok
+test custom_names_match_original_byte_sequences ... ok
+test incomplete_custom_sequences_wait_for_input_and_fail_at_finalization ... ok
+test multibyte_names_attributes_and_byte_positions_at_every_chunk_width ... ok
+test multibyte_source_compaction_preserves_raw_offsets ... ok
+test public_identifier_checks_use_the_original_custom_map_byte_classes ... ok
+test raw_qnames_are_checked_before_decoded_namespace_expansion ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s
+
+     Running tests/name_rules.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/name_rules-7a247bcd1d5a0592)
+
+running 5 tests
+test custom_public_identifiers_classify_original_bytes_with_the_selected_edition ... ok
+test edition_applies_to_every_name_context_and_encoding ... ok
+test external_general_and_parameter_children_inherit_the_edition ... ok
+test invalid_names_precede_entity_lookup_and_namespace_resolution ... ok
+test malformed_model_and_enumeration_names_are_lexical_errors ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/parameter_values.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/parameter_values-2fcee8991d7988cf)
+
+running 7 tests
+test external_children_inherit_the_effective_standalone_parameter_mode ... ok
+test legal_context_and_first_declaration_take_precedence ... ok
+test missing_parameters_finish_current_value_and_control_later_declarations ... ok
+test references_must_be_complete_within_each_replacement ... ok
+test replacement_boundaries_preserve_quotes_references_and_line_endings ... ok
+test replacement_depth_output_and_empty_reference_work_are_bounded ... ok
+test standalone_mode_one_skips_root_parameters_but_processes_external_dtds ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.94s
+
+     Running tests/parser.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/parser-149527cd48b311e6)
+
+running 54 tests
+test a_failed_encoding_setter_preserves_autodetection ... ok
+test attribute_declaration_types_omit_grammar_whitespace ... ok
+test attribute_duplicates_and_defaults_across_small_and_large_elements ... ok
+test attribute_offsets_preserve_owned_events_across_reuse_and_large_tags ... ok
+test byte_line_and_column_positions ... ok
+test changing_the_encoding_preserves_entity_and_deferral_options ... ok
+test character_reference_carriage_returns_survive_entity_replacement ... ok
+test conversion_buffer_boundaries_preserve_utf8_and_cdata_delimiters ... ok
+test custom_single_byte_encoding_retries_buffered_input_once ... ok
+test default_events_preserve_whitespace_without_character_data_callbacks ... ok
+test dtd_comments_do_not_confuse_subset_scanning ... ok
+test dtd_entities_defaults_and_content_models ... ok
+test encodings_and_split_surrogates ... ok
+test external_dtd_declarations_merge_before_document_content ... ok
+test external_entities_require_application_supplied_content ... ok
+test external_entity_children_inherit_namespaces_and_declarations ... ok
+test external_entity_cycles_and_expansion_budgets_are_shared ... ok
+test external_entity_namespace_context_consumes_the_expansion_budget ... ok
+test external_fragments_emit_trailing_text_before_reporting_unbalanced_markup ... ok
+test external_subset_callback_occurs_before_a_root_is_available ... ok
+test foreign_dtd_requests_have_null_identifiers ... ok
+test indexed_declarations_preserve_order_types_ids_and_external_precedence ... ok
+test malformed_prolog_text_and_dtd_repetition_markers_report_their_context ... ok
+test malformed_tokens_report_the_offending_byte ... ok
+test many_declared_attributes_can_be_repeated_without_indirect_expansion ... ok
+test many_newlines_and_a_fragmented_dtd_closer_are_streamed ... ok
+test namespace_constraints ... ok
+test namespace_separators_preserve_legacy_uri_characters ... ok
+test namespaces_and_triplets ... ok
+test namespaces_apply_to_dtd_names_and_entity_references ... ok
+test nested_entity_markup_is_balanced ... ok
+test newer_minor_versions_keep_xml_10_character_rules ... ok
+test non_xml_whitespace_in_a_declaration_has_a_declaration_error ... ok
+test numeric_reference_syntax_is_distinct_from_forbidden_characters ... ok
+test overlapping_processing_instruction_delimiters_never_panic ... ok
+test parameter_entities_expand_declarations_with_explicit_processing ... ok
+test partial_token_after_progress_is_retried_without_deferral ... ok
+test plain_attributes_and_short_references_keep_normalization_and_errors ... ok
+test queued_dtd_events_have_individual_raw_tokens ... ok
+test raw_attribute_validation_precedes_value_and_namespace_processing ... ok
+test raw_tokens_and_owned_events_survive_reusing_the_raw_buffer ... ok
+test reject_malformed_xml ... ok
+test reparse_deferral_is_optional_and_final_input_always_flushes ... ok
+test repeated_external_entity_identifiers_consume_the_shared_expansion_budget ... ok
+test resource_limits_cannot_be_bypassed_by_chunking ... ok
+test reused_default_attributes_consume_the_expansion_budget ... ok
+test reused_namespace_uris_and_declaration_names_consume_the_expansion_budget ... ok
+test standalone_documents_reject_entities_declared_in_parameter_entities ... ok
+test streaming_tokens_references_and_normalization ... ok
+test text_coalesces_lines_and_cdata_keeps_its_boundaries ... ok
+test truncated_cdata_openers_and_utf16_units_have_contextual_errors ... ok
+test unfinished_prolog_names_respect_the_token_limit ... ok
+test unprefixed_attributes_can_match_serialized_namespace_names ... ok
+test unread_external_subsets_allow_skipped_entities_without_loading_them ... ok
+
+test result: ok. 54 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.61s
+
+     Running tests/positions.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/positions-44af0f98edd2b97f)
+
+running 3 tests
+test line_and_character_columns_survive_encoding_and_input_boundaries ... ok
+test line_tracking_survives_source_compaction_and_nonadjacent_crlf ... ok
+test unbalanced_entity_errors_stay_at_the_reference_after_the_source_is_popped ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.44s
+
+     Running tests/prolog.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/prolog-93821e01d64f9550)
+
+running 5 tests
+test deferred_references_preserve_text_delivered_before_a_later_invalid_token ... ok
+test incomplete_prolog_literals_are_bounded_and_resume_linearly ... ok
+test prolog_literal_decoding_errors_keep_the_tokenizer_precedence ... ok
+test prolog_literal_positions_follow_the_wire_encoding ... ok
+test prolog_quotes_are_scanned_before_the_grammar_rejects_them ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/raw_tokens.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/raw_tokens-a13d340d35c95882)
+
+running 1 test
+test terminal_errors_retain_complete_raw_markup_in_every_feed_boundary ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/recycling.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/recycling-d6b4897889729f0b)
+
+running 1 test
+test recycling_preserves_normalization_defaults_namespaces_and_error_order ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/reparse_deferral.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/reparse_deferral-52d5a71e989a1a17)
+
+running 4 tests
+test attlist_events_finish_before_the_following_incomplete_dtd_token ... ok
+test dtd_deferral_is_inherited_and_flushes_on_growth_disable_or_final_input ... ok
+test final_input_and_disabling_deferral_preserve_malformed_dtd_errors ... ok
+test token_limit_and_decoder_errors_bypass_pending_dtd_deferral ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/text_coalescing.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/text_coalescing-b8d213581849515b)
+
+running 7 tests
+test ascii_text_keeps_raw_spans_and_eager_positions_across_feeds ... ok
+test converted_windows_do_not_emit_part_of_a_later_malformed_line ... ok
+test external_children_preserve_default_coalescing ... ok
+test merging_is_bounded_and_never_splits_a_carriage_return_pair ... ok
+test merging_keeps_the_complete_prefix_before_malformed_lines ... ok
+test native_text_plan_matches_ascii_fallback_events_and_errors ... ok
+test text_raw_spans_and_owned_values_survive_every_feed_boundary ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+     Running unittests src/main.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/oriole-3bf19b51320f7d63)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (/home/dev-user/.cache/ohm/verified-build/debug/deps/oriole_expat-4fc4bf9349e77680)
+
+running 106 tests
+test content_model::tests::children_are_contiguous_and_owned_by_one_allocation ... ok
+test content_model::tests::malformed_and_deep_models_are_bounded ... ok
+test context_text_tests::context_input_allocation_failures_preserve_sticky_errors_and_owners ... ok
+test context_text_tests::context_text_default_and_excluded_paths_keep_exact_bytes ... ok
+test context_text_tests::context_text_frame_and_raw_oom_match_owned_mode ... ok
+test context_text_tests::context_text_invalid_host_range_fails_closed ... ok
+test context_text_tests::context_text_late_handler_after_suspension_uses_eager_raw ... ok
+test context_text_tests::context_text_offsets_compaction_split_utf8_and_sizes ... ok
+test context_text_tests::context_text_pointer_survives_reentry_suspend_and_abort ... ok
+test context_text_tests::context_text_warmed_reservations_do_not_allocate ... ok
+test tests::a_different_parser_can_run_from_a_callback ... ok
+test tests::active_entity_membership_survives_suspend_and_is_discarded_on_reset ... ok
+test tests::allocation_tracker_accepts_infinity_and_rejects_child_settings ... ok
+test tests::allocation_tracker_enforces_live_memory_amplification ... ok
+test tests::an_old_dtd_child_cannot_modify_a_reset_parent_document ... ok
+test tests::arena_start_enforces_exact_callback_budget_with_default_fallback ... ok
+test tests::arena_start_preserves_raw_context_live_pointers_and_callback_switches ... FAILED
+test tests::arena_text_enforces_exact_callback_budget_with_default_fallback ... ok
+test tests::arena_text_keeps_bytes_raw_context_and_handlers_live_through_suspension ... ok
+test tests::base_can_be_set_from_its_existing_pointer ... ok
+test tests::buffer_api_bounds_and_reset ... ok
+test tests::buffer_reservation_cannot_bypass_input_budget ... ok
+test tests::c_entity_count_and_depth_boundaries_remain_finite ... ok
+test tests::c_entity_limits_survive_all_constructors_reset_and_both_child_modes ... ok
+test tests::c_name_rules_match_fourth_edition_and_survive_reset_and_child_creation ... ok
+test tests::callback_free_is_ignored_and_dispatch_continues ... ok
+test tests::callback_reset_cannot_replace_live_core ... ok
+test tests::character_data_ownership_survives_nested_calls_and_suspension ... ok
+test tests::child_survives_parent_deletion ... ok
+test tests::consumed_work_credit_survives_old_children_but_not_root_reset ... ok
+test tests::content_model_outlives_parent_and_retains_its_tracker ... ok
+test tests::custom_single_byte_encoding_and_release_ownership ... ok
+test tests::default_doctype_fragments_survive_suspension ... ok
+test tests::default_handler_receives_outside_root_whitespace_without_character_data ... ok
+test tests::default_whitespace_counts_toward_the_shared_event_budget ... ok
+test tests::detached_end_charges_the_name_before_handlers_or_default_fallback ... ok
+test tests::detached_end_owner_survives_default_current_children_stop_and_reset_rejection ... ok
+test tests::doctype_closing_tokens_follow_each_handler_and_survive_mutation ... ok
+test tests::duplicate_entities_preserve_handler_dependent_default_tokens ... ok
+test tests::encoding_release_cannot_double_free_its_parser ... ok
+test tests::encoding_setter_observes_abort_and_suspension_inside_callbacks ... ok
+test tests::entity_amplification_controls_apply_after_suspension_and_reset_to_defaults ... ok
+test tests::entity_value_parameter_context_has_the_expat_error_code ... ok
+test tests::entity_value_parameters_use_buffer_input_and_merge_into_the_parent ... ok
+test tests::external_callback_can_parse_an_inherited_fragment ... ok
+test tests::external_child_depth_is_bounded ... ok
+test tests::external_child_requests_its_own_multibyte_encoding_after_parent_free ... ok
+test tests::external_children_have_source_allowances_and_shared_construction_bounds ... ok
+test tests::external_content_encoding_initialization_survives_buffer_input_and_parent_free ... ok
+test tests::external_declaration_errors_keep_their_codes_in_each_child_context ... ok
+test tests::external_dtd_construction_and_parsing_do_not_taint_parent ... ok
+test tests::external_dtd_declarations_are_available_to_the_parent ... ok
+test tests::external_grammar_continuation_outlives_its_ancestor ... ok
+test tests::external_grammar_keeps_early_callbacks_stop_state_and_handler_changes ... ok
+test tests::external_header_callbacks_preserve_buffer_input_abort_and_parent_suspension ... ok
+test tests::external_values_keep_callback_order_encoding_ownership_and_stop_semantics ... ok
+test tests::family_budgets_survive_child_failure_and_root_reset ... ok
+test tests::family_charge_preserves_zero_overflow_and_limit_boundaries ... ok
+test tests::family_input_statistic_cannot_overflow_or_grant_work_credit ... ok
+test tests::finished_encoding_updates_preserve_decoder_and_reset_ownership ... ok
+test tests::forbidden_callback_calls_preserve_the_outer_parse ... ok
+test tests::foreign_dtd_callback_runs_before_document_content ... ok
+test tests::foreign_dtd_policy_rejection_and_suspension_precede_document_callbacks ... ok
+test tests::hash_salt_changes_root_configuration_and_preserves_owned_children ... ok
+test tests::header_implementation_version_matches_package_version ... ok
+test tests::ignored_free_from_unknown_encoding_callback_preserves_map_ownership ... ok
+test tests::incomplete_allocator_suite_is_rejected ... ok
+test tests::input_context_discards_consumed_eventless_whitespace ... ok
+test tests::input_context_is_inactive_during_reset_and_destruction_callbacks ... ok
+test tests::input_context_keeps_split_dtd_and_parameter_entity_anchors ... ok
+test tests::input_context_preserves_original_bytes_across_feeds_and_suspension ... ok
+test tests::invalid_api_requests_do_not_poison_subsequent_input ... ok
+test tests::invalid_inputs_are_rejected_without_dereference ... ok
+test tests::invalid_multibyte_maps_and_conversion_results_release_once ... ok
+test tests::late_encoding_change_does_not_poison_incremental_parse ... ok
+test tests::manually_injected_dtd_requires_an_external_subset_context ... ok
+test tests::memory_helpers_clear_the_ambient_parser_tracking_scope ... ok
+test tests::metadata_payloads_enforce_exact_shared_event_budget_boundaries ... ok
+test tests::multibyte_converter_can_suspend_or_abort_without_repeating_conversion ... ok
+test tests::multibyte_converter_reentry_is_guarded_and_release_is_owned_once ... ok
+test tests::multibyte_map_allocation_failure_releases_the_callback_instance_once ... ok
+test tests::namespace_constructors_reject_non_ascii_separator_bytes ... ok
+test tests::namespace_triplets_and_specified_attributes ... ok
+test tests::nul_namespace_separator_ignores_triplet_mode ... ok
+test tests::ordinary_attlist_handlers_change_at_tokens_and_resume_between_attributes ... ok
+test tests::parameter_delimiters_preserve_buffer_input_after_parent_free ... ok
+test tests::precreated_parameter_siblings_observe_skips_before_the_first_child_finishes ... ok
+test tests::public_memory_helpers_are_exempt_from_parser_amplification ... ok
+test tests::recursive_default_current_is_rejected ... ok
+test tests::recycling_waits_for_callbacks_and_survives_suspend_resume_and_reset ... ok
+test tests::rejected_custom_encoding_releases_data_once ... ok
+test tests::rejected_suspended_operations_preserve_resumable_input ... ok
+test tests::request_bound_and_public_positions_do_not_depend_on_lifetime_quota ... ok
+test tests::reset_discards_internal_parameter_entities_left_open_by_value_children ... ok
+test tests::resetting_after_a_missing_parameter_restores_declaration_processing ... ok
+test tests::setting_encoding_preserves_default_handler_and_deferral_modes ... ok
+test tests::skipped_declaration_references_deliver_each_default_byte_once ... ok
+test tests::source_bound_preflight_preserves_family_and_input_storage ... ok
+test tests::streaming_callbacks_and_user_data_layout ... ok
+test tests::suspended_parser_resumes_without_repeating_callback ... ok
+test tests::syntax_errors_remain_terminal_after_successful_buffer_requests ... ok
+test tests::unknown_encoding_callbacks_follow_complete_declaration_grammar ... ok
+test tests::unresolved_external_general_entity_reaches_the_default_handler ... ok
+test tests::unused_ordinary_attlist_payloads_do_not_consume_adapter_event_bytes ... ok
+test tests::wider_c_entity_limits_keep_cycle_and_work_guards ... ok
+test tests::zero_length_parse_buffer_finishes_owned_input_without_a_reservation ... ok
+
+failures:
+
+---- tests::arena_start_preserves_raw_context_live_pointers_and_callback_switches stdout ----
+
+thread 'tests::arena_start_preserves_raw_context_live_pointers_and_callback_switches' (3257) panicked at crates/oriole_expat/src/tests.rs:4315:17:
+assertion `left == right` failed
+  left: 1
+ right: 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::arena_start_preserves_raw_context_live_pointers_and_callback_switches
+
+test result: FAILED. 105 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 16.15s
+
+error: test failed, to rerun pass `-p oriole_expat --lib`

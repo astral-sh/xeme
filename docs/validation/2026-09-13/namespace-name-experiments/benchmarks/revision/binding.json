@@ -1,0 +1,29 @@
+{
+  "status": "passed",
+  "mode": "normal",
+  "libraries": {
+    "control": {
+      "path": "/tmp/oriole-native-start-end-namespace-declaration-study/normal/liboriole_expat.so",
+      "sha256": "c3e6533900cf0b1ec6b127fd173f7e25be210cb5afe23ad9963c84873f6ea025"
+    },
+    "candidate": {
+      "path": "/tmp/oriole-namespace-binding-revision-study/normal/liboriole_expat.so",
+      "sha256": "cd6f7c42538cade1d0b4971abb956f0f6aec9f77aeef68d2dfcb5dc240f83217"
+    },
+    "expat": {
+      "path": "/tmp/oriole-pgo-study/expat-control-liboriole_expat.so",
+      "sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+    }
+  },
+  "build_record": {
+    "path": "/tmp/oriole-namespace-binding-revision-study/build.json",
+    "sha256": "1fcd7d454391a878c9ee7a5c08faefe970e5cc69af805ad056e8e1d5b30d2ad8"
+  },
+  "preparation_sha256": "00fb336d8b9e13b42c69d18dc8a56b27482f6d32e5ecabe7fb317ac302b5cc73",
+  "consumer_directories": {
+    "control": "/tmp/oriole-native-start-end-namespace-declaration-study/python/consumers/candidate",
+    "expat": "/tmp/oriole-expanded-start-capacity-study/python/consumers/expat",
+    "candidate": "/tmp/oriole-namespace-binding-revision-benchmark/python/consumers/candidate"
+  },
+  "scope": "Root explicitly releases a passing build and supplies its exact library hash. This command verifies saved bytes; it does not reconstruct compiler provenance."
+}

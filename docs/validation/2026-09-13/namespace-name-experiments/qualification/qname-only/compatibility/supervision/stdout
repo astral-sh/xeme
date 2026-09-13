@@ -1,0 +1,4 @@
+{"completed": "api", "raw_exit": 1, "reaped": true}
+{"completed": "strict-shared", "raw_exit": 2, "reaped": true}
+{"completed": "strict-static", "raw_exit": 2, "reaped": true}
+{"status": "passed_baseline_compatibility_comparison", "report": "/tmp/oriole-namespace-qname-only-correctness/report.json"}

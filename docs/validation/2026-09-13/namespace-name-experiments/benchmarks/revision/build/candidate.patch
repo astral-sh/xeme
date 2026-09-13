@@ -1,0 +1,379 @@
+diff --git a/crates/oriole/src/arena.rs b/crates/oriole/src/arena.rs
+index 2a9fe1d..84d8e6d 100644
+--- a/crates/oriole/src/arena.rs
++++ b/crates/oriole/src/arena.rs
+@@ -1,5 +1,6 @@
+ //! Detached callback storage. Only owned buffers and scalar offsets leave the core.
+ 
++use std::num::NonZeroU64;
+ use std::ops::Range;
+ 
+ use oriole_storage::{AllocError, Allocator, String, Vec, try_extend_from_slice};
+@@ -42,6 +43,7 @@ pub struct AdapterFrame {
+     name: Range<usize>,
+     namespace_name: String,
+     namespace_uri_len: usize,
++    namespace_default_revision: Option<NonZeroU64>,
+     position: Position,
+     callback_bytes: usize,
+     inline: [u8; INLINE_TEXT_BYTES],
+@@ -65,6 +67,7 @@ impl AdapterFrame {
+             name: 0..0,
+             namespace_name: String::new_in(allocator),
+             namespace_uri_len: 0,
++            namespace_default_revision: None,
+             position: Position::default(),
+             callback_bytes: 0,
+             inline: [0; INLINE_TEXT_BYTES],
+@@ -90,6 +93,7 @@ impl AdapterFrame {
+         if self.namespace_name.capacity() > MAX_ARENA_BYTES {
+             self.namespace_name = String::new_in(self.namespace_name.allocator());
+             self.namespace_uri_len = 0;
++            self.namespace_default_revision = None;
+         }
+     }
+ 
+@@ -222,6 +226,8 @@ impl AdapterFrame {
+ 
+     /// Build a namespaced callback spelling while retaining a reusable URI prefix.
+     /// This buffer remains owned by the frame throughout callback delivery.
++    /// A default revision belongs to this frame's parser generation and is supplied
++    /// only for unprefixed names. Other bindings retain the byte-comparison fallback.
+     pub(crate) fn set_expanded_name(
+         &mut self,
+         uri: &str,
+@@ -229,8 +235,10 @@ impl AdapterFrame {
+         prefix: Option<&str>,
+         separator: char,
+         triplets: bool,
++        default_revision: Option<NonZeroU64>,
+     ) -> Result<(), AllocError> {
+         debug_assert!(!self.active && matches!(self.payload, Payload::Start));
++        debug_assert!(default_revision.is_none() || prefix.is_none());
+         debug_assert!(!uri.as_bytes().contains(&0) && !local.as_bytes().contains(&0));
+         let mut encoded_separator = [0; 4];
+         let separator = if separator == '\0' {
+@@ -257,13 +265,17 @@ impl AdapterFrame {
+             .callback_bytes
+             .checked_add(name_len)
+             .ok_or(AllocError::CapacityOverflow)?;
++        let same_revision = default_revision
++            .is_some_and(|revision| self.namespace_default_revision == Some(revision));
+         let same_uri = self.namespace_uri_len == uri.len()
+-            && self.namespace_name.as_bytes().get(..uri.len()) == Some(uri.as_bytes());
++            && (same_revision
++                || self.namespace_name.as_bytes().get(..uri.len()) == Some(uri.as_bytes()));
+         if same_uri {
+             self.namespace_name.truncate(uri.len());
+         } else {
+             self.namespace_name.clear();
+             self.namespace_uri_len = 0;
++            self.namespace_default_revision = None;
+         }
+         let additional = required - self.namespace_name.len();
+         if required > self.namespace_name.capacity()
+@@ -285,6 +297,7 @@ impl AdapterFrame {
+             self.namespace_name.try_push_str(prefix)?;
+         }
+         self.namespace_name.try_push('\0')?;
++        self.namespace_default_revision = default_revision;
+         self.callback_bytes = count;
+         self.payload = Payload::NamespaceStart;
+         Ok(())
+@@ -415,6 +428,180 @@ mod tests {
+     use super::*;
+     use crate::{Config, Parser};
+ 
++    /// Observe actual frame selection while returning ordinary event owners.
++    fn namespace_starts(
++        parser: &mut Parser,
++        frame: &mut AdapterFrame,
++    ) -> std::vec::Vec<(std::string::String, Option<u64>)> {
++        let mut starts = std::vec::Vec::new();
++        loop {
++            let mut event = None;
++            let Some(token) = parser
++                .next_event_for_adapter_into(&mut event, frame)
++                .unwrap()
++            else {
++                break;
++            };
++            if let Some(name) = frame.take_end_name() {
++                parser.recycle_end_element(token, name);
++            } else if frame.is_active()
++                && matches!(frame.payload, Payload::Start | Payload::NamespaceStart)
++            {
++                let name = std::str::from_utf8(frame.name_bytes().strip_suffix(&[0]).unwrap())
++                    .unwrap()
++                    .to_owned();
++                let revision = if matches!(frame.payload, Payload::NamespaceStart) {
++                    frame.namespace_default_revision.map(NonZeroU64::get)
++                } else {
++                    None
++                };
++                starts.push((name, revision));
++            } else if let Some(event) = event {
++                match event.kind {
++                    crate::EventKind::StartElement { name, attributes } => {
++                        starts.push((name.to_string(), None));
++                        parser.recycle_start_element(token, name, attributes);
++                    }
++                    crate::EventKind::EndElement { name } => {
++                        parser.recycle_end_element(token, name)
++                    }
++                    _ => {}
++                }
++            }
++        }
++        starts
++    }
++
++    #[test]
++    fn default_namespace_revisions_follow_scopes_and_parser_generations() {
++        let config = Config {
++            namespace_separator: Some('|'),
++            ..Config::default()
++        };
++        let mut parser = Parser::new(config.clone());
++        let mut frame = parser.adapter_frame();
++        parser
++            .feed(b"<r xmlns='urn:a' xmlns:p='urn:p'>", false)
++            .unwrap();
++        assert_eq!(
++            namespace_starts(&mut parser, &mut frame),
++            [("urn:a|r".into(), None)]
++        );
++        let initial = parser.default_namespace_revision.unwrap().get();
++        parser.feed(b"<n/><n/>", false).unwrap();
++        assert_eq!(
++            namespace_starts(&mut parser, &mut frame),
++            [
++                ("urn:a|n".into(), Some(initial)),
++                ("urn:a|n".into(), Some(initial)),
++            ]
++        );
++
++        // A replacement parser can have the same numeric revision but cannot
++        // accept the old frame, as on the core replacement used by C reset.
++        let mut replacement = Parser::new(config);
++        replacement.feed(b"<r xmlns='urn:other'>", false).unwrap();
++        assert_eq!(
++            namespace_starts(&mut replacement, &mut frame),
++            [("urn:other|r".into(), None)]
++        );
++        assert_eq!(
++            replacement.default_namespace_revision.unwrap().get(),
++            initial
++        );
++        replacement.feed(b"<n/></r>", true).unwrap();
++        assert_eq!(
++            namespace_starts(&mut replacement, &mut frame),
++            [("urn:other|n".into(), None)]
++        );
++
++        parser.feed(b"<p:n/><n/>", false).unwrap();
++        assert_eq!(
++            namespace_starts(&mut parser, &mut frame),
++            [("urn:p|n".into(), None), ("urn:a|n".into(), Some(initial)),]
++        );
++        parser
++            .feed(b"<s xmlns='urn:b'><n/></s><n/>", false)
++            .unwrap();
++        assert_eq!(
++            namespace_starts(&mut parser, &mut frame),
++            [
++                ("urn:b|s".into(), None),
++                ("urn:b|n".into(), Some(initial + 1)),
++                ("urn:a|n".into(), Some(initial + 2)),
++            ]
++        );
++        parser.feed(b"<s xmlns=''><n/></s><n/>", false).unwrap();
++        assert_eq!(
++            namespace_starts(&mut parser, &mut frame),
++            [
++                ("s".into(), None),
++                ("n".into(), None),
++                ("urn:a|n".into(), Some(initial + 4)),
++            ]
++        );
++
++        let mut child = parser.external_child(Some(""), None).unwrap();
++        assert_eq!(child.default_namespace.as_deref(), Some("urn:a"));
++        assert_eq!(child.default_namespace_revision, NonZeroU64::new(1));
++        child.feed(b"<n/>", true).unwrap();
++        assert_eq!(
++            namespace_starts(&mut child, &mut frame),
++            [("urn:a|n".into(), None)]
++        );
++        assert_eq!(
++            parser.default_namespace_revision.unwrap().get(),
++            initial + 4
++        );
++        parser.feed(b"<n/></r>", true).unwrap();
++        assert_eq!(
++            namespace_starts(&mut parser, &mut frame),
++            [("urn:a|n".into(), Some(initial + 4))]
++        );
++        parser.finish_adapter_frame(frame);
++    }
++
++    #[test]
++    fn default_namespace_revision_exhaustion_keeps_byte_comparison_enabled() {
++        let mut parser = Parser::new(Config {
++            namespace_separator: Some('|'),
++            ..Config::default()
++        });
++        let mut frame = parser.adapter_frame();
++        parser.feed(b"<r xmlns='urn:a'>", false).unwrap();
++        namespace_starts(&mut parser, &mut frame);
++        parser.default_namespace_revision = NonZeroU64::new(u64::MAX);
++        parser.feed(b"<n/>", false).unwrap();
++        assert_eq!(
++            namespace_starts(&mut parser, &mut frame),
++            [("urn:a|n".into(), Some(u64::MAX))]
++        );
++        parser
++            .feed(b"<s xmlns='urn:b'><n/></s><n/>", false)
++            .unwrap();
++        assert_eq!(
++            namespace_starts(&mut parser, &mut frame),
++            [
++                ("urn:b|s".into(), None),
++                ("urn:b|n".into(), None),
++                ("urn:a|n".into(), None),
++            ]
++        );
++        assert_eq!(parser.default_namespace_revision, None);
++        parser.feed(b"<s xmlns=''><n/></s><n/></r>", true).unwrap();
++        assert_eq!(
++            namespace_starts(&mut parser, &mut frame),
++            [
++                ("s".into(), None),
++                ("n".into(), None),
++                ("urn:a|n".into(), None),
++            ]
++        );
++        assert_eq!(parser.default_namespace_revision, None);
++        assert_eq!(frame.namespace_default_revision, None);
++        parser.finish_adapter_frame(frame);
++    }
++
+     #[test]
+     fn namespace_name_cache_survives_other_payloads_and_bounds_growth() {
+         let mut parser = Parser::new(Config::default());
+@@ -431,7 +618,7 @@ mod tests {
+                         frame.push_attribute("a", "value").unwrap();
+                         let pointer = frame.namespace_name.as_bytes().as_ptr();
+                         frame
+-                            .set_expanded_name(uri, local, Some("p"), separator, triplets)
++                            .set_expanded_name(uri, local, Some("p"), separator, triplets, None)
+                             .unwrap();
+                         let mut expected = uri.to_owned();
+                         if separator != '\0' {
+@@ -468,7 +655,7 @@ mod tests {
+         for length in [3002, 4093, 4094] {
+             frame.clear();
+             frame
+-                .set_expanded_name("u", &"n".repeat(length), None, '\0', false)
++                .set_expanded_name("u", &"n".repeat(length), None, '\0', false, None)
+                 .unwrap();
+             assert!(frame.namespace_name.capacity() <= MAX_ARENA_BYTES);
+             assert_eq!(frame.prepared_expanded_name().len(), length + 1);
+@@ -479,14 +666,14 @@ mod tests {
+         }
+         frame.clear();
+         assert!(matches!(
+-            frame.set_expanded_name("u", &"n".repeat(4095), None, '\0', false),
++            frame.set_expanded_name("u", &"n".repeat(4095), None, '\0', false, None),
+             Err(AllocError::CapacityOverflow)
+         ));
+         assert!(!frame.is_active());
+         assert_eq!(frame.name_bytes(), b"");
+         frame.clear();
+         frame
+-            .set_expanded_name("u", "last", None, '|', false)
++            .set_expanded_name("u", "last", None, '|', false, None)
+             .unwrap();
+         assert_eq!(frame.name_bytes(), b"u|last\0");
+         parser.finish_adapter_frame(frame);
+diff --git a/crates/oriole/src/lib.rs b/crates/oriole/src/lib.rs
+index 0593b01..3c2ede3 100644
+--- a/crates/oriole/src/lib.rs
++++ b/crates/oriole/src/lib.rs
+@@ -23,7 +23,7 @@ use oriole_storage::{
+     try_insert, try_push, try_set_insert,
+ };
+ use std::fmt;
+-use std::num::NonZeroUsize;
++use std::num::{NonZeroU64, NonZeroUsize};
+ use std::sync::OnceLock;
+ use std::sync::atomic::{AtomicBool, Ordering};
+ 
+@@ -568,6 +568,8 @@ pub struct Parser {
+     // current default URI; scope undo records keep the displaced owners.
+     namespaces: HashMap<String, String>,
+     default_namespace: Option<String>,
++    // None permanently disables revision reuse after the counter is exhausted.
++    default_namespace_revision: Option<NonZeroU64>,
+     tables: DtdTables,
+     shared_tables: OnceLock<Shared<oriole_storage::TryLock<DtdTables>>>,
+     parameter_mode: u8,
+@@ -746,6 +748,7 @@ impl Parser {
+             sources,
+             namespaces,
+             default_namespace: None,
++            default_namespace_revision: NonZeroU64::new(1),
+             pending: Queue::new_in(allocator),
+             stack: Vec::new_in(allocator),
+             namespace_scopes: Vec::new_in(allocator),
+@@ -822,6 +825,7 @@ impl Parser {
+         uri: String,
+     ) -> Result<Option<String>, AllocError> {
+         if prefix.is_empty() {
++            self.advance_default_namespace_revision();
+             Ok(self.default_namespace.replace(uri))
+         } else {
+             try_insert(&mut self.namespaces, prefix, uri)
+@@ -831,12 +835,22 @@ impl Parser {
+     /// Remove the active binding so its owner can become an undo record.
+     fn remove_namespace(&mut self, prefix: &str) -> Option<String> {
+         if prefix.is_empty() {
++            self.advance_default_namespace_revision();
+             self.default_namespace.take()
+         } else {
+             self.namespaces.remove(prefix)
+         }
+     }
+ 
++    /// Invalidate default-binding cache keys on installation, removal and scope undo.
++    /// Exhaustion falls back to comparing URI bytes without wrapping or failing parsing.
++    fn advance_default_namespace_revision(&mut self) {
++        self.default_namespace_revision = self
++            .default_namespace_revision
++            .and_then(|revision| revision.get().checked_add(1))
++            .and_then(NonZeroU64::new);
++    }
++
+     /// Return this parser's local caller salt, without exposing secret randomized keys.
+     /// Parameter children share their DTD seed separately from local namespace and
+     /// active-name indexes, so changing another parser's seed does not change this value.
+@@ -1042,6 +1056,7 @@ impl Parser {
+             child.shared_tables = OnceLock::from(owner.expect("parameter DTD owner"));
+         }
+         child.namespaces.clear();
++        // The new parser has no accepted frames and owns a fresh revision domain.
+         child.default_namespace = self.default_namespace.try_clone()?;
+         for (prefix, uri) in &self.namespaces {
+             try_insert(&mut child.namespaces, prefix.try_clone()?, uri.try_clone()?)?;
+@@ -3876,6 +3891,11 @@ impl Parser {
+                 prefix,
+                 separator,
+                 self.config.namespace_triplets,
++                if prefix.is_none() {
++                    self.default_namespace_revision
++                } else {
++                    None
++                },
+             )?;
+             self.seen_root = true;
+             self.declaration_allowed = false;

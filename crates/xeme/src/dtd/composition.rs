@@ -555,13 +555,21 @@ impl Parser {
                         self.conditional.declaration = Some(state);
                         return Ok(false);
                     }
-                    if text[1..].starts_with(whitespace) {
+                    // A following reference supplies its own leading space, so
+                    // `%%space;name` can start a parameter entity declaration.
+                    let adjacent_reference = text[1..].starts_with('%')
+                        && state.expansion.text.starts_with("ENTITY")
+                        && state.expansion.text[6..].starts_with(whitespace);
+                    if text[1..].starts_with(whitespace) || adjacent_reference {
                         self.append_declaration_token(
                             &mut state.expansion,
                             Slice::plain("%"),
                             false,
                         )?;
                         self.consume(1)?;
+                        if adjacent_reference {
+                            state.ready = state.expansion.text.len();
+                        }
                         continue;
                     }
                     self.charge_declaration_composition(&mut state)?;

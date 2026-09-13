@@ -113,7 +113,7 @@ def main() -> int:
 
     try:
         for mode in ["client-header", "private-code"]:
-            for engine in ["expat", "oriole"]:
+            for engine in ["expat", "xeme"]:
                 execute(engine, mode, -1, 0, True)
         rng = random.Random(args.seed)
         for pair in range(args.pairs):
@@ -144,7 +144,7 @@ def main() -> int:
                 for engine in binaries
             }
             ratios = [
-                medians["expat"][p] / medians["oriole"][p] for p in range(args.pairs)
+                medians["expat"][p] / medians["xeme"][p] for p in range(args.pairs)
             ]
             report["summary"][mode] = {
                 "process_pair_medians_seconds": medians,
@@ -152,9 +152,9 @@ def main() -> int:
                     engine: statistics.median(values)
                     for engine, values in medians.items()
                 },
-                "paired_expat_over_oriole": ratios,
-                "median_expat_over_oriole": statistics.median(ratios),
-                "range_expat_over_oriole": [min(ratios), max(ratios)],
+                "paired_expat_over_xeme": ratios,
+                "median_expat_over_xeme": statistics.median(ratios),
+                "range_expat_over_xeme": [min(ratios), max(ratios)],
             }
         report["status"] = "passed"
     except (RuntimeError, ValueError, OSError, subprocess.SubprocessError) as error:

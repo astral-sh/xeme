@@ -3,11 +3,11 @@
 set -euo pipefail
 
 if [[ $# != 2 && $# != 3 ]]; then
-    echo "usage: $0 /absolute/pbs-checkout /absolute/oriole-bundle [PBS-target]" >&2
+    echo "usage: $0 /absolute/pbs-checkout /absolute/xeme-bundle [PBS-target]" >&2
     exit 2
 fi
 pbs_checkout=$(realpath "$1")
-oriole_bundle=$(realpath "$2")
+xeme_bundle=$(realpath "$2")
 selected_target=${3:-x86_64-unknown-linux-gnu}
 case "$selected_target" in
     x86_64-unknown-linux-gnu|x86_64_v3-unknown-linux-gnu) ;;
@@ -20,18 +20,18 @@ if [[ $(git -C "$pbs_checkout" rev-parse HEAD) != "$revision" ]]; then
 fi
 integration_dir=$(cd "$(dirname "$0")" && pwd)
 git -C "$pbs_checkout" apply --reverse --check "$integration_dir/pbs-a455388.patch"
-test -f "$oriole_bundle/manifest.json"
+test -f "$xeme_bundle/manifest.json"
 python3 "$integration_dir/pbs_target.py" --pbs-target "$selected_target" \
-    --bundle "$oriole_bundle" --check-host
+    --bundle "$xeme_bundle" --check-host
 cd "$pbs_checkout"
-export PYBUILD_ORIOLE_BUNDLE="$oriole_bundle"
+export PYBUILD_XEME_BUNDLE="$xeme_bundle"
 uv run --no-dev python - <<'PY'
 from pythonbuild.downloads import DOWNLOADS
 
 source = DOWNLOADS["cpython-3.12"]
 assert source["version"] == "3.12.13", source
 assert source["sha256"] == "c08bc65a81971c1dd5783182826503369466c7e67374d1646519adf05207b684", source
-print(f"Oriole CPython source: {source['url']} (sha256={source['sha256']})")
+print(f"Xeme CPython source: {source['url']} (sha256={source['sha256']})")
 PY
 uv run --no-dev build.py \
     --target-triple "$selected_target" --python cpython-3.12 --options noopt

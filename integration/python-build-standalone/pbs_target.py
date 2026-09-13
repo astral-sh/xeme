@@ -29,7 +29,7 @@ def validate(manifest: dict, target: str) -> None:
         or "target_cpu" not in manifest
         or manifest["target_cpu"] != expected
     ):
-        raise ValueError("Oriole bundle PBS target, Rust target or CPU does not match")
+        raise ValueError("Xeme bundle PBS target, Rust target or CPU does not match")
 
 
 def check_host(target: str) -> dict:
@@ -43,7 +43,7 @@ def check_host(target: str) -> dict:
     # Never inherit CC/CFLAGS, compiler search overrides, or a v3 compiler default.
     compiler = Path("/usr/bin/gcc").resolve(strict=True)
     environment = {"PATH": "/usr/bin:/bin", "LC_ALL": "C"}
-    with tempfile.TemporaryDirectory(prefix="oriole-pbs-cpu-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="xeme-pbs-cpu-") as temporary:
         executable = Path(temporary) / "check-cpu"
         command = [
             str(compiler),

@@ -6,7 +6,7 @@ matched rounds, with separate real-project and generated summaries.
 
 ## Running benchmarks
 
-Build Oriole with ordinary `-O3`, ThinLTO and one codegen unit, and the Expat
+Build Xeme with ordinary `-O3`, ThinLTO and one codegen unit, and the Expat
 control with `-O3` without LTO, as described in the performance iteration guide.
 Keep the compiler and build settings fixed throughout each comparison.
 
@@ -16,8 +16,8 @@ untimed comparison of complete normalized callbacks before measuring, shuffles
 paired process order, and records every observation and source/input/library hash.
 
 ```console
-python3 benchmarks/run.py --library /path/to/liboriole_expat.so \
-  --output /tmp/oriole-benchmark
+python3 benchmarks/run.py --library /path/to/libxeme_expat.so \
+  --output /tmp/xeme-benchmark
 ```
 
 Each process measures ten complete parses after one discarded warmup. Creation,
@@ -87,7 +87,7 @@ python3 benchmarks/dtd_composition_workload.py --output /tmp/dtd-inputs
 cc -std=c11 -O3 -Wall -Wextra -Werror -I include \
   benchmarks/native_dtd_driver.c -ldl -o /tmp/dtd-driver
 python3 benchmarks/dtd_scaling.py \
-  --library /absolute/liboriole_expat.so --reference /absolute/libexpat.so \
+  --library /absolute/libxeme_expat.so --reference /absolute/libexpat.so \
   --inputs /tmp/dtd-inputs --driver /tmp/dtd-driver \
   --build-manifest /absolute/build.json --output /tmp/dtd-results
 ```

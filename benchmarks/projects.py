@@ -129,7 +129,7 @@ def main() -> int:
             raise ValueError(f"corpus hash mismatch: {path}")
         inputs[project["name"]] = path
     libraries = {
-        "oriole": args.library.resolve(strict=True),
+        "xeme": args.library.resolve(strict=True),
         "expat": args.reference.resolve(strict=True),
     }
     if args.baseline is not None:
@@ -330,7 +330,7 @@ def main() -> int:
                     for engine in libraries
                 }
                 ratios = [
-                    medians["expat"][p] / medians["oriole"][p]
+                    medians["expat"][p] / medians["xeme"][p]
                     for p in range(args.pairs)
                 ]
                 report["summary"][key] = {
@@ -339,9 +339,9 @@ def main() -> int:
                     "median_seconds": {
                         e: statistics.median(v) for e, v in medians.items()
                     },
-                    "paired_expat_over_oriole": ratios,
-                    "median_expat_over_oriole": statistics.median(ratios),
-                    "range_expat_over_oriole": [min(ratios), max(ratios)],
+                    "paired_expat_over_xeme": ratios,
+                    "median_expat_over_xeme": statistics.median(ratios),
+                    "range_expat_over_xeme": [min(ratios), max(ratios)],
                 }
         report["status"] = "preflight-passed" if args.preflight_only else "passed"
     except (

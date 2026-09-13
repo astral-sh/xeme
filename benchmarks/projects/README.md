@@ -19,7 +19,7 @@ The Wayland repository is a GitHub mirror of the upstream GitLab project.
 
 Every condition first compares complete normalized callbacks from the independent ctypes probe. Text fragments are coalesced; all other captured callback types remain exact. The complete callbacks independently derive the C driver's expected FNV-1a hash, element count and text-byte count. Every timed sample must match that result. Callback output, process failures and source/input/library hashes are retained.
 
-The default is seven randomized process pairs with twenty parses per process and one discarded warmup. Reported speedups are medians of the paired Expat/Oriole process medians; a speedup below one is a slowdown. The geometric mean weights each project equally within a namespace/chunk group; it does not describe a project build's elapsed time.
+The default is seven randomized process pairs with twenty parses per process and one discarded warmup. Reported speedups are medians of the paired Expat/Xeme process medians; a speedup below one is a slowdown. The geometric mean weights each project equally within a namespace/chunk group; it does not describe a project build's elapsed time.
 
 ## Matched CPython consumers
 

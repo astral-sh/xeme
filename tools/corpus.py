@@ -31,7 +31,7 @@ def cases(seed: int = 20260910, generated: int = 100) -> list[Case]:
         "nested-entities": b'<!DOCTYPE r [<!ENTITY a "A"><!ENTITY b "&a;&a;">]><r>&b;</r>',
         "default-attribute": b'<!DOCTYPE r [<!ATTLIST r color CDATA "blue">]><r/>',
         "tokenized-attribute": b'<!DOCTYPE r [<!ATTLIST r list NMTOKENS #IMPLIED>]><r list=" a  b\tc "/>',
-        "external-doctype": b'<!DOCTYPE r SYSTEM "file:///definitely-not-an-oriole-file"><r/>',
+        "external-doctype": b'<!DOCTYPE r SYSTEM "file:///definitely-not-an-xeme-file"><r/>',
         "empty": b"",
         "whitespace": b" \n\t",
         "missing-close": b"<r>",
@@ -111,7 +111,7 @@ def workloads(size: int = 10000) -> dict[str, bytes]:
         "entities": b"<root>"
         + b"alpha &amp; beta &#65; &lt; gamma\n" * size
         + b"</root>",
-        "namespaces": b'<root xmlns:p="urn:oriole">'
+        "namespaces": b'<root xmlns:p="urn:xeme">'
         + b'<p:item p:id="123">value</p:item>' * size
         + b"</root>",
     }

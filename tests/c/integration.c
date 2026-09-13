@@ -1,4 +1,4 @@
-/* Public-header consumer assertions. Run against both Expat and Oriole. */
+/* Public-header consumer assertions. Run against both Expat and Xeme. */
 #define XML_DTD 1
 #define XML_GE 1
 #include "expat.h"

@@ -193,11 +193,9 @@ fuzz_target!(|data: &[u8]| {
     }
     assert_eq!(LIVE.get(), 0);
     CALLS.set(0);
-    FAIL_AT.set(if data[1] & 1 == 0 {
-        0
-    } else {
-        1 + usize::from(u16::from_le_bytes([data[1], data[2]])) % 512
-    });
+    FAIL_AT.set(xeme_fuzz::allocation_failure_ordinal(u16::from_le_bytes([
+        data[1], data[2],
+    ])));
     let suite = XML_Memory_Handling_Suite {
         malloc_fcn: Some(allocate),
         realloc_fcn: Some(reallocate),

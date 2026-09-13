@@ -12,7 +12,10 @@ The `ffi` target drives valid C parser handles through arbitrary chunks, buffer
 input, reset, suspension, callback changes, callback-time deletion, and rejected
 reentry. It retains and frees content models and injects failure into a custom
 allocator, checking that every successful allocation is released. It does not
-pass invalid pointers or deliberately use already-freed handles.
+pass invalid pointers or deliberately use already-freed handles. The allocation
+selector uses separate enable and ordinal bits, so all failure positions from 1
+through 512 are reachable. Its exhaustive decoder check is
+`cargo test --manifest-path fuzz/Cargo.toml --lib`.
 Bits 1–3 of the second control byte select a built-in protocol encoding.
 Named Unicode-signature seeds exercise detection with a conflicting protocol.
 
@@ -58,6 +61,50 @@ cargo fuzz run value_family fuzz/seeds/value_family -- -max_len=65536 -max_total
 
 Use an instrumented nightly toolchain with cargo-fuzz. Keep discovered inputs,
 reduce them, and add deterministic regressions before removing crash artifacts.
-Record the revision, command, toolchain, elapsed time, executions, and corpus hash
-for each campaign. A short smoke run establishes harness operation; it does not
-establish security or XML conformance.
+Record the source revision, command, toolchain, sanitizer, bounds, elapsed time,
+and corpus hash for each campaign. Report fixed-input replay, initialization, and
+mutation executions separately: the final libFuzzer counter includes initialization.
+Generated executions can also return early at a target's scope filters. A short
+smoke run establishes harness operation, not security or XML conformance.
+Historical campaigns qualify only their recorded source; rebased code needs fresh
+checks.
+
+## Expat semantic oracle
+
+`expat_differential` compares parse success and successful element, attribute, and
+character-data callbacks against Expat 2.8.4. It compares UTF-8 inputs up to 8,192
+bytes, excluding NUL bytes and the substrings `<!DOCTYPE` and `<?xml`. UTF-16,
+DTD/entity grammar, and encoding declarations are outside this target. Xeme
+resource-limit errors (43) also skip comparison. Error codes, positions, and
+partial callback prefixes on failure are not compared. Adjacent observed text
+callbacks are coalesced. A leading control byte selects namespace mode and a chunk
+size from 1 through 128.
+
+Expat runs in a separate persistent process to prevent `XML_*` symbol interposition.
+The oracle requires an Expat 2.8.4 version greeting. A dead process, invalid reply,
+broken pipe, or timeout fails the run; the harness does not silently restart and
+discard the input. A five-second oracle parse alarm and ten-second libFuzzer input
+timeout bound each exchange. Detected protocol errors and semantic mismatches
+stop and reap the child; stdin EOF releases it on normal fuzzer exit.
+
+Build a normal Expat shared library from revision
+`12cf0b1f25f026a022fe728ad8f7e3d017285b80`, then run:
+
+```console
+cc -std=c11 -O2 -Wall -Wextra -Werror -Iinclude fuzz/expat_oracle.c \
+  /absolute/expat-build/libexpat.so -Wl,-rpath,/absolute/expat-build \
+  -o /tmp/xeme-expat-oracle
+XEME_EXPAT_ORACLE=/tmp/xeme-expat-oracle \
+  cargo fuzz run expat_differential --sanitizer address fuzz/seeds/expat_differential -- \
+  -max_len=8193 -timeout=10 -rss_limit_mb=1536 -max_total_time=300
+```
+
+The size bound includes the control byte. Record the reference revision,
+oracle/library hashes, and compiler command alongside the campaign metadata.
+Rust sanitizer instrumentation covers the fuzz target and Xeme; this command
+builds the separate C oracle without sanitizer instrumentation. Execution totals
+include filtered inputs and do not give an actual oracle-comparison count.
+
+Retained seeds include the reduced CR-plus-quote acceptance bug and the overlapping
+processing-instruction delimiter that caused a DTD slicing panic. Keep these fixed
+regressions alongside subsequent mutation campaigns.

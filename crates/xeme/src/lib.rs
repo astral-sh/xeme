@@ -2890,6 +2890,7 @@ impl Parser {
             return self.parse_prolog_literal();
         }
         let mut limit = self.source().converted_text_limit();
+        let mut before_prolog_literal = false;
         if !self.seen_root && !self.fragment {
             // Whitespace is a separate prolog token before a quoted literal.
             // Emit its default callback before diagnosing the following token.
@@ -2902,10 +2903,14 @@ impl Parser {
                 && matches!(remaining.as_bytes().get(whitespace_end), Some(b'\'' | b'"'))
             {
                 limit = limit.min(whitespace_end);
+                before_prolog_literal = limit == whitespace_end;
             }
         }
         let text = &self.source().remaining()[..limit];
-        let final_text = self.is_source_final() && limit == self.source().remaining().len();
+        // A known quote terminates this whitespace token. A preceding CR cannot
+        // acquire a following LF, so withholding it would stall even final input.
+        let final_text = before_prolog_literal
+            || (self.is_source_final() && limit == self.source().remaining().len());
         let coalesce = !self.stack.is_empty() || self.fragment;
         let text_plan = (coalesce
             && !self.fragment

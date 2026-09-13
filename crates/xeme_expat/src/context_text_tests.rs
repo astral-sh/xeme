@@ -725,3 +725,293 @@ fn context_input_allocation_failures_preserve_sticky_errors_and_owners() {
         }
     }
 }
+
+#[derive(Default)]
+struct CommentState {
+    parser: XML_Parser,
+    comments: Vec<String>,
+    raw: Vec<u8>,
+    positions: Vec<(c_long, c_ulong, c_ulong)>,
+    switch_handlers: bool,
+}
+
+unsafe extern "C" fn capture_comment(data: *mut c_void, text: *const c_char) {
+    // SAFETY: The test state and terminated callback text remain live for this call.
+    unsafe {
+        let state = data.cast::<CommentState>();
+        (*state)
+            .comments
+            .push(CStr::from_ptr(text).to_str().unwrap().to_owned());
+        let parser = (*state).parser;
+        (*state).positions.push((
+            XML_GetCurrentByteIndex(parser),
+            XML_GetCurrentLineNumber(parser),
+            XML_GetCurrentColumnNumber(parser),
+        ));
+    }
+}
+
+unsafe extern "C" fn capture_comment_default(data: *mut c_void, text: *const c_char, len: c_int) {
+    // SAFETY: Only the requested callback bytes are copied into the live test state.
+    unsafe {
+        (*data.cast::<CommentState>())
+            .raw
+            .extend_from_slice(std::slice::from_raw_parts(text.cast(), len as usize));
+    }
+}
+
+unsafe extern "C" fn comment_switch(
+    data: *mut c_void,
+    name: *const c_char,
+    _: *const *const c_char,
+) {
+    // SAFETY: No state borrow crosses a callback-time handler update or stop request.
+    unsafe {
+        let state = data.cast::<CommentState>();
+        let parser = (*state).parser;
+        (*state).positions.push((
+            XML_GetCurrentByteIndex(parser),
+            XML_GetCurrentLineNumber(parser),
+            XML_GetCurrentColumnNumber(parser),
+        ));
+        if (*state).switch_handlers {
+            match CStr::from_ptr(name).to_bytes() {
+                b"on" => XML_SetCommentHandler(parser, Some(capture_comment)),
+                b"default" => {
+                    XML_SetCommentHandler(parser, None);
+                    XML_SetDefaultHandlerExpand(parser, Some(capture_comment_default));
+                }
+                b"off" => XML_SetDefaultHandler(parser, None),
+                b"suspend" => {
+                    XML_SetCommentHandler(parser, Some(capture_comment));
+                    assert_eq!(XML_StopParser(parser, 1), OK);
+                }
+                _ => {}
+            }
+        }
+    }
+}
+
+#[test]
+fn ignored_comments_preserve_split_encoding_errors_and_positions() {
+    // Compare the optimized C path with the existing owned-comment path while
+    // recording only the same element callbacks and every post-feed position.
+    for xml in [
+        "<!--é\r\n--><r><!--inside\r--><n/></r><!--tail-->",
+        "<r><!--bad--comment--></r>",
+        "<r><!--bad---></r>",
+        "<r><!--bad\u{1}--></r>",
+        "<r><!--unfinished",
+        "<!--ok--><?xml version='1.0'?><r/>",
+        "<!DOCTYPE r [<!ENTITY e '<!--entity--><n/>'>]><r>&e;</r>",
+    ] {
+        for utf16 in [false, true] {
+            let bytes = if utf16 {
+                [0xff, 0xfe]
+                    .into_iter()
+                    .chain(xml.encode_utf16().flat_map(u16::to_le_bytes))
+                    .collect::<Vec<_>>()
+            } else {
+                xml.as_bytes().to_vec()
+            };
+            for width in [1, 7, bytes.len()] {
+                let mut outcomes = Vec::new();
+                for optimized in [false, true] {
+                    // SAFETY: Test buffers and state outlive the parser and all callbacks.
+                    unsafe {
+                        let parser = XML_ParserCreate(ptr::null());
+                        assert!(!parser.is_null());
+                        (*parser).core.set_comment_handler_enabled(!optimized);
+                        let mut state = CommentState {
+                            parser,
+                            ..CommentState::default()
+                        };
+                        XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                        XML_SetStartElementHandler(parser, Some(comment_switch));
+                        let mut results = Vec::new();
+                        for (index, chunk) in bytes.chunks(width).enumerate() {
+                            let result =
+                                parse(parser, chunk, (index + 1) * width >= bytes.len(), false);
+                            results.push((
+                                result,
+                                XML_GetErrorCode(parser),
+                                XML_GetCurrentByteIndex(parser),
+                                XML_GetCurrentLineNumber(parser),
+                                XML_GetCurrentColumnNumber(parser),
+                            ));
+                            if result == ERROR {
+                                break;
+                            }
+                        }
+                        outcomes.push((results, state.positions));
+                        XML_ParserFree(parser);
+                    }
+                }
+                assert_eq!(
+                    outcomes[0], outcomes[1],
+                    "{xml:?}, utf16={utf16}, width={width}"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn comment_interest_tracks_callbacks_partial_tokens_suspension_children_and_reset() {
+    // SAFETY: All parser handles, input slices and callback state are test-owned.
+    unsafe {
+        for width in [1, 13, 1024] {
+            let parser = XML_ParserCreate(ptr::null());
+            assert!(!parser.is_null());
+            let mut state = CommentState {
+                parser,
+                switch_handlers: true,
+                ..CommentState::default()
+            };
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+            XML_SetStartElementHandler(parser, Some(comment_switch));
+            assert_eq!(parse(parser, b"<!--partial", false, false), OK);
+            XML_SetCommentHandler(parser, Some(capture_comment));
+            let input = "--><r><on/><!--seen\r\né--><default/><!--raw\r\n--><off/><!--ignored--><suspend/><!--resumed--></r>";
+            for (index, chunk) in input.as_bytes().chunks(width).enumerate() {
+                let result = parse(parser, chunk, (index + 1) * width >= input.len(), false);
+                if result == SUSPENDED {
+                    assert_eq!(XML_ResumeParser(parser), OK);
+                } else {
+                    assert_eq!(result, OK);
+                }
+            }
+            assert_eq!(state.comments, ["partial", "seen\né", "resumed"]);
+            assert_eq!(state.raw, b"<!--raw\r\n-->");
+            let child = XML_ExternalEntityParserCreate(parser, c"".as_ptr(), ptr::null());
+            assert!(!child.is_null());
+            assert_eq!(parse(child, b"<!--inherited-->", true, false), OK);
+            assert_eq!(state.comments.last().unwrap(), "inherited");
+            XML_ParserFree(child);
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            let calls = state.comments.len();
+            assert_eq!(parse(parser, b"<!--reset--><r/>", true, false), OK);
+            assert_eq!(state.comments.len(), calls);
+            XML_ParserFree(parser);
+        }
+    }
+}
+
+#[test]
+fn ignored_comment_allocation_failures_keep_error_contracts_and_cleanup() {
+    let input = format!("<!--{}\r\n--><n/></r>", "é".repeat(128));
+    let mut request_counts = Vec::new();
+    // SAFETY: This module's tracked Rust allocator retains failed realloc owners;
+    // no parser reference crosses the synchronous callbacks.
+    unsafe {
+        for handlers in 0..3 {
+            let mut requests = 0;
+            for fail_at in 0..=128 {
+                if fail_at != 0 && fail_at > requests {
+                    break;
+                }
+                let parser = make_parser();
+                assert_eq!(parse(parser, b"<r>", false, false), OK);
+                let mut state = CommentState {
+                    parser,
+                    ..CommentState::default()
+                };
+                XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                match handlers {
+                    1 => XML_SetCommentHandler(parser, Some(capture_comment)),
+                    2 => XML_SetDefaultHandler(parser, Some(capture_comment_default)),
+                    _ => {}
+                }
+                clear_requests(fail_at);
+                let result = parse(parser, input.as_bytes(), true, false);
+                if fail_at == 0 {
+                    requests = REQUESTS.with(|calls| calls.borrow().len());
+                    assert!(requests <= 128);
+                    request_counts.push(requests);
+                    assert_eq!(result, OK);
+                    if handlers == 1 {
+                        assert_eq!(state.comments, [format!("{}\n", "é".repeat(128))]);
+                    }
+                    if handlers == 2 {
+                        assert_eq!(state.raw, input.as_bytes());
+                    }
+                } else {
+                    assert_eq!(result, ERROR, "handlers={handlers}, failure={fail_at}");
+                    assert_eq!(XML_GetErrorCode(parser), 1);
+                    let calls = state.comments.len();
+                    XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                    assert_eq!(XML_Parse(parser, ptr::null(), 0, 1), ERROR);
+                    assert_eq!(XML_GetErrorCode(parser), 1);
+                    assert_eq!(state.comments.len(), calls);
+                }
+                clear_requests(0);
+                XML_ParserFree(parser);
+                assert_eq!(LIVE.get(), 0);
+            }
+        }
+    }
+    assert!(request_counts[0] < request_counts[1]);
+    assert!(request_counts[0] < request_counts[2]);
+}
+
+#[test]
+fn comment_handlers_keep_prefixes_before_entity_limit_errors() {
+    // SAFETY: The parsers and callback states remain live until all synchronous
+    // parsing and user-configured amplification-limit checks have completed.
+    unsafe {
+        for default in [false, true] {
+            let parser = XML_ParserCreate(ptr::null());
+            assert!(!parser.is_null());
+            let mut state = CommentState {
+                parser,
+                ..CommentState::default()
+            };
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+            if default {
+                XML_SetDefaultHandlerExpand(parser, Some(capture_comment_default));
+            } else {
+                XML_SetCommentHandler(parser, Some(capture_comment));
+            }
+            assert_eq!(
+                XML_SetBillionLaughsAttackProtectionActivationThreshold(parser, 0),
+                1
+            );
+            assert_eq!(
+                XML_SetBillionLaughsAttackProtectionMaximumAmplification(parser, 1.0),
+                1
+            );
+            let prefix = b"<!DOCTYPE r [<!ENTITY e '<!--indirect-->'>]><r><!--before-->";
+            assert_eq!(parse(parser, prefix, false, false), OK);
+            if default {
+                assert!(state.raw.ends_with(b"<!--before-->"));
+            } else {
+                assert_eq!(state.comments, ["before"]);
+            }
+            let comments = state.comments.clone();
+            let raw = state.raw.clone();
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+            assert_eq!(parse(parser, b"&e;</r>", true, false), ERROR);
+            assert_eq!(XML_GetErrorCode(parser), 43);
+            assert_eq!(state.comments, comments);
+            assert_eq!(state.raw, raw);
+            XML_ParserFree(parser);
+        }
+    }
+}
+
+#[test]
+fn ignored_comments_release_previous_native_context_ranges() {
+    // SAFETY: The test owns the parser and only inspects core storage between calls.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        assert!(!parser.is_null());
+        assert_eq!(parse(parser, b"<r>", false, false), OK);
+        let comment = format!("<!--{}-->", "x".repeat(2048));
+        for _ in 0..32 {
+            assert_eq!(parse(parser, comment.as_bytes(), false, false), OK);
+            assert!((*parser).core.input_context().0.len() <= comment.len() + 1024);
+        }
+        assert_eq!(parse(parser, b"</r>", true, false), OK);
+        XML_ParserFree(parser);
+    }
+}

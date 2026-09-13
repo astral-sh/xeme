@@ -170,3 +170,19 @@ fn caller_slots_clear_on_wait_error_and_unknown_encoding_retry() {
     assert_eq!(name, "retained");
     assert_eq!(attributes[0].value, "original");
 }
+
+#[test]
+fn c_comment_interest_does_not_filter_safe_rust_events() {
+    let mut parser = Parser::new(Config::default());
+    parser.set_comment_handler_enabled(false);
+    parser
+        .feed(b"<!--before--><r><!--inside--></r>", true)
+        .unwrap();
+    let mut comments = Vec::new();
+    while let Some(event) = parser.next_event().unwrap() {
+        if let EventKind::Comment(text) = event.kind {
+            comments.push(text.to_string());
+        }
+    }
+    assert_eq!(comments, ["before", "inside"]);
+}

@@ -329,6 +329,7 @@ unsafe fn create(
             core.enable_input_context();
             core.set_notation_handler_enabled(false);
             core.set_attlist_handler_enabled(false);
+            core.set_comment_handler_enabled(false);
             core.set_text_line_boundaries(true);
             let position = core.position();
             let family = Shared::try_new_in(FamilyBudget::default(), allocator)?;
@@ -563,6 +564,7 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                 (*parser).lifetime = lifetime;
                 core.set_notation_handler_enabled(false);
                 core.set_attlist_handler_enabled(false);
+                core.set_comment_handler_enabled(false);
                 core.set_text_line_boundaries(true);
                 (*parser).core = core;
                 (*parser).position = (*parser).core.position();
@@ -1916,7 +1918,12 @@ setter!(XML_SetStartElementHandler, start_element, StartElement);
 setter!(XML_SetEndElementHandler, end_element, StringHandler);
 setter!(XML_SetCharacterDataHandler, text, TextHandler);
 setter!(XML_SetProcessingInstructionHandler, pi, PairHandler);
-setter!(XML_SetCommentHandler, comment, StringHandler);
+setter!(
+    XML_SetCommentHandler,
+    comment,
+    StringHandler,
+    set_comment_handler_enabled
+);
 setter!(XML_SetStartCdataSectionHandler, start_cdata, VoidHandler);
 setter!(XML_SetEndCdataSectionHandler, end_cdata, VoidHandler);
 setter!(XML_SetXmlDeclHandler, xml_decl, XmlDecl);

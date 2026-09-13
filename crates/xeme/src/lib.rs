@@ -722,6 +722,7 @@ pub struct Parser {
     expand_internal_entities: bool,
     default_events: bool,
     text_line_boundaries: bool,
+    comment_handler_enabled: bool,
     notation_handler_enabled: bool,
     attlist_handler_enabled: bool,
     decoding_error: Option<(ErrorKind, &'static str)>,
@@ -906,6 +907,7 @@ impl Parser {
             expand_internal_entities: true,
             default_events: false,
             text_line_boundaries: false,
+            comment_handler_enabled: true,
             notation_handler_enabled: true,
             attlist_handler_enabled: true,
             decoding_error: None,
@@ -1179,6 +1181,7 @@ impl Parser {
         child.default_events = self.default_events;
         child.text_line_boundaries = self.text_line_boundaries;
         child.notation_handler_enabled = self.notation_handler_enabled;
+        child.comment_handler_enabled = self.comment_handler_enabled;
         child.attlist_handler_enabled = self.attlist_handler_enabled;
         child.parameter_mode = self.parameter_mode;
         child.has_external_subset = self.has_external_subset;
@@ -2275,6 +2278,13 @@ impl Parser {
         self.text_line_boundaries = enabled;
     }
 
+    /// Update the C adapter's comment-handler availability. Ordinary Rust event
+    /// consumers always retain comments; default handlers also require delivery.
+    #[doc(hidden)]
+    pub fn set_comment_handler_enabled(&mut self, enabled: bool) {
+        self.comment_handler_enabled = enabled;
+    }
+
     /// Update a foreign interface's notation-handler availability. Safe event
     /// consumers leave this enabled. A continuation captures this preference
     /// when it reads the notation name, matching Expat's callback prerequisites.
@@ -2788,6 +2798,31 @@ impl Parser {
             }
             self.account_source(end)?;
             let position = self.source().position(end);
+            if mode == ScanMode::Comment
+                && output.c_text_context
+                && !self.comment_handler_enabled
+                && !self.default_events
+                && !self.source().has_conversions()
+            {
+                let token = &self.source().remaining()[..end];
+                let text = &token[4..token.len() - 3];
+                // Unobserved comments still require complete lexical validation
+                // and source accounting. Invalid tokens keep ordinary error/raw
+                // publication, and custom lexical conversions keep owned decoding.
+                if invalid_xml_char(token).is_none() && !text.contains("--") && !text.ends_with('-')
+                {
+                    self.declaration_allowed = false;
+                    // The previous callback's raw range must not pin consumed
+                    // input across a stream containing only ignored comments.
+                    self.native_raw = None;
+                    self.current_raw.clear();
+                    self.consume(end)?;
+                    self.last_position = position;
+                    // No callback payload is created, so the C adapter has no
+                    // callback-work charge for this otherwise unobserved token.
+                    continue;
+                }
+            }
             if matched_end.is_some()
                 && output.c_text_context
                 && self.input_context.is_some()

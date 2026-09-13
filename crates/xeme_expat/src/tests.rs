@@ -2302,6 +2302,100 @@ fn arena_start_enforces_exact_callback_budget_with_default_fallback() {
 }
 
 #[test]
+fn empty_element_default_fallback_respects_either_element_handler() {
+    unsafe extern "C" fn element_start(
+        data: *mut c_void,
+        name: *const c_char,
+        _: *const *const c_char,
+    ) {
+        // SAFETY: The test owns the callback state and Expat lends the name.
+        unsafe {
+            (*data.cast::<State>())
+                .events
+                .push(format!("start:{}", CStr::from_ptr(name).to_str().unwrap()));
+        }
+    }
+    for xml in ["<r/>", "<r a='&amp;'/>", "<r xmlns:p='u'/>", "<r></r>"] {
+        for utf16 in [false, true] {
+            let bytes = if utf16 {
+                [0xff, 0xfe]
+                    .into_iter()
+                    .chain(xml.encode_utf16().flat_map(u16::to_le_bytes))
+                    .collect::<Vec<_>>()
+            } else {
+                xml.as_bytes().to_vec()
+            };
+            for width in [1, bytes.len()] {
+                for buffered in [false, true] {
+                    for expand in [false, true] {
+                        for handlers in 0..4 {
+                            // SAFETY: State, parser, callback arguments and input
+                            // remain live through every synchronous parse call.
+                            unsafe {
+                                let parser = XML_ParserCreateNS(ptr::null(), b'|' as c_char);
+                                assert!(!parser.is_null());
+                                let mut state = State::default();
+                                XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                                XML_SetElementHandler(
+                                    parser,
+                                    (handlers & 1 != 0).then_some(element_start),
+                                    (handlers & 2 != 0).then_some(end),
+                                );
+                                if expand {
+                                    XML_SetDefaultHandlerExpand(parser, Some(text));
+                                } else {
+                                    XML_SetDefaultHandler(parser, Some(text));
+                                }
+                                let mut chunks = bytes.chunks(width).peekable();
+                                while let Some(chunk) = chunks.next() {
+                                    let final_input = c_int::from(chunks.peek().is_none());
+                                    let status = if buffered {
+                                        let buffer = XML_GetBuffer(parser, chunk.len() as c_int);
+                                        assert!(!buffer.is_null());
+                                        ptr::copy_nonoverlapping(
+                                            chunk.as_ptr(),
+                                            buffer.cast(),
+                                            chunk.len(),
+                                        );
+                                        XML_ParseBuffer(parser, chunk.len() as c_int, final_input)
+                                    } else {
+                                        XML_Parse(
+                                            parser,
+                                            chunk.as_ptr().cast(),
+                                            chunk.len() as c_int,
+                                            final_input,
+                                        )
+                                    };
+                                    assert_eq!(status, OK);
+                                }
+                                let mut expected = Vec::new();
+                                if handlers & 1 != 0 {
+                                    expected.push("start:r".to_owned());
+                                } else if !xml.ends_with("/>") {
+                                    expected.push("text:<r>".to_owned());
+                                } else if handlers & 2 == 0 {
+                                    expected.push(format!("text:{xml}"));
+                                }
+                                if handlers & 2 != 0 {
+                                    expected.push("end:r".to_owned());
+                                } else if !xml.ends_with("/>") {
+                                    expected.push("text:</r>".to_owned());
+                                }
+                                assert_eq!(
+                                    state.events, expected,
+                                    "{xml}, handlers={handlers}, utf16={utf16}, width={width}, buffered={buffered}, expand={expand}"
+                                );
+                                XML_ParserFree(parser);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn detached_end_charges_the_name_before_handlers_or_default_fallback() {
     for end_handler in [false, true] {
         for default_handler in [false, true] {

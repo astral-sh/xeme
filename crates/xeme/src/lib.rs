@@ -1611,17 +1611,7 @@ impl Parser {
         self.mark_parameter_read();
         self.error = None;
         self.decoding_error = None;
-        let declaration_context = self.declaration_context();
-        if let Err(error) = self.decoder.feed(
-            &[],
-            self.final_input,
-            &mut self.sources[0],
-            self.config.limits.max_token_bytes,
-            self.fragment && !self.external_subset,
-            declaration_context,
-        ) {
-            self.decoding_error = Some((error.kind, error.message));
-        }
+        self.resume_decoder();
         Ok(())
     }
 
@@ -1654,6 +1644,13 @@ impl Parser {
             self.error = Some(error);
             return Err(error);
         }
+        self.resume_decoder();
+        Ok(())
+    }
+
+    /// Resume buffered input after a custom encoding map or conversion is supplied.
+    /// Stage decoding errors so preceding XML events can still be delivered first.
+    fn resume_decoder(&mut self) {
         let declaration_context = self.declaration_context();
         if let Err(error) = self.decoder.feed(
             &[],
@@ -1665,7 +1662,6 @@ impl Parser {
         ) {
             self.decoding_error = Some((error.kind, error.message));
         }
-        Ok(())
     }
 
     /// Return an owned event and a token for an adapter that returns its storage.
@@ -1867,13 +1863,14 @@ impl Parser {
     }
 
     /// Apply decoder precedence and preserve queued or published error prefixes.
+    /// Success delivers a valid prefix before the recorded error is returned.
+    /// Allocation failures discard that prefix and return immediately.
     fn finish_event_error(
         &mut self,
-        error: Error,
+        mut error: Error,
         output: &mut EventOutput<'_>,
     ) -> Result<(), Error> {
-        let mut result = Err(error);
-        if let (Err(error), Some((kind, message))) = (&result, self.decoding_error)
+        if let Some((kind, message)) = self.decoding_error
             && matches!(
                 error.kind,
                 ErrorKind::UnclosedToken
@@ -1888,7 +1885,7 @@ impl Parser {
             } else {
                 (kind, message)
             };
-            result = Err(Error {
+            error = Error {
                 kind,
                 message,
                 position: if matches!(
@@ -1901,59 +1898,58 @@ impl Parser {
                 } else {
                     source.end_position()
                 },
-            });
+            };
         }
-        if let Err(error) = &result {
-            // Ordinary character data publishes before consume. Preserve that
-            // prefix on a subsequent accounting error, as the pending queue did.
-            // CDATA and start frames publish only after their fallible work.
-            let text_prefix = error.kind != ErrorKind::NoMemory
-                && output.frame.as_ref().is_some_and(|frame| frame.is_text());
-            if !text_prefix {
-                output.clear_frame();
-            }
-            self.error = Some(*error);
-            // Unknown encodings can be installed after an error and resume
-            // parsing. Other terminal failures no longer need copied names;
-            // source bytes remain available for diagnostics and child context.
-            if error.kind == ErrorKind::NoMemory
-                || self
-                    .decoding_error
-                    .is_none_or(|(kind, _)| kind != ErrorKind::UnknownEncoding)
-            {
-                self.active_entities.names.clear();
-            }
-            if error.kind == ErrorKind::NoMemory {
-                self.pending.clear();
-                return result;
-            }
-            let cleanup = (|| -> Result<(), Error> {
-                let mut prefixes = Vec::new_in(self.allocator);
-                for event in self.pending.iter() {
-                    if let EventKind::StartNamespace { prefix, .. } = &event.event.kind {
-                        try_push(&mut prefixes, prefix.try_clone()?)?;
-                    }
-                }
-                for prefix in prefixes.into_iter().rev() {
-                    self.emit(EventKind::EndNamespace { prefix }, error.position)?;
-                }
-                Ok(())
-            })();
-            if let Err(error) = cleanup {
-                output.clear_frame();
-                self.error = Some(error);
-                self.pending.clear();
-                return Err(error);
-            }
-            if text_prefix {
-                debug_assert!(self.pending.is_empty());
-                result = Ok(());
-            } else if let Some(event) = self.pop_event() {
-                *output.event = Some(event);
-                result = Ok(());
-            }
+        // Ordinary character data publishes before consume. Preserve that
+        // prefix on a subsequent accounting error, as the pending queue did.
+        // CDATA and start frames publish only after their fallible work.
+        let text_prefix = error.kind != ErrorKind::NoMemory
+            && output.frame.as_ref().is_some_and(|frame| frame.is_text());
+        if !text_prefix {
+            output.clear_frame();
         }
-        result
+        self.error = Some(error);
+        // Unknown encodings can be installed after an error and resume
+        // parsing. Other terminal failures no longer need copied names;
+        // source bytes remain available for diagnostics and child context.
+        if error.kind == ErrorKind::NoMemory
+            || self
+                .decoding_error
+                .is_none_or(|(kind, _)| kind != ErrorKind::UnknownEncoding)
+        {
+            self.active_entities.names.clear();
+        }
+        if error.kind == ErrorKind::NoMemory {
+            self.pending.clear();
+            return Err(error);
+        }
+        let cleanup = (|| -> Result<(), Error> {
+            let mut prefixes = Vec::new_in(self.allocator);
+            for event in self.pending.iter() {
+                if let EventKind::StartNamespace { prefix, .. } = &event.event.kind {
+                    try_push(&mut prefixes, prefix.try_clone()?)?;
+                }
+            }
+            for prefix in prefixes.into_iter().rev() {
+                self.emit(EventKind::EndNamespace { prefix }, error.position)?;
+            }
+            Ok(())
+        })();
+        if let Err(error) = cleanup {
+            output.clear_frame();
+            self.error = Some(error);
+            self.pending.clear();
+            return Err(error);
+        }
+        if text_prefix {
+            debug_assert!(self.pending.is_empty());
+            Ok(())
+        } else if let Some(event) = self.pop_event() {
+            *output.event = Some(event);
+            Ok(())
+        } else {
+            Err(error)
+        }
     }
 
     #[must_use]

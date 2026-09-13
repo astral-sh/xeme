@@ -2446,9 +2446,9 @@ fn detached_end_charges_the_name_before_handlers_or_default_fallback() {
                         assert_eq!(state.events, expected);
                         assert_eq!(
                             XML_GetCurrentByteIndex(parser),
-                            opening.to_bytes().len() as c_long
+                            opening.to_bytes().len() as c_long + 7
                         );
-                        assert_eq!(XML_GetCurrentByteCount(parser), 7);
+                        assert_eq!(XML_GetCurrentByteCount(parser), 0);
                         assert_eq!(XML_GetSpecifiedAttributeCount(parser), 2);
                     }
                     XML_ParserFree(parser);

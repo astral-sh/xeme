@@ -1,9 +1,0 @@
-{
-  "status": "passed",
-  "archive_sha256": "73579260ee1df28286ea2561deb10a3cc0edfd17a34d02e16207b28c6c4d02b7",
-  "uncompressed_tar_sha256": "da9f0f2528ccf5ba6282761240f3abccd661644dc0fc5e7695ca5bf18894ac18",
-  "archive_members_rehashed": 72087,
-  "source_files": 326,
-  "selected_pins": 72,
-  "scope": "Root separately verifies every outer file, exact uncompressed tar identity, all indexed member bytes, selected-source pins and summary totals. The companion publication-audit.json also reconstructs all corpus placements and checks physical origins."
-}

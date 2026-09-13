@@ -1,1 +1,0 @@
-{"status": "passed", "receipt": "/tmp/oriole-cdata-prefilter-publication/root-readback.json", "sha256": "32a87b596fad3a4d68d0eaba673445071dabce7e9cb9f8ef0fc5b44974c5de03", "objects": 165, "aliases": 1344, "native_totals": {"workers": 1344, "samples": 212352}}

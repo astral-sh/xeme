@@ -1,9 +1,0 @@
-{
-  "scope": "Documentation and immutable archive identity; no runtime rerun",
-  "archive_sha256": "467a3b793cc1c08489cd718693bbb77b6c83e399e802a0a38fd460455acf3869",
-  "archive_members": 20,
-  "totals_verified": true,
-  "readme_sections_match_toucan": true,
-  "license_section_exact_after_project_name_substitution": true,
-  "license_files_byte_identical": true
-}

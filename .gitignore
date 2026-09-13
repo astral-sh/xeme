@@ -5,3 +5,12 @@
 /fuzz/target/
 /fuzz/artifacts/
 /.cache/
+
+# Local validation and benchmark output.
+/docs/validation/
+/benchmarks/results/
+/fuzz/results/
+/tools/upstream-expat/results/
+/integration/python-build-standalone/consumer-fix/results/
+/integration/python-build-standalone/validation.json
+/integration/python-build-standalone/consumer-fix/validation.json

@@ -1,9 +1,0 @@
-{
-  "base": "64a270e58f14a4b74e25ffcf25f7832a5216b2d1",
-  "patch_from": "/home/dev-user/code/oss/oriole-matching-end-tags",
-  "patch_sha256": "5c0248f9fccfc1ff6d67fe672f9c9a0d4d1ee33d423a87ff3dde2259f14eeef7",
-  "changed_files": [
-    "crates/oriole/src/lib.rs"
-  ],
-  "coalesced_text_selector_retained": true
-}

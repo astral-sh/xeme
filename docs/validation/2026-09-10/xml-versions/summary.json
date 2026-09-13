@@ -1,8 +1,0 @@
-{
-  "cases": 360,
-  "baseline_outcome_differences": 234,
-  "candidate_outcome_differences": 174,
-  "newly_matching": 60,
-  "regressions": 0,
-  "candidate_library_sha256": "28c99a9520689339588cde62a83235cd7b5c9270beb1321e710214667e935d07"
-}

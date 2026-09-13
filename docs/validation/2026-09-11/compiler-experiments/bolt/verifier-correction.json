@@ -1,6 +1,0 @@
-{
-  "change": "Require exact known original saved auditor SHA256 before executing its I/O-adapted source. Numerical assertions unchanged.",
-  "old_sha256": "82fe394890b930deda767892a61db707cfe0e7d629c8438132b2ce95adbceabd",
-  "new_sha256": "f642d6a7ae124cb70f3a7676e6a5c8451f56c2da40bfac44e56547f54a864768",
-  "archive_unchanged": true
-}

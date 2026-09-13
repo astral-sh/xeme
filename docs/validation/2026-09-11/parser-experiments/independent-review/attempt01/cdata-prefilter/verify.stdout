@@ -1,1 +1,0 @@
-{"status": "passed", "receipt": "/tmp/oriole-parser-experiments-package-review/attempt01/cdata-prefilter/relocated-readback.json", "sha256": "7d5c9ee2cd202527db2ab9754e9ffdbd6bbaebd7a244ad12474d494d7a4093da", "objects": 165, "aliases": 1344, "native_totals": {"workers": 1344, "samples": 212352}}

@@ -1,9 +1,0 @@
-{
-  "base_git": "4b11ace3d89fe6b7bf66ca55290eb23444f11de2",
-  "source_sha256": {
-    "tools/cpython/run.py": "c682b96574c4cf34873899514873bf13947449a7adb35de404c8b73e96ec7fda",
-    "tools/cpython/extension_loader.py": "2116f8972094890d54dbe5fd915ed7eb8619f716ce0dd4e7ff63acf15ef4c5f3",
-    "tools/cpython/check_extension_imports.py": "473e00f55f8bc92a69645df109438da1cf8cdb3f7e1ce08c8fdf7d055b14c3d5",
-    "tools/cpython/README.md": "f8ccf6df89919b67ca39a94823e61bc6597f9001bd57f66382c4d3b387ee3cb6"
-  }
-}

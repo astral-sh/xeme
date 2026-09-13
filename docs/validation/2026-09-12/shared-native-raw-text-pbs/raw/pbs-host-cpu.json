@@ -1,5 +1,0 @@
-{
-  "pbs_target": "x86_64-unknown-linux-gnu",
-  "target_cpu": null,
-  "check": "generic native host"
-}

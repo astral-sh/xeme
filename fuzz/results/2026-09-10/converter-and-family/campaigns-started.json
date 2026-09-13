@@ -1,9 +1,0 @@
-{
-  "seed": 20260910,
-  "seconds_per_target": 600,
-  "cpu_affinity": {
-    "ffi_family": 1,
-    "multibyte": 2
-  },
-  "asan_options": "detect_leaks=0"
-}

@@ -284,6 +284,62 @@ unsafe fn configured(state: &mut State) -> XML_Parser {
 }
 
 #[test]
+fn prolog_cr_quote_finalization_reports_the_error_after_default_whitespace() {
+    // SAFETY: Test-owned input and callback state outlive all synchronous calls.
+    unsafe {
+        for input in [b"\r'", b"\r\""] {
+            for width in 1..=input.len() {
+                for buffered in [false, true] {
+                    for empty_final in [false, true] {
+                        for deferral in [0, 1] {
+                            let mut state = State::default();
+                            let parser = configured(&mut state);
+                            XML_SetDefaultHandler(parser, Some(text));
+                            assert_eq!(XML_SetReparseDeferralEnabled(parser, deferral), 1);
+                            let mut status = OK;
+                            for (index, chunk) in input.chunks(width).enumerate() {
+                                let final_input =
+                                    c_int::from(!empty_final && (index + 1) * width >= input.len());
+                                status = if buffered {
+                                    let buffer = XML_GetBuffer(parser, chunk.len() as c_int);
+                                    assert!(!buffer.is_null());
+                                    ptr::copy_nonoverlapping(
+                                        chunk.as_ptr(),
+                                        buffer.cast(),
+                                        chunk.len(),
+                                    );
+                                    XML_ParseBuffer(parser, chunk.len() as c_int, final_input)
+                                } else {
+                                    XML_Parse(
+                                        parser,
+                                        chunk.as_ptr().cast(),
+                                        chunk.len() as c_int,
+                                        final_input,
+                                    )
+                                };
+                            }
+                            if empty_final {
+                                assert_eq!(status, OK);
+                                status = XML_Parse(parser, ptr::null(), 0, 1);
+                            }
+                            assert_eq!(status, ERROR);
+                            assert_eq!(XML_GetErrorCode(parser), 5);
+                            assert_eq!(XML_GetCurrentByteIndex(parser), 1);
+                            assert_eq!(XML_GetCurrentLineNumber(parser), 2);
+                            assert_eq!(XML_GetCurrentColumnNumber(parser), 0);
+                            assert_eq!(XML_Parse(parser, ptr::null(), 0, 1), ERROR);
+                            assert_eq!(XML_GetErrorCode(parser), 5);
+                            assert_eq!(state.events, ["text:\r"]);
+                            XML_ParserFree(parser);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn streaming_callbacks_and_user_data_layout() {
     // SAFETY: All handles, strings, callback data, and buffers are test-owned.
     unsafe {

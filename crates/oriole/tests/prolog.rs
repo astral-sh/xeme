@@ -1,13 +1,26 @@
 use oriole::{Config, Error, ErrorKind, EventKind, Parser};
 
 fn parse(xml: &[u8], width: usize, deferral: bool) -> (Error, String) {
+    parse_finalization(xml, width, deferral, false)
+}
+
+fn parse_finalization(
+    xml: &[u8],
+    width: usize,
+    deferral: bool,
+    empty_final: bool,
+) -> (Error, String) {
     let mut parser = Parser::new(Config::default());
     parser.set_reparse_deferral_enabled(deferral);
     let mut text = String::new();
     let chunks = xml.chunks(width);
     let count = chunks.len();
-    for (index, chunk) in chunks.enumerate() {
-        if let Err(error) = parser.feed(chunk, index + 1 == count) {
+    let feeds = chunks
+        .enumerate()
+        .map(|(index, chunk)| (chunk, !empty_final && index + 1 == count))
+        .chain(empty_final.then_some((&[][..], true)));
+    for (chunk, final_input) in feeds {
+        if let Err(error) = parser.feed(chunk, final_input) {
             return (error, text);
         }
         loop {
@@ -23,6 +36,40 @@ fn parse(xml: &[u8], width: usize, deferral: bool) -> (Error, String) {
         }
     }
     panic!("invalid XML unexpectedly parsed");
+}
+
+#[test]
+fn prolog_carriage_return_before_quote_does_not_hide_final_errors() {
+    for (xml, kind, offset) in [
+        ("\r'", ErrorKind::UnclosedToken, 1),
+        ("\r\"", ErrorKind::UnclosedToken, 1),
+        ("\u{feff}\r'", ErrorKind::UnclosedToken, 4),
+        (" \t\r'", ErrorKind::UnclosedToken, 3),
+        ("\r\r'", ErrorKind::UnclosedToken, 2),
+        ("\r\n'", ErrorKind::UnclosedToken, 2),
+        ("\n'", ErrorKind::UnclosedToken, 1),
+        ("\r'<r ", ErrorKind::UnclosedToken, 1),
+        ("\r'</r", ErrorKind::UnclosedToken, 1),
+        ("\r'\u{1}</r", ErrorKind::InvalidToken, 2),
+        ("\r''", ErrorKind::Syntax, 1),
+        ("\r'' ", ErrorKind::Syntax, 1),
+        ("\r'é'x", ErrorKind::InvalidToken, 5),
+        ("\r<r ", ErrorKind::UnclosedToken, 1),
+        ("\r</r", ErrorKind::UnclosedToken, 1),
+        ("\r</1", ErrorKind::InvalidToken, 3),
+    ] {
+        for deferral in [false, true] {
+            for width in 1..=xml.len() {
+                for empty_final in [false, true] {
+                    let (error, text) =
+                        parse_finalization(xml.as_bytes(), width, deferral, empty_final);
+                    assert_eq!(error.kind, kind, "{xml:?}, {width}, {empty_final}");
+                    assert_eq!(error.position.byte_index, offset, "{xml:?}");
+                    assert!(text.is_empty());
+                }
+            }
+        }
+    }
 }
 
 #[test]

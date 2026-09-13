@@ -2410,11 +2410,7 @@ pub unsafe extern "C" fn XML_ExternalEntityParserCreate(
                         final_buffer: false,
                         position,
                         specified_attributes: 0,
-                        base: (*parser)
-                            .base
-                            .as_ref()
-                            .map(CString::try_clone)
-                            .transpose()?,
+                        base: None,
                         buffer: XmlVec::new_in(allocator),
                         buffer_available: false,
                         input_context_active: false,

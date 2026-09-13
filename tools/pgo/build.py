@@ -4,7 +4,7 @@
 # [tool.uv]
 # no-build = true
 # ///
-"""Build Oriole with a fresh, generated-input PGO profile (offline, opt-in)."""
+"""Build Xeme with a fresh, generated-input PGO profile (offline, opt-in)."""
 
 from __future__ import annotations
 
@@ -125,9 +125,9 @@ def source_files(source: Path) -> dict[str, str]:
                 for relative, value in files_below(source / name).items()
             }
         )
-    if "crates/oriole_expat/Cargo.toml" not in result:
+    if "crates/xeme_expat/Cargo.toml" not in result:
         raise BuildError(
-            "--source must be an Oriole workspace with crates/oriole_expat"
+            "--source must be an Xeme workspace with crates/xeme_expat"
         )
     return result
 
@@ -469,7 +469,7 @@ def execute(args: argparse.Namespace, run: Run) -> None:
                 "--target",
                 host,
                 "-p",
-                "oriole_expat",
+                "xeme_expat",
                 "--lib",
                 "--crate-type",
                 "cdylib,staticlib",
@@ -489,11 +489,11 @@ def execute(args: argparse.Namespace, run: Run) -> None:
         artifact_directory = run.directory / phase
         artifact_directory.mkdir()
         shared = (
-            "liboriole_expat.dylib"
+            "libxeme_expat.dylib"
             if sys.platform == "darwin"
-            else "liboriole_expat.so"
+            else "libxeme_expat.so"
         )
-        for name in (shared, "liboriole_expat.a"):
+        for name in (shared, "libxeme_expat.a"):
             path = artifact_directory / name
             shutil.copy2(target / host / "release" / name, path)
             libraries[str(path.relative_to(run.directory))] = digest(path)
@@ -503,7 +503,7 @@ def execute(args: argparse.Namespace, run: Run) -> None:
         if phase == "generate":
             if list(raw.iterdir()):
                 raise BuildError("Unexpected raw profiles before training")
-            training_env["LLVM_PROFILE_FILE"] = str(raw / "oriole-%m-%p.profraw")
+            training_env["LLVM_PROFILE_FILE"] = str(raw / "xeme-%m-%p.profraw")
         reports[phase] = train(
             run, artifact_directory / shared, inputs, phase, training_env
         )
@@ -581,7 +581,7 @@ def main() -> int:
         "--source",
         required=True,
         type=Path,
-        help="Oriole workspace; dependencies must be cached",
+        help="Xeme workspace; dependencies must be cached",
     )
     parser.add_argument(
         "--output",

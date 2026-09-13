@@ -43,7 +43,7 @@ def main() -> None:
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     libraries = {
-        "oriole": args.library.resolve(strict=True),
+        "xeme": args.library.resolve(strict=True),
         "expat": args.reference.resolve(strict=True),
     }
     if args.baseline is not None:

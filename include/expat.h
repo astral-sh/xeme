@@ -47,15 +47,15 @@
 #ifndef Expat_INCLUDED
 #  define Expat_INCLUDED 1
 
-/* Oriole implementation version; XML_*_VERSION identifies the API target. */
-#  define ORIOLE_VERSION "0.0.1"
+/* Xeme implementation version; XML_*_VERSION identifies the API target. */
+#  define XEME_VERSION "0.0.1"
 
 #  include <stdint.h> // for uint8_t
 #  include <stdlib.h>
-/* Oriole supports the ordinary, narrow-character Expat ABI. */
+/* Xeme supports the ordinary, narrow-character Expat ABI. */
 #  include <stddef.h>
 #  if defined(XML_UNICODE) || defined(XML_UNICODE_WCHAR_T)
-#    error "Oriole supports only the narrow-character Expat ABI"
+#    error "Xeme supports only the narrow-character Expat ABI"
 #  endif
 #  define XMLCALL
 #  define XMLPARSEAPI(type) type
@@ -64,7 +64,7 @@
 typedef char XML_Char;
 typedef char XML_LChar;
 #  ifdef XML_LARGE_SIZE
-#    error "Oriole does not support XML_LARGE_SIZE"
+#    error "Xeme does not support XML_LARGE_SIZE"
 #  endif
 typedef long XML_Index;
 typedef unsigned long XML_Size;
@@ -265,7 +265,7 @@ XML_ParserCreate(const XML_Char *encoding);
    URI, the namespace separator character, and the local part of the
    name.  If the namespace separator is '\0' then the namespace URI
    and the local part will be concatenated without any separator.
-   Oriole requires an ASCII namespace separator: its C constructors return
+   Xeme requires an ASCII namespace separator: its C constructors return
    NULL for separator bytes 0x80 through 0xff.
    The separator '\0' ignores namespace triplet mode
    (see XML_SetReturnNSTriplet).
@@ -547,7 +547,7 @@ typedef void(XMLCALL *XML_SkippedEntityHandler)(void *userData,
    4. No Unicode character may be encoded by more than one distinct
       sequence of bytes.
 
-   Oriole additionally rejects every multibyte sequence whose convert
+   Xeme additionally rejects every multibyte sequence whose convert
    result is ASCII (less than 0x80), with XML_ERROR_INVALID_TOKEN. ASCII
    characters must use direct single-byte map entries. This prevents
    conversion from changing lexical XML syntax; it is a compatibility
@@ -898,7 +898,7 @@ XML_GetParsingStatus(XML_Parser parser, XML_ParsingStatus *status);
    particular prefix; a token of the form =uri specifies the default
    namespace.  This can be called at any point after the first call to
    an ExternalEntityRefHandler so longer as the parser has not yet
-   been freed.  Oriole requires serialized access to all related parsers,
+   been freed.  Xeme requires serialized access to all related parsers,
    including parsing, resetting, and freeing parent and child handles.
    A parser may be transferred between threads with external synchronization.
    The handlers and userData are
@@ -1042,8 +1042,8 @@ XML_ParserFree(XML_Parser parser);
 XMLPARSEAPI(const XML_LChar *)
 XML_ErrorString(enum XML_Error code);
 
-/* Return the Expat API target as "oriole_compat_M.m.p".
-   ORIOLE_VERSION identifies the Oriole implementation version. */
+/* Return the Expat API target as "xeme_compat_M.m.p".
+   XEME_VERSION identifies the Xeme implementation version. */
 XMLPARSEAPI(const XML_LChar *)
 XML_ExpatVersion(void);
 

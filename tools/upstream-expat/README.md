@@ -2,15 +2,14 @@
 
 `run.py` builds the pinned Expat 2.8.4 test sources against a supplied shared
 library. It preserves public test bodies and records every pass, assertion
-failure, signal, and timeout. Failures remain failures; unsupported Oriole
-capabilities receive no waivers.
+failure, signal, and timeout.
 
 ```sh
 python3 tools/upstream-expat/run.py \
   --source /path/to/expat-2.8.4 \
   --config /path/to/expat-build/expat_config.h \
-  --library /path/to/liboriole_expat.so \
-  --output /tmp/oriole-upstream-api
+  --library /path/to/libxeme_expat.so \
+  --output /tmp/xeme-upstream-api
 ```
 
 The upstream checkout must be clean at commit
@@ -43,9 +42,8 @@ bounds are recorded and can cause failures independently of XML compatibility.
 Twelve named tests of private Expat implementation details are excluded. Their
 exact names and reasons appear in `manifest.json` and `results.json`: SipHash,
 private UTF-8 helpers, private allocation functions, and internal accounting or
-scanning counters. No fake implementation counters are supplied. Reparse
-defaults are applied through public constructor/reset setters instead of
-Expat's private global setting.
+scanning counters. Reparse defaults are applied through public constructor/reset
+setters instead of Expat's private global setting.
 
 The adapter also applies [memcheck.patch](memcheck.patch) to Expat's test-only
 tracking allocator. Its tail-removal path stores `entry->next` (always null for
@@ -55,5 +53,5 @@ four allocator calls and no XML parser linked. The correction preserves every
 test assertion.
 
 `tests.log` retains assertion diagnostics and per-test outcomes. `results.json`
-contains structured results; a nonzero exit remains nonzero. This is an adapted
-public API suite, not a claim that Expat's internal test suite passes unchanged.
+contains structured results and the test process's exit code. The runner exits
+nonzero if tests fail.

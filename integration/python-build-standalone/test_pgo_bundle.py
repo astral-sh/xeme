@@ -29,7 +29,7 @@ class PgoBundleTests(unittest.TestCase):
         self.compiler = self.root / "sysroot/bin/rustc"
         self.compiler.parent.mkdir(parents=True)
         self.compiler.write_text("fixture compiler; never executed")
-        for name in ("Cargo.toml", "Cargo.lock", "crates/oriole_expat/Cargo.toml"):
+        for name in ("Cargo.toml", "Cargo.lock", "crates/xeme_expat/Cargo.toml"):
             path = self.source / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("fixture source")
@@ -41,10 +41,10 @@ class PgoBundleTests(unittest.TestCase):
             "inputs/text.xml",
             "raw-profiles/one.profraw",
             "merged.profdata",
-            "generate/liboriole_expat.so",
-            "generate/liboriole_expat.a",
-            "use/liboriole_expat.so",
-            "use/liboriole_expat.a",
+            "generate/libxeme_expat.so",
+            "generate/libxeme_expat.a",
+            "use/libxeme_expat.so",
+            "use/libxeme_expat.a",
         ):
             path = self.run_directory / name
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -54,12 +54,12 @@ class PgoBundleTests(unittest.TestCase):
         for phase in ("generate", "use"):
             text = "\n".join(
                 self.vector(phase, name)
-                for name in ("oriole_storage", "oriole", "oriole_expat")
+                for name in ("xeme_storage", "xeme", "xeme_expat")
             )
             if phase == "use":
                 text += "\nnote: native-static-libs: -lgcc_s -lpthread -lc\n"
             self.add_command(f"build-{phase}", text)
-            library = self.run_directory / phase / "liboriole_expat.so"
+            library = self.run_directory / phase / "libxeme_expat.so"
             report = {
                 "status": "passed",
                 "rows": [
@@ -95,7 +95,7 @@ class PgoBundleTests(unittest.TestCase):
             "libraries_sha256": {
                 f"{phase}/{name}": build.digest(self.run_directory / phase / name)
                 for phase in ("generate", "use")
-                for name in ("liboriole_expat.so", "liboriole_expat.a")
+                for name in ("libxeme_expat.so", "libxeme_expat.a")
             },
             "commands": self.commands,
             "native_static_libraries": ["-lgcc_s", "-lpthread", "-lc"],
@@ -128,11 +128,11 @@ class PgoBundleTests(unittest.TestCase):
             "--target",
             pgo_bundle.TARGET,
         ]
-        for kind in ["cdylib", "staticlib"] if name == "oriole_expat" else ["lib"]:
+        for kind in ["cdylib", "staticlib"] if name == "xeme_expat" else ["lib"]:
             arguments += ["--crate-type", kind]
         options = [
             "opt-level=3",
-            "lto=thin" if name == "oriole_expat" else "linker-plugin-lto",
+            "lto=thin" if name == "xeme_expat" else "linker-plugin-lto",
             "codegen-units=1",
             "metadata=fixture",
             "extra-filename=-fixture",
@@ -175,7 +175,7 @@ class PgoBundleTests(unittest.TestCase):
         for phase in ("generate", "use"):
             text = "\n".join(
                 self.vector(phase, name)
-                for name in ("oriole_storage", "oriole", "oriole_expat")
+                for name in ("xeme_storage", "xeme", "xeme_expat")
             )
             if phase == "use":
                 text += "\nnote: native-static-libs: -lgcc_s -lpthread -lc\n"
@@ -185,7 +185,7 @@ class PgoBundleTests(unittest.TestCase):
             command["log_sha256"] = build.digest(log)
         self.save()
         archive, _, provenance, _ = self.verify()
-        self.assertEqual(archive, self.run_directory / "use/liboriole_expat.a")
+        self.assertEqual(archive, self.run_directory / "use/libxeme_expat.a")
         self.assertEqual(set(provenance["compiler_vectors"]), {"generate", "use"})
         with self.assertRaises(build.BuildError):
             pgo_bundle.verify(self.output, self.source, self.env, None, [])
@@ -209,7 +209,7 @@ class PgoBundleTests(unittest.TestCase):
             self.target_cpu = cpu
             text = "\n".join(
                 self.vector("normal", name)
-                for name in ("oriole_storage", "oriole", "oriole_expat")
+                for name in ("xeme_storage", "xeme", "xeme_expat")
             )
             self.assertEqual(
                 len(
@@ -259,7 +259,7 @@ class PgoBundleTests(unittest.TestCase):
 
     def test_selects_exact_use_archive_and_native_dependencies(self):
         archive, libraries, provenance, command = self.verify()
-        self.assertEqual(archive, self.run_directory / "use/liboriole_expat.a")
+        self.assertEqual(archive, self.run_directory / "use/libxeme_expat.a")
         self.assertEqual(libraries, ["-lgcc_s", "-lpthread", "-lc"])
         self.assertEqual(provenance["manifest"], self.manifest)
         self.assertEqual(provenance["compiler"], str(self.compiler))
@@ -277,8 +277,8 @@ class PgoBundleTests(unittest.TestCase):
                 "inputs/text.xml",
                 "raw-profiles/one.profraw",
                 "merged.profdata",
-                "use/liboriole_expat.a",
-                "generate/liboriole_expat.so",
+                "use/libxeme_expat.a",
+                "generate/libxeme_expat.so",
                 "build-use.log",
                 "use-training.json",
             )
@@ -332,9 +332,9 @@ class PgoBundleTests(unittest.TestCase):
             (
                 "xml_parse_origin",
                 {
-                    "path": str(self.run_directory / "generate/liboriole_expat.so"),
+                    "path": str(self.run_directory / "generate/libxeme_expat.so"),
                     "sha256": build.digest(
-                        self.run_directory / "generate/liboriole_expat.so"
+                        self.run_directory / "generate/libxeme_expat.so"
                     ),
                 },
             ),
@@ -369,7 +369,7 @@ class PgoBundleTests(unittest.TestCase):
                 )
         with self.assertRaisesRegex(build.BuildError, "fresh workspace"):
             pgo_bundle.verify_vectors(
-                "Fresh oriole", "use", self.run_directory, self.compiler
+                "Fresh xeme", "use", self.run_directory, self.compiler
             )
 
 

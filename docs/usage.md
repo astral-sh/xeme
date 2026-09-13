@@ -1,6 +1,6 @@
 # Command-line usage
 
-Oriole checks XML syntax and can print parser events. It is experimental and does
+Xeme checks XML syntax and can print parser events. It is experimental and does
 not validate documents against DTD content models. See the
 [compatibility guide](compatibility.md) for remaining Expat differences.
 
@@ -9,7 +9,7 @@ not validate documents against DTD content models. See the
 Build from a checkout with Rust 1.96 or later:
 
 ```console
-cargo install --path crates/oriole_cli --bin oriole --locked
+cargo install --path crates/xeme_cli --bin xeme --locked
 ```
 
 The executable uses jemalloc on supported Unix platforms and mimalloc on Windows.
@@ -19,9 +19,9 @@ control over their allocator.
 ## Check a document
 
 ```console
-oriole message.xml
-oriole --events message.xml
-oriole --events --namespaces --chunk-size 4096 message.xml
+xeme message.xml
+xeme --events message.xml
+xeme --events --namespaces --chunk-size 4096 message.xml
 ```
 
 Omit the file or pass `-` to read standard input. Invalid XML exits with a nonzero
@@ -42,4 +42,4 @@ file or standard input and does not fetch external resources.
 
 The CLI uses the parser's default resource limits. Applications that need different
 limits or external-entity resolution can use the [Rust library](library.md) or
-[Expat interface](../crates/oriole_expat/).
+[Expat interface](../crates/xeme_expat/).

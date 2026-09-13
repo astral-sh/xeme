@@ -115,7 +115,7 @@ def main() -> int:
             if name in EXCLUDED:
                 return f"/* Excluded registration: {name}. */"
             if name.startswith("test_"):
-                return f'oriole_register_test({name}, "{name}");\n  {match[0]}'
+                return f'xeme_register_test({name}, "{name}");\n  {match[0]}'
             return match[0]
 
         text = REGISTRATION.sub(register, text)
@@ -146,10 +146,10 @@ def main() -> int:
             )
         if path.name == "runtests.c":
             text = text.replace(
-                "int i, nf;", "int i, nf;\n  oriole_print_library();"
+                "int i, nf;", "int i, nf;\n  xeme_print_library();"
             ).replace(
                 "char context[100];",
-                "if (!oriole_context_enabled(g_chunkSize, enabled)) continue;\n"
+                "if (!xeme_context_enabled(g_chunkSize, enabled)) continue;\n"
                 "      char context[100];",
             )
         path.write_text(text)
@@ -226,12 +226,12 @@ def main() -> int:
     manifest["binary_sha256"] = digest(binary)
     env = os.environ.copy()
     env.update(
-        ORIOLE_CHUNK_MASK=str(sum(1 << value for value in set(chunks))),
-        ORIOLE_DEFERRAL_MASK=str(sum(1 << value for value in set(modes))),
-        ORIOLE_TEST_TIMEOUT=str(args.test_timeout),
-        ORIOLE_MEMORY_MIB=str(args.memory_mib),
-        ORIOLE_RSS_MIB=str(args.rss_mib),
-        ORIOLE_SELECTED_TESTS=",".join(args.tests or []),
+        XEME_CHUNK_MASK=str(sum(1 << value for value in set(chunks))),
+        XEME_DEFERRAL_MASK=str(sum(1 << value for value in set(modes))),
+        XEME_TEST_TIMEOUT=str(args.test_timeout),
+        XEME_MEMORY_MIB=str(args.memory_mib),
+        XEME_RSS_MIB=str(args.rss_mib),
+        XEME_SELECTED_TESTS=",".join(args.tests or []),
     )
     with (output / "tests.log").open("w") as log:
         process = subprocess.Popen(
@@ -248,14 +248,14 @@ def main() -> int:
             process.wait()
             code = 124
     log = (output / "tests.log").read_text(errors="replace")
-    origins = re.findall(r"^ORIOLE_LIBRARY\t(.+)$", log, re.MULTILINE)
+    origins = re.findall(r"^XEME_LIBRARY\t(.+)$", log, re.MULTILINE)
     origin_verified = bool(origins) and all(
         Path(origin).resolve() == frozen_library for origin in origins
     )
     results = [
         {"context": context, "test": test, "outcome": outcome, "code": int(result_code)}
         for context, test, outcome, result_code in re.findall(
-            r"^ORIOLE_RESULT\t([^\t]+)\t([^\t]+)\t([^\t]+)\t(\d+)$", log, re.MULTILINE
+            r"^XEME_RESULT\t([^\t]+)\t([^\t]+)\t([^\t]+)\t(\d+)$", log, re.MULTILINE
         )
     ]
     selection_complete = not args.tests or all(

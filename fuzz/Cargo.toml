@@ -1,5 +1,5 @@
 [package]
-name = "oriole-fuzz"
+name = "xeme-fuzz"
 version = "0.0.0"
 publish = false
 edition = "2024"
@@ -11,8 +11,8 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "0.4"
-oriole = { path = "../crates/oriole" }
-oriole_expat = { path = "../crates/oriole_expat" }
+xeme = { path = "../crates/xeme" }
+xeme_expat = { path = "../crates/xeme_expat" }
 
 [[bin]]
 name = "streaming"

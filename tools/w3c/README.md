@@ -16,8 +16,8 @@ We have not verified the mirror against the official release tarball.
 
 ```console
 python3 tools/w3c/run.py --suite /path/to/xmlconf \
-  --library /path/to/liboriole_expat.so \
-  --reference /path/to/libexpat.so --output /tmp/oriole-w3c
+  --library /path/to/libxeme_expat.so \
+  --reference /path/to/libexpat.so --output /tmp/xeme-w3c
 ```
 
 Use a new output directory. Each library runs in a separate process with a 1 GiB
@@ -27,9 +27,9 @@ Use the pinned, trusted corpus: catalog loading happens before the workers and
 file-size checking follows the read. The parser itself performs no I/O.
 
 All source/library hashes, callbacks' child outcomes, chunk sizes, final status,
-error code and byte index are preserved. Resolver failures are inconclusive and
-receive no conformance credit. Worker failures and timeouts persist a summary
-and last-case progress. The command exits nonzero for any required mismatch,
-inconclusive case, or worker failure in either library; there are no waivers.
+error code and byte index are preserved. Resolver failures are inconclusive.
+Worker failures and timeouts persist a summary and last-case progress. The command
+exits nonzero for any required mismatch, inconclusive case, or worker failure in
+either library.
 This checks acceptance only. It does not compare canonical output or establish
 complete XML or Expat conformance.

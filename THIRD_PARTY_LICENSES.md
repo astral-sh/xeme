@@ -1,6 +1,6 @@
 # Third-party notices
 
-Oriole's implementation is original Rust code, licensed under MIT or Apache-2.0.
+Xeme's implementation is original Rust code, licensed under MIT or Apache-2.0.
 The C header retains Expat's original copyright and license notices. Validation
 artifacts may contain test inputs, assertion excerpts, or diagnostics from these
 pinned upstream projects:

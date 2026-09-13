@@ -56,7 +56,7 @@ def preflight(path: Path) -> None:
         for chunk in specification["chunks"]:
             namespaces = specification.get("namespaces", False)
             expected = engines["expat"].parse(data, chunk, namespaces)
-            actual = engines["oriole"].parse(data, chunk, namespaces)
+            actual = engines["xeme"].parse(data, chunk, namespaces)
             if (
                 expected["status"] != 1
                 or actual["status"] != 1
@@ -107,7 +107,7 @@ def main() -> int:
     source = Path(__file__).with_name("native_driver.c").resolve()
     binary = (args.output / "native-driver").resolve()
     libraries = {
-        "oriole": resolve_library(str(args.library)),
+        "xeme": resolve_library(str(args.library)),
         "expat": resolve_library(args.reference),
     }
     command = [
@@ -143,7 +143,7 @@ def main() -> int:
     rows: list[dict[str, Any]] = []
     report = {
         "status": "failed",
-        "method": "Median of native-driver process medians; speedup is median of paired Expat/Oriole ratios. Each process discards one warmup. Parser creation, callback registration, parse, native callbacks, and parser free are timed. Library/input loading and process startup are excluded. Native callbacks hash names, attributes, and character bytes independent of text fragmentation.",
+        "method": "Median of native-driver process medians; speedup is median of paired Expat/Xeme ratios. Each process discards one warmup. Parser creation, callback registration, parse, native callbacks, and parser free are timed. Library/input loading and process startup are excluded. Native callbacks hash names, attributes, and character bytes independent of text fragmentation.",
         "limitations": "Shared host: CPU frequency, host load, and memory bandwidth are uncontrolled. Warm filesystem caches. The FNV-1a callback digest is an output consistency check; the separate untimed differential preflight compares complete normalized callback streams. These generated workloads do not establish CPython application performance.",
         "platform": platform.platform(),
         "cpu": next(
@@ -268,7 +268,7 @@ def main() -> int:
                     for engine in libraries
                 }
                 ratios = [
-                    medians["expat"][pair] / medians["oriole"][pair]
+                    medians["expat"][pair] / medians["xeme"][pair]
                     for pair in range(args.pairs)
                 ]
                 report["summary"][f"{name}/{chunk}"] = {
@@ -278,9 +278,9 @@ def main() -> int:
                         engine: statistics.median(values)
                         for engine, values in medians.items()
                     },
-                    "paired_expat_over_oriole": ratios,
-                    "median_expat_over_oriole": statistics.median(ratios),
-                    "range_expat_over_oriole": [min(ratios), max(ratios)],
+                    "paired_expat_over_xeme": ratios,
+                    "median_expat_over_xeme": statistics.median(ratios),
+                    "range_expat_over_xeme": [min(ratios), max(ratios)],
                 }
         report["sha256_after"] = {str(path): digest(path) for path in observed_paths}
         if hashes != report["sha256_after"]:

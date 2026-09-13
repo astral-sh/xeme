@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from corpus import workloads
 
 ROOT = Path(__file__).resolve().parents[1]
-ENGINES = {"oriole", "baseline", "expat"}
+ENGINES = {"xeme", "baseline", "expat"}
 
 
 def digest(path: Path) -> str:
@@ -42,7 +42,7 @@ def source_hashes(checkout: Path) -> dict[str, str]:
 
 def workspace_compilations(log: str, checkout: Path, intermediates: Path) -> dict:
     """Reject cached workspace results or compiler inputs from another checkout."""
-    crates = {"oriole_storage", "oriole", "oriole_expat"}
+    crates = {"xeme_storage", "xeme", "xeme_expat"}
     compiled = {}
     for line in log.splitlines():
         if not line.strip().startswith("Running `") or not any(
@@ -102,7 +102,7 @@ def build(args: argparse.Namespace) -> None:
         "--config",
         "profile.release.codegen-units=1",
         "-p",
-        "oriole_expat",
+        "xeme_expat",
         "--crate-type",
         "cdylib,staticlib",
         "-vv",
@@ -153,8 +153,8 @@ def build(args: argparse.Namespace) -> None:
         )
         if source_hashes(checkout) != before:
             raise ValueError("source changed while building")
-        library = output / "liboriole_expat.so"
-        shutil.copy2(args.target_dir / "release/liboriole_expat.so", library)
+        library = output / "libxeme_expat.so"
+        shutil.copy2(args.target_dir / "release/libxeme_expat.so", library)
         report.update(
             status="passed", library=str(library), library_sha256=digest(library)
         )
@@ -163,7 +163,7 @@ def build(args: argparse.Namespace) -> None:
 
 
 def validate_build(path: Path, library: Path) -> dict[str, Any]:
-    """Bind a completed Oriole build record to the actual benchmark library."""
+    """Bind a completed Xeme build record to the actual benchmark library."""
     record = json.loads(path.read_text())
     if record.get("status") != "passed":
         raise ValueError(f"build did not pass: {path}")
@@ -210,7 +210,7 @@ def summarize(report: dict[str, Any]) -> list[dict[str, Any]]:
         row: dict[str, Any] = {"condition": key}
         for control in ["baseline", "expat"]:
             ratios = [
-                medians[key, p, "oriole"] / medians[key, p, control]
+                medians[key, p, "xeme"] / medians[key, p, control]
                 for p in range(pairs)
             ]
             if any(not math.isfinite(ratio) or ratio <= 0 for ratio in ratios):
@@ -318,7 +318,7 @@ def run(args: argparse.Namespace) -> None:
             if bundle["status"] != "passed" or set(bundle["consumers"]) != ENGINES:
                 raise ValueError("requires a passed three-engine consumer build")
             for engine, label in [
-                ("oriole", "candidate"),
+                ("xeme", "candidate"),
                 ("baseline", "baseline"),
                 ("expat", "expat"),
             ]:
@@ -422,7 +422,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     builder = commands.add_parser(
-        "build", help="Freeze an ordinary O3/ThinLTO Oriole library"
+        "build", help="Freeze an ordinary O3/ThinLTO Xeme library"
     )
     builder.add_argument("--checkout", type=Path, required=True)
     builder.add_argument("--target-dir", type=Path, required=True)

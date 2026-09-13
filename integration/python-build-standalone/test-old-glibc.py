@@ -8,7 +8,7 @@ import sys
 import xml.parsers.expat
 
 assert platform.libc_ver() == ("glibc", "2.17"), platform.libc_ver()
-assert xml.parsers.expat.EXPAT_VERSION.startswith("oriole_")
+assert xml.parsers.expat.EXPAT_VERSION.startswith("xeme_")
 
 
 def parse_document(_: int) -> None:

@@ -1,4 +1,4 @@
-/* Public callback guards, plus Oriole's bounded recursive-default rejection. */
+/* Public callback guards, plus Xeme's bounded recursive-default rejection. */
 #define XML_GE 1
 #include "expat.h"
 #include <assert.h>
@@ -89,6 +89,6 @@ int main(void) {
         }
         XML_ParserFree(parser);
     }
-    puts("Oriole native adversarial lifecycle probes passed");
+    puts("Xeme native adversarial lifecycle probes passed");
     return 0;
 }

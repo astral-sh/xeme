@@ -1,6 +1,6 @@
 # Optional profile-guided builds
 
-Profile-guided optimization (PGO) lets the compiler use execution counts from a training run to lay out and optimize code. This tool builds an instrumented Oriole library, trains it on generated XML, merges the profile, and builds an optimized library. It does not change the parser's allocator, limits, or runtime configuration.
+Profile-guided optimization (PGO) lets the compiler use execution counts from a training run to lay out and optimize code. This tool builds an instrumented Xeme library, trains it on generated XML, merges the profile, and builds an optimized library. It does not change the parser's allocator, limits, or runtime configuration.
 
 This workflow is separate from the default release and python-build-standalone builds. Evaluate the resulting library with your application's tests and benchmarks before deployment.
 
@@ -10,7 +10,7 @@ For a PBS consumer, use the [optional PGO bundle command](../../integration/pyth
 
 - Linux or macOS, Python 3.11 or later, and an installed native Rust toolchain.
 - An installed `llvm-profdata` with the same LLVM major, minor, and patch version reported by `rustc -vV`.
-- Oriole's Cargo dependencies already cached. Cargo runs with `--locked --offline`; the tool downloads neither toolchains nor XML.
+- Xeme's Cargo dependencies already cached. Cargo runs with `--locked --offline`; the tool downloads neither toolchains nor XML.
 - Separate, non-overlapping source and output directories. Use one output directory per build configuration.
 
 Run from the repository, supplying paths appropriate to your machine:
@@ -18,7 +18,7 @@ Run from the repository, supplying paths appropriate to your machine:
 ```sh
 uv run --offline tools/pgo/build.py \
   --source "$PWD" \
-  --output "$PWD/../oriole-pgo-output" \
+  --output "$PWD/../xeme-pgo-output" \
   --llvm-profdata /path/to/llvm-profdata
 ```
 
@@ -30,7 +30,7 @@ keeping `rlib` available in the manifest for Rust tests and consumers. Verbose b
 logs retain the actual compiler commands. A matching normal C build uses:
 
 ```sh
-cargo rustc --release --locked --target YOUR_HOST_TARGET -p oriole_expat --lib --crate-type cdylib,staticlib
+cargo rustc --release --locked --target YOUR_HOST_TARGET -p xeme_expat --lib --crate-type cdylib,staticlib
 ```
 
 Global Cargo options can be repeated with `--cargo-arg=OPTION`, attaching any option
@@ -46,7 +46,7 @@ Every invocation creates a new `runs/run-*` directory with an empty raw-profile 
 
 A successful run contains:
 
-- `use/liboriole_expat.so` (Linux) or `.dylib` (macOS), and `use/liboriole_expat.a`.
+- `use/libxeme_expat.so` (Linux) or `.dylib` (macOS), and `use/libxeme_expat.a`.
 - The instrumented libraries, raw profiles, merged profile, and complete profile counter dump.
 - Generated XML inputs, their manifest, and instrumented and optimized parse records.
 - `manifest.json` with source, Cargo configuration, script, tool, input, profile, and library hashes; exact commands, selected build environment, exit codes, timeouts, and raw log hashes.

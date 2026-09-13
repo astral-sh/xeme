@@ -36,7 +36,7 @@ def main() -> None:
     if not args.timeout > 0:
         parser.error("a positive worker timeout is required")
     args.output.mkdir(parents=True, exist_ok=False)
-    libraries = {"oriole": args.library.resolve(), "expat": args.reference.resolve()}
+    libraries = {"xeme": args.library.resolve(), "expat": args.reference.resolve()}
     inputs = sorted(args.inputs.glob("*.dtd"))
     if not inputs:
         parser.error("expected generated DTD inputs")
@@ -167,10 +167,10 @@ def main() -> None:
                         label: statistics.median(values)
                         for label, values in medians.items()
                     },
-                    "median_expat_over_oriole": statistics.median(
+                    "median_expat_over_xeme": statistics.median(
                         a / b
                         for a, b in zip(
-                            medians["expat"], medians["oriole"], strict=True
+                            medians["expat"], medians["xeme"], strict=True
                         )
                     ),
                 }

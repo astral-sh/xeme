@@ -79,7 +79,7 @@ def verify_vectors(
             continue
         arguments = shlex.split(line.split("Running `", 1)[1].rsplit("`", 1)[0])
         name = arguments[arguments.index("--crate-name") + 1]
-        if name not in ("oriole_storage", "oriole", "oriole_expat"):
+        if name not in ("xeme_storage", "xeme", "xeme_expat"):
             continue
         crates.append(name)
         vectors.append(arguments)
@@ -105,7 +105,7 @@ def verify_vectors(
         ]
         expected = [
             "opt-level=3",
-            "lto=thin" if name == "oriole_expat" else "linker-plugin-lto",
+            "lto=thin" if name == "xeme_expat" else "linker-plugin-lto",
             "codegen-units=1",
             "strip=debuginfo",
             "relocation-model=pic",
@@ -133,11 +133,11 @@ def verify_vectors(
             if arg == "--crate-type"
         ]
         require(
-            kinds == (["cdylib", "staticlib"] if name == "oriole_expat" else ["lib"]),
+            kinds == (["cdylib", "staticlib"] if name == "xeme_expat" else ["lib"]),
             "PGO crate-type mismatch",
         )
     require(
-        sorted(crates) == ["oriole", "oriole_expat", "oriole_storage"],
+        sorted(crates) == ["xeme", "xeme_expat", "xeme_storage"],
         "Missing fresh workspace PGO compilations",
     )
     return vectors
@@ -247,7 +247,7 @@ def verify(
             "PGO training report changed",
         )
         report = json.loads(report_path.read_text())
-        library = run / phase / "liboriole_expat.so"
+        library = run / phase / "libxeme_expat.so"
         require(
             report["status"] == "passed" and len(report["rows"]) == 288,
             "Incomplete PGO training",
@@ -267,9 +267,9 @@ def verify(
         reports["generate"]["rows"] == reports["use"]["rows"],
         "PGO generated callbacks differ",
     )
-    archive = run / "use/liboriole_expat.a"
+    archive = run / "use/libxeme_expat.a"
     require(
-        build.digest(archive) == manifest["libraries_sha256"]["use/liboriole_expat.a"],
+        build.digest(archive) == manifest["libraries_sha256"]["use/libxeme_expat.a"],
         "PGO archive identity mismatch",
     )
     return (

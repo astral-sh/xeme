@@ -8,8 +8,8 @@ failure, signal, and timeout.
 python3 tools/upstream-expat/run.py \
   --source /path/to/expat-2.8.4 \
   --config /path/to/expat-build/expat_config.h \
-  --library /path/to/liboriole_expat.so \
-  --output /tmp/oriole-upstream-api
+  --library /path/to/libxeme_expat.so \
+  --output /tmp/xeme-upstream-api
 ```
 
 The upstream checkout must be clean at commit

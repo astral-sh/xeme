@@ -25,7 +25,7 @@ def main() -> None:
     assert module.__file__ is not None
     assert Path(module.__file__).resolve() == path
     shim = ctypes.CDLL(sys.argv[2])
-    shim.oriole_forced_child_failures.restype = ctypes.c_uint
+    shim.xeme_forced_child_failures.restype = ctypes.c_uint
     parent = module.ParserCreate()
     # Retain surplus ownership so a single incorrect decrement cannot free it.
     retained = [parent] * 8
@@ -36,7 +36,7 @@ def main() -> None:
     except MemoryError:
         failed = True
     after = sys.getrefcount(parent)
-    calls = shim.oriole_forced_child_failures()
+    calls = shim.xeme_forced_child_failures()
     print(
         json.dumps(
             {

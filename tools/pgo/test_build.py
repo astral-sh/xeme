@@ -56,11 +56,11 @@ class PgoTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             source = root / "source"
-            (source / "crates/oriole_expat").mkdir(parents=True)
+            (source / "crates/xeme_expat").mkdir(parents=True)
             for filename in (
                 "Cargo.toml",
                 "Cargo.lock",
-                "crates/oriole_expat/Cargo.toml",
+                "crates/xeme_expat/Cargo.toml",
             ):
                 (source / filename).touch()
             (source / ".cargo").mkdir()
@@ -163,7 +163,7 @@ class PgoTests(unittest.TestCase):
                 build.base_flags({"RUSTFLAGS": value})
 
     def test_profile_warnings_are_fatal(self):
-        build.check_profile_output("Compiling oriole\nFinished release\n")
+        build.check_profile_output("Compiling xeme\nFinished release\n")
         for text in (
             "warning: profile data may be out of date",
             "warning[E123]: example",
@@ -204,15 +204,15 @@ class PgoTests(unittest.TestCase):
     def test_source_inventory_detects_added_and_modified_inputs(self):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory)
-            (source / "crates/oriole_expat").mkdir(parents=True)
+            (source / "crates/xeme_expat").mkdir(parents=True)
             for filename in (
                 "Cargo.toml",
                 "Cargo.lock",
-                "crates/oriole_expat/Cargo.toml",
+                "crates/xeme_expat/Cargo.toml",
             ):
                 (source / filename).touch()
             initial = build.source_files(source)
-            (source / "crates/oriole_expat/new.rs").write_text("pub fn added() {}")
+            (source / "crates/xeme_expat/new.rs").write_text("pub fn added() {}")
             with self.assertRaises(build.BuildError):
                 build.require_unchanged(initial, build.source_files(source), "Source")
             initial = build.source_files(source)

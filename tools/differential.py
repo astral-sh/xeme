@@ -120,7 +120,7 @@ def main() -> int:
         "differences": [],
     }
     try:
-        for name, library in (("reference", args.reference), ("oriole", args.library)):
+        for name, library in (("reference", args.reference), ("xeme", args.library)):
             path = Path(library)
             metadata = {
                 "path": library,
@@ -167,10 +167,10 @@ def main() -> int:
             if metadata["sha256_before"] != metadata["sha256_after"]:
                 raise RuntimeError(f"{name} library changed during the run")
         reference = json.loads((args.output / "reference.json").read_text())
-        actual = json.loads((args.output / "oriole.json").read_text())
+        actual = json.loads((args.output / "xeme.json").read_text())
         report["versions"] = {
             "reference": reference["version"],
-            "oriole": actual["version"],
+            "xeme": actual["version"],
         }
         counts = {
             "status": 0,
@@ -205,7 +205,7 @@ def main() -> int:
                         "chunk_size": expected["chunk_size"],
                         "fields": fields,
                         "reference": expected["result"],
-                        "oriole": observed["result"],
+                        "xeme": observed["result"],
                     }
                 )
                 for field in fields:

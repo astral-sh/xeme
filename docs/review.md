@@ -1,21 +1,21 @@
-# Reviewing Oriole
+# Reviewing Xeme
 
 ## Implementation
 
 | Area | Entry points |
 | --- | --- |
-| Incremental parsing and public Rust API | [`oriole`](../crates/oriole/src/lib.rs) |
-| Input decoding and original byte positions | [`encoding.rs`](../crates/oriole/src/encoding.rs) |
-| Tags, XML names, and references | [`tag.rs`](../crates/oriole/src/tag.rs), [`names.rs`](../crates/oriole/src/names.rs), [`lexical.rs`](../crates/oriole/src/lexical.rs) |
-| DTDs and entity replacement | [`dtd.rs`](../crates/oriole/src/dtd.rs), [`dtd/`](../crates/oriole/src/dtd/), [`value.rs`](../crates/oriole/src/value.rs) |
-| Fallible allocation and ownership | [`oriole_storage`](../crates/oriole_storage/src/lib.rs) |
-| Expat ABI, callback frames, and parser families | [`oriole_expat`](../crates/oriole_expat/src/lib.rs) |
-| Command-line input and output | [`oriole_cli`](../crates/oriole_cli/src/main.rs) |
+| Incremental parsing and public Rust API | [`xeme`](../crates/xeme/src/lib.rs) |
+| Input decoding and original byte positions | [`encoding.rs`](../crates/xeme/src/encoding.rs) |
+| Tags, XML names, and references | [`tag.rs`](../crates/xeme/src/tag.rs), [`names.rs`](../crates/xeme/src/names.rs), [`lexical.rs`](../crates/xeme/src/lexical.rs) |
+| DTDs and entity replacement | [`dtd.rs`](../crates/xeme/src/dtd.rs), [`dtd/`](../crates/xeme/src/dtd/), [`value.rs`](../crates/xeme/src/value.rs) |
+| Fallible allocation and ownership | [`xeme_storage`](../crates/xeme_storage/src/lib.rs) |
+| Expat ABI, callback frames, and parser families | [`xeme_expat`](../crates/xeme_expat/src/lib.rs) |
+| Command-line input and output | [`xeme_cli`](../crates/xeme_cli/src/main.rs) |
 
 The core forbids unsafe Rust. Review C pointer validity, allocator ownership, and
 callback lifetimes at the adapter boundary. Callbacks may suspend parsing, change
 handlers, or operate on another parser; no Rust borrow of the active parser may
-cross a callback. The [C interface guide](../crates/oriole_expat/README.md) defines
+cross a callback. The [C interface guide](../crates/xeme_expat/README.md) defines
 the supported operations and ownership contracts.
 
 Changes to streaming paths need coverage for split input, encoding conversion,

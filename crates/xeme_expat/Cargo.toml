@@ -1,0 +1,19 @@
+[package]
+name = "xeme_expat"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Expat-compatible C interface to the Xeme XML parser"
+
+[lib]
+name = "xeme_expat"
+crate-type = ["cdylib", "staticlib", "rlib"]
+
+[dependencies]
+xeme.workspace = true
+xeme_storage = { path = "../xeme_storage" }
+
+[lints]
+workspace = true

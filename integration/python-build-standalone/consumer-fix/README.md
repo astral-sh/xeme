@@ -21,14 +21,14 @@ Enable the backport explicitly:
 ```shell
 python3 tools/cpython/run.py \
   --source /absolute/cpython-3.12.13 \
-  --library /absolute/liboriole_expat.so \
+  --library /absolute/libxeme_expat.so \
   --output /absolute/consumer-fix-shared \
   --consumer-fix
 ```
 
 The harness verifies the pinned source and patch hashes, applies the patch without
 fuzzy matching to a temporary copy, and verifies the resulting source hash. Results
-identify the consumer adaptation separately from Oriole's library hash.
+identify the consumer adaptation separately from Xeme's library hash.
 
 ## Fault injection
 
@@ -40,9 +40,9 @@ tested module's origin, even when the interpreter has a builtin `pyexpat`.
 ```shell
 python3 integration/python-build-standalone/consumer-fix/run.py \
   --original-extension /absolute/original-reference/pyexpat.cpython-312-x86_64-linux-gnu.so \
-  --original-extension /absolute/original-oriole/pyexpat.cpython-312-x86_64-linux-gnu.so \
+  --original-extension /absolute/original-xeme/pyexpat.cpython-312-x86_64-linux-gnu.so \
   --fixed-extension /absolute/fixed-reference/pyexpat.cpython-312-x86_64-linux-gnu.so \
-  --fixed-extension /absolute/fixed-oriole/pyexpat.cpython-312-x86_64-linux-gnu.so \
+  --fixed-extension /absolute/fixed-xeme/pyexpat.cpython-312-x86_64-linux-gnu.so \
   --output /absolute/fault-probe
 ```
 

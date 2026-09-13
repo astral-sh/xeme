@@ -9,9 +9,9 @@ use std::ffi::{c_char, c_int, c_void};
 use std::ptr;
 
 use libfuzzer_sys::fuzz_target;
-use oriole_expat::*;
+use xeme_expat::*;
 
-const GRAMMAR_MARKER: &[u8] = b"ORIOLE-DTD-GRAMMAR\0";
+const GRAMMAR_MARKER: &[u8] = b"XEME-DTD-GRAMMAR\0";
 
 fn grammar_document(selector: u8) -> &'static [u8] {
     match selector % 12 {

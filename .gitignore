@@ -11,6 +11,5 @@
 /benchmarks/results/
 /fuzz/results/
 /tools/upstream-expat/results/
-/integration/python-build-standalone/consumer-fix/results/
-/integration/python-build-standalone/validation.json
-/integration/python-build-standalone/consumer-fix/validation.json
+/tools/cpython/consumer-fix/results/
+/tools/cpython/consumer-fix/validation.json

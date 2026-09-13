@@ -52,9 +52,8 @@ Expat's narrow-character ABI, callbacks, parser reset, suspension, buffer input,
 and custom allocation. Its documentation defines ownership and callback lifetimes,
 supported encoding modes, and remaining compatibility gaps.
 
-The [python-build-standalone integration](../integration/python-build-standalone/)
-links Xeme into CPython 3.12.13. The recipe is opt-in and targets Linux x86-64.
-It includes checks for the glibc 2.17 baseline; see the
+The [CPython consumer harness](../tools/cpython/README.md) builds CPython 3.12.13's
+XML extensions against Xeme and runs their upstream tests. See the
 [compatibility guide](compatibility.md) for remaining consumer differences.
 
 ## Workspace

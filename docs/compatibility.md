@@ -1,7 +1,7 @@
 # Compatibility and release gates
 
-Xeme is experimental. The supported trial is an opt-in Linux x86-64 CPython
-3.12.13 integration. General production substitution requires broader platform,
+Xeme is experimental. CPython consumer checks use pinned CPython 3.12.13 sources.
+General production substitution requires broader platform,
 consumer and adversarial validation. Exact callback fragmentation and some error
 positions differ from Expat.
 
@@ -31,7 +31,7 @@ encoding-declaration restrictions described in the [C guide](../crates/xeme_expa
 Like the pinned Expat build, Xeme accepts some external XML 1.1 declarations
 and UTF-8 BOM/ISO-8859-1 combinations that the W3C catalog rejects.
 
-The pinned CPython consumer needs the explicit [allocation-cleanup backport](../integration/python-build-standalone/consumer-fix/README.md).
+The pinned CPython consumer needs the explicit [allocation-cleanup backport](../tools/cpython/consumer-fix/README.md).
 It changes consumer ownership handling; it does not resolve callback fragmentation.
 
 ## Streaming resource limits
@@ -119,12 +119,11 @@ semantic checks on those inputs. An arbitrary failure in the same method is fata
 The disclosed allocation-cleanup backport remains separate from upstream tests;
 benchmark extensions use unmodified consumer sources.
 
-The [PBS integration](../integration/python-build-standalone/README.md) builds and
-validates an actual static distribution. Integration changes run regardless of
-branch name. Archive structure, installed identity, custom tests and glibc 2.17
-threaded parsing are independent checks; installed XML results retain the same
-strict assertions and use the bounded regression gate. Packaging and installed
-performance require their own evidence for each supported target.
+Distribution packaging requires separate validation of archive structure,
+installed parser identity, native dependencies, and the target's libc baseline
+and threaded parsing behavior. Installed XML tests and application benchmarks
+must exercise the packaged interpreter. Packaging and installed performance
+require their own evidence for each supported target.
 
 ## Safety and release criteria
 

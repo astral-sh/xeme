@@ -1,8 +1,8 @@
 """Validate the actual installed Xeme CPython with the same narrow exception.
 
 Run under the installed interpreter with -I. No extension loading override or
-consumer patch is applied. Distribution structure and threaded identity checks
-remain separate, fatal workflow steps.
+consumer patch is applied. Distribution structure and threaded parsing need
+separate validation.
 """
 
 from __future__ import annotations

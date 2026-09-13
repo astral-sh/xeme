@@ -3,11 +3,12 @@
 Profile-guided optimization (PGO) lets the compiler use execution counts from a training run to lay out and optimize code. This tool builds an instrumented Xeme library, trains it on generated XML, merges the profile, and builds an optimized library. It does not change the parser's allocator, limits, or runtime configuration.
 
 This optional workflow is retained from earlier optimization experiments and is
-separate from default release and python-build-standalone builds. Historical PGO
+separate from default release builds. Historical PGO
 measurements apply only to their recorded source, compiler, profile, and inputs.
 Evaluate a new library with your application's tests and benchmarks before deployment.
 
-For a PBS consumer, use the [optional PGO bundle command](../../integration/python-build-standalone/#optional-fresh-pgo-bundle). It runs this pipeline with the required PIC/unwind flags, verifies the effective ThinLTO configuration, and packages the optimized archive with its build manifest and native linker dependencies. The `--native-static-libs` option is used by that Linux bridge to capture native dependencies from the same profile-use compilation.
+For static linking on Linux, `--native-static-libs` captures native linker
+dependencies from the same compilation that produces the optimized archive.
 
 ## Requirements
 

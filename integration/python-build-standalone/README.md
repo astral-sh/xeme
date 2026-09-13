@@ -218,11 +218,11 @@ verifies the download's size and SHA-256 before exercising the backport on
 
 ### Distribution workflow
 
-The [PBS distribution workflow](../../.github/workflows/pbs.yml) runs for changes
-to this integration directory or the workflow when the head branch starts with
-`charlie/codex-xeme-pbs-`. It can also be dispatched manually with the target
-and PGO options described above. The pull request path uses the generic target,
-normal Rust ThinLTO build, and PBS's CPython `noopt` variant.
+The [PBS distribution workflow](../../.github/workflows/pbs.yml) runs for pull
+requests changing this integration directory, `tools/cpython/`, or the workflow,
+regardless of branch name. It can also be dispatched manually with the target
+and PGO options described above. Pull requests use the generic target, normal
+Rust ThinLTO build, and PBS's CPython `noopt` variant.
 
 Validate the resulting interpreter and archive:
 
@@ -230,13 +230,22 @@ Validate the resulting interpreter and archive:
   `pyexpat.EXPAT_VERSION` must identify Xeme.
 - Run PBS's archive validator and custom checks, inspecting dynamic dependencies
   and symbol versions.
-- Run the installed XML suites and threaded parsing on glibc 2.17.
-- Preserve test failures, including the known callback-grouping differences in
-  the [compatibility guide](../../docs/compatibility.md).
+- Run the installed XML suites on the host and glibc 2.17, using the actual
+  interpreter in isolated mode through `tools/cpython/installed.py`.
+- Complete the separate glibc 2.17 check of 1,024 threaded parses.
+
+The [installed XML gate](../../tools/cpython/README.md#installed-distributions)
+retains the raw upstream exit code and failures. Its only exceptions are the two
+reviewed text-fragmentation assertions, checked against exact messages, traceback
+locations, fixture hashes, and the complete discovered/executed test inventory.
+Separate semantic checks must also pass. Unrelated failures, distribution
+structure, parser identity, custom checks, and threaded parsing remain fatal.
 
 The local [CPython extension harness](../../tools/cpython/README.md) builds
 separate artifacts; repeat distribution checks for each runtime and build mode.
-Installed-interpreter performance also needs separate benchmarks.
+Installed-interpreter performance also needs separate benchmarks. The
+[qualification report](../../docs/evidence/2026-09-13-review.md) records historical
+source and distribution hashes; it does not qualify a later rebased runtime.
 
 macOS packaging, Windows packaging, cross builds, and fully static Python
 validation remain open. Keep these experimental archives outside the release

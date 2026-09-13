@@ -69,3 +69,6 @@ It includes checks for the glibc 2.17 baseline; see the
 See [contributing](../CONTRIBUTING.md) for development commands and acceptance
 criteria, [fuzzing](../fuzz/README.md) for the adversarial harnesses, and the
 [review guide](review.md) for implementation and test entry points.
+
+[Validation evidence](evidence/README.md) identifies the runtime and installed
+artifact each report tested; earlier results do not qualify later changes.

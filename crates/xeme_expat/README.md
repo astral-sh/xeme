@@ -26,8 +26,8 @@ LTO. The command produces `libxeme_expat.so` (or `.dylib` on macOS) and
 same directory can replace those artifacts, so keep the selected C build outputs
 for consumer validation and packaging.
 
-Optional [profile-guided builds](../../tools/pgo/) use the same C-only target
-selection for both training and optimized compilation.
+The [historical PGO guide](../../tools/pgo/) records the optional profile-guided
+build procedure; PGO is no longer an optimization workstream.
 
 ## Ownership and callbacks
 
@@ -140,7 +140,7 @@ The following Expat modes are explicitly unsupported:
   been decoded. A leading custom-encoding declaration may request its encoding
   handler before delivering the XML-declaration callback; Expat reverses this
   callback order in its value processor.
-- Wide-character, `XML_LARGE_SIZE`, and `XML_ATTR_INFO` builds: the header rejects these configurations.
+- Wide-character, `XML_LARGE_SIZE` and `XML_ATTR_INFO` builds: the header rejects these configurations.
 
 `XML_SetHashSalt` and `XML_SetHashSalt16Bytes` mix the caller salt into randomized
 hashing; a predictable salt does not replace the secret random keys. They update
@@ -184,7 +184,7 @@ Input calls and buffer requests are limited to 256 MiB. Cumulative source input
 is bounded by representable positions; work and event-payload allowances grow
 with consumed root input. See [streaming resource limits](../../docs/compatibility.md#streaming-resource-limits)
 for the limits and accounting rules. A parser family permits at most 1,024 child
-creations and 32 levels of external-child ancestry.
+construction attempts, including failures, and 32 levels of external-child ancestry.
 
 CPython can use its standard custom allocator suite. See the
 [compatibility guide](../../docs/compatibility.md) for remaining consumer

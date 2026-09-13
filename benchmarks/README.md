@@ -4,6 +4,15 @@ Start with the [performance iteration guide](HILLCLIMB.md). Its `hillclimb.py`
 entrypoint freezes ordinary builds and compares baseline, candidate and Expat in
 matched rounds, with separate real-project and generated summaries.
 
+## Corpus selection
+
+The six original project files are now a tuning set: repeated optimization has
+used them. The [reserved five-project holdout](holdout/README.md) is for evaluation
+after code selection. Keep its results separate and retain every adverse condition.
+Once observed, it becomes a regression corpus; a new independent evaluation needs
+new inputs. [Historical evidence](../docs/evidence/README.md) identifies the exact
+source and corpus each earlier result measured.
+
 ## Running benchmarks
 
 Build Xeme with ordinary `-O3`, ThinLTO and one codegen unit, and the Expat
@@ -102,7 +111,9 @@ mode. Positions and Default callbacks remain separate compatibility checks.
 
 The [pinned corpus](projects/README.md) contains original XML from Vulkan, Wayland, Maven, Batik, GTK and DocBook. The runners compare native callbacks, matched CPython consumers and complete Wayland code-generation commands, validating all outputs before reporting timings. See the [reproduction commands](projects/RERUN.md).
 
-## Profile-guided builds
+## Historical profile-guided builds
+
+PGO is no longer an optimization workstream.
 
 The optional [PGO workflow](../tools/pgo/) builds an instrumented library, trains on
 a fixed generated corpus, and rebuilds with a fresh profile. It preserves runtime

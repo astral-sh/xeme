@@ -33,3 +33,13 @@ exits nonzero for any required mismatch, inconclusive case, or worker failure in
 either library.
 This checks acceptance only. It does not compare canonical output or establish
 complete XML or Expat conformance.
+
+## Continuous regression gate
+
+CI uses `tools/compatibility.py w3c` with the pinned suite and reviewed baseline.
+It requires the complete selection and recorded source bytes, compares acceptance
+and loaded-child outcomes, and rejects missing rows, resolver failures, or new
+differences. The raw catalog failures remain in its reports; baseline agreement is
+not a passing conformance suite. See the [compatibility guide](../../docs/compatibility.md)
+for the current boundary. Historical reports apply only to their recorded source
+and artifact hashes.

@@ -1,0 +1,277 @@
+{
+  "schema_version": 1,
+  "selection": "Five previously unused projects selected by production XML role before parsing or timing. This holdout is reserved for one final evaluation after code selection. No candidate performance or parser behavior informed project/path selection. Inputs are complete original upstream blobs; no rewriting, repetition, concatenation, truncation or regeneration.",
+  "projects": [
+    {
+      "name": "libreoffice",
+      "repository": "LibreOffice/core",
+      "branch": "master",
+      "commit": "bcc91ade19d17e81688587c1d0e83956fa5813a5",
+      "files": [
+        {
+          "role": "input",
+          "upstream_path": "officecfg/registry/schema/org/openoffice/Office/Calc.xcs",
+          "path": "corpus/libreoffice/Calc.xcs",
+          "url": "https://raw.githubusercontent.com/LibreOffice/core/bcc91ade19d17e81688587c1d0e83956fa5813a5/officecfg/registry/schema/org/openoffice/Office/Calc.xcs",
+          "source_url": "https://github.com/LibreOffice/core/blob/bcc91ade19d17e81688587c1d0e83956fa5813a5/officecfg/registry/schema/org/openoffice/Office/Calc.xcs",
+          "git_blob_sha1": "26c8e6cd75e8a84247a0694b3300dd7dce3b71e3",
+          "bytes": 81280,
+          "sha256": "365962d824b1941bb692caefca292d5d5e9e6ed5a73e6d13d0630de18e0c8989"
+        },
+        {
+          "role": "license",
+          "upstream_path": "COPYING.MPL",
+          "path": "corpus/libreoffice/COPYING.MPL",
+          "url": "https://raw.githubusercontent.com/LibreOffice/core/bcc91ade19d17e81688587c1d0e83956fa5813a5/COPYING.MPL",
+          "source_url": "https://github.com/LibreOffice/core/blob/bcc91ade19d17e81688587c1d0e83956fa5813a5/COPYING.MPL",
+          "git_blob_sha1": "a612ad9813b006ce81d1ee438dd784da99a54007",
+          "bytes": 16725,
+          "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
+        },
+        {
+          "role": "notice",
+          "upstream_path": "readlicense_oo/license/NOTICE",
+          "path": "corpus/libreoffice/NOTICE",
+          "url": "https://raw.githubusercontent.com/LibreOffice/core/bcc91ade19d17e81688587c1d0e83956fa5813a5/readlicense_oo/license/NOTICE",
+          "source_url": "https://github.com/LibreOffice/core/blob/bcc91ade19d17e81688587c1d0e83956fa5813a5/readlicense_oo/license/NOTICE",
+          "git_blob_sha1": "ca4470b7184deea88815a50163d53816a3acce9f",
+          "bytes": 1859,
+          "sha256": "8d34210ebbfaee4ba258ef7b30c3044170f356ab82c8259c81b53860bcdeef7b"
+        },
+        {
+          "role": "license",
+          "upstream_path": "readlicense_oo/license/license.xml",
+          "path": "corpus/libreoffice/license.xml",
+          "url": "https://raw.githubusercontent.com/LibreOffice/core/bcc91ade19d17e81688587c1d0e83956fa5813a5/readlicense_oo/license/license.xml",
+          "source_url": "https://github.com/LibreOffice/core/blob/bcc91ade19d17e81688587c1d0e83956fa5813a5/readlicense_oo/license/license.xml",
+          "git_blob_sha1": "405d8a213c35f465413805a5c2c96444a91afb70",
+          "bytes": 605055,
+          "sha256": "322c24ef047da3acf78479ef5b56c936ccc68aae998c5505d1fb18841e94019d"
+        }
+      ],
+      "lexical_observation": {
+        "non_predefined_named_references": [],
+        "doctype_declarations": [
+          "<!DOCTYPE oor:component-schema SYSTEM \"../../../../component-schema.dtd\">"
+        ],
+        "parser_executed": false
+      },
+      "purpose": "Calc application configuration schema with namespace-qualified names and typed properties",
+      "license_basis": "File header: MPL-2.0, incorporating Apache-2.0 work. Original header, COPYING.MPL, NOTICE, and the complete upstream license.xml (including Apache-2.0 terms) are retained.",
+      "selection_note": "Production document role selected before any parser execution or timing; exact upstream bytes retained. Static relative external DTD declaration retained. No non-predefined named references were found by lexical byte inspection; external DTD resolution must remain disabled."
+    },
+    {
+      "name": "dotnet",
+      "repository": "dotnet/runtime",
+      "branch": "main",
+      "commit": "40caa5753b677322f2202f6fd1037660e85b45b6",
+      "files": [
+        {
+          "role": "input",
+          "upstream_path": "src/libraries/System.Private.CoreLib/src/System.Private.CoreLib.Shared.projitems",
+          "path": "corpus/dotnet/System.Private.CoreLib.Shared.projitems",
+          "url": "https://raw.githubusercontent.com/dotnet/runtime/40caa5753b677322f2202f6fd1037660e85b45b6/src/libraries/System.Private.CoreLib/src/System.Private.CoreLib.Shared.projitems",
+          "source_url": "https://github.com/dotnet/runtime/blob/40caa5753b677322f2202f6fd1037660e85b45b6/src/libraries/System.Private.CoreLib/src/System.Private.CoreLib.Shared.projitems",
+          "git_blob_sha1": "d533f9f033e3204bc8712ac4e2cd207cd8afae95",
+          "bytes": 254307,
+          "sha256": "f46774b63c3fe11cdbb9c3d8fa99c079c210aa01c818d4d351ee146459ce9042"
+        },
+        {
+          "role": "license",
+          "upstream_path": "LICENSE.TXT",
+          "path": "corpus/dotnet/LICENSE.TXT",
+          "url": "https://raw.githubusercontent.com/dotnet/runtime/40caa5753b677322f2202f6fd1037660e85b45b6/LICENSE.TXT",
+          "source_url": "https://github.com/dotnet/runtime/blob/40caa5753b677322f2202f6fd1037660e85b45b6/LICENSE.TXT",
+          "git_blob_sha1": "984713a49622a96da110443c15477613bc12656b",
+          "bytes": 1116,
+          "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310"
+        },
+        {
+          "role": "notice",
+          "upstream_path": "THIRD-PARTY-NOTICES.TXT",
+          "path": "corpus/dotnet/THIRD-PARTY-NOTICES.TXT",
+          "url": "https://raw.githubusercontent.com/dotnet/runtime/40caa5753b677322f2202f6fd1037660e85b45b6/THIRD-PARTY-NOTICES.TXT",
+          "source_url": "https://github.com/dotnet/runtime/blob/40caa5753b677322f2202f6fd1037660e85b45b6/THIRD-PARTY-NOTICES.TXT",
+          "git_blob_sha1": "ca41ed84ced12bc3d9979c31df6ad456a4c8ac2f",
+          "bytes": 91918,
+          "sha256": "4790bb15f0edd1b105aecb05174fc6c589d4d9fad0c50616ef5f7dc365f1c8a6"
+        }
+      ],
+      "lexical_observation": {
+        "non_predefined_named_references": [],
+        "doctype_declarations": [],
+        "parser_executed": false
+      },
+      "purpose": "CoreLib MSBuild shared project metadata and source-item conditions",
+      "license_basis": "MIT; repository LICENSE.TXT and THIRD-PARTY-NOTICES.TXT are retained.",
+      "selection_note": "Production document role selected before any parser execution or timing; exact upstream bytes retained. Initial path without the /src/ component returned HTTP 404; directory metadata located this same named shared-project document."
+    },
+    {
+      "name": "hadoop",
+      "repository": "apache/hadoop",
+      "branch": "trunk",
+      "commit": "40433c51b4826127535c76035a970ba688cac82b",
+      "files": [
+        {
+          "role": "input",
+          "upstream_path": "hadoop-common-project/hadoop-common/src/main/resources/core-default.xml",
+          "path": "corpus/hadoop/core-default.xml",
+          "url": "https://raw.githubusercontent.com/apache/hadoop/40433c51b4826127535c76035a970ba688cac82b/hadoop-common-project/hadoop-common/src/main/resources/core-default.xml",
+          "source_url": "https://github.com/apache/hadoop/blob/40433c51b4826127535c76035a970ba688cac82b/hadoop-common-project/hadoop-common/src/main/resources/core-default.xml",
+          "git_blob_sha1": "6eed9a13fa222ce1a7528f42d4f9c55ec0aaea64",
+          "bytes": 165527,
+          "sha256": "617cbecb2c0677fe8ce73101d31b20e8ce74fd496b8d9c4d648fe5ea3f9ca42b"
+        },
+        {
+          "role": "license",
+          "upstream_path": "LICENSE.txt",
+          "path": "corpus/hadoop/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/apache/hadoop/40433c51b4826127535c76035a970ba688cac82b/LICENSE.txt",
+          "source_url": "https://github.com/apache/hadoop/blob/40433c51b4826127535c76035a970ba688cac82b/LICENSE.txt",
+          "git_blob_sha1": "5ab5097aa6dc42450b27dd44a3c36353f967a831",
+          "bytes": 15769,
+          "sha256": "1cd7319cd139fe0e28c4393ae431b6c8b583472cef1189bd1139a4b13c4be997"
+        },
+        {
+          "role": "notice",
+          "upstream_path": "NOTICE.txt",
+          "path": "corpus/hadoop/NOTICE.txt",
+          "url": "https://raw.githubusercontent.com/apache/hadoop/40433c51b4826127535c76035a970ba688cac82b/NOTICE.txt",
+          "source_url": "https://github.com/apache/hadoop/blob/40433c51b4826127535c76035a970ba688cac82b/NOTICE.txt",
+          "git_blob_sha1": "f6715f7beb085eeea1e4fc5f6175da47eebefb48",
+          "bytes": 1541,
+          "sha256": "bd8d44431e4ce7a8d03d194d6d11f6d1b3206de594885825ef7ce98ee40c456e"
+        }
+      ],
+      "lexical_observation": {
+        "non_predefined_named_references": [],
+        "doctype_declarations": [],
+        "parser_executed": false
+      },
+      "purpose": "Distributed-system default configuration with long descriptive text and comments",
+      "license_basis": "Apache-2.0; original file header, repository LICENSE.txt and NOTICE.txt are retained.",
+      "selection_note": "Production document role selected before any parser execution or timing; exact upstream bytes retained."
+    },
+    {
+      "name": "qt",
+      "repository": "qt/qttranslations",
+      "branch": "dev",
+      "commit": "8b1c94c7125f1539317a43b43840ba918cd45e92",
+      "files": [
+        {
+          "role": "input",
+          "upstream_path": "translations/qtbase_de.ts",
+          "path": "corpus/qt/qtbase_de.ts",
+          "url": "https://raw.githubusercontent.com/qt/qttranslations/8b1c94c7125f1539317a43b43840ba918cd45e92/translations/qtbase_de.ts",
+          "source_url": "https://github.com/qt/qttranslations/blob/8b1c94c7125f1539317a43b43840ba918cd45e92/translations/qtbase_de.ts",
+          "git_blob_sha1": "fdcfbed854ecb15a4e173214899fc377fb70359c",
+          "bytes": 276105,
+          "sha256": "82528f18432ac5b0967b522fbd0f1e597b1544ec481648e316406963bdd1499d"
+        },
+        {
+          "role": "license",
+          "upstream_path": "LICENSES/GPL-3.0-only.txt",
+          "path": "corpus/qt/GPL-3.0-only.txt",
+          "url": "https://raw.githubusercontent.com/qt/qttranslations/8b1c94c7125f1539317a43b43840ba918cd45e92/LICENSES/GPL-3.0-only.txt",
+          "source_url": "https://github.com/qt/qttranslations/blob/8b1c94c7125f1539317a43b43840ba918cd45e92/LICENSES/GPL-3.0-only.txt",
+          "git_blob_sha1": "94a9ed024d3859793618152ea559a168bbcbb5e2",
+          "bytes": 35147,
+          "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+        },
+        {
+          "role": "license",
+          "upstream_path": "LICENSES/BSD-3-Clause.txt",
+          "path": "corpus/qt/BSD-3-Clause.txt",
+          "url": "https://raw.githubusercontent.com/qt/qttranslations/8b1c94c7125f1539317a43b43840ba918cd45e92/LICENSES/BSD-3-Clause.txt",
+          "source_url": "https://github.com/qt/qttranslations/blob/8b1c94c7125f1539317a43b43840ba918cd45e92/LICENSES/BSD-3-Clause.txt",
+          "git_blob_sha1": "b91bbd89468099ae5c3028f176783976ca538187",
+          "bytes": 1469,
+          "sha256": "9f0490f18656c6f2435bd14f603ef0c96434d1825615363dce43abb42ed1dcce"
+        },
+        {
+          "role": "license",
+          "upstream_path": "LICENSES/LicenseRef-Qt-Commercial.txt",
+          "path": "corpus/qt/LicenseRef-Qt-Commercial.txt",
+          "url": "https://raw.githubusercontent.com/qt/qttranslations/8b1c94c7125f1539317a43b43840ba918cd45e92/LICENSES/LicenseRef-Qt-Commercial.txt",
+          "source_url": "https://github.com/qt/qttranslations/blob/8b1c94c7125f1539317a43b43840ba918cd45e92/LICENSES/LicenseRef-Qt-Commercial.txt",
+          "git_blob_sha1": "825b1f358b1f42d762112defbf0a193c9d968488",
+          "bytes": 462,
+          "sha256": "9b1f50aae6267f9d5e0ceb6775ee86450262c25ec7c0573e151fe5d3f18a4700"
+        },
+        {
+          "role": "license",
+          "upstream_path": "LICENSES/Qt-GPL-exception-1.0.txt",
+          "path": "corpus/qt/Qt-GPL-exception-1.0.txt",
+          "url": "https://raw.githubusercontent.com/qt/qttranslations/8b1c94c7125f1539317a43b43840ba918cd45e92/LICENSES/Qt-GPL-exception-1.0.txt",
+          "source_url": "https://github.com/qt/qttranslations/blob/8b1c94c7125f1539317a43b43840ba918cd45e92/LICENSES/Qt-GPL-exception-1.0.txt",
+          "git_blob_sha1": "d0322bf0e4e1d484d35cc6a1d96fa2b65b9d579b",
+          "bytes": 965,
+          "sha256": "40678d338ce53cd93f8b22b281a2ecbcaa3ee65ce60b25ffb0c462b0530846b2"
+        },
+        {
+          "role": "license-metadata",
+          "upstream_path": "licenseRule.json",
+          "path": "corpus/qt/licenseRule.json",
+          "url": "https://raw.githubusercontent.com/qt/qttranslations/8b1c94c7125f1539317a43b43840ba918cd45e92/licenseRule.json",
+          "source_url": "https://github.com/qt/qttranslations/blob/8b1c94c7125f1539317a43b43840ba918cd45e92/licenseRule.json",
+          "git_blob_sha1": "103d429b814908015e7e44f9c9d9636ff0f29eea",
+          "bytes": 2401,
+          "sha256": "0087aedb53430fb236602d1965834ff1c902e905b672b759a22ce9665f8a836c"
+        }
+      ],
+      "lexical_observation": {
+        "non_predefined_named_references": [],
+        "doctype_declarations": [
+          "<!DOCTYPE TS>"
+        ],
+        "parser_executed": false
+      },
+      "purpose": "German application translation catalog with non-ASCII text and message contexts",
+      "license_basis": "No per-file SPDX header. Repository licenseRule.json applies its default module rule to .ts files: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only. All four available upstream LICENSES texts and the rule are retained; GPL-3.0-only is the included open-source license option.",
+      "selection_note": "Production document role selected before any parser execution or timing; exact upstream bytes retained."
+    },
+    {
+      "name": "musescore",
+      "repository": "musescore/MuseScore",
+      "branch": "main",
+      "commit": "c855c21114333cc42676e4dbbf341a9cbb91056e",
+      "files": [
+        {
+          "role": "input",
+          "upstream_path": "share/instruments/instruments.xml",
+          "path": "corpus/musescore/instruments.xml",
+          "url": "https://raw.githubusercontent.com/musescore/MuseScore/c855c21114333cc42676e4dbbf341a9cbb91056e/share/instruments/instruments.xml",
+          "source_url": "https://github.com/musescore/MuseScore/blob/c855c21114333cc42676e4dbbf341a9cbb91056e/share/instruments/instruments.xml",
+          "git_blob_sha1": "6a78fc7ace18208914ceb5fb9064d49de02421c6",
+          "bytes": 820743,
+          "sha256": "fdd9e4a1043665a4aaed90d48dbf82d6931f118e79aa42590a99c87f2c564e12"
+        },
+        {
+          "role": "license",
+          "upstream_path": "LICENSE.txt",
+          "path": "corpus/musescore/LICENSE.txt",
+          "url": "https://raw.githubusercontent.com/musescore/MuseScore/c855c21114333cc42676e4dbbf341a9cbb91056e/LICENSE.txt",
+          "source_url": "https://github.com/musescore/MuseScore/blob/c855c21114333cc42676e4dbbf341a9cbb91056e/LICENSE.txt",
+          "git_blob_sha1": "6d802f72be583b9df9102f85815f5c1e6cac2222",
+          "bytes": 36493,
+          "sha256": "73e75f61f0dfce4fd83ad1f3f45d1d6f9ea8cdfd21a92d7a9216d47e5b3bbb88"
+        }
+      ],
+      "lexical_observation": {
+        "non_predefined_named_references": [],
+        "doctype_declarations": [],
+        "parser_executed": false
+      },
+      "purpose": "Production instrument catalog with nested families, attributes and music metadata",
+      "license_basis": "GPL-3.0-only according to repository LICENSE.txt; that complete upstream file is retained.",
+      "selection_note": "Production document role selected before any parser execution or timing; exact upstream bytes retained. Upstream generated this committed catalog from its instrument spreadsheet. This acquisition does not run the generator or modify its output."
+    }
+  ],
+  "licenses": {
+    "libreoffice": "File header: MPL-2.0, incorporating Apache-2.0 work. Original header, COPYING.MPL, NOTICE, and the complete upstream license.xml (including Apache-2.0 terms) are retained.",
+    "dotnet": "MIT; repository LICENSE.TXT and THIRD-PARTY-NOTICES.TXT are retained.",
+    "hadoop": "Apache-2.0; original file header, repository LICENSE.txt and NOTICE.txt are retained.",
+    "qt": "No per-file SPDX header. Repository licenseRule.json applies its default module rule to .ts files: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only. All four available upstream LICENSES texts and the rule are retained; GPL-3.0-only is the included open-source license option.",
+    "musescore": "GPL-3.0-only according to repository LICENSE.txt; that complete upstream file is retained."
+  }
+}

@@ -33,6 +33,65 @@ def write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, indent=2) + "\n")
 
 
+def corpus_files(manifest_path: Path) -> tuple[dict[str, Path], dict[str, str]]:
+    """Verify original input and notice bytes without parsing the XML."""
+    manifest_path = manifest_path.resolve(strict=True)
+    manifest = json.loads(manifest_path.read_text())
+    inputs: dict[str, Path] = {}
+    hashes = {str(manifest_path): digest(manifest_path)}
+    for project in manifest["projects"]:
+        if project["name"] in inputs:
+            raise ValueError("duplicate corpus project")
+        entries = [entry for entry in project["files"] if entry["role"] == "input"]
+        if len(entries) != 1:
+            raise ValueError("expected one original input per project")
+        for entry in project["files"]:
+            path = (manifest_path.parent / entry["path"]).resolve(strict=True)
+            if not path.is_relative_to(manifest_path.parent) or str(path) in hashes:
+                raise ValueError("unsafe or repeated corpus path")
+            data = path.read_bytes()
+            value = hashlib.sha256(data).hexdigest()
+            if value != entry["sha256"] or len(data) != entry.get("bytes", len(data)):
+                raise ValueError(f"corpus identity mismatch: {path}")
+            if "git_blob_sha1" in entry:
+                blob = hashlib.sha1(
+                    b"blob " + str(len(data)).encode() + b"\0" + data
+                ).hexdigest()
+                if blob != entry["git_blob_sha1"]:
+                    raise ValueError(f"upstream blob identity mismatch: {path}")
+            hashes[str(path)] = value
+            if entry["role"] == "input":
+                inputs[project["name"]] = path
+    if not inputs:
+        raise ValueError("empty corpus")
+    return inputs, hashes
+
+
+def holdout_corpus() -> tuple[Path, dict[str, Path], dict[str, str]]:
+    """Check the reserved corpus's pre-measurement freeze and tuning separation."""
+    manifest = ROOT / "benchmarks/holdout/corpus-manifest.json"
+    freeze_path = manifest.with_name("freeze.json")
+    freeze = json.loads(freeze_path.read_text())
+    if digest(manifest) != freeze["manifest_sha256"]:
+        raise ValueError("holdout manifest differs from its original freeze")
+    inputs, hashes = corpus_files(manifest)
+    frozen_inputs = {entry["project"]: entry["sha256"] for entry in freeze["inputs"]}
+    if {name: hashes[str(path)] for name, path in inputs.items()} != frozen_inputs:
+        raise ValueError("holdout inputs differ from their original freeze")
+    tuning = json.loads((ROOT / "benchmarks/projects/corpus-manifest.json").read_text())
+    tuning_names = {project["name"] for project in tuning["projects"]}
+    tuning_hashes = {
+        entry["sha256"]
+        for project in tuning["projects"]
+        for entry in project["files"]
+        if entry["role"] == "input"
+    }
+    if inputs.keys() & tuning_names or set(frozen_inputs.values()) & tuning_hashes:
+        raise ValueError("holdout reuses a tuning project or input")
+    hashes[str(freeze_path)] = digest(freeze_path)
+    return manifest, inputs, hashes
+
+
 def source_hashes(checkout: Path) -> dict[str, str]:
     paths = [checkout / "Cargo.toml", checkout / "Cargo.lock"]
     paths.extend(path for path in (checkout / "crates").rglob("*") if path.is_file())
@@ -305,6 +364,20 @@ def run(args: argparse.Namespace) -> None:
     build_records = {
         name: validate_build(path, libraries[name]) for name, path in builds.items()
     }
+    if args.mode == "holdout":
+        project_corpus, project_inputs, corpus_hashes = holdout_corpus()
+        if args.selection_note is None or not args.selection_note.read_text().strip():
+            raise ValueError(
+                "holdout requires a nonempty --selection-note recorded before measurement"
+            )
+        selection_note = args.selection_note.resolve(strict=True)
+        corpus_hashes[str(selection_note)] = digest(selection_note)
+        project_group = "holdout"
+    else:
+        project_corpus = ROOT / "benchmarks/projects/corpus-manifest.json"
+        project_inputs, corpus_hashes = corpus_files(project_corpus)
+        selection_note = None
+        project_group = "real"
     manifests = [
         *builds.values(),
         *(p.resolve(strict=True) for p in args.build_manifest),
@@ -312,6 +385,7 @@ def run(args: argparse.Namespace) -> None:
     observed = [
         *libraries.values(),
         *manifests,
+        *(Path(path) for path in corpus_hashes),
         Path(__file__).resolve(),
         ROOT / "tools/corpus.py",
     ]
@@ -341,6 +415,12 @@ def run(args: argparse.Namespace) -> None:
     report: dict[str, Any] = {
         "status": "failed",
         "mode": args.mode,
+        "selection_note": str(selection_note) if selection_note else None,
+        "selection_note_text": selection_note.read_text() if selection_note else None,
+        "project_corpus": str(project_corpus),
+        "evaluation": "final holdout after code selection"
+        if args.mode == "holdout"
+        else "tuning",
         "cpu": args.cpu,
         "seed": args.seed,
         "libraries": {k: str(v) for k, v in libraries.items()},
@@ -358,7 +438,7 @@ def run(args: argparse.Namespace) -> None:
     rows = []
     try:
         corpora = [
-            ("real", ROOT / "benchmarks/projects/corpus-manifest.json"),
+            (project_group, project_corpus),
             ("generated", generated_corpus(output)),
         ]
         jobs = [("native", group, corpus) for group, corpus in corpora]
@@ -376,7 +456,7 @@ def run(args: argparse.Namespace) -> None:
                     libraries[label]
                 ):
                     raise ValueError(f"consumer library differs: {engine}")
-            jobs.append(("python", "real", corpora[0][1]))
+            jobs.append(("python", project_group, project_corpus))
         for consumer, group, corpus in jobs:
             destination = output / f"{consumer}-{group}"
             script = "projects.py" if consumer == "native" else "python_projects.py"
@@ -430,7 +510,7 @@ def run(args: argparse.Namespace) -> None:
                 )
             summary = destination / "summary.json"
             conditions = summarize(json.loads(summary.read_text()))
-            expected_count = 24 if group == "real" else 16
+            expected_count = len(project_inputs) * 4 if group == project_group else 16
             if len(conditions) != expected_count:
                 raise ValueError(
                     f"expected {expected_count} conditions, got {len(conditions)}"
@@ -481,12 +561,23 @@ def main() -> None:
         "--toolchain",
         help="Optional rustup toolchain (for example stable or ohm); otherwise use the checkout's default",
     )
+    commands.add_parser(
+        "verify-holdout",
+        help="Verify frozen input/license bytes without parsing or timing",
+    )
     runner = commands.add_parser(
         "run", help="Compare three frozen parser libraries sequentially"
     )
     for name in ["candidate", "baseline", "expat", "output"]:
         runner.add_argument(f"--{name}", type=Path, required=True)
-    runner.add_argument("--mode", choices=["screen", "confirm"], default="screen")
+    runner.add_argument(
+        "--mode", choices=["screen", "confirm", "holdout"], default="screen"
+    )
+    runner.add_argument(
+        "--selection-note",
+        type=Path,
+        help="Required for holdout: prior decision selecting the frozen code/libraries",
+    )
     runner.add_argument("--cpu", type=int, required=True)
     runner.add_argument("--python", type=Path, default=Path(sys.executable))
     runner.add_argument(
@@ -523,6 +614,21 @@ def main() -> None:
         help="Measured parses per Python process (screen: 3, confirm: 10)",
     )
     args = parser.parse_args()
+    if args.command == "verify-holdout":
+        manifest, inputs, hashes = holdout_corpus()
+        print(
+            json.dumps(
+                {
+                    "manifest": str(manifest),
+                    "manifest_sha256": digest(manifest),
+                    "projects": len(inputs),
+                    "verified_files": len(hashes),
+                    "xml_parsed": False,
+                },
+                indent=2,
+            )
+        )
+        return
     if not sys.platform.startswith("linux") or os.uname().machine != "x86_64":
         parser.error("this benchmark recipe requires x86-64 Linux")
     if args.command == "build":

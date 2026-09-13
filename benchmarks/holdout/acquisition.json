@@ -1,0 +1,238 @@
+{
+  "recorded_at": "2026-09-13T12:20:18.085065+00:00",
+  "github_account_verified": "charliermarsh",
+  "github_operations": "All GitHub API requests used /home/dev-user/.local/bin/gh-auto from the OSS checkout. No Git writes.",
+  "method": "GitHub contents API pinned to full commit; original response content base64-decoded to bytes, with API byte count, Git blob SHA-1 and SHA-256 checked.",
+  "exact_file_acquisition_commands": [
+    {
+      "project": "libreoffice",
+      "role": "input",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/LibreOffice/core/contents/officecfg/registry/schema/org/openoffice/Office/Calc.xcs?ref=bcc91ade19d17e81688587c1d0e83956fa5813a5"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "libreoffice",
+      "role": "license",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/LibreOffice/core/contents/COPYING.MPL?ref=bcc91ade19d17e81688587c1d0e83956fa5813a5"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "libreoffice",
+      "role": "notice",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/LibreOffice/core/contents/readlicense_oo/license/NOTICE?ref=bcc91ade19d17e81688587c1d0e83956fa5813a5"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "libreoffice",
+      "role": "license",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/LibreOffice/core/contents/readlicense_oo/license/license.xml?ref=bcc91ade19d17e81688587c1d0e83956fa5813a5"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "dotnet",
+      "role": "input",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/dotnet/runtime/contents/src/libraries/System.Private.CoreLib/src/System.Private.CoreLib.Shared.projitems?ref=40caa5753b677322f2202f6fd1037660e85b45b6"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "dotnet",
+      "role": "license",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/dotnet/runtime/contents/LICENSE.TXT?ref=40caa5753b677322f2202f6fd1037660e85b45b6"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "dotnet",
+      "role": "notice",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/dotnet/runtime/contents/THIRD-PARTY-NOTICES.TXT?ref=40caa5753b677322f2202f6fd1037660e85b45b6"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "hadoop",
+      "role": "input",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/apache/hadoop/contents/hadoop-common-project/hadoop-common/src/main/resources/core-default.xml?ref=40433c51b4826127535c76035a970ba688cac82b"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "hadoop",
+      "role": "license",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/apache/hadoop/contents/LICENSE.txt?ref=40433c51b4826127535c76035a970ba688cac82b"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "hadoop",
+      "role": "notice",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/apache/hadoop/contents/NOTICE.txt?ref=40433c51b4826127535c76035a970ba688cac82b"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "qt",
+      "role": "input",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/qt/qttranslations/contents/translations/qtbase_de.ts?ref=8b1c94c7125f1539317a43b43840ba918cd45e92"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "qt",
+      "role": "license",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/qt/qttranslations/contents/LICENSES/GPL-3.0-only.txt?ref=8b1c94c7125f1539317a43b43840ba918cd45e92"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "qt",
+      "role": "license",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/qt/qttranslations/contents/LICENSES/BSD-3-Clause.txt?ref=8b1c94c7125f1539317a43b43840ba918cd45e92"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "qt",
+      "role": "license",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/qt/qttranslations/contents/LICENSES/LicenseRef-Qt-Commercial.txt?ref=8b1c94c7125f1539317a43b43840ba918cd45e92"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "qt",
+      "role": "license",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/qt/qttranslations/contents/LICENSES/Qt-GPL-exception-1.0.txt?ref=8b1c94c7125f1539317a43b43840ba918cd45e92"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "qt",
+      "role": "license-metadata",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/qt/qttranslations/contents/licenseRule.json?ref=8b1c94c7125f1539317a43b43840ba918cd45e92"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "musescore",
+      "role": "input",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/musescore/MuseScore/contents/share/instruments/instruments.xml?ref=c855c21114333cc42676e4dbbf341a9cbb91056e"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    },
+    {
+      "project": "musescore",
+      "role": "license",
+      "argv": [
+        "/home/dev-user/.local/bin/gh-auto",
+        "api",
+        "repos/musescore/MuseScore/contents/LICENSE.txt?ref=c855c21114333cc42676e4dbbf341a9cbb91056e"
+      ],
+      "cwd": "/home/dev-user/code/oss/oriole",
+      "materialization": "Base64-decode the JSON content field without text conversion; check bytes, SHA-256 and Git blob SHA-1 before writing."
+    }
+  ],
+  "failed_path_lookups": [
+    {
+      "project": "dotnet",
+      "upstream_path": "src/libraries/System.Private.CoreLib/System.Private.CoreLib.Shared.projitems",
+      "commit": "40caa5753b677322f2202f6fd1037660e85b45b6",
+      "exit_code": 1,
+      "response": {
+        "message": "Not Found",
+        "documentation_url": "https://docs.github.com/rest/repos/contents#get-repository-content",
+        "status": "404"
+      },
+      "stderr": "gh: Not Found (HTTP 404)\n",
+      "response_sha256": "e45906ce02e79f16fb87a838d86bb4e497e37a9591f97608fa013bbcd8b9cbc2",
+      "resolution": "Corrected only the location of the same named CoreLib shared-project document by inspecting its parent directory."
+    },
+    {
+      "project": "qt",
+      "upstream_path": "translations/LICENSE",
+      "commit": "8b1c94c7125f1539317a43b43840ba918cd45e92",
+      "exit_code": 1,
+      "response": {
+        "message": "Not Found",
+        "documentation_url": "https://docs.github.com/rest/repos/contents#get-repository-content",
+        "status": "404"
+      },
+      "stderr": "gh: Not Found (HTTP 404)\n",
+      "response_sha256": "e45906ce02e79f16fb87a838d86bb4e497e37a9591f97608fa013bbcd8b9cbc2",
+      "resolution": "No translations-directory license file; retained repository licenseRule.json and all LICENSES files instead."
+    }
+  ],
+  "no_xml_parser_benchmark_or_compiler_executed": true,
+  "original_api_responses_local_only": "/tmp/oriole-review-holdout-proposal/provenance"
+}

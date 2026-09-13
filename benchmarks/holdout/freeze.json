@@ -1,0 +1,155 @@
+{
+  "status": "held_unmeasured",
+  "frozen_at": "2026-09-13T12:28:09.721339+00:00",
+  "reason": "Five roles and original input blobs fixed before parser/preflight/timing execution. Reserved for a final evaluation after code selection; no candidate tuning using these inputs.",
+  "manifest_sha256": "8c0600d30f246058d84ad005e8de64b8b93e6aa5e759664c204250395ba0175d",
+  "inputs": [
+    {
+      "project": "libreoffice",
+      "path": "corpus/libreoffice/Calc.xcs",
+      "bytes": 81280,
+      "sha256": "365962d824b1941bb692caefca292d5d5e9e6ed5a73e6d13d0630de18e0c8989"
+    },
+    {
+      "project": "dotnet",
+      "path": "corpus/dotnet/System.Private.CoreLib.Shared.projitems",
+      "bytes": 254307,
+      "sha256": "f46774b63c3fe11cdbb9c3d8fa99c079c210aa01c818d4d351ee146459ce9042"
+    },
+    {
+      "project": "hadoop",
+      "path": "corpus/hadoop/core-default.xml",
+      "bytes": 165527,
+      "sha256": "617cbecb2c0677fe8ce73101d31b20e8ce74fd496b8d9c4d648fe5ea3f9ca42b"
+    },
+    {
+      "project": "qt",
+      "path": "corpus/qt/qtbase_de.ts",
+      "bytes": 276105,
+      "sha256": "82528f18432ac5b0967b522fbd0f1e597b1544ec481648e316406963bdd1499d"
+    },
+    {
+      "project": "musescore",
+      "path": "corpus/musescore/instruments.xml",
+      "bytes": 820743,
+      "sha256": "fdd9e4a1043665a4aaed90d48dbf82d6931f118e79aa42590a99c87f2c564e12"
+    }
+  ],
+  "selected_code_binding": null,
+  "selected_code_binding_note": "Final evaluator must bind selected source and libraries separately. This corpus acquisition does not choose the implementation.",
+  "verification": {
+    "manifest_listed_files": 18,
+    "projects": 5,
+    "all_listed_byte_counts_sha256_and_git_blob_sha1_match": true,
+    "manifest_shape_projects_py_compatible": true,
+    "acquisition_script_ast_valid": true,
+    "parser_or_benchmark_executed": false
+  },
+  "files": {
+    "README.md": {
+      "bytes": 6464,
+      "sha256": "0a98c85a2ef6e9b17d76f927160232f73f047cc30c371784effc774580304be0"
+    },
+    "absence-check.json": {
+      "bytes": 1059,
+      "sha256": "6889052dda399ab303dbc1656cd0c8fd5bc35419b605ace589a39a614524efa4"
+    },
+    "acquisition.json": {
+      "bytes": 10193,
+      "sha256": "7b3a5c31a82fac1e1be2b09abba23131d077bec79e7491d9f78d5f5e974fa1ed"
+    },
+    "corpus/dotnet/LICENSE.TXT": {
+      "bytes": 1116,
+      "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310"
+    },
+    "corpus/dotnet/System.Private.CoreLib.Shared.projitems": {
+      "bytes": 254307,
+      "sha256": "f46774b63c3fe11cdbb9c3d8fa99c079c210aa01c818d4d351ee146459ce9042"
+    },
+    "corpus/dotnet/THIRD-PARTY-NOTICES.TXT": {
+      "bytes": 91918,
+      "sha256": "4790bb15f0edd1b105aecb05174fc6c589d4d9fad0c50616ef5f7dc365f1c8a6"
+    },
+    "corpus/hadoop/LICENSE.txt": {
+      "bytes": 15769,
+      "sha256": "1cd7319cd139fe0e28c4393ae431b6c8b583472cef1189bd1139a4b13c4be997"
+    },
+    "corpus/hadoop/NOTICE.txt": {
+      "bytes": 1541,
+      "sha256": "bd8d44431e4ce7a8d03d194d6d11f6d1b3206de594885825ef7ce98ee40c456e"
+    },
+    "corpus/hadoop/core-default.xml": {
+      "bytes": 165527,
+      "sha256": "617cbecb2c0677fe8ce73101d31b20e8ce74fd496b8d9c4d648fe5ea3f9ca42b"
+    },
+    "corpus/libreoffice/COPYING.MPL": {
+      "bytes": 16725,
+      "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
+    },
+    "corpus/libreoffice/Calc.xcs": {
+      "bytes": 81280,
+      "sha256": "365962d824b1941bb692caefca292d5d5e9e6ed5a73e6d13d0630de18e0c8989"
+    },
+    "corpus/libreoffice/NOTICE": {
+      "bytes": 1859,
+      "sha256": "8d34210ebbfaee4ba258ef7b30c3044170f356ab82c8259c81b53860bcdeef7b"
+    },
+    "corpus/libreoffice/license.xml": {
+      "bytes": 605055,
+      "sha256": "322c24ef047da3acf78479ef5b56c936ccc68aae998c5505d1fb18841e94019d"
+    },
+    "corpus/musescore/LICENSE.txt": {
+      "bytes": 36493,
+      "sha256": "73e75f61f0dfce4fd83ad1f3f45d1d6f9ea8cdfd21a92d7a9216d47e5b3bbb88"
+    },
+    "corpus/musescore/instruments.xml": {
+      "bytes": 820743,
+      "sha256": "fdd9e4a1043665a4aaed90d48dbf82d6931f118e79aa42590a99c87f2c564e12"
+    },
+    "corpus/qt/BSD-3-Clause.txt": {
+      "bytes": 1469,
+      "sha256": "9f0490f18656c6f2435bd14f603ef0c96434d1825615363dce43abb42ed1dcce"
+    },
+    "corpus/qt/GPL-3.0-only.txt": {
+      "bytes": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    "corpus/qt/LicenseRef-Qt-Commercial.txt": {
+      "bytes": 462,
+      "sha256": "9b1f50aae6267f9d5e0ceb6775ee86450262c25ec7c0573e151fe5d3f18a4700"
+    },
+    "corpus/qt/Qt-GPL-exception-1.0.txt": {
+      "bytes": 965,
+      "sha256": "40678d338ce53cd93f8b22b281a2ecbcaa3ee65ce60b25ffb0c462b0530846b2"
+    },
+    "corpus/qt/licenseRule.json": {
+      "bytes": 2401,
+      "sha256": "0087aedb53430fb236602d1965834ff1c902e905b672b759a22ce9665f8a836c"
+    },
+    "corpus/qt/qtbase_de.ts": {
+      "bytes": 276105,
+      "sha256": "82528f18432ac5b0967b522fbd0f1e597b1544ec481648e316406963bdd1499d"
+    },
+    "corpus-manifest.json": {
+      "bytes": 16860,
+      "sha256": "8c0600d30f246058d84ad005e8de64b8b93e6aa5e759664c204250395ba0175d"
+    },
+    "fetch.py": {
+      "bytes": 2780,
+      "sha256": "6bea1397069f06e2553f30c6b1b43ca13c88c1ab9c6fcf4d88895ea4f9c2c943"
+    },
+    "selection-paths.json": {
+      "bytes": 647,
+      "sha256": "6a0e2cc64d492f5038646c571cc3a043d24ed482754d6e50bd6d43654a4c512c"
+    },
+    "selection-repositories.json": {
+      "bytes": 885,
+      "sha256": "5bfed2b74c91ede98a2352b843c1370efb299a3fc84aab100b1e43617ae441d5"
+    },
+    ".gitattributes": {
+      "bytes": 84,
+      "sha256": "81ff7ce870fbe18f5253fe1f16619c264dcdfa1345fdc024e1c5d8ec7b373b56"
+    }
+  },
+  "original_selection_frozen_at": "2026-09-13T12:21:29.610808+00:00"
+}

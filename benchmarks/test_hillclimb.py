@@ -370,6 +370,129 @@ class BuildBindingTests(unittest.TestCase):
             )
 
 
+class CorpusTests(unittest.TestCase):
+    def fixture(self, directory):
+        path = directory / "input.xml"
+        path.write_bytes(b"<root/>")
+        notice = directory / "NOTICE"
+        notice.write_bytes(b"Original notice")
+        manifest = directory / "corpus.json"
+        data = {
+            "projects": [
+                {
+                    "name": "project",
+                    "files": [
+                        {
+                            "role": role,
+                            "path": p.name,
+                            "sha256": hillclimb.digest(p),
+                            "bytes": p.stat().st_size,
+                        }
+                        for role, p in [("input", path), ("notice", notice)]
+                    ],
+                }
+            ]
+        }
+        manifest.write_text(json.dumps(data))
+        return manifest, data
+
+    def test_reserved_holdout_is_distinct_and_all_original_files_match(self):
+        manifest, inputs, hashes = hillclimb.holdout_corpus()
+        self.assertEqual(
+            set(inputs), {"libreoffice", "dotnet", "hadoop", "qt", "musescore"}
+        )
+        self.assertEqual(
+            len(hashes), 20
+        )  # 18 source/notice files plus manifest and freeze.
+        self.assertEqual(hashes[str(manifest)], hillclimb.digest(manifest))
+
+    def test_holdout_requires_prior_selection_and_uses_reserved_manifest(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            library = directory / "parser.so"
+            library.write_bytes(b"parser")
+            manifest = directory / "build.json"
+            manifest.write_text(
+                json.dumps(
+                    {"status": "passed", "library_sha256": hillclimb.digest(library)}
+                )
+            )
+            args = argparse.Namespace(
+                cpu=6,
+                output=directory / "missing-note",
+                candidate=library,
+                baseline=library,
+                expat=library,
+                baseline_build=manifest,
+                candidate_build=manifest,
+                build_manifest=[],
+                consumers=None,
+                mode="holdout",
+                selection_note=None,
+                seed=1,
+                native_iterations=None,
+                python_iterations=None,
+                python=Path("python3"),
+            )
+            with (
+                patch.object(os, "sched_getaffinity", return_value={6}),
+                patch.object(hillclimb.subprocess, "run") as child,
+            ):
+                with self.assertRaisesRegex(ValueError, "selection-note"):
+                    hillclimb.run(args)
+                child.assert_not_called()
+                args.output = directory / "selected"
+                args.selection_note = directory / "selection.md"
+                args.selection_note.write_text(
+                    "Code selected using tuning results before holdout exposure."
+                )
+                child.side_effect = subprocess.CalledProcessError(1, ["worker"])
+                with self.assertRaises(subprocess.CalledProcessError):
+                    hillclimb.run(args)
+                command = child.call_args.args[0]
+                self.assertEqual(
+                    command[command.index("--corpus") + 1],
+                    str(hillclimb.ROOT / "benchmarks/holdout/corpus-manifest.json"),
+                )
+                report = json.loads((args.output / "report.json").read_text())
+                self.assertEqual(
+                    report["evaluation"], "final holdout after code selection"
+                )
+                self.assertEqual(
+                    report["sha256_before"][str(args.selection_note)],
+                    hillclimb.digest(args.selection_note),
+                )
+
+    def test_changed_input_or_notice_is_rejected(self):
+        for filename in ["input.xml", "NOTICE"]:
+            with (
+                self.subTest(filename=filename),
+                tempfile.TemporaryDirectory() as temporary,
+            ):
+                directory = Path(temporary)
+                manifest, _ = self.fixture(directory)
+                inputs, _ = hillclimb.corpus_files(manifest)
+                self.assertEqual(set(inputs), {"project"})
+                (directory / filename).write_bytes(b"changed")
+                with self.assertRaisesRegex(ValueError, "identity mismatch"):
+                    hillclimb.corpus_files(manifest)
+
+    def test_duplicate_project_or_multiple_inputs_is_rejected(self):
+        for duplicate_project in [False, True]:
+            with (
+                self.subTest(duplicate_project=duplicate_project),
+                tempfile.TemporaryDirectory() as temporary,
+            ):
+                manifest, data = self.fixture(Path(temporary))
+                if duplicate_project:
+                    data["projects"].append(copy.deepcopy(data["projects"][0]))
+                else:
+                    data["projects"][0]["files"][1]["role"] = "input"
+                manifest.write_text(json.dumps(data))
+                with self.assertRaises(ValueError):
+                    hillclimb.corpus_files(manifest)
+
+
 class SummaryTests(unittest.TestCase):
     def test_median_of_within_round_ratios_discards_warmups(self):
         row = hillclimb.summarize(fixture())[0]

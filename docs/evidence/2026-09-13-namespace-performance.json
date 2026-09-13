@@ -1,0 +1,890 @@
+{
+  "schema_version": 1,
+  "label": "namespace",
+  "pr": 238,
+  "pr_url": "https://github.com/astral-sh/xeme/pull/238",
+  "status": "complete",
+  "builds": {
+    "candidate": {
+      "receipt": {
+        "path": "/tmp/xeme-perf-prs-20260913/namespace/build/build.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "72a8d1227abf6c3076882b4d6178eaa4fd7fd055c695113980cb09fe49eeb145",
+        "archive_member": "study/namespace/build/build.json",
+        "archive_membership": "under study root"
+      },
+      "status": "passed",
+      "revision": "9ab8f47189308814e5f685496bc450048e89372d",
+      "checkout": "/home/dev-user/.codex/worktrees/xeme-perf-namespace",
+      "compiler": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+      "target": "x86_64-unknown-linux-gnu",
+      "command": [
+        "cargo",
+        "+ohm",
+        "-Zohm-defaults=no",
+        "rustc",
+        "--locked",
+        "--release",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--manifest-path",
+        "/home/dev-user/.codex/worktrees/xeme-perf-namespace/Cargo.toml",
+        "--target-dir",
+        "/home/dev-user/.cache/xeme-targets/perf-namespace",
+        "--config",
+        "profile.release.opt-level=3",
+        "--config",
+        "profile.release.lto=\"thin\"",
+        "--config",
+        "profile.release.codegen-units=1",
+        "-p",
+        "xeme_expat",
+        "--crate-type",
+        "cdylib,staticlib",
+        "--message-format=json-render-diagnostics",
+        "-vv"
+      ],
+      "rustflags": "-Ctarget-cpu=x86-64",
+      "library": "/tmp/xeme-perf-prs-20260913/namespace/build/libxeme_expat.so",
+      "library_sha256": "ad995d7e031a9686165b3377b6d3ac53ee6b134975839b11c1673ac0be60a48a",
+      "builder_sha256": "cbe1e9cacbcc16a5ed3336369932152ea092ad77c8d4f8c6ab9e6a94989e450a",
+      "cargo_messages_sha256": "d24a029ff3f962d860f80b53fb37a6a23a241832188a8a068c1ba342a97128fd",
+      "source_files_recorded": 78
+    },
+    "baseline": {
+      "receipt": {
+        "path": "/tmp/xeme-perf-prs-20260913/doctype/build/build.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "8b12ebdbc69729459ef7ed39ed0bbe39693994d88787192cebeecd882d743e61",
+        "archive_member": "study/doctype/build/build.json",
+        "archive_membership": "under study root"
+      },
+      "status": "passed",
+      "revision": "86868a706465dc389d8b6bb536da7bff6c01c66b",
+      "checkout": "/home/dev-user/.codex/worktrees/xeme-perf-doctype",
+      "compiler": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+      "target": "x86_64-unknown-linux-gnu",
+      "command": [
+        "cargo",
+        "+ohm",
+        "-Zohm-defaults=no",
+        "rustc",
+        "--locked",
+        "--release",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--manifest-path",
+        "/home/dev-user/.codex/worktrees/xeme-perf-doctype/Cargo.toml",
+        "--target-dir",
+        "/home/dev-user/.cache/xeme-targets/perf-doctype",
+        "--config",
+        "profile.release.opt-level=3",
+        "--config",
+        "profile.release.lto=\"thin\"",
+        "--config",
+        "profile.release.codegen-units=1",
+        "-p",
+        "xeme_expat",
+        "--crate-type",
+        "cdylib,staticlib",
+        "--message-format=json-render-diagnostics",
+        "-vv"
+      ],
+      "rustflags": "-Ctarget-cpu=x86-64",
+      "library": "/tmp/xeme-perf-prs-20260913/doctype/build/libxeme_expat.so",
+      "library_sha256": "b6087607479279233401b85e8a14e1c53cca6d989edc72622d311389898fbcf6",
+      "builder_sha256": "cbe1e9cacbcc16a5ed3336369932152ea092ad77c8d4f8c6ab9e6a94989e450a",
+      "cargo_messages_sha256": "9233e8eebc3669cadf3108794c32e397351f827302655afbe78d390ad7698f9b",
+      "source_files_recorded": 78
+    }
+  },
+  "expat": {
+    "receipt": {
+      "path": "/tmp/oriole-pgo-study/expat-control-build.json",
+      "path_role": "original local provenance",
+      "exists": true,
+      "sha256": "88445a98ce2f5c8bb9825c89f24078b8c1f04032723266e4b0211e45646cf319",
+      "archive_member": "control/expat/build.json",
+      "archive_membership": "explicit packaging mapping; original path retained as provenance"
+    },
+    "status": "passed",
+    "library_sha256": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+    "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+    "compiler_target": "x86_64-linux-gnu",
+    "method": "Keep pinned Expat2.8.4 normal GCC13.3 -O3/NDEBUG/shared/no-LTO feature context; GCC13 native instrumentation data, not LLVM profdata. Profiles use relative build paths via -fprofile-prefix-path. Compare within engine before cross-engine normal/PGO comparison.",
+    "source_manifest_sha256": "92133e7fbd744a78af56dcea0465ace63b9cd84e198386515106e85b1d1e68db",
+    "normal_config_sha256": "ec397da0c61b6bab207c7aba9f830b5e69f79c8462e58d97c6e6891c87c44a4d",
+    "generated_config_sha256": "ec397da0c61b6bab207c7aba9f830b5e69f79c8462e58d97c6e6891c87c44a4d"
+  },
+  "consumers": {
+    "receipt": {
+      "path": "/tmp/xeme-perf-prs-20260913/namespace/consumers/build.json",
+      "path_role": "original local provenance",
+      "exists": true,
+      "sha256": "3a927739350c54d5d370d7caecc275481725852b0cc691b7d2192ea906a130f0",
+      "archive_member": "study/namespace/consumers/build.json",
+      "archive_membership": "under study root"
+    },
+    "status": "passed",
+    "cpython_revision": "3bb231a6a5dc02b95658877318bf61501a7209e9",
+    "python": "3.12.13 (main, Aug  7 2026, 02:25:39) [Clang 22.1.3 ]",
+    "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+    "adaptations": null,
+    "method": "All engines compile identical unmodified CPython 3.12.13 pyexpat.c and _elementtree.c with identical -O2 flags and the same narrow Expat-compatible header. Only the linked parser library and its rpath differ. No source adaptation, alternate allocator, LTO or PGO is applied."
+  },
+  "validation": {
+    "source": {
+      "path": "/tmp/xeme-perf-prs-20260913/namespace/validation-summary.json",
+      "path_role": "original local provenance",
+      "exists": true,
+      "sha256": "8a553f0e77539d098f1daec1926fb7ead1f08aa5052e1eebd8a61ada2342c934",
+      "archive_member": "study/namespace/validation-summary.json",
+      "archive_membership": "under study root"
+    },
+    "suites": {
+      "api": {
+        "suite": "api",
+        "passed": true,
+        "library_sha256": {
+          "xeme": "ad995d7e031a9686165b3377b6d3ac53ee6b134975839b11c1673ac0be60a48a",
+          "reference": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+        },
+        "baseline_sha256": "08a1d748395f594ce4751bd4390dbfe2f972a30150028f6b0b1fbe7cba1ea5c2",
+        "engines": {
+          "xeme": {
+            "passed": true,
+            "configurations": 4740,
+            "known_failures": 495,
+            "regressions": [],
+            "improvements": [
+              {
+                "context": "chunksize=0 deferral=0",
+                "test": "test_nsalloc_long_element",
+                "outcome": "pass",
+                "code": 0
+              },
+              {
+                "context": "chunksize=0 deferral=0",
+                "test": "test_alloc_realloc_subst_public_entity_value",
+                "outcome": "pass",
+                "code": 0
+              },
+              {
+                "context": "chunksize=0 deferral=1",
+                "test": "test_nsalloc_long_element",
+                "outcome": "pass",
+                "code": 0
+              },
+              {
+                "context": "chunksize=0 deferral=1",
+                "test": "test_alloc_realloc_subst_public_entity_value",
+                "outcome": "pass",
+                "code": 0
+              },
+              {
+                "context": "chunksize=1 deferral=0",
+                "test": "test_nsalloc_long_element",
+                "outcome": "pass",
+                "code": 0
+              },
+              {
+                "context": "chunksize=1 deferral=1",
+                "test": "test_nsalloc_long_element",
+                "outcome": "pass",
+                "code": 0
+              },
+              {
+                "context": "chunksize=2 deferral=0",
+                "test": "test_nsalloc_long_element",
+                "outcome": "pass",
+                "code": 0
+              },
+              {
+                "context": "chunksize=2 deferral=1",
+                "test": "test_nsalloc_long_element",
+                "outcome": "pass",
+                "code": 0
+              },
+              {
+                "context": "chunksize=3 deferral=0",
+                "test": "test_nsalloc_long_element",
+                "outcome": "pass",
+                "code": 0
+              },
+              {
+                "context": "chunksize=3 deferral=1",
+                "test": "test_nsalloc_long_element",
+                "outcome": "pass",
+                "code": 0
+              },
+              {
+                "context": "chunksize=4 deferral=0",
+                "test": "test_nsalloc_long_element",
+                "outcome": "pass",
+                "code": 0
+              },
+              {
+                "context": "chunksize=4 deferral=1",
+                "test": "test_nsalloc_long_element",
+                "outcome": "pass",
+                "code": 0
+              },
+              {
+                "context": "chunksize=5 deferral=0",
+                "test": "test_nsalloc_long_element",
+                "outcome": "pass",
+                "code": 0
+              },
+              {
+                "context": "chunksize=5 deferral=1",
+                "test": "test_nsalloc_long_element",
+                "outcome": "pass",
+                "code": 0
+              }
+            ]
+          },
+          "reference": {
+            "passed": true,
+            "configurations": 4740,
+            "known_failures": 0,
+            "regressions": [],
+            "improvements": []
+          }
+        }
+      },
+      "w3c": {
+        "suite": "w3c",
+        "passed": true,
+        "library_sha256": {
+          "xeme": "ad995d7e031a9686165b3377b6d3ac53ee6b134975839b11c1673ac0be60a48a",
+          "reference": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+        },
+        "baseline_sha256": "08a1d748395f594ce4751bd4390dbfe2f972a30150028f6b0b1fbe7cba1ea5c2",
+        "rows_per_engine": 6003,
+        "conformance_failures": {
+          "reference": 960,
+          "xeme": 960
+        },
+        "differences": [],
+        "improvements": {
+          "reference": [],
+          "xeme": []
+        }
+      },
+      "differential": {
+        "suite": "differential",
+        "passed": true,
+        "library_sha256": {
+          "xeme": "ad995d7e031a9686165b3377b6d3ac53ee6b134975839b11c1673ac0be60a48a",
+          "reference": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478"
+        },
+        "baseline_sha256": "08a1d748395f594ce4751bd4390dbfe2f972a30150028f6b0b1fbe7cba1ea5c2"
+      },
+      "cpython": {
+        "cpython_revision": "3bb231a6a5dc02b95658877318bf61501a7209e9",
+        "python": "3.12.13 (main, Aug  7 2026, 02:25:39) [Clang 22.1.3 ]",
+        "linkage": "shared",
+        "library_sha256": "ad995d7e031a9686165b3377b6d3ac53ee6b134975839b11c1673ac0be60a48a",
+        "probe_exit_code": 0,
+        "origin_exit_code": 0,
+        "tests_exit_code": 2,
+        "gate_exit_code": 0,
+        "text_fragmentation": {
+          "allowed_assertions": [
+            "test1 (test.test_pyexpat.BufferTextTest.test1)",
+            "test_handlers (test.test_sax.CDATAHandlerTest.test_handlers)"
+          ],
+          "semantic_exit_code": 0,
+          "inventory_case_count": 803,
+          "inventory_complete": true
+        }
+      }
+    },
+    "workspace": [
+      {
+        "log": "stacked-workspace-tests.log",
+        "passed": 524,
+        "groups": 37,
+        "failed": 0
+      }
+    ]
+  },
+  "epochs": [
+    {
+      "epoch": 1,
+      "reported_status": "passed",
+      "raw_directory": "/tmp/xeme-perf-prs-20260913/namespace/epoch-1",
+      "report": {
+        "path": "/tmp/xeme-perf-prs-20260913/namespace/epoch-1/report.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "4a13e22f1f219a772bdb534a5273a267eadbd11739b4910c559bf569372cb97e",
+        "archive_member": "study/namespace/epoch-1/report.json",
+        "archive_membership": "under study root"
+      },
+      "conditions_csv": {
+        "path": "/tmp/xeme-perf-prs-20260913/namespace/epoch-1/conditions.csv",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "7e1ee0fbb25945b779ac44e07470c055a8a693d5ede9ac981143efa302116301",
+        "archive_member": "study/namespace/epoch-1/conditions.csv",
+        "archive_membership": "under study root"
+      },
+      "groups": {
+        "native-tuning": {
+          "expected_conditions": 24,
+          "observed_conditions": 24,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9846493696999072,
+            "candidate_over_expat": 1.134606212813057,
+            "conditions": 24
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 6,
+          "candidate_over_baseline": 0.9846493696999072,
+          "candidate_over_expat": 1.134606212813057,
+          "status": "passed"
+        },
+        "native-holdout": {
+          "expected_conditions": 20,
+          "observed_conditions": 20,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9701904019464753,
+            "candidate_over_expat": 1.3669591962219096,
+            "conditions": 20
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 3,
+          "candidate_over_baseline": 0.9701904019464753,
+          "candidate_over_expat": 1.3669591962219096,
+          "status": "passed"
+        },
+        "native-generated": {
+          "expected_conditions": 16,
+          "observed_conditions": 16,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9416679115835209,
+            "candidate_over_expat": 1.4174059929125307,
+            "conditions": 16
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 0,
+          "candidate_over_baseline": 0.9416679115835209,
+          "candidate_over_expat": 1.4174059929125307,
+          "status": "passed"
+        },
+        "python-tuning": {
+          "expected_conditions": 24,
+          "observed_conditions": 24,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9916786293137737,
+            "candidate_over_expat": 1.0324855814019707,
+            "conditions": 24
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 8,
+          "candidate_over_baseline": 0.9916786293137737,
+          "candidate_over_expat": 1.0324855814019707,
+          "status": "passed"
+        },
+        "python-holdout": {
+          "expected_conditions": 20,
+          "observed_conditions": 20,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9713426351117509,
+            "candidate_over_expat": 1.0578253847429122,
+            "conditions": 20
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 3,
+          "candidate_over_baseline": 0.9713426351117509,
+          "candidate_over_expat": 1.0578253847429122,
+          "status": "passed"
+        }
+      },
+      "issues": [],
+      "method": {
+        "pairs": 7,
+        "native_iterations": 20,
+        "python_iterations": 10,
+        "cpu": 0,
+        "evaluation": "Known tuning and observed holdout regression corpora, reported separately; no independent holdout claim."
+      },
+      "status": "passed",
+      "raw_directory_role": "original local provenance",
+      "raw_archive_directory": "study/namespace/epoch-1"
+    },
+    {
+      "epoch": 2,
+      "reported_status": "passed",
+      "raw_directory": "/tmp/xeme-perf-prs-20260913/namespace/epoch-2",
+      "report": {
+        "path": "/tmp/xeme-perf-prs-20260913/namespace/epoch-2/report.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "1f5757f349c76076ab679be8bd79c8cd4ec372f5714cf0711d074b6369e72ae9",
+        "archive_member": "study/namespace/epoch-2/report.json",
+        "archive_membership": "under study root"
+      },
+      "conditions_csv": {
+        "path": "/tmp/xeme-perf-prs-20260913/namespace/epoch-2/conditions.csv",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "7fa39c728b8382621ef8be0101ea81754cc4e74a00f4679876d9927206f58853",
+        "archive_member": "study/namespace/epoch-2/conditions.csv",
+        "archive_membership": "under study root"
+      },
+      "groups": {
+        "native-tuning": {
+          "expected_conditions": 24,
+          "observed_conditions": 24,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9886198608219245,
+            "candidate_over_expat": 1.1481453852686287,
+            "conditions": 24
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 3,
+          "candidate_over_baseline": 0.9886198608219245,
+          "candidate_over_expat": 1.1481453852686287,
+          "status": "passed"
+        },
+        "native-holdout": {
+          "expected_conditions": 20,
+          "observed_conditions": 20,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9657021243519175,
+            "candidate_over_expat": 1.386080036408013,
+            "conditions": 20
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 0,
+          "candidate_over_baseline": 0.9657021243519175,
+          "candidate_over_expat": 1.386080036408013,
+          "status": "passed"
+        },
+        "native-generated": {
+          "expected_conditions": 16,
+          "observed_conditions": 16,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.938690363361516,
+            "candidate_over_expat": 1.4168698609396566,
+            "conditions": 16
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 0,
+          "candidate_over_baseline": 0.938690363361516,
+          "candidate_over_expat": 1.4168698609396566,
+          "status": "passed"
+        },
+        "python-tuning": {
+          "expected_conditions": 24,
+          "observed_conditions": 24,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9989604790479006,
+            "candidate_over_expat": 1.0421207347953696,
+            "conditions": 24
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 11,
+          "candidate_over_baseline": 0.9989604790479006,
+          "candidate_over_expat": 1.0421207347953696,
+          "status": "passed"
+        },
+        "python-holdout": {
+          "expected_conditions": 20,
+          "observed_conditions": 20,
+          "missing_conditions": [],
+          "unexpected_conditions": [],
+          "reported_aggregate": {
+            "candidate_over_baseline": 0.9706152566767052,
+            "candidate_over_expat": 1.0564369393650688,
+            "conditions": 20
+          },
+          "command_returncode": 0,
+          "slower_than_baseline_count": 1,
+          "candidate_over_baseline": 0.9706152566767052,
+          "candidate_over_expat": 1.0564369393650688,
+          "status": "passed"
+        }
+      },
+      "issues": [],
+      "method": {
+        "pairs": 7,
+        "native_iterations": 20,
+        "python_iterations": 10,
+        "cpu": 0,
+        "evaluation": "Known tuning and observed holdout regression corpora, reported separately; no independent holdout claim."
+      },
+      "status": "passed",
+      "raw_directory_role": "original local provenance",
+      "raw_archive_directory": "study/namespace/epoch-2"
+    }
+  ],
+  "targeted_slices": [
+    {
+      "epoch": 1,
+      "name": "Qt / native",
+      "conditions": 4,
+      "candidate_over_baseline": 0.9773537342390214,
+      "candidate_over_expat": 1.530714017864833
+    },
+    {
+      "epoch": 1,
+      "name": "LibreOffice / native",
+      "conditions": 4,
+      "candidate_over_baseline": 0.9159394527282763,
+      "candidate_over_expat": 1.513932909734072
+    },
+    {
+      "epoch": 1,
+      "name": "Qt / ElementTree",
+      "conditions": 2,
+      "candidate_over_baseline": 0.9637466751793149,
+      "candidate_over_expat": 1.165405195239029
+    },
+    {
+      "epoch": 1,
+      "name": "LibreOffice / ElementTree",
+      "conditions": 2,
+      "candidate_over_baseline": 0.8912228180845783,
+      "candidate_over_expat": 1.2610853202459844
+    },
+    {
+      "epoch": 1,
+      "name": "Generated namespaces / namespaces on",
+      "conditions": 2,
+      "candidate_over_baseline": 0.6991781643945821,
+      "candidate_over_expat": 2.2278568129178087
+    },
+    {
+      "epoch": 1,
+      "name": "Generated references",
+      "conditions": 4,
+      "candidate_over_baseline": 0.9892163721612725,
+      "candidate_over_expat": 2.437211138646816
+    },
+    {
+      "epoch": 1,
+      "name": "Generated elements",
+      "conditions": 4,
+      "candidate_over_baseline": 0.9839004611795292,
+      "candidate_over_expat": 1.7210343311833318
+    },
+    {
+      "epoch": 1,
+      "name": "Generated plain text",
+      "conditions": 4,
+      "candidate_over_baseline": 0.977683237042855,
+      "candidate_over_expat": 0.513088661723651
+    },
+    {
+      "epoch": 1,
+      "name": "Tuning / native namespaces on",
+      "conditions": 12,
+      "candidate_over_baseline": 0.9801810455385761,
+      "candidate_over_expat": 1.1771526769207474
+    },
+    {
+      "epoch": 1,
+      "name": "Observed holdout / native namespaces on",
+      "conditions": 10,
+      "candidate_over_baseline": 0.9567991335047951,
+      "candidate_over_expat": 1.3798907765255006
+    },
+    {
+      "epoch": 2,
+      "name": "Qt / native",
+      "conditions": 4,
+      "candidate_over_baseline": 0.9733657998819885,
+      "candidate_over_expat": 1.580515026756785
+    },
+    {
+      "epoch": 2,
+      "name": "LibreOffice / native",
+      "conditions": 4,
+      "candidate_over_baseline": 0.9073247617655774,
+      "candidate_over_expat": 1.502316204843682
+    },
+    {
+      "epoch": 2,
+      "name": "Qt / ElementTree",
+      "conditions": 2,
+      "candidate_over_baseline": 0.974350005642278,
+      "candidate_over_expat": 1.1728436069580637
+    },
+    {
+      "epoch": 2,
+      "name": "LibreOffice / ElementTree",
+      "conditions": 2,
+      "candidate_over_baseline": 0.89726305242478,
+      "candidate_over_expat": 1.2609137340695487
+    },
+    {
+      "epoch": 2,
+      "name": "Generated namespaces / namespaces on",
+      "conditions": 2,
+      "candidate_over_baseline": 0.6988781931912954,
+      "candidate_over_expat": 2.17803394079281
+    },
+    {
+      "epoch": 2,
+      "name": "Generated references",
+      "conditions": 4,
+      "candidate_over_baseline": 0.9879048426164637,
+      "candidate_over_expat": 2.4296947914167655
+    },
+    {
+      "epoch": 2,
+      "name": "Generated elements",
+      "conditions": 4,
+      "candidate_over_baseline": 0.9805716684851109,
+      "candidate_over_expat": 1.753759023540261
+    },
+    {
+      "epoch": 2,
+      "name": "Generated plain text",
+      "conditions": 4,
+      "candidate_over_baseline": 0.9764041281337577,
+      "candidate_over_expat": 0.513625356453192
+    },
+    {
+      "epoch": 2,
+      "name": "Tuning / native namespaces on",
+      "conditions": 12,
+      "candidate_over_baseline": 0.9894667881148071,
+      "candidate_over_expat": 1.2010546230654362
+    },
+    {
+      "epoch": 2,
+      "name": "Observed holdout / native namespaces on",
+      "conditions": 10,
+      "candidate_over_baseline": 0.9480846456583344,
+      "candidate_over_expat": 1.4011425686443024
+    }
+  ],
+  "interpretation_notes": [],
+  "repeated_regressions": [
+    {
+      "group": "python-tuning",
+      "condition": "docbook/65536/elementtree",
+      "epoch_1_percent": 2.2219947811667584,
+      "epoch_2_percent": 3.983943344420826
+    },
+    {
+      "group": "python-tuning",
+      "condition": "maven/4096/elementtree",
+      "epoch_1_percent": 1.814436716175516,
+      "epoch_2_percent": 2.5802388608402005
+    },
+    {
+      "group": "python-tuning",
+      "condition": "maven/65536/elementtree",
+      "epoch_1_percent": 3.2911860742784738,
+      "epoch_2_percent": 1.5904019370338807
+    },
+    {
+      "group": "native-tuning",
+      "condition": "maven/65536/namespaces-1",
+      "epoch_1_percent": 1.2364929906988786,
+      "epoch_2_percent": 1.6031496183615435
+    },
+    {
+      "group": "python-tuning",
+      "condition": "docbook/4096/pyexpat-events",
+      "epoch_1_percent": 0.7770690001613234,
+      "epoch_2_percent": 0.5236712641595309
+    },
+    {
+      "group": "native-tuning",
+      "condition": "maven/4096/namespaces-1",
+      "epoch_1_percent": 0.21737458406936305,
+      "epoch_2_percent": 1.1753795337610562
+    },
+    {
+      "group": "python-tuning",
+      "condition": "maven/65536/pyexpat-events",
+      "epoch_1_percent": 0.7013802282564097,
+      "epoch_2_percent": 0.1466853964365189
+    },
+    {
+      "group": "python-tuning",
+      "condition": "gtk/65536/pyexpat-events",
+      "epoch_1_percent": 0.13863222504046924,
+      "epoch_2_percent": 0.28391898244706226
+    }
+  ],
+  "allocations": {
+    "base_engine": "doctype",
+    "raw_directory": "/tmp/xeme-perf-prs-20260913/frame/allocations",
+    "artifacts": [
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/README.md",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "956e7dbb5f3bb0faba90cfbd5a23b9cccdd9ca9e3bb7927a55018809811f9c46",
+        "archive_member": "study/frame/allocations/README.md",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/results.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "243a93976e219134dda4ff2e9b03fb3b1ae6a671a29ec2071ad8f76a0b59f3c5",
+        "archive_member": "study/frame/allocations/results.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/summary.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "1d6b4d77fb1892837d25f122dccfedcef54dff634371c92127449f583ba88b0d",
+        "archive_member": "study/frame/allocations/summary.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/libraries.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "5604dd5f9fdaa446ffdd95605c878b0522afddfe6dc0cdcbfb6adc877809d174",
+        "archive_member": "study/frame/allocations/libraries.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/inputs.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "58bdbbd5ba710128340641b36a268b16be19d7eea7ff3f27b0821fabb72c3cb1",
+        "archive_member": "study/frame/allocations/inputs.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/artifact-hashes.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "347d08346898a9a3bdc86096b7475b72f09e9dbaf288cd9a2f01e07c84dce0d6",
+        "archive_member": "study/frame/allocations/artifact-hashes.json",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/allocation_driver.c",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "c4c26922ad2a4c783012e54e503b3ced4afdb4f9c975c1ec77e98d96c1dd187f",
+        "archive_member": "study/frame/allocations/allocation_driver.c",
+        "archive_membership": "under study root"
+      },
+      {
+        "path": "/tmp/xeme-perf-prs-20260913/frame/allocations/compile.json",
+        "path_role": "original local provenance",
+        "exists": true,
+        "sha256": "31fdf40b9c10dc9d4cb23f0f80b6dee6bd4f71329840b3c79e523301056d4e78",
+        "archive_member": "study/frame/allocations/compile.json",
+        "archive_membership": "under study root"
+      }
+    ],
+    "summaries": [
+      {
+        "corpus": "tuning",
+        "chunk": 4096,
+        "conditions": 12,
+        "expected_conditions": 12,
+        "missing": [],
+        "requests_geomean_ratio": 0.9836761650303131,
+        "fewer": 3,
+        "equal": 9,
+        "more": 0,
+        "baseline_requested_bytes_total": 3491819,
+        "candidate_requested_bytes_total": 3487952,
+        "peak_requested_bytes_delta_min": -23,
+        "peak_requested_bytes_delta_max": 0
+      },
+      {
+        "corpus": "tuning",
+        "chunk": 65536,
+        "conditions": 12,
+        "expected_conditions": 12,
+        "missing": [],
+        "requests_geomean_ratio": 0.9787790450723788,
+        "fewer": 3,
+        "equal": 9,
+        "more": 0,
+        "baseline_requested_bytes_total": 2642119,
+        "candidate_requested_bytes_total": 2637607,
+        "peak_requested_bytes_delta_min": -23,
+        "peak_requested_bytes_delta_max": 0
+      },
+      {
+        "corpus": "holdout",
+        "chunk": 4096,
+        "conditions": 10,
+        "expected_conditions": 10,
+        "missing": [],
+        "requests_geomean_ratio": 0.9433650188346091,
+        "fewer": 1,
+        "equal": 9,
+        "more": 0,
+        "baseline_requested_bytes_total": 1421976,
+        "candidate_requested_bytes_total": 1263152,
+        "peak_requested_bytes_delta_min": -277,
+        "peak_requested_bytes_delta_max": 0
+      },
+      {
+        "corpus": "holdout",
+        "chunk": 65536,
+        "conditions": 10,
+        "expected_conditions": 10,
+        "missing": [],
+        "requests_geomean_ratio": 0.9392245060226223,
+        "fewer": 1,
+        "equal": 9,
+        "more": 0,
+        "baseline_requested_bytes_total": 2638680,
+        "candidate_requested_bytes_total": 2472783,
+        "peak_requested_bytes_delta_min": -333,
+        "peak_requested_bytes_delta_max": 0
+      }
+    ],
+    "scope": "Separate selected-C-allocator instrumentation; requests and requested bytes are not timing samples, unique allocated bytes, or RSS. No allocator change in timing.",
+    "raw_directory_role": "original local provenance",
+    "raw_archive_directory": "study/frame/allocations"
+  },
+  "condition_rows": 208,
+  "conditions_csv": "2026-09-13-namespace-performance.csv",
+  "conditions_csv_original_path": "/tmp/xeme-perf-prs-20260913/namespace/conditions.csv",
+  "publication": {
+    "files": {
+      "md": "2026-09-13-namespace-performance.md",
+      "json": "2026-09-13-namespace-performance.json",
+      "csv": "2026-09-13-namespace-performance.csv"
+    },
+    "local_path_scope": "Absolute paths are original provenance, not public URLs."
+  },
+  "archive": {
+    "url": "https://github.com/astral-sh/xeme/releases/download/performance-2026-09-13/xeme-performance-2026-09-13.tar.zst",
+    "sha256": "fea3ce48d58394664dc19823118e86fd2ee1bdb5816dffee727deb1a31dce680",
+    "member_prefix": "study"
+  },
+  "issues": [],
+  "scope": "Known tuning and observed holdout corpora; separate epochs. All condition rows retained, including regressions. No cross-PR additive-gain claim. Input/report/build manifest hashes bind raw evidence; library hashes are copied from frozen build receipts, not recomputed by this reporting script."
+}

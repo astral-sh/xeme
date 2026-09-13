@@ -426,3 +426,139 @@ mod tests {
         assert_eq!(text(&mut parent, b"<!DOCTYPE r SYSTEM 'd'><r>&e;</r>"), "E");
     }
 }
+
+#[cfg(test)]
+mod import_tests {
+    use super::*;
+    use crate::{Config, ErrorKind, Limits};
+
+    fn donor(xml: &str) -> Parser {
+        let root = Parser::new(Config::default());
+        let mut donor = root.external_child(None, None).unwrap();
+        donor.feed(xml.as_bytes(), true).unwrap();
+        while donor.next_event().unwrap().is_some() {}
+        donor
+    }
+
+    #[test]
+    fn unrelated_imports_charge_new_storage_and_preserve_existing_definitions() {
+        for xml in [
+            "<!ENTITY e 'value'>",
+            "<!ENTITY % e 'value'>",
+            "<!ATTLIST r a CDATA 'value'>",
+        ] {
+            let donor = donor(xml);
+            let mut recipient = Parser::new(Config {
+                limits: Limits {
+                    max_entity_expansion_bytes: 0,
+                    ..Limits::default()
+                },
+                ..Config::default()
+            });
+            let error = recipient.merge_external_subset(&donor).unwrap_err();
+            assert_eq!(error.kind, ErrorKind::LimitExceeded);
+            assert_eq!(recipient.next_event().unwrap_err(), error);
+            recipient
+                .with_dtd_tables(|parser| {
+                    assert!(parser.tables.is_empty());
+                    Ok(())
+                })
+                .unwrap();
+        }
+
+        let first = donor("<!ATTLIST r a CDATA 'first'>");
+        let duplicate = donor("<!ATTLIST r a CDATA 'second'>");
+        let additional = donor("<!ATTLIST s a CDATA 'new'>");
+        let mut recipient = Parser::new(Config::default());
+        recipient.merge_external_subset(&first).unwrap();
+        let charged = recipient
+            .expanded
+            .expanded
+            .load(std::sync::atomic::Ordering::Relaxed);
+        assert!(charged > "first".len());
+        recipient
+            .set_limits(Limits {
+                max_entity_expansion_bytes: charged,
+                ..Limits::default()
+            })
+            .unwrap();
+        recipient.merge_external_subset(&duplicate).unwrap();
+        recipient
+            .with_dtd_tables(|parser| {
+                assert_eq!(
+                    parser
+                        .tables
+                        .defaults
+                        .get("r")
+                        .unwrap()
+                        .get("a")
+                        .unwrap()
+                        .value
+                        .as_deref(),
+                    Some("first")
+                );
+                Ok(())
+            })
+            .unwrap();
+        assert_eq!(
+            recipient
+                .merge_external_subset(&additional)
+                .unwrap_err()
+                .kind,
+            ErrorKind::LimitExceeded
+        );
+    }
+
+    #[test]
+    fn unrelated_import_strings_use_the_recipient_allocator() {
+        let donor = donor(
+            "<!ENTITY e 'value'><!ENTITY % p 'parameter'><!ENTITY external PUBLIC 'public' 'system'><!ATTLIST r a CDATA 'default'>",
+        );
+        let mut recipient =
+            Parser::try_new_in(Config::default(), Allocator::TrackedSystem).unwrap();
+        recipient.merge_external_subset(&donor).unwrap();
+        recipient
+            .with_dtd_tables(|parser| {
+                let check =
+                    |value: &String| assert!(matches!(value.allocator(), Allocator::TrackedSystem));
+                for (name, entity) in parser
+                    .tables
+                    .entities
+                    .iter()
+                    .chain(&parser.tables.parameter_entities)
+                {
+                    check(name);
+                    for value in [
+                        &entity.value,
+                        &entity.system_id,
+                        &entity.public_id,
+                        &entity.notation,
+                    ]
+                    .into_iter()
+                    .flatten()
+                    {
+                        check(value);
+                    }
+                }
+                for (name, attributes) in &parser.tables.defaults {
+                    check(name);
+                    for attribute in &attributes.ordered {
+                        check(&attribute.name);
+                        check(&attribute.attribute_type);
+                        check(attribute.value.as_ref().unwrap());
+                    }
+                    for name in attributes.by_name.keys() {
+                        check(name);
+                    }
+                }
+                Ok(())
+            })
+            .unwrap();
+        drop(donor);
+        recipient
+            .feed(b"<!DOCTYPE r SYSTEM 'd'><r>&e;</r>", true)
+            .unwrap();
+        while recipient.next_event().unwrap().is_some() {}
+        assert!(recipient.is_finished());
+    }
+}

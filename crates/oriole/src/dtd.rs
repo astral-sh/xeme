@@ -254,7 +254,16 @@ impl Parser {
         self.seen_doctype = true;
         self.declaration_allowed = false;
         self.has_external_subset = system_id.is_some();
-        self.doctype_external = Some((system_id.try_clone()?, public_id.try_clone()?));
+        self.doctype_external = Some(crate::ExternalEntityReference {
+            base: if system_id.is_some() {
+                self.copy_external_base(self.base.as_ref())?
+            } else {
+                None
+            },
+            context: None,
+            system_id: system_id.try_clone()?,
+            public_id: public_id.try_clone()?,
+        });
         self.in_doctype = has_internal_subset;
         if system_id.is_some() && !self.standalone {
             self.emit(EventKind::NotStandalone, position)?;
@@ -308,6 +317,8 @@ impl Parser {
         self.emit(
             EventKind::ExternalEntityReference(oriole_storage::try_box(
                 crate::ExternalEntityReference {
+                    // No declaration fixes the base for an implicit foreign DTD.
+                    base: None,
                     context: None,
                     system_id: None,
                     public_id: None,
@@ -370,18 +381,14 @@ impl Parser {
 
     fn finish_doctype(&mut self, position: Position, raw: &str) -> Result<(), Error> {
         self.in_doctype = false;
-        if let Some((system_id, public_id)) = self.doctype_external.take() {
-            if system_id.is_none() && self.foreign_dtd {
+        if let Some(declaration) = self.doctype_external.take() {
+            if declaration.system_id.is_none() && self.foreign_dtd {
                 self.start_foreign_dtd(position)?;
-            } else if system_id.is_some() && self.parameter_entities_enabled() {
+            } else if declaration.system_id.is_some() && self.parameter_entities_enabled() {
                 self.has_external_subset = true;
                 self.emit(
                     EventKind::ExternalEntityReference(oriole_storage::try_box(
-                        crate::ExternalEntityReference {
-                            context: None,
-                            system_id,
-                            public_id,
-                        },
+                        declaration,
                         self.allocator,
                     )?),
                     position,
@@ -718,6 +725,7 @@ impl Parser {
             ))?;
         } else {
             self.charge_external_identifiers(entity)?;
+            let base = self.copy_external_base(entity.base.as_ref())?;
             let system_id = entity.system_id.try_clone()?;
             let public_id = entity.public_id.try_clone()?;
             self.consume(end + 1)?;
@@ -733,6 +741,7 @@ impl Parser {
             self.emit(
                 EventKind::ExternalEntityReference(oriole_storage::try_box(
                     crate::ExternalEntityReference {
+                        base,
                         context: None,
                         system_id,
                         public_id,
@@ -1409,6 +1418,7 @@ impl Parser {
                 declarations,
                 name.try_clone()?,
                 Entity {
+                    base: system_id.as_ref().and(self.base.clone()),
                     value: value.try_clone()?,
                     system_id: system_id.try_clone()?,
                     public_id: public_id.try_clone()?,

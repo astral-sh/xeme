@@ -2392,6 +2392,7 @@ fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
             2 => EventKind::ExternalEntityReference(
                 oriole_storage::try_box(
                     oriole::ExternalEntityReference {
+                        base: Some(word().into_bytes()),
                         context: Some(word()),
                         system_id: Some(word()),
                         public_id: Some(word()),
@@ -2466,9 +2467,9 @@ fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
     }
     // Each populated string carries one byte. Dispatch must account for every
     // metadata field exactly once, independently of whether a handler is installed.
-    for (case, bytes) in [2, 2, 3, 3, 2, 1, 5, 4, 3, 1].into_iter().enumerate() {
+    for (case, bytes) in [2, 2, 4, 3, 2, 1, 5, 4, 3, 1].into_iter().enumerate() {
         for base in [false, true] {
-            let bytes = bytes + usize::from(base && matches!(case, 2 | 6 | 8));
+            let bytes = bytes + usize::from(base && matches!(case, 6 | 8));
             for remaining in [bytes - 1, bytes] {
                 // SAFETY: The test owns a live handle and manually holds the dispatch
                 // guard; no callback is installed and the event owns all its strings.
@@ -5290,6 +5291,142 @@ fn arena_text_keeps_bytes_raw_context_and_handlers_live_through_suspension() {
             assert_eq!((state.first, state.later), (1, 2));
             assert!(state.raw.iter().any(|raw| raw == &content));
             XML_ParserFree(parser);
+        }
+    }
+}
+
+#[test]
+fn external_entity_references_retain_declaration_bases() {
+    #[derive(Default)]
+    struct Bases {
+        mode: usize,
+        calls: std::vec::Vec<(Option<std::vec::Vec<u8>>, std::vec::Vec<u8>)>,
+    }
+    unsafe extern "C" fn change_base(
+        parser: *mut c_void,
+        _: *const c_char,
+        _: *const *const c_char,
+    ) {
+        // SAFETY: Parser-as-handler-argument supplies the active live parser.
+        unsafe {
+            assert_eq!(
+                XML_SetBase(parser.cast(), c"/changed/root.xml".as_ptr()),
+                OK
+            )
+        };
+    }
+    unsafe extern "C" fn external(
+        parser: XML_Parser,
+        context: *const c_char,
+        base: *const c_char,
+        system: *const c_char,
+        _: *const c_char,
+    ) -> c_int {
+        // SAFETY: Callback metadata is borrowed only here. Child parsers own their
+        // copies and are freed after parsing; state borrows end before recursion.
+        unsafe {
+            let state = XML_GetUserData(parser).cast::<Bases>();
+            let system = CStr::from_ptr(system).to_bytes();
+            (*state).calls.push((
+                (!base.is_null()).then(|| CStr::from_ptr(base).to_bytes().to_vec()),
+                system.to_vec(),
+            ));
+            let (body, child_base): (&[u8], &CStr) = match system {
+                b"entities.dtd" if (*state).mode == 2 => (
+                    b"<!ENTITY % nested SYSTEM 'nested.dtd'>%nested;",
+                    c"/dtd/entities.dtd",
+                ),
+                b"entities.dtd" if (*state).mode == 3 => (
+                    b"<!ENTITY wrapper SYSTEM 'wrapper.txt'><!ENTITY external SYSTEM 'data.txt'>",
+                    c"/dtd/entities.dtd",
+                ),
+                b"entities.dtd" | b"nested.dtd" => (
+                    include_bytes!("../tests/data/entity-base/entities.dtd"),
+                    if system == b"nested.dtd" {
+                        c"/nested/entities.dtd"
+                    } else {
+                        c"/dtd/entities.dtd"
+                    },
+                ),
+                b"wrapper.txt" => (b"&external;", c"/content/wrapper.txt"),
+                b"data.txt" => return OK,
+                _ => panic!("unexpected external entity"),
+            };
+            let child = XML_ExternalEntityParserCreate(parser, context, ptr::null());
+            assert!(!child.is_null());
+            assert_eq!(XML_SetBase(child, child_base.as_ptr()), OK);
+            let result = XML_Parse(child, body.as_ptr().cast(), body.len() as c_int, 1);
+            XML_ParserFree(child);
+            result
+        }
+    }
+    // SAFETY: All buffers, C strings, callback state and handles remain live;
+    // opaque non-UTF-8 base bytes must be preserved exactly like Expat.
+    unsafe {
+        for mode in 0..4 {
+            for initial in [None, Some(c""), Some(c"/root/\xff.xml")] {
+                for buffered in [false, true] {
+                    let parser = XML_ParserCreate(ptr::null());
+                    let mut state = Bases {
+                        mode,
+                        ..Bases::default()
+                    };
+                    XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+                    XML_UseParserAsHandlerArg(parser);
+                    XML_SetStartElementHandler(parser, Some(change_base));
+                    XML_SetExternalEntityRefHandler(parser, Some(external));
+                    assert_eq!(XML_SetParamEntityParsing(parser, 2), 1);
+                    assert_eq!(
+                        XML_SetBase(parser, initial.map_or(ptr::null(), CStr::as_ptr)),
+                        OK
+                    );
+                    let document: &[u8] = match mode {
+                        0 => {
+                            b"<!DOCTYPE r [<!ENTITY external SYSTEM 'data.txt'>]><r>&external;</r>"
+                        }
+                        3 => b"<!DOCTYPE r SYSTEM 'entities.dtd'><r>&wrapper;</r>",
+                        _ => include_bytes!("../tests/data/entity-base/root.xml"),
+                    };
+                    for (index, byte) in document.iter().enumerate() {
+                        let final_input = c_int::from(index + 1 == document.len());
+                        let status = if buffered {
+                            let buffer = XML_GetBuffer(parser, 1).cast::<u8>();
+                            assert!(!buffer.is_null());
+                            *buffer = *byte;
+                            XML_ParseBuffer(parser, 1, final_input)
+                        } else {
+                            XML_Parse(parser, ptr::from_ref(byte).cast(), 1, final_input)
+                        };
+                        assert_eq!(
+                            status,
+                            OK,
+                            "mode={mode}, error={}",
+                            XML_GetErrorCode(parser)
+                        );
+                    }
+                    let original = initial.map(|base| base.to_bytes().to_vec());
+                    let expected = match mode {
+                        0 => vec![(original, b"data.txt".to_vec())],
+                        1 => vec![
+                            (original, b"entities.dtd".to_vec()),
+                            (Some(b"/dtd/entities.dtd".to_vec()), b"data.txt".to_vec()),
+                        ],
+                        2 => vec![
+                            (original, b"entities.dtd".to_vec()),
+                            (Some(b"/dtd/entities.dtd".to_vec()), b"nested.dtd".to_vec()),
+                            (Some(b"/nested/entities.dtd".to_vec()), b"data.txt".to_vec()),
+                        ],
+                        3 => vec![
+                            (original, b"entities.dtd".to_vec()),
+                            (Some(b"/dtd/entities.dtd".to_vec()), b"wrapper.txt".to_vec()),
+                            (Some(b"/dtd/entities.dtd".to_vec()), b"data.txt".to_vec()),
+                        ],
+                        _ => unreachable!(),
+                    };
+                    assert_eq!(state.calls, expected, "mode={mode}, buffered={buffered}");
+                    XML_ParserFree(parser);
+                }
+            }
         }
     }
 }

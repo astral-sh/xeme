@@ -1,8 +1,0 @@
-{
-  "commit": "64a270e58f14a4b74e25ffcf25f7832a5216b2d1",
-  "parent": "dfa6cd3d6587fd1edf155026c01c4326230a284e",
-  "source_manifest_sha256": "38c59dfaa7c94c7a01a9c8af803b35a54bbbf84d8296860e64eca24e522a727b",
-  "source_files": 70,
-  "all_source_bytes_equal_measured_candidate": true,
-  "note": "Frozen candidate3694 was built on d53dc6c plus two component files. Parentdfa6cd3 is documentation-only. All70 runtime/test/header entries remain identical after fast-forward and runtime commit; no binary is relabeled as a new build."
-}

@@ -1,1 +1,0 @@
-{"status": "passed", "receipt": "/tmp/oriole-context-text-frame-fixed-publication/verification-attempt01.json", "sha256": "7c7c8b87940a02051ee6f2a606256529535b34203e3b45be0d1445cc47888771", "objects": 3036, "aliases": 1344, "native_totals": {"workers": 1344, "samples": 212352}}

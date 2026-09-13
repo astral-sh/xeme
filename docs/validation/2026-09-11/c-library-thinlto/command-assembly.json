@@ -1,8 +1,0 @@
-{
-  "command_commit": "e3666076eb444aea2c84c93fda9d6aaeb1bbdecb",
-  "parent": "1cb326c6dcd3aaebf37e555826b515a0b53b6641",
-  "tracked_input_files": 81,
-  "all_git_live_frozen_inputs_exact": true,
-  "source_manifest_sha256": "bc3d40467ba389139baed90deed02ee8ea03c2d6a63729ef4d2da99f18a47e04",
-  "scope": "Build command layer only; measured parser runtime50c20 unchanged. Frozen normal9815/ThinLTOa55 benchmarks, PGOc2d validation and PBSbundle are distinct artifacts."
-}

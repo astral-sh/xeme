@@ -1,9 +1,0 @@
-{
-  "runtime_commit": "50c20c1e73eeaacabb9df90e413f502361fb45b3",
-  "parent": "382891b6662321a7ae7767003e8bc157f1140188",
-  "frozen_build_base": "503a55957f7cdebcc0b3fb3ada2751ffdb8cb9c9",
-  "source_files": 70,
-  "source_manifest_sha256": "e9eaeb4c8ee18357adbe97c91870801b41fb4553dc7259eaecc2d1d98fc5c5e4",
-  "all_git_and_live_bytes_match_measured_source": true,
-  "doc_only_parent_advance": "503a559 -> 382891b; all source bytes unchanged before runtime commit"
-}

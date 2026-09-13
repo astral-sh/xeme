@@ -139,15 +139,6 @@
       "purpose": "UI object tree",
       "files": [
         {
-          "role": "related-small-input",
-          "upstream_path": "gtk/ui/gtkfilechooserdialog.ui",
-          "path": "corpus/gtk/gtkfilechooserdialog.ui",
-          "url": "https://raw.githubusercontent.com/GNOME/gtk/51a0bf3627204325ccf0f8f24f587728a18c43df/gtk/ui/gtkfilechooserdialog.ui",
-          "source_url": "https://github.com/GNOME/gtk/blob/51a0bf3627204325ccf0f8f24f587728a18c43df/gtk/ui/gtkfilechooserdialog.ui",
-          "bytes": 1245,
-          "sha256": "b646f653a169252181e10631abaeaa1f451580f3e395e3c93b8f55d8293db0c5"
-        },
-        {
           "role": "license",
           "upstream_path": "COPYING",
           "path": "corpus/gtk/COPYING",
@@ -165,8 +156,7 @@
           "bytes": 26739,
           "sha256": "2620a2b6553ce99cc564eb3d359eb9cb9c7b8f259e0ccc1aa49bb3534a38101d"
         }
-      ],
-      "selection_note": "The initially selected dialog is a 1245-byte template wrapper. The directly related file chooser widget is the main UI tree; it replaced the thin wrapper before any parser measurements. Original wrapper retained as evidence."
+      ]
     },
     {
       "name": "docbook",

@@ -1,9 +1,0 @@
-{
-  "status": "retargeted_historical_verifier_origin_only",
-  "old_index_sha256": "b65a1166ba9f0edbce4ea63d9f6ac97344637f483a6103db7d9e6b3d9c585890",
-  "new_index_sha256": "e888a29163b8a9f2674206a3837b64c4245e1507b04816fd19253e646c378fc5",
-  "path_key_sha256_member_bytes_unchanged": true,
-  "archive_unchanged": true,
-  "reason": "Top-level verifier gained a source identity guard; archived first-version origin now points to its exact retained snapshot.",
-  "independent_source_review": "0a5b73c70ffa0d662a76d2ca1c6fd9ad1a333cbfebe039a853b80f25a02ff96b binds the same final verifier; its member-index input is the retained attempt02 index."
-}

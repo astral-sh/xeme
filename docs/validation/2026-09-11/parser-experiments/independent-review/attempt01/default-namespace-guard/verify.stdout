@@ -1,1 +1,0 @@
-{"status": "passed", "receipt": "/tmp/oriole-parser-experiments-package-review/attempt01/default-namespace-guard/relocated-readback.json", "sha256": "fef0f1b334debafaa2d7559a563111b4cb24a74daf350d12a7aad0bbbb6435b4", "objects": 164, "aliases": 1344, "native_totals": {"workers": 1344, "samples": 212352}}

@@ -440,7 +440,7 @@ impl TagScanner {
                 self.name_ascii = first.is_ascii();
                 self.offset += first.len_utf8();
             }
-            // Reuse the native name walk; complete/general name scans stay unchanged.
+            // Resume name validation at the first unscanned byte.
             let start = self.offset;
             self.offset = text[start..]
                 .char_indices()

@@ -1320,7 +1320,8 @@ unsafe fn dispatch_context_text(
         ((*parser).handlers.text, arg)
     };
     let Some(callback) = callback else {
-        // SAFETY: Eager raw storage and the default dispatch path are unchanged.
+        // SAFETY: dispatch_unhandled copies raw bytes into owned fragments
+        // before callbacks; no parser borrow crosses them.
         return unsafe { dispatch_unhandled(parser, false, None, false) };
     };
     // SAFETY: The core's immutable context borrow ends before the callback.

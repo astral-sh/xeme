@@ -541,6 +541,87 @@ fn detached_start_frames_use_the_selected_suite_and_clear_on_every_failure() {
 }
 
 #[test]
+fn warmed_namespace_frames_allocate_no_temporary_attribute_names() {
+    fn frames(allocator: Allocator) -> Result<(), Error> {
+        for (separator, element_name, first_name, second_name) in [
+            ('|', "urn:long|item|p", "urn:long|a|p\0", "urn:other|b|q\0"),
+            ('\0', "urn:longitem", "urn:longa\0", "urn:otherb\0"),
+            ('λ', "urn:longλitemλp", "urn:longλaλp\0", "urn:otherλbλq\0"),
+        ] {
+            let mut parser = Parser::try_new_in(
+                Config {
+                    namespace_separator: Some(separator),
+                    namespace_triplets: true,
+                    ..Config::default()
+                },
+                allocator,
+            )?;
+            parser.enable_input_context();
+            let tag = "<p:item p:a='first' q:b='second' raw='literal'>";
+            parser.feed(b"<r xmlns:p='urn:long' xmlns:q='urn:other'><p:item p:a='first' q:b='second' raw='literal'></p:item><p:item p:a='first' q:b='second' raw='literal'></p:item><p:item p:a='first' q:b='second' raw='literal'></p:item></r>", true)?;
+            let mut frame = parser.adapter_frame();
+            let result = (|| {
+                let mut starts = 0;
+                loop {
+                    let before = CALLS.get();
+                    let mut event = None;
+                    let token =
+                        match parser.next_event_for_c_text_context_into(&mut event, &mut frame) {
+                            Ok(Some(token)) => token,
+                            Ok(None) => break,
+                            Err(error) => {
+                                assert!(event.is_none() && !frame.is_active());
+                                let calls = CALLS.get();
+                                assert_eq!(parser.next_event().unwrap_err(), error);
+                                assert_eq!(parser.feed(b"ignored", true).unwrap_err(), error);
+                                assert_eq!(CALLS.get(), calls);
+                                return Err(error);
+                            }
+                        };
+                    if parser.current_raw() == Some(tag) {
+                        starts += 1;
+                        if starts == 3 {
+                            // The lexical records, arena and element-name cache
+                            // are warm. URI/local-name assembly needs no owners.
+                            assert_eq!(CALLS.get(), before, "warmed namespace Start allocated");
+                            assert!(frame.is_active() && event.is_none());
+                            assert_eq!(
+                                frame.name_bytes().strip_suffix(&[0]),
+                                Some(element_name.as_bytes())
+                            );
+                            assert!(frame.attributes().eq([
+                                (first_name.as_bytes(), b"first\0".as_slice()),
+                                (second_name.as_bytes(), b"second\0".as_slice()),
+                                (b"raw\0".as_slice(), b"literal\0".as_slice()),
+                            ]));
+                        }
+                    }
+                    if let Some(name) = frame.take_end_name() {
+                        parser.recycle_end_element(token, name);
+                    } else if let Some(event) = event {
+                        match event.kind {
+                            EventKind::StartElement { name, attributes } => {
+                                parser.recycle_start_element(token, name, attributes);
+                            }
+                            EventKind::EndElement { name } => {
+                                parser.recycle_end_element(token, name)
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                assert_eq!(starts, 3);
+                Ok(())
+            })();
+            parser.finish_adapter_frame(frame);
+            result?;
+        }
+        Ok(())
+    }
+    check_allocations(frames);
+}
+
+#[test]
 fn detached_end_names_reuse_selected_storage_without_new_allocations() {
     fn ends(allocator: Allocator) -> Result<(), Error> {
         let mut parser = Parser::try_new_in(Config::default(), allocator)?;

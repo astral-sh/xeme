@@ -125,14 +125,24 @@ impl AdapterFrame {
     }
 
     fn append(&mut self, text: &str) -> Result<Range<usize>, AllocError> {
-        debug_assert!(!text.as_bytes().contains(&0));
-        let required = text
-            .len()
-            .checked_add(1)
-            .ok_or(AllocError::CapacityOverflow)?;
+        self.append_parts([text])
+    }
+
+    /// Append one terminated spelling without an intermediate string owner.
+    fn append_parts<const N: usize>(
+        &mut self,
+        parts: [&str; N],
+    ) -> Result<Range<usize>, AllocError> {
+        let length = parts.iter().try_fold(0usize, |length, part| {
+            debug_assert!(!part.as_bytes().contains(&0));
+            length
+                .checked_add(part.len())
+                .ok_or(AllocError::CapacityOverflow)
+        })?;
+        let required = length.checked_add(1).ok_or(AllocError::CapacityOverflow)?;
         let count = self
             .callback_bytes
-            .checked_add(text.len())
+            .checked_add(length)
             .ok_or(AllocError::CapacityOverflow)?;
         if required > self.bytes.capacity() - self.bytes.len()
             && self.bytes.capacity() > MAX_ARENA_BYTES / 2
@@ -145,7 +155,9 @@ impl AdapterFrame {
             self.bytes.try_reserve(required)?;
         }
         let start = self.bytes.len();
-        try_extend_from_slice(&mut self.bytes, text.as_bytes())?;
+        for part in parts {
+            try_extend_from_slice(&mut self.bytes, part.as_bytes())?;
+        }
         try_extend_from_slice(&mut self.bytes, b"\0")?;
         self.callback_bytes = count;
         Ok(start..self.bytes.len())
@@ -155,6 +167,19 @@ impl AdapterFrame {
         // Preserve the old literal value-before-name allocation order.
         let value = self.append(value)?;
         let name = self.append(name)?;
+        debug_assert!(self.attributes.len() < self.attributes.capacity());
+        self.attributes.push(ArenaAttribute { name, value });
+        Ok(())
+    }
+
+    /// Keep value-before-name storage while copying an already resolved QName.
+    pub(crate) fn push_namespace_attribute(
+        &mut self,
+        parts: [&str; 5],
+        value: &str,
+    ) -> Result<(), AllocError> {
+        let value = self.append(value)?;
+        let name = self.append_parts(parts)?;
         debug_assert!(self.attributes.len() < self.attributes.capacity());
         self.attributes.push(ArenaAttribute { name, value });
         Ok(())

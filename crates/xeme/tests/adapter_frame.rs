@@ -580,6 +580,7 @@ fn expanded_attribute_frames_preserve_keys_triplets_and_fallbacks() {
         "<r xmlns:p='ax' xmlns:q='a'><n p:b='1' q:xb='2'/></r>",
         "<r xmlns:p='u' xmlns:q='u'><n p:a='v' q:a='duplicate'/></r>",
         "<r xmlns:p='u'><n p:a='v' a='first' a='duplicate'/></r>",
+        "<r xmlns:p='u' xmlns:q='u'><n p:a='v' b='' c='' d='' e='' f='' g='' q:a='duplicate'/></r>",
         "<r xmlns:p='u'><n p:a='v' p:b='&amp;'/></r>",
     ] {
         for separator in ['|', '\0', 'x', 'λ'] {

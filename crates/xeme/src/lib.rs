@@ -14,6 +14,7 @@ mod dtd_tables;
 mod encoding;
 mod lexical;
 mod names;
+mod namespace;
 #[cfg(test)]
 mod prolog_whitespace_tests;
 mod recycling;
@@ -3674,15 +3675,23 @@ impl Parser {
                 // tags can share this storage only when expansion is identity.
                 && self.identity_frame_names(raw_name, rest)
         }) {
-            return self.parse_start_frame::<false>(token, position, raw_name, rest, frame);
+            return self.parse_start_frame(token, position, raw_name, rest, None, frame);
         }
         if let Some(frame) = frame.filter(|_| {
             matches!(planned, tag::Planned::Complete { .. })
                 && !self.source().has_conversions()
                 && self.raw_attributes.len() <= arena::MAX_ARENA_ATTRIBUTES
-                && self.expanded_names_fit_frame(raw_name, rest, token.len())
-        }) {
-            return self.parse_start_frame::<true>(token, position, raw_name, rest, frame);
+        }) && let Some(expanded_name) =
+            self.prepare_namespace_frame(raw_name, rest, token.len(), frame)?
+        {
+            return self.parse_start_frame(
+                token,
+                position,
+                raw_name,
+                rest,
+                Some(expanded_name),
+                frame,
+            );
         }
         if self.config.namespace_separator.is_some() && !self.config.name_rules.is_qname(raw_name) {
             return Err(self.err(ErrorKind::InvalidToken, "invalid qualified element name"));
@@ -4057,149 +4066,163 @@ impl Parser {
         }
     }
 
-    /// Bound final spellings without charging URI work or changing error order.
-    /// The caller supplies the native tag planner's existing Name proofs.
-    fn expanded_names_fit_frame(&self, name: &str, rest: &str, token_bytes: usize) -> bool {
-        let Some(mut bytes) = self
-            .frame_namespace_name_bytes(name, false)
-            .and_then(|extra| token_bytes.checked_add(extra))
-        else {
-            return false;
+    /// Resolve eligible namespace spellings once, before mutating parser bindings.
+    /// Only the detached frame and element-name owner survive this preparation.
+    fn prepare_namespace_frame(
+        &mut self,
+        name: &str,
+        rest: &str,
+        token_bytes: usize,
+        frame: &mut AdapterFrame,
+    ) -> Result<Option<String>, Error> {
+        let Some(plan) = namespace::FramePlan::new(
+            name,
+            rest,
+            &self.raw_attributes,
+            token_bytes,
+            &self.config,
+            &self.namespaces,
+            self.default_namespace.as_deref(),
+        ) else {
+            return Ok(None);
         };
-        for attribute in &self.raw_attributes {
-            let name = attribute.name(rest);
-            if name == "xmlns" {
-                return false;
-            }
-            if name.contains(':') {
-                // Keep expanded duplicate checks bounded and allocation-free.
-                if self.raw_attributes.len() > 8 {
-                    return false;
+        if self.raw_attributes.len() > self.config.limits.max_attributes {
+            return Err(self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded"));
+        }
+        self.event_recycling
+            .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
+        frame.prepare(self.raw_attributes.len())?;
+        let mut names = AttributeNames::new(
+            self.raw_attributes.len(),
+            self.namespaces.hasher(),
+            self.allocator,
+        );
+        for (index, attribute) in self.raw_attributes.iter().enumerate() {
+            names.check(
+                attribute.name(rest),
+                self.raw_attributes[..index]
+                    .iter()
+                    .map(|attribute| attribute.name(rest)),
+                || {
+                    self.source()
+                        .position_at(1 + name.len() + attribute.name_start, 0)
+                },
+            )?;
+        }
+        let mut separator_bytes = [0; 4];
+        let separator = if plan.separator == '\0' {
+            ""
+        } else {
+            plan.separator.encode_utf8(&mut separator_bytes)
+        };
+        let mut key_lengths = [0; 8];
+        for (index, attribute) in self.raw_attributes.iter().enumerate() {
+            if let Some(resolved) = plan.attributes.get(index).copied().flatten() {
+                let uri = resolved.uri.expect("qualified attributes have a binding");
+                self.charge_expansion(uri.len())?;
+                if frame
+                    .attributes()
+                    .zip(key_lengths)
+                    .any(|((name, _), length)| {
+                        length != 0 && resolved.matches_key(separator, &name[..length])
+                    })
+                {
+                    return Err(self.err(
+                        ErrorKind::DuplicateAttribute,
+                        "duplicate expanded attribute name",
+                    ));
                 }
-                let Some(total) = self
-                    .frame_namespace_name_bytes(name, true)
-                    .and_then(|extra| bytes.checked_add(extra))
-                else {
-                    return false;
-                };
-                bytes = total;
+                // Preserve both URI charges and duplicate-error precedence. The
+                // final pieces go directly into the value-before-name arena.
+                self.charge_expansion(uri.len())?;
+                key_lengths[index] = uri.len() + separator.len() + resolved.local.len();
+                frame.push_namespace_attribute(
+                    resolved.parts(separator, self.config.namespace_triplets),
+                    attribute.value(rest),
+                )?;
+            } else {
+                frame.push_attribute(attribute.name(rest), attribute.value(rest))?;
             }
         }
-        bytes <= arena::MAX_ARENA_BYTES
-    }
-
-    /// Additional arena bytes for a validated native QName and its live binding.
-    fn frame_namespace_name_bytes(&self, name: &str, attribute: bool) -> Option<usize> {
-        let separator = self.config.namespace_separator?;
-        let uri = match name.split_once(':') {
-            Some((prefix, local)) => {
-                // The Name proof covers the prefix and all local continuations.
-                // QName adds nonempty parts, a local NameStart, and only one colon.
-                if prefix.is_empty()
-                    || !local
-                        .chars()
-                        .next()
-                        .is_some_and(|first| self.config.name_rules.is_name_start(first))
-                    || local.contains(':')
-                    || prefix == "xmlns"
-                {
-                    return None;
-                }
-                Some(self.namespaces.get(prefix)?)
-            }
-            None if !attribute => self.default_namespace.as_ref(),
-            None => None,
+        self.id_attribute_index = None;
+        let reusable = self.event_recycling.take_name();
+        let resolved = plan.element;
+        let Some(uri) = resolved.uri else {
+            return Ok(Some(recycling::copy_name(
+                resolved.local,
+                reusable,
+                self.allocator,
+            )?));
         };
-        let Some(uri) = uri else {
-            return Some(0);
-        };
-        // Literal fields and their NULs fit within the token. Its raw QName
-        // also covers a triplet's prefix; add the URI and both possible separators.
-        let separators = if separator == '\0' {
-            0
+        self.charge_expansion(uri.len())?;
+        let capacity =
+            uri.len() + resolved.local.len() + resolved.prefix.map_or(2, |p| p.len() + 2);
+        let mut expanded = if let Some(mut expanded) = reusable {
+            expanded.clear();
+            expanded.try_reserve(capacity)?;
+            expanded
         } else {
-            2 * separator.len_utf8()
+            String::try_with_capacity_in(capacity, self.allocator)?
         };
-        uri.len().checked_add(separators)
+        for part in resolved.parts(separator, self.config.namespace_triplets) {
+            expanded.try_push_str(part)?;
+        }
+        Ok(Some(expanded))
     }
 
-    /// Lower a literal tag, optionally expanding its element and attribute names.
+    /// Finish a literal tag, using a prepared namespace frame when supplied.
     /// Keep fallible copies in semantic order and publish after any end event.
-    fn parse_start_frame<const EXPAND_NAMES: bool>(
+    fn parse_start_frame(
         &mut self,
         token: lexical::Slice<'_>,
         position: Position,
         name: &str,
         rest: &str,
+        expanded_name: Option<String>,
         frame: &mut AdapterFrame,
     ) -> Result<(), Error> {
         debug_assert!(self.tables.defaults.is_empty());
         debug_assert!(!self.source().has_conversions());
         debug_assert!(!self.fragment && self.sources.len() == 1);
-        if !EXPAND_NAMES && !token.ends_with("/>") {
+        if expanded_name.is_none() && !token.ends_with("/>") {
             return self
                 .identity_start_state()
                 .lower(name, rest, position, frame);
         }
         let mut raw_attrs =
             std::mem::replace(&mut self.raw_attributes, Vec::new_in(self.allocator));
-        if raw_attrs.len() > self.config.limits.max_attributes {
-            return Err(self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded"));
-        }
-        self.event_recycling
-            .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
-        frame.prepare(raw_attrs.len())?;
-        let literal_span =
-            !EXPAND_NAMES && !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);
-        let mut names =
-            AttributeNames::new(raw_attrs.len(), self.namespaces.hasher(), self.allocator);
-        for (index, attribute) in raw_attrs.iter().enumerate() {
-            let (attr_name, value, attribute_offset, _) = attribute.parts(rest);
-            names.check(
-                attr_name,
-                raw_attrs[..index]
-                    .iter()
-                    .map(|attribute| attribute.name(rest)),
-                || {
-                    self.source()
-                        .position_at(1 + name.len() + attribute_offset, 0)
-                },
-            )?;
-            if !EXPAND_NAMES && !literal_span {
-                frame.push_attribute(attr_name, value)?;
+        if expanded_name.is_none() {
+            if raw_attrs.len() > self.config.limits.max_attributes {
+                return Err(self.err(ErrorKind::LimitExceeded, "attribute count limit exceeded"));
             }
-        }
-        if EXPAND_NAMES && !raw_attrs.is_empty() {
-            let mut key_lengths = [0; 8];
+            self.event_recycling
+                .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
+            frame.prepare(raw_attrs.len())?;
+            let literal_span = !raw_attrs.is_empty() && frame.fits_literal_attributes(rest, name);
+            let mut names =
+                AttributeNames::new(raw_attrs.len(), self.namespaces.hasher(), self.allocator);
             for (index, attribute) in raw_attrs.iter().enumerate() {
-                let name = attribute.name(rest);
-                if name.contains(':') {
-                    let (name, key_length) = self.expand_small_attribute_name(
-                        name,
-                        frame
-                            .attributes()
-                            .zip(key_lengths)
-                            .filter(|(_, length)| *length != 0)
-                            .map(|((name, _), length)| &name[..length]),
-                    )?;
-                    key_lengths[index] = key_length;
-                    frame.push_attribute(&name, attribute.value(rest))?;
-                } else {
-                    frame.push_attribute(name, attribute.value(rest))?;
+                let (attr_name, value, attribute_offset, _) = attribute.parts(rest);
+                names.check(
+                    attr_name,
+                    raw_attrs[..index]
+                        .iter()
+                        .map(|attribute| attribute.name(rest)),
+                    || {
+                        self.source()
+                            .position_at(1 + name.len() + attribute_offset, 0)
+                    },
+                )?;
+                if !literal_span {
+                    frame.push_attribute(attr_name, value)?;
                 }
             }
-        }
-        if literal_span {
-            frame.push_literal_attributes(rest, &raw_attrs)?;
+            if literal_span {
+                frame.push_literal_attributes(rest, &raw_attrs)?;
+            }
+            frame.set_name(name)?;
         }
         self.id_attribute_index = None;
-        let expanded_name = if EXPAND_NAMES {
-            let reusable = self.event_recycling.take_name();
-            Some(self.expand_name(name, false, self.config.namespace_triplets, reusable)?)
-        } else {
-            frame.set_name(name)?;
-            None
-        };
         self.seen_root = true;
         self.declaration_allowed = false;
         let stack_name = if let Some(mut value) = expanded_name {
@@ -5629,7 +5652,16 @@ mod namespace_scope_tests {
                                 .is_some_and(|bytes| bytes <= arena::MAX_ARENA_BYTES)
                         });
                         assert_eq!(
-                            parser.expanded_names_fit_frame(name, "", token_bytes),
+                            namespace::FramePlan::new(
+                                name,
+                                "",
+                                &[],
+                                token_bytes,
+                                &parser.config,
+                                &parser.namespaces,
+                                parser.default_namespace.as_deref(),
+                            )
+                            .is_some(),
                             expected,
                             "{name:?} {name_rules:?} {separator:?} {token_bytes}"
                         );

@@ -12,6 +12,8 @@ mod default_attribute_tests;
 mod dtd;
 mod dtd_tables;
 mod encoding;
+#[cfg(test)]
+mod large_token_tests;
 mod lexical;
 mod names;
 #[cfg(test)]

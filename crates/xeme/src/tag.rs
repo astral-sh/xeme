@@ -209,6 +209,8 @@ impl AttributeScanner {
                     } else {
                         memchr::memchr(quote, suffix)
                     };
+                    #[cfg(test)]
+                    crate::large_token_tests::inspect(next.map_or(suffix.len(), |next| next + 1));
                     let Some(relative) = next else {
                         self.offset = text.len();
                         if final_input {
@@ -265,6 +267,8 @@ impl AttributeScanner {
             .get(self.offset)
             .is_some_and(|b| matches!(b, b' ' | b'\t' | b'\r' | b'\n'))
         {
+            #[cfg(test)]
+            crate::large_token_tests::inspect(1);
             self.offset += 1;
         }
     }
@@ -332,7 +336,11 @@ fn literal_value_end(bytes: &[u8], quote: u8, literal_ascii: &mut bool) -> Optio
 pub(crate) fn name_end(text: &str, offset: usize, rules: NameRules) -> usize {
     text[offset..]
         .char_indices()
-        .find(|(_, c)| !rules.is_name_char(*c))
+        .find(|(_, c)| {
+            #[cfg(test)]
+            crate::large_token_tests::inspect(c.len_utf8());
+            !rules.is_name_char(*c)
+        })
         .map_or(text.len(), |(index, _)| offset + index)
 }
 
@@ -445,6 +453,8 @@ impl TagScanner {
             self.offset = text[start..]
                 .char_indices()
                 .find(|(_, character)| {
+                    #[cfg(test)]
+                    crate::large_token_tests::inspect(character.len_utf8());
                     if !rules.is_name_char(*character) {
                         return true;
                     }

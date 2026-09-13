@@ -45,6 +45,9 @@ balanced and is bounded separately from document input. The C interface also
 bounds aggregate allocation and work across a parser's external-entity family.
 Library crates leave global allocator selection to the embedding application.
 
+See [XML denial-of-service protections](security.md) for entity-expansion and
+large-token protections, and the limits required when a caller decompresses input.
+
 ## Expat consumers
 
 The [C interface](../crates/xeme_expat/) exports shared and static libraries with

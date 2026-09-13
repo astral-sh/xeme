@@ -417,6 +417,8 @@ impl Parser {
                 let end = text[state.word_checked..]
                     .char_indices()
                     .find(|(_, c)| {
+                        #[cfg(test)]
+                        crate::large_token_tests::inspect(c.len_utf8());
                         whitespace(*c) != space || matches!(c, '\'' | '"' | '%' | '<' | '>')
                     })
                     .map_or(text.len(), |(offset, _)| state.word_checked + offset);
@@ -477,7 +479,11 @@ impl Parser {
                     let checked = state.quote_checked.max(1);
                     let Some(end) = text.as_bytes()[checked..]
                         .iter()
-                        .position(|&b| b == quote)
+                        .position(|&b| {
+                            #[cfg(test)]
+                            crate::large_token_tests::inspect(1);
+                            b == quote
+                        })
                         .map(|offset| checked + offset + 1)
                     else {
                         state.expansion.check_token_length(self, text.len())?;

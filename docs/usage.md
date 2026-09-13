@@ -40,6 +40,10 @@ instructions, CDATA, character references, entities, and DTD attribute defaults.
 It supports UTF-8, UTF-16, ASCII, and ISO-8859-1 input. The CLI reads the selected
 file or standard input and does not fetch external resources.
 
+Compressed input is not decompressed automatically. When piping a decompressor's
+output into Xeme, bound its output and work separately; see
+[XML denial-of-service protections](security.md#compressed-input).
+
 The CLI uses the parser's default resource limits. Applications that need different
 limits or external-entity resolution can use the [Rust library](library.md) or
 [Expat interface](../crates/xeme_expat/).

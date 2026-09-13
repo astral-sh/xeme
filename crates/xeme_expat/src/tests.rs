@@ -88,6 +88,150 @@ fn entity_amplification_controls_apply_after_suspension_and_reset_to_defaults() 
     }
 }
 
+unsafe extern "C" fn count_security_text(data: *mut c_void, _: *const c_char, length: c_int) {
+    // SAFETY: Security tests keep their byte counter live through synchronous parsing.
+    unsafe { *data.cast::<usize>() += length as usize };
+}
+
+#[test]
+fn default_entity_protection_rejects_exponential_and_quadratic_bombs() {
+    use std::fmt::Write;
+
+    // Both payloads expand to 16 MiB if unchecked, keeping a regressed test
+    // bounded. The shallow case cannot be stopped by an entity-depth cap.
+    let mut exponential = format!("<!DOCTYPE r [<!ENTITY e0 '{}'>", "x".repeat(512));
+    for level in 1..=5 {
+        write!(
+            exponential,
+            "<!ENTITY e{level} '{}'>",
+            format!("&e{};", level - 1).repeat(8)
+        )
+        .unwrap();
+    }
+    exponential.push_str("]><r>&e5;</r>");
+    let quadratic = format!(
+        "<!DOCTYPE r [<!ENTITY e '{}'>]><r>{}</r>",
+        "x".repeat(4096),
+        "&e;".repeat(4096)
+    );
+
+    // SAFETY: Each parser, input and callback counter is test-owned. Parsing
+    // stops immediately on failure, before attempting to expand the full bomb.
+    unsafe {
+        for document in [exponential, quadratic] {
+            for buffered in [false, true] {
+                for width in [1, document.len()] {
+                    let parser = XML_ParserCreate(ptr::null());
+                    assert!(!parser.is_null());
+                    let mut emitted = 0_usize;
+                    XML_SetUserData(parser, ptr::from_mut(&mut emitted).cast());
+                    XML_SetCharacterDataHandler(parser, Some(count_security_text));
+                    let mut status = OK;
+                    for (index, chunk) in document.as_bytes().chunks(width).enumerate() {
+                        let final_input = c_int::from((index + 1) * width >= document.len());
+                        status = if buffered {
+                            let buffer = XML_GetBuffer(parser, chunk.len() as c_int);
+                            assert!(!buffer.is_null());
+                            ptr::copy_nonoverlapping(chunk.as_ptr(), buffer.cast(), chunk.len());
+                            XML_ParseBuffer(parser, chunk.len() as c_int, final_input)
+                        } else {
+                            XML_Parse(
+                                parser,
+                                chunk.as_ptr().cast(),
+                                chunk.len() as c_int,
+                                final_input,
+                            )
+                        };
+                        if status == ERROR {
+                            break;
+                        }
+                    }
+                    assert_eq!(status, ERROR, "buffered={buffered}, width={width}");
+                    assert_eq!(XML_GetErrorCode(parser), 43);
+                    assert!(emitted <= 8 * 1024 * 1024);
+                    assert_eq!(XML_Parse(parser, ptr::null(), 0, 1), ERROR);
+                    assert_eq!(XML_GetErrorCode(parser), 43);
+                    XML_ParserFree(parser);
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn large_tokens_parse_bytewise_through_both_c_input_apis() {
+    let token = "x".repeat(32 * 1024);
+    let document = format!(
+        "<!DOCTYPE r [<!ENTITY e '{token}'>]><!--{token}--><?pi {token}?><r a='{token}'><![CDATA[{token}]]>&e;</r>"
+    );
+    // SAFETY: The parser, input bytes and callback counter outlive every call.
+    unsafe {
+        for buffered in [false, true] {
+            for deferral in [0, 1] {
+                let parser = XML_ParserCreate(ptr::null());
+                assert!(!parser.is_null());
+                assert_eq!(XML_SetReparseDeferralEnabled(parser, deferral), 1);
+                let mut emitted = 0_usize;
+                XML_SetUserData(parser, ptr::from_mut(&mut emitted).cast());
+                XML_SetCharacterDataHandler(parser, Some(count_security_text));
+                for byte in document.as_bytes() {
+                    let status = if buffered {
+                        let buffer = XML_GetBuffer(parser, 1).cast::<u8>();
+                        assert!(!buffer.is_null());
+                        *buffer = *byte;
+                        XML_ParseBuffer(parser, 1, 0)
+                    } else {
+                        XML_Parse(parser, ptr::from_ref(byte).cast(), 1, 0)
+                    };
+                    assert_eq!(status, OK, "buffered={buffered}, deferral={deferral}");
+                }
+                assert_eq!(
+                    if buffered {
+                        XML_ParseBuffer(parser, 0, 1)
+                    } else {
+                        XML_Parse(parser, ptr::null(), 0, 1)
+                    },
+                    OK
+                );
+                assert_eq!(emitted, 2 * token.len());
+                XML_ParserFree(parser);
+            }
+        }
+    }
+}
+
+#[test]
+fn default_token_limit_rejects_an_unfinished_comment_through_both_c_input_apis() {
+    let chunk = vec![b'x'; 64 * 1024];
+    // SAFETY: The bounded input and parser handles remain live through all calls.
+    unsafe {
+        for buffered in [false, true] {
+            let parser = XML_ParserCreate(ptr::null());
+            assert!(!parser.is_null());
+            assert_eq!(XML_Parse(parser, c"<!--".as_ptr(), 4, 0), OK);
+            let mut status = OK;
+            // Supply at most one chunk past the default 16 MiB token ceiling.
+            // Rejecting before EOF also bounds an attacker-controlled stream.
+            for _ in 0..=256 {
+                status = if buffered {
+                    let buffer = XML_GetBuffer(parser, chunk.len() as c_int);
+                    assert!(!buffer.is_null());
+                    ptr::copy_nonoverlapping(chunk.as_ptr(), buffer.cast(), chunk.len());
+                    XML_ParseBuffer(parser, chunk.len() as c_int, 0)
+                } else {
+                    XML_Parse(parser, chunk.as_ptr().cast(), chunk.len() as c_int, 0)
+                };
+                if status == ERROR {
+                    break;
+                }
+            }
+            assert_eq!(status, ERROR, "buffered={buffered}");
+            assert_eq!(XML_GetErrorCode(parser), 43);
+            XML_ParserFree(parser);
+        }
+    }
+}
+
 #[derive(Default)]
 struct State {
     parser: XML_Parser,

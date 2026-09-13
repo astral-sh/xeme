@@ -23,7 +23,7 @@ use oriole_storage::{
     try_insert, try_push, try_set_insert,
 };
 use std::fmt;
-use std::num::NonZeroUsize;
+use std::num::{NonZeroU64, NonZeroUsize};
 use std::sync::OnceLock;
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -568,6 +568,8 @@ pub struct Parser {
     // current default URI; scope undo records keep the displaced owners.
     namespaces: HashMap<String, String>,
     default_namespace: Option<String>,
+    // None permanently disables revision reuse after the counter is exhausted.
+    default_namespace_revision: Option<NonZeroU64>,
     tables: DtdTables,
     shared_tables: OnceLock<Shared<oriole_storage::TryLock<DtdTables>>>,
     parameter_mode: u8,
@@ -746,6 +748,7 @@ impl Parser {
             sources,
             namespaces,
             default_namespace: None,
+            default_namespace_revision: NonZeroU64::new(1),
             pending: Queue::new_in(allocator),
             stack: Vec::new_in(allocator),
             namespace_scopes: Vec::new_in(allocator),
@@ -822,6 +825,7 @@ impl Parser {
         uri: String,
     ) -> Result<Option<String>, AllocError> {
         if prefix.is_empty() {
+            self.advance_default_namespace_revision();
             Ok(self.default_namespace.replace(uri))
         } else {
             try_insert(&mut self.namespaces, prefix, uri)
@@ -831,10 +835,20 @@ impl Parser {
     /// Remove the active binding so its owner can become an undo record.
     fn remove_namespace(&mut self, prefix: &str) -> Option<String> {
         if prefix.is_empty() {
+            self.advance_default_namespace_revision();
             self.default_namespace.take()
         } else {
             self.namespaces.remove(prefix)
         }
+    }
+
+    /// Invalidate default-binding cache keys on installation, removal and scope undo.
+    /// Exhaustion falls back to comparing URI bytes without wrapping or failing parsing.
+    fn advance_default_namespace_revision(&mut self) {
+        self.default_namespace_revision = self
+            .default_namespace_revision
+            .and_then(|revision| revision.get().checked_add(1))
+            .and_then(NonZeroU64::new);
     }
 
     /// Return this parser's local caller salt, without exposing secret randomized keys.
@@ -1042,6 +1056,7 @@ impl Parser {
             child.shared_tables = OnceLock::from(owner.expect("parameter DTD owner"));
         }
         child.namespaces.clear();
+        // The new parser has no accepted frames and owns a fresh revision domain.
         child.default_namespace = self.default_namespace.try_clone()?;
         for (prefix, uri) in &self.namespaces {
             try_insert(&mut child.namespaces, prefix.try_clone()?, uri.try_clone()?)?;
@@ -3876,6 +3891,11 @@ impl Parser {
                 prefix,
                 separator,
                 self.config.namespace_triplets,
+                if prefix.is_none() {
+                    self.default_namespace_revision
+                } else {
+                    None
+                },
             )?;
             self.seen_root = true;
             self.declaration_allowed = false;

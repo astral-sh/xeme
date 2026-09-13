@@ -23,14 +23,20 @@ python3 integration/python-build-standalone/prepare.py --output /absolute/xeme-b
 
 For local Ohm development, add `--toolchain ohm --cargo-arg=-Zohm-defaults=no` and set a separate
 `CARGO_TARGET_DIR` and shared `CARGO_BUILD_BUILD_DIR` as instructed by the workspace.
+Keep Ohm's experimental trust settings disabled for these bundles.
 The output directory must not already exist. A failed build leaves its log there;
 use a new output directory when retrying.
 
-Both normal and PGO bundles reject inherited Rust flags, compiler wrappers,
-Cargo profile environment overrides and configured Rust flags. Both verify all
-three fresh workspace compiler vectors, including the ABI target, CPU selection,
-PIC, unwinding, ThinLTO and one codegen unit. Use a fresh `CARGO_TARGET_DIR` for a
-normal build so cached compilations cannot omit this evidence.
+Both normal and PGO bundles reject inherited `RUSTFLAGS`,
+`CARGO_ENCODED_RUSTFLAGS`, `CARGO_PROFILE_*` overrides, compiler wrappers and
+configured Rust flags. They verify fresh workspace compilations with the selected
+ABI and CPU, position-independent code, unwinding, ThinLTO and one codegen unit.
+Use a fresh `CARGO_TARGET_DIR` for a normal build so the compiler commands are
+available for verification.
+
+The builder selects `cargo rustc --lib --crate-type cdylib,staticlib` so ThinLTO
+applies to the C artifacts, captures `rustc --print=native-static-libs`, and rejects
+source changes during compilation. The Cargo manifest retains `rlib` for Rust tests.
 
 ### Explicit x86-64-v3 trial
 
@@ -45,9 +51,8 @@ bash integration/python-build-standalone/run.sh \
 
 The same `--pbs-target` option combines with `--pgo --llvm-profdata ...`. PBS uses
 its existing v3 target for the whole distribution; Rust retains the generic ABI
-triple `x86_64-unknown-linux-gnu` and adds only `-C target-cpu=x86-64-v3`. The bundle
-records `target`, `rust_target`, `target_cpu`, actual compiler vectors and host
-checks. A v3 bundle passed to the two-argument, generic `run.sh` invocation is
+triple `x86_64-unknown-linux-gnu` and adds only `-C target-cpu=x86-64-v3`.
+A v3 bundle passed to the two-argument, generic `run.sh` invocation is
 rejected. Unknown targets and hidden CPU/feature overrides are rejected too.
 
 Before training or execution, the v3 path compiles and runs a small GCC CPU/OS
@@ -55,27 +60,10 @@ guard with fixed `-march=x86-64 -mtune=generic` flags and a clean environment.
 Inherited `CC`, `CFLAGS` and compiler-search overrides do not affect that guard.
 Its GCC builtin checks the complete v3 level, including usable AVX OS state;
 checking only `avx2` would be insufficient. The generic path does not compile a
-guard. A supported CPU does not establish old-glibc compatibility: the actual
-distribution still needs the glibc 2.17 and threaded-TLS gates below.
+guard.
 
-The manual workflow's `pbs_target` choice defaults to generic. Artifact names
-include the product target and normal/PGO mode. Installed provenance checks bind
-the distribution filename, `PYTHON.json.target_triple`, installed bundle manifest
-and exact static archive before running the installed parser. PBS's v3 archive
-filename expresses its CPU requirement, but does not identify Xeme by itself;
-these experimental artifacts must remain outside release pools.
+### Bundle contents
 
-This wiring enables a controlled trial. Local v3 PGO Python results do not
-establish installed-distribution performance, native parity, complete
-compatibility or readiness for default deployment.
-
-The script builds with position-independent code and unwinding enabled, captures
-`rustc --print=native-static-libs`, and rejects source changes during compilation.
-It uses Cargo's `rustc --lib --crate-type cdylib,staticlib` target override so the
-release profile's ThinLTO setting applies to the C artifacts. The manifest retains
-`rlib` for Rust tests; verbose build logs record the compiler's effective options.
-The recipe CI job also builds this bundle with stable Rust and its documentation
-component, exercising native-library extraction and the weak TLS-hook check.
 The bundle contains:
 
 - `libexpat.a`: Xeme's Rust static archive under the dependency's expected name.
@@ -102,46 +90,20 @@ python3 integration/python-build-standalone/prepare.py \
 ```
 
 The output must be outside the source tree. Cargo dependencies must already be
-cached. Unset inherited `RUSTFLAGS`, `CARGO_ENCODED_RUSTFLAGS`, and `CARGO_PROFILE_*`
-overrides: this bundle verifies PIC, unwinding, ThinLTO, one codegen unit, and the
-GNU x86-64 target in the actual compiler commands. Use the normal production
-toolchain and matching Rust documentation. For local Ohm checks, add
-`--toolchain ohm --cargo-arg=-Zohm-defaults=no` and keep its experimental trust
-settings disabled.
+cached. The compiler and environment requirements above also apply.
 
-This delegates to the [existing generated-only PGO pipeline](../../tools/pgo/),
+This delegates to the [generated-only PGO pipeline](../../tools/pgo/),
 then copies its exact optimized static archive into `libexpat.a`. It captures
-native linker libraries from that same profile-use compilation. The source,
-compiler, Cargo configuration, training inputs, profiles, library origins, and
-generated callback results must still match when packaging completes. No prior
-profile or separately rebuilt archive is accepted. The normal TLS, header,
-license, and CPython cleanup-backport checks also apply.
+native linker libraries from that same profile-use compilation. Packaging checks
+that build inputs and outputs are unchanged and generated callback results agree.
+No prior profile or separately rebuilt archive is accepted.
 
 `manifest.json` embeds the PGO manifest and its checksum. The `pgo/` subdirectory
 retains the complete build logs, generated training records, profiles, and
-instrumented and optimized libraries; retain it with the bundle when archiving
-evidence. PBS installs the same six payload files and retains the combined
-manifest in its license directory. Pass this bundle to `run.sh` exactly as below.
+instrumented and optimized libraries. Pass this bundle to `run.sh` as below.
+Selecting PGO does not select PBS's CPython optimization variant.
 
-Selecting PGO does not select PBS's CPython optimization variant, and local
-benchmark gains do not establish the installed distribution's performance.
-Repeat the full distribution, installed XML, glibc 2.17, threaded-TLS, and consumer
-benchmark gates for the resulting bundle. The ordinary CI distribution and
-default `prepare.py` invocation continue to use the normal release build.
-
-The manual **PBS distribution** workflow accepts a boolean `pgo` input, defaulting
-to `false`. Enabling it installs stable Rust's matching LLVM tools, fetches the
-locked dependencies before offline training, and passes the resulting PGO bundle
-through the same distribution gates. Its validation artifact retains the PGO
-logs, manifests, training inputs and records, and profiles. Cargo target trees and
-duplicate library binaries are excluded from that artifact. The bundle manifest
-retains the exact static archive hash; the produced PGO distribution still needs
-its packaged archive identity checked.
-
-PBS pull requests use the normal build, including branches whose names contain
-`pbs-pgo-`. The current workflow enables PGO only through its manual `pgo` input.
-Manual dispatch requires the workflow to be present on the repository's default
-branch.
+### GNU compatibility
 
 The archive is built for the GNU target, but target compatibility remains a PBS
 validation gate. At the pinned revision, PBS links x86_64 against a Debian Jessie
@@ -220,13 +182,20 @@ verifies the download's size and SHA-256 before exercising the backport on
 
 The [PBS distribution workflow](../../.github/workflows/pbs.yml) runs for pull
 requests changing this integration directory, `tools/cpython/`, or the workflow,
-regardless of branch name. It can also be dispatched manually with the target
-and PGO options described above. Pull requests use the generic target, normal
-Rust ThinLTO build, and PBS's CPython `noopt` variant.
+regardless of branch name. Pull requests use the generic target, normal Rust ThinLTO
+build, and PBS's CPython `noopt` variant. Manual dispatch exposes `pbs_target`
+(default: generic) and `pgo` (default: `false`); the workflow must be present on the
+default branch to dispatch it. PGO runs install stable Rust's matching LLVM tools
+and fetch locked dependencies before offline training.
 
-Validate the resulting interpreter and archive:
+Artifact names include the product target and normal/PGO mode. The PGO validation
+artifact retains logs, manifests, training inputs and records, and profiles;
+it excludes Cargo target trees and duplicate library binaries.
 
-- Verify the installed bundle manifest, static archive hash, and parser identity.
+Validate the resulting interpreter and archive for each CPU target and build mode:
+
+- Check the distribution filename, `PYTHON.json.target_triple`, installed bundle
+  manifest and static archive hash against the selected bundle.
   `pyexpat.EXPAT_VERSION` must identify Xeme.
 - Run PBS's archive validator and custom checks, inspecting dynamic dependencies
   and symbol versions.
@@ -241,13 +210,10 @@ locations, fixture hashes, and the complete discovered/executed test inventory.
 Separate semantic checks must also pass. Unrelated failures, distribution
 structure, parser identity, custom checks, and threaded parsing remain fatal.
 
-The local [CPython extension harness](../../tools/cpython/README.md) builds
-separate artifacts; repeat distribution checks for each runtime and build mode.
-Installed-interpreter performance also needs separate benchmarks. The
+The local [CPython extension harness](../../tools/cpython/README.md) builds separate
+artifacts. Measure installed-interpreter performance with separate benchmarks. The
 [qualification report](../../docs/evidence/2026-09-13-review.md) records historical
 source and distribution hashes; it does not qualify a later rebased runtime.
 
 macOS packaging, Windows packaging, cross builds, and fully static Python
-validation remain open. Keep these experimental archives outside the release
-artifact pool. The default PBS dependency remains Expat until the relevant
-compatibility and release gates pass.
+validation remain open.

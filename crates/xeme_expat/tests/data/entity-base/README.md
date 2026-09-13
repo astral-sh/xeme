@@ -15,7 +15,3 @@ parameter references inside grammar and entity values:
 ```console
 PYTHONPATH=tools python tools/check_entity_bases.py /path/to/libexpat.so /path/to/libxeme_expat.so
 ```
-
-All 48 probe scenarios agree with Expat 2.8.4. The original implementation fails
-because callbacks read the referencing parser's current base instead of the base
-captured by the entity declaration.

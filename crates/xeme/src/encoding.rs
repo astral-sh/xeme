@@ -1632,7 +1632,7 @@ mod tests {
                     let (mut direct, mut direct_source) = make();
                     let (mut buffered, mut buffered_source) = make();
                     for (part, final_input) in [(&bytes[..split], false), (&bytes[split..], true)] {
-                        // A nonempty pending buffer selects the unchanged path.
+                        // A nonempty pending buffer selects the buffered decoding path.
                         buffered.append_pending(part).unwrap();
                         let expected = buffered.feed(
                             &[],

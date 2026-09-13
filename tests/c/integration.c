@@ -192,8 +192,7 @@ static void namespace_long_names(void) {
 }
 
 /* Successful expansion from Expat's test_alloc_nested_entities. Keep its exact
- * XML bytes; see UPSTREAM-NOTICES.txt. Allocation-injection failures and differing
- * declaration callback positions remain in the separate validation evidence. */
+ * XML bytes; see UPSTREAM-NOTICES.txt. */
 static const char nested_entities_root[] = "<!DOCTYPE doc SYSTEM 'http://example.org/one.ent'>\n"
                      "<doc />";
 static const char nested_entities_dtd[] = "<!ENTITY % pe1 '"

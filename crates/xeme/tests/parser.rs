@@ -1171,7 +1171,7 @@ fn external_dtd_declarations_merge_before_document_content() {
 fn indexed_declarations_preserve_order_types_ids_and_external_precedence() {
     let mut parser = Parser::new(Config::default());
     assert!(parser.set_param_entity_parsing(2));
-    parser.feed(b"<!DOCTYPE r SYSTEM 'test.dtd' [<!ATTLIST r second CDATA 'b' first NMTOKENS 'a' id ID #IMPLIED><!ATTLIST r first CDATA 'ignored' third CDATA 'c'>]><r id='identifier' first=' x  y '/>", true).unwrap();
+    parser.feed(b"<!DOCTYPE r SYSTEM 'test.dtd' [<!ATTLIST r omitted CDATA #IMPLIED second CDATA 'b' required CDATA #REQUIRED first NMTOKENS 'a' id ID #IMPLIED><!ATTLIST r first CDATA 'ignored' omitted CDATA 'ignored' third CDATA 'c'>]><r id='identifier' first=' x  y '/>", true).unwrap();
     let mut seen = false;
     while let Some(event) = parser.next_event().unwrap() {
         match event.kind {
@@ -1179,7 +1179,7 @@ fn indexed_declarations_preserve_order_types_ids_and_external_precedence() {
                 let mut child = parser.external_child_with_encoding(None, None).unwrap();
                 child
                     .feed(
-                        b"<!ATTLIST r second CDATA 'ignored' fourth CDATA 'd'>",
+                        b"<!ATTLIST r second CDATA 'ignored' required CDATA 'ignored' fourth CDATA 'd'>",
                         true,
                     )
                     .unwrap();
@@ -1214,6 +1214,30 @@ fn indexed_declarations_preserve_order_types_ids_and_external_precedence() {
         }
     }
     assert!(seen);
+
+    // General external children reconstruct the declaration index from a snapshot.
+    let mut child = parser.external_child(Some(""), None).unwrap();
+    child.feed(b"<r first=' a  b ' id='child'/>", true).unwrap();
+    let event = child.next_event().unwrap().unwrap();
+    let EventKind::StartElement { attributes, .. } = event.kind else {
+        panic!("expected child start element");
+    };
+    assert_eq!(child.id_attribute_index(), Some(1));
+    let actual: Vec<_> = attributes
+        .iter()
+        .map(|attr| (attr.name.as_str(), attr.value.as_str(), attr.specified))
+        .collect();
+    assert_eq!(
+        actual,
+        [
+            ("first", "a b", true),
+            ("id", "child", true),
+            ("second", "b", false),
+            ("third", "c", false),
+            ("fourth", "d", false),
+        ]
+    );
+    while child.next_event().unwrap().is_some() {}
 }
 
 #[test]

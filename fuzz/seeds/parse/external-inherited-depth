@@ -1,0 +1,1 @@
+<!DOCTYPE r [<!ENTITY inner 'v'><!ENTITY outer '&first;'><!ENTITY first SYSTEM 'first'><!ENTITY middle '&second;'><!ENTITY second SYSTEM 'second'>]><r>&outer;&outer;</r>

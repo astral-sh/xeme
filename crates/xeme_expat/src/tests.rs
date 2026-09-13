@@ -2446,9 +2446,9 @@ fn detached_end_charges_the_name_before_handlers_or_default_fallback() {
                         assert_eq!(state.events, expected);
                         assert_eq!(
                             XML_GetCurrentByteIndex(parser),
-                            opening.to_bytes().len() as c_long
+                            opening.to_bytes().len() as c_long + 7
                         );
-                        assert_eq!(XML_GetCurrentByteCount(parser), 7);
+                        assert_eq!(XML_GetCurrentByteCount(parser), 0);
                         assert_eq!(XML_GetSpecifiedAttributeCount(parser), 2);
                     }
                     XML_ParserFree(parser);
@@ -4433,7 +4433,7 @@ fn arena_start_preserves_raw_context_live_pointers_and_callback_switches() {
                                 .windows(b"<n a='second'".len())
                                 .position(|value| value == b"<n a='second'")
                                 .unwrap()
-                                + if empty { second_raw.len() } else { 0 }
+                                + second_raw.len()
                         );
                         let raw_count = state.raw.len();
                         XML_DefaultCurrent(parser);
@@ -5469,8 +5469,11 @@ fn arena_text_keeps_bytes_raw_context_and_handlers_live_through_suspension() {
                 XML_Parse(parser, input.as_ptr().cast(), input.len() as c_int, 1),
                 SUSPENDED
             );
-            assert_eq!(XML_GetCurrentByteIndex(parser), 3);
-            assert_eq!(XML_GetCurrentByteCount(parser), content.len() as c_int);
+            assert_eq!(
+                XML_GetCurrentByteIndex(parser),
+                (3 + content.len()) as c_long
+            );
+            assert_eq!(XML_GetCurrentByteCount(parser), 0);
             assert_eq!((*parser).core.current_raw(), Some(content.as_str()));
             let raw_count = state.raw.len();
             XML_DefaultCurrent(parser);

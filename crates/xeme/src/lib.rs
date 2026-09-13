@@ -1791,6 +1791,24 @@ impl Parser {
         })
     }
 
+    /// Position for a C host between successful or suspended parsing calls.
+    /// DTD continuations can retain lookahead, and internal replacements use
+    /// reference-anchored positions instead of the physical source cursor.
+    #[doc(hidden)]
+    pub fn position_between_callbacks(&self, suspended: bool) -> Position {
+        if self.sources.len() != 1 || self.in_doctype || self.external_subset {
+            return self.last_position;
+        }
+        let mut position = self.source().position(0);
+        if suspended && !self.seen_root && !self.fragment {
+            // Expat's prolog processor retains the event's byte range while
+            // its line/column cursor advances through the consumed token.
+            position.byte_index = self.last_position.byte_index;
+            position.byte_count = self.last_position.byte_count;
+        }
+        position
+    }
+
     fn next_event_for_adapter_mode_into(
         &mut self,
         event: &mut Option<Event>,

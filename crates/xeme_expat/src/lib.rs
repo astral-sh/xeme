@@ -1421,6 +1421,7 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut xeme::AdapterFra
                 return ERROR;
             }
             if (*parser).state == 3 && !finishing_tag {
+                (*parser).position = (*parser).core.position_between_callbacks(true);
                 (*parser).error = 0;
                 return SUSPENDED;
             }
@@ -1436,7 +1437,7 @@ unsafe fn run_events_with_frame(parser: XML_Parser, frame: &mut xeme::AdapterFra
                     if (*parser).parse_error != 0 {
                         return ERROR;
                     }
-                    (*parser).position = (*parser).core.position();
+                    (*parser).position = (*parser).core.position_between_callbacks(false);
                     if (*parser).core.is_finished() {
                         if !merge_external_subset(parser) {
                             return ERROR;
@@ -2853,3 +2854,6 @@ mod declaration_base_tests;
 
 #[cfg(test)]
 mod tag_stop_tests;
+
+#[cfg(test)]
+mod suspension_position_tests;

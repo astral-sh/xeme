@@ -1294,9 +1294,28 @@ impl Source {
             self.cursor = 0;
         }
     }
+    /// Report an exceeded byte bound at the character containing that boundary,
+    /// so original-byte position projection always receives a complete UTF-8 span.
+    pub(crate) fn scan_token(
+        &mut self,
+        mode: ScanMode,
+        limit: usize,
+    ) -> Result<Option<usize>, (ErrorKind, usize)> {
+        self.scan_token_bytes(mode, limit)
+            .map_err(|(kind, offset)| {
+                let offset = if kind == ErrorKind::LimitExceeded {
+                    self.remaining().floor_char_boundary(offset)
+                } else {
+                    offset
+                };
+                (kind, offset)
+            })
+    }
+
     /// Resume a token boundary scan, preserving progress across appended input.
     /// DTD scans also yield at an internal-subset opener or parameter-reference marker.
-    pub(crate) fn scan_token(
+    /// A byte limit may fall inside a decoded scalar.
+    fn scan_token_bytes(
         &mut self,
         mode: ScanMode,
         limit: usize,

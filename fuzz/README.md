@@ -1,6 +1,8 @@
 # Fuzzing
 
-The `parse` target checks arbitrary bytes against bounded parser limits. The
+The `parse` target checks arbitrary bytes with both a 64 KiB token limit and a
+small token limit selected by the first input byte. This exercises token errors
+independently of the total-input limit. The
 `streaming` target compares acceptance and owned events for whole-input and
 incremental parsing; it coalesces adjacent character-data fragments because XML
 callback fragmentation may vary by input chunking. Its first byte selects chunk

@@ -1067,7 +1067,8 @@ fn queued_dtd_events_have_individual_raw_tokens() {
         raw.push((event.kind, parser.current_raw().unwrap_or("").to_owned()));
     }
     assert_eq!(raw[0].1, "<!DOCTYPE r [");
-    assert_eq!(raw[1].1, "<!ENTITY e 'value'>");
+    // Entity declarations report the value token as soon as it is complete.
+    assert_eq!(raw[1].1, "'value'");
     assert_eq!(raw[2].1, "<!ELEMENT r EMPTY>");
     assert!(matches!(raw[3].0, EventKind::DoctypeClosingPrefix));
     assert_eq!(raw[3].1, "]");

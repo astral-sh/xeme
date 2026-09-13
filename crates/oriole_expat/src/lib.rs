@@ -283,6 +283,17 @@ fn cptr(value: &Option<CString>) -> *const c_char {
     value.as_ref().map_or(ptr::null(), CString::as_ptr)
 }
 
+/// Terminate opaque base metadata while its owner remains live across the callback.
+fn base_cptr(base: &mut Option<XmlVec<u8>>) -> Result<*const c_char, AllocError> {
+    if let Some(base) = base {
+        base.try_reserve(1)?;
+        base.push(0);
+        Ok(base.as_ptr().cast())
+    } else {
+        Ok(ptr::null())
+    }
+}
+
 unsafe fn create(
     encoding: *const c_char,
     separator: Option<char>,
@@ -594,16 +605,12 @@ unsafe fn dispatch(
 ) -> Result<(), AllocError> {
     // A foreign DTD has no declared external identifier. Expat uses the current
     // base when requesting it, including changes in an earlier doctype callback.
-    let foreign_dtd = matches!(
-        &kind,
-        EventKind::ExternalEntityReference(reference)
-            if reference.context.is_none() && reference.system_id.is_none()
-    );
+    let foreign_dtd = matches!(&kind, EventKind::ExternalEntityReference(_))
+        // SAFETY: The guarded parser owns the marker for its current event.
+        && unsafe { (*parser).core.is_foreign_dtd_reference() };
     let needs_base = foreign_dtd
-        || matches!(
-            &kind,
-            EventKind::EntityDeclaration(_) | EventKind::NotationDeclaration(_)
-        );
+        || matches!(&kind, EventKind::NotationDeclaration(_))
+        || matches!(&kind, EventKind::EntityDeclaration(declaration) if declaration.value.is_some());
     // SAFETY: Parser is pinned by the busy flag until the outer parse exits.
     // Copies and owned strings are the only values retained across callbacks.
     let (h, arg, base_bytes) = unsafe {
@@ -671,7 +678,8 @@ unsafe fn dispatch(
         EventKind::StartNamespace { prefix, uri } => optional_len(prefix) + optional_len(uri),
         EventKind::EndNamespace { prefix } => optional_len(prefix),
         EventKind::EntityDeclaration(declaration) => {
-            declaration.name.len()
+            declaration.base.as_ref().map_or(0, |base| base.len())
+                + declaration.name.len()
                 + optional_len(&declaration.value)
                 + optional_len(&declaration.system_id)
                 + optional_len(&declaration.public_id)
@@ -874,12 +882,8 @@ unsafe fn dispatch(
                 if let Some(callback) = h.external {
                     let base = if foreign_dtd {
                         cptr(&base)
-                    } else if let Some(base) = &mut declaration_base {
-                        base.try_reserve(1)?;
-                        base.push(0);
-                        base.as_ptr().cast()
                     } else {
-                        ptr::null()
+                        base_cptr(&mut declaration_base)?
                     };
                     let handler_arg = if (*parser).external_arg.is_null() {
                         parser
@@ -955,6 +959,7 @@ unsafe fn dispatch(
             }
             EventKind::EntityDeclaration(declaration) => {
                 let oriole::EntityDeclaration {
+                    base: mut declaration_base,
                     name,
                     value,
                     parameter,
@@ -962,13 +967,18 @@ unsafe fn dispatch(
                     public_id,
                     notation,
                 } = XmlBox::into_inner(declaration);
+                let base = if value.is_some() {
+                    cptr(&base)
+                } else {
+                    base_cptr(&mut declaration_base)?
+                };
                 if let (Some(callback), Some(notation_name)) = (h.unparsed, notation.as_ref()) {
                     let notation_name =
                         CString::try_from_str_in(notation_name, (*parser).allocator)?;
                     callback(
                         arg,
                         cstring(name)?.as_ptr(),
-                        cptr(&base),
+                        base,
                         cptr(&optional_cstring(system_id)?),
                         cptr(&optional_cstring(public_id)?),
                         notation_name.as_ptr(),
@@ -981,7 +991,7 @@ unsafe fn dispatch(
                         c_int::from(parameter),
                         cptr(&optional_cstring(value)?),
                         len,
-                        cptr(&base),
+                        base,
                         cptr(&optional_cstring(system_id)?),
                         cptr(&optional_cstring(public_id)?),
                         cptr(&optional_cstring(notation)?),
@@ -2809,3 +2819,6 @@ mod tests;
 
 #[cfg(test)]
 mod context_text_tests;
+
+#[cfg(test)]
+mod declaration_base_tests;

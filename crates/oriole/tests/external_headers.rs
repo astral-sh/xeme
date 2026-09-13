@@ -412,11 +412,23 @@ fn header_children_are_acknowledged_only_during_the_request_and_outlive_parents(
         drop(root);
         if let Some(mut child) = retained {
             child.feed(b"<!ENTITY retained 'valid'>", true).unwrap();
-            assert!(matches!(
-                child.next_event().unwrap().unwrap().kind,
-                EventKind::EntityDeclaration(_)
-            ));
-            assert!(child.next_event().unwrap().is_none());
+            let mut retained = Vec::new();
+            let mut raw = String::new();
+            while let Some(event) = child.next_event().unwrap() {
+                raw.push_str(child.current_raw().unwrap_or_default());
+                match event.kind {
+                    EventKind::EntityDeclaration(declaration) => {
+                        retained.push((
+                            declaration.name.to_string(),
+                            declaration.value.as_ref().unwrap().to_string(),
+                        ));
+                    }
+                    EventKind::EntityDeclarationPrefix => {}
+                    unexpected => panic!("unexpected retained-child event: {unexpected:?}"),
+                }
+            }
+            assert_eq!(retained, [("retained".to_owned(), "valid".to_owned())]);
+            assert_eq!(raw, "<!ENTITY retained 'valid'>");
             assert!(child.is_finished());
         }
     }

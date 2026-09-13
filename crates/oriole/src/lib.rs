@@ -235,6 +235,9 @@ pub struct DoctypeDeclaration {
 /// An internal, external, or unparsed entity declaration.
 #[derive(Debug, Eq, PartialEq)]
 pub struct EntityDeclaration {
+    /// Opaque base URI bytes captured with an external system identifier.
+    /// Internal declarations have no captured base.
+    pub base: Option<Vec<u8>>,
     pub name: String,
     pub value: Option<String>,
     pub parameter: bool,

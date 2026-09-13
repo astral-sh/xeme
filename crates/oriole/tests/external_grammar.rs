@@ -480,3 +480,89 @@ fn enumeration_callback_capture_does_not_change_semantic_defaults() {
         assert!(found);
     }
 }
+
+#[test]
+fn direct_entity_bookkeeping_preserves_allowances_across_chunks() {
+    let mut document = "<!DOCTYPE r [".to_owned();
+    for index in 0..10_000 {
+        document.push_str(&format!("<!ENTITY e{index} SYSTEM 's'>"));
+    }
+    document.push_str("]><r/>");
+    for width in [1, document.len()] {
+        for defaults in [false, true] {
+            let mut parser = Parser::new(Config::default());
+            parser.set_default_events(defaults);
+            let mut declarations = 0;
+            let mut chunks = document.as_bytes().chunks(width).peekable();
+            while let Some(chunk) = chunks.next() {
+                parser.feed(chunk, chunks.peek().is_none()).unwrap();
+                while let Some(event) = parser.next_event().unwrap() {
+                    declarations +=
+                        usize::from(matches!(event.kind, EventKind::EntityDeclaration(_)));
+                }
+            }
+            assert_eq!(declarations, 10_000);
+            assert!(parser.is_finished());
+        }
+    }
+}
+
+#[test]
+fn direct_entity_transition_to_parameter_composition_keeps_work_charges() {
+    let mut config = Config::default();
+    config.limits.max_entity_expansion_bytes = 16 * 1024;
+    config.limits.max_depth = 8;
+    let parent = Parser::new(config);
+    let mut parser = parent.external_child(None, None).unwrap();
+    parser.set_param_entity_parsing(2);
+    let document = format!(
+        "<!ENTITY % p SYSTEM 'p'><!ENTITY e SYSTEM 's' {}>",
+        "%p; ".repeat(100)
+    );
+    parser.feed(document.as_bytes(), true).unwrap();
+    let mut requests = 0;
+    let error = loop {
+        match parser.next_event() {
+            Err(error) => break error,
+            Ok(Some(event)) if matches!(event.kind, EventKind::ExternalEntityReference(_)) => {
+                requests += 1;
+                let mut child = match parser.external_child(None, None) {
+                    Ok(child) => child,
+                    Err(error) => break error,
+                };
+                child.feed(b"", true).unwrap();
+                while child.next_event().unwrap().is_some() {}
+            }
+            Ok(Some(_)) => {}
+            Ok(None) => panic!("repeated parameter children must exhaust the work budget"),
+        }
+    };
+    assert!(requests > 0 && requests < 100);
+    assert_eq!(error.kind, ErrorKind::LimitExceeded);
+}
+
+#[test]
+fn direct_entity_token_limits_include_declaration_delimiters() {
+    let document = b"<!DOCTYPE r [<!ENTITY e '12345'>]><r/>";
+    for width in [1, document.len()] {
+        for limit in [18, 19] {
+            let mut config = Config::default();
+            config.limits.max_token_bytes = limit;
+            let mut parser = Parser::new(config);
+            let result = (|| {
+                let mut chunks = document.chunks(width).peekable();
+                while let Some(chunk) = chunks.next() {
+                    parser.feed(chunk, chunks.peek().is_none())?;
+                    while parser.next_event()?.is_some() {}
+                }
+                Ok::<_, oriole::Error>(())
+            })();
+            if limit == 18 {
+                assert_eq!(result.unwrap_err().kind, ErrorKind::LimitExceeded);
+            } else {
+                result.unwrap();
+                assert!(parser.is_finished());
+            }
+        }
+    }
+}

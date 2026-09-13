@@ -2423,6 +2423,7 @@ fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
             6 => EventKind::EntityDeclaration(
                 oriole_storage::try_box(
                     oriole::EntityDeclaration {
+                        base: Some(word().into_bytes()),
                         name: word(),
                         value: Some(word()),
                         parameter: false,
@@ -2467,7 +2468,7 @@ fn metadata_payloads_enforce_exact_shared_event_budget_boundaries() {
     }
     // Each populated string carries one byte. Dispatch must account for every
     // metadata field exactly once, independently of whether a handler is installed.
-    for (case, bytes) in [2, 2, 4, 3, 2, 1, 5, 4, 3, 1].into_iter().enumerate() {
+    for (case, bytes) in [2, 2, 4, 3, 2, 1, 6, 4, 3, 1].into_iter().enumerate() {
         for base in [false, true] {
             let bytes = bytes + usize::from(base && matches!(case, 6 | 8));
             for remaining in [bytes - 1, bytes] {

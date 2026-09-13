@@ -145,6 +145,135 @@ fn external_context_entity_names_are_active_during_attribute_expansion() {
 }
 
 #[test]
+fn attribute_entities_count_the_containing_entity_depth() {
+    for declaration in [
+        "<!ENTITY outer \"<r a='&inner;'/>\">",
+        "<!ENTITY % outer \"<!ATTLIST r a CDATA '&inner;'>\">",
+    ] {
+        let parameter = declaration.contains("ENTITY %");
+        let document = format!(
+            "<!DOCTYPE r [<!ENTITY inner 'value'>{declaration}{}]>{}",
+            if parameter { "%outer;" } else { "" },
+            if parameter {
+                "<r/>"
+            } else {
+                "<root>&outer;</root>"
+            },
+        );
+        for depth in [1, 2] {
+            let config = Config {
+                limits: Limits {
+                    max_entity_depth: depth,
+                    ..Limits::default()
+                },
+                ..Config::default()
+            };
+            assert_eq!(
+                attribute(&document, config),
+                if depth == 1 {
+                    Err(ErrorKind::LimitExceeded)
+                } else {
+                    Ok("value".to_owned())
+                },
+                "{document}, depth={depth}",
+            );
+        }
+    }
+    let mut document =
+        "<!DOCTYPE r [<!ENTITY inner 'value'><!ENTITY e0 \"<r a='&inner;'/>\">".to_owned();
+    for depth in 1..32 {
+        write!(document, "<!ENTITY e{depth} '&e{};'>", depth - 1).unwrap();
+    }
+    document.push_str("]><r>&e31;</r>");
+    assert_eq!(
+        attribute(&document, Config::default()),
+        Err(ErrorKind::LimitExceeded)
+    );
+    let mut config = Config::default();
+    config.limits.max_entity_depth += 1;
+    assert_eq!(attribute(&document, config), Ok("value".to_owned()));
+}
+
+#[test]
+fn default_attribute_entities_count_inherited_parameter_depth() {
+    for depth in [2, 3] {
+        let mut parent = Parser::new(Config {
+            limits: Limits {
+                max_entity_depth: depth,
+                ..Limits::default()
+            },
+            ..Config::default()
+        });
+        parent.set_param_entity_parsing(2);
+        parent.feed(b"<!DOCTYPE r [<!ENTITY e 'value'><!ENTITY % external SYSTEM 'external'><!ENTITY % outer '&#37;external;'>%outer;]><r/>", true).unwrap();
+        let mut requested = false;
+        while let Some(event) = parent.next_event().unwrap() {
+            if matches!(event.kind, EventKind::ExternalEntityReference(_)) {
+                requested = true;
+                let mut child = parent.external_child(None, None).unwrap();
+                child.feed(b"<!ATTLIST r a CDATA '&e;'>", true).unwrap();
+                let mut value = None;
+                let result = loop {
+                    match child.next_event() {
+                        Ok(Some(event)) => {
+                            if let EventKind::AttlistDeclaration(declaration) = event.kind {
+                                value = declaration.default.as_deref().map(str::to_owned);
+                            }
+                        }
+                        Ok(None) => break Ok(value),
+                        Err(error) => {
+                            assert_eq!(child.next_event().unwrap_err(), error);
+                            break Err(error.kind);
+                        }
+                    }
+                };
+                assert_eq!(
+                    result,
+                    if depth == 2 {
+                        Err(ErrorKind::LimitExceeded)
+                    } else {
+                        Ok(Some("value".to_owned()))
+                    }
+                );
+                break;
+            }
+        }
+        assert!(requested);
+    }
+}
+
+#[test]
+fn attribute_entities_count_external_parent_depth() {
+    for depth in [1, 2] {
+        let mut parent = Parser::new(Config {
+            limits: Limits {
+                max_entity_depth: depth,
+                ..Limits::default()
+            },
+            ..Config::default()
+        });
+        parent
+            .feed(b"<!DOCTYPE r [<!ENTITY e 'value'>]><r/>", true)
+            .unwrap();
+        while parent.next_event().unwrap().is_some() {}
+        let mut child = parent.external_child(Some(""), None).unwrap();
+        child.feed(b"<r a='&e;'/>", true).unwrap();
+        if depth == 1 {
+            let error = child.next_event().unwrap_err();
+            assert_eq!(error.kind, ErrorKind::LimitExceeded);
+            assert_eq!(child.next_event().unwrap_err(), error);
+        } else {
+            let event = child.next_event().unwrap().unwrap();
+            let EventKind::StartElement { attributes, .. } = event.kind else {
+                panic!("expected start element")
+            };
+            assert_eq!(attributes[0].value, "value");
+            while child.next_event().unwrap().is_some() {}
+        }
+    }
+}
+
+#[test]
 fn replacement_crlf_is_two_spaces_but_physical_crlf_is_one() {
     for document in [
         "<!DOCTYPE r [<!ENTITY e 'A&#13;&#10;B'>]><r a='&e;'/>",

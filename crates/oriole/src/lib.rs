@@ -4343,7 +4343,12 @@ impl Parser {
                     "recursive entity in attribute",
                 ));
             }
-            if frames.len() >= self.config.limits.max_entity_depth {
+            if frames.len()
+                + self.sources.len()
+                + self.external_depth
+                + self.inherited_parameter_depth
+                > self.config.limits.max_entity_depth
+            {
                 return Err(self.err(ErrorKind::LimitExceeded, "entity nesting limit exceeded"));
             }
             let Some((key, entity)) = self.tables.entities.get_key_value(name) else {

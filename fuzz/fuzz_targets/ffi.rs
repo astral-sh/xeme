@@ -209,7 +209,16 @@ fuzz_target!(|data: &[u8]| {
         } else {
             ptr::null()
         };
-        let parser = XML_ParserCreate_MM(ptr::null(), &suite, separator);
+        let encoding = match (data[1] >> 1) & 7 {
+            1 => c"UTF-8".as_ptr(),
+            2 => c"UTF-16".as_ptr(),
+            3 => c"UTF-16LE".as_ptr(),
+            4 => c"UTF-16BE".as_ptr(),
+            5 => c"ISO-8859-1".as_ptr(),
+            6 => c"US-ASCII".as_ptr(),
+            _ => ptr::null(),
+        };
+        let parser = XML_ParserCreate_MM(encoding, &suite, separator);
         if !parser.is_null() {
             let mut state = State {
                 parser,

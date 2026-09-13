@@ -1934,14 +1934,17 @@ pub unsafe extern "C" fn XML_ResumeParser(parser: XML_Parser) -> c_int {
     unsafe { with_parser_tracking(parser, operation) }
 }
 
+/// Install a callback and optionally synchronize the core's handler-availability
+/// flag, which controls the declaration payloads retained while tokenizing.
 macro_rules! setter {
-    ($name:ident, $field:ident, $ty:ty) => {
+    ($name:ident, $field:ident, $ty:ty $(, $enabled:ident)?) => {
         #[unsafe(no_mangle)]
         pub unsafe extern "C" fn $name(parser: XML_Parser, handler: $ty) {
             if !parser.is_null() && !in_allocator_callback() {
-                // SAFETY: Scalar update on the caller's live, serialized handle.
+                // SAFETY: Scalar updates on the caller's live, serialized handle.
                 unsafe {
                     (*parser).handlers.$field = handler;
+                    $((*parser).core.$enabled(handler.is_some());)?
                 }
             }
         }
@@ -1964,31 +1967,19 @@ setter!(
 );
 setter!(XML_SetEndNamespaceDeclHandler, end_namespace, StringHandler);
 setter!(XML_SetEntityDeclHandler, entity_decl, EntityDecl);
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn XML_SetAttlistDeclHandler(parser: XML_Parser, handler: AttlistDecl) {
-    if !parser.is_null() && !in_allocator_callback() {
-        // SAFETY: Both scalar updates use the caller's serialized live handle.
-        unsafe {
-            (*parser).handlers.attlist_decl = handler;
-            (*parser)
-                .core
-                .set_attlist_handler_enabled(handler.is_some());
-        }
-    }
-}
+setter!(
+    XML_SetAttlistDeclHandler,
+    attlist_decl,
+    AttlistDecl,
+    set_attlist_handler_enabled
+);
 setter!(XML_SetUnparsedEntityDeclHandler, unparsed, UnparsedDecl);
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn XML_SetNotationDeclHandler(parser: XML_Parser, handler: NotationDecl) {
-    if !parser.is_null() && !in_allocator_callback() {
-        // SAFETY: Both updates are allocation-free on the serialized live handle.
-        unsafe {
-            (*parser).handlers.notation = handler;
-            (*parser)
-                .core
-                .set_notation_handler_enabled(handler.is_some());
-        }
-    }
-}
+setter!(
+    XML_SetNotationDeclHandler,
+    notation,
+    NotationDecl,
+    set_notation_handler_enabled
+);
 setter!(XML_SetExternalEntityRefHandler, external, ExternalEntity);
 setter!(XML_SetSkippedEntityHandler, skipped, SkippedEntity);
 setter!(XML_SetNotStandaloneHandler, not_standalone, NotStandalone);

@@ -70,6 +70,31 @@ impl EntityBudget {
         {
             return false;
         }
+        self.accepts_charge(enforce)
+    }
+
+    /// Charge an exclusively owned budget without an atomic read-modify-write.
+    pub(crate) fn account_mut(&mut self, bytes: usize, indirect: bool, enforce: bool) -> bool {
+        if bytes == 0 {
+            return true;
+        }
+        let Ok(bytes) = u64::try_from(bytes) else {
+            return false;
+        };
+        let counter = if indirect {
+            self.indirect.get_mut()
+        } else {
+            self.direct.get_mut()
+        };
+        let Some(updated) = counter.checked_add(bytes) else {
+            return false;
+        };
+        *counter = updated;
+        self.accepts_charge(enforce)
+    }
+
+    /// Validate after charging, retaining the increment even when limits reject it.
+    fn accepts_charge(&self, enforce: bool) -> bool {
         let direct = self.direct.load(Ordering::Relaxed);
         let indirect = self.indirect.load(Ordering::Relaxed);
         let Some(total) = direct.checked_add(indirect) else {
@@ -127,5 +152,54 @@ mod tests {
         budget.direct.store(0, Ordering::Relaxed);
         budget.indirect.store(u64::MAX - 1, Ordering::Relaxed);
         assert!(!budget.account(1, true, true));
+    }
+
+    #[test]
+    fn exclusive_and_shared_accounting_preserve_failed_charge_state() {
+        for exclusive in [false, true] {
+            let mut budget = EntityBudget::new();
+            let charge = |budget: &mut EntityBudget, bytes, indirect, enforce| {
+                if exclusive {
+                    budget.account_mut(bytes, indirect, enforce)
+                } else {
+                    budget.account(bytes, indirect, enforce)
+                }
+            };
+            budget.set_threshold(0);
+            assert!(budget.set_factor(2.0));
+
+            // A rejected chosen-counter increment must not modify that counter.
+            budget.direct.store(u64::MAX, Ordering::Relaxed);
+            assert!(!charge(&mut budget, 1, false, false));
+            assert_eq!(budget.direct.load(Ordering::Relaxed), u64::MAX);
+            // A later total overflow retains the successfully charged byte.
+            assert!(!charge(&mut budget, 1, true, false));
+            assert_eq!(budget.indirect.load(Ordering::Relaxed), 1);
+            assert!(charge(&mut budget, 0, true, true));
+
+            budget.direct.store(0, Ordering::Relaxed);
+            budget.indirect.store(u64::MAX - 1, Ordering::Relaxed);
+            // The indirect-only denominator overflows after the increment.
+            assert!(!charge(&mut budget, 1, true, true));
+            assert_eq!(budget.indirect.load(Ordering::Relaxed), u64::MAX);
+            assert!(!charge(&mut budget, 1, true, false));
+            assert_eq!(budget.indirect.load(Ordering::Relaxed), u64::MAX);
+
+            budget.indirect.store(0, Ordering::Relaxed);
+            assert!(charge(&mut budget, 22, true, true));
+            assert!(!charge(&mut budget, 1, true, true));
+            assert_eq!(budget.indirect.load(Ordering::Relaxed), 23);
+            assert!(charge(&mut budget, 1, true, false));
+            assert_eq!(budget.indirect.load(Ordering::Relaxed), 24);
+
+            // Real root bytes replace the synthetic denominator without
+            // clearing earlier charges; threshold equality enables enforcement.
+            budget.set_threshold(49);
+            assert!(charge(&mut budget, 24, false, true));
+            assert!(!charge(&mut budget, 1, true, true));
+            assert_eq!(budget.direct.load(Ordering::Relaxed), 24);
+            assert_eq!(budget.indirect.load(Ordering::Relaxed), 25);
+            assert_eq!(budget.work_limit(0, Some(100)), 2400);
+        }
     }
 }

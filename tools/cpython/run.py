@@ -96,6 +96,20 @@ def complete_inventory(log: str, cases: list[str], reported_count: int) -> bool:
     )
 
 
+def successful_test_run(
+    log: str, returncode: int, file_count: int, cases: list[str]
+) -> bool:
+    """Require a successful upstream run with every pinned case accounted for."""
+    total = re.search(r"^Total tests: run=(\d+)(?: skipped=\d+)?$", log, re.MULTILINE)
+    return (
+        returncode == 0
+        and total is not None
+        and f"Total test files: run={file_count}/{file_count}" in log.splitlines()
+        and not re.search(r"^(FAIL|ERROR): ", log, re.MULTILINE)
+        and complete_inventory(log, cases, int(total[1]))
+    )
+
+
 def only_text_fragmentation(
     log: str,
     returncode: int,
@@ -198,7 +212,7 @@ def main() -> int:
     parser.add_argument(
         "--allow-text-fragmentation",
         action="store_true",
-        help="Accept two known callback-boundary assertions only after semantic checks",
+        help="Reproduce the historical two-assertion exception; not a current release gate",
     )
     parser.add_argument(
         "--consumer-fix",
@@ -226,11 +240,10 @@ def main() -> int:
         parser.error(f"expected CPython {REVISION}, got {revision}")
     if subprocess.check_output(["git", "-C", str(source), "status", "--porcelain"]):
         parser.error("CPython source must be clean")
-    if args.allow_text_fragmentation:
-        if sorted(args.tests) != sorted(TESTS):
-            parser.error(
-                "the fragmentation exception requires all six XML test modules"
-            )
+    full_suite = sorted(args.tests) == sorted(TESTS)
+    if args.allow_text_fragmentation and not full_suite:
+        parser.error("the fragmentation exception requires all six XML test modules")
+    if full_suite:
         for filename, expected in FRAGMENTATION_SOURCE_HASHES.items():
             if (
                 hashlib.sha256(
@@ -238,7 +251,7 @@ def main() -> int:
                 ).hexdigest()
                 != expected
             ):
-                parser.error(f"fragmentation fixture source changed: {filename}")
+                parser.error(f"upstream fixture source changed: {filename}")
     output.mkdir(parents=True, exist_ok=True)
     frozen_library = output / library.name
     shutil.copy2(library, frozen_library)
@@ -365,7 +378,7 @@ xeme_create_system(const XML_Char *encoding,
     Path(env["TMPDIR"]).mkdir(exist_ok=True)
     cases = None
     inventory_command = [executable, "-s", "-m", "test", "--list-cases", *args.tests]
-    if args.allow_text_fragmentation:
+    if full_suite:
         inventory = subprocess.run(
             inventory_command,
             env=env,
@@ -406,15 +419,17 @@ xeme_create_system(const XML_Char *encoding,
         )
     gate_exit_code = result.returncode
     fragmentation = None
-    if args.allow_text_fragmentation:
+    if full_suite:
         assert cases is not None
         tests_log = (output / "tests.log").read_text()
         total = re.search(r"^Total tests: run=(\d+)\b", tests_log, re.MULTILINE)
         inventory_complete = total is not None and complete_inventory(
             tests_log, cases, int(total[1])
         )
-        if not inventory_complete:
-            gate_exit_code = 1
+        if not successful_test_run(
+            tests_log, result.returncode, len(args.tests), cases
+        ):
+            gate_exit_code = gate_exit_code or 1
         semantic_script = Path(__file__).with_name("text_fragmentation.py")
         semantic_command = [executable, "-s", str(semantic_script), str(output)]
         with (output / "text-fragmentation.log").open("w") as log:
@@ -426,7 +441,7 @@ xeme_create_system(const XML_Char *encoding,
                 timeout=120,
                 check=False,
             )
-        known_failures = only_text_fragmentation(
+        known_failures = args.allow_text_fragmentation and only_text_fragmentation(
             tests_log, result.returncode, len(args.tests), cases, source / "Lib/test"
         )
         accepted = known_failures and semantic.returncode == 0
@@ -436,7 +451,11 @@ xeme_create_system(const XML_Char *encoding,
             gate_exit_code = gate_exit_code or semantic.returncode
         fragmentation = {
             "accepted_upstream_failures": accepted,
-            "allowed_assertions": sorted(TEXT_FRAGMENTATION_FAILURES),
+            "allowed_assertions": (
+                sorted(TEXT_FRAGMENTATION_FAILURES)
+                if args.allow_text_fragmentation
+                else []
+            ),
             "semantic_command": semantic_command,
             "semantic_exit_code": semantic.returncode,
             "semantic_source_sha256": hashlib.sha256(

@@ -646,6 +646,13 @@ fn context_input_allocation_failures_preserve_sticky_errors_and_owners() {
                 b"<r>hello</r>".as_slice(),
                 b"hello".as_slice(),
             ),
+            // Start the root before arming failures. Each line then grows the
+            // native Text frame, with a separately published LF between them.
+            (
+                b"<r>".as_slice(),
+                b"abcdefghijklmnopqrstuvwx\nabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789</r>".as_slice(),
+                b"abcdefghijklmnopqrstuvwx\nabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".as_slice(),
+            ),
             (
                 b"<r>seed<n/>".as_slice(),
                 b"tail\xc3".as_slice(),
@@ -658,6 +665,7 @@ fn context_input_allocation_failures_preserve_sticky_errors_and_owners() {
             ),
         ] {
             let mut successful_requests = 0;
+            let mut failed_after_newline = false;
             for fail_at in 0..=64 {
                 if fail_at != 0 && fail_at > successful_requests {
                     break;
@@ -668,6 +676,7 @@ fn context_input_allocation_failures_preserve_sticky_errors_and_owners() {
                 }
                 let mut state = State {
                     parser,
+                    expect_native: prefix == b"<r>",
                     ..State::default()
                 };
                 XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
@@ -688,11 +697,15 @@ fn context_input_allocation_failures_preserve_sticky_errors_and_owners() {
                         assert_eq!(state.text, "tailé".as_bytes());
                     } else {
                         assert_eq!(state.text, expected);
+                        if prefix == b"<r>" {
+                            assert_eq!(state.calls, 3);
+                        }
                     }
                 } else {
                     assert_eq!(result, ERROR, "failure={fail_at}");
                     assert_eq!(XML_GetErrorCode(parser), 1);
                     assert!(expected.starts_with(&state.text));
+                    failed_after_newline |= state.text == b"abcdefghijklmnopqrstuvwx\n";
                     let calls = state.calls;
                     XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
                     assert_eq!(XML_Parse(parser, ptr::null(), 0, 1), ERROR);
@@ -705,6 +718,9 @@ fn context_input_allocation_failures_preserve_sticky_errors_and_owners() {
                 clear_requests(0);
                 XML_ParserFree(parser);
                 assert_eq!(LIVE.get(), 0, "failure={fail_at}");
+            }
+            if prefix == b"<r>" {
+                assert!(failed_after_newline);
             }
         }
     }

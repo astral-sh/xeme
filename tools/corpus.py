@@ -22,6 +22,9 @@ def cases(seed: int = 20260910, generated: int = 100) -> list[Case]:
         "declaration": b'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><r/>',
         "misc": b"<?before yes?><!--before--><r><?target value?><![CDATA[<hello>&x]]><!--a--></r><!--after-->",
         "line-endings": b'<r a="one\r\ntwo\tthree\rfour">a\r\nb\rc\n</r>',
+        # Reduced CPython BufferTextTest and SAX CDATAHandlerTest inputs.
+        "python-buffer-text-lines": b"<a>1<b buffer-text='no'/>2\n3<c buffer-text='yes'/>4\n5</a>",
+        "python-sax-cdata-lines": b"<r>\nParseable character data\n<![CDATA[<> &% - assorted other XML junk.]]>\n</r>",
         "character-references": b'<r a="&#x9;&#10;&#13;">&#65;&#x1F600;&lt;&gt;&apos;&quot;&amp;</r>',
         "utf8-bom": b"\xef\xbb\xbf<r>ok</r>",
         "utf16-le": b"\xff\xfe" + '<r a="é">😀</r>'.encode("utf-16-le"),

@@ -721,6 +721,7 @@ pub struct Parser {
     event_recycling: EventRecycling,
     expand_internal_entities: bool,
     default_events: bool,
+    text_line_boundaries: bool,
     notation_handler_enabled: bool,
     attlist_handler_enabled: bool,
     decoding_error: Option<(ErrorKind, &'static str)>,
@@ -904,6 +905,7 @@ impl Parser {
             event_recycling: EventRecycling::new(allocator)?,
             expand_internal_entities: true,
             default_events: false,
+            text_line_boundaries: false,
             notation_handler_enabled: true,
             attlist_handler_enabled: true,
             decoding_error: None,
@@ -1175,6 +1177,7 @@ impl Parser {
         }
         child.expand_internal_entities = self.expand_internal_entities;
         child.default_events = self.default_events;
+        child.text_line_boundaries = self.text_line_boundaries;
         child.notation_handler_enabled = self.notation_handler_enabled;
         child.attlist_handler_enabled = self.attlist_handler_enabled;
         child.parameter_mode = self.parameter_mode;
@@ -1969,12 +1972,81 @@ impl Parser {
         if !self.event_recycling.accepts(&frame.generation) {
             return self.next_event_for_recycling_into(event);
         }
-        self.next_delivery_into(&mut EventOutput {
+        let mut output = EventOutput {
             event,
             frame: Some(frame),
             c_text_context,
-        })?;
+        };
+        match self.next_native_text_for_c(&mut output) {
+            Ok(true) => {}
+            Ok(false) => self.next_delivery_into(&mut output)?,
+            Err(error) => self.finish_event_error(error, &mut output)?,
+        }
         Ok((event.is_some() || frame.active).then(|| self.event_recycling.token()))
+    }
+
+    /// Deliver one native text token without re-entering the general XML grammar.
+    /// Every callback still commits its own allocation, raw span and work credit.
+    /// Uncertain input and parser continuations retain the ordinary event path.
+    fn next_native_text_for_c(&mut self, output: &mut EventOutput<'_>) -> Result<bool, Error> {
+        if !output.c_text_context || !self.text_line_boundaries || self.sources.len() != 1 {
+            return Ok(false);
+        }
+        let source = &self.sources[0];
+        let text = source.remaining();
+        if text.is_empty() || matches!(text.as_bytes()[0], b'<' | b'&' | b']' | b'\r') {
+            return Ok(false);
+        }
+        if self.error.is_some()
+            || !self.pending.is_empty()
+            || self.stack.is_empty()
+            || self.fragment
+            || self.external_subset
+            || self.in_doctype
+            || self.in_cdata
+            || self.shared_tables.get().is_some()
+            || self.foreign_dtd_pending.is_some()
+            || self.active_parameter_reference.is_some()
+            || self.value_state.is_some()
+            || self.has_header_composition()
+            || self.has_declaration_composition()
+            || self.input_context.is_none()
+            || source.has_conversions()
+            || source.accounting_bytes(0) != 0
+        {
+            return Ok(false);
+        }
+        let Some(start) = source.native_utf8_byte_index() else {
+            return Ok(false);
+        };
+        // Inspect one byte beyond the arena bound to distinguish an actual
+        // delimiter from a truncated long line. Never split a UTF-8 scalar.
+        let limit = text.floor_char_boundary((arena::MAX_ARENA_BYTES + 1).min(text.len()));
+        let Some(plan) = text::TextPlan::scan(&text[..limit], false) else {
+            return Ok(false);
+        };
+        let count = plan.end;
+        if count == 0 || count > arena::MAX_ARENA_BYTES || (count == limit && limit < text.len()) {
+            return Ok(false);
+        }
+        let position = source.position(count);
+        let frame = output.frame.as_deref_mut().unwrap();
+        if count > arena::INLINE_TEXT_BYTES {
+            self.event_recycling
+                .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
+        }
+        frame.prepare_native_text(start, count)?;
+        self.native_raw = Some(NativeRawRange {
+            start,
+            count: NonZeroUsize::new(count).unwrap(),
+        });
+        self.declaration_allowed = false;
+        frame.publish(position);
+        // Match parse_text's published-prefix behavior if accounting fails.
+        self.last_position = position;
+        self.account_source(count)?;
+        self.source_mut().consume_text(plan);
+        Ok(true)
     }
 
     /// Drop the detached cache before releasing its share of retained-memory space.
@@ -2195,6 +2267,14 @@ impl Parser {
         self.default_events = enabled;
     }
 
+    /// Preserve literal newline boundaries for character-data callbacks.
+    /// Rust consumers coalesce text by default; external children inherit this
+    /// preference. Custom-encoding aliases retain their lexical token boundaries.
+    #[doc(hidden)]
+    pub fn set_text_line_boundaries(&mut self, enabled: bool) {
+        self.text_line_boundaries = enabled;
+    }
+
     /// Update a foreign interface's notation-handler availability. Safe event
     /// consumers leave this enabled. A continuation captures this preference
     /// when it reads the notation name, matching Expat's callback prerequisites.
@@ -2368,10 +2448,13 @@ impl Parser {
 
     /// Charge a nonempty source delta before advancing its accounting cursor.
     fn account_source_bytes(&mut self, bytes: usize) -> Result<(), Error> {
-        if !self
-            .expanded
-            .account(bytes, self.fragment || self.sources.len() > 1, true)
-        {
+        let indirect = self.fragment || self.sources.len() > 1;
+        let accepted = if let Some(budget) = self.expanded.get_mut() {
+            budget.account_mut(bytes, indirect, true)
+        } else {
+            self.expanded.account(bytes, indirect, true)
+        };
+        if !accepted {
             return Err(self.err(
                 ErrorKind::LimitExceeded,
                 "entity amplification limit exceeded",
@@ -2958,15 +3041,16 @@ impl Parser {
         // A known quote completes the preceding horizontal whitespace token.
         let final_text = before_prolog_literal
             || (self.is_source_final() && limit == self.source().remaining().len());
-        let coalesce = !self.stack.is_empty() || self.fragment;
-        let text_plan = (coalesce
+        let character_data = !self.stack.is_empty() || self.fragment;
+        let coalesce = character_data && !self.text_line_boundaries;
+        let text_plan = (character_data
             && !self.fragment
             && !internal
             && !self.source().has_conversions()
             && self.source().native_utf8_byte_index().is_some())
-        .then(|| text::TextPlan::scan(text))
+        .then(|| text::TextPlan::scan(text, coalesce))
         .flatten();
-        let text_plan = if !coalesce {
+        let text_plan = if !character_data {
             (!self.fragment
                 && !internal
                 && !self.source().has_conversions()
@@ -3127,7 +3211,6 @@ impl Parser {
             ));
         }
         let position = self.source().position(end);
-        let character_data = !self.stack.is_empty() || self.fragment;
         let value = if character_data {
             self.prepare_character_data(
                 end,

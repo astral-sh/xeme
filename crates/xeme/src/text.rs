@@ -26,13 +26,22 @@ pub(crate) struct TextPlan {
 }
 
 impl TextPlan {
-    /// Scan the complete coalesced span, abandoning the proof on uncertain bytes.
+    /// Scan a text span, optionally coalescing across literal newline boundaries.
+    /// Uncertain bytes abandon the proof.
     /// A markup delimiter at the 64 KiB boundary still precedes the line cutoff.
-    pub(crate) fn scan(text: &str) -> Option<Self> {
+    pub(crate) fn scan(text: &str, coalesce: bool) -> Option<Self> {
         const LIMIT: usize = 65_536;
         const HIGH: u64 = 0x8080_8080_8080_8080;
         const LOW: u64 = 0x0101_0101_0101_0101;
         let bytes = text.as_bytes();
+        if !coalesce && bytes.first() == Some(&b'\n') {
+            return Some(Self {
+                end: 1,
+                newlines: 1,
+                trailing_columns: 0,
+                leading_lf: true,
+            });
+        }
         let limit = bytes.len().min(LIMIT);
         let mut end = 0;
         let mut newlines = 0;
@@ -41,6 +50,7 @@ impl TextPlan {
             let scalar_end = (end + 8).min(limit);
             if let Some(chunk) = bytes[end..limit].first_chunk::<16>() {
                 let (stops, linefeeds) = ascii_masks(chunk);
+                let stops = if coalesce { stops } else { stops | linefeeds };
                 let span = if stops == 0 {
                     16
                 } else {
@@ -48,7 +58,7 @@ impl TextPlan {
                 };
                 // Only the first stop matters. An uncertain byte before markup
                 // abandons the whole proof; bytes after a delimiter are ignored.
-                if stops != 0 && !matches!(chunk[span], b'<' | b'&') {
+                if stops != 0 && !matches!(chunk[span], b'<' | b'&' | b'\n') {
                     return None;
                 }
                 let prefix_linefeeds = linefeeds & ((1_u32 << span) - 1);
@@ -82,6 +92,7 @@ impl TextPlan {
             while end < scalar_end {
                 match bytes[end] {
                     b'<' | b'&' => break 'scan,
+                    b'\n' if !coalesce => break 'scan,
                     b'\n' => {
                         newlines += 1;
                         last_line_end = end + 1;
@@ -92,7 +103,11 @@ impl TextPlan {
                 end += 1;
             }
         }
-        if end == LIMIT && bytes.len() > LIMIT && !matches!(bytes[end], b'<' | b'&') {
+        if end == LIMIT
+            && bytes.len() > LIMIT
+            && !matches!(bytes[end], b'<' | b'&')
+            && (coalesce || bytes[end] != b'\n')
+        {
             return None;
         }
         Some(Self {
@@ -162,13 +177,36 @@ mod tests {
     use super::{TextPlan, ascii_masks};
 
     #[test]
+    fn literal_newlines_end_uncoalesced_spans_before_later_errors() {
+        for offset in [0, 1, 7, 8, 15, 16, 23, 31, 32, 65_535, 65_536] {
+            let prefix = "x".repeat(offset);
+            for suffix in ["\n", "\ré", "]]>\u{1}", "yyyyyyyyyyyyyyyy"] {
+                let text = format!("{prefix}\n{suffix}");
+                let plan = TextPlan::scan(&text, false).unwrap();
+                let leading = offset == 0;
+                assert_eq!(plan.end, offset.max(1));
+                for prior_cr in [false, true] {
+                    let (mut line, mut column, mut previous_cr) = (3, 7, prior_cr);
+                    plan.advance_position(&mut line, &mut column, &mut previous_cr);
+                    assert_eq!(line, 3 + usize::from(leading && !prior_cr));
+                    assert_eq!(column, if leading { 0 } else { 7 + offset });
+                    assert!(!previous_cr);
+                }
+            }
+            for uncertain in ['\r', ']', '\u{1}', 'é'] {
+                assert!(TextPlan::scan(&format!("{prefix}{uncertain}\n"), false).is_none());
+            }
+        }
+    }
+
+    #[test]
     fn every_ascii_byte_and_vector_lane_preserve_the_proof_boundary() {
         for byte in 0..=0x7f {
             for offset in 0..32 {
                 let mut text = "x".repeat(offset);
                 text.push(char::from(byte));
                 text.push_str("yyyyyyyyyyyyyyyy<\r]\u{1}é");
-                let plan = TextPlan::scan(&text);
+                let plan = TextPlan::scan(&text, true);
                 if matches!(byte, b'<' | b'&') {
                     assert_eq!(plan.unwrap().end, offset);
                 } else if matches!(byte, b'\t' | b'\n' | 0x20..=0x7f) && byte != b']' {
@@ -178,7 +216,7 @@ mod tests {
                 }
             }
         }
-        assert!(TextPlan::scan("line\ninvalidé<").is_none());
+        assert!(TextPlan::scan("line\ninvalidé<", true).is_none());
     }
 
     #[test]
@@ -216,7 +254,7 @@ mod tests {
             let columns = prefix.rsplit('\n').next().unwrap().len();
             for delimiter in ['<', '&'] {
                 let text = format!("{prefix}{delimiter}\n\n\t\r]\u{1}éxxxxxxxxxxxxxxxx");
-                let plan = TextPlan::scan(&text).unwrap();
+                let plan = TextPlan::scan(&text, true).unwrap();
                 assert_eq!(
                     (
                         plan.end,
@@ -239,7 +277,8 @@ mod tests {
             }
             for uncertain in ['\r', ']', '\u{1}', 'é'] {
                 assert!(
-                    TextPlan::scan(&format!("{prefix}{uncertain}yyyyyyyyyyyyyyyy<\n")).is_none()
+                    TextPlan::scan(&format!("{prefix}{uncertain}yyyyyyyyyyyyyyyy<\n"), true)
+                        .is_none()
                 );
             }
         }
@@ -252,7 +291,9 @@ mod tests {
         for offset in 0..16 {
             for len in 0..48 {
                 assert_eq!(
-                    TextPlan::scan(&backing[offset..offset + len]).unwrap().end,
+                    TextPlan::scan(&backing[offset..offset + len], true)
+                        .unwrap()
+                        .end,
                     len
                 );
             }
@@ -262,7 +303,7 @@ mod tests {
             for tail_len in 0..16 {
                 let tail: String = "\n\t".chars().cycle().take(tail_len).collect();
                 let text = format!("{block}{tail}");
-                let plan = TextPlan::scan(&text).unwrap();
+                let plan = TextPlan::scan(&text, true).unwrap();
                 let newlines = text.bytes().filter(|&byte| byte == b'\n').count();
                 let columns = text.rsplit('\n').next().unwrap().len();
                 assert_eq!(
@@ -289,7 +330,7 @@ mod tests {
         for offset in 0..32 {
             let prefix = "x".repeat(offset);
             let text = format!("{prefix}\nyyyyyyyyyyyyyyyyy<\r]é");
-            let plan = TextPlan::scan(&text).unwrap();
+            let plan = TextPlan::scan(&text, true).unwrap();
             assert_eq!(plan.end, offset + 18);
             for prior_cr in [false, true] {
                 let (mut line, mut column, mut previous_cr) = (3, 7, prior_cr);
@@ -298,8 +339,8 @@ mod tests {
                 assert_eq!(column, 17);
                 assert!(!previous_cr);
             }
-            assert!(TextPlan::scan(&format!("{prefix}éyyyyyyyyyyyyyyyy<")).is_none());
-            assert!(TextPlan::scan(&format!("{prefix}😀yyyyyyyyyyyyyyyy<")).is_none());
+            assert!(TextPlan::scan(&format!("{prefix}éyyyyyyyyyyyyyyyy<"), true).is_none());
+            assert!(TextPlan::scan(&format!("{prefix}😀yyyyyyyyyyyyyyyy<"), true).is_none());
         }
     }
 
@@ -315,7 +356,7 @@ mod tests {
             ("xxxxxxxxxxxxxxx\n\nxxxxxxx&\ré", 24, 7),
             ("\nxxxxxx\nxxxxxxxx<é", 16, 8),
         ] {
-            let plan = TextPlan::scan(text).unwrap();
+            let plan = TextPlan::scan(text, true).unwrap();
             assert_eq!(plan.end, end);
             for prior_cr in [false, true] {
                 let (mut line, mut actual_column, mut previous_cr) = (3, 7, prior_cr);
@@ -361,14 +402,17 @@ mod tests {
         for offset in [65_535, 65_536, 65_537] {
             let prefix = format!("a\n{}", "x".repeat(offset - 2));
             for delimiter in ['<', '&'] {
-                let plan = TextPlan::scan(&format!("{prefix}{delimiter}]\u{1}"));
+                let plan = TextPlan::scan(&format!("{prefix}{delimiter}]\u{1}"), true);
                 assert_eq!(
                     plan.map(|plan| plan.end),
                     (offset <= 65_536).then_some(offset)
                 );
             }
         }
-        assert_eq!(TextPlan::scan(&"x".repeat(65_536)).unwrap().end, 65_536);
-        assert!(TextPlan::scan(&"x".repeat(65_537)).is_none());
+        assert_eq!(
+            TextPlan::scan(&"x".repeat(65_536), true).unwrap().end,
+            65_536
+        );
+        assert!(TextPlan::scan(&"x".repeat(65_537), true).is_none());
     }
 }

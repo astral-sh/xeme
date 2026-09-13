@@ -47,6 +47,18 @@ impl<T> Shared<T> {
         // SAFETY: This strong reference keeps Inner live for the atomic load.
         unsafe { self.pointer.as_ref().references.load(Ordering::Acquire) }
     }
+
+    /// Borrow the value mutably when this is its only shared owner.
+    #[inline]
+    pub fn get_mut(&mut self) -> Option<&mut T> {
+        if self.strong_count() != 1 {
+            return None;
+        }
+        // SAFETY: Exclusive access to this owner prevents cloning it while the
+        // value is borrowed. There are no weak owners, and the Acquire load
+        // synchronizes with the Release drop of any former strong owners.
+        unsafe { Some(&mut (*self.pointer.as_ptr()).value) }
+    }
 }
 impl<T> Clone for Shared<T> {
     fn clone(&self) -> Self {
@@ -84,9 +96,9 @@ impl<T> Drop for Shared<T> {
         }
     }
 }
-// SAFETY: Shared ownership exposes only immutable references. The value's bounds
-// permit cross-thread access; allocator constructors require callable callbacks
-// wherever their allocated containers are moved or dropped.
+// SAFETY: Shared owners expose immutable references; mutable access requires
+// exclusive ownership. The value's bounds permit cross-thread access; allocator
+// constructors require callable callbacks wherever containers are moved or dropped.
 unsafe impl<T: Send + Sync> Send for Shared<T> {}
 // SAFETY: Atomic reference counting plus T: Sync permits concurrent shared access.
 unsafe impl<T: Send + Sync> Sync for Shared<T> {}

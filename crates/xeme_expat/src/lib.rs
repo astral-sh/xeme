@@ -329,6 +329,7 @@ unsafe fn create(
             core.enable_input_context();
             core.set_notation_handler_enabled(false);
             core.set_attlist_handler_enabled(false);
+            core.set_text_line_boundaries(true);
             let position = core.position();
             let family = Shared::try_new_in(FamilyBudget::default(), allocator)?;
             let lifetime = Shared::try_new_in(AtomicPtr::new(ptr::null_mut()), allocator)?;
@@ -562,6 +563,7 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
                 (*parser).lifetime = lifetime;
                 core.set_notation_handler_enabled(false);
                 core.set_attlist_handler_enabled(false);
+                core.set_text_line_boundaries(true);
                 (*parser).core = core;
                 (*parser).position = (*parser).core.position();
                 let unknown_encoding = (*parser).handlers.unknown_encoding;

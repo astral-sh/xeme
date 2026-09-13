@@ -1234,6 +1234,12 @@ impl Source {
         (self.raw_index + self.raw_len(0, count)).saturating_sub(self.accounted_raw)
     }
 
+    /// A native token starts exactly where the previous source charge ended.
+    #[inline]
+    pub(crate) fn accounted_to_cursor(&self) -> bool {
+        self.accounted_raw == self.raw_index
+    }
+
     pub(crate) fn unaccounted_prefix(&self, raw_bytes: usize) -> usize {
         raw_bytes.saturating_sub(self.accounted_raw)
     }

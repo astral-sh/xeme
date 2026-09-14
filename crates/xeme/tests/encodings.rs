@@ -1,7 +1,15 @@
 use xeme::{Config, ErrorKind, EventKind, Parser};
 
 fn mapped_text(input: &[u8], map: [i32; 256]) -> Result<String, ErrorKind> {
-    let mut parser = Parser::new(Config::default());
+    mapped_text_with_config(input, map, Config::default())
+}
+
+fn mapped_text_with_config(
+    input: &[u8],
+    map: [i32; 256],
+    config: Config,
+) -> Result<String, ErrorKind> {
+    let mut parser = Parser::new(config);
     parser.feed(input, true).map_err(|error| error.kind)?;
     assert_eq!(
         parser.next_event().unwrap_err().kind,
@@ -47,15 +55,69 @@ fn custom_encodings_can_leave_ordinary_ascii_punctuation_undefined() {
 }
 
 #[test]
-fn a_declared_custom_encoding_can_follow_a_utf8_bom() {
+fn compatibility_mode_allows_a_declared_custom_encoding_after_a_utf8_bom() {
     let map = std::array::from_fn(|byte| byte as i32);
     assert_eq!(
-        mapped_text(
+        mapped_text_with_config(
             b"\xef\xbb\xbf<?xml version='1.0' encoding='custom'?><r>plain</r>",
-            map
+            map,
+            Config {
+                allow_utf8_bom_encoding_mismatch: true,
+                ..Config::default()
+            },
         ),
         Ok("plain".into()),
     );
+}
+
+#[test]
+fn utf8_bom_requires_a_matching_declaration_unless_overridden() {
+    for name in ["UTF-8", "ISO-8859-1", "US-ASCII", "custom"] {
+        for allow_mismatch in [false, true] {
+            for protocol in [None, Some("UTF-8")] {
+                for context in [None, Some(Some("")), Some(None)] {
+                    let body = if context == Some(None) {
+                        "<!ELEMENT r EMPTY>"
+                    } else {
+                        "<r/>"
+                    };
+                    let input = format!("\u{feff}<?xml version='1.0' encoding='{name}'?>{body}");
+                    for width in [1, 7, input.len()] {
+                        let expected = if protocol.is_some() || name == "UTF-8" {
+                            Ok(String::new())
+                        } else if !allow_mismatch {
+                            Err(ErrorKind::IncorrectEncoding)
+                        } else if name == "custom" {
+                            Err(ErrorKind::UnknownEncoding)
+                        } else {
+                            Ok(String::new())
+                        };
+                        for setter in [false, true] {
+                            let mut parser = Parser::new(Config {
+                                allow_utf8_bom_encoding_mismatch: allow_mismatch,
+                                encoding: protocol.map(str::to_owned),
+                                ..Config::default()
+                            });
+                            if let Some(context) = context {
+                                parser = parser
+                                    .external_child_with_encoding(context, protocol)
+                                    .unwrap();
+                            }
+                            // Rebuilding the decoder must retain its compatibility policy.
+                            if setter {
+                                parser.set_encoding(protocol).unwrap();
+                            }
+                            assert_eq!(
+                                encoded_content(&mut parser, input.as_bytes(), width),
+                                expected,
+                                "{name}, allow={allow_mismatch}, protocol={protocol:?}, context={context:?}, width={width}, setter={setter}",
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[test]
@@ -356,6 +418,10 @@ fn declaration_limits_precede_encoding_detection_across_chunk_boundaries() {
                         result,
                         if limit < declaration.len() {
                             Err(ErrorKind::LimitExceeded)
+                        } else if !bom.is_empty()
+                            && declaration == "<?xml version='1.0' encoding='custom'?>"
+                        {
+                            Err(ErrorKind::IncorrectEncoding)
                         } else {
                             within_limit.clone()
                         },

@@ -3,63 +3,12 @@
 //! Custom encoding callbacks, partial wire characters, allocator faults, and re-entry.
 //! Sixteen control bytes precede arbitrary XML in a two-, three-, and four-byte encoding.
 
-use std::cell::Cell;
 use std::ffi::{c_char, c_int, c_void};
 use std::ptr;
 
 use libfuzzer_sys::fuzz_target;
 use xeme_expat::*;
-
-unsafe extern "C" {
-    fn malloc(size: usize) -> *mut c_void;
-    fn realloc(pointer: *mut c_void, size: usize) -> *mut c_void;
-    fn free(pointer: *mut c_void);
-}
-
-thread_local! {
-    static CALLS: Cell<usize> = const { Cell::new(0) };
-    static FAIL_AT: Cell<usize> = const { Cell::new(0) };
-    static LIVE: Cell<usize> = const { Cell::new(0) };
-}
-
-fn allocation_fails(size: usize) -> bool {
-    let call = CALLS.get() + 1;
-    CALLS.set(call);
-    call == FAIL_AT.get() || size > 8 * 1024 * 1024
-}
-
-unsafe extern "C" fn allocate(size: usize) -> *mut c_void {
-    if allocation_fails(size) {
-        return ptr::null_mut();
-    }
-    let pointer = unsafe { malloc(size.max(1)) };
-    if !pointer.is_null() {
-        LIVE.set(LIVE.get() + 1);
-    }
-    pointer
-}
-
-unsafe extern "C" fn reallocate(pointer: *mut c_void, size: usize) -> *mut c_void {
-    if allocation_fails(size) {
-        return ptr::null_mut();
-    }
-    let replacement = unsafe { realloc(pointer, size.max(1)) };
-    if pointer.is_null() && !replacement.is_null() {
-        LIVE.set(LIVE.get() + 1);
-    }
-    replacement
-}
-
-unsafe extern "C" fn deallocate(pointer: *mut c_void) {
-    if !pointer.is_null() {
-        LIVE.set(
-            LIVE.get()
-                .checked_sub(1)
-                .expect("unowned custom allocation"),
-        );
-        unsafe { free(pointer) };
-    }
-}
+use xeme_fuzz::allocator::{CALLS, FAIL_AT, LIVE, SUITE};
 
 struct State {
     parser: XML_Parser,
@@ -255,11 +204,6 @@ fuzz_target!(|data: &[u8]| {
     } else {
         usize::from(u16::from_le_bytes([data[1], data[2]])) % 512 + 1
     });
-    let suite = XML_Memory_Handling_Suite {
-        malloc_fcn: Some(allocate),
-        realloc_fcn: Some(reallocate),
-        free_fcn: Some(deallocate),
-    };
     let input = &data[16..];
     let width = usize::from(data[3]) + 1;
     let buffered = data[0] & 2 != 0;
@@ -276,7 +220,7 @@ fuzz_target!(|data: &[u8]| {
         } else {
             ptr::null()
         };
-        parent.parser = XML_ParserCreate_MM(protocol, &suite, separator);
+        parent.parser = XML_ParserCreate_MM(protocol, &SUITE, separator);
         if !parent.parser.is_null() {
             configure(&mut parent, data[11]);
             document(parent.parser, input, buffered, width);

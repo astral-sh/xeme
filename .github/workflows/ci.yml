@@ -58,14 +58,48 @@ jobs:
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
       - run: uvx --from ruff==0.16.6 ruff check tools benchmarks
       - run: uvx --from ty==0.0.80 ty check --extra-search-path tools tools benchmarks
-      - run: python3 -m unittest discover -s benchmarks -p test_hillclimb.py
+      - run: python3 -m unittest discover -s benchmarks
       - run: python3 -m unittest discover -s tools/cpython -p test_run.py
       - run: python3 -m unittest discover -s tools -p test_compatibility.py
       - run: python3 -m unittest discover -s tools/upstream-expat -p test_allocation.py
       - run: python3 -m unittest discover -s tools -p test_differential.py
       - run: python3 -m unittest discover -s tools -p test_xml_abi.py
+      - run: python3 -m unittest discover -s tools/w3c -p test_native.py
       - run: python3 benchmarks/hillclimb.py verify-holdout
       - run: python3 -m unittest discover -s tools/pgo -p test_build.py
+  w3c-native:
+    name: Native Rust W3C conformance
+    runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: lddubeau/xml-conformance-suite
+          ref: 3fb4516daedd0ac736249a383733883b95fcdbb2
+          path: .cache/w3c
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: stable
+      - name: Test the native Rust parser adapter
+        run: cargo test --locked -p xeme --example w3c
+      - name: Build the native Rust parser runner
+        run: cargo build --release --locked -p xeme --example w3c
+      - name: Check the complete pinned catalog against the specification
+        run: >-
+          python3 -I -S tools/w3c/native.py
+          --suite .cache/w3c/packages/test-data/xmlconf
+          --runner target/release/examples/w3c
+          --output "$RUNNER_TEMP/xeme-w3c-native"
+      - name: Retain native conformance results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: w3c-native
+          path: ${{ runner.temp }}/xeme-w3c-native
+          if-no-files-found: warn
+          retention-days: 30
   compatibility:
     name: Compatibility regression (${{ matrix.suite }})
     runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}

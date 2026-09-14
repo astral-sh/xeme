@@ -161,8 +161,8 @@ controls. Root and child parsers share consumed input and replacement-byte count
 unparsed trailing input does not increase the denominator. Defaults are 100 times
 the consumed root input, activated at 8 MiB of combined direct and indirect bytes.
 An external parser used before any root input follows Expat's 22-byte baseline.
-These controls leave Xeme's absolute input, token, nesting, attribute, and
-entity-expansion limits active.
+These controls leave Xeme's input, token, nesting, attribute, and fixed work
+policy active; the C work allowance grows with consumed root input.
 
 The C constructors allow up to 100,000 declared entities and 100,000 levels of
 internal entity expansion. Reset preserves these limits and external children
@@ -185,6 +185,11 @@ is bounded by representable positions; work and event-payload allowances grow
 with consumed root input. See [streaming resource limits](../../docs/compatibility.md#streaming-resource-limits)
 for the limits and accounting rules. A parser family permits at most 1,024 child
 construction attempts, including failures, and 32 levels of external-child ancestry.
+
+Xeme does not decompress input. Consumers supplying decompressed streams must
+bound cumulative decompressed bytes and decompressor work themselves; the per-call
+input limit is not a document-size ceiling. See
+[XML denial-of-service protections](../../docs/security.md).
 
 CPython can use its standard custom allocator suite. See the
 [compatibility guide](../../docs/compatibility.md) for remaining consumer

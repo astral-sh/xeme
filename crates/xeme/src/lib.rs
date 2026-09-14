@@ -12,6 +12,8 @@ mod default_attribute_tests;
 mod dtd;
 mod dtd_tables;
 mod encoding;
+#[cfg(test)]
+mod large_token_tests;
 mod lexical;
 mod names;
 #[cfg(test)]
@@ -92,6 +94,9 @@ pub struct Config {
     pub namespace_separator: Option<char>,
     pub namespace_triplets: bool,
     pub encoding: Option<std::string::String>,
+    /// Let an encoding declaration override a UTF-8 BOM, matching Expat.
+    /// Disabled by default because XML requires the declaration to match the BOM.
+    pub allow_utf8_bom_encoding_mismatch: bool,
     pub limits: Limits,
 }
 
@@ -584,13 +589,12 @@ impl Entity {
     /// General-content children copy Expat's DTD table. A reserved slot without
     /// a system ID becomes an empty internal value in that copy; parameter
     /// children retain the unfinished slot and its already parsed identifiers.
-    fn clone_for_child(
+    fn clone_for_general_child(
         &self,
-        parameter_context: bool,
         parameter_entity: bool,
         allocator: Allocator,
     ) -> Result<Self, AllocError> {
-        if !parameter_context && self.value.is_none() && self.system_id.is_none() {
+        if self.value.is_none() && self.system_id.is_none() {
             Ok(Self {
                 base: None,
                 value: Some(String::new_in(allocator)),
@@ -604,7 +608,7 @@ impl Entity {
             })
         } else {
             let mut entity = self.try_clone()?;
-            if !parameter_context && self.value_open.is_some() {
+            if self.value_open.is_some() {
                 entity.value_open = Some(Shared::try_new_in(AtomicBool::new(false), allocator)?);
             }
             Ok(entity)
@@ -832,7 +836,7 @@ impl Parser {
         allocator: Allocator,
     ) -> Result<Self, Error> {
         config.encoding = None;
-        let decoder = Decoder::new(encoding, allocator)?;
+        let decoder = Decoder::new(encoding, allocator, config.allow_utf8_bom_encoding_mismatch)?;
         let mut namespaces = hash_map(allocator);
         if config.namespace_separator.is_some() {
             try_insert(
@@ -1048,7 +1052,11 @@ impl Parser {
         }
         // This initialization setter is transactional: an allocation failure must
         // leave the previous decoder available for autodetection during parsing.
-        self.decoder = Decoder::new(encoding, self.allocator)?;
+        self.decoder = Decoder::new(
+            encoding,
+            self.allocator,
+            self.config.allow_utf8_bom_encoding_mismatch,
+        )?;
         Ok(())
     }
 
@@ -1127,7 +1135,7 @@ impl Parser {
                 try_insert(
                     &mut child.tables.entities,
                     name.try_clone()?,
-                    entity.clone_for_child(false, false, self.allocator)?,
+                    entity.clone_for_general_child(false, self.allocator)?,
                 )?;
             }
             for (name, attributes) in &tables.defaults {
@@ -1141,7 +1149,7 @@ impl Parser {
                 try_insert(
                     &mut child.tables.parameter_entities,
                     name.try_clone()?,
-                    entity.clone_for_child(false, true, self.allocator)?,
+                    entity.clone_for_general_child(true, self.allocator)?,
                 )?;
             }
             child.tables.max_default_attributes = tables.max_default_attributes;
@@ -2089,7 +2097,9 @@ impl Parser {
         frame.publish(position);
         // Match parse_text's published-prefix behavior if accounting fails.
         self.last_position = position;
-        self.account_source(count)?;
+        // Native UTF-8 and the accounting cursor check prove this token's
+        // original byte delta. Keep the charge after publication on rejection.
+        self.account_source_bytes(count)?;
         self.source_mut().consume_text(plan);
         Ok(true)
     }
@@ -2850,9 +2860,9 @@ impl Parser {
                     start: position.byte_index,
                     count: NonZeroUsize::new(end).expect("nonempty matched End"),
                 });
-                // Accounting above is complete and name detachment allocates
-                // nothing. Commit ordinary Unicode coordinates before delivery.
-                self.consume(end)?;
+                // The complete token was charged before semantic processing;
+                // name detachment cannot allocate. Commit coordinates now.
+                self.source_mut().consume(end);
                 frame.publish(position);
                 continue;
             }
@@ -2983,10 +2993,9 @@ impl Parser {
             ) && self.source().native_utf8_byte_index().is_some()
                 && !self.source().has_conversions()
             {
-                self.account_source(end)?;
                 self.source_mut().consume_ascii_tag(end);
             } else {
-                self.consume(end)?;
+                self.source_mut().consume(end);
             }
             if framed_end {
                 // Native token publication only swaps owners. Consume sees the

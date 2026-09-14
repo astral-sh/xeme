@@ -18,11 +18,6 @@ must preserve element/CDATA order, every text character, and callback-controlled
 buffering. Original failures and exit codes remain in `tests.log` and
 `summary.json`.
 
-The optional `--allow-text-fragmentation` reproduces the historical exception for
-the two exact recorded assertion messages and traceback locations. It is retained
-for old-source diagnostics and is not a current CI or release gate. An unrelated
-failure or changed payload in either method fails even that historical gate.
-
 `--consumer-fix` separately applies the pinned upstream [allocation-failure backport](consumer-fix/) to a temporary C source copy. `--system-allocator` separately selects the system allocator. Each adaptation is recorded explicitly.
 
 ## Installed distributions

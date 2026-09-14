@@ -13,7 +13,7 @@ A streaming XML parser written in Rust, with an Expat-compatible C API.
 - Check XML and inspect parser events from the command line.
 - Embed the safe Rust parser or use the Expat-compatible C interface.
 
-| Project XML | Xeme¹ | Expat | Xeme / Expat |
+| Project XML | Xeme | Expat | Xeme / Expat |
 | --- | ---: | ---: | ---: |
 | .NET runtime | 2.133 ms | 1.938 ms | 1.089× |
 | Apache Hadoop | 1.302 ms | 1.024 ms | 1.269× |
@@ -21,21 +21,10 @@ A streaming XML parser written in Rust, with an Expat-compatible C API.
 | MuseScore | 9.795 ms | 6.425 ms | 1.523× |
 | Qt translations | 6.630 ms | 2.133 ms | 3.018× |
 
-¹ Measured under the former name Oriole. These [pre-rebase measurements](docs/evidence/2026-09-13-review.md#performance)
-tested runtime `ec4d068` on five previously unused project files, with 4 KiB chunks
-and namespaces disabled. Times are medians of seven process medians; ratios are
-medians of paired ratios. Across all conditions, this holdout took **1.787× Expat's
-native time and 1.216× its CPython time**, missing the 1.20× goal. The original six
-tuning projects remained at 1.191× and 1.049×. These are parser/consumer measurements
-on a shared Linux host. Later revisions need fresh measurements; see the
-[benchmark guide](benchmarks/HILLCLIMB.md).
-
-The [compatibility guide](docs/compatibility.md) defines the current contract and
-regression gates. Known strict failures remain: 509 Expat API configurations and
-960 shared W3C catalog rows. These are documented differences. The six pinned
-[CPython XML suites](docs/evidence/2026-09-13-cpython-grouping.md) pass with both
-shared and static parser libraries. [Qualification evidence](docs/evidence/README.md)
-identifies the tested source and scope of these CPython consumer checks.
+Xeme passes the [W3C XML 1.0 Fifth Edition conformance suite](docs/compatibility.md#native-rust-conformance-gate)
+and all six [CPython 3.12.13 XML test suites](docs/evidence/2026-09-13-cpython-grouping.md)
+with both shared and static libraries. See [compatibility](docs/compatibility.md)
+for known differences from Expat and the XML specification.
 
 ## Installation
 

@@ -18,7 +18,9 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from corpus import workloads
+from corpus_manifest import corpus_files
 
 ROOT = Path(__file__).resolve().parents[1]
 ENGINES = {"xeme", "baseline", "expat"}
@@ -31,40 +33,6 @@ def digest(path: Path) -> str:
 
 def write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, indent=2) + "\n")
-
-
-def corpus_files(manifest_path: Path) -> tuple[dict[str, Path], dict[str, str]]:
-    """Verify original input and notice bytes without parsing the XML."""
-    manifest_path = manifest_path.resolve(strict=True)
-    manifest = json.loads(manifest_path.read_text())
-    inputs: dict[str, Path] = {}
-    hashes = {str(manifest_path): digest(manifest_path)}
-    for project in manifest["projects"]:
-        if project["name"] in inputs:
-            raise ValueError("duplicate corpus project")
-        entries = [entry for entry in project["files"] if entry["role"] == "input"]
-        if len(entries) != 1:
-            raise ValueError("expected one original input per project")
-        for entry in project["files"]:
-            path = (manifest_path.parent / entry["path"]).resolve(strict=True)
-            if not path.is_relative_to(manifest_path.parent) or str(path) in hashes:
-                raise ValueError("unsafe or repeated corpus path")
-            data = path.read_bytes()
-            value = hashlib.sha256(data).hexdigest()
-            if value != entry["sha256"] or len(data) != entry.get("bytes", len(data)):
-                raise ValueError(f"corpus identity mismatch: {path}")
-            if "git_blob_sha1" in entry:
-                blob = hashlib.sha1(
-                    b"blob " + str(len(data)).encode() + b"\0" + data
-                ).hexdigest()
-                if blob != entry["git_blob_sha1"]:
-                    raise ValueError(f"upstream blob identity mismatch: {path}")
-            hashes[str(path)] = value
-            if entry["role"] == "input":
-                inputs[project["name"]] = path
-    if not inputs:
-        raise ValueError("empty corpus")
-    return inputs, hashes
 
 
 def holdout_corpus() -> tuple[Path, dict[str, Path], dict[str, str]]:
@@ -392,6 +360,7 @@ def run(args: argparse.Namespace) -> None:
     observed.extend(
         ROOT / path
         for path in [
+            "benchmarks/corpus_manifest.py",
             "benchmarks/projects.py",
             "benchmarks/python_projects.py",
             "benchmarks/native_driver.c",

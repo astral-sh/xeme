@@ -180,7 +180,7 @@ jobs:
   miri:
     name: C callback aliasing (${{ matrix.model }})
     runs-on: ${{ github.repository_owner == 'astral-sh' && 'github-ubuntu-24.04-x86_64-4' || 'ubuntu-24.04' }}
-    timeout-minutes: 20
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:

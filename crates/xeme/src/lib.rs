@@ -20,6 +20,7 @@ mod namespace;
 #[cfg(test)]
 mod prolog_whitespace_tests;
 mod recycling;
+mod reference;
 mod tag;
 mod text;
 mod value;
@@ -1986,7 +1987,7 @@ impl Parser {
             frame: Some(frame),
             c_text_context,
         };
-        match self.next_native_text_for_c(&mut output) {
+        match self.next_native_character_data_for_c(&mut output) {
             Ok(true) => {}
             Ok(false) => self.next_delivery_into(&mut output)?,
             Err(error) => self.finish_event_error(error, &mut output)?,
@@ -1994,16 +1995,19 @@ impl Parser {
         Ok((event.is_some() || frame.active).then(|| self.event_recycling.token()))
     }
 
-    /// Deliver one native text token without re-entering the general XML grammar.
+    /// Deliver native text or a scalar reference without re-entering XML grammar.
     /// Every callback still commits its own allocation, raw span and work credit.
     /// Uncertain input and parser continuations retain the ordinary event path.
-    fn next_native_text_for_c(&mut self, output: &mut EventOutput<'_>) -> Result<bool, Error> {
+    fn next_native_character_data_for_c(
+        &mut self,
+        output: &mut EventOutput<'_>,
+    ) -> Result<bool, Error> {
         if !output.c_text_context || !self.text_line_boundaries || self.sources.len() != 1 {
             return Ok(false);
         }
         let source = &self.sources[0];
         let text = source.remaining();
-        if text.is_empty() || matches!(text.as_bytes()[0], b'<' | b'&' | b']' | b'\r') {
+        if text.is_empty() || matches!(text.as_bytes()[0], b'<' | b']' | b'\r') {
             return Ok(false);
         }
         if self.error.is_some()
@@ -2028,6 +2032,47 @@ impl Parser {
         let Some(start) = source.native_utf8_byte_index() else {
             return Ok(false);
         };
+        if text.starts_with('&') {
+            if self.reparse_deferral
+                && !self.is_source_final()
+                && source.should_defer(self.config.limits.max_token_bytes)
+            {
+                return Ok(false);
+            }
+            let Some(reference) =
+                reference::ScalarReference::scan(text, self.config.limits.max_token_bytes)
+            else {
+                return Ok(false);
+            };
+            let position = source.position(reference.bytes);
+            self.native_raw = Some(NativeRawRange {
+                start,
+                count: NonZeroUsize::new(reference.bytes).unwrap(),
+            });
+            self.account_source_bytes(reference.bytes)?;
+            if reference.predefined {
+                let accepted = if let Some(budget) = self.expanded.get_mut() {
+                    budget.account_mut(1, true, false)
+                } else {
+                    self.expanded.account(1, true, false)
+                };
+                if !accepted {
+                    return Err(self.err(
+                        ErrorKind::LimitExceeded,
+                        "entity amplification limit exceeded",
+                    ));
+                }
+            }
+            // The plan proves a native ASCII spelling without line breaks;
+            // source and predefined-entity charges are complete before delivery.
+            self.source_mut().consume_ascii_tag(reference.bytes);
+            let mut bytes = [0; 4];
+            let frame = output.frame.as_deref_mut().unwrap();
+            frame.prepare_text(reference.character.encode_utf8(&mut bytes))?;
+            frame.publish(position);
+            self.last_position = position;
+            return Ok(true);
+        }
         // Inspect one byte beyond the arena bound to distinguish an actual
         // delimiter from a truncated long line. Never split a UTF-8 scalar.
         let limit = text.floor_char_boundary((arena::MAX_ARENA_BYTES + 1).min(text.len()));

@@ -217,3 +217,54 @@ fn native_text_retains_partial_source_precharges() {
         assert_eq!(results[1].1, 6);
     }
 }
+
+#[test]
+fn native_scalar_references_preserve_unique_and_shared_amplification_errors() {
+    for shared in [false, true] {
+        for indirect in [0, 100] {
+            let mut results = std::vec::Vec::new();
+            for native in [false, true] {
+                let mut parser = Parser::new(Config::default());
+                parser.enable_input_context();
+                parser.set_text_line_boundaries(true);
+                parser.feed(b"<r>&amp;&#65;</r>", true).unwrap();
+                parser.next_event().unwrap().unwrap();
+                let _owner = shared.then(|| parser.expanded.clone());
+                assert!(parser.expanded.account(indirect, true, false));
+                assert!(parser.set_entity_maximum_amplification(1.0));
+                parser.set_entity_activation_threshold(0);
+                let mut frame = parser.adapter_frame();
+                let mut event = None;
+                let result = parser
+                    .next_event_for_adapter_mode_into(&mut event, &mut frame, native)
+                    .map(|token| token.is_some());
+                let text = frame
+                    .is_active()
+                    .then(|| frame.text_bytes().unwrap().to_vec());
+                results.push((
+                    result,
+                    text,
+                    parser.position(),
+                    parser.position_between_callbacks(true),
+                    parser.current_raw().map(str::to_owned),
+                    parser.work_bytes_limit(0),
+                ));
+                if let Err(error) = result {
+                    assert_eq!(error.kind, ErrorKind::LimitExceeded);
+                    assert!(event.is_none() && !frame.is_active());
+                    assert_eq!(
+                        parser
+                            .next_event_for_adapter_mode_into(&mut event, &mut frame, native)
+                            .unwrap_err(),
+                        error,
+                    );
+                }
+                parser.finish_adapter_frame(frame);
+            }
+            assert_eq!(
+                results[0], results[1],
+                "shared={shared}, indirect={indirect}"
+            );
+        }
+    }
+}

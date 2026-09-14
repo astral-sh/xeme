@@ -1,0 +1,1337 @@
+{
+  "schema_version": 1,
+  "title": "Deliver native empty elements without transient stack and event entries",
+  "source": {
+    "runtime": "08ccf6f9e6d3ced949893b0e00bac684c10bd120",
+    "base": "1957281e1422c9669ac9f7a68d350dab491eae85",
+    "library_sha256": {
+      "libexpat.so.1.12.4": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+      "libxeme_expat.a": "0133acd78b00eef4e182f8590251a8bb1484212102c49ea0a48a9cba3327577a",
+      "libxeme_expat.so": "eecf30dbed92fa692d67bd55dc0c34c30e3eb16bb3ac4316c373b98122fdb241"
+    },
+    "baseline_library_sha256": "b364ffc5164f2057a1f339508e7be135ad6f6a74be9f1e347466b7586359cbf9",
+    "compiler": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+    "target": "x86_64-unknown-linux-gnu",
+    "rustflags": "-Ctarget-cpu=x86-64",
+    "pre_documentation_head": "08ccf6f9e6d3ced949893b0e00bac684c10bd120",
+    "committed_paths_changed_since_runtime": [],
+    "logical_label": "empty",
+    "physical_folder": "empty",
+    "build_checkout": "/home/dev-user/code/oss/xeme-perf-empty",
+    "source_manifest_sha256": "a114388828fc55795cc221e7e849a3221f03203cab4265eed670823dc80841be",
+    "changed_source_sha256": {
+      "crates/xeme/src/lib.rs": "8d141788de4811c6836c620f5a6f59fd47a563c57b91aaa2f08298d6c47e9d60",
+      "crates/xeme/tests/adapter_frame.rs": "239e392d9f31f73858796dc83769dcd3b468e0769f3ea187f2ef27b0b65e585d",
+      "crates/xeme_expat/src/tag_stop_tests.rs": "837aa360394dc178227f3cee46e4ffa6a8f3b5b66af17877f40eca47fcabf336",
+      "crates/xeme_expat/tests/memory.rs": "f83b93a41ee5dbf766752f7673116d74a6123ba8b789fef4c12bacd8b31c140e"
+    }
+  },
+  "method": "Two separate epochs each use seven matched rounds, randomizing candidate/base/Expat order within each condition. Each native process contributes 20 measured parses and each CPython process 10, after one discarded warmup. A condition ratio is the median of seven paired process-median ratios; aggregate rows are geometric means of those condition ratios. Epochs are reported separately. Ratios are candidate/base or candidate/Expat elapsed time; lower is faster. Runs use CPU affinity 6, 4,096/65,536-byte feeds, native namespaces off/on, and CPython pyexpat/ElementTree modes. Each epoch has 60 native and 44 Python conditions: six tuning projects, five previously observed holdout projects, and four generated native controls. Python generated controls were not measured. Seeds are 20260910 and 20260911.",
+  "limitations": "The holdout has already been inspected and is an observed regression corpus, with no unseen-input claim. Generated controls remain separate from project aggregates. Every adverse condition is retained; a ratio above 1 is an observation, not a significance finding. The shared-host study does not establish confidence intervals, cross-machine performance, or a general parser-speed guarantee. Native timing includes parser creation, handler setup, feeds, native callback hashing, and free; file/library loading and process startup are excluded. Python timing includes parser and Python result creation/destruction with GC enabled, while imports, input loading, explicit collection, and canonical output checks are excluded. These parser/consumer workloads do not execute complete project builds, rendering, transformations, or external DTD/entity resolution. Python extension compilation uses identical O2 without PGO/LTO; explicit result destruction follows untimed validation and therefore has warmer cache lines than some production lifetimes. Full callback preflights and every measured sample are checked; all input/library hashes remain unchanged within each report. Callgrind and allocator counts were collected separately and are mechanism evidence, not elapsed-time estimates.",
+  "aggregates": [
+    {
+      "epoch": 1,
+      "consumer": "native",
+      "corpus": "tuning",
+      "conditions": 24,
+      "candidate_base": 0.9713122398774509,
+      "candidate_expat": 1.1388885753398583,
+      "base_expat": 1.1716794127819843
+    },
+    {
+      "epoch": 1,
+      "consumer": "native",
+      "corpus": "observed-holdout",
+      "conditions": 20,
+      "candidate_base": 0.9943983204582676,
+      "candidate_expat": 1.4118925820695973,
+      "base_expat": 1.4207448363913224
+    },
+    {
+      "epoch": 1,
+      "consumer": "native",
+      "corpus": "generated",
+      "conditions": 16,
+      "candidate_base": 0.9127603087852743,
+      "candidate_expat": 1.5526254573168916,
+      "base_expat": 1.6953472257590607
+    },
+    {
+      "epoch": 1,
+      "consumer": "python",
+      "corpus": "tuning",
+      "conditions": 24,
+      "candidate_base": 1.0006633842619934,
+      "candidate_expat": 1.1508486188823823,
+      "base_expat": 1.1537136719034147
+    },
+    {
+      "epoch": 1,
+      "consumer": "python",
+      "corpus": "observed-holdout",
+      "conditions": 20,
+      "candidate_base": 0.9992905829968927,
+      "candidate_expat": 1.19075164270165,
+      "base_expat": 1.1896741670737858
+    },
+    {
+      "epoch": 2,
+      "consumer": "native",
+      "corpus": "tuning",
+      "conditions": 24,
+      "candidate_base": 0.9763150081515115,
+      "candidate_expat": 1.1412395347072612,
+      "base_expat": 1.1719955272383706
+    },
+    {
+      "epoch": 2,
+      "consumer": "native",
+      "corpus": "observed-holdout",
+      "conditions": 20,
+      "candidate_base": 0.9926748153318667,
+      "candidate_expat": 1.4110550968641802,
+      "base_expat": 1.4205127656629335
+    },
+    {
+      "epoch": 2,
+      "consumer": "native",
+      "corpus": "generated",
+      "conditions": 16,
+      "candidate_base": 0.9158467803493631,
+      "candidate_expat": 1.548353468638972,
+      "base_expat": 1.6894463115961338
+    },
+    {
+      "epoch": 2,
+      "consumer": "python",
+      "corpus": "tuning",
+      "conditions": 24,
+      "candidate_base": 0.9992034527816397,
+      "candidate_expat": 1.1478514952910925,
+      "base_expat": 1.149524119698687
+    },
+    {
+      "epoch": 2,
+      "consumer": "python",
+      "corpus": "observed-holdout",
+      "conditions": 20,
+      "candidate_base": 0.9956106196126939,
+      "candidate_expat": 1.1907598333330978,
+      "base_expat": 1.1934205285769113
+    }
+  ],
+  "targeted_metrics": [
+    {
+      "epoch": 1,
+      "consumer": "native",
+      "project": "elements",
+      "mode": "all",
+      "conditions": 4,
+      "candidate_base": 0.6231194812773221,
+      "candidate_expat": 1.1336926745210432,
+      "base_expat": 1.804741317238678
+    },
+    {
+      "epoch": 2,
+      "consumer": "native",
+      "project": "elements",
+      "mode": "all",
+      "conditions": 4,
+      "candidate_base": 0.6308616336470543,
+      "candidate_expat": 1.1136407140404159,
+      "base_expat": 1.7731609671868904
+    },
+    {
+      "epoch": 1,
+      "consumer": "native",
+      "project": "musescore",
+      "mode": "all",
+      "conditions": 4,
+      "candidate_base": 1.0198918781926178,
+      "candidate_expat": 1.6335869270801493,
+      "base_expat": 1.6029016541771817
+    },
+    {
+      "epoch": 2,
+      "consumer": "native",
+      "project": "musescore",
+      "mode": "all",
+      "conditions": 4,
+      "candidate_base": 1.0185285522710605,
+      "candidate_expat": 1.6340360352948002,
+      "base_expat": 1.6048042271185505
+    },
+    {
+      "epoch": 1,
+      "consumer": "python",
+      "project": "musescore",
+      "mode": "all",
+      "conditions": 4,
+      "candidate_base": 1.0235372104034026,
+      "candidate_expat": 1.2481457333301835,
+      "base_expat": 1.2117682605624773
+    },
+    {
+      "epoch": 2,
+      "consumer": "python",
+      "project": "musescore",
+      "mode": "all",
+      "conditions": 4,
+      "candidate_base": 1.0202209008592156,
+      "candidate_expat": 1.2510466198217682,
+      "base_expat": 1.2175131941128827
+    }
+  ],
+  "regressions": {
+    "epochs": {
+      "1": {
+        "conditions": 104,
+        "slower": 65
+      },
+      "2": {
+        "conditions": 104,
+        "slower": 64
+      }
+    },
+    "groups": [
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "corpus": "tuning",
+        "conditions": 24,
+        "slower": 11
+      },
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "slower": 16
+      },
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "corpus": "generated",
+        "conditions": 16,
+        "slower": 8
+      },
+      {
+        "epoch": 1,
+        "consumer": "python",
+        "corpus": "tuning",
+        "conditions": 24,
+        "slower": 14
+      },
+      {
+        "epoch": 1,
+        "consumer": "python",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "slower": 16
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "corpus": "tuning",
+        "conditions": 24,
+        "slower": 11
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "slower": 16
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "corpus": "generated",
+        "conditions": 16,
+        "slower": 8
+      },
+      {
+        "epoch": 2,
+        "consumer": "python",
+        "corpus": "tuning",
+        "conditions": 24,
+        "slower": 14
+      },
+      {
+        "epoch": 2,
+        "consumer": "python",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "slower": 15
+      }
+    ],
+    "repeat_count": 62,
+    "top_repeat": [
+      {
+        "condition": "native/entities/65536/namespaces-0",
+        "epoch_1_candidate_base": 1.086407915992556,
+        "epoch_2_candidate_base": 1.0804790488612903
+      },
+      {
+        "condition": "native/entities/65536/namespaces-1",
+        "epoch_1_candidate_base": 1.0845217749808227,
+        "epoch_2_candidate_base": 1.0773473283787116
+      },
+      {
+        "condition": "native/namespaces/65536/namespaces-0",
+        "epoch_1_candidate_base": 1.071702783583737,
+        "epoch_2_candidate_base": 1.077084495948035
+      },
+      {
+        "condition": "native/entities/4096/namespaces-1",
+        "epoch_1_candidate_base": 1.0731987784330714,
+        "epoch_2_candidate_base": 1.0658011915210268
+      },
+      {
+        "condition": "native/entities/4096/namespaces-0",
+        "epoch_1_candidate_base": 1.07699845975494,
+        "epoch_2_candidate_base": 1.0649546167299921
+      }
+    ]
+  },
+  "workspace": {
+    "checks": {
+      "default": {
+        "passed": 540,
+        "failed": 0,
+        "suites": 38,
+        "exit_code_recorded": false,
+        "archive_member": "performance-followup/empty/validation/workspace-tests.log",
+        "sha256": "65ed8c3e7f2d78a5b06c40514c75cc7e3d2298c69eb7e467b7ea0bae70b4b90e"
+      },
+      "no-default": {
+        "passed": 540,
+        "failed": 0,
+        "suites": 38,
+        "exit_code_recorded": false,
+        "archive_member": "performance-followup/empty/validation/workspace-no-default-tests.log",
+        "sha256": "9d5e39c80b5226b0f77796e7501c37fd9cfa1f27ba31231bbca4e18ad90d2ca9"
+      },
+      "clippy": {
+        "passed": true,
+        "exit_code_recorded": false,
+        "archive_member": "performance-followup/empty/validation/clippy.log",
+        "sha256": "7e6b38c65e2215eadbb403799f49fadf817dd762c14d4308c0cd1d2e66f47b5e"
+      },
+      "format": {
+        "passed": true,
+        "exit_code_recorded": false,
+        "archive_member": "performance-followup/empty/validation/fmt.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "command_receipt": {
+      "archive_member": "performance-followup/empty/validation/summary.json",
+      "sha256": "16d249921551406985561b2824f6048370d4723545ce5bd9c65d3676dc69bebe"
+    },
+    "qualification": "The default log covers the final runtime; the final test-only matrix expansion ran without default features. Complete hashed logs and the command script are retained, but original command exit-code receipts are absent for these local runs; the separately linked exact-head CI provides complete process-status evidence.",
+    "command_script": {
+      "archive_member": "performance-followup/empty/validation/commands.sh",
+      "sha256": "c671545f99ac4368d5db6640d8646047e9943cd2b6d0557c09a25c58914197a1"
+    }
+  },
+  "compatibility": {
+    "passed": true,
+    "source_and_libraries_unchanged": true,
+    "api": {
+      "xeme": {
+        "passed": true,
+        "configurations": 4740,
+        "known_failures": 495,
+        "improvement_count": 14,
+        "regression_count": 0
+      },
+      "reference": {
+        "passed": true,
+        "configurations": 4740,
+        "known_failures": 0,
+        "improvement_count": 0,
+        "regression_count": 0
+      }
+    },
+    "allocation": {
+      "xeme": {
+        "passed": true,
+        "configurations": 1008,
+        "known_failures": 0,
+        "regressions": [],
+        "ownership_reports": 1008,
+        "totals": {
+          "injected_malloc_failures": 23792,
+          "injected_realloc_failures": 1625,
+          "live_blocks": 0,
+          "system_failures": 0
+        }
+      },
+      "reference": {
+        "passed": true,
+        "configurations": 1008,
+        "known_failures": 0,
+        "regressions": [],
+        "ownership_reports": 1008,
+        "totals": {
+          "injected_malloc_failures": 10913,
+          "injected_realloc_failures": 934,
+          "live_blocks": 0,
+          "system_failures": 0
+        }
+      }
+    },
+    "w3c": {
+      "passed": true,
+      "rows_per_engine": 6003,
+      "conformance_failures": {
+        "reference": 960,
+        "xeme": 960
+      },
+      "differences": [],
+      "improvements": {
+        "reference": [],
+        "xeme": []
+      }
+    },
+    "differential": {
+      "status": "passed",
+      "cases": 2730,
+      "seed": 20260910,
+      "semantic_pass": true,
+      "exact_pass": false,
+      "difference_counts": {
+        "status": 0,
+        "error": 0,
+        "normalized_events": 0,
+        "events": 8,
+        "position": 84,
+        "callback_errors": 0
+      }
+    },
+    "cpython": {
+      "cpython-shared": {
+        "linkage": "shared",
+        "consumer_adaptation": null,
+        "probe_exit_code": 0,
+        "origin_exit_code": 0,
+        "tests_exit_code": 0,
+        "gate_exit_code": 0,
+        "inventory_case_count": 803,
+        "inventory_complete": true,
+        "semantic_exit_code": 0,
+        "accepted_upstream_failures": false,
+        "totals": [
+          "Total tests: run=802 skipped=14",
+          "Total test files: run=6/6"
+        ]
+      },
+      "cpython-shared-consumer-fix": {
+        "linkage": "shared",
+        "consumer_adaptation": "CPython upstream allocation-failure fix",
+        "probe_exit_code": 0,
+        "origin_exit_code": 0,
+        "tests_exit_code": 0,
+        "gate_exit_code": 0,
+        "inventory_case_count": 803,
+        "inventory_complete": true,
+        "semantic_exit_code": 0,
+        "accepted_upstream_failures": false,
+        "totals": [
+          "Total tests: run=802 skipped=14",
+          "Total test files: run=6/6"
+        ]
+      },
+      "cpython-static": {
+        "linkage": "static",
+        "consumer_adaptation": null,
+        "probe_exit_code": 0,
+        "origin_exit_code": 0,
+        "tests_exit_code": 0,
+        "gate_exit_code": 0,
+        "inventory_case_count": 803,
+        "inventory_complete": true,
+        "semantic_exit_code": 0,
+        "accepted_upstream_failures": false,
+        "totals": [
+          "Total tests: run=802 skipped=14",
+          "Total test files: run=6/6"
+        ]
+      },
+      "cpython-static-consumer-fix": {
+        "linkage": "static",
+        "consumer_adaptation": "CPython upstream allocation-failure fix",
+        "probe_exit_code": 0,
+        "origin_exit_code": 0,
+        "tests_exit_code": 0,
+        "gate_exit_code": 0,
+        "inventory_case_count": 803,
+        "inventory_complete": true,
+        "semantic_exit_code": 0,
+        "accepted_upstream_failures": false,
+        "totals": [
+          "Total tests: run=802 skipped=14",
+          "Total test files: run=6/6"
+        ]
+      }
+    },
+    "cleanup_fault": {
+      "shared": [
+        {
+          "kind": "original",
+          "exit_code": -11,
+          "timed_out": false,
+          "matches_expected_failure_or_recovery": true
+        },
+        {
+          "kind": "fixed",
+          "exit_code": 0,
+          "timed_out": false,
+          "matches_expected_failure_or_recovery": true
+        }
+      ],
+      "static": [
+        {
+          "kind": "original",
+          "exit_code": -11,
+          "timed_out": false,
+          "matches_expected_failure_or_recovery": true
+        },
+        {
+          "kind": "fixed",
+          "exit_code": 0,
+          "timed_out": false,
+          "matches_expected_failure_or_recovery": true
+        }
+      ]
+    }
+  },
+  "mechanism": {
+    "input": "Generated empty elements, namespaces off, 4,096-byte feeds",
+    "method": "Callgrind Ir counts over parser create/feed/native callbacks/free for four parses, including warmup. Profiling ran separately from elapsed-time benchmarks. Instruction counts include native callback hashing; they are not elapsed-time estimates. Callback signatures match baseline/candidate.",
+    "result": {
+      "label": "empty",
+      "instructions": {
+        "baseline": 219622005,
+        "candidate": 161093361
+      },
+      "callbacks": {
+        "baseline": {
+          "hash": "f76c8e12cae92d27",
+          "elements": 10001,
+          "text_bytes": 0
+        },
+        "candidate": {
+          "hash": "f76c8e12cae92d27",
+          "elements": 10001,
+          "text_bytes": 0
+        }
+      },
+      "candidate_over_baseline": 0.7335028245462015
+    },
+    "artifact": {
+      "archive_member": "performance-followup/profiles/summary.json",
+      "sha256": "c68f56d7707a6b4283d7e825292d55a951963add4595358aeb6dc9ad3c888e2d"
+    }
+  },
+  "ci": {
+    "pr": 248,
+    "pr_url": "https://github.com/astral-sh/xeme/pull/248",
+    "passed_head": "08ccf6f9e6d3ced949893b0e00bac684c10bd120",
+    "passed_checks": 18,
+    "skipped_checks": 1,
+    "skipped_check": "Profile-guided library",
+    "workflow_runs": [
+      "https://github.com/astral-sh/xeme/actions/runs/34787505775"
+    ],
+    "checks": [
+      {
+        "name": "Test (ubuntu-24.04, stable)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547481"
+      },
+      {
+        "name": "Test (ubuntu-24.04-arm, stable)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547347"
+      },
+      {
+        "name": "Test (windows-latest, stable)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547385"
+      },
+      {
+        "name": "Test (macos-15, stable)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547414"
+      },
+      {
+        "name": "Test (ubuntu-24.04, 1.96.0)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547407"
+      },
+      {
+        "name": "lint",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547218"
+      },
+      {
+        "name": "Compatibility regression (api)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547431"
+      },
+      {
+        "name": "Compatibility regression (allocation)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547442"
+      },
+      {
+        "name": "Compatibility regression (w3c)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547328"
+      },
+      {
+        "name": "Compatibility regression (differential)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547440"
+      },
+      {
+        "name": "Allocator ownership (stacked)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547350"
+      },
+      {
+        "name": "Allocator ownership (tree)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547352"
+      },
+      {
+        "name": "C callback aliasing (stacked)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547511"
+      },
+      {
+        "name": "C callback aliasing (tree)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547406"
+      },
+      {
+        "name": "C ABI and callback safety",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547341"
+      },
+      {
+        "name": "Sanitized parser fuzz smoke",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547378"
+      },
+      {
+        "name": "CPython XML consumers (shared)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547349"
+      },
+      {
+        "name": "CPython XML consumers (static)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547461"
+      },
+      {
+        "name": "Profile-guided library",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34787505775/job/103805547777"
+      }
+    ],
+    "artifacts": {
+      "summary": {
+        "archive_member": "performance-followup/ci/summary.json",
+        "sha256": "aa5ff7cc2f235a7a87291e610451fe72c42fcbc82f6c84904a7e29bff74aa3b8"
+      },
+      "report": {
+        "archive_member": "performance-followup/ci/report.md",
+        "sha256": "2c0a21ad6ccad4e7f8965af553de409344279f4e10b88627cd1773d8ff46cb89"
+      },
+      "raw_status": {
+        "archive_member": "performance-followup/ci/pr-248-completed-08ccf6f9.json",
+        "sha256": "e460f2883c8df2a9fc34ad1051cda04dd24bfa2455e4611cb919fa9029f74c20"
+      }
+    },
+    "scope": "This exact pre-documentation PR head passed CI; measured runtime and later documentation heads are distinct identities.",
+    "paths_changed_since_measured_runtime": [],
+    "post_runtime_changes": []
+  },
+  "selection": {
+    "mapping": {
+      "events": "events",
+      "references": "references",
+      "namespaces": "namespace-outlined",
+      "empty": "empty",
+      "comments": "comments",
+      "combined": "combined-outlined"
+    },
+    "artifact": {
+      "archive_member": "performance-followup/selection-map.json",
+      "sha256": "8583fab0318c51061187baaa408eacea6f677bd550361fb8c23adb3db7ad4da1"
+    }
+  },
+  "combined_integration": {
+    "source": {
+      "runtime": "61c8c6d1784b92180436370e55b74050410dde74",
+      "base": "1957281e1422c9669ac9f7a68d350dab491eae85",
+      "library_sha256": {
+        "libexpat.so.1.12.4": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+        "libxeme_expat.a": "92da32720e7652269958197b6bfad355f9a1968f260194492824f29e581024f0",
+        "libxeme_expat.so": "4368b068b03071287d291dfe51716cf859f5ab2c3857debc2546c0297f9cce2c"
+      },
+      "baseline_library_sha256": "b364ffc5164f2057a1f339508e7be135ad6f6a74be9f1e347466b7586359cbf9",
+      "compiler": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+      "target": "x86_64-unknown-linux-gnu",
+      "rustflags": "-Ctarget-cpu=x86-64",
+      "pre_documentation_head": "61c8c6d1784b92180436370e55b74050410dde74",
+      "committed_paths_changed_since_runtime": [],
+      "logical_label": "combined",
+      "physical_folder": "combined-outlined",
+      "build_checkout": "/home/dev-user/code/oss/xeme-perf-combined-outlined",
+      "source_manifest_sha256": "dc55c23381060d5968c1e1ec67fd12cbbd99462dbdf66958011052b1835a0fb8",
+      "changed_source_sha256": {
+        "crates/xeme/src/arena.rs": "deb8b8a0ccdfdf171faf5d2931e10fb6d5c0ca5fae59cb9c6162fdf6af8a9594",
+        "crates/xeme/src/context_text_tests.rs": "e550fecbf987a7e4d89cbb163fc7ce55b34064498e06dee61da5336512412b07",
+        "crates/xeme/src/encoding.rs": "f642760cf5cb4b77d545fce0266e496d10cc67f10ae078ae10e57542cbbc85b0",
+        "crates/xeme/src/lib.rs": "6a3564573b87de8e88b23a76108afbb93f177cefb7414308de50dbe231087f1e",
+        "crates/xeme/src/namespace.rs": "f1df3c8a990d69cb3a9ff77bd2cb581b5c5b2339a9f1d418520984aedefb5b38",
+        "crates/xeme/src/reference.rs": "6a13353bbe14b434b5d80294c6ec9f14d302ec5ad371a30cc294638935eedf42",
+        "crates/xeme/tests/adapter_frame.rs": "7908042398a68fefe004449dfdfd99d289b417db54306ba4044c16537933c9f5",
+        "crates/xeme/tests/allocation.rs": "f9b2e90640eb6ff8d757d212082392712f22f99dc84af2d407461532d9c3d4a6",
+        "crates/xeme/tests/event_output.rs": "247c0f28188f57c0b60e50e0b5b1a4d3cc214020459b5b92502d026ef5b4e94e",
+        "crates/xeme/tests/native_text_delivery.rs": "72851852010a254e493189be2589ad17a0c381772c3828f17d2753178abf5d6d",
+        "crates/xeme_expat/src/context_text_tests.rs": "445b30595f7af25829843b1e22b4889fa435bd0833f5550c05cd8347e71bfc29",
+        "crates/xeme_expat/src/lib.rs": "d748c22cc8271f65eed333e3fac89539832a5fdf3e895bad740e998f909df02d",
+        "crates/xeme_expat/src/tag_stop_tests.rs": "837aa360394dc178227f3cee46e4ffa6a8f3b5b66af17877f40eca47fcabf336",
+        "crates/xeme_expat/tests/memory.rs": "f83b93a41ee5dbf766752f7673116d74a6123ba8b789fef4c12bacd8b31c140e"
+      }
+    },
+    "workspace": {
+      "checks": {
+        "default": {
+          "passed": 551,
+          "failed": 0,
+          "suites": 38,
+          "exit_code_recorded": true,
+          "exit_code": 0,
+          "command": [
+            "cargo",
+            "+ohm",
+            "test",
+            "--workspace",
+            "--locked"
+          ],
+          "archive_member": "performance-followup/combined-outlined/validation/workspace.log",
+          "sha256": "69e77bb531ded8b854e92aa146c32251aec42be9c4338661797d7bd3cee8c480"
+        },
+        "no-default": {
+          "passed": 551,
+          "failed": 0,
+          "suites": 38,
+          "exit_code_recorded": true,
+          "exit_code": 0,
+          "command": [
+            "cargo",
+            "+ohm",
+            "test",
+            "--workspace",
+            "--locked",
+            "--no-default-features"
+          ],
+          "archive_member": "performance-followup/combined-outlined/validation/no-default.log",
+          "sha256": "3ba9a6389fff964dd0e89d2148577b97c334ccef31e9c4bce05348d0046720d2"
+        },
+        "clippy": {
+          "passed": true,
+          "exit_code_recorded": true,
+          "exit_code": 0,
+          "command": [
+            "cargo",
+            "+ohm",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "archive_member": "performance-followup/combined-outlined/validation/clippy.log",
+          "sha256": "25a4dab74db4215c1a51c8fdec54898af56d0ec13088e079e5a2ff2c0b91b824"
+        },
+        "format": {
+          "passed": true,
+          "exit_code_recorded": true,
+          "exit_code": 0,
+          "command": [
+            "cargo",
+            "+ohm",
+            "fmt",
+            "--all",
+            "--check"
+          ],
+          "archive_member": "performance-followup/combined-outlined/validation/format.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "command_receipt": {
+        "archive_member": "performance-followup/combined-outlined/validation/summary.json",
+        "sha256": "146497ce95806f74da1d3f3e4ce95e8852c13c66c44ed93ee831e7e8905db442"
+      }
+    },
+    "compatibility": {
+      "passed": true,
+      "source_and_libraries_unchanged": true,
+      "api": {
+        "xeme": {
+          "passed": true,
+          "configurations": 4740,
+          "known_failures": 495,
+          "improvement_count": 14,
+          "regression_count": 0
+        },
+        "reference": {
+          "passed": true,
+          "configurations": 4740,
+          "known_failures": 0,
+          "improvement_count": 0,
+          "regression_count": 0
+        }
+      },
+      "allocation": {
+        "xeme": {
+          "passed": true,
+          "configurations": 1008,
+          "known_failures": 0,
+          "regressions": [],
+          "ownership_reports": 1008,
+          "totals": {
+            "injected_malloc_failures": 23768,
+            "injected_realloc_failures": 1625,
+            "live_blocks": 0,
+            "system_failures": 0
+          }
+        },
+        "reference": {
+          "passed": true,
+          "configurations": 1008,
+          "known_failures": 0,
+          "regressions": [],
+          "ownership_reports": 1008,
+          "totals": {
+            "injected_malloc_failures": 10918,
+            "injected_realloc_failures": 934,
+            "live_blocks": 0,
+            "system_failures": 0
+          }
+        }
+      },
+      "w3c": {
+        "passed": true,
+        "rows_per_engine": 6003,
+        "conformance_failures": {
+          "reference": 960,
+          "xeme": 960
+        },
+        "differences": [],
+        "improvements": {
+          "reference": [],
+          "xeme": []
+        }
+      },
+      "differential": {
+        "status": "passed",
+        "cases": 2730,
+        "seed": 20260910,
+        "semantic_pass": true,
+        "exact_pass": false,
+        "difference_counts": {
+          "status": 0,
+          "error": 0,
+          "normalized_events": 0,
+          "events": 8,
+          "position": 84,
+          "callback_errors": 0
+        }
+      },
+      "cpython": {
+        "cpython-shared": {
+          "linkage": "shared",
+          "consumer_adaptation": null,
+          "probe_exit_code": 0,
+          "origin_exit_code": 0,
+          "tests_exit_code": 0,
+          "gate_exit_code": 0,
+          "inventory_case_count": 803,
+          "inventory_complete": true,
+          "semantic_exit_code": 0,
+          "accepted_upstream_failures": false,
+          "totals": [
+            "Total tests: run=802 skipped=14",
+            "Total test files: run=6/6"
+          ]
+        },
+        "cpython-shared-consumer-fix": {
+          "linkage": "shared",
+          "consumer_adaptation": "CPython upstream allocation-failure fix",
+          "probe_exit_code": 0,
+          "origin_exit_code": 0,
+          "tests_exit_code": 0,
+          "gate_exit_code": 0,
+          "inventory_case_count": 803,
+          "inventory_complete": true,
+          "semantic_exit_code": 0,
+          "accepted_upstream_failures": false,
+          "totals": [
+            "Total tests: run=802 skipped=14",
+            "Total test files: run=6/6"
+          ]
+        },
+        "cpython-static": {
+          "linkage": "static",
+          "consumer_adaptation": null,
+          "probe_exit_code": 0,
+          "origin_exit_code": 0,
+          "tests_exit_code": 0,
+          "gate_exit_code": 0,
+          "inventory_case_count": 803,
+          "inventory_complete": true,
+          "semantic_exit_code": 0,
+          "accepted_upstream_failures": false,
+          "totals": [
+            "Total tests: run=802 skipped=14",
+            "Total test files: run=6/6"
+          ]
+        },
+        "cpython-static-consumer-fix": {
+          "linkage": "static",
+          "consumer_adaptation": "CPython upstream allocation-failure fix",
+          "probe_exit_code": 0,
+          "origin_exit_code": 0,
+          "tests_exit_code": 0,
+          "gate_exit_code": 0,
+          "inventory_case_count": 803,
+          "inventory_complete": true,
+          "semantic_exit_code": 0,
+          "accepted_upstream_failures": false,
+          "totals": [
+            "Total tests: run=802 skipped=14",
+            "Total test files: run=6/6"
+          ]
+        }
+      },
+      "cleanup_fault": {
+        "shared": [
+          {
+            "kind": "original",
+            "exit_code": -11,
+            "timed_out": false,
+            "matches_expected_failure_or_recovery": true
+          },
+          {
+            "kind": "fixed",
+            "exit_code": 0,
+            "timed_out": false,
+            "matches_expected_failure_or_recovery": true
+          }
+        ],
+        "static": [
+          {
+            "kind": "original",
+            "exit_code": -11,
+            "timed_out": false,
+            "matches_expected_failure_or_recovery": true
+          },
+          {
+            "kind": "fixed",
+            "exit_code": 0,
+            "timed_out": false,
+            "matches_expected_failure_or_recovery": true
+          }
+        ]
+      }
+    },
+    "aggregates": [
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "corpus": "tuning",
+        "conditions": 24,
+        "candidate_base": 0.9429627196190565,
+        "candidate_expat": 1.1057977310229032,
+        "base_expat": 1.1727468934649135
+      },
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "candidate_base": 0.9372139120217485,
+        "candidate_expat": 1.3334937672516702,
+        "base_expat": 1.4251384616951464
+      },
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "corpus": "generated",
+        "conditions": 16,
+        "candidate_base": 0.8091828518676027,
+        "candidate_expat": 1.3649989826516318,
+        "base_expat": 1.6915245341331657
+      },
+      {
+        "epoch": 1,
+        "consumer": "python",
+        "corpus": "tuning",
+        "conditions": 24,
+        "candidate_base": 0.9943914464896396,
+        "candidate_expat": 1.1391138757707453,
+        "base_expat": 1.1484924404989971
+      },
+      {
+        "epoch": 1,
+        "consumer": "python",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "candidate_base": 0.9752448044828981,
+        "candidate_expat": 1.155139771293128,
+        "base_expat": 1.1825949067346686
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "corpus": "tuning",
+        "conditions": 24,
+        "candidate_base": 0.9426877715810869,
+        "candidate_expat": 1.1072370952431225,
+        "base_expat": 1.1752104105661565
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "candidate_base": 0.9394739389961544,
+        "candidate_expat": 1.3344717192573479,
+        "base_expat": 1.420673293818206
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "corpus": "generated",
+        "conditions": 16,
+        "candidate_base": 0.8084147770445841,
+        "candidate_expat": 1.3752153346647404,
+        "base_expat": 1.7000139634950973
+      },
+      {
+        "epoch": 2,
+        "consumer": "python",
+        "corpus": "tuning",
+        "conditions": 24,
+        "candidate_base": 0.9909700541258567,
+        "candidate_expat": 1.1383175621672925,
+        "base_expat": 1.1537661677859068
+      },
+      {
+        "epoch": 2,
+        "consumer": "python",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "candidate_base": 0.9779093084087919,
+        "candidate_expat": 1.15856490881441,
+        "base_expat": 1.185243651401992
+      }
+    ],
+    "regressions": {
+      "epochs": {
+        "1": {
+          "conditions": 104,
+          "slower": 28
+        },
+        "2": {
+          "conditions": 104,
+          "slower": 33
+        }
+      },
+      "groups": [
+        {
+          "epoch": 1,
+          "consumer": "native",
+          "corpus": "tuning",
+          "conditions": 24,
+          "slower": 3
+        },
+        {
+          "epoch": 1,
+          "consumer": "native",
+          "corpus": "observed-holdout",
+          "conditions": 20,
+          "slower": 6
+        },
+        {
+          "epoch": 1,
+          "consumer": "native",
+          "corpus": "generated",
+          "conditions": 16,
+          "slower": 2
+        },
+        {
+          "epoch": 1,
+          "consumer": "python",
+          "corpus": "tuning",
+          "conditions": 24,
+          "slower": 9
+        },
+        {
+          "epoch": 1,
+          "consumer": "python",
+          "corpus": "observed-holdout",
+          "conditions": 20,
+          "slower": 8
+        },
+        {
+          "epoch": 2,
+          "consumer": "native",
+          "corpus": "tuning",
+          "conditions": 24,
+          "slower": 2
+        },
+        {
+          "epoch": 2,
+          "consumer": "native",
+          "corpus": "observed-holdout",
+          "conditions": 20,
+          "slower": 8
+        },
+        {
+          "epoch": 2,
+          "consumer": "native",
+          "corpus": "generated",
+          "conditions": 16,
+          "slower": 3
+        },
+        {
+          "epoch": 2,
+          "consumer": "python",
+          "corpus": "tuning",
+          "conditions": 24,
+          "slower": 10
+        },
+        {
+          "epoch": 2,
+          "consumer": "python",
+          "corpus": "observed-holdout",
+          "conditions": 20,
+          "slower": 10
+        }
+      ],
+      "repeat_count": 25,
+      "top_repeat": [
+        {
+          "condition": "native/namespaces/65536/namespaces-0",
+          "epoch_1_candidate_base": 1.0769678788831882,
+          "epoch_2_candidate_base": 1.0817089307553278
+        },
+        {
+          "condition": "native/namespaces/4096/namespaces-0",
+          "epoch_1_candidate_base": 1.061020397997506,
+          "epoch_2_candidate_base": 1.0643022506402537
+        },
+        {
+          "condition": "native/maven/65536/namespaces-1",
+          "epoch_1_candidate_base": 1.0488794163826243,
+          "epoch_2_candidate_base": 1.0587639730010938
+        },
+        {
+          "condition": "native/maven/4096/namespaces-1",
+          "epoch_1_candidate_base": 1.0473138608015113,
+          "epoch_2_candidate_base": 1.0509716661742774
+        },
+        {
+          "condition": "python/maven/4096/elementtree",
+          "epoch_1_candidate_base": 1.043267576920577,
+          "epoch_2_candidate_base": 1.0411165052026983
+        }
+      ]
+    },
+    "reports": [
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "archive_member": "performance-followup/combined-outlined/native-epoch-1/summary.json",
+        "sha256": "6be765c7d6fba0e5cd9e4fc601670e9d2915d1cc1ea3096445766d518b2c4b04",
+        "pairs": 7,
+        "iterations": 20,
+        "cpu": "AMD EPYC-Milan Processor",
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      },
+      {
+        "epoch": 1,
+        "consumer": "python",
+        "archive_member": "performance-followup/combined-outlined/python-epoch-1/summary.json",
+        "sha256": "7e703ed316c8770765f2ce42c5f0913159ec0195e50eae053e84b299d7e2030b",
+        "pairs": 7,
+        "iterations": 10,
+        "cpu": null,
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "archive_member": "performance-followup/combined-outlined/native-epoch-2/summary.json",
+        "sha256": "d0f4bd33de2f7d76d6d8a9967e1f3b8d56d37fe4729b334ee5956c4f6cbe6056",
+        "pairs": 7,
+        "iterations": 20,
+        "cpu": "AMD EPYC-Milan Processor",
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      },
+      {
+        "epoch": 2,
+        "consumer": "python",
+        "archive_member": "performance-followup/combined-outlined/python-epoch-2/summary.json",
+        "sha256": "47a65862459c0ffc4dfd936372d580e3a1b25848939d121cbfb36a381dff7ea1",
+        "pairs": 7,
+        "iterations": 10,
+        "cpu": null,
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      }
+    ],
+    "artifacts": {
+      "build": {
+        "archive_member": "performance-followup/combined-outlined/build/build.json",
+        "sha256": "cd7b9ebe050f00c641bca07bb20e4cc9fa329146dd26f6b63eb57538da4af2ab"
+      },
+      "baseline_build": {
+        "archive_member": "performance-followup/baseline/build.json",
+        "sha256": "7b25757dd578235b544900f120e22939aab4e7bf8a1fa2beaea86d7dae01fb82"
+      },
+      "metrics": {
+        "archive_member": "performance-followup/combined-outlined/metrics.json",
+        "sha256": "6e21ed2b185bbbc679793304063f06324ea96931709ea82bd6290fd8260983a4"
+      },
+      "compatibility": {
+        "archive_member": "performance-followup/combined-outlined/compatibility-results.json",
+        "sha256": "2d010f26d83c8155dbacb9ec0b17901a1954469ec7e1715dfd2d6ceab7a5a115"
+      }
+    },
+    "conditions": {
+      "rows": 208,
+      "archive_member": "performance-followup/combined-outlined/conditions.csv",
+      "sha256": "598875743c4c54dc4337aceb23a5fc8a55cf54a3e308c973a3bdcbca44f4d1a9"
+    },
+    "superseded_initial_integration": {
+      "name": "Initial five-change integration",
+      "physical_folder": "combined",
+      "runtime": "4eeb93a0df41c56a5b27653143529c60bcc1c7f1",
+      "library_sha256": "c3d09df7fa07b4dee74f478dddffc38d82680c5c2721620d2b6432a7109ae1df",
+      "pairs": 7,
+      "iterations": 20,
+      "conditions": 60,
+      "slower": 16,
+      "aggregates_candidate_base": {
+        "tuning": 0.9481037266077278,
+        "observed-holdout": 0.9543807675780138,
+        "generated": 0.8146948033720094
+      },
+      "targets_candidate_base": {
+        "namespaces/namespaces-1": 0.9129950855912072,
+        "libreoffice/namespaces-1": 0.9373504747262826,
+        "maven/namespaces-1": 1.0666622024574297,
+        "entities/all": 0.7181374916306905,
+        "elements/all": 0.6294758342043651
+      },
+      "artifacts": {
+        "build": {
+          "archive_member": "performance-followup/combined/build/build.json",
+          "sha256": "a315b76b3f7c9a2f6cc3a203ef6a9d36f0d893d6df9efa6e7e5c886ccf183870"
+        },
+        "report": {
+          "archive_member": "performance-followup/combined/native-epoch-1/summary.json",
+          "sha256": "4709015c15ae98c91e0d0297c020e577b026990cfb223109e6def606a30235e7"
+        }
+      }
+    }
+  },
+  "conditions_csv": {
+    "rows": 208,
+    "url": "https://github.com/astral-sh/xeme/blob/charlie/codex-perf-empty-elements/docs/evidence/2026-09-13-empty-elements-performance.csv",
+    "sha256": "5fb3cce390677882f65db8e0a71c0a504dbae189b8eb75c28688a0493eb49058"
+  },
+  "artifacts": {
+    "build": {
+      "archive_member": "performance-followup/empty/build/build.json",
+      "sha256": "bef218ae7a503ef9f99d0776050429f338102ea6e71437355a087fc80904a15b"
+    },
+    "baseline_build": {
+      "archive_member": "performance-followup/baseline/build.json",
+      "sha256": "7b25757dd578235b544900f120e22939aab4e7bf8a1fa2beaea86d7dae01fb82"
+    },
+    "metrics": {
+      "archive_member": "performance-followup/empty/metrics.json",
+      "sha256": "b83ffe8029e16798d0a19223fc23f30f3ec971b39cf287f7510764f09a324aaa"
+    },
+    "compatibility": {
+      "archive_member": "performance-followup/empty/compatibility-results.json",
+      "sha256": "f216e150f04ec0fed8a87d6e26423d6882211f574f87c9b94ab8d0f62e8a7e34"
+    },
+    "reports": [
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "archive_member": "performance-followup/empty/native-epoch-1/summary.json",
+        "sha256": "88c093678945d3dbd149804cfd55117b826696f70537597698bbc68a8f61f505",
+        "pairs": 7,
+        "iterations": 20,
+        "cpu": "AMD EPYC-Milan Processor",
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      },
+      {
+        "epoch": 1,
+        "consumer": "python",
+        "archive_member": "performance-followup/empty/python-epoch-1/summary.json",
+        "sha256": "9b6d3faf000803d2be31a1758c63a8c07509feedb86a2cf2cf00c22e900c1706",
+        "pairs": 7,
+        "iterations": 10,
+        "cpu": null,
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "archive_member": "performance-followup/empty/native-epoch-2/summary.json",
+        "sha256": "61d1005ba1d3ab90a59c8de9f82188c95e86e23cef84d843de875b994c964ed5",
+        "pairs": 7,
+        "iterations": 20,
+        "cpu": "AMD EPYC-Milan Processor",
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      },
+      {
+        "epoch": 2,
+        "consumer": "python",
+        "archive_member": "performance-followup/empty/python-epoch-2/summary.json",
+        "sha256": "a845cf64d397bcec456b8724e121a2e254865954afbd95a56ba6be4a50ec17a9",
+        "pairs": 7,
+        "iterations": 10,
+        "cpu": null,
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      }
+    ],
+    "generator": {
+      "archive_member": "performance-followup/write_final_evidence.py",
+      "sha256": "63dcd74b52d46b387d0bf3a9d29befabfa7bf5fdff0acd414dc6408f2d37d271"
+    }
+  },
+  "raw_archive": {
+    "url": "https://github.com/astral-sh/xeme/releases/download/performance-followup-2026-09-13/performance-followup-2026-09-13.tar.zst",
+    "sha256": "80222e8cadbf6d90a305ad23f4e06d0e99f662bb7ef7c019dab8c417fbf17ecf",
+    "sidecar_sha256": "048264f15a0c20d9d187561437b1f3e08d58010aba8ea041485a83ff01eceac4",
+    "manifest_sha256": "34bc534e85a51ac4e7ffab487a471d4c737a92ee90d3312671b18cc6a3289fde",
+    "archive": "performance-followup-2026-09-13.tar.zst",
+    "release_tag": "performance-followup-2026-09-13"
+  }
+}

@@ -211,6 +211,20 @@ def worker(library, label):
     print(label, len(rows), flush=True)
 
 
+def selected_catalog():
+    """Retain every descriptor and select the XML 1.0 Fifth Edition cases."""
+    descriptors = catalog()
+    for row in descriptors:
+        if (
+            row.get("RECOMMENDATION", "XML1.0").startswith(("XML1.1", "NS1.1"))
+            or "1.0" not in row.get("VERSION", "1.0").split()
+        ):
+            row["skip"] = "XML 1.1"
+        elif "5" not in row.get("EDITION", "5").split():
+            row["skip"] = "Earlier XML edition only"
+    return descriptors
+
+
 def main():
     global SUITE, OUT
     parser = argparse.ArgumentParser(description=__doc__)
@@ -230,15 +244,7 @@ def main():
     if args.reference is None:
         parser.error("--reference is required")
     OUT.mkdir(parents=True, exist_ok=False)
-    descriptors = catalog()
-    for row in descriptors:
-        if (
-            row.get("RECOMMENDATION", "XML1.0").startswith(("XML1.1", "NS1.1"))
-            or "1.0" not in row.get("VERSION", "1.0").split()
-        ):
-            row["skip"] = "XML 1.1"
-        elif "5" not in row.get("EDITION", "5").split():
-            row["skip"] = "Earlier XML edition only"
+    descriptors = selected_catalog()
     (OUT / "catalog.json").write_text(json.dumps(descriptors, indent=2) + "\n")
     report = {
         "scope": "Nonvalidating XML 1.0 Fifth Edition and Namespaces 1.0 acceptance; valid and invalid cases must accept, not-wf must reject, error is optional. Resolver failures are inconclusive and receive no conformance credit. No canonical-output comparison. All referenced external files are read through a local-only resolver.",

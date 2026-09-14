@@ -17,6 +17,8 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from corpus_manifest import corpus_files
 from xml_abi import Expat
 
 
@@ -118,16 +120,7 @@ def main() -> int:
     binary = output / "native-driver"
     corpus = args.corpus.resolve()
     manifest = json.loads(corpus.read_text())
-    inputs = {}
-    for project in manifest["projects"]:
-        files = [f for f in project["files"] if f["role"] == "input"]
-        if len(files) != 1 or project["name"] in inputs:
-            raise ValueError("expected exactly one input per unique project")
-        entry = files[0]
-        path = (corpus.parent / entry["path"]).resolve(strict=True)
-        if digest(path) != entry["sha256"]:
-            raise ValueError(f"corpus hash mismatch: {path}")
-        inputs[project["name"]] = path
+    inputs, corpus_hashes = corpus_files(corpus)
     libraries = {
         "xeme": args.library.resolve(strict=True),
         "expat": args.reference.resolve(strict=True),
@@ -152,11 +145,11 @@ def main() -> int:
         return build.returncode
     observed = [
         Path(__file__).resolve(),
+        Path(__file__).with_name("corpus_manifest.py").resolve(),
         source,
         binary,
         Path(__file__).resolve().parents[1] / "tools/xml_abi.py",
-        corpus,
-        *inputs.values(),
+        *(Path(path) for path in corpus_hashes),
         *libraries.values(),
         *(p.resolve(strict=True) for p in args.build_manifest),
     ]

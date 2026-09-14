@@ -13,6 +13,7 @@ import random
 import statistics
 import subprocess
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -89,7 +90,7 @@ def worker(spec_path: Path) -> None:
         raise RuntimeError(f"normalized callback preflight failed: {spec_path}")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None, *, source_files: Sequence[Path] = ()) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--library", type=Path, required=True)
     parser.add_argument("--reference", type=Path, required=True)
@@ -103,7 +104,8 @@ def main() -> int:
     parser.add_argument("--cc", default="cc")
     parser.add_argument("--build-manifest", type=Path, action="append", default=[])
     parser.add_argument("--preflight-only", action="store_true")
-    args = parser.parse_args()
+    parser.add_argument("--namespaces", choices=["off", "on", "both"], default="both")
+    args = parser.parse_args(argv)
     if (
         args.pairs < 3
         or args.iterations < 3
@@ -152,6 +154,7 @@ def main() -> int:
         *(Path(path) for path in corpus_hashes),
         *libraries.values(),
         *(p.resolve(strict=True) for p in args.build_manifest),
+        *(p.resolve(strict=True) for p in source_files),
     ]
     hashes = {str(path): digest(path) for path in observed}
     report: dict[str, Any] = {
@@ -159,7 +162,7 @@ def main() -> int:
         "schema_version": 1,
         "corpus_manifest": manifest,
         "method": "Seven matched rounds by default, randomizing all engines within each condition; per-process median of parse samples after one discarded warmup. Creation, callback registration, parse, native callback hashing and free are timed. File/library loading and process startup are excluded. Full normalized callback streams are compared before timing and derive the expected native output hash. Each measured sample must match its independent preflight hash/counts.",
-        "limitations": "These are parser microbenchmarks on original real-project inputs, not end-to-end project build, rendering or code generation. No external entity handler is installed; no runtime network or file resolution occurs. Batik external DTD is skipped by both parsers. XSL includes are XML data, not resolved transformations. Shared host CPU frequency/load/memory bandwidth are uncontrolled. Warm filesystem caches.",
+        "limitations": "These are parser microbenchmarks on the supplied corpus, not end-to-end project build, rendering or code generation. No external entity handler is installed; no runtime network or file resolution occurs. Batik external DTD is skipped by both parsers. XSL includes are XML data, not resolved transformations. Shared host CPU frequency/load/memory bandwidth are uncontrolled. Warm filesystem caches.",
         "platform": platform.platform(),
         "cpu": next(
             (
@@ -180,11 +183,12 @@ def main() -> int:
         "processes": [],
         "summary": {},
     }
+    namespaces = {"off": [False], "on": [True], "both": [False, True]}[args.namespaces]
     jobs = [
         (name, chunk, ns)
         for name in inputs
         for chunk in args.chunks
-        for ns in [False, True]
+        for ns in namespaces
     ]
     expected = {}
 

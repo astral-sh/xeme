@@ -34,6 +34,14 @@ python3 benchmarks/run.py --library /path/to/libxeme_expat.so \
   --output /tmp/xeme-benchmark
 ```
 
+`run.py` generates the inputs and delegates measurement to `projects.py`. It keeps
+the XML, `corpus.json`, and build-manifest copies in the output directory. Results
+now use the shared runner's schema at `results/summary.json`, replacing the former
+top-level `summary.json`: condition keys include `/namespaces-0` or
+`/namespaces-1`, and sample rows use `chunk` instead of `chunk_size`. Console
+output reports status and worker counts; timing ratios are in the summary file.
+Preflight callbacks and worker logs are retained alongside the summary.
+
 Each process measures ten complete parses after one discarded warmup. Creation,
 handler registration, parsing, callbacks, and parser destruction are included.
 Process startup, library loading, and input loading are excluded. The driver

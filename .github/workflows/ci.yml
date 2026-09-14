@@ -58,7 +58,7 @@ jobs:
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
       - run: uvx --from ruff==0.16.6 ruff check tools benchmarks
       - run: uvx --from ty==0.0.80 ty check --extra-search-path tools tools benchmarks
-      - run: python3 -m unittest discover -s benchmarks -p test_hillclimb.py
+      - run: python3 -m unittest discover -s benchmarks
       - run: python3 -m unittest discover -s tools/cpython -p test_run.py
       - run: python3 -m unittest discover -s tools -p test_compatibility.py
       - run: python3 -m unittest discover -s tools/upstream-expat -p test_allocation.py

@@ -585,13 +585,12 @@ impl Entity {
     /// General-content children copy Expat's DTD table. A reserved slot without
     /// a system ID becomes an empty internal value in that copy; parameter
     /// children retain the unfinished slot and its already parsed identifiers.
-    fn clone_for_child(
+    fn clone_for_general_child(
         &self,
-        parameter_context: bool,
         parameter_entity: bool,
         allocator: Allocator,
     ) -> Result<Self, AllocError> {
-        if !parameter_context && self.value.is_none() && self.system_id.is_none() {
+        if self.value.is_none() && self.system_id.is_none() {
             Ok(Self {
                 base: None,
                 value: Some(String::new_in(allocator)),
@@ -605,7 +604,7 @@ impl Entity {
             })
         } else {
             let mut entity = self.try_clone()?;
-            if !parameter_context && self.value_open.is_some() {
+            if self.value_open.is_some() {
                 entity.value_open = Some(Shared::try_new_in(AtomicBool::new(false), allocator)?);
             }
             Ok(entity)
@@ -1128,7 +1127,7 @@ impl Parser {
                 try_insert(
                     &mut child.tables.entities,
                     name.try_clone()?,
-                    entity.clone_for_child(false, false, self.allocator)?,
+                    entity.clone_for_general_child(false, self.allocator)?,
                 )?;
             }
             for (name, attributes) in &tables.defaults {
@@ -1142,7 +1141,7 @@ impl Parser {
                 try_insert(
                     &mut child.tables.parameter_entities,
                     name.try_clone()?,
-                    entity.clone_for_child(false, true, self.allocator)?,
+                    entity.clone_for_general_child(true, self.allocator)?,
                 )?;
             }
             child.tables.max_default_attributes = tables.max_default_attributes;

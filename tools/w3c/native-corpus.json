@@ -1,0 +1,22 @@
+{
+  "catalog_descriptors": 2585,
+  "selected_descriptors": 2001,
+  "chunks": [
+    1,
+    7,
+    4096
+  ],
+  "source_digest": "0b03ed5fda9f907b8d707e8e9e884c899d766e3dc6659ee08aa02ea2c28ba6ad",
+  "inventory_digest": "8cb5bf35b677ebe88267a7c1a18701e6bc9bd46f984901fa7902ee05202f2e69",
+  "catalog_digest": "bf40d2a19bc1b76a7efea9510985575279809e632eb019e6eca0af353e07d82d",
+  "source_revision": "3fb4516daedd0ac736249a383733883b95fcdbb2",
+  "expectation_corrections": {
+    "rmt-e2e-38": {
+      "catalog_type": "not-wf",
+      "expected": "accept",
+      "reason": "Fifth Edition VersionNum accepts 1.x with XML 1.0 content; W3C E10 explicitly reverses the E38 restriction tested by this older catalog entry.",
+      "specification": "https://www.w3.org/TR/REC-xml/#NT-VersionNum",
+      "erratum": "https://www.w3.org/XML/xml-V10-4e-errata#E10"
+    }
+  }
+}

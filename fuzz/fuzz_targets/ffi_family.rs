@@ -2,63 +2,12 @@
 
 //! Valid external parser families, allocator faults, and parent/child lifetime order.
 
-use std::cell::Cell;
-use std::ffi::{c_char, c_void};
+use std::ffi::c_char;
 use std::ptr;
 
 use libfuzzer_sys::fuzz_target;
 use xeme_expat::*;
-
-unsafe extern "C" {
-    fn malloc(size: usize) -> *mut c_void;
-    fn realloc(pointer: *mut c_void, size: usize) -> *mut c_void;
-    fn free(pointer: *mut c_void);
-}
-
-thread_local! {
-    static CALLS: Cell<usize> = const { Cell::new(0) };
-    static FAIL_AT: Cell<usize> = const { Cell::new(0) };
-    static LIVE: Cell<usize> = const { Cell::new(0) };
-}
-
-fn allocation_fails(size: usize) -> bool {
-    let call = CALLS.get() + 1;
-    CALLS.set(call);
-    call == FAIL_AT.get() || size > 8 * 1024 * 1024
-}
-
-unsafe extern "C" fn allocate(size: usize) -> *mut c_void {
-    if allocation_fails(size) {
-        return ptr::null_mut();
-    }
-    let pointer = unsafe { malloc(size.max(1)) };
-    if !pointer.is_null() {
-        LIVE.set(LIVE.get() + 1);
-    }
-    pointer
-}
-
-unsafe extern "C" fn reallocate(pointer: *mut c_void, size: usize) -> *mut c_void {
-    if allocation_fails(size) {
-        return ptr::null_mut();
-    }
-    let replacement = unsafe { realloc(pointer, size.max(1)) };
-    if pointer.is_null() && !replacement.is_null() {
-        LIVE.set(LIVE.get() + 1);
-    }
-    replacement
-}
-
-unsafe extern "C" fn deallocate(pointer: *mut c_void) {
-    if !pointer.is_null() {
-        LIVE.set(
-            LIVE.get()
-                .checked_sub(1)
-                .expect("unowned custom allocation"),
-        );
-        unsafe { free(pointer) };
-    }
-}
+use xeme_fuzz::allocator::{CALLS, FAIL_AT, LIVE, SUITE};
 
 unsafe fn parse(parser: XML_Parser, bytes: &[u8], width: usize) {
     // Each pointer and slice stays live for its call; no handlers are installed.
@@ -83,16 +32,11 @@ fuzz_target!(|data: &[u8]| {
     } else {
         usize::from(u16::from_le_bytes([data[1], data[2]])) % 512 + 1
     });
-    let suite = XML_Memory_Handling_Suite {
-        malloc_fcn: Some(allocate),
-        realloc_fcn: Some(reallocate),
-        free_fcn: Some(deallocate),
-    };
     // Fixed stack slots own every live handle. A freed slot is cleared immediately,
     // and children keep their own lifetime token after a parent is freed/reset.
     unsafe {
         let mut parsers: [XML_Parser; 8] = [ptr::null_mut(); 8];
-        parsers[0] = XML_ParserCreate_MM(ptr::null(), &suite, c"|".as_ptr());
+        parsers[0] = XML_ParserCreate_MM(ptr::null(), &SUITE, c"|".as_ptr());
         if !parsers[0].is_null() {
             let prefix = b"<!DOCTYPE r [<!ENTITY e 'value'><!ATTLIST r a CDATA 'default'>]><r>";
             XML_Parse(parsers[0], prefix.as_ptr().cast(), prefix.len() as i32, 0);

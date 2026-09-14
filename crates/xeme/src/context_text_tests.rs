@@ -182,3 +182,38 @@ fn context_text_foreign_generation_uses_owned_events() {
     assert!(matches!(event.unwrap().kind, EventKind::Text(value) if value.as_str() == "abc"));
     origin.finish_adapter_frame(frame);
 }
+
+#[test]
+fn native_text_retains_partial_source_precharges() {
+    for precharged in [0, 1, 2, 3] {
+        let mut results = std::vec::Vec::new();
+        for native in [false, true] {
+            let mut parser = Parser::new(Config {
+                limits: Limits {
+                    max_work_amplification: Some(1),
+                    ..Limits::default()
+                },
+                ..Config::default()
+            });
+            parser.enable_input_context();
+            parser.set_text_line_boundaries(true);
+            parser.feed(b"<r>abc</r>", true).unwrap();
+            parser.next_event().unwrap().unwrap();
+            parser.account_source(precharged).unwrap();
+            let mut frame = parser.adapter_frame();
+            let mut event = None;
+            parser
+                .next_event_for_adapter_mode_into(&mut event, &mut frame, native)
+                .unwrap()
+                .unwrap();
+            results.push((
+                frame.position(),
+                parser.work_bytes_limit(0),
+                parser.current_raw().unwrap().to_owned(),
+            ));
+            parser.finish_adapter_frame(frame);
+        }
+        assert_eq!(results[0], results[1]);
+        assert_eq!(results[1].1, 6);
+    }
+}

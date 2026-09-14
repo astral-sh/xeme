@@ -32,6 +32,23 @@ Fourth Edition rules, which the C interface uses to match Expat. The parser is
 non-validating: it checks XML syntax without validating documents against their
 DTD content models.
 
+By default, a UTF-8 byte order mark (BOM) must agree with the declared encoding.
+A conflicting declaration is rejected unless an explicit higher-level encoding
+override applies. `Config::allow_utf8_bom_encoding_mismatch` defaults to `false`;
+the C interface explicitly enables this legacy compatibility option to match
+Expat.
+
+CI runs the pinned W3C XML catalog directly against this Rust interface, with
+Fifth Edition names and the catalog's namespace mode. Its
+[conformance gate](../tools/w3c/README.md#native-rust-conformance-gate) requires
+every mandatory Fifth Edition acceptance/rejection expectation to pass,
+including one [documented catalog correction](../tools/w3c/README.md#fifth-edition-expectation-correction),
+without an Expat oracle or a known-failure allowance. DTD-invalid but well-formed
+documents must be accepted because the parser is nonvalidating. Resource-limit
+and allocation failures are inconclusive and fail the gate, including on
+malformed input. The separate C-interface compatibility gate does not define
+native Rust acceptance.
+
 ## Resource limits
 
 `Config::limits` bounds document bytes, unfinished tokens, element depth,
@@ -44,6 +61,17 @@ scanning a growing unfinished token. Internal entity replacement must remain
 balanced and is bounded separately from document input. The C interface also
 bounds aggregate allocation and work across a parser's external-entity family.
 Library crates leave global allocator selection to the embedding application.
+
+See [XML denial-of-service protections](security.md) for entity-expansion and
+large-token protections, and the limits required when a caller decompresses input.
+
+## Python API
+
+The `xeme` Python package parses bytes incrementally into events, with namespace
+options, resource limits, and source positions. Install it from this checkout
+with `uv pip install .`. See the [Python API guide](../crates/xeme_python/README.md)
+for examples and supported events. This API is separate from `pyexpat`'s callback
+interface.
 
 ## Expat consumers
 
@@ -64,6 +92,7 @@ XML extensions against Xeme and runs their upstream tests. See the
 | [`xeme_storage`](../crates/xeme_storage) | Fallible storage, allocator ownership, and resource accounting |
 | [`xeme_expat`](../crates/xeme_expat) | Expat C interface and callback integration |
 | [`xeme_cli`](../crates/xeme_cli) | Command-line XML checker |
+| [`xeme_python`](../crates/xeme_python) | Python event API and extension package |
 
 See [contributing](../CONTRIBUTING.md) for development commands and acceptance
 criteria, [fuzzing](../fuzz/README.md) for the adversarial harnesses, and the

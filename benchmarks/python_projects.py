@@ -20,6 +20,9 @@ import time
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from corpus_manifest import corpus_files
+
 
 def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -199,25 +202,18 @@ def main() -> int:
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     corpus = args.corpus.resolve()
-    manifest = json.loads(corpus.read_text())
+    inputs, corpus_hashes = corpus_files(corpus)
     build = args.consumers.resolve()
     consumers = json.loads(build.read_text())
     if consumers["status"] != "passed":
         parser.error("consumer build did not pass")
-    inputs = {}
-    for project in manifest["projects"]:
-        entry = next(f for f in project["files"] if f["role"] == "input")
-        path = (corpus.parent / entry["path"]).resolve(strict=True)
-        if digest(path) != entry["sha256"]:
-            parser.error("input hash mismatch")
-        inputs[project["name"]] = path
     libraries = {e: Path(c["library"]) for e, c in consumers["consumers"].items()}
     observed = [
         Path(__file__).resolve(),
+        Path(__file__).with_name("corpus_manifest.py").resolve(),
         Path(sys.executable).resolve(),
-        corpus,
+        *(Path(path) for path in corpus_hashes),
         build,
-        *inputs.values(),
         *[Path(p) for c in consumers["consumers"].values() for p in c["files"]],
     ]
     hashes = {str(p): digest(p) for p in observed}

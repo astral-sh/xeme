@@ -40,6 +40,7 @@ impl Encoding {
 #[derive(Debug)]
 struct Detection {
     requested: Option<String>,
+    allow_utf8_bom_encoding_mismatch: bool,
     declaration_checked: usize,
     unknown_name: Option<String>,
     encoding_error_position: Option<Position>,
@@ -131,6 +132,8 @@ impl Detection {
                 .windows(2)
                 .position(|window| window == b"?>")
                 .map(|end| end + start);
+            #[cfg(test)]
+            crate::large_token_tests::inspect(end.map_or(content.len(), |end| end + 2) - start);
             self.declaration_checked = content.len().saturating_sub(1);
             // Enforce the complete token bound before inspecting or copying an
             // encoding name, including when the closing delimiter just arrived.
@@ -179,6 +182,12 @@ impl Detection {
                             // unknown encoding by assuming UTF-8.
                             return Ok(Some((Encoding::Utf8, skip)));
                         }
+                        // Without a protocol override, a UTF-8 BOM fixes the
+                        // encoding even when the declaration names another one.
+                        let mismatch = mismatch
+                            || (skip == 3
+                                && !self.allow_utf8_bom_encoding_mismatch
+                                && encoding != Some(Encoding::Utf8));
                         if encoding.is_none() || mismatch {
                             let offset = declaration.len() - rest.len() + 1;
                             let mut position = Position {
@@ -236,11 +245,16 @@ pub(crate) struct Decoder {
     conversion: Option<([u8; 4], u8)>,
 }
 impl Decoder {
-    pub(crate) fn new(requested: Option<&str>, allocator: Allocator) -> Result<Self, Error> {
+    pub(crate) fn new(
+        requested: Option<&str>,
+        allocator: Allocator,
+        allow_utf8_bom_encoding_mismatch: bool,
+    ) -> Result<Self, Error> {
         Ok(Self {
             allocator,
             encoding: None,
             detection: Detection {
+                allow_utf8_bom_encoding_mismatch,
                 requested: requested
                     .map(|name| String::try_from_str_in(name, allocator))
                     .transpose()?,
@@ -1166,6 +1180,8 @@ impl Source {
         let quote = text.as_bytes()[0];
         let start = self.scan.checked.max(1);
         for (relative, character) in text[start..].char_indices() {
+            #[cfg(test)]
+            crate::large_token_tests::inspect(character.len_utf8());
             let index = start + relative;
             if index >= limit {
                 return Err((ErrorKind::LimitExceeded, 0));
@@ -1196,6 +1212,8 @@ impl Source {
         let digits_start = if hexadecimal { 3 } else { 2 };
         let start = self.scan.checked.max(1);
         for (relative, character) in text[start..].char_indices() {
+            #[cfg(test)]
+            crate::large_token_tests::inspect(character.len_utf8());
             let index = start + relative;
             if index >= limit {
                 return Err((ErrorKind::LimitExceeded, 0));
@@ -1234,6 +1252,12 @@ impl Source {
         (self.raw_index + self.raw_len(0, count)).saturating_sub(self.accounted_raw)
     }
 
+    /// A native token starts exactly where the previous source charge ended.
+    #[inline]
+    pub(crate) fn accounted_to_cursor(&self) -> bool {
+        self.accounted_raw == self.raw_index
+    }
+
     pub(crate) fn unaccounted_prefix(&self, raw_bytes: usize) -> usize {
         raw_bytes.saturating_sub(self.accounted_raw)
     }
@@ -1265,7 +1289,7 @@ impl Source {
                     .bytes()
                     .all(|byte| byte.is_ascii() && !matches!(byte, b'\r' | b'\n'))
         );
-        self.raw_index += self.raw_len(0, count);
+        self.raw_index += count;
         self.column += count;
         self.previous_cr = false;
         self.finish_consume(count);
@@ -1274,7 +1298,7 @@ impl Source {
     /// Commit native text whose scanner already computed the eager position delta.
     pub(crate) fn consume_text(&mut self, plan: crate::text::TextPlan) {
         debug_assert!(self.native_utf8_byte_index().is_some() && !self.has_conversions());
-        self.raw_index += self.raw_len(0, plan.end);
+        self.raw_index += plan.end;
         plan.advance_position(&mut self.line, &mut self.column, &mut self.previous_cr);
         self.finish_consume(plan.end);
     }
@@ -1337,6 +1361,8 @@ impl Source {
                 let mut after_name =
                     start > 2 && matches!(bytes[start - 1], b' ' | b'\t' | b'\r' | b'\n');
                 for (relative, character) in self.text[self.cursor + start..].char_indices() {
+                    #[cfg(test)]
+                    crate::large_token_tests::inspect(character.len_utf8());
                     let index = start + relative;
                     if index + character.len_utf8() > limit {
                         return Err((ErrorKind::LimitExceeded, index));
@@ -1370,17 +1396,23 @@ impl Source {
                         .position(|part| part == terminator)
                 {
                     let end = start + relative + terminator.len();
+                    #[cfg(test)]
+                    crate::large_token_tests::inspect(end - start);
                     return if end <= limit {
                         Ok(Some(end))
                     } else {
                         Err((ErrorKind::LimitExceeded, limit))
                     };
                 }
+                #[cfg(test)]
+                crate::large_token_tests::inspect(bytes.len().saturating_sub(start));
                 scan.checked = bytes.len().saturating_sub(terminator.len() - 1);
             }
             ScanMode::Tag | ScanMode::Doctype | ScanMode::DtdDeclaration => {
                 let mut index = scan.checked;
                 while index < bytes.len() {
+                    #[cfg(test)]
+                    crate::large_token_tests::inspect(1);
                     if index >= limit {
                         return Err((ErrorKind::LimitExceeded, limit));
                     }
@@ -1469,6 +1501,8 @@ fn scan_element_tag(
     // Short tags avoid setting up a byte search. Resume the bulk scan only
     // after this fixed prefix, including when a tag spans input chunks.
     while index < bytes.len().min(64) {
+        #[cfg(test)]
+        crate::large_token_tests::inspect(1);
         let byte = bytes[index];
         if byte == b'<' {
             return Err((ErrorKind::InvalidToken, index));
@@ -1504,6 +1538,8 @@ fn scan_element_tag(
             let syntax = memchr::memchr3(b'>', b'\'', b'"', text);
             memchr::memchr(b'<', &text[..syntax.unwrap_or(text.len())]).or(syntax)
         };
+        #[cfg(test)]
+        crate::large_token_tests::inspect(2 * next.map_or(text.len(), |next| next + 1));
         let Some(next) = next else {
             if end > limit {
                 return Err((ErrorKind::LimitExceeded, limit));
@@ -1618,7 +1654,7 @@ mod tests {
             for split in 0..=bytes.len() {
                 for warm in [false, true] {
                     let make = || {
-                        let mut decoder = Decoder::new(None, Allocator::System).unwrap();
+                        let mut decoder = Decoder::new(None, Allocator::System, false).unwrap();
                         decoder.encoding = Some(Encoding::Utf8);
                         if warm {
                             decoder.append_pending(&[0; 64]).unwrap();
@@ -1676,7 +1712,7 @@ mod tests {
             let tracker = AllocationTracker::try_new_in(Allocator::System).unwrap();
             with_tracking(&tracker, || {
                 let allocator = Allocator::TrackedSystem;
-                let mut decoder = Decoder::new(None, allocator).unwrap();
+                let mut decoder = Decoder::new(None, allocator, false).unwrap();
                 decoder.encoding = Some(Encoding::Utf8);
                 let bytes = [b'x'; 2048];
                 decoder.append_pending(&bytes).unwrap();

@@ -1,0 +1,60 @@
+name: Python
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: python-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Python ${{ matrix.python }} (${{ matrix.os }})
+    runs-on: ${{ github.repository_owner == 'astral-sh' && matrix.os == 'ubuntu-24.04' && 'github-ubuntu-24.04-x86_64-4' || matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-latest]
+        python: ["3.10", "3.14"]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: stable
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Build and install the wheel
+        run: |
+          uv build --wheel --out-dir dist --config-setting build-args=--locked
+          uv venv
+          uv pip install dist/*.whl
+      - name: Test the installed package
+        run: uv run --no-sync python -m unittest discover -s crates/xeme_python/tests -v
+      - name: Check Python source and annotations
+        if: matrix.os == 'ubuntu-24.04' && matrix.python == '3.14'
+        run: |
+          uvx --from ruff==0.16.6 ruff check --target-version py310 crates/xeme_python
+          uvx --from ty==0.0.80 ty check --python .venv crates/xeme_python/python
+      - name: Build and test a wheel from the source distribution
+        if: matrix.os == 'ubuntu-24.04' && matrix.python == '3.14'
+        run: |
+          uv build --sdist --out-dir dist
+          uv build dist/*.tar.gz --wheel --out-dir dist/from-sdist
+          uv pip install --reinstall dist/from-sdist/*.whl
+          uv run --no-sync python -m unittest discover -s crates/xeme_python/tests -v
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: python-${{ matrix.os }}-${{ matrix.python }}
+          path: dist/*
+          retention-days: 14

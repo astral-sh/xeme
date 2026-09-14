@@ -17,6 +17,7 @@ from unittest.mock import patch
 
 import hillclimb
 import projects
+from corpus_manifest import corpus_files
 
 
 def fixture() -> dict:
@@ -471,11 +472,11 @@ class CorpusTests(unittest.TestCase):
             ):
                 directory = Path(temporary)
                 manifest, _ = self.fixture(directory)
-                inputs, _ = hillclimb.corpus_files(manifest)
+                inputs, _ = corpus_files(manifest)
                 self.assertEqual(set(inputs), {"project"})
                 (directory / filename).write_bytes(b"changed")
                 with self.assertRaisesRegex(ValueError, "identity mismatch"):
-                    hillclimb.corpus_files(manifest)
+                    corpus_files(manifest)
 
     def test_duplicate_project_or_multiple_inputs_is_rejected(self):
         for duplicate_project in [False, True]:
@@ -490,7 +491,7 @@ class CorpusTests(unittest.TestCase):
                     data["projects"][0]["files"][1]["role"] = "input"
                 manifest.write_text(json.dumps(data))
                 with self.assertRaises(ValueError):
-                    hillclimb.corpus_files(manifest)
+                    corpus_files(manifest)
 
 
 class SummaryTests(unittest.TestCase):

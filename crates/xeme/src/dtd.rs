@@ -65,10 +65,10 @@ struct DeclarationExpansion {
     // parameter replacement participates, retain the existing composition costs.
     direct: bool,
     text: Buffer,
+    // Value callbacks may install a Default handler later.
     raw: Buffer,
     literals: Vec<DeclarationLiteral>,
     parameters: Vec<DeclarationParameter>,
-    capture_raw: bool,
     raw_offsets: Vec<(usize, usize)>,
 }
 
@@ -811,10 +811,10 @@ impl Parser {
             ));
         }
         result.text.append(text)?;
-        if !boundary && result.capture_raw {
-            result.raw.append(text)?;
-        } else if boundary {
+        if boundary {
             self.declaration_raw_boundary(result)?;
+        } else {
+            result.raw.append(text)?;
         }
         Ok(())
     }

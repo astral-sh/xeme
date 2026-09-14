@@ -31,30 +31,6 @@ TESTS = [
     "test_pulldom",
 ]
 
-TEXT_FRAGMENTATION_FAILURES = {
-    "test1 (test.test_pyexpat.BufferTextTest.test1)",
-    "test_handlers (test.test_sax.CDATAHandlerTest.test_handlers)",
-}
-
-# The optional exception is deliberately tied to these exact upstream assertions,
-# rather than every failure that happens to occur in the same test methods.
-FRAGMENTATION_ASSERTIONS = {
-    "test1 (test.test_pyexpat.BufferTextTest.test1)": (
-        "test_pyexpat.py",
-        401,
-        "test1",
-        "self.assertEqual(self.stuff,",
-        "AssertionError: Lists differ: ['<a>', '1', '<b>', '2\\n3', '<c>', '4\\n5'] != "
-        "['<a>', '1', '<b>', '2', '\\n', '3', '<c>', '4\\n5']",
-    ),
-    "test_handlers (test.test_sax.CDATAHandlerTest.test_handlers)": (
-        "test_sax.py",
-        1543,
-        "characters",
-        "h.assertEqual(t[0], content)",
-        "AssertionError: 'Parseable character data' != '\\nParseable character data\\n'",
-    ),
-}
 FRAGMENTATION_SOURCE_HASHES = {
     "test_pyexpat.py": "44129616745434f065948aa9cee6a9be4546aa7cea93b952259e140cbc3fe844",
     "test_sax.py": "b061db0792bb838bf2568ff145b770db0b89cbf7bfa995664f4d392d5e41ec34",
@@ -110,69 +86,6 @@ def successful_test_run(
     )
 
 
-def only_text_fragmentation(
-    log: str,
-    returncode: int,
-    file_count: int,
-    cases: list[str],
-    test_directory: Path | None = None,
-) -> bool:
-    """Recognize only the two pinned upstream callback-boundary assertions."""
-    failures = re.findall(r"^(FAIL|ERROR): (.+)$", log, re.MULTILINE)
-    total = re.search(
-        r"^Total tests: run=(\d+) failures=(\d+)(?: skipped=\d+)?$", log, re.MULTILINE
-    )
-    complete = (
-        f"Total test files: run={file_count}/{file_count} failed={len(failures)}"
-        in log.splitlines()
-    )
-    valid = (
-        returncode == 2
-        and bool(failures)
-        and total is not None
-        and int(total[2]) == len(failures)
-        and complete
-        and complete_inventory(log, cases, int(total[1]))
-        and len({name for _, name in failures}) == len(failures)
-        and all(
-            kind == "FAIL" and name in TEXT_FRAGMENTATION_FAILURES
-            for kind, name in failures
-        )
-    )
-    if not valid:
-        return False
-    for _, name in failures:
-        section = re.search(
-            r"^FAIL: " + re.escape(name) + r"\n-+\n(.*?)\n-+\n",
-            log,
-            re.MULTILINE | re.DOTALL,
-        )
-        if section is None:
-            return False
-        traceback = section[1]
-        filename, line, function, source_line, assertion = FRAGMENTATION_ASSERTIONS[
-            name
-        ]
-        frames = re.findall(
-            r'^  File "([^"\n]+)", line (\d+), in ([^\n]+)\n    ([^\n]+)',
-            traceback,
-            re.MULTILINE,
-        )
-        assertions = re.findall(r"^AssertionError: [^\n]*$", traceback, re.MULTILINE)
-        if (
-            not frames
-            or (
-                Path(frames[-1][0]).resolve() != (test_directory / filename).resolve()
-                if test_directory is not None
-                else not frames[-1][0].endswith(f"/Lib/test/{filename}")
-            )
-            or frames[-1][1:] != (str(line), function, source_line)
-            or assertions != [assertion]
-        ):
-            return False
-    return True
-
-
 def apply_consumer_fix(text: str, root: Path, output: Path) -> tuple[str, dict]:
     """Apply the pinned upstream allocation-failure backport to a temporary copy."""
     directory = root / "tools/cpython/consumer-fix"
@@ -210,11 +123,6 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--system-allocator", action="store_true")
     parser.add_argument(
-        "--allow-text-fragmentation",
-        action="store_true",
-        help="Reproduce the historical two-assertion exception; not a current release gate",
-    )
-    parser.add_argument(
         "--consumer-fix",
         action="store_true",
         help="Explicitly backport CPython's upstream pyexpat allocation-failure fix",
@@ -241,8 +149,6 @@ def main() -> int:
     if subprocess.check_output(["git", "-C", str(source), "status", "--porcelain"]):
         parser.error("CPython source must be clean")
     full_suite = sorted(args.tests) == sorted(TESTS)
-    if args.allow_text_fragmentation and not full_suite:
-        parser.error("the fragmentation exception requires all six XML test modules")
     if full_suite:
         for filename, expected in FRAGMENTATION_SOURCE_HASHES.items():
             if (
@@ -441,21 +347,10 @@ xeme_create_system(const XML_Char *encoding,
                 timeout=120,
                 check=False,
             )
-        known_failures = args.allow_text_fragmentation and only_text_fragmentation(
-            tests_log, result.returncode, len(args.tests), cases, source / "Lib/test"
-        )
-        accepted = known_failures and semantic.returncode == 0
-        if accepted:
-            gate_exit_code = 0
         if semantic.returncode:
             gate_exit_code = gate_exit_code or semantic.returncode
         fragmentation = {
-            "accepted_upstream_failures": accepted,
-            "allowed_assertions": (
-                sorted(TEXT_FRAGMENTATION_FAILURES)
-                if args.allow_text_fragmentation
-                else []
-            ),
+            "accepted_upstream_failures": False,
             "semantic_command": semantic_command,
             "semantic_exit_code": semantic.returncode,
             "semantic_source_sha256": hashlib.sha256(

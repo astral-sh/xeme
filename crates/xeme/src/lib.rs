@@ -4130,6 +4130,35 @@ impl Parser {
         token_bytes: usize,
         frame: &mut AdapterFrame,
     ) -> Result<Option<String>, Error> {
+        // Default-namespace elements without attributes need no attribute plan.
+        if self.raw_attributes.is_empty()
+            && !name.contains(':')
+            && let (Some(separator), Some(uri)) = (
+                self.config.namespace_separator,
+                self.default_namespace.as_ref(),
+            )
+        {
+            let separator_bytes = if separator == '\0' {
+                0
+            } else {
+                2 * separator.len_utf8()
+            };
+            if token_bytes
+                .checked_add(uri.len())
+                .and_then(|bytes| bytes.checked_add(separator_bytes))
+                .is_none_or(|bytes| bytes > arena::MAX_ARENA_BYTES)
+            {
+                return Ok(None);
+            }
+            self.event_recycling
+                .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
+            frame.prepare(0)?;
+            self.id_attribute_index = None;
+            let reusable = self.event_recycling.take_name();
+            return self
+                .expand_name(name, false, self.config.namespace_triplets, reusable)
+                .map(Some);
+        }
         let Some(plan) = namespace::FramePlan::new(
             name,
             rest,

@@ -511,6 +511,7 @@ fn namespace_plans_preserve_errors_and_owned_expansions() {
 fn expanded_element_frames_preserve_packed_names_and_literal_attributes() {
     for (input, expected_frames) in [
         ("<r xmlns='urn:m'><n a='α😀'><n b='v'/></n></r>", 2),
+        ("<r xmlns='urn:m'><é><n/></é><n/></r>", 3),
         ("<p:r xmlns:p='urn:π'><p:é a='v'><p:é/></p:é></p:r>", 2),
         // NUL and colon separators can make expanded and raw spellings equal.
         ("<r xmlns:p='p:'><p:n a='v'><p:n/></p:n></r>", 2),
@@ -675,47 +676,52 @@ fn expanded_attribute_frames_keep_uri_accounting_and_arena_bounds() {
 
 #[test]
 fn expanded_element_frames_keep_uri_work_and_arena_limits() {
-    let tag = "<p:n a='v'/>";
-    for separator in ['|', '\0', 'λ'] {
-        let separator_bytes = if separator == '\0' {
-            0
-        } else {
-            2 * separator.len_utf8()
-        };
-        for triplets in [false, true] {
-            for extra in [0, 1, 2] {
-                let uri = "u".repeat(4096 - tag.len() - separator_bytes - 1 + extra);
-                let input = format!("<r xmlns:p='{uri}'>{tag}{tag}</r>");
-                for chunk in [1, 4096, input.len()] {
-                    let config = Config {
-                        namespace_separator: Some(separator),
-                        namespace_triplets: triplets,
-                        ..Config::default()
-                    };
-                    let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
-                    let owned = collect(input.as_bytes(), chunk, config, false);
-                    assert_eq!(
-                        adapter.0, owned.0,
-                        "{separator:?} {triplets} {extra} {chunk}"
-                    );
-                    assert_eq!(adapter.1, if extra == 2 { 0 } else { 2 });
+    for (declaration, tag) in [("xmlns:p", "<p:n a='v'/>"), ("xmlns", "<n/>")] {
+        for separator in ['|', '\0', 'λ'] {
+            let separator_bytes = if separator == '\0' {
+                0
+            } else {
+                2 * separator.len_utf8()
+            };
+            for triplets in [false, true] {
+                for extra in [0, 1, 2] {
+                    let uri = "u".repeat(4096 - tag.len() - separator_bytes - 1 + extra);
+                    let input = format!("<r {declaration}='{uri}'>{tag}{tag}</r>");
+                    for chunk in [1, 4096, input.len()] {
+                        let config = Config {
+                            namespace_separator: Some(separator),
+                            namespace_triplets: triplets,
+                            ..Config::default()
+                        };
+                        let adapter = collect(input.as_bytes(), chunk, config.clone(), true);
+                        let owned = collect(input.as_bytes(), chunk, config, false);
+                        assert_eq!(
+                            adapter.0, owned.0,
+                            "{separator:?} {triplets} {extra} {chunk}"
+                        );
+                        assert_eq!(adapter.1, if extra == 2 { 0 } else { 2 });
+                    }
                 }
             }
         }
     }
-    let input = "<r xmlns:p='urn:long'><p:n a='v'/><p:n/><p:n/></r>";
-    for limit in 0..=3 * "urn:long".len() {
-        let mut config = Config {
-            namespace_separator: Some('|'),
-            ..Config::default()
-        };
-        config.limits.max_entity_expansion_bytes = limit;
-        for chunk in [1, 7, input.len()] {
-            assert_eq!(
-                collect(input.as_bytes(), chunk, config.clone(), true).0,
-                collect(input.as_bytes(), chunk, config.clone(), false).0,
-                "URI work limit {limit}, chunk {chunk}"
-            );
+    for input in [
+        "<r xmlns:p='urn:long'><p:n a='v'/><p:n/><p:n/></r>",
+        "<r xmlns='urn:long'><n/><n/><n/></r>",
+    ] {
+        for limit in 0..=4 * "urn:long".len() {
+            let mut config = Config {
+                namespace_separator: Some('|'),
+                ..Config::default()
+            };
+            config.limits.max_entity_expansion_bytes = limit;
+            for chunk in [1, 7, input.len()] {
+                assert_eq!(
+                    collect(input.as_bytes(), chunk, config.clone(), true).0,
+                    collect(input.as_bytes(), chunk, config.clone(), false).0,
+                    "URI work limit {limit}, chunk {chunk}"
+                );
+            }
         }
     }
 }

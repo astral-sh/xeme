@@ -114,7 +114,7 @@ impl Allocator {
     }
 
     /// Call the C suite directly, preserving its original pointer.
-    /// This is adapter plumbing; C API blocks use `tracked_malloc` instead.
+    /// Does not add tracking metadata. Use `tracked_malloc` for C API blocks.
     ///
     /// # Safety
     /// The returned block must be freed through this same allocator's `free` method.

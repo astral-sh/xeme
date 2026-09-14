@@ -1,36 +1,43 @@
 # CPython XML consumers
 
-`run.py` builds the pinned CPython 3.12.13 XML extensions against a frozen Xeme shared library or static archive, verifies their loaded paths, and runs six unchanged upstream XML test modules. The source checkout must match the pinned revision and remain clean. Build commands, source hashes, logs and original exit codes are retained in the output directory.
+`run.py` builds CPython 3.12.13's XML extensions against a supplied Xeme shared
+library or static archive and runs six unchanged upstream XML test modules. The
+source checkout must match the pinned revision and remain clean. The output
+directory contains build commands, source hashes, logs, and exit codes.
 
-A persistent import finder routes only `pyexpat` and `_elementtree` to those built extensions, including fresh imports made by the upstream tests. The mandatory preflight checks initial and fresh module paths, import specs and binary hashes, exercises both ElementTree accelerator import paths, and verifies that deliberately blocked imports still select the pure-Python implementation. Optimized Python is rejected so it cannot disable the preflight's assertions. The helper sources and `origin.log` are recorded with each run.
+An import finder loads the built `pyexpat` and `_elementtree` extensions, including
+when tests reimport them. Before running the suite, the harness checks module
+paths, import specs, and binary hashes, then verifies ElementTree's accelerator
+and pure-Python import paths. These checks require Python without `-O`. Results
+are recorded in `origin.log`.
 
-The C interface preserves the line-break character-data boundaries required by
-`BufferTextTest.test1` and `CDATAHandlerTest.test_handlers`. All six unchanged
-upstream XML suites must pass in CI. This resolves the two historical assertions;
-other exact callback-fragmentation differences remain outside this guarantee.
+## Test requirements
+
+All six upstream XML suites must pass in CI, including the line-break callback
+checks in `BufferTextTest.test1` and `CDATAHandlerTest.test_handlers`. Other
+callback boundaries can still differ from Expat's.
 
 All six modules and the complete pinned 803-case discovery inventory are required.
-Every case must execute or have an explicit class-setup skip, with consistent
-test/file counts and no errors. The runner retains discovery in
-`test-inventory.log`; the formerly failing fixture files must match their pinned
-hashes. Two additional checks using the same compiled extensions
-must preserve element/CDATA order, every text character, and callback-controlled
-buffering. Original failures and exit codes remain in `tests.log` and
-`summary.json`.
+Every case must execute or have an explicit class-setup skip. Discovery is
+recorded in `test-inventory.log`, and the callback fixture files must match their
+pinned hashes. Two additional checks verify element/CDATA order, text preservation,
+and callback-controlled buffering with the same extensions. `tests.log` and
+`summary.json` retain the upstream results and exit codes.
 
-`--consumer-fix` separately applies the pinned upstream [allocation-failure backport](consumer-fix/) to a temporary C source copy. `--system-allocator` separately selects the system allocator. Each adaptation is recorded explicitly.
+`--consumer-fix` applies the [CPython allocation-failure backport](consumer-fix/)
+to a temporary source copy. `--system-allocator` selects the system allocator. The
+summary records both options.
 
 ## Installed distributions
 
-To check a CPython 3.12.13 distribution built with Xeme, run its installed interpreter in isolated mode:
+To test a CPython 3.12.13 distribution built with Xeme, run its installed
+interpreter in isolated mode:
 
 ```console
 /absolute/python/install/bin/python3.12 -I tools/cpython/installed.py --output /tmp/installed-xml
 ```
 
-The output directory must be new. This runner requires all six upstream suites,
-the same fixture hashes, complete inventory and semantic checks to pass with the
-installed modules, retaining raw logs and exit codes. It does not substitute
-extensions or modify CPython sources. Packaging, platform compatibility, and
-threaded parsing need separate validation. Results identify the installed artifact
-they tested; earlier runs do not qualify a later build.
+The output directory must be new. This runner requires the same six upstream
+suites, fixture hashes, test inventory, and semantic checks to pass with the
+installed modules. It retains raw logs and exit codes. Packaging, platform
+compatibility, and threaded parsing need separate validation.

@@ -29,9 +29,9 @@ enum Payload {
 
 /// Detached callback storage for literal tags or plain character data.
 ///
-/// Start-tag slices include a trailing NUL; text is length-delimited. No
-/// parser borrow escapes. The explicit C host may instead receive a scalar
-/// original-input Text range. The parser retains the corresponding raw token.
+/// Start-tag slices include a trailing NUL; text is length-delimited. The frame
+/// does not borrow the parser. A C adapter that retains the original input can
+/// receive text as byte offsets into that input. The parser retains the raw token.
 #[doc(hidden)]
 #[derive(Debug)]
 pub struct AdapterFrame {
@@ -225,7 +225,7 @@ impl AdapterFrame {
         self.position
     }
 
-    /// Identify Text without requiring an owned-byte projection.
+    /// Whether the frame contains text, including a range in the original input.
     pub(crate) fn is_text(&self) -> bool {
         self.active
             && matches!(
@@ -234,8 +234,8 @@ impl AdapterFrame {
             )
     }
 
-    /// Absolute original-input range for the explicit C-context host protocol.
-    /// The host must validate and resolve this range before each callback.
+    /// Absolute byte offset and length of text in the original input.
+    /// The C adapter must validate this range against its input before each callback.
     #[doc(hidden)]
     #[must_use]
     pub fn native_text_range_for_c(&self) -> Option<(usize, usize)> {
@@ -246,7 +246,7 @@ impl AdapterFrame {
         }
     }
 
-    /// Copy the prepared native range for raw publication before frame publication.
+    /// Return the text range so the parser can retain the raw token before delivery.
     pub(crate) fn prepared_native_text_range(&self) -> Option<(usize, usize)> {
         if let Payload::NativeText { start } = self.payload {
             Some((start, self.callback_bytes))

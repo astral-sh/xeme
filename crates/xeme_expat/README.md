@@ -1,13 +1,10 @@
 # Xeme's Expat interface
 
-This crate exports the ordinary `char` Expat C ABI as a shared library and static
-archive. [The public header](../../include/expat.h) describes that ABI; its Expat
-version macros, `XML_ExpatVersionInfo()`, and the `xeme_compat_2.8.4` string from
-`XML_ExpatVersion()` identify the same targeted API revision. The separate
-`XEME_VERSION` header macro and Cargo package version identify the Xeme
-implementation, currently `0.0.1`. Consumers that require Expat's literal version
-string still distinguish Xeme. The header retains the upstream Expat authors'
-MIT notice.
+This crate exports Expat's `char` C ABI as a shared library and static archive.
+The [public header](../../include/expat.h) targets Expat 2.8.4.
+`XML_ExpatVersion()` returns `xeme_compat_2.8.4`, so consumers that check Expat's
+literal version string will see a difference. `XEME_VERSION` and the Cargo package
+version identify the Xeme implementation, currently `0.0.1`.
 
 ## Build the C libraries
 
@@ -26,8 +23,7 @@ LTO. The command produces `libxeme_expat.so` (or `.dylib` on macOS) and
 same directory can replace those artifacts, so keep the selected C build outputs
 for consumer validation and packaging.
 
-The [historical PGO guide](../../tools/pgo/) records the optional profile-guided
-build procedure; PGO is no longer an optimization workstream.
+See the [PGO guide](../../tools/pgo/) for the experimental profile-guided build.
 
 ## Ownership and callbacks
 
@@ -42,10 +38,10 @@ Callbacks can suspend, abort, or change handlers. As in Expat 2.8.4, recursive
 parsing, buffer requests, reset, and resume on the active parser fail without
 changing its error state. `XML_ParserFree` during a callback is ignored; the caller
 must free the handle after the outer operation returns. Recursive
-`XML_DefaultCurrent` calls are rejected with `XML_ERROR_UNEXPECTED_STATE`. A different parser can be
-used from a callback. Rust panics in allocating entry points are caught before the C
-boundary. Allocation failures on the C path return errors without allocating an
-error message.
+`XML_DefaultCurrent` calls are rejected with `XML_ERROR_UNEXPECTED_STATE`.
+A different parser can be used from a callback. Rust panics in allocating entry
+points are caught before the C boundary. Allocation failures on the C path return
+errors without allocating an error message.
 
 A failed API request, such as requesting a negative buffer size or resuming an
 unsuspended parser, updates the reported error without invalidating pending input.
@@ -56,7 +52,7 @@ Content-model callbacks receive one C allocation containing the entire model and
 its names. The consumer owns that allocation and releases it with
 `XML_FreeContentModel`, including after freeing the parser.
 
-## Current boundaries
+## Supported API
 
 The exported API includes streaming/buffer input, parser reset, suspension,
 namespace processing, DTD declaration callbacks, internal and external entities,
@@ -65,12 +61,19 @@ External content comes exclusively from caller-provided callbacks. Xeme never
 fetches external resources itself. Root reset disconnects children of the previous
 document so they cannot modify declarations in the new document.
 
+Wide-character, `XML_LARGE_SIZE` and `XML_ATTR_INFO` builds are unsupported;
+the header rejects these configurations.
+
+### Custom allocators
+
 Complete `XML_Memory_Handling_Suite` values are supported. Every parser-owned
 allocation, temporary callback buffer, child parser, and content model carries its
 allocator. Incomplete suites are rejected. Allocation callbacks must implement the
 C memory-allocation contract and must not reenter parser APIs; entry points reject
 reentry before accessing a parser. Ordinary event callbacks remain reentrant for
 the documented operations above.
+
+### Namespaces
 
 Namespace separators must be ASCII bytes. The C constructors reject bytes
 `0x80` through `0xff`, which cannot be represented as a single UTF-8 byte by the
@@ -81,6 +84,8 @@ names unambiguous. Following Expat, URI characters such as `:` are also supporte
 as legacy separators; collisions are rejected for non-URI separators, including
 when the URI introduces that character through an XML character reference.
 
+### Encodings and XML names
+
 Custom encodings support single-byte maps and conversion callbacks for two- to
 four-byte sequences. Each completed sequence is converted once, with original
 byte widths retained for positions. Reset, free, and rejected maps release their
@@ -90,14 +95,11 @@ including ASCII. Converted ASCII remains distinct from raw syntax: an encoded
 sequence producing `<` is character data, while a raw `<` starts markup. Names,
 references, declaration keywords, whitespace, and public identifiers retain their
 original lexical roles. End tags compare original encoded name spellings;
-callbacks and semantic lookups receive decoded strings. Sparse provenance uses
-the selected parser allocator and existing memory and work budgets; ordinary
-UTF-8 input does not allocate provenance records.
+callbacks and semantic lookups receive decoded strings.
 
-External DTD default-handler prefixes and some malformed-input errors, callback
-prefixes, and positions still differ. Invalid maps, supplementary converted
-characters, and forbidden XML characters remain errors; the external value-child
-declaration restrictions below also apply.
+Invalid maps, supplementary converted characters, and forbidden XML characters
+are errors. Some malformed-input errors, callback prefixes, and positions differ
+from Expat, including external DTD default-handler prefixes.
 
 The C interface uses XML 1.0 Fourth Edition name rules to match the pinned
 Expat 2.8.4 reference, including in DTDs, references, and custom-encoding byte
@@ -105,12 +107,15 @@ classification. Resets and external children retain those rules. The Rust
 interface defaults to Fifth Edition and can select either edition through
 `Config::name_rules`.
 
+### External DTDs and parameter entities
+
 Internal parameter entities can supply complete lexical tokens and grammar
 delimiters inside declarations in external DTDs and parameter entities.
-Replacement frames preserve name and quote boundaries, attribute whitespace,
-and entity-value provenance. A replacement may close the containing declaration
-or conditional header and leave further declaration grammar to resume in the
-parent. References between declarations must contain complete declarations;
+Replacements preserve name and quote boundaries, attribute whitespace,
+and the distinction between literal and referenced entity-value text. A
+replacement may close the containing declaration or conditional header and leave
+further declaration grammar to resume in the parent. References between
+declarations must contain complete declarations;
 ignored conditional sections must close within their source.
 
 External references between declaration tokens and in conditional headers load
@@ -132,15 +137,14 @@ section uses the token-byte ceiling. Value children distinguish unread children
 from initialized empty or failed children, including partial output before a
 storage error.
 
-The following Expat modes are explicitly unsupported:
+A value child's encoding declaration must be first, apart from its byte-order
+mark. Expat also permits the first declaration after value content, including
+whitespace or a comment; Xeme cannot switch encoding after that prefix has
+been decoded. A leading custom-encoding declaration may request its encoding
+handler before delivering the XML-declaration callback; Expat reverses this
+callback order in its value processor.
 
-- A value child's encoding declaration must be first, apart from its byte-order
-  mark. Expat also permits the first declaration after value content, including
-  whitespace or a comment; Xeme cannot switch encoding after that prefix has
-  been decoded. A leading custom-encoding declaration may request its encoding
-  handler before delivering the XML-declaration callback; Expat reverses this
-  callback order in its value processor.
-- Wide-character, `XML_LARGE_SIZE` and `XML_ATTR_INFO` builds: the header rejects these configurations.
+### Hash salts
 
 `XML_SetHashSalt` and `XML_SetHashSalt16Bytes` mix the caller salt into randomized
 hashing; a predictable salt does not replace the secret random keys. They update
@@ -151,10 +155,14 @@ salt and all tables. Reset preserves the configured salt. Newly created children
 inherit it; existing children retain their independently owned hash states, so
 changing the root never invalidates a child's populated tables.
 
+### Input context
+
 `XML_GetInputContext` exposes original encoded bytes while parsing is active,
 including entity-reference spellings and UTF-16 input. The buffer retains at least
 1,024 bytes before pending input and remains valid for the requesting callback.
 The getter returns null outside parsing and after reset.
+
+## Resource limits
 
 Entity amplification supports Expat's maximum-factor and activation-threshold
 controls. Root and child parsers share consumed input and replacement-byte counts;
@@ -167,18 +175,17 @@ policy active; the C work allowance grows with consumed root input.
 The C constructors allow up to 100,000 declared entities and 100,000 levels of
 internal entity expansion. Reset preserves these limits and external children
 inherit them. The safe Rust API retains its defaults of 10,000 declarations and
-32 entity levels. Iterative expansion and active-name indexes avoid a matching
-host call stack or repeated scans of the active chain.
+32 entity levels.
 
-Reparse deferral is configurable, with progressive scanning in both modes. The
-live-allocation tracker supports Expat's maximum-amplification and activation
-threshold controls, including child allocations. Application-owned blocks requested
-through `XML_MemMalloc`/`XML_MemRealloc` use the selected allocator but are exempt
+Reparse deferral is configurable, with progressive scanning in both modes.
+Expat's allocation amplification controls include child allocations.
+Application-owned blocks requested through `XML_MemMalloc`/`XML_MemRealloc` use
+the selected allocator but are exempt
 from parser amplification accounting, including when requested inside a callback.
 Defaults are 100 times the root's input size, activated at 64 MiB of live
-allocation. Allocation headers retain their tracker through reallocation and through destruction of their original parser.
-A separate 512 MiB ceiling on parser-owned live backing allocations remains active even when
-relative amplification checks are disabled.
+allocation. Tracking continues through reallocation and destruction of the
+original parser. A separate 512 MiB ceiling on parser-owned live backing
+allocations remains active even when relative amplification checks are disabled.
 
 Input calls and buffer requests are limited to 256 MiB. Cumulative source input
 is bounded by representable positions; work and event-payload allowances grow

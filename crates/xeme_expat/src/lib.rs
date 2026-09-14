@@ -2,13 +2,14 @@
 //!
 //! # Safety
 //!
-//! As with Expat, callers must provide live parser handles, valid buffers and
-//! callbacks with the declared ABI, and serialize access to each parser family. A
-//! callback may change handlers or stop parsing. Recursive parsing of the same
-//! parser is rejected without changing its error state. Callback-time Free is
-//! ignored; the caller must free the parser after the outer operation returns.
-//! No Rust parser reference crosses an event callback; allocation callbacks cannot
-//! reenter parser APIs.
+//! Callers must provide live parser handles, valid buffers, and callbacks with
+//! the declared ABI, and serialize access to each parser family.
+//!
+//! Event callbacks may change handlers or stop parsing. Recursive parsing of the
+//! same parser is rejected without changing its error state. Calls to
+//! `XML_ParserFree` from a callback are ignored; free the parser after the outer
+//! operation returns. The adapter holds no Rust parser references during event
+//! callbacks. Allocation callbacks must not reenter parser APIs.
 #![allow(non_snake_case, non_camel_case_types)]
 #![allow(clippy::missing_safety_doc)] // The common C ABI contract is documented above.
 

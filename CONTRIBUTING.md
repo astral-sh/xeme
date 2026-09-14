@@ -1,7 +1,6 @@
 # Contributing
 
-Use Rust 1.96 or later. The parser is implemented in this repository; it does not
-wrap an existing XML parser or invoke one at runtime.
+Use Rust 1.96 or later.
 
 ```console
 cargo test --workspace
@@ -38,7 +37,7 @@ annotations synchronized with the bindings. See the
 
 The [review guide](docs/review.md) maps the implementation and validation tools.
 See the [compatibility guide](docs/compatibility.md) for known differences and
-release gates.
+release criteria.
 
 Measure optimizations against a fresh parent build on the same input, with
 equivalent compilers, allocators, callbacks, and chunk sizes. Include raw samples,

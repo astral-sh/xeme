@@ -16,7 +16,7 @@ The core forbids unsafe Rust. Review C pointer validity, allocator ownership, an
 callback lifetimes at the adapter boundary. Callbacks may suspend parsing, change
 handlers, or operate on another parser; no Rust borrow of the active parser may
 cross a callback. The [C interface guide](../crates/xeme_expat/README.md) defines
-the supported operations and ownership contracts.
+the supported operations and ownership rules.
 
 Changes to streaming paths need coverage for split input, encoding conversion,
 error positions, suspension, and allocation failure. Keep resource accounting
@@ -25,11 +25,10 @@ allocator state, and may outlive a reset or freed parent.
 
 ## Validation
 
-CI runs the complete pinned API, allocation-behavior, W3C and differential gates through
-[`tools/compatibility.py`](../tools/compatibility.py). Known strict failures are
-checked against exact assertions and complete inventories; a passing regression
-gate does not turn those upstream failures into passes. The separate allocation
-gate requires all adapted tests and ownership checks to pass without allowances.
+CI runs the pinned API, allocation-behavior, W3C and differential suites through
+[`tools/compatibility.py`](../tools/compatibility.py). It checks known failures
+against the assertion baseline and verifies that every expected test ran.
+All adapted allocation tests and ownership checks must pass.
 
 Start with the workspace tests, formatting, and Clippy commands in
 [contributing](../CONTRIBUTING.md). Choose additional checks for the affected
@@ -52,6 +51,5 @@ limits.
 See [contributing](../CONTRIBUTING.md#review-and-performance) for performance
 comparison requirements.
 
-The [evidence index](evidence/README.md) separates tested-source reports from current
-contracts and links checksummed raw archives. Benchmark results must identify the
-measured runtime; historical qualification does not cover later code changes.
+The [test reports](evidence/README.md) link raw results and their checksums.
+Include the tested revision with benchmark results.

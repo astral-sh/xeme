@@ -53,14 +53,17 @@ pub struct Limits {
     pub max_depth: usize,
     pub max_token_bytes: usize,
     pub max_total_bytes: usize,
-    /// Allowance for indirect bytes from entities, reused defaults, namespace URI expansion,
-    /// repeated declaration callback names, skipped conditional-reference callback
-    /// storage, and external reference identifiers and namespace contexts. Child construction also charges inherited declaration,
-    /// namespace, encoding, and context storage, including per-entry structural
-    /// work. Parameter children share definitions without copying them. Shared
-    /// with external entity children. This is an absolute limit when
-    /// `max_work_amplification` is `None`; otherwise the limit is the greater of
-    /// this allowance and that factor times consumed original root-input bytes.
+    /// Work allowance shared with external entity children. Counts bytes from
+    /// entity expansion, reused defaults, expanded namespace URIs, repeated
+    /// declaration callback names, skipped conditional-reference callbacks, and
+    /// external reference identifiers and namespace contexts. Child construction
+    /// also counts inherited declaration, namespace, encoding, and context
+    /// storage, including per-entry overhead. Parameter children share definitions
+    /// without copying them.
+    ///
+    /// With `max_work_amplification: None`, this is an absolute limit. Otherwise,
+    /// the limit is the greater of this allowance and the amplification factor
+    /// times consumed original root-input bytes.
     pub max_entity_expansion_bytes: usize,
     /// Optional input-relative allowance for cumulative indirect and adapter work.
     /// `None` preserves absolute work limits. Children share consumed root credit;
@@ -647,14 +650,17 @@ struct NativeRawRange {
 
 /// An incremental, non-validating XML 1.0 parser.
 ///
-/// External entity references produce events for application-controlled resolution;
-/// the parser never performs I/O. Parameter entity processing is opt-in and supports
+/// External entity references produce events for the application to resolve;
+/// the parser never performs I/O.
+///
+/// Parameter entity processing is opt-in and supports
 /// references between declarations and nested INCLUDE/IGNORE sections in external
 /// DTDs. Internal parameter entities may select a conditional keyword or expand
 /// inside entity values in external DTDs and parameter entities, and supply
 /// complete lexical tokens and grammar delimiters inside declarations. Names,
 /// quoted literals, and references retain their original lexical boundaries;
 /// references between declarations must contain complete declarations.
+///
 /// External references between declaration tokens and in conditional headers
 /// load separate DTDs; their declarations are available before grammar resumes.
 /// Completed attributes and declarations are emitted before a subsequent child
@@ -1060,11 +1066,9 @@ impl Parser {
         Ok(())
     }
 
-    /// Update protocol metadata for an adapter that has finished or irreversibly
-    /// aborted parsing. This leaves the active decoder, custom map, buffered input,
-    /// and positions intact; it does not make the parser accept further input.
-    /// The adapter must have finished or irreversibly aborted and must never
-    /// resume feeding this parser. The core cannot verify the adapter state.
+    /// Update the encoding name after an adapter has finished or aborted parsing.
+    /// Leaves the active decoder, custom map, buffered input, and positions intact.
+    /// The adapter must never feed this parser again; the core cannot verify that.
     #[doc(hidden)]
     pub fn set_completed_encoding(&mut self, encoding: Option<&str>) -> Result<(), Error> {
         self.decoder.set_completed_encoding(encoding)
@@ -1074,12 +1078,12 @@ impl Parser {
     ///
     /// Pass the context from [`EventKind::ExternalEntityReference`]. Namespace
     /// bindings, declarations, recursion tracking, and the expansion budget are
-    /// inherited. The parser never opens a path or performs a network request.
+    /// inherited. The application supplies the child's input.
     /// A `None` context creates an external DTD parser, or a value parser when
     /// resolving a reference inside an entity value. DTD children immediately share
-    /// committed declarations, including declarations preceding an error; value children share
-    /// an owned output channel with the suspended declaration. Every child must
-    /// be processed before requesting the parent's next event.
+    /// committed declarations, including declarations preceding an error. Value
+    /// children append their output to the suspended declaration. Process each
+    /// child before requesting the parent's next event.
     pub fn external_child(
         &self,
         context: Option<&str>,
@@ -1235,10 +1239,9 @@ impl Parser {
         )?))
     }
 
-    /// Bound inherited copies before allocating a child, including work for empty
-    /// declarations. Repeated empty external references must not repeatedly clone
-    /// an otherwise unused large declaration environment for free.
-    /// Charge only copies that a general-content child will actually perform.
+    /// Charge the DTD copies needed by a general-content child before allocating.
+    /// Include empty declarations so repeated empty external references cannot
+    /// bypass the work limit while copying large DTDs.
     fn charge_dtd_snapshot(&self, tables: &DtdTables) -> Result<(), Error> {
         for entity in tables.parameter_entities.values() {
             if entity.value.is_none() && entity.system_id.is_none() {
@@ -1552,8 +1555,8 @@ impl Parser {
         ));
     }
 
-    /// Retain original input before decoding. The outer allocation error is a
-    /// context-publication failure; the inner result retains ordinary feed errors.
+    /// Retain original input before decoding. The outer result reports allocation
+    /// failures while retaining that input; the inner result reports feed errors.
     #[doc(hidden)]
     pub fn feed_with_input_context(
         &mut self,
@@ -1831,9 +1834,8 @@ impl Parser {
 
     /// Return an owned event and a token for an adapter that returns its storage.
     ///
-    /// Ordinary [`Self::next_event`] consumers keep the existing owned-event API.
-    /// The token is allocation-free, cannot be cloned, and identifies this parser
-    /// generation without retaining a parser reference across a callback.
+    /// The token requires no allocation, cannot be cloned, and identifies this
+    /// parser generation without borrowing the parser.
     #[doc(hidden)]
     #[inline(always)]
     pub fn next_event_for_recycling(&mut self) -> Result<Option<(Event, RecyclingToken)>, Error> {
@@ -1862,10 +1864,9 @@ impl Parser {
     /// The token rejects accidental returns to another parser, including a reset
     /// parser at the same address. The adapter must return the original buffers:
     /// substituting foreign storage can violate allocator routing and accounting.
-    /// This is a host contract, not a security boundary against malicious Rust
-    /// code, which can also change resource limits. Every allocation retains its
-    /// original allocator regardless. Rejected or oversized storage is dropped.
-    /// This operation never allocates and retains at most 64 KiB of capacities.
+    /// The token does not verify buffer identity. Each allocation retains its
+    /// original allocator, and rejected or oversized storage is dropped.
+    /// This operation never allocates and retains at most 64 KiB of capacity.
     #[doc(hidden)]
     pub fn recycle_attributes(&mut self, token: RecyclingToken, attributes: Vec<Attribute>) {
         self.event_recycling.recycle(token, attributes);
@@ -1925,9 +1926,10 @@ impl Parser {
         self.next_event_for_adapter_mode_into(event, frame, false)
     }
 
-    /// Fill detached slots for a C host retaining the original input context.
-    /// Native Text frames contain scalar ranges; the host must validate them
-    /// against its stable context and never call the ordinary byte projection.
+    /// Fill event and frame slots for a C adapter that retains the original input.
+    /// Native text frames contain byte offsets into that input. The adapter must
+    /// validate those offsets and read the input directly; calling
+    /// [`AdapterFrame::text_bytes`] on these frames panics.
     #[doc(hidden)]
     pub fn next_event_for_c_text_context_into(
         &mut self,

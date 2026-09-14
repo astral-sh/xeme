@@ -1252,6 +1252,12 @@ impl Source {
         (self.raw_index + self.raw_len(0, count)).saturating_sub(self.accounted_raw)
     }
 
+    /// A native token starts exactly where the previous source charge ended.
+    #[inline]
+    pub(crate) fn accounted_to_cursor(&self) -> bool {
+        self.accounted_raw == self.raw_index
+    }
+
     pub(crate) fn unaccounted_prefix(&self, raw_bytes: usize) -> usize {
         raw_bytes.saturating_sub(self.accounted_raw)
     }
@@ -1283,7 +1289,7 @@ impl Source {
                     .bytes()
                     .all(|byte| byte.is_ascii() && !matches!(byte, b'\r' | b'\n'))
         );
-        self.raw_index += self.raw_len(0, count);
+        self.raw_index += count;
         self.column += count;
         self.previous_cr = false;
         self.finish_consume(count);
@@ -1292,7 +1298,7 @@ impl Source {
     /// Commit native text whose scanner already computed the eager position delta.
     pub(crate) fn consume_text(&mut self, plan: crate::text::TextPlan) {
         debug_assert!(self.native_utf8_byte_index().is_some() && !self.has_conversions());
-        self.raw_index += self.raw_len(0, plan.end);
+        self.raw_index += plan.end;
         plan.advance_position(&mut self.line, &mut self.column, &mut self.previous_cr);
         self.finish_consume(plan.end);
     }

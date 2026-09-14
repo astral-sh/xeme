@@ -4,12 +4,12 @@
 //! Thirty-two control bytes precede separately owned p/q input slices.
 //! A marked payload adds declaration-grammar templates without changing old controls.
 
-use std::cell::Cell;
 use std::ffi::{c_char, c_int, c_void};
 use std::ptr;
 
 use libfuzzer_sys::fuzz_target;
 use xeme_expat::*;
+use xeme_fuzz::allocator::{CALLS, FAIL_AT, LIVE, SUITE};
 
 const GRAMMAR_MARKER: &[u8] = b"XEME-DTD-GRAMMAR\0";
 
@@ -27,57 +27,6 @@ fn grammar_document(selector: u8) -> &'static [u8] {
         9 => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ENTITY e 'FIRST'><!ENTITY e %missing;%p; 'L%q;R' %missing;><!ENTITY after 'A'>",
         10 => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ENTITY % e PUBLIC ' public id ' %p; 's'><!ENTITY after 'A'>",
         _ => b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!NOTATION n SYSTEM 's' %p;><!ENTITY after 'A'>",
-    }
-}
-
-unsafe extern "C" {
-    fn malloc(size: usize) -> *mut c_void;
-    fn realloc(pointer: *mut c_void, size: usize) -> *mut c_void;
-    fn free(pointer: *mut c_void);
-}
-
-thread_local! {
-    static CALLS: Cell<usize> = const { Cell::new(0) };
-    static FAIL_AT: Cell<usize> = const { Cell::new(0) };
-    static LIVE: Cell<usize> = const { Cell::new(0) };
-}
-
-fn allocation_fails(size: usize) -> bool {
-    let call = CALLS.get() + 1;
-    CALLS.set(call);
-    call == FAIL_AT.get() || size > 8 * 1024 * 1024
-}
-
-unsafe extern "C" fn allocate(size: usize) -> *mut c_void {
-    if allocation_fails(size) {
-        return ptr::null_mut();
-    }
-    let pointer = unsafe { malloc(size.max(1)) };
-    if !pointer.is_null() {
-        LIVE.set(LIVE.get() + 1);
-    }
-    pointer
-}
-
-unsafe extern "C" fn reallocate(pointer: *mut c_void, size: usize) -> *mut c_void {
-    if allocation_fails(size) {
-        return ptr::null_mut();
-    }
-    let replacement = unsafe { realloc(pointer, size.max(1)) };
-    if pointer.is_null() && !replacement.is_null() {
-        LIVE.set(LIVE.get() + 1);
-    }
-    replacement
-}
-
-unsafe extern "C" fn deallocate(pointer: *mut c_void) {
-    if !pointer.is_null() {
-        LIVE.set(
-            LIVE.get()
-                .checked_sub(1)
-                .expect("unowned custom allocation"),
-        );
-        unsafe { free(pointer) };
     }
 }
 
@@ -680,11 +629,6 @@ fuzz_target!(|data: &[u8]| {
         used: 1,
         requests: 0,
     };
-    let suite = XML_Memory_Handling_Suite {
-        malloc_fcn: Some(allocate),
-        realloc_fcn: Some(reallocate),
-        free_fcn: Some(deallocate),
-    };
     let family_pointer = ptr::from_mut(&mut family);
     for state in &mut family.states {
         state.family = family_pointer;
@@ -692,7 +636,7 @@ fuzz_target!(|data: &[u8]| {
     unsafe {
         family.states[0].parser = XML_ParserCreate_MM(
             ptr::null(),
-            &suite,
+            &SUITE,
             if data[0] & 32 != 0 {
                 c"|".as_ptr()
             } else {

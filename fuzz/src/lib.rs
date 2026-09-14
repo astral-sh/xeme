@@ -1,4 +1,6 @@
-//! Shared, directly testable control decoding for fuzz harnesses.
+//! Shared support for fuzz harnesses.
+
+pub mod allocator;
 
 /// Decode an optional failure at any of the first 512 allocator requests.
 /// Bit zero enables failure; the next nine bits select an independent ordinal.

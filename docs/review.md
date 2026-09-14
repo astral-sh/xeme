@@ -30,9 +30,15 @@ CI runs the pinned API, allocation-behavior, W3C and differential suites through
 against the assertion baseline and verifies that every expected test ran.
 All adapted allocation tests and ownership checks must pass.
 
-Start with the workspace tests, formatting, and Clippy commands in
-[contributing](../CONTRIBUTING.md). Choose additional checks for the affected
-behavior:
+Start with the workspace checks:
+
+```console
+cargo test --workspace
+cargo clippy --workspace --all-targets -- -D warnings
+cargo fmt --all --check
+```
+
+Choose additional checks for the affected behavior:
 
 | Change | Checks |
 | --- | --- |
@@ -47,9 +53,6 @@ regression tests. Exact callback fragmentation and diagnostic positions matter t
 some consumers even when acceptance and coalesced text agree. The
 [compatibility guide](compatibility.md) describes known differences and resource
 limits.
-
-See [contributing](../CONTRIBUTING.md#review-and-performance) for performance
-comparison requirements.
 
 The [test reports](evidence/README.md) link raw results and their checksums.
 Include the tested revision with benchmark results.

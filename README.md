@@ -7,7 +7,11 @@ A streaming XML parser written in Rust, with an Expat-compatible C API.
 > documentation were authored entirely by GPT-6 Astra in [Codex](https://openai.com/codex/).
 > Use at your own risk.
 
-## Performance
+## Highlights
+
+- Parse XML incrementally, with namespaces, encodings, entities, and DTD attribute defaults.
+- Check XML and inspect parser events from the command line.
+- Embed the safe Rust parser or use the Expat-compatible C interface.
 
 | Project XML | Xeme | Expat | Xeme / Expat |
 | --- | ---: | ---: | ---: |
@@ -56,12 +60,11 @@ xeme --events --namespaces --chunk-size 4096 message.xml
 ```
 
 See the [command-line guide](docs/usage.md), the [Rust library guide](docs/library.md),
-or the [Expat interface](crates/xeme_expat/) for embedding and callback lifetimes.
+or the [Expat interface](crates/xeme_expat/) for embedding and callback contracts.
 The parser performs no filesystem or network I/O; applications supply input and
 resolve external entities. The CLI does not fetch external resources.
 
-See [contributing](CONTRIBUTING.md) for development and acceptance criteria, and the
-[review guide](docs/review.md) for implementation and test entry points.
+See the [review guide](docs/review.md) for implementation and test entry points.
 
 ## License
 

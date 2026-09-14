@@ -116,4 +116,18 @@ The Python event API is separate from `xml.parsers.expat`'s callback API and is
 not a drop-in replacement. The [C interface](../xeme_expat/) and
 [CPython consumer harness](../../tools/cpython/) cover existing Expat consumers.
 
-See [contributing](../../CONTRIBUTING.md#python-bindings) for build and test commands.
+## Development
+
+From the repository root, reinstall after changing Rust code, then run the tests:
+
+```console
+uv pip install --reinstall .
+uv run --no-sync python -m unittest discover -s crates/xeme_python/tests -v
+```
+
+Build distribution packages with:
+
+```console
+uv build --wheel --out-dir dist
+uv build --sdist --out-dir dist
+```

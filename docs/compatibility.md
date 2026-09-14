@@ -184,4 +184,4 @@ in each consumer, validate packaging on each target platform, run longer fuzz
 campaigns, and obtain independent review. The performance goal is within roughly
 20% of Expat on representative project XML through both C and CPython. Report
 every workload and measure against inputs that were not used for tuning.
-See [benchmarking](../benchmarks/HILLCLIMB.md) and [acceptance](../CONTRIBUTING.md#review-and-performance).
+See the [benchmark guide](../benchmarks/HILLCLIMB.md) for measurement instructions.

@@ -93,8 +93,7 @@ XML extensions against Xeme and runs their upstream tests. See the
 | [`xeme_cli`](../crates/xeme_cli) | Command-line XML checker |
 | [`xeme_python`](../crates/xeme_python) | Python event API and extension package |
 
-See [contributing](../CONTRIBUTING.md) for development commands and acceptance
-criteria, [fuzzing](../fuzz/README.md) for the adversarial harnesses, and the
-[review guide](review.md) for implementation and test entry points.
+See [fuzzing](../fuzz/README.md) for the adversarial harnesses and the
+[review guide](review.md) for development commands and implementation entry points.
 
 [Test reports](evidence/README.md) include the tested revisions and library hashes.

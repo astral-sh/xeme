@@ -123,6 +123,9 @@ fn collect(input: &[u8], width: usize, mode: Mode, pause: bool) -> Vec<Delivery>
 #[test]
 fn native_delivery_keeps_each_callback_and_resume_position() {
     let documents = [
+        "<r>&amp;&lt;&gt;&apos;&quot;&#9;&#10;&#13;&#x80;&#x10FFFF;tail</r>",
+        "<r>&#000000000000000000000065;&amp;&#xD800;</r>",
+        "<r>&amp;&#x41;&#0;</r>",
         "<r>alpha\tbeta\n\nlast\r\nline\rtail</r>",
         "\u{feff}<r>one\n<n/>two&amp;three\n<![CDATA[four\nfive]]>six</r>",
         "<r>valid\ninvalid]]></r>",

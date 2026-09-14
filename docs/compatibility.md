@@ -1,12 +1,9 @@
-# Compatibility and release gates
+# Compatibility
 
 Xeme is experimental. CPython consumer checks use pinned CPython 3.12.13 sources.
-General production substitution requires broader platform,
-consumer and adversarial validation. Exact callback fragmentation and some error
-positions differ from Expat.
+Some callback boundaries and error positions differ from Expat.
 
-This document defines current contracts. [Evidence](evidence/README.md) records
-which source each measurement or qualification actually tested.
+[Test reports](evidence/README.md) record results for specific revisions.
 
 ## Interface scope
 
@@ -18,10 +15,8 @@ which source each measurement or qualification actually tested.
   Namespace separators must be ASCII.
 - Applications supply external resources. The parser performs no filesystem or
   network I/O. External-entity policy belongs to the embedding application.
-- [C callback contracts](../crates/xeme_expat/README.md) define pointer lifetimes,
-  custom encodings and remaining unsupported behavior. A normalized callback
-  comparison does not establish compatibility for consumers that depend on text
-  fragmentation or exact positions.
+- The [C interface guide](../crates/xeme_expat/README.md) describes pointer
+  lifetimes, custom encodings and unsupported behavior.
 
 ## Known semantic differences
 
@@ -35,12 +30,12 @@ encoding unless an explicit higher-level encoding override applies.
 `Config::allow_utf8_bom_encoding_mismatch` defaults to `false`; the C adapter
 explicitly enables this legacy compatibility option.
 
-The pinned CPython consumer needs the explicit [allocation-cleanup backport](../tools/cpython/consumer-fix/README.md).
-It changes consumer ownership handling and is separate from callback fragmentation.
+The pinned CPython consumer needs the
+[allocation-cleanup backport](../tools/cpython/consumer-fix/README.md).
 
 ## Streaming resource limits
 
-This is the authoritative description of the fixed C resource policy.
+The C interface has these fixed limits:
 
 | Resource | C interface limit |
 | --- | --- |
@@ -52,12 +47,12 @@ This is the authoritative description of the fixed C resource policy.
 | External-child construction | 1,024 attempts (including failures), ancestry depth 32 |
 | Declared entities / internal expansion depth | 100,000 / 100,000 |
 
-Token, attribute, element-depth and entity-cycle limits also apply. Only consumed
-original root input supplies work credit. Buffered suffixes, external input and
-reset documents cannot subsidize earlier work. Children retained across root reset
-keep the original work, callback and child counters. Allocation tracking remains
-shared across reset, including its reset input denominator. Checked counters reject
-overflow.
+Token, attribute, element-depth and entity-cycle limits also apply. Work allowances
+grow with consumed root input. Buffered input, external input and input after a
+reset do not increase the allowance for earlier work. Children retained across
+root reset keep the original work, callback and child counters. Allocation
+tracking remains shared across reset, including its reset input denominator.
+Checked counters reject overflow.
 
 Expat-compatible entity and allocation amplification setters do not disable the
 fixed work policy or live allocation ceiling. Application-owned blocks requested
@@ -69,8 +64,8 @@ The Rust interface defaults to 256 MiB cumulative input, 16 MiB tokens, 256 nest
 elements, 10,000 declarations, 32 entity levels and 8 MiB cumulative work.
 `Limits.max_work_amplification` defaults to `None`; setting it explicitly enables
 relative work. Importing an unrelated DTD charges new declaration bytes and
-structure to the recipient and copies strings and retained declaration bases through its allocator. See the
-[Rust guide](library.md) for configuration.
+structure to the recipient and copies strings and retained declaration bases
+through its allocator. See the [Rust guide](library.md) for configuration.
 
 ## Native Rust conformance gate
 
@@ -109,15 +104,15 @@ gate, not DTD validation or canonical-output conformance. See the
 ## Expat compatibility regression gates
 
 CI runs four pinned regression suites through
-[`tools/compatibility.py`](../tools/compatibility.py). They retain raw failures;
-passing the regression gate means the reviewed boundary has not worsened.
+[`tools/compatibility.py`](../tools/compatibility.py). CI allows known failures
+only when they match the checked-in baseline.
 
-| Suite | Required coverage and interpretation |
+| Suite | Checks |
 | --- | --- |
 | Expat 2.8.4 API | All 395 tests in 12 configurations: 4,740 rows. Expat must pass every row. Candidate failures must match the checked-in configuration and assertion baseline. |
 | Allocation behavior | All 83 public allocation-suite tests plus the deferral-growth test in 12 configurations: 1,008 reported rows per engine. Both engines must pass the adapted tests and their ownership checks, with no failure allowance. |
-| W3C XML catalog through the C interface | All 6,003 selected rows per engine, including 81 optional observations. Bind selection, loaded bytes and namespace mode; compare acceptance and child outcomes. |
-| Differential corpus | Named fixtures plus 200 deterministic generated cases, complete worker inventory and semantic callbacks. Error codes are compared; exact text fragmentation and final positions have a separate strict mode. |
+| W3C XML catalog through the C interface | All 6,003 selected rows per engine, including 81 optional observations. Verify selected tests, loaded bytes and namespace mode; compare acceptance and child outcomes. |
+| Differential corpus | Named fixtures plus 200 deterministic generated cases. Verify every worker ran and compare callbacks and error codes; exact text fragmentation and final positions have a separate strict mode. |
 
 The API baseline retains 509 failures: 484 allocation retry/schedule assertions,
 12 literal version checks, 12 single-buffer policy checks and one deferral-growth
@@ -128,8 +123,7 @@ raises retry ceilings to 512 and adapts allocation-count assumptions while
 retaining callback, error, state-transition and cleanup checks. The deferral test
 exercises 504 size combinations in its one active configuration; its other 11
 configurations return early. Some fixtures check successful parsing without
-comparing complete event data. These adapted passes do not change the original
-509 failures or establish exhaustive allocation-failure coverage.
+comparing complete event data. The original 509 failures remain in the API baseline.
 
 Candidate tests retain three-second and 1 GiB address-space limits. Original API
 reference tests use 30 seconds and 4 GiB so their large-buffer cases can complete;
@@ -141,7 +135,7 @@ The C-interface W3C baseline retains 960 mandatory failures in both engines:
 are C-interface results; the native Rust gate independently requires Fifth
 Edition acceptance. Matching Expat does not establish conformance to that
 catalog. New failures, missing configurations, changed assertions, resolver
-failures and corpus drift reject the regression gate;
+failures and corpus changes fail CI;
 improvements are reported separately. Baseline changes require review.
 
 For a local run, use a fresh output directory and the pinned sources from CI:
@@ -161,37 +155,33 @@ python3 tools/compatibility.py differential --library /absolute/libxeme_expat.so
 
 ## CPython and distribution checks
 
-[`tools/cpython`](../tools/cpython/README.md) pins CPython 3.12.13, builds its real
+[`tools/cpython`](../tools/cpython/README.md) pins CPython 3.12.13, builds its
 `pyexpat` and `_elementtree` extensions, and verifies loaded module origins. All six
 unchanged upstream XML suites must pass. The C interface preserves line-break
 callback boundaries used by `BufferTextTest.test1` and
-`CDATAHandlerTest.test_handlers`; the [focused evidence](evidence/2026-09-13-cpython-grouping.md)
-records their resolution. The regression gate also checks pinned fixture hashes,
-the complete discovered/executed inventory and semantic checks on those inputs.
-The historical text-fragmentation allowance remains available only as an explicit
-diagnostic option; CI and installed-distribution checks accept no test failures.
-The disclosed allocation-cleanup backport remains separate from upstream tests;
+`CDATAHandlerTest.test_handlers`; the [test report](evidence/2026-09-13-cpython-grouping.md)
+records their resolution. The harness also checks pinned fixture hashes,
+the complete list of discovered and executed tests, and semantic checks on those inputs.
+The allocation-cleanup backport is separate from upstream tests;
 benchmark extensions use unmodified consumer sources.
 
 Distribution packaging requires separate validation of archive structure,
 installed parser identity, native dependencies, and the target's libc baseline
 and threaded parsing behavior. Installed XML tests and application benchmarks
-must exercise the packaged interpreter, and the XML suites must pass the same
-strict regression gate. Packaging and installed performance require their own
-evidence for each supported target.
+must exercise the packaged interpreter, and the XML suites must pass without
+exceptions. Check packaging and measure installed performance on each supported target.
 
 ## Safety and release criteria
 
 The core forbids unsafe Rust. The storage and C boundary still need careful
 ownership review, allocation-failure injection, callback reentry checks, Miri and
-sanitizers. [Fuzzing](../fuzz/README.md) includes deterministic replay, bounded
-mutation campaigns and an isolated Expat oracle; coverage and bounds must be
-reported for the exact tested source. Bounded campaigns cannot establish exhaustive
-memory safety.
+sanitizers. [Fuzzing](../fuzz/README.md) includes deterministic replay, mutation
+campaigns and an isolated Expat oracle. Report the tested revision, scope and
+duration of each run.
 
-A production decision requires consumer-specific acceptance of remaining semantic
-and resource differences, native platform and packaging evidence, sustained
-adversarial coverage, and independent review. The performance goal is roughly
-within 20% of Expat on representative project XML through both C and CPython;
-report every workload and keep the untouched holdout separate from tuning inputs.
-See [benchmarking](../benchmarks/HILLCLIMB.md) and [acceptance](../CONTRIBUTING.md#review-and-performance).
+Before a production release, test the remaining semantic and resource differences
+in each consumer, validate packaging on each target platform, run longer fuzz
+campaigns, and obtain independent review. The performance goal is within roughly
+20% of Expat on representative project XML through both C and CPython. Report
+every workload and measure against inputs that were not used for tuning.
+See the [benchmark guide](../benchmarks/HILLCLIMB.md) for measurement instructions.

@@ -1,4 +1,5 @@
-//! Per-family live allocation accounting with allocation-owned tracker lifetimes.
+//! Tracks live allocations for a root parser and its children.
+//! Each allocation retains its tracker until freed.
 
 use std::cell::Cell;
 use std::ptr;
@@ -114,8 +115,7 @@ impl Drop for Restore {
 
 /// Select the tracker for new allocations made by trackable allocators in a closure.
 /// Existing allocations always retain their original tracker on resize and free.
-/// The closure-based API enforces nested lifetimes; an exposed guard could be
-/// dropped out of order and restore a pointer to an expired previous scope.
+/// Restores the previous tracker when the closure returns or unwinds.
 pub fn with_tracking<R>(tracker: &Shared<AllocationTracker>, operation: impl FnOnce() -> R) -> R {
     let previous = CURRENT.with(|current| current.replace(ptr::from_ref(tracker)));
     let _restore = Restore(previous);

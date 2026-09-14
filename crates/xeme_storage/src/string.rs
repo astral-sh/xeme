@@ -245,9 +245,8 @@ impl fmt::Debug for CString {
 
 /// Immutable UTF-8 character data with inline storage for short values.
 ///
-/// Heap values keep the selected allocator. Inline values allocate no memory and
-/// expose no growth operation; copying them never needs an allocator. Pointers
-/// into an inline value remain valid only while that value remains in place.
+/// Heap values keep the selected allocator. Copying an inline value requires no
+/// allocation. Pointers into an inline value are invalidated when it moves.
 pub struct Text {
     buffer: TextBuffer,
 }

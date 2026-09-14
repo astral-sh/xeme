@@ -1,8 +1,8 @@
 # Rust library
 
 Xeme provides incremental XML parsing with owned events. The parser core forbids
-unsafe Rust and has no XML parser dependency. It performs no filesystem or network
-I/O; applications provide input and resolve external entities themselves.
+unsafe Rust. Applications provide input and resolve external entities; the parser
+performs no filesystem or network I/O.
 
 ## Parse incrementally
 
@@ -56,10 +56,9 @@ attributes, entity declarations, and entity expansion. Defaults allow 256 MiB of
 input, 16 MiB tokens, 256 nested elements, and 8 MiB of entity expansion.
 Applications should choose limits suited to their inputs.
 
-Incremental token scanning retains its progress across chunks to avoid repeatedly
-scanning a growing unfinished token. Internal entity replacement must remain
-balanced and is bounded separately from document input. The C interface also
-bounds aggregate allocation and work across a parser's external-entity family.
+Internal entity replacement must remain balanced and is bounded separately from
+document input. The C interface also limits total allocation and work across a
+parser and its external-entity children.
 Library crates leave global allocator selection to the embedding application.
 
 See [XML denial-of-service protections](security.md) for entity-expansion and
@@ -94,9 +93,7 @@ XML extensions against Xeme and runs their upstream tests. See the
 | [`xeme_cli`](../crates/xeme_cli) | Command-line XML checker |
 | [`xeme_python`](../crates/xeme_python) | Python event API and extension package |
 
-See [contributing](../CONTRIBUTING.md) for development commands and acceptance
-criteria, [fuzzing](../fuzz/README.md) for the adversarial harnesses, and the
-[review guide](review.md) for implementation and test entry points.
+See [fuzzing](../fuzz/README.md) for the adversarial harnesses and the
+[review guide](review.md) for development commands and implementation entry points.
 
-[Validation evidence](evidence/README.md) identifies the runtime and installed
-artifact each report tested; earlier results do not qualify later changes.
+[Test reports](evidence/README.md) include the tested revisions and library hashes.

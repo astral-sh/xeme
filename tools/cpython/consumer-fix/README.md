@@ -1,22 +1,21 @@
 # CPython external parser cleanup
 
-This directory backports CPython's existing fix for allocation failures in
-`pyexpat.ExternalEntityParserCreate` to the pinned CPython 3.12.13 source.
+This directory backports CPython's fix for allocation failures in
+`pyexpat.ExternalEntityParserCreate` to CPython 3.12.13.
 The original cleanup can dereference an uninitialized handler array and decrement
 the parent parser's reference count twice. The same failure occurs when using
-reference Expat; this is a consumer ownership bug.
+reference Expat.
 
 The patch comes from [CPython PR #144992](https://github.com/python/cpython/pull/144992),
 commit `e6b9a1406980fbb1d4032eca9cc0b4f8f252b716`, which fixes
-[issue #144984](https://github.com/python/cpython/issues/144984). It carries over only
-the `Modules/pyexpat.c` change, preserving CPython's existing tests. The patch is
+[issue #144984](https://github.com/python/cpython/issues/144984). It includes only
+the `Modules/pyexpat.c` change. The patch is
 derived from CPython under its [license](https://github.com/python/cpython/blob/e6b9a1406980fbb1d4032eca9cc0b4f8f252b716/LICENSE).
 `provenance.json` records the original, patched-source, and patch hashes.
 
 ## Consumer tests
 
-The regular CPython harness leaves the consumer source unchanged by default.
-Enable the backport explicitly:
+Enable the backport in the CPython harness with `--consumer-fix`:
 
 ```shell
 python3 tools/cpython/run.py \
@@ -27,8 +26,7 @@ python3 tools/cpython/run.py \
 ```
 
 The harness verifies the pinned source and patch hashes, applies the patch without
-fuzzy matching to a temporary copy, and verifies the resulting source hash. Results
-identify the consumer adaptation separately from Xeme's library hash.
+fuzzy matching to a temporary copy, and verifies the resulting source hash.
 
 ## Fault injection
 
@@ -46,12 +44,10 @@ python3 tools/cpython/consumer-fix/run.py \
   --output /absolute/fault-probe
 ```
 
-The probe checks that the original consumers crash during cleanup and the fixed
-consumers raise `MemoryError` while preserving the parent reference count. The
-probe retains extra parent references and exits without interpreter teardown
-after reporting, so a
-refcount mismatch cannot cause an unrelated shutdown failure. Original crashes
-remain recorded as crashes in the manifest.
+The probe checks that the original extensions crash during cleanup and the fixed
+extensions raise `MemoryError` while preserving the parent reference count. It
+retains extra parent references and skips interpreter teardown after reporting,
+so a refcount mismatch cannot cause a second crash during shutdown.
 
 This probe isolates NULL-parser cleanup. It does not inject the separate
 Python-side buffer or handler-array allocation failures. The backport fixes all

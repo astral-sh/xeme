@@ -1,11 +1,13 @@
 # Run the real-project benchmarks
 
-For baseline/candidate/Expat comparisons and repeatable optimization work, use the
-[performance iteration guide](../HILLCLIMB.md). These commands expose the underlying
-two-engine runners; `--baseline` optionally adds a third engine to the native
-runner and matched consumer builder.
+For baseline/candidate/Expat comparisons, use the [performance iteration
+guide](../HILLCLIMB.md). The commands below compare two libraries; `--baseline`
+optionally adds a third library to the native runner and matched consumer builder.
 
-Run these Linux commands from the repository root, with absolute paths to the candidate and reference shared libraries. Keep the corpus, executables and source unchanged during measurement. Reserve one CPU for timing; use a new output directory for every run.
+Run these Linux commands from the repository root, with absolute paths to the
+candidate and reference shared libraries. Keep the corpus, executables and
+source unchanged during measurement. Reserve one CPU for timing and use a new
+output directory for every run.
 
 ```console
 taskset -c 0 python3 benchmarks/projects.py \
@@ -20,7 +22,10 @@ The default runs seven randomized pairs, twenty parses after a discarded warmup,
 
 ## Python consumers
 
-Use a CPython 3.12.13 interpreter and its unmodified source checkout at commit `3bb231a6a5dc02b95658877318bf61501a7209e9`. The builder compiles matched extensions and records source, command, binary and library hashes. The worker loads these extensions explicitly and checks the resolved parser library before measuring.
+Use CPython 3.12.13 and its unmodified source at commit
+`3bb231a6a5dc02b95658877318bf61501a7209e9`. The builder records source, command,
+binary and library hashes. The worker loads the built extensions and checks the
+resolved parser library before measuring.
 
 ```console
 python3.12 benchmarks/build_project_consumers.py \

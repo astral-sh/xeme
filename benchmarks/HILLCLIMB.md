@@ -1,31 +1,29 @@
 # Improve parser performance
 
-Use `hillclimb.py` for new optimization work on **x86-64 Linux**. It compares the
-candidate, its baseline and Expat in each randomized round, using the existing
+Use `hillclimb.py` to compare parser changes on **x86-64 Linux**. It compares the
+candidate, its baseline and Expat in each randomized round, using the
 native C callback driver and unmodified CPython consumers. It does not use PGO or
 change allocators.
 
 The **tuning corpus** is the six pinned, original XML files in
 [projects/corpus-manifest.json](projects/corpus-manifest.json). Native conditions
 cover namespaces on/off and 4/64 KiB feeds; Python covers ElementTree and pyexpat at
-both feed sizes. The native and combined Python campaigns each have **24 real
+both feed sizes. The native and combined Python runs each have **24 real
 conditions**. Four deterministic inputs from `tools/corpus.py` add **16 separate
 native generated conditions**. Use the same iteration count per consumer for
 baseline and candidate runs. Historical studies used other iteration schedules
 and generated subsets, so compare each study separately.
 
-These six files have informed optimization decisions. Repeating them tests
-repeatability, not unseen performance. The [first holdout](holdout/README.md) was
-evaluated after code selection on 2026-09-13 and is now a regression corpus.
-Future independent evaluations need newly reserved inputs; the final-evaluation
-protocol below explains how to preserve that boundary.
+Both the tuning corpus and the [first holdout](holdout/README.md), evaluated on
+2026-09-13, have known results. Use them for regression testing; an independent
+evaluation needs new inputs reserved until after candidate selection.
 
 ## 1. Freeze the baseline and candidate
 
 Prerequisites: Rust 1.96 or later, Cargo, Python, uv, a C compiler, CMake, Git,
 `taskset` and `readelf`. Run from the repository root. Keep one stable Cargo target
-directory per worktree. Choose a new
-study directory; build and measurement commands refuse to overwrite existing outputs.
+directory per worktree and a new study directory. Commands refuse to overwrite
+existing outputs.
 
 ```sh
 benchmark_root="$PWD/../xeme-bench"
@@ -41,35 +39,31 @@ python3 -I -S benchmarks/hillclimb.py build \
   --output "$study/candidate"
 ```
 
-The builder uses the checkout's configured Rust toolchain, ordinary O3, ThinLTO,
+The builder uses the checkout's configured Rust toolchain, O3, ThinLTO,
 one codegen unit and generic x86-64. Set `--toolchain stable`, or another rustup
 toolchain name, to choose one explicitly. Local Ohm users must pass
 `--toolchain ohm`; this adds `+ohm -Zohm-defaults=no` to Cargo commands. Ohm is
 optional and is not required for CI or reproduction.
 
-The build explicitly targets `x86_64-unknown-linux-gnu` and selects only the C
-library crate types so ThinLTO takes effect. It freezes the exact shared library
-named in Cargo's fresh `compiler-artifact` message, verifying its source,
-manifest and target path. An old library at `target/release` cannot satisfy this
-check. Each output retains compiler/source hashes, verbose compiler commands in
+The build targets `x86_64-unknown-linux-gnu` and selects only the C library crate
+types so ThinLTO takes effect. It copies the shared library named in Cargo's
+`compiler-artifact` message after verifying its source, manifest and target path.
+Each output retains compiler/source hashes, verbose compiler commands in
 `build.log`, and Cargo's emitted artifact records in `cargo-messages.jsonl`.
 Build both revisions with the same compiler.
 
-Controlled benchmark builds use a **fresh `output/intermediates` directory** for
-the subprocess's `CARGO_BUILD_BUILD_DIR`, while keeping each worktree's stable
-target directory. This prevents reuse of artifacts from a different checkout.
-The builder requires actual compiler records for the storage, parser
-and C interface from the requested checkout, writing into the fresh directory,
-before accepting the library. This override applies only to these benchmark
-builds; the normal development shared cache and environment remain unchanged.
+Benchmark builds set `CARGO_BUILD_BUILD_DIR` to a fresh `output/intermediates`
+directory to prevent reuse of artifacts from a different checkout. The builder
+requires compiler records for the storage, parser and C interface crates from
+the requested checkout, writing into this directory. The override is local to
+the build subprocess; each worktree keeps its stable target directory.
 Commit the candidate before publishing results so others can recover
 its exact source; hashes also identify uncommitted experiments.
 
 ## 2. Build the pinned Expat control once
 
-Keep this normal GCC O3 build unchanged across candidates. Expat uses its own
-normal build configuration, without LTO; Xeme's recipe is the one above. Use the
-same GCC version throughout a study and retain its version and CMake cache.
+Build Expat with GCC O3 and without LTO. Keep the build and GCC version unchanged
+across candidates, and retain the compiler version and CMake cache.
 
 ```sh
 git clone https://github.com/libexpat/libexpat.git "$benchmark_root/expat-source"
@@ -105,8 +99,8 @@ python3 -I -S benchmarks/hillclimb.py run --mode screen --cpu 0 \
 ```
 
 A screen uses three rounds and three measured parses per process after a discarded
-warmup. It covers every condition; it is a quick rejection signal, not evidence
-for a small improvement. Every parser must pass the same complete normalized
+warmup. It covers every condition and can reject a poor candidate; small gains
+need confirmation. Every parser must pass the same complete normalized
 callback checks, and every timed parse must match its expected output hash.
 Both Xeme build records must report success and match their supplied library
 SHA-256; failed, stale or swapped records stop the run. Python targets use isolated
@@ -115,7 +109,7 @@ overrides (`LD_PRELOAD`, `LD_LIBRARY_PATH` and `LD_AUDIT`).
 
 ## 4. Confirm through CPython too
 
-Use CPython **3.12.13** and its **unmodified** pinned source. Consumer compilation
+Use CPython **3.12.13** and its unmodified pinned source. Consumer compilation
 uses the same O2 flags for all three libraries. Do this before starting timings.
 
 ```sh
@@ -144,15 +138,15 @@ python3 -I -S benchmarks/hillclimb.py run --mode confirm --cpu 0 \
 Confirmation uses seven rounds, twenty native parses and ten Python parses per
 process, each after one discarded warmup. Use `--native-iterations 100` and
 `--python-iterations 50`, for example, to increase sample work for small gains.
-Keep these settings identical across confirmation epochs; actual counts are
-recorded. The Python workers verify the loaded
-extensions and parser library, and compare complete canonical trees/event lists.
+Keep these settings identical across confirmation runs; counts are recorded.
+The Python workers verify the loaded extensions and parser library, and compare
+complete canonical trees/event lists.
 Adjacent character callbacks are coalesced for these output comparisons; strict
 callback grouping remains a separate compatibility test.
 
 Repeat the last command later with `--output "$study/confirmation-2"`, retaining
-both epochs separately; do not pool their samples or medians. A native-only confirmation omits `--consumers`; it makes
-no Python performance claim. `--mode screen` also accepts `--consumers`.
+both runs separately; do not pool their samples or medians. Omit `--consumers`
+for a native-only confirmation. `--mode screen` also accepts `--consumers`.
 
 ## Read the results
 
@@ -164,30 +158,29 @@ no Python performance claim. `--mode screen` also accepts `--consumers`.
   enter either real aggregate. Every slower-than-baseline condition is listed.
 - The existing runners retain raw samples, canonical output hashes, process order,
   library/input hashes, and failure logs under each group's directory. A failed
-  subprocess or incomplete result stops the campaign; earlier files remain.
+  subprocess or incomplete result stops the run; earlier files remain.
 
 Prefer an improvement that repeats in both real aggregates without substantial
 individual regressions. Our Expat target is at most **1.20×** on each real aggregate;
-meeting that target does not waive individual or generated outliers. Keep source,
-build settings and corpus fixed between confirmation epochs. Benchmark success does
-not replace compatibility, allocation, sanitizer or callback-lifetime review.
+also review individual and generated outliers. Keep source, build settings and
+corpus fixed between confirmation runs. Run compatibility, allocation, sanitizer
+and callback-lifetime checks separately.
 
 For lower-level controls and complete Wayland code generation, see
 [projects/RERUN.md](projects/RERUN.md).
 
-## Final evaluation on unseen projects
+## Holdout evaluation
 
-The first holdout contains original pinned LibreOffice, .NET, Hadoop, Qt and
-MuseScore files, selected independently by document role before parsing or
-timing. They are different projects from the tuning corpus. Their input bytes,
-licenses, acquisition records and pre-measurement freeze are in
-[`holdout/`](holdout/README.md). No performance result was used to select them.
-Its [first results](../docs/evidence/2026-09-13-review.md#performance) are now public;
-repeating this command measures a known regression corpus, not unseen performance.
+The first holdout contains LibreOffice, .NET, Hadoop, Qt and MuseScore files,
+selected by document role before parsing or timing. Its [provenance
+records](holdout/README.md) and [first
+results](../docs/evidence/2026-09-13-review.md#performance) are retained.
 
-First finish candidate selection and correctness review using the tuning corpus.
-Freeze the selected source/libraries and write a short decision note identifying
-that choice and why it was selected. Then, before any holdout parser execution:
+The command below reproduces that evaluation protocol on the now-known corpus.
+For an unseen evaluation, first finish candidate selection and correctness review
+using the tuning corpus. Freeze the selected source and libraries, and write a
+short decision note identifying the choice and its rationale before parsing the
+reserved inputs.
 
 ```sh
 python3 -I -S benchmarks/hillclimb.py verify-holdout
@@ -212,7 +205,5 @@ selection note and frozen source/library records are retained with their hashes.
 Keep every failure and adverse condition. Do not replace an input after seeing
 its result, or pool these measurements with the tuning aggregate.
 
-Evaluate this corpus only after the implementation choice has been made. Once
-results are observed, it becomes a regression corpus, not an unseen holdout for
-further optimization. The tool records the decision but cannot enforce this
-research discipline. A later independent claim needs newly reserved inputs.
+The tool records the selection note; it cannot establish whether results were
+already known when the candidate was chosen.

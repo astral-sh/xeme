@@ -1,21 +1,20 @@
 # Benchmarks
 
-Start with the [performance iteration guide](HILLCLIMB.md). Its `hillclimb.py`
-entrypoint freezes ordinary builds and compares baseline, candidate and Expat in
-matched rounds, with separate real-project and generated summaries.
+Use [hillclimb.py](HILLCLIMB.md) to build and compare a baseline, candidate and
+Expat in matched rounds. It reports project and generated inputs separately.
 
 ## Corpus selection
 
-The six original project files are a tuning set: repeated optimization has used
-them. The [2026-09-13 pre-rebase evaluation](../docs/evidence/2026-09-13-review.md#performance)
+The six project files are a tuning set used for repeated optimization.
+The [2026-09-13 pre-rebase evaluation](../docs/evidence/2026-09-13-review.md#performance)
 tested runtime `ec4d068`: 1.1906× Expat's native time and 1.0489× its CPython time
 on that set. Five independently selected projects instead reported **1.7867×
 native and 1.2158× CPython**, missing the 1.20× goal. Most of that gap already
 existed in the measured baseline.
 
-The [five-project holdout](holdout/README.md) is now observed. Keep every condition
-and report it separately as a regression corpus; a new independent evaluation
-needs new inputs. These historical results do not measure later revisions.
+The [five-project holdout](holdout/README.md) is now a regression corpus. Report
+all its conditions separately; a new independent evaluation needs new inputs.
+These historical results do not measure later revisions.
 [Checksummed archives](../docs/evidence/README.md) retain the full raw evidence.
 
 ## Running benchmarks
@@ -87,7 +86,7 @@ candidate build for an optimization. Both runners accept repeated
 `--build-manifest` arguments and retain copies and hashes with their results.
 Manifests should identify source hashes, the compiler, build commands, features,
 and the resulting executable hashes. Build before measuring and keep source and
-executables unchanged throughout each campaign.
+executables unchanged throughout the comparison.
 
 `dtd_workload.py` generates separate declaration-only and repeated-element inputs
 with 128–1,024 declared attributes. It exercises attribute type and ID lookup while
@@ -122,11 +121,15 @@ mode. Positions and Default callbacks remain separate compatibility checks.
 
 ## Real-project inputs and consumers
 
-The [pinned corpus](projects/README.md) contains original XML from Vulkan, Wayland, Maven, Batik, GTK and DocBook. The runners compare native callbacks, matched CPython consumers and complete Wayland code-generation commands, validating all outputs before reporting timings. See the [reproduction commands](projects/RERUN.md).
+The [pinned corpus](projects/README.md) contains XML from Vulkan, Wayland, Maven,
+Batik, GTK and DocBook. The runners compare native callbacks, CPython consumers
+built against each library, and complete Wayland code-generation commands. They
+validate outputs before reporting timings. See the
+[reproduction commands](projects/RERUN.md).
 
 ## Historical profile-guided builds
 
-PGO is no longer an optimization workstream.
+Current comparisons do not use PGO.
 
 The optional [PGO workflow](../tools/pgo/) builds an instrumented library, trains on
 a fixed generated corpus, and rebuilds with a fresh profile. It preserves runtime

@@ -29,7 +29,7 @@ status. Files whose names start with `-` can follow `--`.
 
 | Option | Behavior |
 | --- | --- |
-| `--events` | Print the owned parser events |
+| `--events` | Print parser events |
 | `--namespaces` | Expand namespace names with `\|` as the separator |
 | `--chunk-size BYTES` | Read at most this many bytes per chunk; defaults to 65,536, with a range of 1–16,777,216 |
 | `--help` | Print command-line help |

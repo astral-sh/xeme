@@ -64,8 +64,7 @@ or the [Expat interface](crates/xeme_expat/) for embedding and callback contract
 The parser performs no filesystem or network I/O; applications supply input and
 resolve external entities. The CLI does not fetch external resources.
 
-See [contributing](CONTRIBUTING.md) for development and acceptance criteria, and the
-[review guide](docs/review.md) for implementation and test entry points.
+See the [review guide](docs/review.md) for implementation and test entry points.
 
 ## License
 

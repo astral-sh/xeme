@@ -21,13 +21,10 @@ A streaming XML parser written in Rust, with an Expat-compatible C API.
 | MuseScore | 9.795 ms | 6.425 ms | 1.523× |
 | Qt translations | 6.630 ms | 2.133 ms | 3.018× |
 
-The native Rust parser passes all 5,922 mandatory checks in the pinned
-[W3C XML 1.0 Fifth Edition acceptance gate](docs/compatibility.md#native-rust-conformance-gate),
-which also records 81 optional observations.
-
-Xeme passes the six [CPython 3.12.13 XML test suites](docs/evidence/2026-09-13-cpython-grouping.md)
-with both shared and static libraries. See [compatibility](docs/compatibility.md) for
-known differences from Expat and the XML specification.
+Xeme passes the [W3C XML 1.0 Fifth Edition conformance suite](docs/compatibility.md#native-rust-conformance-gate)
+and all six [CPython 3.12.13 XML test suites](docs/evidence/2026-09-13-cpython-grouping.md)
+with both shared and static libraries. See [compatibility](docs/compatibility.md)
+for known differences from Expat and the XML specification.
 
 ## Installation
 

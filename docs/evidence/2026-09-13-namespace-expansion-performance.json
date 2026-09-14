@@ -1,0 +1,1774 @@
+{
+  "schema_version": 1,
+  "title": "Resolve namespace frames once and append attribute names directly",
+  "source": {
+    "runtime": "ad5e08a3aeda572760dd6ef7a9d402b60880897c",
+    "base": "1957281e1422c9669ac9f7a68d350dab491eae85",
+    "library_sha256": {
+      "libexpat.so.1.12.4": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+      "libxeme_expat.a": "c7e94c6c605a1b7df35dc6e22afdb0e54a6661988fe97e5b4637e8348f133fc3",
+      "libxeme_expat.so": "645109ab7d42bf189bd6d929e0144ce6b7e58f357357545ea93b298d10ac08a0"
+    },
+    "baseline_library_sha256": "b364ffc5164f2057a1f339508e7be135ad6f6a74be9f1e347466b7586359cbf9",
+    "compiler": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+    "target": "x86_64-unknown-linux-gnu",
+    "rustflags": "-Ctarget-cpu=x86-64",
+    "pre_documentation_head": "ad5e08a3aeda572760dd6ef7a9d402b60880897c",
+    "committed_paths_changed_since_runtime": [],
+    "logical_label": "namespaces",
+    "physical_folder": "namespace-outlined",
+    "build_checkout": "/home/dev-user/code/oss/xeme-perf-namespace-outlined",
+    "source_manifest_sha256": "021f53749413e9445c8d077400bc33e0bb7d0fb930a6351e097b80a1b3f5e433",
+    "changed_source_sha256": {
+      "crates/xeme/src/arena.rs": "deb8b8a0ccdfdf171faf5d2931e10fb6d5c0ca5fae59cb9c6162fdf6af8a9594",
+      "crates/xeme/src/lib.rs": "d4d73b0ec85dd77827cb9bc1f395dbdc3f8add5944ab048f9083d29bac7bdb6f",
+      "crates/xeme/src/namespace.rs": "f1df3c8a990d69cb3a9ff77bd2cb581b5c5b2339a9f1d418520984aedefb5b38",
+      "crates/xeme/tests/adapter_frame.rs": "ddfab72f44bf2a5adfa13c57c0b8a3ddd86a4bebfb5a4fd86e4cf2c3a4b3a881",
+      "crates/xeme/tests/allocation.rs": "f9b2e90640eb6ff8d757d212082392712f22f99dc84af2d407461532d9c3d4a6"
+    }
+  },
+  "method": "Two separate epochs each use seven matched rounds, randomizing candidate/base/Expat order within each condition. Each native process contributes 20 measured parses and each CPython process 10, after one discarded warmup. A condition ratio is the median of seven paired process-median ratios; aggregate rows are geometric means of those condition ratios. Epochs are reported separately. Ratios are candidate/base or candidate/Expat elapsed time; lower is faster. Runs use CPU affinity 6, 4,096/65,536-byte feeds, native namespaces off/on, and CPython pyexpat/ElementTree modes. Each epoch has 60 native and 44 Python conditions: six tuning projects, five previously observed holdout projects, and four generated native controls. Python generated controls were not measured. Seeds are 20260910 and 20260911.",
+  "limitations": "The holdout has already been inspected and is an observed regression corpus, with no unseen-input claim. Generated controls remain separate from project aggregates. Every adverse condition is retained; a ratio above 1 is an observation, not a significance finding. The shared-host study does not establish confidence intervals, cross-machine performance, or a general parser-speed guarantee. Native timing includes parser creation, handler setup, feeds, native callback hashing, and free; file/library loading and process startup are excluded. Python timing includes parser and Python result creation/destruction with GC enabled, while imports, input loading, explicit collection, and canonical output checks are excluded. These parser/consumer workloads do not execute complete project builds, rendering, transformations, or external DTD/entity resolution. Python extension compilation uses identical O2 without PGO/LTO; explicit result destruction follows untimed validation and therefore has warmer cache lines than some production lifetimes. Full callback preflights and every measured sample are checked; all input/library hashes remain unchanged within each report. Callgrind and allocator counts were collected separately and are mechanism evidence, not elapsed-time estimates.",
+  "aggregates": [
+    {
+      "epoch": 1,
+      "consumer": "native",
+      "corpus": "tuning",
+      "conditions": 24,
+      "candidate_base": 1.0002577641599768,
+      "candidate_expat": 1.1736092035034704,
+      "base_expat": 1.175471697126921
+    },
+    {
+      "epoch": 1,
+      "consumer": "native",
+      "corpus": "observed-holdout",
+      "conditions": 20,
+      "candidate_base": 0.9843536854119986,
+      "candidate_expat": 1.4078191285230837,
+      "base_expat": 1.4303225269022763
+    },
+    {
+      "epoch": 1,
+      "consumer": "native",
+      "corpus": "generated",
+      "conditions": 16,
+      "candidate_base": 0.9779934618293404,
+      "candidate_expat": 1.6450594381957127,
+      "base_expat": 1.675975332002258
+    },
+    {
+      "epoch": 1,
+      "consumer": "python",
+      "corpus": "tuning",
+      "conditions": 24,
+      "candidate_base": 1.0033800572933265,
+      "candidate_expat": 1.1545490259409565,
+      "base_expat": 1.1518607859291663
+    },
+    {
+      "epoch": 1,
+      "consumer": "python",
+      "corpus": "observed-holdout",
+      "conditions": 20,
+      "candidate_base": 0.9936526408519246,
+      "candidate_expat": 1.1761968192055858,
+      "base_expat": 1.1837880822307916
+    },
+    {
+      "epoch": 2,
+      "consumer": "native",
+      "corpus": "tuning",
+      "conditions": 24,
+      "candidate_base": 0.9992039235757408,
+      "candidate_expat": 1.1748309333177223,
+      "base_expat": 1.1744103638989396
+    },
+    {
+      "epoch": 2,
+      "consumer": "native",
+      "corpus": "observed-holdout",
+      "conditions": 20,
+      "candidate_base": 0.9894326849414642,
+      "candidate_expat": 1.4060817687227745,
+      "base_expat": 1.4196104272222045
+    },
+    {
+      "epoch": 2,
+      "consumer": "native",
+      "corpus": "generated",
+      "conditions": 16,
+      "candidate_base": 0.9821242258501043,
+      "candidate_expat": 1.6615714696072523,
+      "base_expat": 1.6892528452136413
+    },
+    {
+      "epoch": 2,
+      "consumer": "python",
+      "corpus": "tuning",
+      "conditions": 24,
+      "candidate_base": 0.9985219608737659,
+      "candidate_expat": 1.153834381199183,
+      "base_expat": 1.1527370781995994
+    },
+    {
+      "epoch": 2,
+      "consumer": "python",
+      "corpus": "observed-holdout",
+      "conditions": 20,
+      "candidate_base": 0.9950826444266703,
+      "candidate_expat": 1.1736927788359863,
+      "base_expat": 1.1799033882061678
+    }
+  ],
+  "targeted_metrics": [
+    {
+      "epoch": 1,
+      "consumer": "native",
+      "project": "namespaces",
+      "mode": "namespaces-1",
+      "conditions": 2,
+      "candidate_base": 0.8966556961121528,
+      "candidate_expat": 1.9094887009051442,
+      "base_expat": 2.139111100137321
+    },
+    {
+      "epoch": 2,
+      "consumer": "native",
+      "project": "namespaces",
+      "mode": "namespaces-1",
+      "conditions": 2,
+      "candidate_base": 0.9116881674058634,
+      "candidate_expat": 1.9352076031666483,
+      "base_expat": 2.1104262820382274
+    },
+    {
+      "epoch": 1,
+      "consumer": "native",
+      "project": "libreoffice",
+      "mode": "namespaces-1",
+      "conditions": 2,
+      "candidate_base": 0.9367503059564112,
+      "candidate_expat": 1.4741507367677054,
+      "base_expat": 1.5752922941662655
+    },
+    {
+      "epoch": 2,
+      "consumer": "native",
+      "project": "libreoffice",
+      "mode": "namespaces-1",
+      "conditions": 2,
+      "candidate_base": 0.9380996405960028,
+      "candidate_expat": 1.4653631800370384,
+      "base_expat": 1.5585845910000171
+    },
+    {
+      "epoch": 1,
+      "consumer": "python",
+      "project": "libreoffice",
+      "mode": "all",
+      "conditions": 4,
+      "candidate_base": 0.9723772920958701,
+      "candidate_expat": 1.2246594877840373,
+      "base_expat": 1.2592499044824867
+    },
+    {
+      "epoch": 2,
+      "consumer": "python",
+      "project": "libreoffice",
+      "mode": "all",
+      "conditions": 4,
+      "candidate_base": 0.975090093074621,
+      "candidate_expat": 1.2260335184138513,
+      "base_expat": 1.2572192965279423
+    }
+  ],
+  "regressions": {
+    "epochs": {
+      "1": {
+        "conditions": 104,
+        "slower": 44
+      },
+      "2": {
+        "conditions": 104,
+        "slower": 39
+      }
+    },
+    "groups": [
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "corpus": "tuning",
+        "conditions": 24,
+        "slower": 11
+      },
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "slower": 4
+      },
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "corpus": "generated",
+        "conditions": 16,
+        "slower": 7
+      },
+      {
+        "epoch": 1,
+        "consumer": "python",
+        "corpus": "tuning",
+        "conditions": 24,
+        "slower": 15
+      },
+      {
+        "epoch": 1,
+        "consumer": "python",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "slower": 7
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "corpus": "tuning",
+        "conditions": 24,
+        "slower": 10
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "slower": 6
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "corpus": "generated",
+        "conditions": 16,
+        "slower": 7
+      },
+      {
+        "epoch": 2,
+        "consumer": "python",
+        "corpus": "tuning",
+        "conditions": 24,
+        "slower": 10
+      },
+      {
+        "epoch": 2,
+        "consumer": "python",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "slower": 6
+      }
+    ],
+    "repeat_count": 30,
+    "top_repeat": [
+      {
+        "condition": "native/maven/4096/namespaces-1",
+        "epoch_1_candidate_base": 1.0308907820414648,
+        "epoch_2_candidate_base": 1.0383015093985353
+      },
+      {
+        "condition": "native/maven/65536/namespaces-1",
+        "epoch_1_candidate_base": 1.020436379882214,
+        "epoch_2_candidate_base": 1.0352580636583613
+      },
+      {
+        "condition": "native/batik/4096/namespaces-0",
+        "epoch_1_candidate_base": 1.0174104364832428,
+        "epoch_2_candidate_base": 1.0248991245451597
+      },
+      {
+        "condition": "python/maven/4096/elementtree",
+        "epoch_1_candidate_base": 1.0172218181703383,
+        "epoch_2_candidate_base": 1.0307949913801506
+      },
+      {
+        "condition": "native/namespaces/65536/namespaces-0",
+        "epoch_1_candidate_base": 1.0229886730604116,
+        "epoch_2_candidate_base": 1.0170501347201015
+      }
+    ]
+  },
+  "workspace": {
+    "checks": {
+      "default": {
+        "passed": 538,
+        "failed": 0,
+        "suites": 38,
+        "exit_code_recorded": true,
+        "exit_code": 0,
+        "command": [
+          "cargo",
+          "+ohm",
+          "test",
+          "--locked",
+          "--workspace"
+        ],
+        "archive_member": "performance-followup/namespace-outlined/validation/selected-default.log",
+        "sha256": "77d023eb10d61498ecab71cb8423afc996f4dc570386e6df797a08b3e6a7f788"
+      },
+      "no-default": {
+        "passed": 538,
+        "failed": 0,
+        "suites": 38,
+        "exit_code_recorded": true,
+        "exit_code": 0,
+        "command": [
+          "cargo",
+          "+ohm",
+          "test",
+          "--locked",
+          "--workspace",
+          "--no-default-features"
+        ],
+        "archive_member": "performance-followup/namespace-outlined/validation/selected-no-default.log",
+        "sha256": "729037256517f30333850e1e91d050793318529d3a69fcf8bfdd972968bb7c96"
+      },
+      "clippy": {
+        "passed": true,
+        "exit_code_recorded": true,
+        "exit_code": 0,
+        "command": [
+          "cargo",
+          "+ohm",
+          "clippy",
+          "--locked",
+          "--workspace",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "archive_member": "performance-followup/namespace-outlined/validation/selected-clippy.log",
+        "sha256": "533e00e5f64198de0c677a09d86381c84b5148614ecd17050a7cfa3957b2230a"
+      },
+      "format": {
+        "passed": true,
+        "exit_code_recorded": true,
+        "exit_code": 0,
+        "command": [
+          "cargo",
+          "+ohm",
+          "fmt",
+          "--all",
+          "--check"
+        ],
+        "archive_member": "performance-followup/namespace-outlined/validation/selected-fmt.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "command_receipt": {
+      "archive_member": "performance-followup/namespace-outlined/validation/summary.json",
+      "sha256": "a9d5ae9e11f76ceae7cb6460b82d0433ad9c58ed629db15f103a39ce31f7216f"
+    }
+  },
+  "compatibility": {
+    "passed": true,
+    "source_and_libraries_unchanged": true,
+    "api": {
+      "xeme": {
+        "passed": true,
+        "configurations": 4740,
+        "known_failures": 495,
+        "improvement_count": 14,
+        "regression_count": 0
+      },
+      "reference": {
+        "passed": true,
+        "configurations": 4740,
+        "known_failures": 0,
+        "improvement_count": 0,
+        "regression_count": 0
+      }
+    },
+    "allocation": {
+      "xeme": {
+        "passed": true,
+        "configurations": 1008,
+        "known_failures": 0,
+        "regressions": [],
+        "ownership_reports": 1008,
+        "totals": {
+          "injected_malloc_failures": 23888,
+          "injected_realloc_failures": 1637,
+          "live_blocks": 0,
+          "system_failures": 0
+        }
+      },
+      "reference": {
+        "passed": true,
+        "configurations": 1008,
+        "known_failures": 0,
+        "regressions": [],
+        "ownership_reports": 1008,
+        "totals": {
+          "injected_malloc_failures": 10915,
+          "injected_realloc_failures": 934,
+          "live_blocks": 0,
+          "system_failures": 0
+        }
+      }
+    },
+    "w3c": {
+      "passed": true,
+      "rows_per_engine": 6003,
+      "conformance_failures": {
+        "reference": 960,
+        "xeme": 960
+      },
+      "differences": [],
+      "improvements": {
+        "reference": [],
+        "xeme": []
+      }
+    },
+    "differential": {
+      "status": "passed",
+      "cases": 2730,
+      "seed": 20260910,
+      "semantic_pass": true,
+      "exact_pass": false,
+      "difference_counts": {
+        "status": 0,
+        "error": 0,
+        "normalized_events": 0,
+        "events": 8,
+        "position": 84,
+        "callback_errors": 0
+      }
+    },
+    "cpython": {
+      "cpython-shared": {
+        "linkage": "shared",
+        "consumer_adaptation": null,
+        "probe_exit_code": 0,
+        "origin_exit_code": 0,
+        "tests_exit_code": 0,
+        "gate_exit_code": 0,
+        "inventory_case_count": 803,
+        "inventory_complete": true,
+        "semantic_exit_code": 0,
+        "accepted_upstream_failures": false,
+        "totals": [
+          "Total tests: run=802 skipped=14",
+          "Total test files: run=6/6"
+        ]
+      },
+      "cpython-shared-consumer-fix": {
+        "linkage": "shared",
+        "consumer_adaptation": "CPython upstream allocation-failure fix",
+        "probe_exit_code": 0,
+        "origin_exit_code": 0,
+        "tests_exit_code": 0,
+        "gate_exit_code": 0,
+        "inventory_case_count": 803,
+        "inventory_complete": true,
+        "semantic_exit_code": 0,
+        "accepted_upstream_failures": false,
+        "totals": [
+          "Total tests: run=802 skipped=14",
+          "Total test files: run=6/6"
+        ]
+      },
+      "cpython-static": {
+        "linkage": "static",
+        "consumer_adaptation": null,
+        "probe_exit_code": 0,
+        "origin_exit_code": 0,
+        "tests_exit_code": 0,
+        "gate_exit_code": 0,
+        "inventory_case_count": 803,
+        "inventory_complete": true,
+        "semantic_exit_code": 0,
+        "accepted_upstream_failures": false,
+        "totals": [
+          "Total tests: run=802 skipped=14",
+          "Total test files: run=6/6"
+        ]
+      },
+      "cpython-static-consumer-fix": {
+        "linkage": "static",
+        "consumer_adaptation": "CPython upstream allocation-failure fix",
+        "probe_exit_code": 0,
+        "origin_exit_code": 0,
+        "tests_exit_code": 0,
+        "gate_exit_code": 0,
+        "inventory_case_count": 803,
+        "inventory_complete": true,
+        "semantic_exit_code": 0,
+        "accepted_upstream_failures": false,
+        "totals": [
+          "Total tests: run=802 skipped=14",
+          "Total test files: run=6/6"
+        ]
+      }
+    },
+    "cleanup_fault": {
+      "shared": [
+        {
+          "kind": "original",
+          "exit_code": -11,
+          "timed_out": false,
+          "matches_expected_failure_or_recovery": true
+        },
+        {
+          "kind": "fixed",
+          "exit_code": 0,
+          "timed_out": false,
+          "matches_expected_failure_or_recovery": true
+        }
+      ],
+      "static": [
+        {
+          "kind": "original",
+          "exit_code": -11,
+          "timed_out": false,
+          "matches_expected_failure_or_recovery": true
+        },
+        {
+          "kind": "fixed",
+          "exit_code": 0,
+          "timed_out": false,
+          "matches_expected_failure_or_recovery": true
+        }
+      ]
+    }
+  },
+  "mechanism": {
+    "input": "Generated namespaces, namespaces on, 4,096-byte feeds",
+    "method": "Callgrind Ir counts over parser create/feed/native callbacks/free for four parses, including warmup. Profiling ran separately from elapsed-time benchmarks. Instruction counts include native callback hashing; they are not elapsed-time estimates. Callback signatures match baseline/candidate.",
+    "result": {
+      "label": "namespaces",
+      "instructions": {
+        "baseline": 337362195,
+        "candidate": 290471057
+      },
+      "callbacks": {
+        "baseline": {
+          "hash": "10d8f1f796d0a0a7",
+          "elements": 10001,
+          "text_bytes": 50000
+        },
+        "candidate": {
+          "hash": "10d8f1f796d0a0a7",
+          "elements": 10001,
+          "text_bytes": 50000
+        }
+      },
+      "candidate_over_baseline": 0.8610065422416403
+    },
+    "artifact": {
+      "archive_member": "performance-followup/namespace-outlined/profiles/summary.json",
+      "sha256": "cde6611c41a27343639899bdf1e6c9256d41f5bc1113837d162dae0da826d589"
+    },
+    "allocation_counts": {
+      "method": "One parse per fresh process through XML_ParserCreate_MM with the existing repository allocation_tracker. Derived native driver preserves callback hashing and parse boundaries; all clock calls removed. Counts include parser creation, all feeds, callbacks and teardown. File loading and diagnostic tracker metadata allocations are outside the supplied parser allocator.",
+      "limitations": "Injected allocator counts are independent mechanism evidence, not elapsed-time measurements or process-wide memory usage. They do not detect allocations that bypass the supplied allocator; the separate Rust allocation-failure tests cover that contract. Peak bytes measure supplied-allocator live requested bytes, not RSS. Generated namespace workload only.",
+      "rows": [
+        {
+          "label": "baseline",
+          "chunk": 4096,
+          "namespaces": false,
+          "callbacks": {
+            "iteration": 0,
+            "hash": "9602c557c2a1990b",
+            "elements": 10001,
+            "text_bytes": 50000
+          },
+          "allocation_counts": {
+            "malloc_calls": 178,
+            "realloc_calls": 83,
+            "free_calls": 178,
+            "injected_malloc_failures": 0,
+            "injected_realloc_failures": 0,
+            "system_failures": 0,
+            "live_blocks": 0,
+            "peak_live_blocks": 18,
+            "peak_live_bytes": 16287
+          }
+        },
+        {
+          "label": "candidate",
+          "chunk": 4096,
+          "namespaces": false,
+          "callbacks": {
+            "iteration": 0,
+            "hash": "9602c557c2a1990b",
+            "elements": 10001,
+            "text_bytes": 50000
+          },
+          "allocation_counts": {
+            "malloc_calls": 178,
+            "realloc_calls": 83,
+            "free_calls": 178,
+            "injected_malloc_failures": 0,
+            "injected_realloc_failures": 0,
+            "system_failures": 0,
+            "live_blocks": 0,
+            "peak_live_blocks": 18,
+            "peak_live_bytes": 16287
+          }
+        },
+        {
+          "label": "expat",
+          "chunk": 4096,
+          "namespaces": false,
+          "callbacks": {
+            "iteration": 0,
+            "hash": "9602c557c2a1990b",
+            "elements": 10001,
+            "text_bytes": 50000
+          },
+          "allocation_counts": {
+            "malloc_calls": 18,
+            "realloc_calls": 0,
+            "free_calls": 18,
+            "injected_malloc_failures": 0,
+            "injected_realloc_failures": 0,
+            "system_failures": 0,
+            "live_blocks": 0,
+            "peak_live_blocks": 18,
+            "peak_live_bytes": 19000
+          }
+        },
+        {
+          "label": "baseline",
+          "chunk": 4096,
+          "namespaces": true,
+          "callbacks": {
+            "iteration": 0,
+            "hash": "10d8f1f796d0a0a7",
+            "elements": 10001,
+            "text_bytes": 50000
+          },
+          "allocation_counts": {
+            "malloc_calls": 10190,
+            "realloc_calls": 164,
+            "free_calls": 10190,
+            "injected_malloc_failures": 0,
+            "injected_realloc_failures": 0,
+            "system_failures": 0,
+            "live_blocks": 0,
+            "peak_live_blocks": 27,
+            "peak_live_bytes": 17968
+          }
+        },
+        {
+          "label": "candidate",
+          "chunk": 4096,
+          "namespaces": true,
+          "callbacks": {
+            "iteration": 0,
+            "hash": "10d8f1f796d0a0a7",
+            "elements": 10001,
+            "text_bytes": 50000
+          },
+          "allocation_counts": {
+            "malloc_calls": 190,
+            "realloc_calls": 164,
+            "free_calls": 190,
+            "injected_malloc_failures": 0,
+            "injected_realloc_failures": 0,
+            "system_failures": 0,
+            "live_blocks": 0,
+            "peak_live_blocks": 26,
+            "peak_live_bytes": 17908
+          }
+        },
+        {
+          "label": "expat",
+          "chunk": 4096,
+          "namespaces": true,
+          "callbacks": {
+            "iteration": 0,
+            "hash": "10d8f1f796d0a0a7",
+            "elements": 10001,
+            "text_bytes": 50000
+          },
+          "allocation_counts": {
+            "malloc_calls": 26,
+            "realloc_calls": 0,
+            "free_calls": 26,
+            "injected_malloc_failures": 0,
+            "injected_realloc_failures": 0,
+            "system_failures": 0,
+            "live_blocks": 0,
+            "peak_live_blocks": 26,
+            "peak_live_bytes": 20006
+          }
+        },
+        {
+          "label": "baseline",
+          "chunk": 65536,
+          "namespaces": false,
+          "callbacks": {
+            "iteration": 0,
+            "hash": "9602c557c2a1990b",
+            "elements": 10001,
+            "text_bytes": 50000
+          },
+          "allocation_counts": {
+            "malloc_calls": 28,
+            "realloc_calls": 8,
+            "free_calls": 28,
+            "injected_malloc_failures": 0,
+            "injected_realloc_failures": 0,
+            "system_failures": 0,
+            "live_blocks": 0,
+            "peak_live_blocks": 18,
+            "peak_live_bytes": 139167
+          }
+        },
+        {
+          "label": "candidate",
+          "chunk": 65536,
+          "namespaces": false,
+          "callbacks": {
+            "iteration": 0,
+            "hash": "9602c557c2a1990b",
+            "elements": 10001,
+            "text_bytes": 50000
+          },
+          "allocation_counts": {
+            "malloc_calls": 28,
+            "realloc_calls": 8,
+            "free_calls": 28,
+            "injected_malloc_failures": 0,
+            "injected_realloc_failures": 0,
+            "system_failures": 0,
+            "live_blocks": 0,
+            "peak_live_blocks": 18,
+            "peak_live_bytes": 139167
+          }
+        },
+        {
+          "label": "expat",
+          "chunk": 65536,
+          "namespaces": false,
+          "callbacks": {
+            "iteration": 0,
+            "hash": "9602c557c2a1990b",
+            "elements": 10001,
+            "text_bytes": 50000
+          },
+          "allocation_counts": {
+            "malloc_calls": 18,
+            "realloc_calls": 0,
+            "free_calls": 18,
+            "injected_malloc_failures": 0,
+            "injected_realloc_failures": 0,
+            "system_failures": 0,
+            "live_blocks": 0,
+            "peak_live_blocks": 18,
+            "peak_live_bytes": 203320
+          }
+        },
+        {
+          "label": "baseline",
+          "chunk": 65536,
+          "namespaces": true,
+          "callbacks": {
+            "iteration": 0,
+            "hash": "10d8f1f796d0a0a7",
+            "elements": 10001,
+            "text_bytes": 50000
+          },
+          "allocation_counts": {
+            "malloc_calls": 10040,
+            "realloc_calls": 14,
+            "free_calls": 10040,
+            "injected_malloc_failures": 0,
+            "injected_realloc_failures": 0,
+            "system_failures": 0,
+            "live_blocks": 0,
+            "peak_live_blocks": 27,
+            "peak_live_bytes": 140848
+          }
+        },
+        {
+          "label": "candidate",
+          "chunk": 65536,
+          "namespaces": true,
+          "callbacks": {
+            "iteration": 0,
+            "hash": "10d8f1f796d0a0a7",
+            "elements": 10001,
+            "text_bytes": 50000
+          },
+          "allocation_counts": {
+            "malloc_calls": 40,
+            "realloc_calls": 14,
+            "free_calls": 40,
+            "injected_malloc_failures": 0,
+            "injected_realloc_failures": 0,
+            "system_failures": 0,
+            "live_blocks": 0,
+            "peak_live_blocks": 26,
+            "peak_live_bytes": 140788
+          }
+        },
+        {
+          "label": "expat",
+          "chunk": 65536,
+          "namespaces": true,
+          "callbacks": {
+            "iteration": 0,
+            "hash": "10d8f1f796d0a0a7",
+            "elements": 10001,
+            "text_bytes": 50000
+          },
+          "allocation_counts": {
+            "malloc_calls": 26,
+            "realloc_calls": 0,
+            "free_calls": 26,
+            "injected_malloc_failures": 0,
+            "injected_realloc_failures": 0,
+            "system_failures": 0,
+            "live_blocks": 0,
+            "peak_live_blocks": 26,
+            "peak_live_bytes": 204326
+          }
+        }
+      ],
+      "artifact": {
+        "archive_member": "performance-followup/namespace-outlined/allocation-counts/summary.json",
+        "sha256": "de4db8b3ed6017f6f49c11ff69238550993e777f18b31a3e18ec18db2b08e9fa"
+      }
+    }
+  },
+  "ci": {
+    "pr": 247,
+    "pr_url": "https://github.com/astral-sh/xeme/pull/247",
+    "passed_head": "ad5e08a3aeda572760dd6ef7a9d402b60880897c",
+    "passed_checks": 18,
+    "skipped_checks": 1,
+    "skipped_check": "Profile-guided library",
+    "workflow_runs": [
+      "https://github.com/astral-sh/xeme/actions/runs/34789412553"
+    ],
+    "checks": [
+      {
+        "name": "Test (ubuntu-24.04, stable)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740563"
+      },
+      {
+        "name": "Test (ubuntu-24.04-arm, stable)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740543"
+      },
+      {
+        "name": "Test (windows-latest, stable)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740582"
+      },
+      {
+        "name": "Test (macos-15, stable)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740561"
+      },
+      {
+        "name": "Test (ubuntu-24.04, 1.96.0)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740574"
+      },
+      {
+        "name": "lint",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740550"
+      },
+      {
+        "name": "Compatibility regression (api)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740542"
+      },
+      {
+        "name": "Compatibility regression (allocation)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740605"
+      },
+      {
+        "name": "Compatibility regression (w3c)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740549"
+      },
+      {
+        "name": "Compatibility regression (differential)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740635"
+      },
+      {
+        "name": "Allocator ownership (stacked)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740523"
+      },
+      {
+        "name": "Allocator ownership (tree)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740588"
+      },
+      {
+        "name": "C callback aliasing (stacked)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740567"
+      },
+      {
+        "name": "C callback aliasing (tree)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740429"
+      },
+      {
+        "name": "C ABI and callback safety",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740654"
+      },
+      {
+        "name": "Sanitized parser fuzz smoke",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740530"
+      },
+      {
+        "name": "CPython XML consumers (shared)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740607"
+      },
+      {
+        "name": "CPython XML consumers (static)",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810740577"
+      },
+      {
+        "name": "Profile-guided library",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/astral-sh/xeme/actions/runs/34789412553/job/103810741345"
+      }
+    ],
+    "artifacts": {
+      "summary": {
+        "archive_member": "performance-followup/ci/summary.json",
+        "sha256": "aa5ff7cc2f235a7a87291e610451fe72c42fcbc82f6c84904a7e29bff74aa3b8"
+      },
+      "report": {
+        "archive_member": "performance-followup/ci/report.md",
+        "sha256": "2c0a21ad6ccad4e7f8965af553de409344279f4e10b88627cd1773d8ff46cb89"
+      },
+      "raw_status": {
+        "archive_member": "performance-followup/ci/namespace-outlined/snapshot-20260913T233719Z.json",
+        "sha256": "5287da3e00b495bc2b0791ecc81c5392fa632550f572b9be9eb0e766adaf2341"
+      }
+    },
+    "scope": "This exact pre-documentation PR head passed CI; measured runtime and later documentation heads are distinct identities.",
+    "paths_changed_since_measured_runtime": [],
+    "post_runtime_changes": []
+  },
+  "selection": {
+    "mapping": {
+      "events": "events",
+      "references": "references",
+      "namespaces": "namespace-outlined",
+      "empty": "empty",
+      "comments": "comments",
+      "combined": "combined-outlined"
+    },
+    "artifact": {
+      "archive_member": "performance-followup/selection-map.json",
+      "sha256": "8583fab0318c51061187baaa408eacea6f677bd550361fb8c23adb3db7ad4da1"
+    }
+  },
+  "combined_integration": {
+    "source": {
+      "runtime": "61c8c6d1784b92180436370e55b74050410dde74",
+      "base": "1957281e1422c9669ac9f7a68d350dab491eae85",
+      "library_sha256": {
+        "libexpat.so.1.12.4": "7a333bc8ac92ff53b8fc1ecc68711802e7c5781f52d3d0592a6f0ee362d9f478",
+        "libxeme_expat.a": "92da32720e7652269958197b6bfad355f9a1968f260194492824f29e581024f0",
+        "libxeme_expat.so": "4368b068b03071287d291dfe51716cf859f5ab2c3857debc2546c0297f9cce2c"
+      },
+      "baseline_library_sha256": "b364ffc5164f2057a1f339508e7be135ad6f6a74be9f1e347466b7586359cbf9",
+      "compiler": "rustc 1.98.1-dev (f62703110 2026-09-08) (ohm-1.98.1-1)\nbinary: rustc\ncommit-hash: f6270311094cd4b48fefce03debdffcf8396c64c\ncommit-date: 2026-09-08\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1-dev\nLLVM version: 22.1.8\n",
+      "target": "x86_64-unknown-linux-gnu",
+      "rustflags": "-Ctarget-cpu=x86-64",
+      "pre_documentation_head": "61c8c6d1784b92180436370e55b74050410dde74",
+      "committed_paths_changed_since_runtime": [],
+      "logical_label": "combined",
+      "physical_folder": "combined-outlined",
+      "build_checkout": "/home/dev-user/code/oss/xeme-perf-combined-outlined",
+      "source_manifest_sha256": "dc55c23381060d5968c1e1ec67fd12cbbd99462dbdf66958011052b1835a0fb8",
+      "changed_source_sha256": {
+        "crates/xeme/src/arena.rs": "deb8b8a0ccdfdf171faf5d2931e10fb6d5c0ca5fae59cb9c6162fdf6af8a9594",
+        "crates/xeme/src/context_text_tests.rs": "e550fecbf987a7e4d89cbb163fc7ce55b34064498e06dee61da5336512412b07",
+        "crates/xeme/src/encoding.rs": "f642760cf5cb4b77d545fce0266e496d10cc67f10ae078ae10e57542cbbc85b0",
+        "crates/xeme/src/lib.rs": "6a3564573b87de8e88b23a76108afbb93f177cefb7414308de50dbe231087f1e",
+        "crates/xeme/src/namespace.rs": "f1df3c8a990d69cb3a9ff77bd2cb581b5c5b2339a9f1d418520984aedefb5b38",
+        "crates/xeme/src/reference.rs": "6a13353bbe14b434b5d80294c6ec9f14d302ec5ad371a30cc294638935eedf42",
+        "crates/xeme/tests/adapter_frame.rs": "7908042398a68fefe004449dfdfd99d289b417db54306ba4044c16537933c9f5",
+        "crates/xeme/tests/allocation.rs": "f9b2e90640eb6ff8d757d212082392712f22f99dc84af2d407461532d9c3d4a6",
+        "crates/xeme/tests/event_output.rs": "247c0f28188f57c0b60e50e0b5b1a4d3cc214020459b5b92502d026ef5b4e94e",
+        "crates/xeme/tests/native_text_delivery.rs": "72851852010a254e493189be2589ad17a0c381772c3828f17d2753178abf5d6d",
+        "crates/xeme_expat/src/context_text_tests.rs": "445b30595f7af25829843b1e22b4889fa435bd0833f5550c05cd8347e71bfc29",
+        "crates/xeme_expat/src/lib.rs": "d748c22cc8271f65eed333e3fac89539832a5fdf3e895bad740e998f909df02d",
+        "crates/xeme_expat/src/tag_stop_tests.rs": "837aa360394dc178227f3cee46e4ffa6a8f3b5b66af17877f40eca47fcabf336",
+        "crates/xeme_expat/tests/memory.rs": "f83b93a41ee5dbf766752f7673116d74a6123ba8b789fef4c12bacd8b31c140e"
+      }
+    },
+    "workspace": {
+      "checks": {
+        "default": {
+          "passed": 551,
+          "failed": 0,
+          "suites": 38,
+          "exit_code_recorded": true,
+          "exit_code": 0,
+          "command": [
+            "cargo",
+            "+ohm",
+            "test",
+            "--workspace",
+            "--locked"
+          ],
+          "archive_member": "performance-followup/combined-outlined/validation/workspace.log",
+          "sha256": "69e77bb531ded8b854e92aa146c32251aec42be9c4338661797d7bd3cee8c480"
+        },
+        "no-default": {
+          "passed": 551,
+          "failed": 0,
+          "suites": 38,
+          "exit_code_recorded": true,
+          "exit_code": 0,
+          "command": [
+            "cargo",
+            "+ohm",
+            "test",
+            "--workspace",
+            "--locked",
+            "--no-default-features"
+          ],
+          "archive_member": "performance-followup/combined-outlined/validation/no-default.log",
+          "sha256": "3ba9a6389fff964dd0e89d2148577b97c334ccef31e9c4bce05348d0046720d2"
+        },
+        "clippy": {
+          "passed": true,
+          "exit_code_recorded": true,
+          "exit_code": 0,
+          "command": [
+            "cargo",
+            "+ohm",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "archive_member": "performance-followup/combined-outlined/validation/clippy.log",
+          "sha256": "25a4dab74db4215c1a51c8fdec54898af56d0ec13088e079e5a2ff2c0b91b824"
+        },
+        "format": {
+          "passed": true,
+          "exit_code_recorded": true,
+          "exit_code": 0,
+          "command": [
+            "cargo",
+            "+ohm",
+            "fmt",
+            "--all",
+            "--check"
+          ],
+          "archive_member": "performance-followup/combined-outlined/validation/format.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "command_receipt": {
+        "archive_member": "performance-followup/combined-outlined/validation/summary.json",
+        "sha256": "146497ce95806f74da1d3f3e4ce95e8852c13c66c44ed93ee831e7e8905db442"
+      }
+    },
+    "compatibility": {
+      "passed": true,
+      "source_and_libraries_unchanged": true,
+      "api": {
+        "xeme": {
+          "passed": true,
+          "configurations": 4740,
+          "known_failures": 495,
+          "improvement_count": 14,
+          "regression_count": 0
+        },
+        "reference": {
+          "passed": true,
+          "configurations": 4740,
+          "known_failures": 0,
+          "improvement_count": 0,
+          "regression_count": 0
+        }
+      },
+      "allocation": {
+        "xeme": {
+          "passed": true,
+          "configurations": 1008,
+          "known_failures": 0,
+          "regressions": [],
+          "ownership_reports": 1008,
+          "totals": {
+            "injected_malloc_failures": 23768,
+            "injected_realloc_failures": 1625,
+            "live_blocks": 0,
+            "system_failures": 0
+          }
+        },
+        "reference": {
+          "passed": true,
+          "configurations": 1008,
+          "known_failures": 0,
+          "regressions": [],
+          "ownership_reports": 1008,
+          "totals": {
+            "injected_malloc_failures": 10918,
+            "injected_realloc_failures": 934,
+            "live_blocks": 0,
+            "system_failures": 0
+          }
+        }
+      },
+      "w3c": {
+        "passed": true,
+        "rows_per_engine": 6003,
+        "conformance_failures": {
+          "reference": 960,
+          "xeme": 960
+        },
+        "differences": [],
+        "improvements": {
+          "reference": [],
+          "xeme": []
+        }
+      },
+      "differential": {
+        "status": "passed",
+        "cases": 2730,
+        "seed": 20260910,
+        "semantic_pass": true,
+        "exact_pass": false,
+        "difference_counts": {
+          "status": 0,
+          "error": 0,
+          "normalized_events": 0,
+          "events": 8,
+          "position": 84,
+          "callback_errors": 0
+        }
+      },
+      "cpython": {
+        "cpython-shared": {
+          "linkage": "shared",
+          "consumer_adaptation": null,
+          "probe_exit_code": 0,
+          "origin_exit_code": 0,
+          "tests_exit_code": 0,
+          "gate_exit_code": 0,
+          "inventory_case_count": 803,
+          "inventory_complete": true,
+          "semantic_exit_code": 0,
+          "accepted_upstream_failures": false,
+          "totals": [
+            "Total tests: run=802 skipped=14",
+            "Total test files: run=6/6"
+          ]
+        },
+        "cpython-shared-consumer-fix": {
+          "linkage": "shared",
+          "consumer_adaptation": "CPython upstream allocation-failure fix",
+          "probe_exit_code": 0,
+          "origin_exit_code": 0,
+          "tests_exit_code": 0,
+          "gate_exit_code": 0,
+          "inventory_case_count": 803,
+          "inventory_complete": true,
+          "semantic_exit_code": 0,
+          "accepted_upstream_failures": false,
+          "totals": [
+            "Total tests: run=802 skipped=14",
+            "Total test files: run=6/6"
+          ]
+        },
+        "cpython-static": {
+          "linkage": "static",
+          "consumer_adaptation": null,
+          "probe_exit_code": 0,
+          "origin_exit_code": 0,
+          "tests_exit_code": 0,
+          "gate_exit_code": 0,
+          "inventory_case_count": 803,
+          "inventory_complete": true,
+          "semantic_exit_code": 0,
+          "accepted_upstream_failures": false,
+          "totals": [
+            "Total tests: run=802 skipped=14",
+            "Total test files: run=6/6"
+          ]
+        },
+        "cpython-static-consumer-fix": {
+          "linkage": "static",
+          "consumer_adaptation": "CPython upstream allocation-failure fix",
+          "probe_exit_code": 0,
+          "origin_exit_code": 0,
+          "tests_exit_code": 0,
+          "gate_exit_code": 0,
+          "inventory_case_count": 803,
+          "inventory_complete": true,
+          "semantic_exit_code": 0,
+          "accepted_upstream_failures": false,
+          "totals": [
+            "Total tests: run=802 skipped=14",
+            "Total test files: run=6/6"
+          ]
+        }
+      },
+      "cleanup_fault": {
+        "shared": [
+          {
+            "kind": "original",
+            "exit_code": -11,
+            "timed_out": false,
+            "matches_expected_failure_or_recovery": true
+          },
+          {
+            "kind": "fixed",
+            "exit_code": 0,
+            "timed_out": false,
+            "matches_expected_failure_or_recovery": true
+          }
+        ],
+        "static": [
+          {
+            "kind": "original",
+            "exit_code": -11,
+            "timed_out": false,
+            "matches_expected_failure_or_recovery": true
+          },
+          {
+            "kind": "fixed",
+            "exit_code": 0,
+            "timed_out": false,
+            "matches_expected_failure_or_recovery": true
+          }
+        ]
+      }
+    },
+    "aggregates": [
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "corpus": "tuning",
+        "conditions": 24,
+        "candidate_base": 0.9429627196190565,
+        "candidate_expat": 1.1057977310229032,
+        "base_expat": 1.1727468934649135
+      },
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "candidate_base": 0.9372139120217485,
+        "candidate_expat": 1.3334937672516702,
+        "base_expat": 1.4251384616951464
+      },
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "corpus": "generated",
+        "conditions": 16,
+        "candidate_base": 0.8091828518676027,
+        "candidate_expat": 1.3649989826516318,
+        "base_expat": 1.6915245341331657
+      },
+      {
+        "epoch": 1,
+        "consumer": "python",
+        "corpus": "tuning",
+        "conditions": 24,
+        "candidate_base": 0.9943914464896396,
+        "candidate_expat": 1.1391138757707453,
+        "base_expat": 1.1484924404989971
+      },
+      {
+        "epoch": 1,
+        "consumer": "python",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "candidate_base": 0.9752448044828981,
+        "candidate_expat": 1.155139771293128,
+        "base_expat": 1.1825949067346686
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "corpus": "tuning",
+        "conditions": 24,
+        "candidate_base": 0.9426877715810869,
+        "candidate_expat": 1.1072370952431225,
+        "base_expat": 1.1752104105661565
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "candidate_base": 0.9394739389961544,
+        "candidate_expat": 1.3344717192573479,
+        "base_expat": 1.420673293818206
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "corpus": "generated",
+        "conditions": 16,
+        "candidate_base": 0.8084147770445841,
+        "candidate_expat": 1.3752153346647404,
+        "base_expat": 1.7000139634950973
+      },
+      {
+        "epoch": 2,
+        "consumer": "python",
+        "corpus": "tuning",
+        "conditions": 24,
+        "candidate_base": 0.9909700541258567,
+        "candidate_expat": 1.1383175621672925,
+        "base_expat": 1.1537661677859068
+      },
+      {
+        "epoch": 2,
+        "consumer": "python",
+        "corpus": "observed-holdout",
+        "conditions": 20,
+        "candidate_base": 0.9779093084087919,
+        "candidate_expat": 1.15856490881441,
+        "base_expat": 1.185243651401992
+      }
+    ],
+    "regressions": {
+      "epochs": {
+        "1": {
+          "conditions": 104,
+          "slower": 28
+        },
+        "2": {
+          "conditions": 104,
+          "slower": 33
+        }
+      },
+      "groups": [
+        {
+          "epoch": 1,
+          "consumer": "native",
+          "corpus": "tuning",
+          "conditions": 24,
+          "slower": 3
+        },
+        {
+          "epoch": 1,
+          "consumer": "native",
+          "corpus": "observed-holdout",
+          "conditions": 20,
+          "slower": 6
+        },
+        {
+          "epoch": 1,
+          "consumer": "native",
+          "corpus": "generated",
+          "conditions": 16,
+          "slower": 2
+        },
+        {
+          "epoch": 1,
+          "consumer": "python",
+          "corpus": "tuning",
+          "conditions": 24,
+          "slower": 9
+        },
+        {
+          "epoch": 1,
+          "consumer": "python",
+          "corpus": "observed-holdout",
+          "conditions": 20,
+          "slower": 8
+        },
+        {
+          "epoch": 2,
+          "consumer": "native",
+          "corpus": "tuning",
+          "conditions": 24,
+          "slower": 2
+        },
+        {
+          "epoch": 2,
+          "consumer": "native",
+          "corpus": "observed-holdout",
+          "conditions": 20,
+          "slower": 8
+        },
+        {
+          "epoch": 2,
+          "consumer": "native",
+          "corpus": "generated",
+          "conditions": 16,
+          "slower": 3
+        },
+        {
+          "epoch": 2,
+          "consumer": "python",
+          "corpus": "tuning",
+          "conditions": 24,
+          "slower": 10
+        },
+        {
+          "epoch": 2,
+          "consumer": "python",
+          "corpus": "observed-holdout",
+          "conditions": 20,
+          "slower": 10
+        }
+      ],
+      "repeat_count": 25,
+      "top_repeat": [
+        {
+          "condition": "native/namespaces/65536/namespaces-0",
+          "epoch_1_candidate_base": 1.0769678788831882,
+          "epoch_2_candidate_base": 1.0817089307553278
+        },
+        {
+          "condition": "native/namespaces/4096/namespaces-0",
+          "epoch_1_candidate_base": 1.061020397997506,
+          "epoch_2_candidate_base": 1.0643022506402537
+        },
+        {
+          "condition": "native/maven/65536/namespaces-1",
+          "epoch_1_candidate_base": 1.0488794163826243,
+          "epoch_2_candidate_base": 1.0587639730010938
+        },
+        {
+          "condition": "native/maven/4096/namespaces-1",
+          "epoch_1_candidate_base": 1.0473138608015113,
+          "epoch_2_candidate_base": 1.0509716661742774
+        },
+        {
+          "condition": "python/maven/4096/elementtree",
+          "epoch_1_candidate_base": 1.043267576920577,
+          "epoch_2_candidate_base": 1.0411165052026983
+        }
+      ]
+    },
+    "reports": [
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "archive_member": "performance-followup/combined-outlined/native-epoch-1/summary.json",
+        "sha256": "6be765c7d6fba0e5cd9e4fc601670e9d2915d1cc1ea3096445766d518b2c4b04",
+        "pairs": 7,
+        "iterations": 20,
+        "cpu": "AMD EPYC-Milan Processor",
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      },
+      {
+        "epoch": 1,
+        "consumer": "python",
+        "archive_member": "performance-followup/combined-outlined/python-epoch-1/summary.json",
+        "sha256": "7e703ed316c8770765f2ce42c5f0913159ec0195e50eae053e84b299d7e2030b",
+        "pairs": 7,
+        "iterations": 10,
+        "cpu": null,
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "archive_member": "performance-followup/combined-outlined/native-epoch-2/summary.json",
+        "sha256": "d0f4bd33de2f7d76d6d8a9967e1f3b8d56d37fe4729b334ee5956c4f6cbe6056",
+        "pairs": 7,
+        "iterations": 20,
+        "cpu": "AMD EPYC-Milan Processor",
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      },
+      {
+        "epoch": 2,
+        "consumer": "python",
+        "archive_member": "performance-followup/combined-outlined/python-epoch-2/summary.json",
+        "sha256": "47a65862459c0ffc4dfd936372d580e3a1b25848939d121cbfb36a381dff7ea1",
+        "pairs": 7,
+        "iterations": 10,
+        "cpu": null,
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      }
+    ],
+    "artifacts": {
+      "build": {
+        "archive_member": "performance-followup/combined-outlined/build/build.json",
+        "sha256": "cd7b9ebe050f00c641bca07bb20e4cc9fa329146dd26f6b63eb57538da4af2ab"
+      },
+      "baseline_build": {
+        "archive_member": "performance-followup/baseline/build.json",
+        "sha256": "7b25757dd578235b544900f120e22939aab4e7bf8a1fa2beaea86d7dae01fb82"
+      },
+      "metrics": {
+        "archive_member": "performance-followup/combined-outlined/metrics.json",
+        "sha256": "6e21ed2b185bbbc679793304063f06324ea96931709ea82bd6290fd8260983a4"
+      },
+      "compatibility": {
+        "archive_member": "performance-followup/combined-outlined/compatibility-results.json",
+        "sha256": "2d010f26d83c8155dbacb9ec0b17901a1954469ec7e1715dfd2d6ceab7a5a115"
+      }
+    },
+    "conditions": {
+      "rows": 208,
+      "archive_member": "performance-followup/combined-outlined/conditions.csv",
+      "sha256": "598875743c4c54dc4337aceb23a5fc8a55cf54a3e308c973a3bdcbca44f4d1a9"
+    },
+    "superseded_initial_integration": {
+      "name": "Initial five-change integration",
+      "physical_folder": "combined",
+      "runtime": "4eeb93a0df41c56a5b27653143529c60bcc1c7f1",
+      "library_sha256": "c3d09df7fa07b4dee74f478dddffc38d82680c5c2721620d2b6432a7109ae1df",
+      "pairs": 7,
+      "iterations": 20,
+      "conditions": 60,
+      "slower": 16,
+      "aggregates_candidate_base": {
+        "tuning": 0.9481037266077278,
+        "observed-holdout": 0.9543807675780138,
+        "generated": 0.8146948033720094
+      },
+      "targets_candidate_base": {
+        "namespaces/namespaces-1": 0.9129950855912072,
+        "libreoffice/namespaces-1": 0.9373504747262826,
+        "maven/namespaces-1": 1.0666622024574297,
+        "entities/all": 0.7181374916306905,
+        "elements/all": 0.6294758342043651
+      },
+      "artifacts": {
+        "build": {
+          "archive_member": "performance-followup/combined/build/build.json",
+          "sha256": "a315b76b3f7c9a2f6cc3a203ef6a9d36f0d893d6df9efa6e7e5c886ccf183870"
+        },
+        "report": {
+          "archive_member": "performance-followup/combined/native-epoch-1/summary.json",
+          "sha256": "4709015c15ae98c91e0d0297c020e577b026990cfb223109e6def606a30235e7"
+        }
+      }
+    }
+  },
+  "conditions_csv": {
+    "rows": 208,
+    "url": "https://github.com/astral-sh/xeme/blob/charlie/codex-perf-namespace-expansion/docs/evidence/2026-09-13-namespace-expansion-performance.csv",
+    "sha256": "080af03ecb635694dd9e490fed34386bc9061819294b8de3d1d9f4db78c5385e"
+  },
+  "artifacts": {
+    "build": {
+      "archive_member": "performance-followup/namespace-outlined/build/build.json",
+      "sha256": "98bb6a99bb7ba2887317b0cbd6ea3700207dd9048da020b18109ad9889ae9118"
+    },
+    "baseline_build": {
+      "archive_member": "performance-followup/baseline/build.json",
+      "sha256": "7b25757dd578235b544900f120e22939aab4e7bf8a1fa2beaea86d7dae01fb82"
+    },
+    "metrics": {
+      "archive_member": "performance-followup/namespace-outlined/metrics.json",
+      "sha256": "378673bc0037a8b8770c7b484d1bf91b092757a2249debc0b57cdfb162c905da"
+    },
+    "compatibility": {
+      "archive_member": "performance-followup/namespace-outlined/compatibility-results.json",
+      "sha256": "29df36223c1f45a7776c0e2257d82e6a8dcc06ca7a1f9dc6d1ff727af601f19a"
+    },
+    "reports": [
+      {
+        "epoch": 1,
+        "consumer": "native",
+        "archive_member": "performance-followup/namespace-outlined/native-epoch-1/summary.json",
+        "sha256": "5723c4390d17e0b479ed54b26e08d9b29d8fd7bc5f156c50b0c56d0ec06b36a7",
+        "pairs": 7,
+        "iterations": 20,
+        "cpu": "AMD EPYC-Milan Processor",
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      },
+      {
+        "epoch": 1,
+        "consumer": "python",
+        "archive_member": "performance-followup/namespace-outlined/python-epoch-1/summary.json",
+        "sha256": "617a8796907ca516a7154ec10b02229bb0e73328a380cadd8e02b51a88d86b53",
+        "pairs": 7,
+        "iterations": 10,
+        "cpu": null,
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      },
+      {
+        "epoch": 2,
+        "consumer": "native",
+        "archive_member": "performance-followup/namespace-outlined/native-epoch-2/summary.json",
+        "sha256": "73b498582eb4a5c863e3fff756eb7e073782a5ed4cbe5fc3d63ceb1bdd723693",
+        "pairs": 7,
+        "iterations": 20,
+        "cpu": "AMD EPYC-Milan Processor",
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      },
+      {
+        "epoch": 2,
+        "consumer": "python",
+        "archive_member": "performance-followup/namespace-outlined/python-epoch-2/summary.json",
+        "sha256": "2bb50dc446f7b6c6e6ebfd52e3ca49a88c88f508526a4ac4849c2282b7088ca7",
+        "pairs": 7,
+        "iterations": 10,
+        "cpu": null,
+        "platform": "Linux-6.8.0-106-generic-x86_64-with-glibc2.39"
+      }
+    ],
+    "generator": {
+      "archive_member": "performance-followup/write_final_evidence.py",
+      "sha256": "63dcd74b52d46b387d0bf3a9d29befabfa7bf5fdff0acd414dc6408f2d37d271"
+    }
+  },
+  "raw_archive": {
+    "url": "https://github.com/astral-sh/xeme/releases/download/performance-followup-2026-09-13/performance-followup-2026-09-13.tar.zst",
+    "sha256": "80222e8cadbf6d90a305ad23f4e06d0e99f662bb7ef7c019dab8c417fbf17ecf",
+    "sidecar_sha256": "048264f15a0c20d9d187561437b1f3e08d58010aba8ea041485a83ff01eceac4",
+    "manifest_sha256": "34bc534e85a51ac4e7ffab487a471d4c737a92ee90d3312671b18cc6a3289fde",
+    "archive": "performance-followup-2026-09-13.tar.zst",
+    "release_tag": "performance-followup-2026-09-13"
+  },
+  "selection_trials": [
+    {
+      "name": "Initial namespace candidate",
+      "physical_folder": "namespaces",
+      "runtime": "db6da8c97c95405d4c68f1238761c3c05c13ee85",
+      "library_sha256": "5e7eb6c0ecb94e43938d7eb288d896610a4e6144443f15decd51fa69d8b360cf",
+      "pairs": 7,
+      "iterations": 20,
+      "conditions": 60,
+      "slower": 49,
+      "aggregates_candidate_base": {
+        "tuning": 1.0133982121639866,
+        "observed-holdout": 1.003557493384277,
+        "generated": 1.0020273232601196
+      },
+      "targets_candidate_base": {
+        "namespaces/namespaces-1": 0.8902307515807601,
+        "libreoffice/namespaces-1": 0.9577726925564093,
+        "maven/namespaces-1": 1.0430792092878636,
+        "entities/all": 1.0394383927480089,
+        "elements/all": 1.0302209206009718
+      },
+      "artifacts": {
+        "build": {
+          "archive_member": "performance-followup/namespaces/build/build.json",
+          "sha256": "42550c480721010b05bf5b91f7823e66b316a6c7d3ba8b8787590e3b4850259a"
+        },
+        "report": {
+          "archive_member": "performance-followup/namespaces/native-epoch-1/summary.json",
+          "sha256": "7fdc511d2a2fccedc582e2c3d5fd4d82ca1c31b97234f56bc16448abc194b5de"
+        }
+      }
+    },
+    {
+      "name": "A: inline finalizer",
+      "physical_folder": "namespace-inline",
+      "runtime": "c223426ec2e4a9b5bb48adfe5a0a0e16e41fc942",
+      "library_sha256": "2b2534d454c12c5988eb9e77fe519092ed8ade7a414ea1372ef491fbc738d441",
+      "pairs": 7,
+      "iterations": 10,
+      "conditions": 60,
+      "slower": 50,
+      "aggregates_candidate_base": {
+        "tuning": 1.0179761111495031,
+        "observed-holdout": 1.012329379046841,
+        "generated": 1.0153283505813304
+      },
+      "targets_candidate_base": {
+        "namespaces/namespaces-1": 0.9120785804252526,
+        "libreoffice/namespaces-1": 0.9610079809917539,
+        "maven/namespaces-1": 1.0391870758353061,
+        "entities/all": 1.0387488576135642,
+        "elements/all": 1.056921977581502
+      },
+      "artifacts": {
+        "build": {
+          "archive_member": "performance-followup/namespace-inline/build/build.json",
+          "sha256": "ca09613b51d87a850fb8d96630ff37471bd22f9a30f8ed63f10d7ed18871f651"
+        },
+        "report": {
+          "archive_member": "performance-followup/namespace-inline/specialization-trial/summary.json",
+          "sha256": "04c430756ce4740c8b8acc8c73b101b4fcd28991bbada1e3cf9cfab187d12af8"
+        }
+      }
+    },
+    {
+      "name": "B: specialize finalizer",
+      "physical_folder": "namespace-specialized",
+      "runtime": "266c72817e96233c3799e92bb80d1fd58e24e77c",
+      "library_sha256": "bde1f150d018890f7e096b56ea3e405c31278777e0798ebb88f81b618f52ab71",
+      "pairs": 7,
+      "iterations": 10,
+      "conditions": 60,
+      "slower": 43,
+      "aggregates_candidate_base": {
+        "tuning": 1.0073542855691862,
+        "observed-holdout": 1.0063471539838058,
+        "generated": 1.016970116823618
+      },
+      "targets_candidate_base": {
+        "namespaces/namespaces-1": 0.9149907933439098,
+        "libreoffice/namespaces-1": 0.9620884007318319,
+        "maven/namespaces-1": 1.0533128489632522,
+        "entities/all": 1.080768590325325,
+        "elements/all": 1.0114924298092702
+      },
+      "artifacts": {
+        "build": {
+          "archive_member": "performance-followup/namespace-specialized/build/build.json",
+          "sha256": "9092057b12b0815ffba9cf1f777cbda0aa0fd2e5a529d9b3e024f0a5ae18b868"
+        },
+        "report": {
+          "archive_member": "performance-followup/namespace-specialized/specialization-trial/summary.json",
+          "sha256": "9bd1caad80ba6af3ed762ec412f7999e6d4355acb6c2f54c351b8e263258bbfa"
+        }
+      }
+    },
+    {
+      "name": "C: outline preparation",
+      "physical_folder": "namespace-outlined",
+      "runtime": "ad5e08a3aeda572760dd6ef7a9d402b60880897c",
+      "library_sha256": "645109ab7d42bf189bd6d929e0144ce6b7e58f357357545ea93b298d10ac08a0",
+      "pairs": 7,
+      "iterations": 10,
+      "conditions": 60,
+      "slower": 25,
+      "aggregates_candidate_base": {
+        "tuning": 0.9987874713107301,
+        "observed-holdout": 0.9851044614239453,
+        "generated": 0.9832851629920114
+      },
+      "targets_candidate_base": {
+        "namespaces/namespaces-1": 0.8921014316149003,
+        "libreoffice/namespaces-1": 0.931836204044415,
+        "maven/namespaces-1": 1.0193758064845995,
+        "entities/all": 1.0096397866708005,
+        "elements/all": 0.994070376232161
+      },
+      "artifacts": {
+        "build": {
+          "archive_member": "performance-followup/namespace-outlined/build/build.json",
+          "sha256": "98bb6a99bb7ba2887317b0cbd6ea3700207dd9048da020b18109ad9889ae9118"
+        },
+        "report": {
+          "archive_member": "performance-followup/namespace-outlined/specialization-trial/summary.json",
+          "sha256": "94fec2679a345b730b7b419cb23fc0229227db0ef6267aa302bd425fde08ff92"
+        }
+      }
+    }
+  ]
+}

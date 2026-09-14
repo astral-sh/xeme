@@ -537,15 +537,10 @@ pub unsafe extern "C" fn XML_ParserReset(parser: XML_Parser, encoding: *const c_
             // changing parser fields. Allocator callbacks cannot reenter any C API.
             unsafe {
                 let allocator = (*parser).allocator;
-                let encoding = input_string(encoding)?
-                    .map(|value| XmlString::try_from_str_in(value, allocator))
-                    .transpose()?;
-                let mut core = Parser::try_new_with_encoding_in(
-                    (*parser).config.clone(),
-                    encoding.as_deref(),
-                    allocator,
-                )
-                .map_err(|_| AllocError::OutOfMemory)?;
+                let encoding = input_string(encoding)?;
+                let mut core =
+                    Parser::try_new_with_encoding_in((*parser).config.clone(), encoding, allocator)
+                        .map_err(|_| AllocError::OutOfMemory)?;
                 core.enable_input_context();
                 core.set_hash_salt((*parser).core.hash_salt())
                     .map_err(|_| AllocError::OutOfMemory)?;
@@ -1568,8 +1563,8 @@ unsafe fn try_resolve_unknown_encoding(parser: XML_Parser) -> Result<bool, Alloc
         let Some(name) = (*parser).core.unknown_encoding() else {
             return Ok(false);
         };
-        let name = XmlString::try_from_str_in(name, (*parser).allocator)?;
-        let c_name = CString::try_from_str_in(&name, (*parser).allocator)?;
+        let c_name = CString::try_from_str_in(name, (*parser).allocator)?;
+        let name = c_name.to_str().expect("encoding name is UTF-8");
         let arg = (*parser).unknown_encoding_arg;
         let mut info = XML_Encoding {
             map: [-1; 256],
@@ -1580,9 +1575,9 @@ unsafe fn try_resolve_unknown_encoding(parser: XML_Parser) -> Result<bool, Alloc
         let accepted = handler(arg, c_name.as_ptr(), &mut info) != 0;
         if accepted && !(*parser).destroying && (*parser).parse_error == 0 {
             let installed = if info.convert.is_some() {
-                (*parser).core.set_multibyte_encoding_map(&name, info.map)
+                (*parser).core.set_multibyte_encoding_map(name, info.map)
             } else {
-                (*parser).core.set_encoding_map(&name, info.map)
+                (*parser).core.set_encoding_map(name, info.map)
             };
             match installed {
                 Ok(()) => {

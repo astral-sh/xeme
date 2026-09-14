@@ -327,8 +327,6 @@ impl Parser {
                     raw: Buffer::new_in(self.allocator),
                     literals: Vec::new_in(self.allocator),
                     parameters: Vec::new_in(self.allocator),
-                    // Value callbacks may install a Default handler later.
-                    capture_raw: true,
                     raw_offsets: Vec::new_in(self.allocator),
                 },
                 position: self.here(),

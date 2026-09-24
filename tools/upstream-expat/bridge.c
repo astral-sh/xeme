@@ -8,6 +8,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Preserve the legacy API coverage while compiling against the new header. */
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+int xeme_test_set_hash_salt(XML_Parser parser, unsigned long salt) {
+  return XML_SetHashSalt(parser, salt);
+}
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+
 #ifdef XEME_ALLOCATION_BEHAVIOR
 #include "allocation_tracker.h"
 
@@ -83,6 +95,7 @@ void xeme_print_library(void) {
   if (!dladdr((void *)XML_Parse, &info) || !info.dli_fname)
     abort();
   printf("XEME_LIBRARY\t%s\n", info.dli_fname);
+  printf("XEME_VERSION\t%s\n", XML_ExpatVersion());
 }
 
 static XML_Parser set_defaults(XML_Parser parser) {

@@ -61,6 +61,13 @@
 #  define XMLPARSEAPI(type) type
 #  define XML_ATTR_MALLOC
 #  define XML_ATTR_ALLOC_SIZE(x)
+#  if defined(__clang__) || defined(__GNUC__)
+#    define XML_ATTR_DEPRECATED(message) __attribute__((__deprecated__(message)))
+#  elif defined(_MSC_VER)
+#    define XML_ATTR_DEPRECATED(message) __declspec(deprecated(message))
+#  else
+#    define XML_ATTR_DEPRECATED(message)
+#  endif
 typedef char XML_Char;
 typedef char XML_LChar;
 #  ifdef XML_LARGE_SIZE
@@ -951,8 +958,9 @@ XML_SetParamEntityParsing(XML_Parser parser,
    function behavior. This must be called before parsing is started.
    Returns 1 if successful, 0 when called after parsing has started.
    Note: If parser == NULL, the function will do nothing and return 0.
-   DEPRECATED since Expat 2.8.0.
+   DEPRECATED since Expat 2.8.0. Please use XML_SetHashSalt16Bytes instead.
 */
+XML_ATTR_DEPRECATED("please use XML_SetHashSalt16Bytes instead")
 XMLPARSEAPI(int)
 XML_SetHashSalt(XML_Parser parser, unsigned long hash_salt);
 
@@ -1128,7 +1136,7 @@ XML_SetReparseDeferralEnabled(XML_Parser parser, XML_Bool enabled);
 */
 #  define XML_MAJOR_VERSION 2
 #  define XML_MINOR_VERSION 8
-#  define XML_MICRO_VERSION 4
+#  define XML_MICRO_VERSION 5
 
 #  ifdef __cplusplus
 }

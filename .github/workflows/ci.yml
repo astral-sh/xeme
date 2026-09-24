@@ -113,7 +113,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: libexpat/libexpat
-          ref: 12cf0b1f25f026a022fe728ad8f7e3d017285b80
+          ref: 4b3f0b06f39fb5529cead381694f8929901bc273
           path: .cache/expat
           persist-credentials: false
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -334,7 +334,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: libexpat/libexpat
-          ref: 12cf0b1f25f026a022fe728ad8f7e3d017285b80
+          ref: 4b3f0b06f39fb5529cead381694f8929901bc273
           path: .cache/expat
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0

@@ -14,6 +14,24 @@ fn check(input: &[u8], width: usize) -> Output {
 }
 
 #[test]
+fn declaration_versions_control_exit_status_and_events() {
+    for version in ["1.0", "1.2", "1.01", "banana", "2.0", "1", "1."] {
+        let input = format!("<?xml version='{version}'?><r/>");
+        for width in [1, 7, input.len()] {
+            let result = check(input.as_bytes(), width);
+            let valid = matches!(version, "1.0" | "1.2" | "1.01");
+            assert_eq!(result.status.success(), valid, "{version}: {result:?}");
+            if valid {
+                assert!(!result.stdout.is_empty());
+            } else {
+                assert!(result.stdout.is_empty());
+                assert!(!result.stderr.is_empty());
+            }
+        }
+    }
+}
+
+#[test]
 fn utf16_requires_encoding_evidence_before_printing_events() {
     for big_endian in [false, true] {
         for evidence in ["none", "bom", "declaration"] {

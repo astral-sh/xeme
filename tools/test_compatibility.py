@@ -13,6 +13,108 @@ import compatibility
 from compatibility import check_api, check_w3c, digest
 
 
+class ReferenceVersionTests(unittest.TestCase):
+    def test_every_gate_requires_the_pinned_loaded_reference_version(self) -> None:
+        # Semantic checks succeed so only the loaded version can reject the gate.
+        for suite in ("api", "allocation", "w3c", "differential"):
+            for reference in (
+                {"version": "expat_2.8.5"},
+                {"version": "expat_2.8.4"},
+                {"version": "expat_2.9.0"},
+                {"version": "xeme_fixture"},
+                {"version": None},
+                {},
+            ):
+                with (
+                    self.subTest(suite=suite, reference=reference),
+                    tempfile.TemporaryDirectory() as temporary,
+                ):
+                    root = Path(temporary).resolve()
+                    baseline = root / "baseline.json"
+                    baseline.write_text(
+                        json.dumps(
+                            {"expat_version": "expat_2.8.5", "api": {}, "w3c": {}}
+                        )
+                    )
+                    for label in ("xeme", "reference"):
+                        (root / f"{label}.so").write_bytes(label.encode())
+
+                    def run_suite(
+                        command: list[str],
+                        output: Path,
+                        accepted: tuple[int, ...],
+                        suite: str = suite,
+                        reference: dict = reference,
+                    ) -> None:
+                        directory = Path(command[command.index("--output") + 1])
+                        directory.mkdir()
+                        results = {
+                            "reference": reference,
+                            "xeme": {"version": "xeme_fixture"},
+                        }
+                        if suite in ("api", "allocation"):
+                            label = Path(command[command.index("--library") + 1]).stem
+                            (directory / "results.json").write_text(
+                                json.dumps(results[label])
+                            )
+                            (directory / "tests.log").write_text("")
+                        else:
+                            for label, result in results.items():
+                                (directory / f"{label}.json").write_text(
+                                    json.dumps(result)
+                                )
+
+                    with (
+                        patch.object(compatibility, "BASELINE", baseline),
+                        patch.object(compatibility, "run", side_effect=run_suite),
+                        patch.object(
+                            compatibility, "check_api", return_value={"passed": True}
+                        ),
+                        patch.object(
+                            compatibility,
+                            "check_allocation",
+                            return_value={"passed": True},
+                        ),
+                        patch.object(
+                            compatibility, "check_w3c", return_value={"passed": True}
+                        ),
+                        patch.object(
+                            sys,
+                            "argv",
+                            [
+                                "compatibility.py",
+                                suite,
+                                "--library",
+                                str(root / "xeme.so"),
+                                "--reference",
+                                str(root / "reference.so"),
+                                "--source",
+                                str(root),
+                                "--config",
+                                str(root),
+                                "--output",
+                                str(root / "report"),
+                            ],
+                        ),
+                        patch("builtins.print"),
+                    ):
+                        correct_version = reference.get("version") == "expat_2.8.5"
+                        self.assertEqual(
+                            compatibility.main(), 0 if correct_version else 1
+                        )
+                    report = json.loads((root / "report/gate.json").read_text())
+                    self.assertEqual(report["passed"], correct_version)
+                    self.assertEqual(
+                        report["versions"],
+                        {
+                            "reference": reference.get("version"),
+                            "xeme": "xeme_fixture",
+                        },
+                    )
+                    if not correct_version:
+                        self.assertIn("expected reference version", report["error"])
+
+
 class ApiGateTests(unittest.TestCase):
     def setUp(self) -> None:
         self.baseline = {
@@ -106,12 +208,12 @@ class ApiGateTests(unittest.TestCase):
         self,
     ) -> None:
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve()
             baseline = root / "baseline.json"
-            baseline.write_text(json.dumps({"api": self.baseline}))
-            libraries = {
-                label: root / f"{label}.so" for label in ("xeme", "reference")
-            }
+            baseline.write_text(
+                json.dumps({"api": self.baseline, "expat_version": "expat_2.8.5"})
+            )
+            libraries = {label: root / f"{label}.so" for label in ("xeme", "reference")}
             for library in libraries.values():
                 library.write_bytes(b"fixture library")
             config = root / "expat_config.h"
@@ -127,6 +229,7 @@ class ApiGateTests(unittest.TestCase):
                 directory = Path(command[command.index("--output") + 1])
                 directory.mkdir()
                 result = copy.deepcopy(self.result)
+                result["version"] = "expat_2.8.5" if reference else "xeme_fixture"
                 log = self.log
                 if reference:
                     result.update(returncode=0, failed=0, passed=2)

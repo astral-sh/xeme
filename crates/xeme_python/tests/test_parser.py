@@ -89,6 +89,23 @@ class ParserTests(unittest.TestCase):
             ("1.0", None, None),
         )
 
+    def test_xml_version_grammar(self):
+        for version in ["1.0", "1.2", "1.01", "banana", "2.0", "1", "1."]:
+            data = f"<?xml version='{version}'?><r/>".encode()
+            for width in [1, 7, len(data)]:
+                with self.subTest(version=version, width=width):
+                    parser = xeme.Parser()
+                    events = []
+
+                    if version in ["1.0", "1.2", "1.01"]:
+                        feed_chunks(parser, data, width, events)
+                        self.assertEqual(events[0].data, (version, None, None))
+                    else:
+                        with self.assertRaises(xeme.ParseError) as raised:
+                            feed_chunks(parser, data, width, events)
+                        self.assertEqual(raised.exception.kind, "XmlDeclaration")
+                        self.assertEqual(events, [])
+
     def test_utf8_all_two_chunk_boundaries(self):
         document = '<r a="é">€\r\n𐐀&amp;tail</r>'.encode()
         expected = [("start", ("r", {"a": "é"})), ("text", "€\n𐐀&tail"), ("end", "r")]

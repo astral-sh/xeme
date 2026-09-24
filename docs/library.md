@@ -32,6 +32,10 @@ Fourth Edition rules, which the C interface uses to match Expat. The parser is
 non-validating: it checks XML syntax without validating documents against their
 DTD content models.
 
+Declaration versions must contain `1.` followed by one or more ASCII digits.
+Versions such as `1.2` still use XML 1.0 character rules. The C adapter uses the
+same grammar as Expat 2.8.5.
+
 By default, a UTF-8 byte order mark (BOM) must agree with the declared encoding.
 A conflicting declaration is rejected unless an explicit higher-level encoding
 override applies. `Config::allow_utf8_bom_encoding_mismatch` defaults to `false`;

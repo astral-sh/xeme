@@ -256,13 +256,17 @@ fn ascii_alias_names_keep_raw_delimiters_keywords_and_references_distinct() {
         b"<?\x80xml?><r/>",
         b"<!DOCTYPE r [<!ENTITY \x80e 'value'>]><r>&\x80e;</r>",
         b"<!DOCTYPE r [<!ENTITY e '\x80<'>]><r/>",
-        b"<?xml version='\x80A.0'?><r/>",
+        b"<?xml version='\x801.0'?><r/>",
     ] {
         for width in [1, document.len()] {
             parse_ascii_aliases(document, width).unwrap();
         }
     }
     for (document, expected) in [
+        (
+            b"<?xml version='\x80A.0'?><r/>".as_slice(),
+            ErrorKind::XmlDeclaration,
+        ),
         (b"<\x80A></A>".as_slice(), ErrorKind::TagMismatch),
         (b"<A></\x80A>", ErrorKind::TagMismatch),
         (b"<r A='1' \x80A='2'/>", ErrorKind::DuplicateAttribute),

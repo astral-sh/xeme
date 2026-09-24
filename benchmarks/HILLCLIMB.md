@@ -64,11 +64,13 @@ its exact source; hashes also identify uncommitted experiments.
 
 Build Expat with GCC O3 and without LTO. Keep the build and GCC version unchanged
 across candidates, and retain the compiler version and CMake cache.
+New studies use Expat 2.8.5. When reproducing an earlier study, use the reference
+revision recorded in that study rather than changing its control.
 
 ```sh
 git clone https://github.com/libexpat/libexpat.git "$benchmark_root/expat-source"
 git -C "$benchmark_root/expat-source" checkout --detach \
-  12cf0b1f25f026a022fe728ad8f7e3d017285b80
+  4b3f0b06f39fb5529cead381694f8929901bc273
 cmake -S "$benchmark_root/expat-source/expat" -B "$benchmark_root/expat-build" \
   -DCMAKE_C_COMPILER=gcc -DCMAKE_BUILD_TYPE=Release \
   '-DCMAKE_C_FLAGS_RELEASE=-O3 -DNDEBUG' \

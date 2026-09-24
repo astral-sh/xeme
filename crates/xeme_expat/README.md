@@ -51,6 +51,8 @@ processing input remain terminal until reset.
 Content-model callbacks receive one C allocation containing the entire model and
 its names. The consumer owns that allocation and releases it with
 `XML_FreeContentModel`, including after freeing the parser.
+Rust consumers may borrow the live root model and return its pointer after that
+borrow ends; freeing the model does not require retaining an untouched pointer.
 
 ## Supported API
 

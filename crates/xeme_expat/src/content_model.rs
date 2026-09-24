@@ -170,7 +170,11 @@ pub(super) fn allocate(text: &str, allocator: Allocator) -> Result<*mut XML_Cont
         if owner.is_null() {
             return Err(1);
         }
-        owner.cast::<Allocator>().write(allocator);
+        let metadata = owner.cast::<Allocator>();
+        metadata.write(allocator);
+        // A consumer may reborrow only the model. Expose the initialized
+        // allocator separately so that reborrow need not cover this prefix.
+        let _ = ptr::from_mut(&mut *metadata).expose_provenance();
         let block = owner.add(OWNER_BYTES).cast::<XML_Content>();
         let mut next_node = 1;
         let mut next_string = block.cast::<u8>().add(node_bytes).cast::<c_char>();
@@ -185,11 +189,13 @@ pub(super) unsafe fn free(model: *mut XML_Content) {
     if model.is_null() {
         return;
     }
-    // SAFETY: allocate stores a copied allocator immediately before the model's
-    // node block. It survives parent deletion and receives its original pointer.
+    // SAFETY: allocate exposes the initialized allocator prefix independently of
+    // the model. The live model guarantees that metadata remains at this address,
+    // even after a reborrow or parent deletion. tracked_free recovers the original
+    // backing allocation from its own separately exposed tracking header.
     unsafe {
-        let owner = model.cast::<u8>().sub(OWNER_BYTES);
-        let allocator = owner.cast::<Allocator>().read();
+        let owner = ptr::with_exposed_provenance_mut::<Allocator>(model.addr() - OWNER_BYTES);
+        let allocator = owner.read();
         allocator.tracked_free(owner.cast());
     }
 }

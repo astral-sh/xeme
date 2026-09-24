@@ -129,7 +129,7 @@ only when they match the checked-in baseline.
 | W3C XML catalog through the C interface | All 6,003 selected rows per engine, including 81 optional observations. Verify selected tests, loaded bytes and namespace mode; compare acceptance and child outcomes. |
 | Differential corpus | Named fixtures plus 200 deterministic generated cases. Verify every worker ran and compare callbacks and error codes; exact text fragmentation and final positions have a separate strict mode. |
 
-The API baseline retains 509 failures: 484 allocation retry/schedule assertions,
+The API baseline retains 495 failures: 470 allocation retry/schedule assertions,
 12 literal version checks, 12 single-buffer policy checks and one deferral-growth
 assertion. An early allocation assertion can hide later semantic assertions.
 The [2.8.5 update](evidence/2026-09-24-expat-2.8.5.md) records the new test
@@ -139,7 +139,9 @@ raises retry ceilings to 512 and adapts allocation-count assumptions while
 retaining callback, error, state-transition and cleanup checks. The deferral test
 exercises 504 size combinations in its one active configuration; its other 11
 configurations return early. Some fixtures check successful parsing without
-comparing complete event data. The original 509 failures remain in the API baseline.
+comparing complete event data. Fourteen consistently passing configurations were removed from the failure
+baseline; the [cleanup report](evidence/2026-09-24-expat-cleanup.md) records
+the tightened boundary.
 
 Candidate tests retain three-second and 1 GiB address-space limits. Original API
 reference tests use 30 seconds and 4 GiB so their large-buffer cases can complete;

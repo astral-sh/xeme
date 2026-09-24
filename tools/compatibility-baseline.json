@@ -842,8 +842,6 @@
       "test_alloc_realloc_subst_public_entity_value": {
         "reason": "Allocation injection exhausts the upstream reallocation retry ceiling. A separately recorded raised-ceiling diagnostic passes these fixtures.",
         "contexts": [
-          "chunksize=0 deferral=0",
-          "chunksize=0 deferral=1",
           "chunksize=1 deferral=0",
           "chunksize=1 deferral=1",
           "chunksize=2 deferral=0",
@@ -1006,26 +1004,6 @@
         ],
         "assertions": [
           "test_nsalloc_long_default_in_ext at nsalloc_tests.c:1405"
-        ]
-      },
-      "test_nsalloc_long_element": {
-        "reason": "Fallible allocation schedule exceeds the upstream retry ceiling or differs from its expected allocation point.",
-        "contexts": [
-          "chunksize=0 deferral=0",
-          "chunksize=0 deferral=1",
-          "chunksize=1 deferral=0",
-          "chunksize=1 deferral=1",
-          "chunksize=2 deferral=0",
-          "chunksize=2 deferral=1",
-          "chunksize=3 deferral=0",
-          "chunksize=3 deferral=1",
-          "chunksize=4 deferral=0",
-          "chunksize=4 deferral=1",
-          "chunksize=5 deferral=0",
-          "chunksize=5 deferral=1"
-        ],
-        "assertions": [
-          "test_nsalloc_long_element at nsalloc_tests.c:504"
         ]
       },
       "test_nsalloc_long_systemid_in_ext": {

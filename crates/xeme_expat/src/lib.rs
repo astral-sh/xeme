@@ -1995,9 +1995,7 @@ pub unsafe extern "C" fn XML_SetDefaultHandler(parser: XML_Parser, handler: Text
             (*parser).handlers.default = handler;
             (*parser).core.set_default_events(handler.is_some());
             (*parser).handlers.default_expand = false;
-            (*parser)
-                .core
-                .set_expand_internal_entities(handler.is_none());
+            (*parser).core.set_expand_internal_entities(false);
         }
     }
 }

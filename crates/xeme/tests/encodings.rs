@@ -133,7 +133,7 @@ fn custom_encodings_cannot_alias_markup_or_encode_supplementary_characters() {
 }
 
 #[test]
-fn utf16_detection_allows_leading_whitespace_without_a_bom() {
+fn explicit_utf16_allows_leading_whitespace_without_a_bom() {
     for big_endian in [true, false] {
         let bytes: Vec<_> = " \r\n<r/>"
             .encode_utf16()
@@ -146,7 +146,10 @@ fn utf16_detection_allows_leading_whitespace_without_a_bom() {
             })
             .collect();
         for chunk in [1, 2, 3, bytes.len()] {
-            let mut parser = Parser::new(Config::default());
+            let mut parser = Parser::new(Config {
+                encoding: Some(if big_endian { "UTF-16BE" } else { "UTF-16LE" }.into()),
+                ..Config::default()
+            });
             for piece in bytes.chunks(chunk) {
                 parser.feed(piece, false).unwrap();
                 while parser.next_event().unwrap().is_some() {}
@@ -165,7 +168,17 @@ fn incomplete_utf16_unit_and_surrogate_have_distinct_errors() {
         (&b"<\0r\0>\0\0"[..], ErrorKind::UnclosedToken, 1, 3),
         (&b"<\0r\0>\0\0\xd8"[..], ErrorKind::PartialCharacter, 1, 3),
     ] {
-        let mut parser = Parser::new(Config::default());
+        let mut parser = Parser::new(Config {
+            encoding: Some(
+                if input[0] == 0 {
+                    "UTF-16BE"
+                } else {
+                    "UTF-16LE"
+                }
+                .into(),
+            ),
+            ..Config::default()
+        });
         parser.feed(input, true).unwrap();
         loop {
             match parser.next_event() {
@@ -310,23 +323,34 @@ fn external_content_retains_explicit_encodings_and_utf16_signatures() {
             let mut child = parent
                 .external_child_with_encoding(Some(""), protocol)
                 .unwrap();
-            assert_eq!(encoded_content(&mut child, input, width).unwrap(), expected);
+            let result = encoded_content(&mut child, input, width);
+            if protocol.is_none() && !input.starts_with(&[0xff, 0xfe]) {
+                assert_eq!(result, Err(ErrorKind::IncorrectEncoding));
+            } else {
+                assert_eq!(result.unwrap(), expected);
+            }
         }
     }
 }
 
 #[test]
-fn dtd_and_value_children_keep_prolog_encoding_detection() {
+fn legacy_dtd_and_value_children_keep_prolog_encoding_detection() {
     let declaration: Vec<_> = " <!ELEMENT r ANY>"
         .encode_utf16()
         .flat_map(u16::to_le_bytes)
         .collect();
     for width in 1..=declaration.len() {
-        let parent = Parser::new(Config::default());
+        let parent = Parser::new(Config {
+            allow_undeclared_utf16: true,
+            ..Config::default()
+        });
         let mut dtd = parent.external_child(None, None).unwrap();
         encoded_content(&mut dtd, &declaration, width).unwrap();
     }
-    let parent = Parser::new(Config::default());
+    let parent = Parser::new(Config {
+        allow_undeclared_utf16: true,
+        ..Config::default()
+    });
     let mut dtd = parent.external_child(None, None).unwrap();
     dtd.set_param_entity_parsing(2);
     dtd.feed(b"<!ENTITY % p SYSTEM 'p'><!ENTITY e 'L%p;R'>", true)
@@ -490,6 +514,140 @@ fn unicode_signatures_override_builtin_protocol_encodings() {
                             Ok(if dtd { "" } else { "é" }.into()),
                             "protocol={protocol}, encoding={encoding}, bom={bom}, dtd={dtd}, width={width}",
                         );
+                    }
+                }
+            }
+        }
+    }
+}
+#[test]
+fn undeclared_utf16_fails_before_delivering_events() {
+    for big_endian in [false, true] {
+        for document in [
+            "<r/>",
+            " <?xml version='1.0'?><r/>",
+            "<?xml version='1.0'?><r/>",
+        ] {
+            let input: Vec<u8> = document
+                .encode_utf16()
+                .flat_map(|unit| {
+                    if big_endian {
+                        unit.to_be_bytes()
+                    } else {
+                        unit.to_le_bytes()
+                    }
+                })
+                .collect();
+            for width in [1, 7, input.len()] {
+                let mut parser = Parser::new(Config::default());
+                let result = (|| {
+                    for (index, chunk) in input.chunks(width).enumerate() {
+                        parser.feed(chunk, (index + 1) * width >= input.len())?;
+                        assert!(
+                            parser.next_event()?.is_none(),
+                            "unexpected event for {document}"
+                        );
+                    }
+                    Ok::<_, xeme::Error>(())
+                })();
+                assert_eq!(result.unwrap_err().kind, ErrorKind::IncorrectEncoding);
+            }
+        }
+    }
+}
+
+#[test]
+fn utf16_encoding_evidence_is_per_source_and_inherited_policy_is_explicit() {
+    for legacy in [false, true] {
+        for big_endian in [false, true] {
+            let encoding = if big_endian { "UTF-16BE" } else { "UTF-16LE" };
+            for context in 0..4 {
+                for evidence in ["none", "bom", "declaration", "override", "setter"] {
+                    let body = match context {
+                        2 => "<!ELEMENT r EMPTY>",
+                        3 => "X",
+                        _ => "<r/>",
+                    };
+                    let text = if evidence == "declaration" {
+                        format!("<?xml version='1.0' encoding='{encoding}'?>{body}")
+                    } else {
+                        body.into()
+                    };
+                    let text = if evidence == "bom" {
+                        format!("\u{feff}{text}")
+                    } else {
+                        text
+                    };
+                    let bytes: Vec<u8> = text
+                        .encode_utf16()
+                        .flat_map(|unit| {
+                            if big_endian {
+                                unit.to_be_bytes()
+                            } else {
+                                unit.to_le_bytes()
+                            }
+                        })
+                        .collect();
+                    for (width, input_context) in [1, 7, bytes.len()]
+                        .into_iter()
+                        .flat_map(|width| [(width, false), (width, true)])
+                    {
+                        let config = Config {
+                            allow_undeclared_utf16: legacy,
+                            ..Config::default()
+                        };
+                        let mut parent = Parser::new(config.clone());
+                        let override_encoding =
+                            (evidence == "override").then(|| encoding.to_string());
+                        if context == 3 {
+                            parent = parent.external_child(None, None).unwrap();
+                            parent
+                                .feed(b"<!ENTITY % p SYSTEM 'p'><!ENTITY e '%p;'>", true)
+                                .unwrap();
+                            while !matches!(
+                                parent.next_event().unwrap().unwrap().kind,
+                                EventKind::ExternalEntityReference(_)
+                            ) {}
+                        }
+                        let mut parser = match context {
+                            0 => Parser::new(Config {
+                                encoding: override_encoding,
+                                ..config
+                            }),
+                            1 => parent.external_child(Some(""), override_encoding).unwrap(),
+                            _ => parent.external_child(None, override_encoding).unwrap(),
+                        };
+                        if input_context {
+                            parser.enable_input_context();
+                        }
+                        if evidence == "setter" {
+                            parser.set_encoding(Some(encoding)).unwrap();
+                        }
+                        let result = encoded_content(&mut parser, &bytes, width);
+                        if !legacy && evidence == "none" {
+                            assert_eq!(
+                                result,
+                                Err(ErrorKind::IncorrectEncoding),
+                                "context={context}, {encoding}, width={width}"
+                            );
+                            assert_eq!(
+                                parser.next_event().unwrap_err().kind,
+                                ErrorKind::IncorrectEncoding
+                            );
+                        } else {
+                            assert_eq!(result.unwrap(), "");
+                            if context == 3 {
+                                parent.merge_external_subset(&parser).unwrap();
+                                let mut found = false;
+                                while let Some(event) = parent.next_event().unwrap() {
+                                    if let EventKind::EntityDeclaration(declaration) = event.kind {
+                                        assert_eq!(declaration.value.as_deref(), Some("X"));
+                                        found = true;
+                                    }
+                                }
+                                assert!(found);
+                            }
+                        }
                     }
                 }
             }

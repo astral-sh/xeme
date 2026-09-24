@@ -2277,6 +2277,56 @@ fn external_value_compatibility_survives_children_and_reset() {
 }
 
 #[test]
+fn legacy_utf16_autodetection_survives_children_and_reset() {
+    // SAFETY: The test owns the root, children, and byte buffers through parsing.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        assert!(!parser.is_null());
+        for big_endian in [false, true] {
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            for context in 0..3 {
+                let current = match context {
+                    0 => parser,
+                    1 => XML_ExternalEntityParserCreate(parser, c"".as_ptr(), ptr::null()),
+                    _ => XML_ExternalEntityParserCreate(parser, ptr::null(), ptr::null()),
+                };
+                assert!(!current.is_null());
+                let text = if context == 2 {
+                    "<!ELEMENT r EMPTY>"
+                } else {
+                    "<r/>"
+                };
+                let bytes: Vec<u8> = text
+                    .encode_utf16()
+                    .flat_map(|unit| {
+                        if big_endian {
+                            unit.to_be_bytes()
+                        } else {
+                            unit.to_le_bytes()
+                        }
+                    })
+                    .collect();
+                for (index, byte) in bytes.iter().enumerate() {
+                    assert_eq!(
+                        XML_Parse(
+                            current,
+                            ptr::from_ref(byte).cast(),
+                            1,
+                            c_int::from(index + 1 == bytes.len())
+                        ),
+                        OK
+                    );
+                }
+                if context != 0 {
+                    XML_ParserFree(current);
+                }
+            }
+        }
+        XML_ParserFree(parser);
+    }
+}
+
+#[test]
 fn unresolved_external_general_entity_reaches_the_default_handler() {
     // SAFETY: The default callback owns no parser references and records raw input.
     unsafe {

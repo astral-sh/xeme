@@ -36,6 +36,11 @@ release their recursion state when expansion completes. The C adapter enables
 internal parameter reference truncates the external value and remains open in
 the shared DTD. The option defaults to `false` for Rust callers.
 
+The native parser rejects inferred UTF-16 without a BOM or encoding declaration
+unless the caller supplies an encoding. This check applies independently to each
+external source, before document events or value output. The C adapter enables
+`Config::allow_undeclared_utf16` to retain Expat's permissive autodetection.
+
 The pinned CPython consumer needs the
 [allocation-cleanup backport](../tools/cpython/consumer-fix/README.md).
 

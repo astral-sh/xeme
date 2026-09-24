@@ -26,6 +26,8 @@ use xeme_storage::{
 };
 
 mod content_model;
+#[cfg(test)]
+mod content_model_tests;
 
 const OK: c_int = 1;
 const ERROR: c_int = 0;

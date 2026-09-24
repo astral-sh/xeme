@@ -44,3 +44,22 @@ Every report identifies `xeme_compat_2.8.5` and `expat_2.8.5`. The 22 harness
 self-tests pass on Linux; macOS passes 20 with the two Linux-only isolation tests
 skipped. Ruff and ty (Linux target) pass. Raw results are under
 `.cache/review-stack/expat-285-followup-linux-*`.
+
+## Declaration differential coverage
+
+The Expat differential fuzz target now admits XML declarations without encoding
+pseudo-attributes, including invalid and incomplete versions. Its conservative
+filter still excludes NUL/non-UTF-8 inputs, DTDs, and `<?xml` spans containing
+`encoding` before `?>` or EOF. Dedicated unit tests cover declaration admission
+and these retained exclusions.
+
+Ten new seeds cover `1.0`, `1.1`, `1.01`, `2.0`, a missing digit, an empty version,
+a non-ASCII digit, an incomplete declaration, a declaration inside content, and
+`standalone`. All 19 retained seeds replayed successfully against the separately
+linked Expat 2.8.5 oracle. Each new declaration also passed with every control byte:
+2,560 fixed inputs covering chunk widths 1–128 and both namespace modes.
+
+These were uninstrumented debug-build replays, not a mutation campaign or
+sanitizer run. The three fuzz-support unit tests, target build, Clippy, and
+formatting pass. Logs and the matrix's corpus/oracle/reference hashes are in
+`.cache/review-stack/expat-285-declaration-{seeds,matrix}.*`.

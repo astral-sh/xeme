@@ -73,8 +73,11 @@ by the target's filters.
 
 `expat_differential` compares parse success and successful element, attribute, and
 character-data callbacks against Expat 2.8.5. It compares UTF-8 inputs up to 8,192
-bytes, excluding NUL bytes and the substrings `<!DOCTYPE` and `<?xml`. UTF-16,
-DTD/entity grammar, and encoding declarations are outside this target. Xeme
+bytes, including version declarations and malformed or incomplete versions.
+It excludes NUL bytes, the substring `<!DOCTYPE`, and any `<?xml` span containing
+`encoding` before its first `?>` (or EOF). This conservative filter also excludes
+XML-like processing instructions containing that substring. UTF-16, DTD/entity
+grammar, and encoding declarations are outside this target. Xeme
 resource-limit errors (43) also skip comparison. Error codes, positions, and
 partial callback prefixes on failure are not compared. Adjacent observed text
 callbacks are coalesced. A leading control byte selects namespace mode and a chunk
@@ -105,4 +108,6 @@ builds the separate C oracle without sanitizer instrumentation. Execution totals
 include filtered inputs and do not give an actual oracle-comparison count.
 
 Retained seeds include a reduced CR-plus-quote acceptance bug and an overlapping
-processing-instruction delimiter that caused a DTD slicing panic.
+processing-instruction delimiter that caused a DTD slicing panic. Declaration
+seeds cover valid `1.x` versions, invalid and incomplete versions, a declaration
+inside element content, and the `standalone` pseudo-attribute.

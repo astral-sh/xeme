@@ -155,12 +155,7 @@ fuzz_target!(|data: &[u8]| {
     };
     // Encoding declarations and DTD grammar have separately documented differences.
     // Limit errors are outside this semantic oracle; dedicated targets cover them.
-    if bytes.len() > 8192
-        || bytes.contains(&0)
-        || std::str::from_utf8(bytes).is_err()
-        || bytes.windows(9).any(|part| part == b"<!DOCTYPE")
-        || bytes.windows(5).any(|part| part == b"<?xml")
-    {
+    if !xeme_fuzz::expat_differential_input_supported(bytes) {
         return;
     }
     let namespaces = control & 128 != 0;

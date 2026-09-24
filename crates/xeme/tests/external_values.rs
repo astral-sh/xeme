@@ -9,6 +9,140 @@ enum Load {
 }
 
 #[test]
+fn native_external_values_expand_internal_references_and_resume() {
+    let dtd = b"<!ENTITY % i 'I'><!ENTITY % p SYSTEM 'p'><!ENTITY e 'L%p;R'>";
+    for width in [1, 7, 4096] {
+        let values = parse(
+            dtd,
+            width,
+            2,
+            false,
+            &[("p", Load::Parse(b"X%i;Y"))],
+            Config::default(),
+        )
+        .unwrap();
+        assert!(
+            values
+                .iter()
+                .any(|(name, value)| name == "e" && value == "LXIYR")
+        );
+        let dtd = b"<!ENTITY % i 'I'><!ENTITY % p SYSTEM 'p'><!ENTITY e 'L%p;R'><!ENTITY z '%i;'><!ENTITY twice '%p;%p;'>";
+        let values = parse(
+            dtd,
+            width,
+            2,
+            false,
+            &[("p", Load::Parse(b"X%i;Y"))],
+            Config::default(),
+        )
+        .unwrap();
+        assert!(
+            values
+                .iter()
+                .any(|(name, value)| name == "z" && value == "I")
+        );
+        assert!(
+            values
+                .iter()
+                .any(|(name, value)| name == "twice" && value == "XIYXIY")
+        );
+        let dtd = b"<!ENTITY % i ''><!ENTITY % p SYSTEM 'p'><!ENTITY e 'L%p;R'>";
+        let values = parse(
+            dtd,
+            width,
+            2,
+            false,
+            &[("p", Load::Parse(b"X%i;Y"))],
+            Config::default(),
+        )
+        .unwrap();
+        assert!(
+            values
+                .iter()
+                .any(|(name, value)| name == "e" && value == "LXYR")
+        );
+        let dtd = b"<!ENTITY % q SYSTEM 'q'><!ENTITY % i 'I&#37;q;J'><!ENTITY % p SYSTEM 'p'><!ENTITY e 'L%p;R'>";
+        let values = parse(
+            dtd,
+            width,
+            2,
+            false,
+            &[("p", Load::Parse(b"X%i;Y")), ("q", Load::Parse(b"Q"))],
+            Config::default(),
+        )
+        .unwrap();
+        assert!(
+            values
+                .iter()
+                .any(|(name, value)| name == "e" && value == "LXIQJYR")
+        );
+        let dtd = b"<!ENTITY % i '&#37;i;'><!ENTITY % p SYSTEM 'p'><!ENTITY e 'L%p;R'>";
+        assert_eq!(
+            parse(
+                dtd,
+                width,
+                2,
+                false,
+                &[("p", Load::Parse(b"X%i;Y"))],
+                Config::default()
+            ),
+            Err(ErrorKind::RecursiveEntityReference)
+        );
+    }
+}
+
+#[test]
+fn native_external_internal_values_are_bounded() {
+    let dtd = format!(
+        "<!ENTITY % a '{}'><!ENTITY % b '{}'><!ENTITY % c '{}'><!ENTITY % p SYSTEM 'p'><!ENTITY e '%p;'>",
+        "A".repeat(512),
+        "&#37;a;".repeat(8),
+        "&#37;b;".repeat(8)
+    );
+    for width in [1, 7, 4096] {
+        let values = parse(
+            dtd.as_bytes(),
+            width,
+            2,
+            false,
+            &[("p", Load::Parse(b"%c;"))],
+            Config::default(),
+        )
+        .unwrap();
+        assert!(
+            values
+                .iter()
+                .any(|(name, value)| name == "e" && value == &"A".repeat(32768))
+        );
+        for limits in [
+            Limits {
+                max_entity_expansion_bytes: 8192,
+                ..Limits::default()
+            },
+            Limits {
+                max_entity_depth: 3,
+                ..Limits::default()
+            },
+        ] {
+            assert_eq!(
+                parse(
+                    dtd.as_bytes(),
+                    width,
+                    2,
+                    false,
+                    &[("p", Load::Parse(b"%c;"))],
+                    Config {
+                        limits,
+                        ..Config::default()
+                    }
+                ),
+                Err(ErrorKind::LimitExceeded)
+            );
+        }
+    }
+}
+
+#[test]
 fn value_continuations_preserve_grammar_and_default_callback_state() {
     let bodies = [
         "<!ENTITY e %missing;'L%p;R'>",
@@ -349,7 +483,7 @@ fn nested_value_output_and_child_truncation_follow_source_boundaries() {
             "LX\"QYR",
             false,
         ),
-        (b"X%i;Y".as_slice(), Load::Parse(b""), "LXR", false),
+        (b"X%i;Y".as_slice(), Load::Parse(b""), "LXIYR", false),
         (b"X%missing;Y".as_slice(), Load::Parse(b""), "LXR", true),
     ] {
         let values = parse(
@@ -517,7 +651,10 @@ fn external_value_internal_references_remain_open_in_the_shared_dtd() {
                     2,
                     false,
                     &[("a", Load::Parse(b"%b;")), ("c", Load::Parse(b"%a;"))],
-                    Config::default(),
+                    Config {
+                        expat_external_value_compatibility: true,
+                        ..Config::default()
+                    },
                 ),
                 Err(ErrorKind::RecursiveEntityReference),
                 "{} / chunk {chunk}",
@@ -535,7 +672,10 @@ fn external_value_internal_references_remain_open_in_the_shared_dtd() {
             2,
             false,
             &[("a", Load::Parse(value))],
-            Config::default(),
+            Config {
+                expat_external_value_compatibility: true,
+                ..Config::default()
+            },
         )
         .unwrap();
         assert!(
@@ -548,7 +688,10 @@ fn external_value_internal_references_remain_open_in_the_shared_dtd() {
 
 #[test]
 fn open_value_state_is_shared_by_siblings_but_not_general_entity_copies() {
-    let root = Parser::new(Config::default());
+    let root = Parser::new(Config {
+        expat_external_value_compatibility: true,
+        ..Config::default()
+    });
     let mut dtd = root.external_child(None, None).unwrap();
     dtd.feed(
         b"<!ENTITY % a SYSTEM 'a'><!ENTITY % b 'B'><!ENTITY n '%a;'>",

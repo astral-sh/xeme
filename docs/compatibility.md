@@ -36,6 +36,11 @@ release their recursion state when expansion completes. The C adapter enables
 internal parameter reference truncates the external value and remains open in
 the shared DTD. The option defaults to `false` for Rust callers.
 
+Native XML and text declarations validate the XML `VersionNum` grammar. The C
+adapter enables `Config::allow_invalid_xml_versions` to retain Expat's permissive
+version syntax. This option defaults to `false` and does not change XML 1.0
+character rules or enable XML 1.1 features.
+
 The pinned CPython consumer needs the
 [allocation-cleanup backport](../tools/cpython/consumer-fix/README.md).
 

@@ -41,6 +41,7 @@ impl Encoding {
 struct Detection {
     requested: Option<String>,
     allow_utf8_bom_encoding_mismatch: bool,
+    allow_invalid_xml_versions: bool,
     declaration_checked: usize,
     unknown_name: Option<String>,
     encoding_error_position: Option<Position>,
@@ -174,6 +175,7 @@ impl Detection {
                             && crate::malformed_ascii_declaration(
                                 &declaration[5..],
                                 declaration_context,
+                                self.allow_invalid_xml_versions,
                             )
                         {
                             // These bytes are invariant under every custom map.
@@ -248,13 +250,14 @@ impl Decoder {
     pub(crate) fn new(
         requested: Option<&str>,
         allocator: Allocator,
-        allow_utf8_bom_encoding_mismatch: bool,
+        config: &crate::Config,
     ) -> Result<Self, Error> {
         Ok(Self {
             allocator,
             encoding: None,
             detection: Detection {
-                allow_utf8_bom_encoding_mismatch,
+                allow_utf8_bom_encoding_mismatch: config.allow_utf8_bom_encoding_mismatch,
+                allow_invalid_xml_versions: config.allow_invalid_xml_versions,
                 requested: requested
                     .map(|name| String::try_from_str_in(name, allocator))
                     .transpose()?,
@@ -1654,7 +1657,9 @@ mod tests {
             for split in 0..=bytes.len() {
                 for warm in [false, true] {
                     let make = || {
-                        let mut decoder = Decoder::new(None, Allocator::System, false).unwrap();
+                        let mut decoder =
+                            Decoder::new(None, Allocator::System, &crate::Config::default())
+                                .unwrap();
                         decoder.encoding = Some(Encoding::Utf8);
                         if warm {
                             decoder.append_pending(&[0; 64]).unwrap();
@@ -1712,7 +1717,7 @@ mod tests {
             let tracker = AllocationTracker::try_new_in(Allocator::System).unwrap();
             with_tracking(&tracker, || {
                 let allocator = Allocator::TrackedSystem;
-                let mut decoder = Decoder::new(None, allocator, false).unwrap();
+                let mut decoder = Decoder::new(None, allocator, &crate::Config::default()).unwrap();
                 decoder.encoding = Some(Encoding::Utf8);
                 let bytes = [b'x'; 2048];
                 decoder.append_pending(&bytes).unwrap();

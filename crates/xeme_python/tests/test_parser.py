@@ -13,6 +13,14 @@ def parse(data, **options):
     return list(parser.read_events())
 
 
+def feed_chunks(parser, data, width, events):
+    for offset in range(0, len(data), width):
+        parser.feed(
+            data[offset : offset + width], final=offset + width >= len(data)
+        )
+        events.extend(parser.read_events())
+
+
 def payloads(events):
     """Compare document content without depending on text event boundaries."""
     result = []
@@ -80,6 +88,23 @@ class ParserTests(unittest.TestCase):
             parse(b'<?xml version="1.0"?><r/>')[0].data,
             ("1.0", None, None),
         )
+
+    def test_xml_version_grammar(self):
+        for version in ["1.0", "1.2", "1.01", "banana", "2.0", "1", "1."]:
+            data = f"<?xml version='{version}'?><r/>".encode()
+            for width in [1, 7, len(data)]:
+                with self.subTest(version=version, width=width):
+                    parser = xeme.Parser()
+                    events = []
+
+                    if version in ["1.0", "1.2", "1.01"]:
+                        feed_chunks(parser, data, width, events)
+                        self.assertEqual(events[0].data, (version, None, None))
+                    else:
+                        with self.assertRaises(xeme.ParseError) as raised:
+                            feed_chunks(parser, data, width, events)
+                        self.assertEqual(raised.exception.kind, "XmlDeclaration")
+                        self.assertEqual(events, [])
 
     def test_utf8_all_two_chunk_boundaries(self):
         document = '<r a="é">€\r\n𐐀&amp;tail</r>'.encode()

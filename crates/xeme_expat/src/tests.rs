@@ -2277,6 +2277,34 @@ fn external_value_compatibility_survives_children_and_reset() {
 }
 
 #[test]
+fn legacy_version_syntax_survives_children_and_reset() {
+    // SAFETY: The test owns every parser and input through synchronous parsing.
+    unsafe {
+        let parser = XML_ParserCreate(ptr::null());
+        assert!(!parser.is_null());
+        for version in ["banana", "2.0", "1", "1."] {
+            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            let input = format!("<?xml version='{version}'?><r/>");
+            assert_eq!(
+                XML_Parse(parser, input.as_ptr().cast(), input.len() as c_int, 1),
+                OK
+            );
+            for context in [ptr::null(), c"".as_ptr()] {
+                let child = XML_ExternalEntityParserCreate(parser, context, ptr::null());
+                assert!(!child.is_null());
+                let input = format!("<?xml version='{version}' encoding='UTF-8'?>");
+                assert_eq!(
+                    XML_Parse(child, input.as_ptr().cast(), input.len() as c_int, 1),
+                    OK
+                );
+                XML_ParserFree(child);
+            }
+        }
+        XML_ParserFree(parser);
+    }
+}
+
+#[test]
 fn unresolved_external_general_entity_reaches_the_default_handler() {
     // SAFETY: The default callback owns no parser references and records raw input.
     unsafe {

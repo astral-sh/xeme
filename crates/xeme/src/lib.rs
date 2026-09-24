@@ -103,6 +103,9 @@ pub struct Config {
     /// Preserve Expat's truncation and persistent recursion state for internal
     /// parameter references in external entity values. Disabled by default.
     pub expat_external_value_compatibility: bool,
+    /// Accept Expat's permissive declaration version values. Disabled by default;
+    /// native declarations require `1.` followed by one or more ASCII digits.
+    pub allow_invalid_xml_versions: bool,
     pub limits: Limits,
 }
 
@@ -845,7 +848,7 @@ impl Parser {
         allocator: Allocator,
     ) -> Result<Self, Error> {
         config.encoding = None;
-        let decoder = Decoder::new(encoding, allocator, config.allow_utf8_bom_encoding_mismatch)?;
+        let decoder = Decoder::new(encoding, allocator, &config)?;
         let mut namespaces = hash_map(allocator);
         if config.namespace_separator.is_some() {
             try_insert(
@@ -1061,11 +1064,7 @@ impl Parser {
         }
         // This initialization setter is transactional: an allocation failure must
         // leave the previous decoder available for autodetection during parsing.
-        self.decoder = Decoder::new(
-            encoding,
-            self.allocator,
-            self.config.allow_utf8_bom_encoding_mismatch,
-        )?;
+        self.decoder = Decoder::new(encoding, self.allocator, &self.config)?;
         Ok(())
     }
 
@@ -3628,9 +3627,13 @@ impl Parser {
                 version,
                 encoding,
                 standalone,
-            } = declaration_fields(rest, &attrs, context, |value| {
-                token.for_slice(value).decoded(allocator)
-            })
+            } = declaration_fields(
+                rest,
+                &attrs,
+                context,
+                self.config.allow_invalid_xml_versions,
+                |value| token.for_slice(value).decoded(allocator),
+            )
             .map_err(|failure| match failure {
                 DeclarationFailure::Allocation(error) => Error::from(error),
                 DeclarationFailure::Syntax {
@@ -4960,6 +4963,7 @@ fn declaration_fields<'a>(
     rest: &'a str,
     attrs: &[RawAttribute],
     context: DeclarationContext,
+    allow_invalid_xml_versions: bool,
     mut decode: impl FnMut(&'a str) -> Result<lexical::Decoded<'a>, AllocError>,
 ) -> Result<Declaration<'a>, DeclarationFailure> {
     let syntax = |message| DeclarationFailure::Syntax {
@@ -4977,6 +4981,13 @@ fn declaration_fields<'a>(
         } else {
             (None, Some(first))
         };
+        if !allow_invalid_xml_versions
+            && version
+                .as_ref()
+                .is_some_and(|version| !valid_xml_version(version))
+        {
+            return Err(syntax("invalid XML version"));
+        }
         let (name, encoding, _, _) =
             encoding_attr.ok_or_else(|| syntax("text declaration requires an encoding"))?;
         let encoding = decode(encoding)?;
@@ -4996,6 +5007,9 @@ fn declaration_fields<'a>(
     if attrs.is_empty()
         || attrs[0].name(rest) != "version"
         || !version.as_ref().is_some_and(|version| {
+            if !allow_invalid_xml_versions {
+                return valid_xml_version(version);
+            }
             !version.is_empty()
                 && version
                     .bytes()
@@ -5036,10 +5050,20 @@ fn declaration_fields<'a>(
     })
 }
 
+fn valid_xml_version(version: &str) -> bool {
+    version
+        .strip_prefix("1.")
+        .is_some_and(|minor| !minor.is_empty() && minor.bytes().all(|byte| byte.is_ascii_digit()))
+}
+
 /// Prove malformed syntax only in a complete bounded ASCII bootstrap declaration.
 /// Ordinary parsing still reports the error after token limits, raw publication
 /// and source accounting. This helper creates no owned values or parser state.
-fn malformed_ascii_declaration(rest: &str, context: DeclarationContext) -> bool {
+fn malformed_ascii_declaration(
+    rest: &str,
+    context: DeclarationContext,
+    allow_invalid_xml_versions: bool,
+) -> bool {
     debug_assert!(rest.is_ascii());
     if invalid_xml_char(rest).is_some() {
         return true;
@@ -5061,9 +5085,13 @@ fn malformed_ascii_declaration(rest: &str, context: DeclarationContext) -> bool 
                 count += 1;
             }
             Ok(tag::Step::End) => {
-                return declaration_fields(rest, &attrs[..count], context, |value| {
-                    Ok(lexical::Decoded::Borrowed(value))
-                })
+                return declaration_fields(
+                    rest,
+                    &attrs[..count],
+                    context,
+                    allow_invalid_xml_versions,
+                    |value| Ok(lexical::Decoded::Borrowed(value)),
+                )
                 .is_err();
             }
             Err(_) => return true,

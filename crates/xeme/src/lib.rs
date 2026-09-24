@@ -103,9 +103,6 @@ pub struct Config {
     /// Preserve Expat's truncation and persistent recursion state for internal
     /// parameter references in external entity values. Disabled by default.
     pub expat_external_value_compatibility: bool,
-    /// Accept Expat's permissive declaration version values. Disabled by default;
-    /// native declarations require `1.` followed by one or more ASCII digits.
-    pub allow_invalid_xml_versions: bool,
     /// Accept inferred UTF-16 without a BOM, encoding declaration, or external
     /// encoding information, matching Expat. Disabled by default.
     pub allow_undeclared_utf16: bool,
@@ -3646,13 +3643,9 @@ impl Parser {
                 version,
                 encoding,
                 standalone,
-            } = declaration_fields(
-                rest,
-                &attrs,
-                context,
-                self.config.allow_invalid_xml_versions,
-                |value| token.for_slice(value).decoded(allocator),
-            )
+            } = declaration_fields(rest, &attrs, context, |value| {
+                token.for_slice(value).decoded(allocator)
+            })
             .map_err(|failure| match failure {
                 DeclarationFailure::Allocation(error) => Error::from(error),
                 DeclarationFailure::Syntax {
@@ -4985,7 +4978,6 @@ fn declaration_fields<'a>(
     rest: &'a str,
     attrs: &[RawAttribute],
     context: DeclarationContext,
-    allow_invalid_xml_versions: bool,
     mut decode: impl FnMut(&'a str) -> Result<lexical::Decoded<'a>, AllocError>,
 ) -> Result<Declaration<'a>, DeclarationFailure> {
     let syntax = |message| DeclarationFailure::Syntax {
@@ -5003,10 +4995,9 @@ fn declaration_fields<'a>(
         } else {
             (None, Some(first))
         };
-        if !allow_invalid_xml_versions
-            && version
-                .as_ref()
-                .is_some_and(|version| !valid_xml_version(version))
+        if version
+            .as_ref()
+            .is_some_and(|version| !valid_xml_version(version))
         {
             return Err(syntax("invalid XML version"));
         }
@@ -5028,15 +5019,9 @@ fn declaration_fields<'a>(
         .transpose()?;
     if attrs.is_empty()
         || attrs[0].name(rest) != "version"
-        || !version.as_ref().is_some_and(|version| {
-            if !allow_invalid_xml_versions {
-                return valid_xml_version(version);
-            }
-            !version.is_empty()
-                && version
-                    .bytes()
-                    .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_'))
-        })
+        || !version
+            .as_ref()
+            .is_some_and(|version| valid_xml_version(version))
     {
         return Err(DeclarationFailure::Syntax {
             message: "XML declaration must begin with a version",
@@ -5081,11 +5066,7 @@ fn valid_xml_version(version: &str) -> bool {
 /// Prove malformed syntax only in a complete bounded ASCII bootstrap declaration.
 /// Ordinary parsing still reports the error after token limits, raw publication
 /// and source accounting. This helper creates no owned values or parser state.
-fn malformed_ascii_declaration(
-    rest: &str,
-    context: DeclarationContext,
-    allow_invalid_xml_versions: bool,
-) -> bool {
+fn malformed_ascii_declaration(rest: &str, context: DeclarationContext) -> bool {
     debug_assert!(rest.is_ascii());
     if invalid_xml_char(rest).is_some() {
         return true;
@@ -5107,13 +5088,9 @@ fn malformed_ascii_declaration(
                 count += 1;
             }
             Ok(tag::Step::End) => {
-                return declaration_fields(
-                    rest,
-                    &attrs[..count],
-                    context,
-                    allow_invalid_xml_versions,
-                    |value| Ok(lexical::Decoded::Borrowed(value)),
-                )
+                return declaration_fields(rest, &attrs[..count], context, |value| {
+                    Ok(lexical::Decoded::Borrowed(value))
+                })
                 .is_err();
             }
             Err(_) => return true,

@@ -91,7 +91,7 @@ struct Oracle {
 impl Oracle {
     fn new() -> Self {
         let executable = std::env::var_os("XEME_EXPAT_ORACLE")
-            .expect("set XEME_EXPAT_ORACLE to the separately linked Expat 2.8.4 oracle");
+            .expect("set XEME_EXPAT_ORACLE to the separately linked Expat 2.8.5 oracle");
         let mut child = Command::new(executable)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -105,9 +105,9 @@ impl Oracle {
             output,
         };
         let mut greeting = [0; 8];
-        if oracle.output.read_exact(&mut greeting).is_err() || &greeting != b"EXPAT284" {
+        if oracle.output.read_exact(&mut greeting).is_err() || &greeting != b"EXPAT285" {
             oracle.stop();
-            panic!("oracle must link Expat 2.8.4 and provide its protocol greeting");
+            panic!("oracle must link Expat 2.8.5 and provide its protocol greeting");
         }
         oracle
     }

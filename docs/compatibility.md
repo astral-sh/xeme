@@ -36,9 +36,8 @@ release their recursion state when expansion completes. The C adapter enables
 internal parameter reference truncates the external value and remains open in
 the shared DTD. The option defaults to `false` for Rust callers.
 
-Native XML and text declarations validate the XML `VersionNum` grammar. The C
-adapter enables `Config::allow_invalid_xml_versions` to retain Expat's permissive
-version syntax. This option defaults to `false` and does not change XML 1.0
+Native and C XML and text declarations validate the XML `VersionNum` grammar,
+matching Expat 2.8.5. Accepting versions such as `1.1` does not change XML 1.0
 character rules or enable XML 1.1 features.
 
 The native parser rejects inferred UTF-16 without a BOM or encoding declaration
@@ -125,7 +124,7 @@ only when they match the checked-in baseline.
 
 | Suite | Checks |
 | --- | --- |
-| Expat 2.8.4 API | All 395 tests in 12 configurations: 4,740 rows. Expat must pass every row. Candidate failures must match the checked-in configuration and assertion baseline. |
+| Expat 2.8.5 API | All 398 tests in 12 configurations: 4,776 rows. Expat must pass every row. Candidate failures must match the checked-in configuration and assertion baseline. |
 | Allocation behavior | All 83 public allocation-suite tests plus the deferral-growth test in 12 configurations: 1,008 reported rows per engine. Both engines must pass the adapted tests and their ownership checks, with no failure allowance. |
 | W3C XML catalog through the C interface | All 6,003 selected rows per engine, including 81 optional observations. Verify selected tests, loaded bytes and namespace mode; compare acceptance and child outcomes. |
 | Differential corpus | Named fixtures plus 200 deterministic generated cases. Verify every worker ran and compare callbacks and error codes; exact text fragmentation and final positions have a separate strict mode. |
@@ -133,7 +132,8 @@ only when they match the checked-in baseline.
 The API baseline retains 509 failures: 484 allocation retry/schedule assertions,
 12 literal version checks, 12 single-buffer policy checks and one deferral-growth
 assertion. An early allocation assertion can hide later semantic assertions.
-The [rebase check](evidence/2026-09-13-rebase.md) records the latest baseline update.
+The [2.8.5 update](evidence/2026-09-24-expat-2.8.5.md) records the new test
+inventory, assertion locations, and unchanged failure allowances.
 The separate [allocation-behavior gate](evidence/2026-09-13-allocation-behavior.md)
 raises retry ceilings to 512 and adapts allocation-count assumptions while
 retaining callback, error, state-transition and cleanup checks. The deferral test
@@ -158,10 +158,10 @@ For a local run, use a fresh output directory and the pinned sources from CI:
 
 ```console
 python3 tools/compatibility.py api --library /absolute/libxeme_expat.so \
-  --reference /absolute/libexpat.so --source /absolute/expat-2.8.4 \
+  --reference /absolute/libexpat.so --source /absolute/expat-2.8.5 \
   --config /absolute/expat-build/expat_config.h --output /tmp/xeme-api
 python3 tools/compatibility.py allocation --library /absolute/libxeme_expat.so \
-  --reference /absolute/libexpat.so --source /absolute/expat-2.8.4 \
+  --reference /absolute/libexpat.so --source /absolute/expat-2.8.5 \
   --config /absolute/expat-build/expat_config.h --output /tmp/xeme-allocation
 python3 tools/compatibility.py w3c --library /absolute/libxeme_expat.so \
   --reference /absolute/libexpat.so --source /absolute/xmlconf --output /tmp/xeme-w3c

@@ -1,6 +1,6 @@
 {
   "source_revision": "fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f",
-  "expat_revision": "12cf0b1f25f026a022fe728ad8f7e3d017285b80",
+  "expat_revision": "4b3f0b06f39fb5529cead381694f8929901bc273",
   "w3c_revision": "3fb4516daedd0ac736249a383733883b95fcdbb2",
   "policy": "Known failures remain failures in raw suite outputs. New failures, assertion changes, missing cases and harness failures reject the regression gate; improvements are reported separately. Baseline edits require review.",
   "api": {
@@ -399,6 +399,7 @@
       "test_utf16_pe",
       "test_utf16_pi",
       "test_utf16_second_attr",
+      "test_utf16_surrogate_pairs",
       "test_utf8_false_rejection",
       "test_utf8_in_cdata_section",
       "test_utf8_in_cdata_section_2",
@@ -409,11 +410,13 @@
       "test_wfc_undeclared_entity_unread_external_subset",
       "test_wfc_undeclared_entity_with_external_subset",
       "test_wfc_undeclared_entity_with_external_subset_standalone",
+      "test_xmldecl_accepts_1_x_version",
       "test_xmldecl_empty_version",
       "test_xmldecl_invalid",
       "test_xmldecl_misplaced",
       "test_xmldecl_missing_attr",
-      "test_xmldecl_missing_value"
+      "test_xmldecl_missing_value",
+      "test_xmldecl_wrong_version_number"
     ],
     "failures": {
       "test_alloc_attribute_enum_value": {
@@ -933,7 +936,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_buffer_can_grow_to_max at basic_tests.c:3456"
+          "test_buffer_can_grow_to_max at basic_tests.c:3797"
         ]
       },
       "test_bypass_heuristic_when_close_to_bufsize": {
@@ -942,7 +945,7 @@
           "chunksize=0 deferral=1"
         ],
         "assertions": [
-          "test_bypass_heuristic_when_close_to_bufsize at basic_tests.c:6398"
+          "test_bypass_heuristic_when_close_to_bufsize at basic_tests.c:6739"
         ]
       },
       "test_misc_version": {
@@ -982,7 +985,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_long_context at nsalloc_tests.c:934"
+          "test_nsalloc_long_context at nsalloc_tests.c:936"
         ]
       },
       "test_nsalloc_long_default_in_ext": {
@@ -1002,7 +1005,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_long_default_in_ext at nsalloc_tests.c:1403"
+          "test_nsalloc_long_default_in_ext at nsalloc_tests.c:1405"
         ]
       },
       "test_nsalloc_long_element": {
@@ -1022,7 +1025,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_long_element at nsalloc_tests.c:502"
+          "test_nsalloc_long_element at nsalloc_tests.c:504"
         ]
       },
       "test_nsalloc_long_systemid_in_ext": {
@@ -1042,7 +1045,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_long_systemid_in_ext at nsalloc_tests.c:1472"
+          "test_nsalloc_long_systemid_in_ext at nsalloc_tests.c:1474"
         ]
       },
       "test_nsalloc_parse_buffer": {
@@ -1062,7 +1065,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_parse_buffer at nsalloc_tests.c:129"
+          "test_nsalloc_parse_buffer at nsalloc_tests.c:131"
         ]
       },
       "test_nsalloc_prefixed_element": {
@@ -1082,7 +1085,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_prefixed_element at nsalloc_tests.c:1508"
+          "test_nsalloc_prefixed_element at nsalloc_tests.c:1510"
         ]
       },
       "test_nsalloc_realloc_binding_uri": {
@@ -1102,7 +1105,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_realloc_binding_uri at nsalloc_tests.c:541"
+          "test_nsalloc_realloc_binding_uri at nsalloc_tests.c:543"
         ]
       },
       "test_nsalloc_realloc_long_context": {
@@ -1122,7 +1125,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_realloc_long_context at nsalloc_tests.c:963"
+          "test_nsalloc_realloc_long_context at nsalloc_tests.c:965"
         ]
       },
       "test_nsalloc_realloc_long_context_2": {
@@ -1142,7 +1145,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_realloc_long_context_2 at nsalloc_tests.c:963"
+          "test_nsalloc_realloc_long_context_2 at nsalloc_tests.c:965"
         ]
       },
       "test_nsalloc_realloc_long_context_3": {
@@ -1162,7 +1165,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_realloc_long_context_3 at nsalloc_tests.c:963"
+          "test_nsalloc_realloc_long_context_3 at nsalloc_tests.c:965"
         ]
       },
       "test_nsalloc_realloc_long_context_4": {
@@ -1182,7 +1185,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_realloc_long_context_4 at nsalloc_tests.c:963"
+          "test_nsalloc_realloc_long_context_4 at nsalloc_tests.c:965"
         ]
       },
       "test_nsalloc_realloc_long_context_5": {
@@ -1202,7 +1205,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_realloc_long_context_5 at nsalloc_tests.c:963"
+          "test_nsalloc_realloc_long_context_5 at nsalloc_tests.c:965"
         ]
       },
       "test_nsalloc_realloc_long_context_6": {
@@ -1222,7 +1225,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_realloc_long_context_6 at nsalloc_tests.c:963"
+          "test_nsalloc_realloc_long_context_6 at nsalloc_tests.c:965"
         ]
       },
       "test_nsalloc_realloc_long_context_7": {
@@ -1242,7 +1245,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_realloc_long_context_7 at nsalloc_tests.c:963"
+          "test_nsalloc_realloc_long_context_7 at nsalloc_tests.c:965"
         ]
       },
       "test_nsalloc_realloc_long_ge_name": {
@@ -1262,7 +1265,7 @@
           "chunksize=5 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_realloc_long_ge_name at nsalloc_tests.c:1246"
+          "test_nsalloc_realloc_long_ge_name at nsalloc_tests.c:1248"
         ]
       },
       "test_nsalloc_realloc_long_prefix": {
@@ -1272,7 +1275,7 @@
           "chunksize=0 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_realloc_long_prefix at nsalloc_tests.c:617"
+          "test_nsalloc_realloc_long_prefix at nsalloc_tests.c:619"
         ]
       },
       "test_nsalloc_realloc_longer_prefix": {
@@ -1282,7 +1285,7 @@
           "chunksize=0 deferral=1"
         ],
         "assertions": [
-          "test_nsalloc_realloc_longer_prefix at nsalloc_tests.c:693"
+          "test_nsalloc_realloc_longer_prefix at nsalloc_tests.c:695"
         ]
       }
     },

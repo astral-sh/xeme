@@ -1,5 +1,57 @@
 use xeme::{Config, ErrorKind, EventKind, Parser};
 
+#[test]
+fn utf16_surrogate_boundaries_are_validated_across_chunks() {
+    // Expat 2.8.5 / CVE-2026-93990: a high surrogate must not consume an
+    // ordinary character or markup as the second half of a pair.
+    let boundaries = [0xd7ff, 0xd800, 0xdbff, 0xdc00, 0xdfff, 0xe000];
+    for first in boundaries {
+        for second in boundaries.into_iter().chain([0x0041, 0x003c]) {
+            let expected = char::decode_utf16([first, second]).collect::<Result<String, _>>();
+            // A literal '<' is markup; only use it to test malformed pairs.
+            if second == 0x003c && expected.is_ok() {
+                continue;
+            }
+            for big_endian in [false, true] {
+                let input: Vec<u8> = [0xfeff]
+                    .into_iter()
+                    .chain("<r>".encode_utf16())
+                    .chain([first, second])
+                    .chain("</r>".encode_utf16())
+                    .flat_map(|unit| {
+                        if big_endian {
+                            unit.to_be_bytes()
+                        } else {
+                            unit.to_le_bytes()
+                        }
+                    })
+                    .collect();
+                for width in [1, 2, 3, 7, input.len()] {
+                    let mut parser = Parser::new(Config::default());
+                    let result = (|| {
+                        let mut text = String::new();
+                        for (index, part) in input.chunks(width).enumerate() {
+                            parser.feed(part, (index + 1) * width >= input.len())?;
+                            while let Some(event) = parser.next_event()? {
+                                if let EventKind::Text(value) = event.kind {
+                                    text.push_str(&value);
+                                }
+                            }
+                        }
+                        Ok::<_, xeme::Error>(text)
+                    })()
+                    .map_err(|error| error.kind);
+                    assert_eq!(
+                        result,
+                        expected.clone().map_err(|_| ErrorKind::InvalidToken),
+                        "{first:x} {second:x}, big_endian={big_endian}, width={width}"
+                    );
+                }
+            }
+        }
+    }
+}
+
 fn mapped_text(input: &[u8], map: [i32; 256]) -> Result<String, ErrorKind> {
     mapped_text_with_config(input, map, Config::default())
 }

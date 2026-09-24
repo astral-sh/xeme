@@ -1,6 +1,78 @@
 use super::*;
 
 #[test]
+fn utf16_surrogate_boundaries_are_validated_across_chunks() {
+    unsafe extern "C" fn text(data: *mut c_void, value: *const c_char, length: c_int) {
+        // SAFETY: The parser borrows this Vec and the callback bytes for the call.
+        unsafe {
+            (*data.cast::<Vec<u8>>())
+                .extend_from_slice(std::slice::from_raw_parts(value.cast(), length as usize));
+        }
+    }
+    // Expat 2.8.5 / CVE-2026-93990; exercise both BOM and legacy autodetection.
+    let boundaries = [0xd7ff, 0xd800, 0xdbff, 0xdc00, 0xdfff, 0xe000];
+    for first in boundaries {
+        for second in boundaries.into_iter().chain([0x0041, 0x003c]) {
+            let expected = char::decode_utf16([first, second]).collect::<Result<String, _>>();
+            if second == 0x003c && expected.is_ok() {
+                continue;
+            }
+            for big_endian in [false, true] {
+                for bom in [false, true] {
+                    let input: Vec<u8> = bom
+                        .then_some(0xfeff)
+                        .into_iter()
+                        .chain("<r>".encode_utf16())
+                        .chain([first, second])
+                        .chain("</r>".encode_utf16())
+                        .flat_map(|unit| {
+                            if big_endian {
+                                unit.to_be_bytes()
+                            } else {
+                                unit.to_le_bytes()
+                            }
+                        })
+                        .collect();
+                    for width in [1, 2, 3, 7, input.len()] {
+                        // SAFETY: The test owns the parser, callback state, and input.
+                        unsafe {
+                            let mut output = Vec::<u8>::new();
+                            let parser = XML_ParserCreate(ptr::null());
+                            assert!(!parser.is_null());
+                            XML_SetUserData(parser, ptr::from_mut(&mut output).cast());
+                            XML_SetCharacterDataHandler(parser, Some(text));
+                            let mut status = OK;
+                            for (index, part) in input.chunks(width).enumerate() {
+                                status = XML_Parse(
+                                    parser,
+                                    part.as_ptr().cast(),
+                                    part.len() as c_int,
+                                    c_int::from((index + 1) * width >= input.len()),
+                                );
+                                if status != OK {
+                                    break;
+                                }
+                            }
+                            assert_eq!(
+                                status == OK,
+                                expected.is_ok(),
+                                "{first:x} {second:x}, big_endian={big_endian}, bom={bom}, width={width}"
+                            );
+                            if let Ok(expected) = &expected {
+                                assert_eq!(&output, expected.as_bytes());
+                            } else {
+                                assert_eq!(XML_GetErrorCode(parser), 4);
+                            }
+                            XML_ParserFree(parser);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn header_implementation_version_matches_package_version() {
     let definition = format!("#  define XEME_VERSION \"{}\"", env!("CARGO_PKG_VERSION"));
     assert!(
@@ -1440,10 +1512,9 @@ fn unknown_encoding_callbacks_follow_complete_declaration_grammar() {
 
     // ASCII bytes outside required markup may decode differently. Preserve the
     // existing custom-map path before deciding grammar, including a multibyte
-    // sequence whose decoded document version is valid. TextDecl versions keep
-    // their existing permissive grammar.
+    // sequence whose decoded version is valid in documents and text declarations.
     for remapping in 1..=2 {
-        let version = if remapping == 1 { "\u{1}" } else { "@$" };
+        let version = if remapping == 1 { "\u{1}" } else { "@$.0" };
         for context in 0..3 {
             for explicit in [false, true] {
                 for malformed_tail in [false, true] {
@@ -1458,7 +1529,7 @@ fn unknown_encoding_callbacks_follow_complete_declaration_grammar() {
                     for accept in [false, true] {
                         let expected = if !accept {
                             18
-                        } else if malformed_tail || (remapping == 1 && context == 0) {
+                        } else if malformed_tail || remapping == 1 {
                             if context == 0 { 30 } else { 31 }
                         } else {
                             0
@@ -2277,30 +2348,61 @@ fn external_value_compatibility_survives_children_and_reset() {
 }
 
 #[test]
-fn legacy_version_syntax_survives_children_and_reset() {
-    // SAFETY: The test owns every parser and input through synchronous parsing.
+fn version_grammar_survives_children_and_reset() {
+    // SAFETY: Every parser and input remains live through synchronous parsing.
     unsafe {
-        let parser = XML_ParserCreate(ptr::null());
-        assert!(!parser.is_null());
-        for version in ["banana", "2.0", "1", "1."] {
-            assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
-            let input = format!("<?xml version='{version}'?><r/>");
-            assert_eq!(
-                XML_Parse(parser, input.as_ptr().cast(), input.len() as c_int, 1),
-                OK
-            );
-            for context in [ptr::null(), c"".as_ptr()] {
-                let child = XML_ExternalEntityParserCreate(parser, context, ptr::null());
-                assert!(!child.is_null());
-                let input = format!("<?xml version='{version}' encoding='UTF-8'?>");
-                assert_eq!(
-                    XML_Parse(child, input.as_ptr().cast(), input.len() as c_int, 1),
-                    OK
-                );
-                XML_ParserFree(child);
+        let parent = XML_ParserCreate(ptr::null());
+        assert!(!parent.is_null());
+        for version in ["1.0", "1.1", "1.01", "banana", "2.0", "1", "1.", "", "1.١"] {
+            let valid = matches!(version, "1.0" | "1.1" | "1.01");
+            for context in 0..3 {
+                let input = match context {
+                    0 => format!("<?xml version='{version}'?><r/>"),
+                    1 => format!("<?xml version='{version}' encoding='UTF-8'?>text"),
+                    _ => format!("<?xml version='{version}' encoding='UTF-8'?><!ELEMENT r EMPTY>"),
+                };
+                for width in [1, 7, input.len()] {
+                    assert_eq!(XML_ParserReset(parent, ptr::null()), 1);
+                    let parser = match context {
+                        0 => parent,
+                        1 => XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null()),
+                        _ => XML_ExternalEntityParserCreate(parent, ptr::null(), ptr::null()),
+                    };
+                    assert!(!parser.is_null());
+                    let mut status = OK;
+                    for (index, part) in input.as_bytes().chunks(width).enumerate() {
+                        status = XML_Parse(
+                            parser,
+                            part.as_ptr().cast(),
+                            part.len() as c_int,
+                            c_int::from((index + 1) * width >= input.len()),
+                        );
+                        if status != OK {
+                            break;
+                        }
+                    }
+                    assert_eq!(
+                        status,
+                        c_int::from(valid),
+                        "{input}, context={context}, width={width}"
+                    );
+                    assert_eq!(
+                        XML_GetErrorCode(parser),
+                        if valid {
+                            0
+                        } else if context == 0 {
+                            30
+                        } else {
+                            31
+                        }
+                    );
+                    if parser != parent {
+                        XML_ParserFree(parser);
+                    }
+                }
             }
         }
-        XML_ParserFree(parser);
+        XML_ParserFree(parent);
     }
 }
 

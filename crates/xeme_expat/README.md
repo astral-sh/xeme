@@ -1,8 +1,8 @@
 # Xeme's Expat interface
 
 This crate exports Expat's `char` C ABI as a shared library and static archive.
-The [public header](../../include/expat.h) targets Expat 2.8.4.
-`XML_ExpatVersion()` returns `xeme_compat_2.8.4`, so consumers that check Expat's
+The [public header](../../include/expat.h) targets Expat 2.8.5.
+`XML_ExpatVersion()` returns `xeme_compat_2.8.5`, so consumers that check Expat's
 literal version string will see a difference. `XEME_VERSION` and the Cargo package
 version identify the Xeme implementation, currently `0.0.1`.
 
@@ -34,7 +34,7 @@ arrays remain valid only for their callback. No Rust reference to the parser cro
 a callback: handlers receive owned event data, and handler changes take effect for
 subsequent events.
 
-Callbacks can suspend, abort, or change handlers. As in Expat 2.8.4, recursive
+Callbacks can suspend, abort, or change handlers. As in Expat 2.8.5, recursive
 parsing, buffer requests, reset, and resume on the active parser fail without
 changing its error state. `XML_ParserFree` during a callback is ignored; the caller
 must free the handle after the outer operation returns. Recursive
@@ -109,10 +109,14 @@ are errors. Some malformed-input errors, callback prefixes, and positions differ
 from Expat, including external DTD default-handler prefixes.
 
 The C interface uses XML 1.0 Fourth Edition name rules to match the pinned
-Expat 2.8.4 reference, including in DTDs, references, and custom-encoding byte
+Expat 2.8.5 reference, including in DTDs, references, and custom-encoding byte
 classification. Resets and external children retain those rules. The Rust
 interface defaults to Fifth Edition and can select either edition through
 `Config::name_rules`.
+
+XML and text declarations require `1.` followed by one or more ASCII digits,
+matching Expat 2.8.5. Accepted versions such as `1.1` still use XML 1.0 character
+rules. The decoder rejects invalid UTF-16 surrogate pairs.
 
 ### External DTDs and parameter entities
 
@@ -153,8 +157,9 @@ callback order in its value processor.
 
 ### Hash salts
 
-`XML_SetHashSalt` and `XML_SetHashSalt16Bytes` mix the caller salt into randomized
-hashing; a predictable salt does not replace the secret random keys. They update
+The public header marks `XML_SetHashSalt` deprecated, matching Expat 2.8.5;
+use `XML_SetHashSalt16Bytes` for new callers. Both APIs mix the caller salt into
+randomized hashing; a predictable salt does not replace the secret random keys. They update
 the root parser before parsing or after completion, including when called through
 a child. They reject roots that are parsing, suspended, or executing a callback,
 and children whose parent was freed or reset. Allocation failure preserves the old

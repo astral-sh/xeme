@@ -41,7 +41,6 @@ impl Encoding {
 struct Detection {
     requested: Option<String>,
     allow_utf8_bom_encoding_mismatch: bool,
-    allow_invalid_xml_versions: bool,
     allow_undeclared_utf16: bool,
     declaration_checked: usize,
     unknown_name: Option<String>,
@@ -176,7 +175,6 @@ impl Detection {
                             && crate::malformed_ascii_declaration(
                                 &declaration[5..],
                                 declaration_context,
-                                self.allow_invalid_xml_versions,
                             )
                         {
                             // These bytes are invariant under every custom map.
@@ -260,7 +258,6 @@ impl Decoder {
             requires_encoding_declaration: false,
             detection: Detection {
                 allow_utf8_bom_encoding_mismatch: config.allow_utf8_bom_encoding_mismatch,
-                allow_invalid_xml_versions: config.allow_invalid_xml_versions,
                 allow_undeclared_utf16: config.allow_undeclared_utf16,
                 requested: requested
                     .map(|name| String::try_from_str_in(name, allocator))

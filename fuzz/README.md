@@ -72,7 +72,7 @@ by the target's filters.
 ## Expat semantic oracle
 
 `expat_differential` compares parse success and successful element, attribute, and
-character-data callbacks against Expat 2.8.4. It compares UTF-8 inputs up to 8,192
+character-data callbacks against Expat 2.8.5. It compares UTF-8 inputs up to 8,192
 bytes, excluding NUL bytes and the substrings `<!DOCTYPE` and `<?xml`. UTF-16,
 DTD/entity grammar, and encoding declarations are outside this target. Xeme
 resource-limit errors (43) also skip comparison. Error codes, positions, and
@@ -81,13 +81,13 @@ callbacks are coalesced. A leading control byte selects namespace mode and a chu
 size from 1 through 128.
 
 Expat runs in a separate persistent process to prevent `XML_*` symbol interposition.
-The oracle requires an Expat 2.8.4 version greeting. A dead process, invalid reply,
+The oracle requires an Expat 2.8.5 version greeting. A dead process, invalid reply,
 broken pipe, or timeout fails the run. Each exchange has a five-second oracle
 parse alarm and a ten-second libFuzzer input timeout. Protocol errors and semantic
 mismatches stop and reap the child; stdin EOF releases it on normal fuzzer exit.
 
 Build a normal Expat shared library from revision
-`12cf0b1f25f026a022fe728ad8f7e3d017285b80`, then run:
+`4b3f0b06f39fb5529cead381694f8929901bc273`, then run:
 
 ```console
 cc -std=c11 -O2 -Wall -Wextra -Werror -Iinclude fuzz/expat_oracle.c \

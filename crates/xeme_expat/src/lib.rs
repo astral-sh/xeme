@@ -315,6 +315,7 @@ unsafe fn create(
                 allow_utf8_bom_encoding_mismatch: true,
                 expat_external_value_compatibility: true,
                 allow_invalid_xml_versions: true,
+                allow_undeclared_utf16: true,
                 // Iterative expansion supports Expat's deep-entity workloads.
                 // Shared work, live-allocation and external-child bounds still apply.
                 limits: xeme::Limits {

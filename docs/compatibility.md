@@ -41,6 +41,11 @@ adapter enables `Config::allow_invalid_xml_versions` to retain Expat's permissiv
 version syntax. This option defaults to `false` and does not change XML 1.0
 character rules or enable XML 1.1 features.
 
+The native parser rejects inferred UTF-16 without a BOM or encoding declaration
+unless the caller supplies an encoding. This check applies independently to each
+external source, before document events or value output. The C adapter enables
+`Config::allow_undeclared_utf16` to retain Expat's permissive autodetection.
+
 The pinned CPython consumer needs the
 [allocation-cleanup backport](../tools/cpython/consumer-fix/README.md).
 

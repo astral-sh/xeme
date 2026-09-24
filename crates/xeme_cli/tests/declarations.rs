@@ -30,3 +30,34 @@ fn declaration_versions_control_exit_status_and_events() {
         }
     }
 }
+
+#[test]
+fn utf16_requires_encoding_evidence_before_printing_events() {
+    for big_endian in [false, true] {
+        for evidence in ["none", "bom", "declaration"] {
+            let name = if big_endian { "UTF-16BE" } else { "UTF-16LE" };
+            let text = match evidence {
+                "bom" => "\u{feff}<r/>".to_string(),
+                "declaration" => format!("<?xml version='1.0' encoding='{name}'?><r/>"),
+                _ => "<r/>".to_string(),
+            };
+            let bytes: Vec<u8> = text
+                .encode_utf16()
+                .flat_map(|unit| {
+                    if big_endian {
+                        unit.to_be_bytes()
+                    } else {
+                        unit.to_le_bytes()
+                    }
+                })
+                .collect();
+            for width in [1, 7, bytes.len()] {
+                let result = check(&bytes, width);
+                assert_eq!(result.status.success(), evidence != "none", "{result:?}");
+                if evidence == "none" {
+                    assert!(result.stdout.is_empty());
+                }
+            }
+        }
+    }
+}

@@ -43,6 +43,11 @@ override applies. `Config::allow_utf8_bom_encoding_mismatch` defaults to `false`
 the C interface explicitly enables this legacy compatibility option to match
 Expat.
 
+Inferred UTF-16 also requires a BOM or an encoding declaration. Explicit encoding
+information supplied through `Config::encoding`, `set_encoding`, or external-child
+construction permits BOM-less input. `Config::allow_undeclared_utf16` defaults to
+`false`; the C adapter enables it to preserve Expat's autodetection behavior.
+
 Internal parameter references in external entity values preserve surrounding
 text and can be reused after expansion. `Config::expat_external_value_compatibility`
 defaults to `false`; enabling it reproduces Expat's text truncation and persistent

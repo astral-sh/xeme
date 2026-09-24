@@ -138,6 +138,30 @@ class ParserTests(unittest.TestCase):
                     ],
                 )
 
+    def test_utf16_requires_encoding_evidence(self):
+        for encoding, bom in [("utf-16-le", b"\xff\xfe"), ("utf-16-be", b"\xfe\xff")]:
+            name = encoding.upper().replace("-LE", "LE").replace("-BE", "BE")
+            for evidence in ["none", "bom", "declaration", "override"]:
+                document = "<r/>"
+                if evidence == "declaration":
+                    document = f"<?xml version='1.0' encoding='{name}'?>" + document
+                data = document.encode(encoding)
+                if evidence == "bom":
+                    data = bom + data
+                for width in [1, 7, len(data)]:
+                    with self.subTest(encoding=encoding, evidence=evidence, width=width):
+                        parser = xeme.Parser(encoding=name if evidence == "override" else None)
+                        events = []
+
+                        if evidence == "none":
+                            with self.assertRaises(xeme.ParseError) as raised:
+                                feed_chunks(parser, data, width, events)
+                            self.assertEqual(raised.exception.kind, "IncorrectEncoding")
+                            self.assertEqual(events, [])
+                        else:
+                            feed_chunks(parser, data, width, events)
+                            self.assertEqual(payloads(events)[-2:], [("start", ("r", {})), ("end", "r")])
+
     def test_encoding_override(self):
         self.assertEqual(
             payloads(parse(b"<r>caf\xe9</r>", encoding="ISO-8859-1")),

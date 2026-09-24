@@ -120,7 +120,10 @@ gate, not DTD validation or canonical-output conformance. See the
 
 CI runs four pinned regression suites through
 [`tools/compatibility.py`](../tools/compatibility.py). CI allows known failures
-only when they match the checked-in baseline.
+only when they match the checked-in baseline. Every gate also requires the loaded
+reference library to report `expat_2.8.5`. Gate reports record both engines'
+versions and library hashes; a missing or different reference version fails the
+gate even when the semantic comparisons pass.
 
 | Suite | Checks |
 | --- | --- |

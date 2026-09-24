@@ -95,6 +95,7 @@ void xeme_print_library(void) {
   if (!dladdr((void *)XML_Parse, &info) || !info.dli_fname)
     abort();
   printf("XEME_LIBRARY\t%s\n", info.dli_fname);
+  printf("XEME_VERSION\t%s\n", XML_ExpatVersion());
 }
 
 static XML_Parser set_defaults(XML_Parser parser) {

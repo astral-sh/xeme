@@ -276,6 +276,7 @@ def main() -> int:
             code = 124
     log = (output / "tests.log").read_text(errors="replace")
     origins = re.findall(r"^XEME_LIBRARY\t(.+)$", log, re.MULTILINE)
+    versions = re.findall(r"^XEME_VERSION\t(.+)$", log, re.MULTILINE)
     origin_verified = bool(origins) and all(
         Path(origin).resolve() == frozen_library for origin in origins
     )
@@ -296,6 +297,7 @@ def main() -> int:
         for mode in modes
     )
     summary = {
+        "version": versions[0] if len(versions) == 1 else None,
         "returncode": code,
         "selection_complete": selection_complete,
         "library_origin_verified": origin_verified,

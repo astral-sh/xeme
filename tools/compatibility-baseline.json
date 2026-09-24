@@ -1,6 +1,7 @@
 {
   "source_revision": "fe31da9b4050dfc901aa2fbd1080cb558e1c9f3f",
   "expat_revision": "4b3f0b06f39fb5529cead381694f8929901bc273",
+  "expat_version": "expat_2.8.5",
   "w3c_revision": "3fb4516daedd0ac736249a383733883b95fcdbb2",
   "policy": "Known failures remain failures in raw suite outputs. New failures, assertion changes, missing cases and harness failures reject the regression gate; improvements are reported separately. Baseline edits require review.",
   "api": {

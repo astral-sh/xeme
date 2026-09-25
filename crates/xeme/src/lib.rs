@@ -103,6 +103,9 @@ pub struct Config {
     /// Preserve Expat's truncation and persistent recursion state for internal
     /// parameter references in external entity values. Disabled by default.
     pub expat_external_value_compatibility: bool,
+    /// Accept inferred UTF-16 without a BOM, encoding declaration, or external
+    /// encoding information, matching Expat. Disabled by default.
+    pub allow_undeclared_utf16: bool,
     pub limits: Limits,
 }
 
@@ -845,7 +848,7 @@ impl Parser {
         allocator: Allocator,
     ) -> Result<Self, Error> {
         config.encoding = None;
-        let decoder = Decoder::new(encoding, allocator, config.allow_utf8_bom_encoding_mismatch)?;
+        let decoder = Decoder::new(encoding, allocator, &config)?;
         let mut namespaces = hash_map(allocator);
         if config.namespace_separator.is_some() {
             try_insert(
@@ -1061,11 +1064,7 @@ impl Parser {
         }
         // This initialization setter is transactional: an allocation failure must
         // leave the previous decoder available for autodetection during parsing.
-        self.decoder = Decoder::new(
-            encoding,
-            self.allocator,
-            self.config.allow_utf8_bom_encoding_mismatch,
-        )?;
+        self.decoder = Decoder::new(encoding, self.allocator, &self.config)?;
         Ok(())
     }
 
@@ -2574,6 +2573,22 @@ impl Parser {
     }
 
     fn next_event_inner(&mut self, output: &mut EventOutput<'_>) -> Result<(), Error> {
+        if self.decoder.requires_encoding_declaration() {
+            let text = self.sources[0].remaining();
+            if !self.final_input && "<?xml".starts_with(text) {
+                return Ok(());
+            }
+            // Decode the initial declaration provisionally, but do not publish
+            // other events or append external value text without encoding evidence.
+            if !text
+                .strip_prefix("<?xml")
+                .is_some_and(|rest| rest.starts_with(whitespace))
+            {
+                self.decoder
+                    .ensure_declared_encoding()
+                    .map_err(|error| self.err(error.kind, error.message))?;
+            }
+        }
         // Encoding detection consumes a BOM without producing a text token.
         // Charge that prefix even for empty input or an incomplete next token.
         self.account_source(0)?;
@@ -3651,6 +3666,9 @@ impl Parser {
                     .check_declaration(encoding)
                     .map_err(|error| self.err(error.kind, error.message))?;
             }
+            self.decoder
+                .ensure_declared_encoding()
+                .map_err(|error| self.err(error.kind, error.message))?;
             if context == DeclarationContext::Text {
                 self.declaration_allowed = false;
                 self.emit(
@@ -5590,7 +5608,10 @@ mod matching_end_tests {
             ErrorKind::LimitExceeded
         );
 
-        let mut parser = Parser::new(Config::default());
+        let mut parser = Parser::new(Config {
+            encoding: Some("UTF-16LE".into()),
+            ..Config::default()
+        });
         let utf16: std::vec::Vec<u8> = "<r></r>"
             .encode_utf16()
             .flat_map(u16::to_le_bytes)

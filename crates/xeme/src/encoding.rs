@@ -41,6 +41,7 @@ impl Encoding {
 struct Detection {
     requested: Option<String>,
     allow_utf8_bom_encoding_mismatch: bool,
+    allow_undeclared_utf16: bool,
     declaration_checked: usize,
     unknown_name: Option<String>,
     encoding_error_position: Option<Position>,
@@ -238,6 +239,7 @@ impl Detection {
 pub(crate) struct Decoder {
     allocator: Allocator,
     encoding: Option<Encoding>,
+    requires_encoding_declaration: bool,
     detection: Detection,
     pending: Vec<u8>,
     pending_cursor: usize,
@@ -248,13 +250,15 @@ impl Decoder {
     pub(crate) fn new(
         requested: Option<&str>,
         allocator: Allocator,
-        allow_utf8_bom_encoding_mismatch: bool,
+        config: &crate::Config,
     ) -> Result<Self, Error> {
         Ok(Self {
             allocator,
             encoding: None,
+            requires_encoding_declaration: false,
             detection: Detection {
-                allow_utf8_bom_encoding_mismatch,
+                allow_utf8_bom_encoding_mismatch: config.allow_utf8_bom_encoding_mismatch,
+                allow_undeclared_utf16: config.allow_undeclared_utf16,
                 requested: requested
                     .map(|name| String::try_from_str_in(name, allocator))
                     .transpose()?,
@@ -361,7 +365,7 @@ impl Decoder {
             else {
                 return Ok(());
             };
-            self.encoding = Some(encoding);
+            self.set_detected_encoding(encoding, skip);
             source.encoding = encoding;
             source.raw_index = skip;
             source.column = usize::from(skip != 0);
@@ -667,7 +671,29 @@ impl Decoder {
         }
         Ok(())
     }
-    pub(crate) fn check_declaration(&self, name: &str) -> Result<(), Error> {
+    fn set_detected_encoding(&mut self, encoding: Encoding, skip: usize) {
+        self.encoding = Some(encoding);
+        self.requires_encoding_declaration = !self.detection.allow_undeclared_utf16
+            && self.detection.requested.is_none()
+            && skip == 0
+            && matches!(encoding, Encoding::Utf16Le | Encoding::Utf16Be);
+    }
+
+    pub(crate) fn requires_encoding_declaration(&self) -> bool {
+        self.requires_encoding_declaration
+    }
+
+    pub(crate) fn ensure_declared_encoding(&self) -> Result<(), Error> {
+        if self.requires_encoding_declaration {
+            return Err(Error::bare(
+                ErrorKind::IncorrectEncoding,
+                "UTF-16 requires a BOM, encoding declaration, or external encoding information",
+            ));
+        }
+        Ok(())
+    }
+
+    pub(crate) fn check_declaration(&mut self, name: &str) -> Result<(), Error> {
         if matches!(
             self.encoding,
             Some(Encoding::SingleByte | Encoding::MultiByte)
@@ -687,6 +713,7 @@ impl Decoder {
         if name.eq_ignore_ascii_case("UTF-16")
             && matches!(actual, Encoding::Utf16Le | Encoding::Utf16Be)
         {
+            self.requires_encoding_declaration = false;
             return Ok(());
         }
         let declared = Encoding::named(name).ok_or(Error::bare(
@@ -699,6 +726,7 @@ impl Decoder {
                 "declared encoding conflicts with detected encoding",
             ));
         }
+        self.requires_encoding_declaration = false;
         Ok(())
     }
 }
@@ -872,7 +900,7 @@ impl InputContext {
         match detected {
             Ok(None) => Ok(()),
             Ok(Some((Encoding::Utf8, skip))) => {
-                decoder.encoding = Some(Encoding::Utf8);
+                decoder.set_detected_encoding(Encoding::Utf8, skip);
                 source.encoding = Encoding::Utf8;
                 source.raw_index = skip;
                 source.column = usize::from(skip != 0);
@@ -886,7 +914,7 @@ impl InputContext {
                 };
                 // Reuse the completed detection result. In particular, do not
                 // rescan a declaration after its progress cursor advanced.
-                decoder.encoding = Some(encoding);
+                decoder.set_detected_encoding(encoding, skip);
                 source.encoding = encoding;
                 source.raw_index = skip;
                 source.column = usize::from(skip != 0);
@@ -1654,8 +1682,10 @@ mod tests {
             for split in 0..=bytes.len() {
                 for warm in [false, true] {
                     let make = || {
-                        let mut decoder = Decoder::new(None, Allocator::System, false).unwrap();
-                        decoder.encoding = Some(Encoding::Utf8);
+                        let mut decoder =
+                            Decoder::new(None, Allocator::System, &crate::Config::default())
+                                .unwrap();
+                        decoder.set_detected_encoding(Encoding::Utf8, 0);
                         if warm {
                             decoder.append_pending(&[0; 64]).unwrap();
                             decoder.pending.clear();
@@ -1712,8 +1742,8 @@ mod tests {
             let tracker = AllocationTracker::try_new_in(Allocator::System).unwrap();
             with_tracking(&tracker, || {
                 let allocator = Allocator::TrackedSystem;
-                let mut decoder = Decoder::new(None, allocator, false).unwrap();
-                decoder.encoding = Some(Encoding::Utf8);
+                let mut decoder = Decoder::new(None, allocator, &crate::Config::default()).unwrap();
+                decoder.set_detected_encoding(Encoding::Utf8, 0);
                 let bytes = [b'x'; 2048];
                 decoder.append_pending(&bytes).unwrap();
                 decoder.pending.clear();

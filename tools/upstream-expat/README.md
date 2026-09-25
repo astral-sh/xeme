@@ -1,19 +1,19 @@
 # Upstream Expat API tests
 
-`run.py` builds Expat 2.8.4's API tests against a supplied shared library and
+`run.py` builds Expat 2.8.5's API tests against a supplied shared library and
 records passes, assertion failures, signals, and timeouts. By default, test bodies
 are unchanged; the allocation diagnostic below adapts them.
 
 ```sh
 python3 tools/upstream-expat/run.py \
-  --source /path/to/expat-2.8.4 \
+  --source /path/to/expat-2.8.5 \
   --config /path/to/expat-build/expat_config.h \
   --library /path/to/libxeme_expat.so \
   --output /tmp/xeme-upstream-api
 ```
 
 The upstream checkout must be clean at commit
-`12cf0b1f25f026a022fe728ad8f7e3d017285b80`. Use the same generated narrow-character
+`4b3f0b06f39fb5529cead381694f8929901bc273`. Use the same generated narrow-character
 configuration for the reference and candidate runs. By default the runner
 exercises chunk sizes 0 through 5 with reparse deferral disabled and enabled.
 Use `--chunks 0 --deferral 1` for a shorter run, or
@@ -38,18 +38,16 @@ the outcome and continues. Children receive a configurable address-space ceiling
 timeout. The entire run has a deadline too. Resident-memory checks use Linux
 `/proc`; hitting a resource limit is reported as a failure.
 
-Twelve named tests of private Expat implementation details are excluded. Their
+Thirteen named tests of private Expat implementation details are excluded. Their
 exact names and reasons appear in `manifest.json` and `results.json`: SipHash,
 private UTF-8 helpers, private allocation functions, and internal accounting or
 scanning counters. Reparse defaults are applied through public constructor/reset
 setters instead of Expat's private global setting.
 
-The adapter applies [memcheck.patch](memcheck.patch) to Expat's test-only
-tracking allocator. The original tail-removal path stores `entry->next` (always null for
-the tail) instead of `entry->prev`, so a later allocation crashes when earlier
-allocations remain. [allocator_repro.c](allocator_repro.c) reproduces this with
-four allocator calls and no XML parser linked. The patch leaves test assertions
-unchanged.
+Expat 2.8.5 includes the tracking allocator tail-removal fix, so the adapter no
+longer patches `memcheck.c`. Its private `xmlSetHashSalt` calls are routed through
+the deprecated public `XML_SetHashSalt` API, retaining the test assertions. The
+new private hash-table test is excluded alongside the other internal-only tests.
 
 `tests.log` retains assertion diagnostics and per-test outcomes. `results.json`
 contains structured results and the test process's exit code. The runner exits
@@ -67,7 +65,7 @@ configurations return early as in upstream.
 
 ```sh
 python3 tools/upstream-expat/run.py \
-  --source /path/to/expat-2.8.4 \
+  --source /path/to/expat-2.8.5 \
   --config /path/to/expat-build/expat_config.h \
   --library /path/to/libxeme_expat.so \
   --allocation-behavior --output /tmp/xeme-allocation-behavior

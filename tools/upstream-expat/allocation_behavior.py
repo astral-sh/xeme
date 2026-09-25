@@ -7,7 +7,7 @@ import hashlib
 import re
 from pathlib import Path
 
-REVISION = "12cf0b1f25f026a022fe728ad8f7e3d017285b80"
+REVISION = "4b3f0b06f39fb5529cead381694f8929901bc273"
 RETRY_CEILING = 512
 EXTRA_TESTS = {
     "test_mem_api_cycle",
@@ -17,11 +17,11 @@ EXTRA_TESTS = {
 INVENTORY_SHA256 = "7407dc73a762540b15880e14b790ff951f9eafa0c87e077896a8ed8d1483f57c"
 SOURCE_SHA256 = {
     "alloc_tests.c": "d7285ac29f476045b884bdd8fe4d5b7cdf7316a9f4dedbb54d5497f1f6ddde15",
-    "nsalloc_tests.c": "f08db4d6bf3ea5d2fd1d66b1c9a1646d4ef7fefe570d6af40278f6e5b8daf4d1",
+    "nsalloc_tests.c": "f51a351d8cde0d3ba774284245d65d0572420af36511d8b7c33cbbff39eb9b48",
     "handlers.c": "3435e02418febb9966e5822e3715fa87c0a6b4a1bb098afb0ee97834ddce9cd8",
     "common.c": "799da6b4ff129f60ed81ebd3a126ce840cb4c78b4a3b8ef9c16dc5acec5354f1",
-    "basic_tests.c": "b37059b33e308c1b33eeb8a1a73d8a020e3ac2fc62ab9f11b062eae5adbdf284",
-    "misc_tests.c": "67bbfb2a9e88219e2c3144f4d7b545686896bc4720155f7847146fbf674814fb",
+    "basic_tests.c": "a58b2acf6a9d9017b349255641aa2f84e26596d77fa54796b74fc83745e6b92e",
+    "misc_tests.c": "8795150cfbde2e1511a332dedcff3f9dc276f5172f2c58f0b495cb1cd7fd0ab9",
 }
 
 

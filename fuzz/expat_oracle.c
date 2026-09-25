@@ -1,4 +1,4 @@
-/* Persistent, separately linked Expat 2.8.4 semantic oracle.
+/* Persistent, separately linked Expat 2.8.5 semantic oracle.
  * The process boundary prevents XML_* symbol interposition with Xeme. */
 #include <expat.h>
 #include <stdint.h>
@@ -75,11 +75,11 @@ static void XMLCALL text(void *data, const XML_Char *bytes, int length) {
 }
 
 int main(void) {
-  if (strcmp(XML_ExpatVersion(), "expat_2.8.4") != 0) {
-    fprintf(stderr, "oracle requires Expat 2.8.4, loaded %s\n", XML_ExpatVersion());
+  if (strcmp(XML_ExpatVersion(), "expat_2.8.5") != 0) {
+    fprintf(stderr, "oracle requires Expat 2.8.5, loaded %s\n", XML_ExpatVersion());
     return 2;
   }
-  if (fwrite("EXPAT284", 1, 8, stdout) != 8 || fflush(stdout))
+  if (fwrite("EXPAT285", 1, 8, stdout) != 8 || fflush(stdout))
     return 2;
   for (;;) {
     unsigned char header[7], input[MAX_INPUT];

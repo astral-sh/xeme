@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run Expat 2.8.4 public API tests in isolated children against a chosen library."""
+"""Run Expat 2.8.5 public API tests in isolated children against a chosen library."""
 
 from __future__ import annotations
 
@@ -15,8 +15,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-REVISION = "12cf0b1f25f026a022fe728ad8f7e3d017285b80"
+REVISION = "4b3f0b06f39fb5529cead381694f8929901bc273"
 EXCLUDED = {
+    "test_hash_table": "Expat's private hash table implementation",
     "test_siphash_self": "Expat's private SipHash implementation",
     "test_siphash_spec": "Expat's private SipHash implementation",
     "test_utf8_auto_align": "private _INTERNAL_trim_to_complete_utf8_characters",
@@ -136,13 +137,6 @@ def main() -> int:
         includes = list(re.finditer(r"^#include [^\n]+$", text, re.MULTILINE))
         offset = includes[-1].end()
         text = text[:offset] + '\n#include "bridge.h"' + text[offset:]
-        if path.name == "memcheck.c":
-            # Upstream's test allocator loses its tail when a tail allocation is
-            # freed before earlier allocations. See allocator_repro.c/memcheck.patch.
-            assert text.count("alloc_tail = entry->next;") == 1
-            text = text.replace(
-                "alloc_tail = entry->next;", "alloc_tail = entry->prev;"
-            )
         if path.name == "minicheck.c":
             if args.allocation_behavior:
                 text = '#include "allocation_tracker.h"\n' + text
@@ -282,6 +276,7 @@ def main() -> int:
             code = 124
     log = (output / "tests.log").read_text(errors="replace")
     origins = re.findall(r"^XEME_LIBRARY\t(.+)$", log, re.MULTILINE)
+    versions = re.findall(r"^XEME_VERSION\t(.+)$", log, re.MULTILINE)
     origin_verified = bool(origins) and all(
         Path(origin).resolve() == frozen_library for origin in origins
     )
@@ -302,6 +297,7 @@ def main() -> int:
         for mode in modes
     )
     summary = {
+        "version": versions[0] if len(versions) == 1 else None,
         "returncode": code,
         "selection_complete": selection_complete,
         "library_origin_verified": origin_verified,

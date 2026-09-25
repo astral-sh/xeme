@@ -4995,6 +4995,12 @@ fn declaration_fields<'a>(
         } else {
             (None, Some(first))
         };
+        if version
+            .as_ref()
+            .is_some_and(|version| !valid_xml_version(version))
+        {
+            return Err(syntax("invalid XML version"));
+        }
         let (name, encoding, _, _) =
             encoding_attr.ok_or_else(|| syntax("text declaration requires an encoding"))?;
         let encoding = decode(encoding)?;
@@ -5013,12 +5019,9 @@ fn declaration_fields<'a>(
         .transpose()?;
     if attrs.is_empty()
         || attrs[0].name(rest) != "version"
-        || !version.as_ref().is_some_and(|version| {
-            !version.is_empty()
-                && version
-                    .bytes()
-                    .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'-' | b'_'))
-        })
+        || !version
+            .as_ref()
+            .is_some_and(|version| valid_xml_version(version))
     {
         return Err(DeclarationFailure::Syntax {
             message: "XML declaration must begin with a version",
@@ -5052,6 +5055,12 @@ fn declaration_fields<'a>(
         encoding,
         standalone,
     })
+}
+
+fn valid_xml_version(version: &str) -> bool {
+    version
+        .strip_prefix("1.")
+        .is_some_and(|minor| !minor.is_empty() && minor.bytes().all(|byte| byte.is_ascii_digit()))
 }
 
 /// Prove malformed syntax only in a complete bounded ASCII bootstrap declaration.

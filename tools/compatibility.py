@@ -318,6 +318,7 @@ def main() -> int:
         "suite": args.suite,
         "passed": False,
         "library_sha256": hashes,
+        "versions": {},
         "baseline_sha256": hashlib.sha256(BASELINE.read_bytes()).hexdigest(),
         "commands": [],
     }
@@ -353,6 +354,7 @@ def main() -> int:
                     (0,) if label == "reference" and args.suite == "api" else (0, 1),
                 )
                 result = json.loads((directory / "results.json").read_text())
+                report["versions"][label] = result.get("version")
                 log = (directory / "tests.log").read_text()
                 report["engines"][label] = (
                     check_allocation(result, log, baseline["api"])
@@ -389,10 +391,18 @@ def main() -> int:
                 args.output / "suite.log",
                 (0, 1) if args.suite == "w3c" else (0,),
             )
+            for label in libraries:
+                result = json.loads((directory / f"{label}.json").read_text())
+                report["versions"][label] = result.get("version")
             if args.suite == "w3c":
                 report.update(check_w3c(directory, baseline["w3c"]))
             else:
                 report["passed"] = True
+        if report["versions"]["reference"] != baseline["expat_version"]:
+            raise ValueError(
+                f"expected reference version {baseline['expat_version']!r}, "
+                f"got {report['versions']['reference']!r}"
+            )
         if hashes != {
             name: hashlib.sha256(path.read_bytes()).hexdigest()
             for name, path in libraries.items()

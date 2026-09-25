@@ -2659,7 +2659,7 @@ pub unsafe extern "C" fn XML_FreeContentModel(_parser: XML_Parser, model: *mut X
 
 #[unsafe(no_mangle)]
 pub extern "C" fn XML_ExpatVersion() -> *const c_char {
-    c"xeme_compat_2.8.4".as_ptr()
+    c"xeme_compat_2.8.5".as_ptr()
 }
 
 #[unsafe(no_mangle)]
@@ -2670,7 +2670,7 @@ pub extern "C" fn XML_ExpatVersionInfo() -> XML_Expat_Version {
     XML_Expat_Version {
         major: 2,
         minor: 8,
-        micro: 4,
+        micro: 5,
     }
 }
 

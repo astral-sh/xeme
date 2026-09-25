@@ -2225,6 +2225,58 @@ fn default_handler_null_preserves_entity_policy() {
 }
 
 #[test]
+fn external_value_compatibility_survives_children_and_reset() {
+    unsafe extern "C" fn external(
+        parser: XML_Parser,
+        context: *const c_char,
+        _: *const c_char,
+        system: *const c_char,
+        _: *const c_char,
+    ) -> c_int {
+        // SAFETY: Each child is live through parsing and inherits test-owned state.
+        unsafe {
+            let child = XML_ExternalEntityParserCreate(parser, context, ptr::null());
+            assert!(!child.is_null());
+            let input: &[u8] = if CStr::from_ptr(system).to_bytes() == b"d" {
+                b"<!ENTITY % i 'I'><!ENTITY % p SYSTEM 'p'><!ENTITY e 'L%p;R'>"
+            } else {
+                b"X%i;Y"
+            };
+            let status = XML_Parse(child, input.as_ptr().cast(), input.len() as c_int, 1);
+            XML_ParserFree(child);
+            status
+        }
+    }
+    // SAFETY: State and inputs outlive both synchronous parses and all callbacks.
+    unsafe {
+        let mut state = State::default();
+        let parser = configured(&mut state);
+        for reset in [false, true] {
+            if reset {
+                assert_eq!(XML_ParserReset(parser, ptr::null()), 1);
+            }
+            state.events.clear();
+            XML_SetUserData(parser, ptr::from_mut(&mut state).cast());
+            XML_SetCharacterDataHandler(parser, Some(text));
+            XML_SetParamEntityParsing(parser, 2);
+            XML_SetExternalEntityRefHandler(parser, Some(external));
+            let input = b"<!DOCTYPE r SYSTEM 'd'><r>&e;</r>";
+            assert_eq!(
+                XML_Parse(parser, input.as_ptr().cast(), input.len() as c_int, 1),
+                OK
+            );
+            let text: String = state
+                .events
+                .iter()
+                .filter_map(|event| event.strip_prefix("text:"))
+                .collect();
+            assert_eq!(text, "LXR");
+        }
+        XML_ParserFree(parser);
+    }
+}
+
+#[test]
 fn unresolved_external_general_entity_reaches_the_default_handler() {
     // SAFETY: The default callback owns no parser references and records raw input.
     unsafe {

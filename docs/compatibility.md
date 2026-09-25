@@ -30,6 +30,12 @@ encoding unless an explicit higher-level encoding override applies.
 `Config::allow_utf8_bom_encoding_mismatch` defaults to `false`; the C adapter
 explicitly enables this legacy compatibility option.
 
+Native external entity values expand internal parameter references in place and
+release their recursion state when expansion completes. The C adapter enables
+`Config::expat_external_value_compatibility` to preserve Expat's behavior: an
+internal parameter reference truncates the external value and remains open in
+the shared DTD. The option defaults to `false` for Rust callers.
+
 The pinned CPython consumer needs the
 [allocation-cleanup backport](../tools/cpython/consumer-fix/README.md).
 

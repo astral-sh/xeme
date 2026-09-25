@@ -100,6 +100,9 @@ pub struct Config {
     /// Let an encoding declaration override a UTF-8 BOM, matching Expat.
     /// Disabled by default because XML requires the declaration to match the BOM.
     pub allow_utf8_bom_encoding_mismatch: bool,
+    /// Preserve Expat's truncation and persistent recursion state for internal
+    /// parameter references in external entity values. Disabled by default.
+    pub expat_external_value_compatibility: bool,
     pub limits: Limits,
 }
 

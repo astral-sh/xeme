@@ -257,7 +257,7 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
     let mut values = parent.external_child(None, None)?;
     values.set_default_events(true);
     values.feed(
-        b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ENTITY % wrapper 'L&#37;p;R'><!ENTITY e '%wrapper;'><!ENTITY after 'A'>",
+        b"<!ENTITY % p SYSTEM 'p'><!ENTITY % q SYSTEM 'q'><!ENTITY % i 'I&#37;q;J'><!ENTITY % wrapper 'L&#37;p;R'><!ENTITY e '%wrapper;'><!ENTITY after 'A'>",
         true,
     )?;
     while let Some(event) = next_event(&mut values)? {
@@ -266,7 +266,7 @@ fn workload(allocator: Allocator) -> Result<(), Error> {
             // under every selected-allocation failure before child creation.
             values.set_hash_salt([23; 16])?;
             let mut child = values.external_child(None, None)?;
-            child.feed(b"<?xml version='1.0'?>X%q;Y", true)?;
+            child.feed(b"<?xml version='1.0'?>X%i;Y", true)?;
             while let Some(event) = next_event(&mut child)? {
                 if let EventKind::ExternalEntityReference(_) = event.kind {
                     let mut nested = child.external_child(None, None)?;
@@ -868,8 +868,14 @@ fn foreign_recycling_token_rejects_storage_from_the_same_custom_suite() {
     assert_eq!(LIVE.get(), 0);
 }
 
-fn open_value_workload(allocator: Allocator) -> Result<(), Error> {
-    let root = Parser::try_new_in(Config::default(), allocator)?;
+fn open_value_workload<const COMPAT: bool>(allocator: Allocator) -> Result<(), Error> {
+    let root = Parser::try_new_in(
+        Config {
+            expat_external_value_compatibility: COMPAT,
+            ..Config::default()
+        },
+        allocator,
+    )?;
     let mut dtd = root.external_child(None, None)?;
     dtd.feed(
         b"<!ENTITY % a SYSTEM 'a'><!ENTITY % b 'B'><!ENTITY n '%a;'>",
@@ -891,10 +897,15 @@ fn open_value_workload(allocator: Allocator) -> Result<(), Error> {
     drop(root);
     drop(general);
     sibling.feed(b"%b;", true)?;
-    match next_event(&mut sibling) {
-        Err(error) if error.kind == ErrorKind::RecursiveEntityReference => {}
-        Err(error) => return Err(error),
-        _ => panic!("a precreated sibling must retain the open entity state"),
+    if COMPAT {
+        match next_event(&mut sibling) {
+            Err(error) if error.kind == ErrorKind::RecursiveEntityReference => {}
+            Err(error) => return Err(error),
+            _ => panic!("a precreated sibling must retain the open entity state"),
+        }
+    } else {
+        while next_event(&mut sibling)?.is_some() {}
+        assert!(sibling.is_finished());
     }
     copied_dtd.feed(b"<!ENTITY m '%b;'>", true)?;
     while next_event(&mut copied_dtd)?.is_some() {}
@@ -903,7 +914,8 @@ fn open_value_workload(allocator: Allocator) -> Result<(), Error> {
 
 #[test]
 fn shared_open_value_state_survives_every_allocation_failure_and_parent_drop() {
-    check_allocations(open_value_workload);
+    check_allocations(open_value_workload::<false>);
+    check_allocations(open_value_workload::<true>);
 }
 
 fn inherited_attribute_workload(allocator: Allocator) -> Result<(), Error> {

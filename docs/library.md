@@ -38,6 +38,11 @@ override applies. `Config::allow_utf8_bom_encoding_mismatch` defaults to `false`
 the C interface explicitly enables this legacy compatibility option to match
 Expat.
 
+Internal parameter references in external entity values preserve surrounding
+text and can be reused after expansion. `Config::expat_external_value_compatibility`
+defaults to `false`; enabling it reproduces Expat's text truncation and persistent
+recursion state. The C adapter enables that option for compatibility.
+
 CI runs the pinned W3C XML catalog directly against this Rust interface, with
 Fifth Edition names and the catalog's namespace mode. Its
 [conformance gate](../tools/w3c/README.md#native-rust-conformance-gate) requires

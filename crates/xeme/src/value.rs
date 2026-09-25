@@ -414,7 +414,7 @@ impl Parser {
         while let Some(frame) = state.frames.last() {
             let rest = &frame.text[frame.offset..];
             let start = rest.find(['&', '%']).unwrap_or(rest.len());
-            if state.child {
+            if state.child && frame.name.is_none() {
                 self.account_source(state.content_start + frame.offset + start)?;
             } else if frame.name.is_some() {
                 self.account_entity_bytes(start, true)?;
@@ -434,7 +434,7 @@ impl Parser {
             let end = rest.find(';').ok_or_else(|| {
                 self.err(ErrorKind::InvalidToken, "unclosed entity value reference")
             })?;
-            if state.child {
+            if state.child && frame.name.is_none() {
                 self.account_source(state.content_start + frame.offset + end + 1)?;
             } else if frame.name.is_some() {
                 self.account_entity_bytes(end + 1, true)?;
@@ -496,7 +496,7 @@ impl Parser {
                 // Expat's external value processor queues this internal entity
                 // without draining its value stack. The shared DTD keeps it open
                 // after this child finishes or is freed, so later reads recurse.
-                if state.child {
+                if state.child && self.config.expat_external_value_compatibility {
                     entity
                         .value_open
                         .as_ref()

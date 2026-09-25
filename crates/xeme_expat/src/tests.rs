@@ -2133,6 +2133,98 @@ fn an_old_dtd_child_cannot_modify_a_reset_parent_document() {
 }
 
 #[test]
+fn default_handler_null_preserves_entity_policy() {
+    unsafe extern "C" fn ignore(_: *mut c_void, _: *const c_char, _: c_int) {}
+    unsafe extern "C" fn skipped(data: *mut c_void, name: *const c_char, parameter: c_int) {
+        // SAFETY: The parser supplies a callback-lived name and test-owned State.
+        unsafe {
+            (*data.cast::<State>()).events.push(format!(
+                "skipped:{}:{parameter}",
+                CStr::from_ptr(name).to_str().unwrap()
+            ));
+        }
+    }
+    unsafe extern "C" fn clear(data: *mut c_void, _: *const c_char, _: *const *const c_char) {
+        // SAFETY: Handler changes are allowed on this live callback parser.
+        unsafe { XML_SetDefaultHandler((*data.cast::<State>()).parser, None) };
+    }
+    // SAFETY: Each parser and callback state stay live through synchronous parsing.
+    unsafe {
+        for child in [false, true] {
+            for mode in 0..4 {
+                for width in [1, 7, 4096] {
+                    let mut state = State::default();
+                    let parent = configured(&mut state);
+                    XML_SetElementHandler(parent, None, None);
+                    XML_SetSkippedEntityHandler(parent, Some(skipped));
+                    match mode {
+                        0 => XML_SetDefaultHandler(parent, None),
+                        1 => {
+                            XML_SetDefaultHandler(parent, Some(ignore));
+                            XML_SetStartElementHandler(parent, Some(clear));
+                        }
+                        2 => {
+                            XML_SetDefaultHandlerExpand(parent, None);
+                            XML_SetDefaultHandler(parent, None);
+                        }
+                        _ => {
+                            XML_SetDefaultHandler(parent, None);
+                            XML_SetDefaultHandlerExpand(parent, None);
+                        }
+                    }
+                    let dtd = b"<!DOCTYPE r [<!ENTITY e 'EXPANDED'>]>";
+                    assert_eq!(
+                        XML_Parse(parent, dtd.as_ptr().cast(), dtd.len() as c_int, 0),
+                        OK
+                    );
+                    let parser = if child {
+                        XML_ExternalEntityParserCreate(parent, c"".as_ptr(), ptr::null())
+                    } else {
+                        parent
+                    };
+                    assert!(!parser.is_null());
+                    state.parser = parser;
+                    let body = b"<r>&e;</r>";
+                    for (index, chunk) in body.chunks(width).enumerate() {
+                        assert_eq!(
+                            XML_Parse(
+                                parser,
+                                chunk.as_ptr().cast(),
+                                chunk.len() as c_int,
+                                c_int::from((index + 1) * width >= body.len())
+                            ),
+                            OK
+                        );
+                    }
+                    let text: String = state
+                        .events
+                        .iter()
+                        .filter_map(|event| event.strip_prefix("text:"))
+                        .collect();
+                    assert_eq!(
+                        text,
+                        if mode == 3 { "EXPANDED" } else { "" },
+                        "child={child}, mode={mode}, width={width}"
+                    );
+                    assert_eq!(
+                        state
+                            .events
+                            .iter()
+                            .filter(|event| event.as_str() == "skipped:e:0")
+                            .count(),
+                        usize::from(mode != 3)
+                    );
+                    if child {
+                        XML_ParserFree(parser);
+                    }
+                    XML_ParserFree(parent);
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn unresolved_external_general_entity_reaches_the_default_handler() {
     // SAFETY: The default callback owns no parser references and records raw input.
     unsafe {

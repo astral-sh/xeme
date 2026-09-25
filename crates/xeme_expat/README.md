@@ -61,6 +61,11 @@ External content comes exclusively from caller-provided callbacks. Xeme never
 fetches external resources itself. Root reset disconnects children of the previous
 document so they cannot modify declarations in the new document.
 
+`XML_SetDefaultHandler` suppresses internal entity expansion even when its callback
+is null. `XML_SetDefaultHandlerExpand` enables expansion even with a null callback.
+External children inherit this policy; clearing a callback does not select the
+other setter's policy.
+
 Wide-character, `XML_LARGE_SIZE` and `XML_ATTR_INFO` builds are unsupported;
 the header rejects these configurations.
 

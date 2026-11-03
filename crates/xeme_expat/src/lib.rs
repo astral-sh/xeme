@@ -1639,6 +1639,13 @@ unsafe fn finish_operation(
     }
 }
 
+/// Feed bytes and dispatch any available callbacks. A nonzero `final_input`
+/// marks the end of the input.
+///
+/// # Safety
+///
+/// A non-null parser handle must be live. For a positive `len`, `input` must point to
+/// `len` readable bytes that remain valid for the call.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn XML_Parse(
     parser: XML_Parser,
@@ -1736,6 +1743,13 @@ pub unsafe extern "C" fn XML_Parse(
     unsafe { with_parser_tracking(parser, operation) }
 }
 
+/// Reserve `len` writable input bytes for [`XML_ParseBuffer`]. Returns NULL
+/// on failure. A subsequent buffer request, parse, reset, or free can
+/// invalidate the pointer.
+///
+/// # Safety
+///
+/// A non-null parser handle must be live. Serialize access while writing to the buffer.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn XML_GetBuffer(parser: XML_Parser, len: c_int) -> *mut c_void {
     // SAFETY: The scope owns a tracker clone and rejects allocator-callback reentry
@@ -1785,6 +1799,13 @@ pub unsafe extern "C" fn XML_GetBuffer(parser: XML_Parser, len: c_int) -> *mut c
     unsafe { with_parser_tracking(parser, operation) }
 }
 
+/// Parse `len` bytes from the buffer reserved by [`XML_GetBuffer`].
+/// While parsing is in progress, a zero-length call needs no reservation.
+///
+/// # Safety
+///
+/// A non-null parser handle must be live. Stop writing through the buffer pointer
+/// before calling this function.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn XML_ParseBuffer(
     parser: XML_Parser,

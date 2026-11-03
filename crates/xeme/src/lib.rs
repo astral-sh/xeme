@@ -2,6 +2,17 @@
 //!
 //! Feed bytes with [`Parser::feed`], then drain owned events with
 //! [`Parser::next_event`]. No borrowed parser state crosses an event boundary.
+//!
+//! ```
+//! use xeme::{Config, Parser};
+//!
+//! let mut parser = Parser::new(Config::default());
+//! parser.feed(b"<message>Hello &amp; goodbye</message>", true)?;
+//! while let Some(event) = parser.next_event()? {
+//!     println!("{:?}", event.kind);
+//! }
+//! # Ok::<(), xeme::Error>(())
+//! ```
 #![forbid(unsafe_code)]
 
 mod accounting;
@@ -50,8 +61,11 @@ use names::{invalid_xml_char, is_uri_char, is_xml_char, whitespace};
 /// Bounds applied independently of input chunking.
 #[derive(Clone, Debug)]
 pub struct Limits {
+    /// Maximum element nesting depth. Also bounds nesting in DTD content models.
     pub max_depth: usize,
+    /// Maximum token size in bytes.
     pub max_token_bytes: usize,
+    /// Maximum bytes supplied to one parser. Each external child has its own allowance.
     pub max_total_bytes: usize,
     /// Work allowance shared with external entity children. Counts bytes from
     /// entity expansion, reused defaults, expanded namespace URIs, repeated
@@ -69,8 +83,11 @@ pub struct Limits {
     /// `None` preserves absolute work limits. Children share consumed root credit;
     /// buffered but unconsumed bytes and external input do not increase it.
     pub max_work_amplification: Option<usize>,
+    /// Bounds nesting of internal replacements and external entity parsers.
     pub max_entity_depth: usize,
+    /// Maximum attributes on an element, including those supplied by the DTD.
     pub max_attributes: usize,
+    /// Maximum combined general and parameter entity declarations.
     pub max_entities: usize,
 }
 
@@ -94,8 +111,11 @@ impl Default for Limits {
 pub struct Config {
     /// XML edition used for all names. Defaults to Fifth Edition.
     pub name_rules: NameRules,
+    /// Enable namespace processing with the supplied separator.
     pub namespace_separator: Option<char>,
+    /// Append the prefix to expanded names that used one, when namespaces are enabled.
     pub namespace_triplets: bool,
+    /// Input encoding supplied by the caller. With `None`, detect it from the input.
     pub encoding: Option<std::string::String>,
     /// Let an encoding declaration override a UTF-8 BOM, matching Expat.
     /// Disabled by default because XML requires the declaration to match the BOM.
@@ -106,6 +126,7 @@ pub struct Config {
     /// Accept inferred UTF-16 without a BOM, encoding declaration, or external
     /// encoding information, matching Expat. Disabled by default.
     pub allow_undeclared_utf16: bool,
+    /// Resource limits for this parser and its external entities.
     pub limits: Limits,
 }
 
@@ -145,7 +166,8 @@ pub struct EncodingConversion {
     pub position: Position,
 }
 
-/// An XML parse failure. A parser remains failed after returning an error.
+/// An XML parse failure. To resume after an unknown encoding, install a map
+/// with [`Parser::set_encoding_map`] or [`Parser::set_multibyte_encoding_map`].
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Error {
     pub kind: ErrorKind,
@@ -153,6 +175,7 @@ pub struct Error {
     pub position: Position,
 }
 
+/// The category of a parse or parser operation error.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ErrorKind {
     NoMemory,
@@ -219,13 +242,16 @@ impl From<AllocError> for Error {
     }
 }
 
+/// An attribute on a start-element event, including defaults supplied by the DTD.
 #[derive(Debug, Eq, PartialEq)]
 pub struct Attribute {
     pub name: String,
     pub value: String,
+    /// Whether the attribute appeared in the start tag.
     pub specified: bool,
 }
 
+/// An owned event and its location in the input.
 #[derive(Debug, Eq, PartialEq)]
 pub struct Event {
     pub kind: EventKind,
@@ -283,6 +309,7 @@ pub struct NotationDeclaration {
     pub public_id: Option<String>,
 }
 
+/// The data produced by one step of incremental parsing.
 #[derive(Debug, Eq, PartialEq)]
 pub enum EventKind {
     /// Opt-in whitespace callback outside element content. Read [`Parser::current_raw`]
@@ -829,12 +856,22 @@ impl IdentityStartState<'_> {
 }
 
 impl Parser {
+    /// Construct a parser using the system allocator.
+    ///
+    /// # Panics
+    ///
+    /// Panics if initialization fails. Use [`Self::try_new_in`] to handle the error.
     #[must_use]
     pub fn new(config: Config) -> Self {
         Self::try_new_in(config, Allocator::System).expect("XML parser allocation failed")
     }
 
     /// Construct a parser whose owned data uses the selected allocator.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ErrorKind::NoMemory`] if initialization cannot reserve the
+    /// parser's resources. Encoding detection runs when input is supplied.
     pub fn try_new_in(mut config: Config, allocator: Allocator) -> Result<Self, Error> {
         let encoding = config.encoding.take();
         Self::try_new_with_encoding_in(config, encoding.as_deref(), allocator)
@@ -1534,6 +1571,11 @@ impl Parser {
     }
 
     /// Append input without calling user code. Drain events before feeding more data.
+    ///
+    /// Pass `is_final = true` on the last chunk, which may be empty, and continue
+    /// draining events until [`Self::next_event`] returns `None` or an error.
+    /// A later call to `feed` after final input returns [`ErrorKind::Finished`]
+    /// unless the parser already recorded another error.
     pub fn feed(&mut self, bytes: &[u8], is_final: bool) -> Result<(), Error> {
         if self.input_context.is_some() {
             return match self.feed_with_input_context(bytes, is_final, 1024) {

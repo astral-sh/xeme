@@ -33,7 +33,7 @@ impl EventRecycling {
     /// Assign a never-reused generation without allocating an identity object.
     pub(crate) fn new(allocator: Allocator) -> Result<Self, AllocError> {
         let parser_id = NEXT_PARSER_ID
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
             .map_err(|_| AllocError::CapacityOverflow)?;
         Ok(Self {
             parser_id,

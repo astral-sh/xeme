@@ -63,7 +63,7 @@ impl EntityBudget {
             &self.direct
         };
         if counter
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
                 current.checked_add(bytes)
             })
             .is_err()

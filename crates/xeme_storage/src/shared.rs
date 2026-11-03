@@ -34,7 +34,7 @@ impl<T> Shared<T> {
         // SAFETY: This strong reference keeps Inner live for the atomic increment.
         let references = unsafe { &self.pointer.as_ref().references };
         references
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
                 (count < isize::MAX as usize).then_some(count + 1)
             })
             .map_err(|_| AllocError::CapacityOverflow)?;

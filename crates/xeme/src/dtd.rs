@@ -59,6 +59,12 @@ struct DeclarationLiteral {
     parameters: Vec<String>,
 }
 
+#[derive(Clone, Copy, Debug)]
+struct DeclarationOffset {
+    grammar: usize,
+    raw: usize,
+}
+
 #[derive(Debug)]
 struct DeclarationExpansion {
     // Ordinary token bookkeeping follows direct-input accounting. Once a
@@ -69,7 +75,7 @@ struct DeclarationExpansion {
     raw: Buffer,
     literals: Vec<DeclarationLiteral>,
     parameters: Vec<DeclarationParameter>,
-    raw_offsets: Vec<(usize, usize)>,
+    raw_offsets: Vec<DeclarationOffset>,
 }
 
 impl DeclarationExpansion {
@@ -821,14 +827,17 @@ impl Parser {
 
     /// Record only changes in grammar/raw displacement, never one entry per feed.
     fn declaration_raw_boundary(&self, expansion: &mut DeclarationExpansion) -> Result<(), Error> {
-        let pair = (expansion.text.len(), expansion.raw.len());
+        let offset = DeclarationOffset {
+            grammar: expansion.text.len(),
+            raw: expansion.raw.len(),
+        };
         if let Some(last) = expansion.raw_offsets.last_mut()
-            && last.0 == pair.0
+            && last.grammar == offset.grammar
         {
-            *last = pair;
+            *last = offset;
         } else {
-            self.charge_expansion(size_of::<(usize, usize)>())?;
-            try_push(&mut expansion.raw_offsets, pair)?;
+            self.charge_expansion(size_of::<DeclarationOffset>())?;
+            try_push(&mut expansion.raw_offsets, offset)?;
         }
         Ok(())
     }
@@ -950,7 +959,9 @@ impl Parser {
             self.emit(
                 if unconditional {
                     EventKind::Default
-                } else if let Some((external, unparsed)) = cursor.duplicate_defaults {
+                } else if let Some(DuplicateDeclaration { external, unparsed }) =
+                    cursor.duplicate_defaults
+                {
                     EventKind::EntityDeclarationDuplicate { external, unparsed }
                 } else {
                     match cursor.projection {
@@ -1362,7 +1373,10 @@ impl Parser {
                 self.tables.entities.contains_key(&name)
             }
         {
-            cursor.duplicate_defaults = Some((!cursor.starts("\"") && !cursor.starts("'"), false));
+            cursor.duplicate_defaults = Some(DuplicateDeclaration {
+                external: !cursor.starts("\"") && !cursor.starts("'"),
+                unparsed: false,
+            });
         }
         let mut skipped_parameter = false;
         let (value, system_id, public_id, notation) = if cursor.starts("\"") || cursor.starts("'") {
@@ -1425,8 +1439,8 @@ impl Parser {
             } else {
                 None
             };
-            if let Some((_, unparsed)) = &mut cursor.duplicate_defaults {
-                *unparsed = notation.is_some();
+            if let Some(duplicate) = &mut cursor.duplicate_defaults {
+                duplicate.unparsed = notation.is_some();
             }
             (None, system_id, public_id, notation)
         };
@@ -1755,9 +1769,10 @@ impl Parser {
             cursor
                 .require_space()
                 .map_err(|message| self.err(ErrorKind::Syntax, message))?;
-            enumeration(cursor, true).map_err(|message| self.dtd_grammar_error(cursor, message))?;
+            enumeration(cursor, EnumerationKind::Notation)
+                .map_err(|message| self.dtd_grammar_error(cursor, message))?;
         } else if cursor.starts("(") {
-            enumeration(cursor, false)
+            enumeration(cursor, EnumerationKind::Nmtoken)
                 .map_err(|message| self.dtd_grammar_error(cursor, message))?;
         } else {
             self.check_dtd_token(cursor)?;
@@ -1955,6 +1970,12 @@ fn invalid_dtd_token(text: &str, namespaces: bool, name_rules: crate::NameRules)
     Some(start + end)
 }
 
+#[derive(Clone, Copy, Debug, Default)]
+struct DuplicateDeclaration {
+    external: bool,
+    unparsed: bool,
+}
+
 struct Cursor<'a> {
     lexical: Slice<'a>,
     text: &'a str,
@@ -1970,7 +1991,7 @@ struct Cursor<'a> {
     parameter_defaults: bool,
     entity_defaults: bool,
     projection: Option<grammar::Kind>,
-    duplicate_defaults: Option<(bool, bool)>,
+    duplicate_defaults: Option<DuplicateDeclaration>,
     raw_offset: usize,
     raw_event: usize,
     raw_started: bool,
@@ -2163,13 +2184,18 @@ fn normalize_public_id(
     Ok(normalized)
 }
 
-fn enumeration(cursor: &mut Cursor<'_>, names: bool) -> Result<(), &'static str> {
+enum EnumerationKind {
+    Notation,
+    Nmtoken,
+}
+
+fn enumeration(cursor: &mut Cursor<'_>, kind: EnumerationKind) -> Result<(), &'static str> {
     if !cursor.eat("(") {
         return Err("enumeration requires an opening parenthesis");
     }
     loop {
         cursor.space();
-        if names {
+        if matches!(kind, EnumerationKind::Notation) {
             cursor.ncname()?;
         } else {
             let end = cursor

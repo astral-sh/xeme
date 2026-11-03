@@ -1,7 +1,9 @@
 //! Semantic commits around ordinary external DTD children. Grammar and raw
 //! cursors only advance; no declaration is replayed after a callback yields.
 
-use super::{AttributeCallback, Cursor, DeclarationExpansion, composition, grammar};
+use super::{
+    AttributeCallback, Cursor, DeclarationExpansion, DuplicateDeclaration, composition, grammar,
+};
 use crate::lexical::Buffer;
 use crate::{Entity, Error, ErrorKind, EventKind, Parser, Position};
 use std::sync::atomic::Ordering;
@@ -17,6 +19,12 @@ pub(super) struct Request {
 }
 
 #[derive(Debug)]
+struct ReservedEntity {
+    name: String,
+    parameter: bool,
+}
+
+#[derive(Debug)]
 pub(super) struct State {
     grammar: grammar::Cursor,
     raw_offset: usize,
@@ -28,12 +36,12 @@ pub(super) struct State {
     enumeration_seen: bool,
     enumeration_type: Option<String>,
     entity_committed: bool,
-    reserved: Option<(String, bool)>,
+    reserved: Option<ReservedEntity>,
     reservation_checked: bool,
     name_prepared: bool,
     public_prepared: bool,
     system_prepared: bool,
-    duplicate: Option<(bool, bool)>,
+    duplicate: Option<DuplicateDeclaration>,
     notation_capture: Option<bool>,
     notation_committed: bool,
     notation_final_default: bool,
@@ -78,12 +86,12 @@ impl DeclarationExpansion {
     fn raw_at(&self, offset: usize) -> usize {
         let index = self
             .raw_offsets
-            .partition_point(|&(grammar, _)| grammar <= offset);
+            .partition_point(|entry| entry.grammar <= offset);
         if index == 0 {
             offset
         } else {
-            let (grammar, raw) = self.raw_offsets[index - 1];
-            raw + offset - grammar
+            let entry = self.raw_offsets[index - 1];
+            entry.raw + offset - entry.grammar
         }
     }
 }
@@ -236,7 +244,7 @@ impl Parser {
             if self.declarations_skipped() {
                 continue;
             }
-            let Some((name, parameter)) = &state.reserved else {
+            let Some(ReservedEntity { name, parameter }) = &state.reserved else {
                 continue;
             };
             declaration.expansion.charge_work(self, end - start)?;
@@ -315,7 +323,7 @@ impl Parser {
                 .decoded(self.allocator)?;
             if table.contains_key(&*name) {
                 state.reservation_checked = true;
-                state.duplicate = Some((false, false));
+                state.duplicate = Some(DuplicateDeclaration::default());
             }
         }
         Ok(())
@@ -349,7 +357,7 @@ impl Parser {
             &self.tables.entities
         };
         if table.contains_key(name) {
-            state.duplicate = Some((false, false));
+            state.duplicate = Some(DuplicateDeclaration::default());
             return Ok(());
         }
         if self.tables.entities.len() + self.tables.parameter_entities.len() >= self.entity_limit()
@@ -381,7 +389,7 @@ impl Parser {
                 value_open: None,
             },
         )?;
-        state.reserved = Some((name, parameter));
+        state.reserved = Some(ReservedEntity { name, parameter });
         Ok(())
     }
 
@@ -491,7 +499,7 @@ impl Parser {
         let mut entity_base = self.base.clone();
         if commit.kind == grammar::Kind::Entity
             && !self.declarations_skipped()
-            && let Some((name, parameter)) = state.reserved.take()
+            && let Some(ReservedEntity { name, parameter }) = state.reserved.take()
         {
             // Child table merges preserve this first slot. Remove only our own
             // reservation before the ordinary declaration commit fills it.

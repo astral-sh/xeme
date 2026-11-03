@@ -468,8 +468,11 @@ impl TagScanner {
             self.name_end = Some(self.offset);
             self.attributes = Some(AttributeScanner::new(self.offset));
         }
-        let name_end = self.name_end.unwrap();
-        let scanner = self.attributes.as_mut().unwrap();
+        let name_end = self.name_end.expect("start-tag name has been scanned");
+        let scanner = self
+            .attributes
+            .as_mut()
+            .expect("attribute scanner starts at the end of the name");
         loop {
             match scanner.next_literal(text, attribute_limit, rules) {
                 Ok(Step::Attribute(mut attribute)) => {

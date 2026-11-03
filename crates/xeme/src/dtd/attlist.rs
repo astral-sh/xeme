@@ -237,7 +237,7 @@ impl Parser {
             &mut cursor,
             self.source()
                 .position_from_cursor(&mut state.position, state.fragment_start, 0),
-            state.element.as_ref().expect("ATTLIST element"),
+            state.element.as_deref().expect("ATTLIST element"),
             &mut state.first_attribute,
             callback,
         )?;

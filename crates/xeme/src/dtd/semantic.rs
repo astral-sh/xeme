@@ -1,7 +1,11 @@
 //! Semantic commits around ordinary external DTD children. Grammar and raw
 //! cursors only advance; no declaration is replayed after a callback yields.
 
-use super::*;
+use super::{AttributeCallback, Cursor, DeclarationExpansion, composition, grammar};
+use crate::lexical::Buffer;
+use crate::{Entity, Error, ErrorKind, EventKind, Parser, Position};
+use std::sync::atomic::Ordering;
+use xeme_storage::{String, Vec};
 
 #[derive(Debug)]
 pub(super) struct Request {
@@ -119,7 +123,7 @@ impl Parser {
                     if let Some(kind) = &mut state.enumeration_type {
                         kind.push('|')?;
                     } else {
-                        state.enumeration_type = Some(string(
+                        state.enumeration_type = Some(crate::string(
                             if notation { "NOTATION(" } else { "(" },
                             self.allocator,
                         )?);
@@ -243,7 +247,7 @@ impl Parser {
                 .for_slice(&declaration.expansion.text[start + 1..end - 1]);
             let value = if is_public {
                 let value = value.decoded(self.allocator)?;
-                normalize_public_id(&value, self.allocator)?
+                super::normalize_public_id(&value, self.allocator)?
             } else {
                 let index = declaration
                     .expansion
@@ -358,13 +362,13 @@ impl Parser {
         declaration
             .expansion
             .charge_work(self, 2 * name.len() + size_of::<Entity>())?;
-        let name = string(name, self.allocator)?;
+        let name = crate::string(name, self.allocator)?;
         let table = if parameter {
             &mut self.tables.parameter_entities
         } else {
             &mut self.tables.entities
         };
-        try_insert(
+        xeme_storage::try_insert(
             table,
             name.try_clone()?,
             Entity {
@@ -563,7 +567,7 @@ impl Parser {
                 .as_mut()
                 .expect("pending declaration value");
             let raw_end = declaration.expansion.raw_at(commit.end);
-            let mut raw = Buffer::plain(string("<!", self.allocator)?);
+            let mut raw = Buffer::plain(crate::string("<!", self.allocator)?);
             raw.append(
                 declaration
                     .expansion

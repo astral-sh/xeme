@@ -1,7 +1,11 @@
 //! Owned continuation for complete ATTLIST tokens without grammar replacements.
 //! Lexical prefixes and attribute definitions are published before callbacks.
 
-use super::*;
+use super::{AttributeCallback, Cursor, grammar};
+use crate::lexical::Buffer;
+use crate::names;
+use crate::{Error, EventKind, Parser};
+use xeme_storage::{Allocator, String};
 
 #[derive(Debug)]
 pub(super) struct State {
@@ -282,7 +286,7 @@ fn fragment_length(text: &str) -> usize {
     match first {
         '\'' | '"' => text[1..].find(first).map_or(text.len(), |end| end + 2),
         '(' | ')' | '|' | ',' | '%' | '?' | '*' | '+' | '=' => first.len_utf8(),
-        ' ' | '\r' | '\n' | '\t' => text.find(|c| !whitespace(c)).unwrap_or(text.len()),
+        ' ' | '\r' | '\n' | '\t' => text.find(|c| !names::whitespace(c)).unwrap_or(text.len()),
         _ => text
             .find([
                 ' ', '\r', '\n', '\t', '\'', '"', '(', ')', '|', ',', '%', '?', '*', '+', '=',
@@ -294,6 +298,8 @@ fn fragment_length(text: &str) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ErrorKind;
+    use std::sync::atomic::Ordering;
 
     #[test]
     fn captured_types_do_not_retain_whitespace_or_later_default_capacity() {

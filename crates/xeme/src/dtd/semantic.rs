@@ -541,7 +541,7 @@ impl Parser {
             self.attlist_attribute(
                 &mut cursor,
                 position,
-                state.element.as_ref().expect("ATTLIST element"),
+                state.element.as_deref().expect("ATTLIST element"),
                 &mut state.first_attribute,
                 callback,
             )?;

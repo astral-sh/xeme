@@ -125,8 +125,8 @@ struct EventOutput<'a> {
 }
 
 impl EventOutput<'_> {
-    fn has_frame(&self) -> bool {
-        self.frame.as_ref().is_some_and(|frame| frame.active)
+    fn active_frame(&self) -> Option<&AdapterFrame> {
+        self.frame.as_deref().filter(|frame| frame.active)
     }
 
     fn clear_frame(&mut self) {
@@ -564,9 +564,8 @@ impl DefaultAttribute {
 impl Entity {
     /// Copy imported storage while preserving the declaration's shared open flag.
     fn clone_in(&self, allocator: Allocator) -> Result<Self, AllocError> {
-        let copy = |value: &Option<String>| {
+        let copy = |value: Option<&str>| {
             value
-                .as_deref()
                 .map(|value| String::try_from_str_in(value, allocator))
                 .transpose()
         };
@@ -580,10 +579,10 @@ impl Entity {
                     Shared::try_new_in(bytes, allocator)
                 })
                 .transpose()?,
-            value: copy(&self.value)?,
-            system_id: copy(&self.system_id)?,
-            public_id: copy(&self.public_id)?,
-            notation: copy(&self.notation)?,
+            value: copy(self.value.as_deref())?,
+            system_id: copy(self.system_id.as_deref())?,
+            public_id: copy(self.public_id.as_deref())?,
+            notation: copy(self.notation.as_deref())?,
             declared_in_parameter_entity: self.declared_in_parameter_entity,
             value_open: self.value_open.clone(),
         })
@@ -1985,12 +1984,17 @@ impl Parser {
         if !self.event_recycling.accepts(&frame.generation) {
             return self.next_event_for_recycling_into(event);
         }
+        let native = if c_text_context {
+            self.next_native_character_data_for_c(frame)
+        } else {
+            Ok(false)
+        };
         let mut output = EventOutput {
             event,
             frame: Some(frame),
             c_text_context,
         };
-        match self.next_native_character_data_for_c(&mut output) {
+        match native {
             Ok(true) => {}
             Ok(false) => self.next_delivery_into(&mut output)?,
             Err(error) => self.finish_event_error(error, &mut output)?,
@@ -2003,9 +2007,9 @@ impl Parser {
     /// Uncertain input and parser continuations retain the ordinary event path.
     fn next_native_character_data_for_c(
         &mut self,
-        output: &mut EventOutput<'_>,
+        frame: &mut AdapterFrame,
     ) -> Result<bool, Error> {
-        if !output.c_text_context || !self.text_line_boundaries || self.sources.len() != 1 {
+        if !self.text_line_boundaries || self.sources.len() != 1 {
             return Ok(false);
         }
         let source = &self.sources[0];
@@ -2050,7 +2054,7 @@ impl Parser {
             let position = source.position(reference.bytes);
             self.native_raw = Some(NativeRawRange {
                 start,
-                count: NonZeroUsize::new(reference.bytes).unwrap(),
+                count: NonZeroUsize::new(reference.bytes).expect("nonempty scalar reference"),
             });
             self.account_source_bytes(reference.bytes)?;
             if reference.predefined {
@@ -2070,7 +2074,6 @@ impl Parser {
             // source and predefined-entity charges are complete before delivery.
             self.source_mut().consume_ascii_tag(reference.bytes);
             let mut bytes = [0; 4];
-            let frame = output.frame.as_deref_mut().unwrap();
             frame.prepare_text(reference.character.encode_utf8(&mut bytes))?;
             frame.publish(position);
             self.last_position = position;
@@ -2087,7 +2090,6 @@ impl Parser {
             return Ok(false);
         }
         let position = source.position(count);
-        let frame = output.frame.as_deref_mut().unwrap();
         if count > arena::INLINE_TEXT_BYTES {
             self.event_recycling
                 .reserve_adapter(&frame.generation, arena::RETAINED_ARENA_BYTES);
@@ -2095,7 +2097,7 @@ impl Parser {
         frame.prepare_native_text(start, count)?;
         self.native_raw = Some(NativeRawRange {
             start,
-            count: NonZeroUsize::new(count).unwrap(),
+            count: NonZeroUsize::new(count).expect("nonempty native text"),
         });
         self.declaration_allowed = false;
         frame.publish(position);
@@ -2158,8 +2160,8 @@ impl Parser {
         if let Some(event) = output.event {
             self.last_position = event.position;
         }
-        if output.has_frame() {
-            self.last_position = output.frame.as_ref().unwrap().position();
+        if let Some(frame) = output.active_frame() {
+            self.last_position = frame.position();
         }
         Ok(())
     }
@@ -2609,7 +2611,7 @@ impl Parser {
             }
         }
         loop {
-            if output.has_frame() {
+            if output.active_frame().is_some() {
                 return Ok(());
             }
             if let Some(event) = self.pop_event() {
@@ -3021,7 +3023,11 @@ impl Parser {
                 // Native token publication only swaps owners. Consume sees the
                 // bytes already charged above, so neither can fail after the
                 // matched name is detached. Keep raw/position updates first.
-                output.frame.as_deref_mut().unwrap().publish(position);
+                output
+                    .frame
+                    .as_deref_mut()
+                    .expect("matched end was prepared in the frame")
+                    .publish(position);
             }
         }
     }
@@ -3314,7 +3320,11 @@ impl Parser {
             self.emit(EventKind::Text(value), position)?;
         } else if character_data {
             debug_assert!(self.pending.is_empty());
-            output.frame.as_deref_mut().unwrap().publish(position);
+            output
+                .frame
+                .as_deref_mut()
+                .expect("character data was prepared in the frame")
+                .publish(position);
         } else if self.default_events {
             self.emit(EventKind::Default, position)?;
         }
@@ -3385,7 +3395,11 @@ impl Parser {
             self.emit(EventKind::Text(value), position)?;
         } else {
             debug_assert!(self.pending.is_empty());
-            output.frame.as_deref_mut().unwrap().publish(position);
+            output
+                .frame
+                .as_deref_mut()
+                .expect("CDATA was prepared in the frame")
+                .publish(position);
         }
         Ok(true)
     }

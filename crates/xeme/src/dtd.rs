@@ -1752,7 +1752,7 @@ impl Parser {
         &mut self,
         cursor: &mut Cursor<'_>,
         position: Position,
-        element: &String,
+        element: &str,
         first_attribute: &mut bool,
         callback: AttributeCallback<'_>,
     ) -> Result<(), Error> {
@@ -1838,7 +1838,7 @@ impl Parser {
         if !self.tables.defaults.contains_key(element) {
             try_insert(
                 &mut self.tables.defaults,
-                element.try_clone()?,
+                string(element, self.allocator)?,
                 DefaultAttributes::new(self.allocator, self.tables.salt),
             )?;
         }
@@ -1900,7 +1900,7 @@ impl Parser {
         self.emit(
             EventKind::AttlistDeclaration(xeme_storage::try_box(
                 crate::AttributeDeclaration {
-                    element: element.try_clone()?,
+                    element: string(element, self.allocator)?,
                     name,
                     attribute_type,
                     default: value,

@@ -4,7 +4,11 @@
 //! nonvalidating parser accepts a closing delimiter from a replacement, while
 //! names, quoted literals and references still have one lexical source.
 
-use super::*;
+use super::{DeclarationExpansion, DeclarationLiteral, DeclarationParameter, grammar, semantic};
+use crate::lexical::{Buffer, Slice};
+use crate::names;
+use crate::{Entity, Error, ErrorKind, EventKind, Parser, Position};
+use xeme_storage::{String, TryClone, Vec};
 
 #[derive(Debug)]
 pub(super) struct Declaration {
@@ -75,7 +79,7 @@ impl Parser {
             Header {
                 selected: None,
                 word: Buffer::new_in(self.allocator),
-                raw: Buffer::plain(string("<![", self.allocator)?),
+                raw: Buffer::plain(crate::string("<![", self.allocator)?),
                 position: self.here(),
                 bytes: 3,
             },
@@ -218,7 +222,7 @@ impl Parser {
                     value.len() + end + 1 + size_of::<crate::encoding::Source>(),
                 )?;
                 let value = value.try_clone()?;
-                let mut source_name = string("%", self.allocator)?;
+                let mut source_name = crate::string("%", self.allocator)?;
                 source_name.push_str(name)?;
                 let position = self.source().position(end + 1);
                 self.consume(end + 1)?;
@@ -240,7 +244,7 @@ impl Parser {
                     "expanded conditional header limit exceeded",
                 ));
             }
-            if character == '[' || whitespace(character) {
+            if character == '[' || names::whitespace(character) {
                 self.header_word(&mut state)?;
             } else {
                 state.word.append(
@@ -268,7 +272,10 @@ impl Parser {
                     ));
                 }
                 if included {
-                    try_push(&mut self.conditional.included_sources, self.sources.len())?;
+                    xeme_storage::try_push(
+                        &mut self.conditional.included_sources,
+                        self.sources.len(),
+                    )?;
                 } else {
                     self.conditional.ignored_depth = 1;
                     self.conditional.ignored_source = self.sources.len();
@@ -411,13 +418,13 @@ impl Parser {
             }
             let text = self.source().remaining();
             let end = if state.expansion.direct {
-                let space = text.starts_with(whitespace);
+                let space = text.starts_with(names::whitespace);
                 let end = text[state.word_checked..]
                     .char_indices()
                     .find(|(_, c)| {
                         #[cfg(test)]
                         crate::large_token_tests::inspect(c.len_utf8());
-                        whitespace(*c) != space || matches!(c, '\'' | '"' | '%' | '<' | '>')
+                        names::whitespace(*c) != space || matches!(c, '\'' | '"' | '%' | '<' | '>')
                     })
                     .map_or(text.len(), |(offset, _)| state.word_checked + offset);
                 if !space && end == text.len() && !self.is_source_final() {
@@ -433,8 +440,9 @@ impl Parser {
                 text.find(['\'', '"', '%', '<', '>']).unwrap_or(text.len())
             };
             if end != 0 {
-                if let Some((offset, character)) =
-                    text[..end].char_indices().rfind(|(_, c)| whitespace(*c))
+                if let Some((offset, character)) = text[..end]
+                    .char_indices()
+                    .rfind(|(_, c)| names::whitespace(*c))
                 {
                     state.ready = state.expansion.text.len() + offset + character.len_utf8();
                 }
@@ -516,11 +524,14 @@ impl Parser {
                             .and_then(|name| name.strip_prefix('%'))
                         {
                             self.charge_expansion(size_of::<String>() + name.len())?;
-                            try_push(&mut parameters, string(name, self.allocator)?)?;
+                            xeme_storage::try_push(
+                                &mut parameters,
+                                crate::string(name, self.allocator)?,
+                            )?;
                         }
                     }
                     let offset = state.expansion.text.len();
-                    try_push(
+                    xeme_storage::try_push(
                         &mut state.expansion.literals,
                         DeclarationLiteral {
                             offset,
@@ -546,8 +557,8 @@ impl Parser {
                     // `%%space;name` can start a parameter entity declaration.
                     let adjacent_reference = text[1..].starts_with('%')
                         && state.expansion.text.starts_with("ENTITY")
-                        && state.expansion.text[6..].starts_with(whitespace);
-                    if text[1..].starts_with(whitespace) || adjacent_reference {
+                        && state.expansion.text[6..].starts_with(names::whitespace);
+                    if text[1..].starts_with(names::whitespace) || adjacent_reference {
                         self.append_declaration_token(
                             &mut state.expansion,
                             Slice::plain("%"),
@@ -615,7 +626,7 @@ impl Parser {
                         )?;
                         let offset = state.expansion.text.len();
                         let raw_start = state.expansion.raw.len();
-                        try_push(
+                        xeme_storage::try_push(
                             &mut state.expansion.parameters,
                             DeclarationParameter {
                                 offset,
@@ -662,7 +673,7 @@ impl Parser {
                         let base = self.copy_external_base(entity.base.as_ref())?;
                         let system_id = entity.system_id.try_clone()?;
                         let public_id = entity.public_id.try_clone()?;
-                        let mut source_name = string("%", self.allocator)?;
+                        let mut source_name = crate::string("%", self.allocator)?;
                         source_name.push_str(name)?;
                         let position = self.source().position(end + 1);
                         self.consume(end + 1)?;
@@ -688,7 +699,7 @@ impl Parser {
                         value.len() + name.len() + 1 + size_of::<crate::encoding::Source>(),
                     )?;
                     let value = value.try_clone()?;
-                    let mut source_name = string("%", self.allocator)?;
+                    let mut source_name = crate::string("%", self.allocator)?;
                     source_name.push_str(name)?;
                     let position = self.source().position(end + 1);
                     self.consume(end + 1)?;
@@ -712,7 +723,7 @@ impl Parser {
     /// on both success and failure; no callback is dispatched in this scope.
     fn finish_declaration_composition(&mut self, mut state: Declaration) -> Result<bool, Error> {
         self.charge_expansion(state.expansion.text.len() + 3)?;
-        let mut token = Buffer::plain(string("<!", self.allocator)?);
+        let mut token = Buffer::plain(crate::string("<!", self.allocator)?);
         token.append(state.expansion.text.view())?;
         token.push('>')?;
         for literal in &mut state.expansion.literals {

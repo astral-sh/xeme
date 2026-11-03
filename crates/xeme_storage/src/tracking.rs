@@ -58,7 +58,7 @@ impl AllocationTracker {
     }
     pub fn add_direct_bytes(&self, bytes: u64) -> bool {
         self.direct
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
                 value.checked_add(bytes)
             })
             .is_ok()
@@ -82,7 +82,7 @@ impl AllocationTracker {
         let direct = self.direct.load(Ordering::Relaxed);
         let previous = self
             .live
-            .fetch_update(Ordering::AcqRel, Ordering::Relaxed, |current| {
+            .try_update(Ordering::AcqRel, Ordering::Relaxed, |current| {
                 let next = current.checked_add(amount)?;
                 if next > MAXIMUM_LIVE_BYTES {
                     return None;

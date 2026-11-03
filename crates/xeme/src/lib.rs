@@ -4571,7 +4571,7 @@ impl Parser {
         let limit = self.work_bytes_limit(self.config.limits.max_entity_expansion_bytes);
         self.expanded
             .expanded
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |expanded| {
                 expanded
                     .checked_add(size)
                     .filter(|expanded| *expanded <= limit)

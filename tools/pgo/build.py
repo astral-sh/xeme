@@ -3,6 +3,8 @@
 # dependencies = []
 # [tool.uv]
 # no-build = true
+# require-build-hashes = true
+# preview-features = ["build-dependency-hashes"]
 # ///
 """Build Xeme with a fresh, generated-input PGO profile (offline, opt-in)."""
 
